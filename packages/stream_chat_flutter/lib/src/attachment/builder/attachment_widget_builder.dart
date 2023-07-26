@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/file_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/gallery_attachment.dart';
-import 'package:stream_chat_flutter/src/attachment/giphy_attachment.dart';
-import 'package:stream_chat_flutter/src/attachment/image_attachment.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/video_attachment_thumbnail.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/attachment/url_attachment.dart';
-import 'package:stream_chat_flutter/src/attachment/video_attachment.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
-import '../attachment_upload_state_builder.dart';
 
 part 'fallback_attachment_builder.dart';
 
@@ -82,41 +75,58 @@ abstract class StreamAttachmentWidgetBuilder {
   /// widget.
   static List<StreamAttachmentWidgetBuilder> defaultBuilders({
     required Message message,
+    ShapeBorder? shape,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(4),
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
   }) {
     return [
-      // Handles a mix of image, gif, video, and file attachments.
+      // Handles a mix of image, gif, video, url and file attachments.
       MixedAttachmentBuilder(
+        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles a mix of image, gif, and video attachments.
       GalleryAttachmentBuilder(
+        shape: shape,
+        padding: padding,
+        runSpacing: padding.vertical / 2,
+        spacing: padding.horizontal / 2,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles file attachments.
       FileAttachmentBuilder(
+        shape: shape,
+        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles giphy attachments.
       GiphyAttachmentBuilder(
+        shape: shape,
+        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles image attachments.
       ImageAttachmentBuilder(
+        shape: shape,
+        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles video attachments.
       VideoAttachmentBuilder(
+        shape: shape,
+        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
       // We don't handle URL attachments if the message is a reply.
       if (message.quotedMessage == null)
         UrlAttachmentBuilder(
+          shape: shape,
+          padding: padding,
           onAttachmentTap: onAttachmentTap,
         ),
 

@@ -16,6 +16,7 @@ class ParseAttachments extends StatelessWidget {
     required this.message,
     required this.attachmentBuilders,
     required this.attachmentPadding,
+    this.attachmentShape,
     this.onAttachmentTap,
     this.onShowMessage,
     this.onReplyTap,
@@ -30,6 +31,9 @@ class ParseAttachments extends StatelessWidget {
 
   /// {@macro attachmentPadding}
   final EdgeInsetsGeometry attachmentPadding;
+
+  /// {@macro attachmentShape}
+  final ShapeBorder? attachmentShape;
 
   /// {@macro onAttachmentTap}
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
@@ -104,6 +108,8 @@ class ParseAttachments extends StatelessWidget {
     var builders = attachmentBuilders;
     builders ??= StreamAttachmentWidgetBuilder.defaultBuilders(
       message: message,
+      shape: attachmentShape,
+      padding: attachmentPadding,
       onAttachmentTap: onAttachmentTap,
     );
 

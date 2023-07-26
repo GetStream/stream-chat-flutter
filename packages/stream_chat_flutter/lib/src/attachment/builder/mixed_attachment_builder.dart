@@ -3,67 +3,71 @@ part of 'attachment_widget_builder.dart';
 /// {@template mixedAttachmentBuilder}
 /// A widget builder for Mixed attachment type.
 ///
-/// This builder is used when a message contains both image/video/giphy and file
-/// attachments.
+/// This builder is used when a message contains a mix of media type and file
+/// or url preview attachments.
 ///
-/// This builder will render first image/video/giphy attachment and then render
-/// the file attachments.
+/// This builder will render first the url preview or file attachment and then
+/// the media attachments.
 /// {@endtemplate}
 class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro mixedAttachmentBuilder}
   MixedAttachmentBuilder({
-    this.shape,
     this.padding = const EdgeInsets.all(4),
-    this.onAttachmentTap,
+    StreamAttachmentWidgetTapCallback? onAttachmentTap,
   })  : _imageAttachmentBuilder = ImageAttachmentBuilder(
+          padding: EdgeInsets.zero,
           onAttachmentTap: onAttachmentTap,
-          padding: EdgeInsets.symmetric(horizontal: padding.horizontal),
         ),
         _videoAttachmentBuilder = VideoAttachmentBuilder(
+          padding: EdgeInsets.zero,
           onAttachmentTap: onAttachmentTap,
-          padding: EdgeInsets.symmetric(horizontal: padding.horizontal),
         ),
         _giphyAttachmentBuilder = GiphyAttachmentBuilder(
+          padding: EdgeInsets.zero,
           onAttachmentTap: onAttachmentTap,
-          padding: EdgeInsets.symmetric(horizontal: padding.horizontal),
         ),
         _galleryAttachmentBuilder = GalleryAttachmentBuilder(
+          padding: EdgeInsets.zero,
           onAttachmentTap: onAttachmentTap,
-          padding: EdgeInsets.symmetric(horizontal: padding.horizontal),
         ),
         _fileAttachmentBuilder = FileAttachmentBuilder(
+          padding: EdgeInsets.zero,
           onAttachmentTap: onAttachmentTap,
-          padding: EdgeInsets.symmetric(horizontal: padding.horizontal),
+        ),
+        _urlAttachmentBuilder = UrlAttachmentBuilder(
+          padding: EdgeInsets.zero,
+          onAttachmentTap: onAttachmentTap,
         );
 
-  /// The shape of the gallery attachment.
-  final ShapeBorder? shape;
-
-  /// The padding to apply to the gallery attachment widget.
+  /// The padding to apply to the mixed attachment widget.
   final EdgeInsetsGeometry padding;
-
-  /// The callback to call when the attachment is tapped.
-  final StreamAttachmentWidgetTapCallback? onAttachmentTap;
 
   late final StreamAttachmentWidgetBuilder _imageAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _videoAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _giphyAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _galleryAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _fileAttachmentBuilder;
+  late final StreamAttachmentWidgetBuilder _urlAttachmentBuilder;
 
   @override
   bool canHandle(
     Message message,
     Map<String, List<Attachment>> attachments,
   ) {
-    final containsImage = attachments.keys.contains(AttachmentType.image);
-    final containsVideo = attachments.keys.contains(AttachmentType.video);
-    final containsGiphy = attachments.keys.contains(AttachmentType.giphy);
-    final containsFile = attachments.keys.contains(AttachmentType.file);
+    final types = attachments.keys;
+
+    final containsImage = types.contains(AttachmentType.image);
+    final containsVideo = types.contains(AttachmentType.video);
+    final containsGiphy = types.contains(AttachmentType.giphy);
+    final containsFile = types.contains(AttachmentType.file);
+    final containsUrlPreview = types.contains(AttachmentType.urlPreview);
 
     final containsMedia = containsImage || containsVideo || containsGiphy;
 
-    return containsMedia && containsFile;
+    return containsMedia && containsFile ||
+        containsMedia && containsUrlPreview ||
+        containsFile && containsUrlPreview ||
+        containsMedia && containsFile && containsUrlPreview;
   }
 
   @override
@@ -74,6 +78,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   ) {
     assert(debugAssertCanHandle(message, attachments), '');
 
+    final urls = attachments[AttachmentType.urlPreview];
     final files = attachments[AttachmentType.file];
     final images = attachments[AttachmentType.image];
     final videos = attachments[AttachmentType.video];
@@ -86,11 +91,14 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          if (urls != null)
+            _urlAttachmentBuilder.build(context, message, {
+              AttachmentType.urlPreview: urls,
+            }),
           if (files != null)
-            for (final file in files)
-              _fileAttachmentBuilder.build(context, message, {
-                AttachmentType.file: [file],
-              }),
+            _fileAttachmentBuilder.build(context, message, {
+              AttachmentType.file: files,
+            }),
           if (shouldBuildGallery)
             _galleryAttachmentBuilder.build(context, message, {
               if (images != null) AttachmentType.image: images,

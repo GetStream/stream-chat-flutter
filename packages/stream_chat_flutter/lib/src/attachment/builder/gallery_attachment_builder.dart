@@ -93,16 +93,6 @@ class GalleryAttachmentBuilder extends StreamAttachmentWidgetBuilder {
         attachments: galleryAttachments,
         itemBuilder: (context, index) {
           final attachment = galleryAttachments[index];
-          final attachmentType = attachment.type;
-
-          final isImage = attachmentType == AttachmentType.image;
-          final isVideo = attachmentType == AttachmentType.video;
-          final isGiphy = attachmentType == AttachmentType.giphy;
-
-          assert(
-            isImage || isVideo || isGiphy,
-            'Attachment type should be image, video or giphy',
-          );
 
           VoidCallback? onTap;
           if (onAttachmentTap != null) {
@@ -112,29 +102,13 @@ class GalleryAttachmentBuilder extends StreamAttachmentWidgetBuilder {
           return InkWell(
             onTap: onTap,
             child: Stack(
-              alignment: Alignment.center,
               children: [
-                if (isImage)
-                  StreamImageAttachmentThumbnail(
-                    image: attachment,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                  )
-                else if (isVideo)
-                  StreamVideoAttachmentThumbnail(
-                    video: attachment,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                  )
-                else if (isGiphy)
-                  StreamGiphyAttachmentThumbnail(
-                    giphy: attachment,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+                StreamMediaAttachmentThumbnail(
+                  media: attachment,
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  fit: BoxFit.cover,
+                ),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: StreamAttachmentUploadStateBuilder(

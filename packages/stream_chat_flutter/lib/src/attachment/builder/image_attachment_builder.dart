@@ -62,6 +62,7 @@ class ImageAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       child: InkWell(
         onTap: onTap,
         child: StreamImageAttachment(
+          shape: shape,
           message: message,
           constraints: constraints,
           image: image,

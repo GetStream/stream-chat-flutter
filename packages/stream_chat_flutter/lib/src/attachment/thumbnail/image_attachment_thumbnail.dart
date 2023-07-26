@@ -2,48 +2,11 @@ import 'dart:io' show File;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:image_size_getter/file_input.dart'; // For compatibility with flutter web.
-import 'package:image_size_getter/image_size_getter.dart' hide Size;
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
-extension AspectRatioX on Attachment {
-  /// Returns the size of the attachment if it is an image or giffy.
-  /// Otherwise, returns null.
-  Size? get originalSize {
-    // Return null if the attachment is not an image or giffy.
-    if (type != 'image' && type != 'giphy') return null;
-
-    // Calculate size locally if the attachment is not uploaded yet.
-    final file = this.file;
-    if (file != null) {
-      ImageInput? input;
-      if (file.bytes != null) {
-        input = MemoryInput(file.bytes!);
-      } else if (file.path != null) {
-        input = FileInput(File(file.path!));
-      }
-
-      // Return null if the file does not contain enough information.
-      if (input == null) return null;
-
-      final size = ImageSizeGetter.getSize(input);
-      if (size.needRotate) {
-        return Size(size.height.toDouble(), size.width.toDouble());
-      }
-      return Size(size.width.toDouble(), size.height.toDouble());
-    }
-
-    // Otherwise, use the size provided by the server.
-    final width = originalWidth;
-    final height = originalHeight;
-    if (width == null || height == null) return null;
-    return Size(width.toDouble(), height.toDouble());
-  }
-}
 
 /// {@template imageAttachmentThumbnail}
 /// Widget for building image attachment thumbnail.
@@ -101,6 +64,9 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
     return ThumbnailError(
       error: error,
       stackTrace: stackTrace,
+      height: double.infinity,
+      width: double.infinity,
+      fit: BoxFit.cover,
     );
   }
 

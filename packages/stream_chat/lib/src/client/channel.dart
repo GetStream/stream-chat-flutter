@@ -499,7 +499,7 @@ class Channel {
         ]);
       }
 
-      final isImage = it.type == 'image';
+      final isImage = it.type == AttachmentType.image;
       final cancelToken = CancelToken();
       Future<SendAttachmentResponse> future;
       if (isImage) {

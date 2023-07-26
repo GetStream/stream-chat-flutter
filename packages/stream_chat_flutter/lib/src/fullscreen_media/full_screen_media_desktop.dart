@@ -94,7 +94,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
     _pageController = PageController(initialPage: widget.startIndex);
     for (var i = 0; i < widget.mediaAttachmentPackages.length; i++) {
       final attachment = widget.mediaAttachmentPackages[i].attachment;
-      if (attachment.type != 'video') continue;
+      if (attachment.type != AttachmentType.video) continue;
       final package = DesktopVideoPackage(attachment);
       videoPackages[attachment.id] = package;
     }
@@ -298,7 +298,8 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                   p.player.pause();
                 }
               }
-              if (widget.autoplayVideos && currentAttachment.type == 'video') {
+              if (widget.autoplayVideos &&
+                  currentAttachment.type == AttachmentType.video) {
                 final package = videoPackages[currentAttachment.id]!;
                 package.player.play();
               }
@@ -307,7 +308,8 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
               final currentAttachmentPackage =
                   widget.mediaAttachmentPackages[index];
               final attachment = currentAttachmentPackage.attachment;
-              if (attachment.type == 'image' || attachment.type == 'giphy') {
+              if (attachment.type == AttachmentType.image ||
+                  attachment.type == AttachmentType.giphy) {
                 final imageUrl = attachment.imageUrl ??
                     attachment.assetUrl ??
                     attachment.thumbUrl;
@@ -359,7 +361,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                     ),
                   ),
                 );
-              } else if (attachment.type == 'video') {
+              } else if (attachment.type == AttachmentType.video) {
                 final package = videoPackages[attachment.id]!;
                 package.player.open(
                   Playlist(

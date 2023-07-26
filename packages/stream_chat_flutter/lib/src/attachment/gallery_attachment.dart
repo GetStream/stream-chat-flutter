@@ -127,6 +127,8 @@ class StreamGalleryAttachment extends StatelessWidget {
           [1],
           [1],
         ],
+        spacing: spacing,
+        runSpacing: runSpacing,
         children: [
           itemBuilder(context, 0),
           itemBuilder(context, 1),
@@ -145,6 +147,8 @@ class StreamGalleryAttachment extends StatelessWidget {
         pattern: const [
           [1, 1],
         ],
+        spacing: spacing,
+        runSpacing: runSpacing,
         children: [
           itemBuilder(context, 0),
           itemBuilder(context, 1),
@@ -170,6 +174,8 @@ class StreamGalleryAttachment extends StatelessWidget {
       pattern: [
         if (isLandscape1) [2, 1] else [1, 2],
       ],
+      spacing: spacing,
+      runSpacing: runSpacing,
       children: [
         itemBuilder(context, 0),
         itemBuilder(context, 1),
@@ -204,6 +210,8 @@ class StreamGalleryAttachment extends StatelessWidget {
         [1],
         [1, 1],
       ],
+      spacing: spacing,
+      runSpacing: runSpacing,
       reverse: !isLandscape1,
       children: [
         itemBuilder(context, 0),
@@ -238,6 +246,8 @@ class StreamGalleryAttachment extends StatelessWidget {
     return FlexGrid(
       pattern: pattern,
       maxChildren: 4,
+      spacing: spacing,
+      runSpacing: runSpacing,
       children: children,
       overlayBuilder: (context, remaining) {
         return IgnorePointer(

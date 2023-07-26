@@ -21,7 +21,19 @@ class ThumbnailError extends StatelessWidget {
     super.key,
     required this.error,
     this.stackTrace,
+    this.width,
+    this.height,
+    this.fit,
   });
+
+  /// The width of the thumbnail.
+  final double? width;
+
+  /// The height of the thumbnail.
+  final double? height;
+
+  /// How to inscribe the thumbnail into the space allocated during layout.
+  final BoxFit? fit;
 
   /// The error that triggered this error widget.
   final Object error;
@@ -33,7 +45,9 @@ class ThumbnailError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.asset(
       'images/placeholder.png',
-      fit: BoxFit.cover,
+      width: width,
+      height: height,
+      fit: fit,
       package: 'stream_chat_flutter',
     );
   }

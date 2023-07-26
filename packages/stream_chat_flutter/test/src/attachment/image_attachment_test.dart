@@ -31,7 +31,7 @@ void main() {
                     300,
                   )),
                   message: Message(),
-                  file: Attachment(
+                  image: Attachment(
                     type: 'image',
                     title: 'example.png',
                     imageUrl:

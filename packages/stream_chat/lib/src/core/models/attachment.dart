@@ -16,6 +16,7 @@ mixin AttachmentType {
   static const file = 'file';
   static const giphy = 'giphy';
   static const video = 'video';
+  static const audio = 'audio';
 
   /// Application custom types.
   static const urlPreview = 'url_preview';
@@ -53,19 +54,15 @@ class Attachment extends Equatable {
   })  : id = id ?? const Uuid().v4(),
         _type = type,
         title = title ?? file?.name,
+        _uploadState = uploadState,
         localUri = file?.path != null ? Uri.parse(file!.path!) : null,
         // For backwards compatibility,
         // set 'file_size', 'mime_type' in [extraData].
         extraData = {
           ...extraData,
           if (file?.size != null) 'file_size': file?.size,
-          if (file?.mimeType != null) 'mime_type': file?.mimeType?.mimeType,
-        } {
-    this.uploadState = uploadState ??
-        ((assetUrl != null || imageUrl != null || thumbUrl != null)
-            ? const UploadState.success()
-            : const UploadState.preparing());
-  }
+          if (file?.mediaType != null) 'mime_type': file?.mediaType?.mimeType,
+        };
 
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) =>
@@ -82,7 +79,8 @@ class Attachment extends Equatable {
 
   factory Attachment.fromOGAttachment(OGAttachmentResponse ogAttachment) =>
       Attachment(
-        type: ogAttachment.type,
+        // If the type is not specified, we default to urlPreview.
+        type: ogAttachment.type ?? AttachmentType.urlPreview,
         title: ogAttachment.title,
         titleLink: ogAttachment.titleLink,
         text: ogAttachment.text,
@@ -98,7 +96,9 @@ class Attachment extends Equatable {
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
   String? get type {
-    if (_type == AttachmentType.image && titleLink != null) {
+    // If the attachment contains titleLink but is not of type giphy, we
+    // consider it as a urlPreview.
+    if (_type != AttachmentType.giphy && titleLink != null) {
       return AttachmentType.urlPreview;
     }
 
@@ -106,6 +106,9 @@ class Attachment extends Equatable {
   }
 
   final String? _type;
+
+  /// The raw attachment type.
+  String? get rawType => _type;
 
   ///The link to which the attachment message points to.
   final String? titleLink;
@@ -159,7 +162,15 @@ class Attachment extends Equatable {
   final AttachmentFile? file;
 
   /// The current upload state of the attachment
-  late final UploadState uploadState;
+  UploadState get uploadState {
+    if (_uploadState case final state?) return state;
+
+    return ((assetUrl != null || imageUrl != null || thumbUrl != null)
+        ? const UploadState.success()
+        : const UploadState.preparing());
+  }
+
+  final UploadState? _uploadState;
 
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;

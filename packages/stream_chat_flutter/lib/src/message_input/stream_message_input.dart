@@ -1169,7 +1169,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     final containsUrl = quotedMessage.attachments.any((it) {
-      return it.titleLink != null;
+      return it.type == AttachmentType.urlPreview;
     });
 
     return StreamQuotedMessageWidget(
@@ -1316,8 +1316,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
       message = message.copyWith(text: '/${message.command} ${message.text}');
     }
 
-    final skipEnrichUrl = _effectiveController.ogAttachment == null;
-
     var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
     shouldKeepFocus ??= !_commandEnabled;
 
@@ -1341,10 +1339,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       await WidgetsBinding.instance.endOfFrame;
     }
 
-    await _sendOrUpdateMessage(
-      message: message,
-      skipEnrichUrl: skipEnrichUrl,
-    );
+    await _sendOrUpdateMessage(message: message);
 
     if (mounted) {
       if (shouldKeepFocus) {
@@ -1357,36 +1352,29 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Future<void> _sendOrUpdateMessage({
     required Message message,
-    bool skipEnrichUrl = false,
   }) async {
     final channel = StreamChannel.of(context).channel;
 
     try {
       Future sendingFuture;
       if (_isEditing) {
-        sendingFuture = channel.updateMessage(
-          message,
-          skipEnrichUrl: skipEnrichUrl,
-        );
+        sendingFuture = channel.updateMessage(message);
       } else {
-        sendingFuture = channel.sendMessage(
-          message,
-          skipEnrichUrl: skipEnrichUrl,
-        );
+        sendingFuture = channel.sendMessage(message);
       }
 
       final resp = await sendingFuture;
-      if (resp.message?.type == 'error') {
+      if (resp.message?.isError ?? false) {
         _effectiveController.message = message;
       }
       _startSlowMode();
       widget.onMessageSent?.call(resp.message);
     } catch (e, stk) {
       if (widget.onError != null) {
-        widget.onError?.call(e, stk);
-      } else {
-        rethrow;
+        return widget.onError?.call(e, stk);
       }
+
+      rethrow;
     }
   }
 

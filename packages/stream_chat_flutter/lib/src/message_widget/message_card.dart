@@ -22,6 +22,7 @@ class MessageCard extends StatefulWidget {
     required this.isGiphy,
     required this.attachmentBuilders,
     required this.attachmentPadding,
+    required this.attachmentShape,
     required this.onAttachmentTap,
     required this.onShowMessage,
     required this.onReplyTap,
@@ -79,6 +80,9 @@ class MessageCard extends StatefulWidget {
 
   /// {@macro attachmentPadding}
   final EdgeInsetsGeometry attachmentPadding;
+
+  /// {@macro attachmentShape}
+  final ShapeBorder? attachmentShape;
 
   /// {@macro onAttachmentTap}
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
@@ -200,6 +204,7 @@ class _MessageCardState extends State<MessageCard> {
               message: widget.message,
               attachmentBuilders: widget.attachmentBuilders,
               attachmentPadding: widget.attachmentPadding,
+              attachmentShape: widget.attachmentShape,
               onAttachmentTap: widget.onAttachmentTap,
               onShowMessage: widget.onShowMessage,
               onReplyTap: widget.onReplyTap,

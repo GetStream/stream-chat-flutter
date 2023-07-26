@@ -129,7 +129,7 @@ class AttachmentActionsModal extends StatelessWidget {
                   if (showSave)
                     _buildButton(
                       context,
-                      attachment.type == 'video'
+                      attachment.type == AttachmentType.video
                           ? context.translations.saveVideoLabel
                           : context.translations.saveImageLabel,
                       StreamSvgIcon.iconSave(

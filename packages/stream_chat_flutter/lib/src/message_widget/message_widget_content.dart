@@ -48,6 +48,7 @@ class MessageWidgetContent extends StatelessWidget {
     required this.isGiphy,
     required this.attachmentBuilders,
     required this.attachmentPadding,
+    required this.attachmentShape,
     required this.onAttachmentTap,
     required this.onShowMessage,
     required this.onReplyTap,
@@ -149,6 +150,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro attachmentPadding}
   final EdgeInsetsGeometry attachmentPadding;
+
+  /// {@macro attachmentShape}
+  final ShapeBorder? attachmentShape;
 
   /// {@macro onAttachmentTap}
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
@@ -341,6 +345,7 @@ class MessageWidgetContent extends StatelessWidget {
                                         isGiphy: isGiphy,
                                         attachmentBuilders: attachmentBuilders,
                                         attachmentPadding: attachmentPadding,
+                                        attachmentShape: attachmentShape,
                                         onAttachmentTap: onAttachmentTap,
                                         onReplyTap: onReplyTap,
                                         onShowMessage: onShowMessage,

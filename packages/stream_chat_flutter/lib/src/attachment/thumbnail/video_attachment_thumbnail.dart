@@ -46,6 +46,9 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
     return ThumbnailError(
       error: error,
       stackTrace: stackTrace,
+      height: double.infinity,
+      width: double.infinity,
+      fit: BoxFit.cover,
     );
   }
 

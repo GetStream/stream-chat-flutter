@@ -47,7 +47,7 @@ class StreamUrlAttachment extends StatelessWidget {
             color: colorTheme.borders,
             strokeAlign: BorderSide.strokeAlignOutside,
           ),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(8),
         );
 
     final backgroundColor = messageTheme.urlAttachmentBackgroundColor;
@@ -62,44 +62,43 @@ class StreamUrlAttachment extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (urlAttachment.imageUrl != null)
-            Stack(
-              children: [
-                AspectRatio(
-                  // Default aspect ratio for Open Graph images.
-                  // https://www.kapwing.com/resources/what-is-an-og-image-make-and-format-og-images-for-your-blog-or-webpage
-                  aspectRatio: 1.91 / 1,
-                  child: StreamImageAttachmentThumbnail(
-                    image: urlAttachment,
-                    fit: BoxFit.cover,
-                  ),
+          Stack(
+            children: [
+              AspectRatio(
+                // Default aspect ratio for Open Graph images.
+                // https://www.kapwing.com/resources/what-is-an-og-image-make-and-format-og-images-for-your-blog-or-webpage
+                aspectRatio: 1.91 / 1,
+                child: StreamImageAttachmentThumbnail(
+                  image: urlAttachment,
+                  fit: BoxFit.cover,
                 ),
-                Positioned(
-                  left: 0,
-                  bottom: 0,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(16),
-                      ),
-                      color: backgroundColor,
+              ),
+              Positioned(
+                left: 0,
+                bottom: 0,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(16),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 8,
-                        left: 8,
-                        right: 12,
-                        bottom: 4,
-                      ),
-                      child: Text(
-                        hostDisplayName,
-                        style: messageTheme.urlAttachmentHostStyle,
-                      ),
+                    color: backgroundColor,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      left: 8,
+                      right: 12,
+                      bottom: 4,
+                    ),
+                    child: Text(
+                      hostDisplayName,
+                      style: messageTheme.urlAttachmentHostStyle,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.all(8),
             child: Column(

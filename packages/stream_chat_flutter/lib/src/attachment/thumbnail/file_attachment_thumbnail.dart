@@ -50,9 +50,9 @@ class StreamFileAttachmentThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mimeType = file.title?.mimeType?.type;
+    final mediaType = file.title?.mediaType;
 
-    final isImage = mimeType == 'image';
+    final isImage = mediaType?.type == AttachmentType.image;
     if (isImage) {
       return StreamImageAttachmentThumbnail(
         image: file,
@@ -62,7 +62,7 @@ class StreamFileAttachmentThumbnail extends StatelessWidget {
       );
     }
 
-    final isVideo = mimeType == 'video';
+    final isVideo = mediaType?.type == AttachmentType.video;
     if (isVideo) {
       return StreamVideoAttachmentThumbnail(
         video: file,
@@ -73,6 +73,6 @@ class StreamFileAttachmentThumbnail extends StatelessWidget {
     }
 
     // Return a generic file type icon.
-    return getFileTypeImage(mimeType);
+    return getFileTypeImage(mediaType?.mimeType);
   }
 }

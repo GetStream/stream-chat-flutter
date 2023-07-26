@@ -26,6 +26,7 @@ void main() {
               child: SizedBox(
                 child: StreamUrlAttachment(
                   messageTheme: streamTheme.ownMessageTheme,
+                  message: Message(),
                   hostDisplayName: 'Test',
                   urlAttachment: Attachment(
                     title: 'Flutter',

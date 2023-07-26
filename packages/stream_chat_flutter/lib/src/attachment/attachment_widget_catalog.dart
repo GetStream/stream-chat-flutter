@@ -57,6 +57,8 @@ class AttachmentWidgetCatalog {
 extension on List<Attachment> {
   /// Groups the attachments by their type.
   Map<String, List<Attachment>> get grouped {
-    return groupBy(this, (attachment) => attachment.type!);
+    return groupBy(where((it) {
+      return it.type != null;
+    }), (attachment) => attachment.type!);
   }
 }

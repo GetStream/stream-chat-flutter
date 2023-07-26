@@ -259,6 +259,14 @@ typedef SystemMessageBuilder = Widget Function(
   Message,
 );
 
+/// {@template ephemeralMessageBuilder}
+/// A widget builder for creating custom ephemeral messages.
+/// {@endtemplate}
+typedef EphemeralMessageBuilder = Widget Function(
+  BuildContext,
+  Message,
+);
+
 /// {@template threadBuilder}
 /// A widget builder for creating custom thread UI.
 /// {@endtemplate}

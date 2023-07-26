@@ -49,11 +49,9 @@ class StreamMessageWidget extends StatefulWidget {
     this.reverse = false,
     this.translateUserAvatar = true,
     this.shape,
-    this.attachmentShape,
     this.borderSide,
-    this.attachmentBorderSide,
     this.borderRadiusGeometry,
-    this.attachmentBorderRadiusGeometry,
+    this.attachmentShape,
     this.onMentionTap,
     this.onMessageTap,
     this.showReactionPicker = true,
@@ -334,20 +332,10 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final BorderSide? borderSide;
 
-  /// {@template attachmentBorderSide}
-  /// The borderSide of an attachment
-  /// {@endtemplate}
-  final BorderSide? attachmentBorderSide;
-
   /// {@template borderRadiusGeometry}
   /// The border radius of the message text
   /// {@endtemplate}
   final BorderRadiusGeometry? borderRadiusGeometry;
-
-  /// {@template attachmentBorderRadiusGeometry}
-  /// The border radius of an attachment
-  /// {@endtemplate}
-  final BorderRadiusGeometry? attachmentBorderRadiusGeometry;
 
   /// {@template padding}
   /// The padding of the widget
@@ -542,9 +530,7 @@ class StreamMessageWidget extends StatefulWidget {
     ShapeBorder? shape,
     ShapeBorder? attachmentShape,
     BorderSide? borderSide,
-    BorderSide? attachmentBorderSide,
     BorderRadiusGeometry? borderRadiusGeometry,
-    BorderRadiusGeometry? attachmentBorderRadiusGeometry,
     EdgeInsetsGeometry? padding,
     EdgeInsets? textPadding,
     EdgeInsetsGeometry? attachmentPadding,
@@ -603,10 +589,7 @@ class StreamMessageWidget extends StatefulWidget {
       shape: shape ?? this.shape,
       attachmentShape: attachmentShape ?? this.attachmentShape,
       borderSide: borderSide ?? this.borderSide,
-      attachmentBorderSide: attachmentBorderSide ?? this.attachmentBorderSide,
       borderRadiusGeometry: borderRadiusGeometry ?? this.borderRadiusGeometry,
-      attachmentBorderRadiusGeometry:
-          attachmentBorderRadiusGeometry ?? this.attachmentBorderRadiusGeometry,
       padding: padding ?? this.padding,
       textPadding: textPadding ?? this.textPadding,
       attachmentPadding: attachmentPadding ?? this.attachmentPadding,
@@ -691,8 +674,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// {@template isGiphy}
   /// `true` if any of the [message]'s attachments are a giphy.
   /// {@endtemplate}
-  bool get isGiphy =>
-      widget.message.attachments.any((element) => element.type == 'giphy');
+  bool get isGiphy => widget.message.attachments
+      .any((element) => element.type == AttachmentType.giphy);
 
   /// {@template isOnlyEmoji}
   /// `true` if [message.text] contains only emoji.
@@ -749,7 +732,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   bool get shouldShowEditAction =>
       widget.showEditMessage &&
       !isDeleteFailed &&
-      !widget.message.attachments.any((element) => element.type == 'giphy');
+      !widget.message.attachments
+          .any((element) => element.type == AttachmentType.giphy);
 
   bool get shouldShowResendAction =>
       widget.showResendMessage && (isSendFailed || isUpdateFailed);
@@ -762,7 +746,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   bool get shouldShowEditMessage =>
       widget.showEditMessage &&
       !isDeleteFailed &&
-      !widget.message.attachments.any((element) => element.type == 'giphy');
+      !widget.message.attachments
+          .any((element) => element.type == AttachmentType.giphy);
 
   bool get shouldShowThreadReplyAction =>
       widget.showThreadReplyMessage &&
@@ -853,6 +838,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       textPadding: widget.textPadding,
                       attachmentBuilders: widget.attachmentBuilders,
                       attachmentPadding: widget.attachmentPadding,
+                      attachmentShape: widget.attachmentShape,
                       onAttachmentTap: widget.onAttachmentTap,
                       onReplyTap: widget.onReplyTap,
                       onShowMessage: widget.onShowMessage,

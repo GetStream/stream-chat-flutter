@@ -128,19 +128,21 @@ class _FileTypeImage extends StatelessWidget {
       file: file,
       width: double.infinity,
       height: double.infinity,
-      // fit: BoxFit.cover,
     );
 
-    final mimeType = file.title?.mimeType?.type;
-    final isImage = mimeType == 'image';
-    final isVideo = mimeType == 'video';
+    final mediaType = file.title?.mediaType;
+    final isImage = mediaType?.type == AttachmentType.image;
+    final isVideo = mediaType?.type == AttachmentType.video;
     if (isImage || isVideo) {
       final colorTheme = StreamChatTheme.of(context).colorTheme;
       child = Container(
         clipBehavior: Clip.hardEdge,
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
-            side: BorderSide(color: colorTheme.borders),
+            side: BorderSide(
+              color: colorTheme.borders,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
         ),

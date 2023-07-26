@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -272,7 +272,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                   }
                 }
                 if (widget.autoplayVideos &&
-                    currentAttachment.type == 'video') {
+                    currentAttachment.type == AttachmentType.video) {
                   final controller = videoPackages[currentAttachment.id]!;
                   controller._chewieController?.play();
                 }
@@ -294,46 +294,18 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                       child: ContextMenuArea(
                         verticalPadding: 0,
                         builder: (_) => [
-                          DownloadMenuItem(
-                            attachment: attachment,
-                          ),
+                          DownloadMenuItem(attachment: attachment),
                         ],
                         child: PhotoView.customChild(
-                          heroAttributes: PhotoViewHeroAttributes(
-                            tag: attachment.id,
-                          ),
-                          // imageProvider: (imageUrl == null &&
-                          //         attachment.localUri != null &&
-                          //         attachment.file?.bytes != null)
-                          //     ? Image.memory(attachment.file!.bytes!).image
-                          //     : CachedNetworkImageProvider(imageUrl!),
-                          // errorBuilder: (_, __, ___) => const AttachmentError(),
-                          // loadingBuilder: (context, _) {
-                          //   final image = Image.asset(
-                          //     'images/placeholder.png',
-                          //     fit: BoxFit.cover,
-                          //     package: 'stream_chat_flutter',
-                          //   );
-                          //   final colorTheme =
-                          //       StreamChatTheme.of(context).colorTheme;
-                          //   return Shimmer.fromColors(
-                          //     baseColor: colorTheme.disabled,
-                          //     highlightColor: colorTheme.inputBg,
-                          //     child: image,
-                          //   );
-                          // },
-                          child: StreamImageAttachmentThumbnail(
-                            image: attachment,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
                           maxScale: PhotoViewComputedScale.covered,
                           minScale: PhotoViewComputedScale.contained,
-                          // heroAttributes: PhotoViewHeroAttributes(
-                          //   tag: widget.mediaAttachmentPackages,
-                          // ),
                           backgroundDecoration: const BoxDecoration(
                             color: Colors.transparent,
+                          ),
+                          child: StreamMediaAttachmentThumbnail(
+                            media: attachment,
+                            width: double.infinity,
+                            height: double.infinity,
                           ),
                         ),
                       ),
@@ -353,9 +325,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                       child: ContextMenuArea(
                         verticalPadding: 0,
                         builder: (_) => [
-                          DownloadMenuItem(
-                            attachment: attachment,
-                          ),
+                          DownloadMenuItem(attachment: attachment),
                         ],
                         child: Chewie(
                           controller: controller.chewieController!,

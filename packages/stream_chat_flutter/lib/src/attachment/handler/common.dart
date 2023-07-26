@@ -50,18 +50,18 @@ Future<AttachmentData> downloadAttachmentData(
   String? downloadUrl;
   String? fileName;
   /* ---IMAGES/GIFS--- */
-  if (type == 'image') {
+  if (type == AttachmentType.image) {
     downloadUrl = attachment.imageUrl ?? attachment.assetUrl;
     fileName = attachment.title;
     fileName ??= 'attachment.${attachment.mimeType ?? 'png'}';
   }
   /* ---GIPHY's--- */
-  else if (type == 'giphy') {
+  else if (type == AttachmentType.giphy) {
     downloadUrl = attachment.thumbUrl;
     fileName = '${attachment.title}.gif';
   }
   /* ---FILES AND VIDEOS--- */
-  else if (type == 'file' || type == 'video') {
+  else if (type == AttachmentType.file || type == AttachmentType.video) {
     downloadUrl = attachment.assetUrl;
     fileName = attachment.title;
   }

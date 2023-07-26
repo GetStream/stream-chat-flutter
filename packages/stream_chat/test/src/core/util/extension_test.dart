@@ -25,13 +25,13 @@ void main() {
   group('mimeType', () {
     test('should return null if `String` is not a filename', () {
       const fileName = 'not-a-file-name';
-      final mimeType = fileName.mimeType;
+      final mimeType = fileName.mediaType;
       expect(mimeType, isNull);
     });
 
     test('should return mimeType if string is a filename', () {
       const fileName = 'dummyFileName.jpeg';
-      final mimeType = fileName.mimeType;
+      final mimeType = fileName.mediaType;
       expect(mimeType, isNotNull);
       expect(mimeType!.type, 'image');
       expect(mimeType.subtype, 'jpeg');
@@ -39,7 +39,7 @@ void main() {
 
     test('should return `image/heic` if ends with `heic`', () {
       const fileName = 'dummyFileName.heic';
-      final mimeType = fileName.mimeType;
+      final mimeType = fileName.mediaType;
       expect(mimeType, isNotNull);
       expect(mimeType!.type, 'image');
       expect(mimeType.subtype, 'heic');

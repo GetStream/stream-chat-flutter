@@ -142,6 +142,8 @@ class StreamVideoThumbnailImage
   int get hashCode => Object.hash(video, scale);
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'StreamVideoThumbnailImage')}($video, scale: $scale)';
+  String toString() {
+    final runtimeType = objectRuntimeType(this, 'StreamVideoThumbnailImage');
+    return '$runtimeType($video, scale: $scale)';
+  }
 }

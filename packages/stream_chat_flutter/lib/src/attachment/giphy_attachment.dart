@@ -12,7 +12,7 @@ class StreamGiphyAttachment extends StatelessWidget {
     super.key,
     required this.message,
     required this.giphy,
-    this.type = GiphyInfoType.fixedHeightDownsampled,
+    this.type = GiphyInfoType.original,
     this.shape,
     this.constraints = const BoxConstraints(),
   });
