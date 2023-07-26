@@ -26,8 +26,9 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
       authorIcon: json['author_icon'] as String?,
       assetUrl: json['asset_url'] as String?,
       actions: (json['actions'] as List<dynamic>?)
-          ?.map((e) => Action.fromJson(e as Map<String, dynamic>))
-          .toList(),
+              ?.map((e) => Action.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
       originalWidth: json['original_width'] as int?,
       originalHeight: json['original_height'] as int?,
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
