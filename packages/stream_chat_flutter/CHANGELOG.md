@@ -51,6 +51,12 @@
 - Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
 - Updated `jiffy` dependency to `^6.2.1`.
 
+## 6.8.1
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` always sending message as `system`.
+
 ## 6.8.0
 
 🔄 Changed
