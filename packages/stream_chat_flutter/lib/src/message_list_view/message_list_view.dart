@@ -817,7 +817,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             child: FloatingDateDivider(
               itemCount: itemCount,
               reverse: widget.reverse,
-              itemPositionListener: _itemPositionListener,
+              itemPositionListener: _itemPositionListener.itemPositions,
               messages: messages,
               dateDividerBuilder: widget.dateDividerBuilder,
               isThreadConversation: _isThreadConversation,

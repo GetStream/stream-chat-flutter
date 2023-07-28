@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
@@ -22,7 +23,7 @@ class FloatingDateDivider extends StatelessWidget {
   final bool isThreadConversation;
 
   // ignore: public_member_api_docs
-  final ItemPositionsListener itemPositionListener;
+  final ValueListenable<Iterable<ItemPosition>> itemPositionListener;
 
   // ignore: public_member_api_docs
   final bool reverse;
@@ -38,9 +39,8 @@ class FloatingDateDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemPositions = itemPositionListener.itemPositions;
     return ValueListenableBuilder(
-      valueListenable: itemPositions,
+      valueListenable: itemPositionListener,
       builder: (context, positions, child) {
         if (positions.isEmpty || messages.isEmpty) {
           return const Offstage();
