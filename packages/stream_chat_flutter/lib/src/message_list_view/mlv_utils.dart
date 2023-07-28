@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -73,30 +70,4 @@ int? getBottomElementIndex(Iterable<ItemPosition> values) {
 /// Returns true if the message is the initial message.
 bool isInitialMessage(String id, StreamChannelState? channelState) {
   return channelState!.initialMessageId == id;
-}
-
-/// Converts a [ValueListenable] to a [Stream].
-Stream<T> valueListenableToStreamAdapter<T>(ValueListenable<T> listenable) {
-  late StreamController<T> _controller;
-
-  void listener() {
-    _controller.add(listenable.value);
-  }
-
-  void start() {
-    listenable.addListener(listener);
-  }
-
-  void end() {
-    listenable.removeListener(listener);
-  }
-
-  _controller = StreamController<T>(
-    onListen: start,
-    onPause: end,
-    onResume: start,
-    onCancel: end,
-  );
-
-  return _controller.stream;
 }

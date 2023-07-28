@@ -810,13 +810,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             ),
           ),
         if (widget.showFloatingDateDivider)
-          FloatingDateDivider(
-            itemCount: itemCount,
-            reverse: widget.reverse,
-            itemPositionListener: _itemPositionListener,
-            messages: messages,
-            dateDividerBuilder: widget.dateDividerBuilder,
-            isThreadConversation: _isThreadConversation,
+          Positioned(
+            top: 20,
+            left: 0,
+            right: 0,
+            child: FloatingDateDivider(
+              itemCount: itemCount,
+              reverse: widget.reverse,
+              itemPositionListener: _itemPositionListener,
+              messages: messages,
+              dateDividerBuilder: widget.dateDividerBuilder,
+              isThreadConversation: _isThreadConversation,
+            ),
           ),
       ],
     );
