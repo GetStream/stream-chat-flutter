@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/file_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
@@ -178,16 +177,10 @@ class _QuotedMessage extends StatelessWidget {
     }
 
     // Add clear button if needed.
-    if (onQuotedMessageClear != null) {
+    if (isDesktopDeviceOrWeb && onQuotedMessageClear != null) {
       children.insert(
         0,
-        PlatformWidgetBuilder(
-          web: (context, child) => child,
-          desktop: (context, child) => child,
-          child: ClearInputItemButton(
-            onTap: onQuotedMessageClear,
-          ),
-        ),
+        ClearInputItemButton(onTap: onQuotedMessageClear),
       );
     }
 

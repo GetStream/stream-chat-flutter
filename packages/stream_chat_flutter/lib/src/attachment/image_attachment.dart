@@ -103,31 +103,3 @@ class StreamImageAttachment extends StatelessWidget {
     );
   }
 }
-
-//   Future<void> _onTap(
-//     BuildContext context,
-//     int index,
-//   ) async {
-//     if (onAttachmentTap != null) {
-//       return onAttachmentTap!();
-//     }
-//
-//     final channel = StreamChannel.of(context).channel;
-//
-//     Navigator.of(context).push(
-//       MaterialPageRoute(
-//         builder: (context) => StreamChannel(
-//           channel: channel,
-//           child: StreamFullScreenMediaBuilder(
-//             mediaAttachmentPackages: message.getAttachmentPackageList(),
-//             startIndex: index,
-//             userName: message.user!.name,
-//             onShowMessage: onShowMessage,
-//             onReplyMessage: onReplyMessage,
-//             attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

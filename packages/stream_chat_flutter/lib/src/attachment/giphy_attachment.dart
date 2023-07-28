@@ -68,67 +68,39 @@ class StreamGiphyAttachment extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
         );
 
-    return Hero(
-      tag: giphy.id,
-      child: Container(
-        constraints: constraints,
-        clipBehavior: Clip.hardEdge,
-        decoration: ShapeDecoration(shape: shape),
-        child: AspectRatio(
-          aspectRatio: giphySize?.aspectRatio ?? 1,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              StreamGiphyAttachmentThumbnail(
-                type: type,
-                giphy: giphy,
-                fit: fit,
-                width: double.infinity,
-                height: double.infinity,
-              ),
-              if (giphy.uploadState.isSuccess)
-                const Positioned(
-                  bottom: 8,
-                  left: 8,
-                  child: GiphyChip(),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: StreamAttachmentUploadStateBuilder(
-                    message: message,
-                    attachment: giphy,
-                  ),
+    return Container(
+      constraints: constraints,
+      clipBehavior: Clip.hardEdge,
+      decoration: ShapeDecoration(shape: shape),
+      child: AspectRatio(
+        aspectRatio: giphySize?.aspectRatio ?? 1,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            StreamGiphyAttachmentThumbnail(
+              type: type,
+              giphy: giphy,
+              fit: fit,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+            if (giphy.uploadState.isSuccess)
+              const Positioned(
+                bottom: 8,
+                left: 8,
+                child: GiphyChip(),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: StreamAttachmentUploadStateBuilder(
+                  message: message,
+                  attachment: giphy,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
   }
-
-// Future<void> _onTap(BuildContext context) async {
-//   if (onAttachmentTap != null) {
-//     return onAttachmentTap!();
-//   }
-//
-//   await Navigator.of(context).push(
-//     MaterialPageRoute(
-//       builder: (_) {
-//         final channel = StreamChannel.of(context).channel;
-//         return StreamChannel(
-//           channel: channel,
-//           child: StreamFullScreenMediaBuilder(
-//             mediaAttachmentPackages: message.getAttachmentPackageList(),
-//             startIndex: message.attachments.indexOf(giphy),
-//             userName: message.user!.name,
-//             onShowMessage: onShowMessage,
-//             onReplyMessage: onReplyMessage,
-//             attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-//           ),
-//         );
-//       },
-//     ),
-//   );
-// }
 }
