@@ -1,6 +1,6 @@
 part of 'attachment_widget_builder.dart';
 
-const _kDefaultUrlAttachmentConstraints = BoxConstraints(maxWidth: 290);
+const _kDefaultUrlAttachmentConstraints = BoxConstraints(maxWidth: 256);
 
 /// {@template urlAttachmentBuilder}
 /// A widget builder for url attachment type.
@@ -30,25 +30,23 @@ class UrlAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
 
   @override
-  bool canHandle(
-    Message message,
-    Map<String, List<Attachment>> attachments,
-  ) {
+  bool canHandle(Message message,
+      Map<String, List<Attachment>> attachments,) {
     final urls = attachments[AttachmentType.urlPreview];
     return urls != null && urls.isNotEmpty;
   }
 
   @override
-  Widget build(
-    BuildContext context,
-    Message message,
-    Map<String, List<Attachment>> attachments,
-  ) {
+  Widget build(BuildContext context,
+      Message message,
+      Map<String, List<Attachment>> attachments,) {
     assert(debugAssertCanHandle(message, attachments), '');
 
     final urlPreviews = attachments[AttachmentType.urlPreview]!;
 
-    final client = StreamChat.of(context).client;
+    final client = StreamChat
+        .of(context)
+        .client;
     final isMyMessage = message.user?.id == client.state.currentUser?.id;
 
     final streamChatTheme = StreamChatTheme.of(context);
@@ -62,7 +60,9 @@ class UrlAttachmentBuilder extends StreamAttachmentWidgetBuilder {
         onTap = () => onAttachmentTap!(message, urlPreview);
       }
 
-      final host = Uri.parse(urlPreview.titleLink!).host;
+      final host = Uri
+          .parse(urlPreview.titleLink!)
+          .host;
       final splitList = host.split('.');
       final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
       final hostDisplayName = urlPreview.authorName?.capitalize() ??
