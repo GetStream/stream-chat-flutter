@@ -1,3 +1,7 @@
+## 7.0.0-beta.3
+
+- Included the changes from version [6.8.1](#681).
+
 ## 7.0.0-beta.2
 
 - Updated `stream_chat_flutter_core` dependency
