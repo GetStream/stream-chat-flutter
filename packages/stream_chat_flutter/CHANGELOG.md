@@ -1,3 +1,9 @@
+## 6.8.1
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` always sending message as `system`.
+
 ## 6.8.0
 
 🔄 Changed
