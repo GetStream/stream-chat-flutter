@@ -2334,6 +2334,26 @@ class ChannelClientState {
         !isThreadMessage;
   }
 
+  /// Counts the number of unread messages mentioning the current user.
+  ///
+  /// **NOTE**: The method relies on the [Channel.messages] list and doesn't do
+  /// any API call. Therefore, the count might be not reliable as it relies on
+  /// the local data.
+  int countUnreadMentions() {
+    final lastRead = currentUserRead?.lastRead;
+    final userId = _channel.client.state.currentUser?.id;
+
+    var count = 0;
+    for (final message in messages) {
+      if (_countMessageAsUnread(message) &&
+          (lastRead == null || message.createdAt.isAfter(lastRead)) &&
+          message.mentionedUsers.any((user) => user.id == userId) == true) {
+        count++;
+      }
+    }
+    return count;
+  }
+
   /// Update threads with updated information about messages.
   void updateThreadInfo(String parentId, List<Message> messages) {
     final newThreads = Map<String, List<Message>>.from(threads);
