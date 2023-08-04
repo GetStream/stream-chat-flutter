@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/http/interceptor/additional_headers_interceptor.dart';
 import 'package:stream_chat/stream_chat.dart';
