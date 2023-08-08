@@ -73,5 +73,5 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   golden_toolkit: ^0.15.0
-  mocktail: ^0.3.0
+  mocktail: ^1.0.0
   path: ^1.8.2
