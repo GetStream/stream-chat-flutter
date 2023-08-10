@@ -993,9 +993,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       showReactionPickerTail: widget.showReactionPickerTail,
                       showReactions: showReactions,
                       onReactionsTap: () {
-                        widget.onReactionsTap != null ? widget.onReactionsTap!(
-                            widget.message
-                        ) : _showMessageReactionsModal(context);
+                        widget.onReactionsTap != null
+                            ? widget.onReactionsTap!(widget.message)
+                            : _showMessageReactionsModal(context);
                       },
                       showUserAvatar: widget.showUserAvatar,
                       streamChat: _streamChat,
