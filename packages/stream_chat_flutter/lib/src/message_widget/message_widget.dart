@@ -55,6 +55,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.attachmentBorderRadiusGeometry,
     this.onMentionTap,
     this.onMessageTap,
+    this.onReactionsTap,
     bool? showReactionPicker,
     @Deprecated('Use `showReactionPicker` instead')
     bool showReactionPickerIndicator = true,
@@ -563,6 +564,9 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@macro onMessageTap}
   final void Function(Message)? onMessageTap;
 
+  /// {@macro onReactionsTap}
+  final OnReactionsTap? onReactionsTap;
+
   /// {@template customActions}
   /// List of custom actions shown on message long tap
   /// {@endtemplate}
@@ -657,6 +661,7 @@ class StreamMessageWidget extends StatefulWidget {
     bool? translateUserAvatar,
     OnQuotedMessageTap? onQuotedMessageTap,
     void Function(Message)? onMessageTap,
+    OnReactionsTap? onReactionsTap,
     List<StreamMessageAction>? customActions,
     void Function(Message message, Attachment attachment)? onAttachmentTap,
     Widget Function(BuildContext, User)? userAvatarBuilder,
@@ -746,6 +751,7 @@ class StreamMessageWidget extends StatefulWidget {
       translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
       onMessageTap: onMessageTap ?? this.onMessageTap,
+      onReactionsTap: onReactionsTap ?? this.onReactionsTap,
       customActions: customActions ?? this.customActions,
       onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
       userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
@@ -986,7 +992,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       showPinHighlight: widget.showPinHighlight,
                       showReactionPickerTail: widget.showReactionPickerTail,
                       showReactions: showReactions,
-                      onReactionsTap: () => _showMessageReactionsModal(context),
+                      onReactionsTap: () {
+                        widget.onReactionsTap != null ? widget.onReactionsTap!(
+                            widget.message
+                        ) : _showMessageReactionsModal(context);
+                      },
                       showUserAvatar: widget.showUserAvatar,
                       streamChat: _streamChat,
                       translateUserAvatar: widget.translateUserAvatar,
