@@ -352,12 +352,12 @@ extension MessageX on Message {
       final userName = user.name;
       if (linkify) {
         messageTextToRender = messageTextToRender?.replaceAll(
-          '@$userId',
-          '[@$userName](@${userName.replaceAll(' ', '')})',
+          RegExp('@($userId|$userName)'),
+          '[@$userName]($userId)',
         );
       } else {
         messageTextToRender = messageTextToRender?.replaceAll(
-          '@$userId',
+          RegExp('@($userId|$userName)'),
           '@$userName',
         );
       }
