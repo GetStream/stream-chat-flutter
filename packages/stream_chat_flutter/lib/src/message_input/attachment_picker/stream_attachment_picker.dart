@@ -698,6 +698,7 @@ Widget mobileAttachmentPickerBuilder({
   ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
   int attachmentThumbnailQuality = 100,
   double attachmentThumbnailScale = 1,
+  ErrorListener? onError,
 }) {
   return StreamMobileAttachmentPickerBottomSheet(
     controller: controller,
@@ -721,10 +722,15 @@ Widget mobileAttachmentPickerBuilder({
               mediaThumbnailQuality: attachmentThumbnailQuality,
               mediaThumbnailScale: attachmentThumbnailScale,
               onMediaItemSelected: (media) async {
-                if (selectedIds.contains(media.id)) {
-                  return controller.removeAssetAttachment(media);
+                try {
+                  if (selectedIds.contains(media.id)) {
+                    return await controller.removeAssetAttachment(media);
+                  }
+                  return await controller.addAssetAttachment(media);
+                } catch (e, stk) {
+                  if (onError != null) return onError.call(e, stk);
+                  rethrow;
                 }
-                return controller.addAssetAttachment(media);
               },
             );
           },
@@ -736,8 +742,15 @@ Widget mobileAttachmentPickerBuilder({
           optionViewBuilder: (context, controller) {
             return StreamFilePicker(
               onFilePicked: (file) async {
-                if (file != null) await controller.addAttachment(file);
-                return Navigator.pop(context, controller.value);
+                try {
+                  if (file != null) await controller.addAttachment(file);
+                  return Navigator.pop(context, controller.value);
+                } catch (e, stk) {
+                  Navigator.pop(context, controller.value);
+                  if (onError != null) return onError.call(e, stk);
+
+                  rethrow;
+                }
               },
             );
           },
@@ -749,10 +762,17 @@ Widget mobileAttachmentPickerBuilder({
           optionViewBuilder: (context, controller) {
             return StreamImagePicker(
               onImagePicked: (image) async {
-                if (image != null) {
-                  await controller.addAttachment(image);
+                try {
+                  if (image != null) {
+                    await controller.addAttachment(image);
+                  }
+                  return Navigator.pop(context, controller.value);
+                } catch (e, stk) {
+                  Navigator.pop(context, controller.value);
+                  if (onError != null) return onError.call(e, stk);
+
+                  rethrow;
                 }
-                return Navigator.pop(context, controller.value);
               },
             );
           },
@@ -764,10 +784,17 @@ Widget mobileAttachmentPickerBuilder({
           optionViewBuilder: (context, controller) {
             return StreamVideoPicker(
               onVideoPicked: (video) async {
-                if (video != null) {
-                  await controller.addAttachment(video);
+                try {
+                  if (video != null) {
+                    await controller.addAttachment(video);
+                  }
+                  return Navigator.pop(context, controller.value);
+                } catch (e, stk) {
+                  Navigator.pop(context, controller.value);
+                  if (onError != null) return onError.call(e, stk);
+
+                  rethrow;
                 }
-                return Navigator.pop(context, controller.value);
               },
             );
           },
@@ -787,6 +814,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
   ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
   int attachmentThumbnailQuality = 100,
   double attachmentThumbnailScale = 1,
+  ErrorListener? onError,
 }) {
   return StreamWebOrDesktopAttachmentPickerBottomSheet(
     controller: controller,
@@ -814,13 +842,20 @@ Widget webOrDesktopAttachmentPickerBuilder({
       }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
     },
     onOptionTap: (context, controller, option) async {
-      final attachment = await StreamAttachmentHandler.instance.pickFile(
-        type: option.type.fileType,
-      );
-      if (attachment != null) {
-        await controller.addAttachment(attachment);
+      try {
+        final attachment = await StreamAttachmentHandler.instance.pickFile(
+          type: option.type.fileType,
+        );
+        if (attachment != null) {
+          await controller.addAttachment(attachment);
+        }
+        return Navigator.pop(context, controller.value);
+      } catch (e, stk) {
+        Navigator.pop(context, controller.value);
+        if (onError != null) return onError.call(e, stk);
+
+        rethrow;
       }
-      return Navigator.pop(context, controller.value);
     },
   );
 }
