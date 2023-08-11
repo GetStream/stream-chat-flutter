@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1702]](https://github.com/GetStream/stream-chat-flutter/issues/1702)
+  Fixed `Message.replaceMentions` not treating `@usernames` as mentions.
+
 ## 6.8.1
 
 🐞 Fixed
