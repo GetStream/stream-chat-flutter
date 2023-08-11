@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Fixed `Channel.query` not initializing `ChannelState`.
+
 ✅ Added
 
 - Added support for `channel.countUnreadMentions()` to get the count of unread messages mentioning the current user on a
