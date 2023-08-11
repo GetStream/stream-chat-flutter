@@ -815,6 +815,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _onAttachmentButtonPressed() async {
     final attachments = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
+      onError: widget.onError,
       allowedTypes: widget.allowedAttachmentPickerTypes,
       initialAttachments: _effectiveController.attachments,
     );
