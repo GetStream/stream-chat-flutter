@@ -8,6 +8,7 @@
 ✅ Added
 
 - Added support for listening error events in AttachmentPickerBottomSheet.
+- Added support for overriding the `MessageWidget.onReactionTap` callback.
 
 ## 6.8.1
 
