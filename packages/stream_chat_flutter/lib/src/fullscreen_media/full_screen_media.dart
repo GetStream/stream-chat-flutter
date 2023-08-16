@@ -3,13 +3,11 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
-import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
-import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -281,84 +279,83 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                 final currentAttachmentPackage =
                     widget.mediaAttachmentPackages[index];
                 final attachment = currentAttachmentPackage.attachment;
-                if (attachment.type == 'image' || attachment.type == 'giphy') {
-                  final imageUrl = attachment.imageUrl ??
-                      attachment.assetUrl ??
-                      attachment.thumbUrl;
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: _isDisplayingDetail,
-                    builder: (context, isDisplayingDetail, _) =>
-                        AnimatedContainer(
+                return ValueListenableBuilder(
+                  valueListenable: _isDisplayingDetail,
+                  builder: (context, isDisplayingDetail, child) {
+                    return AnimatedContainer(
+                      duration: kThemeChangeDuration,
                       color: isDisplayingDetail
                           ? StreamChannelHeaderTheme.of(context).color
                           : Colors.black,
-                      duration: kThemeAnimationDuration,
-                      child: ContextMenuArea(
-                        verticalPadding: 0,
-                        builder: (_) => [
-                          DownloadMenuItem(
-                            attachment: attachment,
-                          ),
-                        ],
-                        child: PhotoView(
-                          imageProvider: (imageUrl == null &&
-                                  attachment.localUri != null &&
-                                  attachment.file?.bytes != null)
-                              ? Image.memory(attachment.file!.bytes!).image
-                              : CachedNetworkImageProvider(imageUrl!),
-                          errorBuilder: (_, __, ___) => const AttachmentError(),
-                          loadingBuilder: (context, _) {
-                            final image = Image.asset(
-                              'images/placeholder.png',
-                              fit: BoxFit.cover,
-                              package: 'stream_chat_flutter',
+                      child: Builder(
+                        builder: (context) {
+                          if (attachment.type == 'image' ||
+                              attachment.type == 'giphy') {
+                            final imageUrl = attachment.imageUrl ??
+                                attachment.assetUrl ??
+                                attachment.thumbUrl;
+
+                            return PhotoView(
+                              imageProvider: (imageUrl == null &&
+                                      attachment.localUri != null &&
+                                      attachment.file?.bytes != null)
+                                  ? Image.memory(attachment.file!.bytes!).image
+                                  : CachedNetworkImageProvider(imageUrl!),
+                              errorBuilder: (_, __, ___) =>
+                                  const AttachmentError(),
+                              loadingBuilder: (context, _) {
+                                final image = Image.asset(
+                                  'images/placeholder.png',
+                                  fit: BoxFit.cover,
+                                  package: 'stream_chat_flutter',
+                                );
+                                final colorTheme =
+                                    StreamChatTheme.of(context).colorTheme;
+                                return Shimmer.fromColors(
+                                  baseColor: colorTheme.disabled,
+                                  highlightColor: colorTheme.inputBg,
+                                  child: image,
+                                );
+                              },
+                              maxScale: PhotoViewComputedScale.covered,
+                              minScale: PhotoViewComputedScale.contained,
+                              heroAttributes: PhotoViewHeroAttributes(
+                                tag: widget.mediaAttachmentPackages,
+                              ),
+                              backgroundDecoration: const BoxDecoration(
+                                color: Colors.transparent,
+                              ),
                             );
-                            final colorTheme =
-                                StreamChatTheme.of(context).colorTheme;
-                            return Shimmer.fromColors(
-                              baseColor: colorTheme.disabled,
-                              highlightColor: colorTheme.inputBg,
-                              child: image,
+                          } else if (attachment.type == 'video') {
+                            final controller = videoPackages[attachment.id]!;
+                            if (!controller.initialized) {
+                              return const Center(
+                                child: CircularProgressIndicator.adaptive(),
+                              );
+                            }
+
+                            final mediaQuery = MediaQuery.of(context);
+                            final bottomPadding = mediaQuery.padding.bottom;
+
+                            return AnimatedPadding(
+                              duration: kThemeChangeDuration,
+                              padding: EdgeInsets.symmetric(
+                                vertical: isDisplayingDetail
+                                    ? kToolbarHeight + bottomPadding
+                                    : 0,
+                              ),
+                              child: Chewie(
+                                controller: controller.chewieController!,
+                              ),
                             );
-                          },
-                          maxScale: PhotoViewComputedScale.covered,
-                          minScale: PhotoViewComputedScale.contained,
-                          heroAttributes: PhotoViewHeroAttributes(
-                            tag: widget.mediaAttachmentPackages,
-                          ),
-                          backgroundDecoration: const BoxDecoration(
-                            color: Colors.transparent,
-                          ),
-                        ),
+                          }
+
+                          return const SizedBox();
+                        },
                       ),
-                    ),
-                  );
-                } else if (attachment.type == 'video') {
-                  final controller = videoPackages[attachment.id]!;
-                  if (!controller.initialized) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
                     );
-                  }
-                  return InkWell(
-                    onTap: switchDisplayingDetail,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 50),
-                      child: ContextMenuArea(
-                        verticalPadding: 0,
-                        builder: (_) => [
-                          DownloadMenuItem(
-                            attachment: attachment,
-                          ),
-                        ],
-                        child: Chewie(
-                          controller: controller.chewieController!,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox();
+                  },
+                );
               },
             ),
           ),
@@ -475,6 +472,7 @@ class VideoPackage {
         videoPlayerController: _videoPlayerController,
         autoInitialize: _autoInitialize,
         showControls: _showControls,
+        showOptions: false,
         aspectRatio: _videoPlayerController.value.aspectRatio,
       );
     });

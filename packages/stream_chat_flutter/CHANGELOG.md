@@ -4,6 +4,8 @@
 
 - [[#1702]](https://github.com/GetStream/stream-chat-flutter/issues/1702)
   Fixed `Message.replaceMentions` not treating `@usernames` as mentions.
+- [[#1694]](https://github.com/GetStream/stream-chat-flutter/issues/1694) Fixed Video player buttons
+  getting covered by bottom toolbar.
 
 ✅ Added
 
