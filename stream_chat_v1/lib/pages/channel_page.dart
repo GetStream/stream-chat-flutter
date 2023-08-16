@@ -156,6 +156,9 @@ class _ChannelPageState extends State<ChannelPage> {
           StreamMessageInput(
             focusNode: _focusNode,
             messageInputController: _messageInputController,
+            onQuotedMessageCleared: () {
+              _messageInputController.clearQuotedMessage();
+            },
           ),
         ],
       ),
