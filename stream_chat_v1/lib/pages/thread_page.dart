@@ -25,9 +25,8 @@ class _ThreadPageState extends State<ThreadPage> {
   void initState() {
     super.initState();
     _messageInputController = StreamMessageInputController(
-        message: Message(
-      parentId: widget.parent.id,
-    ));
+      message: Message(parentId: widget.parent.id),
+    );
   }
 
   @override

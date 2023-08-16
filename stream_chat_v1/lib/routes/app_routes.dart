@@ -31,8 +31,8 @@ final appRoutes = [
               .client
               .state
               .channels[state.pathParameters['cid']];
-          final messageId = state.queryParameters['mid'];
-          final parentId = state.queryParameters['pid'];
+          final messageId = state.uri.queryParameters['mid'];
+          final parentId = state.uri.queryParameters['pid'];
 
           Message? parentMessage;
           if (parentId != null) {
