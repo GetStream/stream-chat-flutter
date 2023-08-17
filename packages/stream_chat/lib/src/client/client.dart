@@ -1696,7 +1696,7 @@ class ClientState {
   void updateUsers(List<User?> userList) {
     final newUsers = {
       ...users,
-      for (var user in userList)
+      for (final user in userList)
         if (user != null) user.id: user,
     };
     _usersController.add(newUsers);

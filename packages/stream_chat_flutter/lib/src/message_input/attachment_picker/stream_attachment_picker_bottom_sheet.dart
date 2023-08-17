@@ -69,6 +69,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   List<Attachment>? initialAttachments,
   StreamAttachmentPickerController? controller,
+  ErrorListener? onError,
   Color? backgroundColor,
   double? elevation,
   BoxConstraints? constraints,
@@ -117,6 +118,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
           if (isWebOrDesktop) {
             return webOrDesktopAttachmentPickerBuilder.call(
               context: context,
+              onError: onError,
               controller: controller,
               allowedTypes: allowedTypes,
               customOptions: customOptions?.map(
@@ -131,6 +133,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
 
           return mobileAttachmentPickerBuilder.call(
             context: context,
+            onError: onError,
             controller: controller,
             allowedTypes: allowedTypes,
             customOptions: customOptions,
