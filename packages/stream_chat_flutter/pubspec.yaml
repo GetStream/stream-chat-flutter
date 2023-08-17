@@ -17,26 +17,26 @@ dependencies:
   dart_vlc: ^0.4.0
   desktop_drop: ^0.4.1
   diacritic: ^0.1.4
-  dio: ^5.2.1+1
+  dio: ^5.3.2
   ezanimation: ^0.6.0
-  file_picker: ^5.3.2
+  file_picker: ^5.3.3
   file_selector: ^1.0.0
   flutter:
     sdk: flutter
-  flutter_markdown: ^0.6.17
+  flutter_markdown: ^0.6.17+1
   flutter_portal: ^1.1.4
   flutter_svg: ^2.0.7
   http_parser: ^4.0.2
   image_gallery_saver: ^2.0.3
-  image_picker: ^1.0.1
+  image_picker: ^1.0.2
   jiffy: ^6.2.1
-  lottie: ^2.4.0
+  lottie: ^2.6.0
   meta: ^1.9.1
-  path_provider: ^2.0.15
-  photo_manager: ^2.6.0
+  path_provider: ^2.1.0
+  photo_manager: ^2.7.1
   photo_view: ^0.14.0
   rxdart: ^0.27.7
-  share_plus: ^7.0.2
+  share_plus: ^7.1.0
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^6.7.0
   synchronized: ^3.1.0
@@ -74,4 +74,4 @@ dev_dependencies:
     sdk: flutter
   golden_toolkit: ^0.15.0
   mocktail: ^1.0.0
-  path: ^1.8.2
+  path: ^1.8.3
