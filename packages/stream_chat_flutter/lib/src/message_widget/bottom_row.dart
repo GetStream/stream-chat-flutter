@@ -162,8 +162,7 @@ class BottomRow extends StatelessWidget {
       msg = context.translations.threadReplyCountText(replyCount);
     }
 
-    // ignore: prefer_function_declarations_over_variables
-    final _onThreadTap = () async {
+    Future<void> _onThreadTap() async {
       try {
         var message = this.message;
         if (showInChannel) {
@@ -172,12 +171,9 @@ class BottomRow extends StatelessWidget {
         }
         return onThreadTap!(message);
       } catch (e, stk) {
-        print(e);
-        print(stk);
-        // ignore: avoid_returning_null_for_void
-        return null;
+        debugPrint('Error while fetching message: $e, $stk');
       }
-    };
+    }
 
     const usernameKey = Key('username');
 
@@ -191,7 +187,7 @@ class BottomRow extends StatelessWidget {
             ),
       if (showTimeStamp)
         Text(
-          Jiffy(message.createdAt.toLocal()).jm,
+          Jiffy.parseFromDateTime(message.createdAt.toLocal()).jm,
           style: messageTheme.createdAtStyle,
         ),
       if (showSendingIndicator)

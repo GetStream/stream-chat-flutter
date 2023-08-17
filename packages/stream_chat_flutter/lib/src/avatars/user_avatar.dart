@@ -86,7 +86,8 @@ class StreamUserAvatar extends StatelessWidget {
 
     final backupGradientAvatar = ClipRRect(
       borderRadius: borderRadius ??
-          streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
+          streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius ??
+          BorderRadius.zero,
       child: streamChatConfig.defaultUserImage(context, user),
     );
 

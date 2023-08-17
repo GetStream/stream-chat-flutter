@@ -1,3 +1,8 @@
+## Upcoming
+
+- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
+- Updated `stream_chat` dependency to [`Upcoming`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 6.7.0
 
 - [[#1683]](https://github.com/GetStream/stream-chat-flutter/issues/1683) Fixed SqliteException no such
