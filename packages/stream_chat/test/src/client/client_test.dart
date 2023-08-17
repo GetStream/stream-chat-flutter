@@ -975,7 +975,7 @@ void main() {
         // skipping initial seed event -> {} users
         client.state.usersStream.skip(1),
         emitsInOrder([
-          {for (var user in users) user.id: user},
+          {for (final user in users) user.id: user},
         ]),
       );
 
