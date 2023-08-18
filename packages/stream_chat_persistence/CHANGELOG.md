@@ -3,16 +3,16 @@
 - Included the changes from version [6.7.0](#670).
 - Updated `stream_chat` dependency to [`7.0.0-beta.2`](https://pub.dev/packages/stream_chat/changelog).
 
-## 7.0.0-beta.1
-
-- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
-- 🛑 **BREAKING** Removed deprecated `getChannelStates.sort` parameter. Use `getChannelStates.channelStateSort` instead.
-
 ## 6.7.0
 
 - [[#1683]](https://github.com/GetStream/stream-chat-flutter/issues/1683) Fixed SqliteException no such
   column `messages.state`.
 - Updated `stream_chat` dependency to [`6.7.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.0.0-beta.1
+
+- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
+- 🛑 **BREAKING** Removed deprecated `getChannelStates.sort` parameter. Use `getChannelStates.channelStateSort` instead.
 
 ## 6.6.0
 
