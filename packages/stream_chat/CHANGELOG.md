@@ -1,3 +1,18 @@
+## 6.8.0
+
+🐞 Fixed
+
+- Fixed `Channel.query` not initializing `ChannelState`.
+
+✅ Added
+
+- Added support for `channel.countUnreadMentions()` to get the count of unread messages mentioning the current user on a
+  channel. [#1692](https://github.com/GetStream/stream-chat-flutter/issues/1692)
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Dart 3.0
+
 ## 7.0.0-beta.2
 
 - Included the changes from version [6.7.0](#670).

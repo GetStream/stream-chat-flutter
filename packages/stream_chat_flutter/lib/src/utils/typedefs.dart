@@ -221,6 +221,11 @@ typedef OnQuotedMessageTap = void Function(String?);
 /// {@endtemplate}
 typedef OnMessageTap = void Function(Message);
 
+/// {@template onReactionsTap}
+/// The action to perform when a message's reactions are tapped.
+/// {@endtemplate}
+typedef OnReactionsTap = void Function(Message);
+
 /// {@template messageSearchItemTapCallback}
 /// The action to perform when tapping or clicking on a user in a
 /// [MessageSearchListView].

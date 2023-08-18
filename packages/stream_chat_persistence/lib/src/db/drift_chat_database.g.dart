@@ -41,16 +41,13 @@ class $ChannelsTable extends Channels
           .withConverter<Map<String, dynamic>>($ChannelsTable.$converterconfig);
   static const VerificationMeta _frozenMeta = const VerificationMeta('frozen');
   @override
-  late final GeneratedColumn<bool> frozen =
-      GeneratedColumn<bool>('frozen', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("frozen" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> frozen = GeneratedColumn<bool>(
+      'frozen', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("frozen" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _lastMessageAtMeta =
       const VerificationMeta('lastMessageAt');
   @override
@@ -726,28 +723,22 @@ class $MessagesTable extends Messages
   static const VerificationMeta _showInChannelMeta =
       const VerificationMeta('showInChannel');
   @override
-  late final GeneratedColumn<bool> showInChannel =
-      GeneratedColumn<bool>('show_in_channel', aliasedName, true,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("show_in_channel" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }));
+  late final GeneratedColumn<bool> showInChannel = GeneratedColumn<bool>(
+      'show_in_channel', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("show_in_channel" IN (0, 1))'));
   static const VerificationMeta _shadowedMeta =
       const VerificationMeta('shadowed');
   @override
-  late final GeneratedColumn<bool> shadowed =
-      GeneratedColumn<bool>('shadowed', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("shadowed" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> shadowed = GeneratedColumn<bool>(
+      'shadowed', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("shadowed" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _commandMeta =
       const VerificationMeta('command');
   @override
@@ -797,16 +788,13 @@ class $MessagesTable extends Messages
       type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
   @override
-  late final GeneratedColumn<bool> pinned =
-      GeneratedColumn<bool>('pinned', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("pinned" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> pinned = GeneratedColumn<bool>(
+      'pinned', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("pinned" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _pinnedAtMeta =
       const VerificationMeta('pinnedAt');
   @override
@@ -2004,28 +1992,22 @@ class $PinnedMessagesTable extends PinnedMessages
   static const VerificationMeta _showInChannelMeta =
       const VerificationMeta('showInChannel');
   @override
-  late final GeneratedColumn<bool> showInChannel =
-      GeneratedColumn<bool>('show_in_channel', aliasedName, true,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("show_in_channel" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }));
+  late final GeneratedColumn<bool> showInChannel = GeneratedColumn<bool>(
+      'show_in_channel', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("show_in_channel" IN (0, 1))'));
   static const VerificationMeta _shadowedMeta =
       const VerificationMeta('shadowed');
   @override
-  late final GeneratedColumn<bool> shadowed =
-      GeneratedColumn<bool>('shadowed', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("shadowed" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> shadowed = GeneratedColumn<bool>(
+      'shadowed', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("shadowed" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _commandMeta =
       const VerificationMeta('command');
   @override
@@ -2075,16 +2057,13 @@ class $PinnedMessagesTable extends PinnedMessages
       type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
   @override
-  late final GeneratedColumn<bool> pinned =
-      GeneratedColumn<bool>('pinned', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("pinned" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> pinned = GeneratedColumn<bool>(
+      'pinned', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("pinned" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _pinnedAtMeta =
       const VerificationMeta('pinnedAt');
   @override
@@ -3928,28 +3907,22 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _onlineMeta = const VerificationMeta('online');
   @override
-  late final GeneratedColumn<bool> online =
-      GeneratedColumn<bool>('online', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("online" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> online = GeneratedColumn<bool>(
+      'online', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("online" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _bannedMeta = const VerificationMeta('banned');
   @override
-  late final GeneratedColumn<bool> banned =
-      GeneratedColumn<bool>('banned', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("banned" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> banned = GeneratedColumn<bool>(
+      'banned', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("banned" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _extraDataMeta =
       const VerificationMeta('extraData');
   @override
@@ -4388,54 +4361,42 @@ class $MembersTable extends Members
   static const VerificationMeta _invitedMeta =
       const VerificationMeta('invited');
   @override
-  late final GeneratedColumn<bool> invited =
-      GeneratedColumn<bool>('invited', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("invited" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> invited = GeneratedColumn<bool>(
+      'invited', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("invited" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _bannedMeta = const VerificationMeta('banned');
   @override
-  late final GeneratedColumn<bool> banned =
-      GeneratedColumn<bool>('banned', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("banned" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> banned = GeneratedColumn<bool>(
+      'banned', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("banned" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _shadowBannedMeta =
       const VerificationMeta('shadowBanned');
   @override
-  late final GeneratedColumn<bool> shadowBanned =
-      GeneratedColumn<bool>('shadow_banned', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("shadow_banned" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> shadowBanned = GeneratedColumn<bool>(
+      'shadow_banned', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("shadow_banned" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _isModeratorMeta =
       const VerificationMeta('isModerator');
   @override
-  late final GeneratedColumn<bool> isModerator =
-      GeneratedColumn<bool>('is_moderator', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("is_moderator" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> isModerator = GeneratedColumn<bool>(
+      'is_moderator', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_moderator" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
