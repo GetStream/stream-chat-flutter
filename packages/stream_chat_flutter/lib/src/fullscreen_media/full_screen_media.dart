@@ -288,12 +288,8 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                           : Colors.black,
                       child: Builder(
                         builder: (context) {
-                          if (attachment.type == 'image' ||
-                              attachment.type == 'giphy') {
-                            final imageUrl = attachment.imageUrl ??
-                                attachment.assetUrl ??
-                                attachment.thumbUrl;
-
+                          if (attachment.type == AttachmentType.image ||
+                              attachment.type == AttachmentType.giphy) {
                             return PhotoView.customChild(
                               maxScale: PhotoViewComputedScale.covered,
                               minScale: PhotoViewComputedScale.contained,
@@ -306,7 +302,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                                 height: double.infinity,
                               ),
                             );
-                          } else if (attachment.type == 'video') {
+                          } else if (attachment.type == AttachmentType.video) {
                             final controller = videoPackages[attachment.id]!;
                             if (!controller.initialized) {
                               return const Center(

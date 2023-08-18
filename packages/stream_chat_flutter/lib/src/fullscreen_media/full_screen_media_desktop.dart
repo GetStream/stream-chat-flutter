@@ -317,12 +317,8 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                         : Colors.black,
                     child: Builder(
                       builder: (context) {
-                        if (attachment.type == 'image' ||
-                            attachment.type == 'giphy') {
-                          final imageUrl = attachment.imageUrl ??
-                              attachment.assetUrl ??
-                              attachment.thumbUrl;
-
+                        if (attachment.type == AttachmentType.image ||
+                            attachment.type == AttachmentType.giphy) {
                           return PhotoView.customChild(
                             maxScale: PhotoViewComputedScale.covered,
                             minScale: PhotoViewComputedScale.contained,
@@ -335,7 +331,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                               height: double.infinity,
                             ),
                           );
-                        } else if (attachment.type == 'video') {
+                        } else if (attachment.type == AttachmentType.video) {
                           final package = videoPackages[attachment.id]!;
                           package.player.open(
                             Playlist(
