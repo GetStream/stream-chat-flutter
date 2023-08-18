@@ -1,4 +1,4 @@
-## Upcoming-Beta
+## 7.0.0-beta.3
 
 - Included the changes from version [6.8.0](#670).
 - Updated minimum supported `SDK` version to Dart 3.1
