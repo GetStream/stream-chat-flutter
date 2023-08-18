@@ -6,13 +6,13 @@ repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.10.0"
+  sdk: ">=3.1.0 <4.0.0"
+  flutter: ">=3.13.0"
 
 dependencies:
   cached_network_image: ^3.2.3
   chewie: ^1.7.0
-  collection: ^1.17.1
+  collection: ^1.17.2
   contextmenu: ^3.0.0
   dart_vlc: ^0.4.0
   desktop_drop: ^0.4.1

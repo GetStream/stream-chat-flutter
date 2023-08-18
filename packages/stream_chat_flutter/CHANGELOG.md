@@ -1,3 +1,8 @@
+## Upcoming-Beta
+
+- Included the changes from version [6.9.0](#681).
+- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
+
 ## 6.9.0
 
 🐞 Fixed
