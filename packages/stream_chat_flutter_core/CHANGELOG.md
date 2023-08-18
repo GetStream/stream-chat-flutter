@@ -1,7 +1,7 @@
-## Upcoming-Beta
+## 7.0.0-beta.3
 
 - Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
-- Updated `stream_chat` dependency to [`Upcoming-Beta`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat` dependency to [`7.0.0-beta.3`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 6.8.0
 
