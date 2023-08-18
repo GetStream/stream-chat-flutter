@@ -1,6 +1,38 @@
+## 7.0.0-beta.3
+
+- Included the changes from version [6.8.0](#670).
+- Updated minimum supported `SDK` version to Dart 3.1
+
+## 6.8.0
+
+🐞 Fixed
+
+- Fixed `Channel.query` not initializing `ChannelState`.
+
+✅ Added
+
+- Added support for `channel.countUnreadMentions()` to get the count of unread messages mentioning the current user on a
+  channel. [#1692](https://github.com/GetStream/stream-chat-flutter/issues/1692)
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Dart 3.0
+
 ## 7.0.0-beta.2
 
 - Included the changes from version [6.7.0](#670).
+
+## 6.7.0
+
+✅ Added
+
+- Added support for setting `Message.type`. [#1682](https://github.com/GetStream/stream-chat-flutter/issues/1682)
+  ```
+  It is now possible to send system messages. System messages differ from normal messages in the way they are
+  presented to the user. Like the name says, system messages are normally send from the system itself, but a user is
+  able to send it as well by specifying type: 'system' with the message. The user who sends a system message client-side
+  should have the Create System Message permission. Server-side system messages don't need that permission.
+  ```
 
 ## 7.0.0-beta.1
 
@@ -15,18 +47,6 @@
 🔄 Changed
 
 - Updated minimum supported `SDK` version to Dart 3.0
-
-## 6.7.0
-
-✅ Added
-
-- Added support for setting `Message.type`. [#1682](https://github.com/GetStream/stream-chat-flutter/issues/1682)
-  ```
-  It is now possible to send system messages. System messages differ from normal messages in the way they are
-  presented to the user. Like the name says, system messages are normally send from the system itself, but a user is
-  able to send it as well by specifying type: 'system' with the message. The user who sends a system message client-side
-  should have the Create System Message permission. Server-side system messages don't need that permission.
-  ```
 
 ## 6.6.0
 

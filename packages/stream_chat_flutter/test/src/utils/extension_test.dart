@@ -148,4 +148,126 @@ void main() {
       expect('ㅎㅎㅎㅎ'.isOnlyEmoji, false);
     });
   });
+
+  group('Message Extension Tests', () {
+    test('replaceMentions should replace user mentions with names and IDs', () {
+      final user1 = User(id: 'user1', name: 'Alice');
+      final user2 = User(id: 'user2', name: 'Bob');
+
+      final message = Message(
+        text: 'Hello, @user1 and @user2!',
+        mentionedUsers: [user1, user2],
+      );
+
+      final modifiedMessage = message.replaceMentions();
+
+      expect(modifiedMessage.text, contains('[@Alice](user1)'));
+      expect(modifiedMessage.text, contains('[@Bob](user2)'));
+    });
+
+    test('replaceMentions without linkify should not add links', () {
+      final user = User(id: 'user1', name: 'Alice');
+
+      final message = Message(
+        text: 'Hello, @user1!',
+        mentionedUsers: [user],
+      );
+
+      final modifiedMessage = message.replaceMentions(linkify: false);
+
+      expect(modifiedMessage.text, contains('@Alice'));
+    });
+
+    test('replaceMentions should handle mentions with usernames', () {
+      final user = User(id: 'user1', name: 'Alice');
+
+      final message = Message(
+        text: 'Hello, @Alice!',
+        mentionedUsers: [user],
+      );
+
+      final modifiedMessage = message.replaceMentions();
+
+      expect(modifiedMessage.text, contains('[@Alice](user1)'));
+    });
+
+    test(
+      '''replaceMentions without linkify should not change mentions with usernames''',
+      () {
+        final user = User(id: 'user1', name: 'Alice');
+
+        final message = Message(
+          text: 'Hello, @Alice!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions(linkify: false);
+
+        expect(modifiedMessage.text, contains('@Alice'));
+      },
+    );
+
+    test(
+      'replaceMentions should replace mixed user mentions with names and IDs',
+      () {
+        final user1 = User(id: 'user1', name: 'Alice');
+        final user2 = User(id: 'user2', name: 'Bob');
+
+        final message = Message(
+          text: 'Hello, @user1 and @Bob!',
+          mentionedUsers: [user1, user2],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(modifiedMessage.text, contains('[@Alice](user1)'));
+        expect(modifiedMessage.text, contains('[@Bob](user2)'));
+      },
+    );
+
+    test('replaceMentionsWithId should replace user names with IDs', () {
+      final user1 = User(id: 'user1', name: 'Alice');
+      final user2 = User(id: 'user2', name: 'Bob');
+
+      final message = Message(
+        text: 'Hello, @Alice and @Bob!',
+        mentionedUsers: [user1, user2],
+      );
+
+      final modifiedMessage = message.replaceMentionsWithId();
+
+      expect(modifiedMessage.text, contains('@user1'));
+      expect(modifiedMessage.text, contains('@user2'));
+      expect(modifiedMessage.text, isNot(contains('@Alice')));
+      expect(modifiedMessage.text, isNot(contains('@Bob')));
+    });
+
+    test(
+      'replaceMentionsWithId should not change message without mentions',
+      () {
+        final message = Message(
+          text: 'Hello, @Alice!',
+        );
+
+        final modifiedMessage = message.replaceMentionsWithId();
+
+        expect(modifiedMessage.text, equals('Hello, @Alice!'));
+        expect(modifiedMessage.text, isNot(contains('@user1')));
+      },
+    );
+
+    test('replaceMentionsWithId should handle message with only mention', () {
+      final user = User(id: 'user1', name: 'Alice');
+
+      final message = Message(
+        text: '@Alice',
+        mentionedUsers: [user],
+      );
+
+      final modifiedMessage = message.replaceMentionsWithId();
+
+      expect(modifiedMessage.text, contains('@user1'));
+      expect(modifiedMessage.text, isNot(contains('@Alice')));
+    });
+  });
 }

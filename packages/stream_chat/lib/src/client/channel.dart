@@ -1339,26 +1339,6 @@ class Channel {
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Loads the initial channel state and watches for changes.
-  Future<ChannelState> watch({bool presence = false}) async {
-    ChannelState response;
-
-    try {
-      response = await query(watch: true, presence: presence);
-    } catch (error, stackTrace) {
-      if (!_initializedCompleter.isCompleted) {
-        _initializedCompleter.completeError(error, stackTrace);
-      }
-      rethrow;
-    }
-
-    if (state == null) {
-      _initState(response);
-    }
-
-    return response;
-  }
-
   void _initState(ChannelState channelState) {
     state = ChannelClientState(this, channelState);
 
@@ -1368,6 +1348,22 @@ class Channel {
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete(true);
     }
+  }
+
+  /// Loads the initial channel state and watches for changes.
+  Future<ChannelState> watch({
+    bool presence = false,
+    PaginationParams? messagesPagination,
+    PaginationParams? membersPagination,
+    PaginationParams? watchersPagination,
+  }) {
+    return query(
+      watch: true,
+      presence: presence,
+      messagesPagination: messagesPagination,
+      membersPagination: membersPagination,
+      watchersPagination: watchersPagination,
+    );
   }
 
   /// Stop watching the channel.
@@ -1435,7 +1431,7 @@ class Channel {
       );
 
   /// Creates a new channel.
-  Future<ChannelState> create() async => query(state: false);
+  Future<ChannelState> create() => query(state: false);
 
   /// Query the API, get messages, members or other channel fields.
   ///
@@ -1450,23 +1446,28 @@ class Channel {
     PaginationParams? watchersPagination,
     bool preferOffline = false,
   }) async {
-    if (preferOffline && cid != null) {
-      final updatedState = await _client.chatPersistenceClient
-          ?.getChannelStateByCid(cid!, messagePagination: messagesPagination);
-      if (updatedState != null &&
-          updatedState.messages != null &&
-          updatedState.messages!.isNotEmpty) {
-        if (this.state == null) {
-          _initState(updatedState);
-        } else {
-          this.state?.updateChannelState(updatedState);
-        }
-        return updatedState;
-      }
-    }
+    ChannelState? channelState;
 
     try {
-      final updatedState = await _client.queryChannel(
+      // If we prefer offline, we first try to get the channel state from the
+      // offline storage.
+      if (preferOffline && !watch && cid != null) {
+        final persistenceClient = _client.chatPersistenceClient;
+        if (persistenceClient != null) {
+          final cachedState = await persistenceClient.getChannelStateByCid(
+            cid!,
+            messagePagination: messagesPagination,
+          );
+
+          // If the cached state contains messages, we can use it.
+          if (cachedState.messages?.isNotEmpty == true) {
+            channelState = cachedState;
+          }
+        }
+      }
+
+      // If we still don't have the channelState, we try to get it from the API.
+      channelState ??= await _client.queryChannel(
         type,
         channelId: id,
         channelData: _extraData,
@@ -1479,18 +1480,35 @@ class Channel {
       );
 
       if (_id == null) {
-        _id = updatedState.channel!.id;
-        _cid = updatedState.channel!.cid;
+        _id = channelState.channel!.id;
+        _cid = channelState.channel!.cid;
       }
 
-      this.state?.updateChannelState(updatedState);
-      return updatedState;
-    } catch (e) {
-      if (_client.persistenceEnabled) {
-        return _client.chatPersistenceClient!.getChannelStateByCid(
-          cid!,
-          messagePagination: messagesPagination,
-        );
+      // Initialize the channel state if it's not initialized yet.
+      if (this.state == null) {
+        _initState(channelState);
+      } else {
+        // Otherwise, update the channel state.
+        this.state?.updateChannelState(channelState);
+      }
+
+      return channelState;
+    } catch (e, stk) {
+      // If we failed to get the channel state from the API and we were not
+      // supposed to watch the channel, we will try to get the channel state
+      // from the offline storage.
+      if (watch == false) {
+        if (_client.persistenceEnabled) {
+          return _client.chatPersistenceClient!.getChannelStateByCid(
+            cid!,
+            messagePagination: messagesPagination,
+          );
+        }
+      }
+
+      // Otherwise, we will just rethrow the error.
+      if (!_initializedCompleter.isCompleted) {
+        _initializedCompleter.completeError(e, stk);
       }
 
       rethrow;
@@ -2332,6 +2350,26 @@ class ChannelClientState {
         message.user?.id != userId &&
         !userIsMuted &&
         !isThreadMessage;
+  }
+
+  /// Counts the number of unread messages mentioning the current user.
+  ///
+  /// **NOTE**: The method relies on the [Channel.messages] list and doesn't do
+  /// any API call. Therefore, the count might be not reliable as it relies on
+  /// the local data.
+  int countUnreadMentions() {
+    final lastRead = currentUserRead?.lastRead;
+    final userId = _channel.client.state.currentUser?.id;
+
+    var count = 0;
+    for (final message in messages) {
+      if (_countMessageAsUnread(message) &&
+          (lastRead == null || message.createdAt.isAfter(lastRead)) &&
+          message.mentionedUsers.any((user) => user.id == userId) == true) {
+        count++;
+      }
+    }
+    return count;
   }
 
   /// Update threads with updated information about messages.

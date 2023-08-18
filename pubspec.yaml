@@ -1,7 +1,7 @@
 name: stream_chat_flutter_workspace
 
 environment:
-  sdk: '>=2.19.0 <4.0.0'
+  sdk: '>=3.1.0 <4.0.0'
 
 dev_dependencies:
-  melos: ^3.1.0
+  melos: ^3.1.1

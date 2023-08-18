@@ -278,46 +278,64 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                 final currentAttachmentPackage =
                     widget.mediaAttachmentPackages[index];
                 final attachment = currentAttachmentPackage.attachment;
-                if (attachment.type == AttachmentType.image ||
-                    attachment.type == AttachmentType.giphy) {
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: _isDisplayingDetail,
-                    builder: (context, isDisplayingDetail, _) =>
-                        AnimatedContainer(
+                return ValueListenableBuilder(
+                  valueListenable: _isDisplayingDetail,
+                  builder: (context, isDisplayingDetail, child) {
+                    return AnimatedContainer(
+                      duration: kThemeChangeDuration,
                       color: isDisplayingDetail
                           ? StreamChannelHeaderTheme.of(context).color
                           : Colors.black,
-                      duration: kThemeAnimationDuration,
-                      child: PhotoView.customChild(
-                        maxScale: PhotoViewComputedScale.covered,
-                        minScale: PhotoViewComputedScale.contained,
-                        backgroundDecoration: const BoxDecoration(
-                          color: Colors.transparent,
-                        ),
-                        child: StreamMediaAttachmentThumbnail(
-                          media: attachment,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                      ),
-                    ),
-                  );
-                } else if (attachment.type == AttachmentType.video) {
-                  final controller = videoPackages[attachment.id]!;
-                  if (!controller.initialized) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    );
-                  }
+                      child: Builder(
+                        builder: (context) {
+                          if (attachment.type == 'image' ||
+                              attachment.type == 'giphy') {
+                            final imageUrl = attachment.imageUrl ??
+                                attachment.assetUrl ??
+                                attachment.thumbUrl;
 
-                  return InkWell(
-                    onTap: switchDisplayingDetail,
-                    child: Chewie(
-                      controller: controller.chewieController!,
-                    ),
-                  );
-                }
-                return const SizedBox();
+                            return PhotoView.customChild(
+                              maxScale: PhotoViewComputedScale.covered,
+                              minScale: PhotoViewComputedScale.contained,
+                              backgroundDecoration: const BoxDecoration(
+                                color: Colors.transparent,
+                              ),
+                              child: StreamMediaAttachmentThumbnail(
+                                media: attachment,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            );
+                          } else if (attachment.type == 'video') {
+                            final controller = videoPackages[attachment.id]!;
+                            if (!controller.initialized) {
+                              return const Center(
+                                child: CircularProgressIndicator.adaptive(),
+                              );
+                            }
+
+                            final mediaQuery = MediaQuery.of(context);
+                            final bottomPadding = mediaQuery.padding.bottom;
+
+                            return AnimatedPadding(
+                              duration: kThemeChangeDuration,
+                              padding: EdgeInsets.symmetric(
+                                vertical: isDisplayingDetail
+                                    ? kToolbarHeight + bottomPadding
+                                    : 0,
+                              ),
+                              child: Chewie(
+                                controller: controller.chewieController!,
+                              ),
+                            );
+                          }
+
+                          return const SizedBox();
+                        },
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),
@@ -366,6 +384,7 @@ class VideoPackage {
         videoPlayerController: _videoPlayerController,
         autoInitialize: _autoInitialize,
         showControls: _showControls,
+        showOptions: false,
         aspectRatio: _videoPlayerController.value.aspectRatio,
       );
     });

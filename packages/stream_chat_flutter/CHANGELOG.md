@@ -1,11 +1,66 @@
+## 7.0.0-beta.4
+
+- Included the changes from version [6.9.0](#681).
+- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
+- Updated `stream_chat_flutter_core` dependency
+  to [`7.0.0-beta.3`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+## 6.9.0
+
+🐞 Fixed
+
+- [[#1702]](https://github.com/GetStream/stream-chat-flutter/issues/1702)
+  Fixed `Message.replaceMentions` not treating `@usernames` as mentions.
+- [[#1694]](https://github.com/GetStream/stream-chat-flutter/issues/1694) Fixed Video player buttons
+  getting covered by bottom toolbar.
+
+✅ Added
+
+- Added support for listening error events in AttachmentPickerBottomSheet.
+- Added support for overriding the `MessageWidget.onReactionTap` callback.
+- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content insertion configuration.
+  [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
+
+  ```dart
+  StreamMessageInput(
+    ...,
+    contentInsertionConfiguration: ContentInsertionConfiguration(
+      onContentInserted: (content) {
+        // Do something with the content.
+        controller.addAttachment(...);
+      },
+    ),
+  )
+  ```
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
+- Updated `stream_chat_flutter_core` dependency
+  to [`6.8.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated jiffy dependency to ^6.2.1.
+
 ## 7.0.0-beta.3
 
 - Included the changes from version [6.8.1](#681).
+
+## 6.8.1
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` always sending message as `system`.
 
 ## 7.0.0-beta.2
 
 - Updated `stream_chat_flutter_core` dependency
   to [`7.0.0-beta.2`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+## 6.8.0
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency
+  to [`6.7.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 7.0.0-beta.1
 
@@ -55,19 +110,6 @@
 - Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
 - Updated `jiffy` dependency to `^6.2.1`.
 
-## 6.8.1
-
-🐞 Fixed
-
-- Fixed `StreamMessageInput` always sending message as `system`.
-
-## 6.8.0
-
-🔄 Changed
-
-- Updated `stream_chat_flutter_core` dependency
-  to [`6.7.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
-
 ## 6.7.0
 
 🔄 Changed
@@ -85,43 +127,57 @@
 
 🐞 Fixed
 
-- [[#1620]](https://github.com/GetStream/stream-chat-flutter/issues/1620) Fixed messages Are Not Hard Deleting even
+- [[#1620]](https://github.com/GetStream/stream-chat-flutter/issues/1620) Fixed messages Are Not
+  Hard Deleting even
   after overriding the `onConfirmDeleteTap` callback.
-- [[#1621]](https://github.com/GetStream/stream-chat-flutter/issues/1621) Fixed `createdAtStyle` null check error
+- [[#1621]](https://github.com/GetStream/stream-chat-flutter/issues/1621) Fixed `createdAtStyle`
+  null check error
   in `SendingIndicatorBuilder`.
-- [[#1069]](https://github.com/GetStream/stream-chat-flutter/issues/1069) Fixed message swipe to reply using same
-  direction for both current user and other users. It now uses `SwipeDirection.startToEnd` for current user
+- [[#1069]](https://github.com/GetStream/stream-chat-flutter/issues/1069) Fixed message swipe to
+  reply using same
+  direction for both current user and other users. It now uses `SwipeDirection.startToEnd` for
+  current user
   and `SwipeDirection.endToStart` for other users.
 - [[#1590]](https://github.com/GetStream/stream-chat-flutter/issues/1590)
-  Fixed `StreamMessageWidget.showReactionPickerIndicator` not toggling the reaction picker indicator visibility.
-- [[#1639]](https://github.com/GetStream/stream-chat-flutter/issues/1639) Fixed attachments not showing in gallery view
+  Fixed `StreamMessageWidget.showReactionPickerIndicator` not toggling the reaction picker indicator
+  visibility.
+- [[#1639]](https://github.com/GetStream/stream-chat-flutter/issues/1639) Fixed attachments not
+  showing in gallery view
   even after saving them to the device.
   > **Note**
-  > This fix depends on the [image_gallery_saver](https://pub.dev/packages/image_gallery_saver) plugin. Make sure to add
+  > This fix depends on the [image_gallery_saver](https://pub.dev/packages/image_gallery_saver)
+  plugin. Make sure to add
   necessary permissions in your App as per the plugin documentation.
-- [[#1642]](https://github.com/GetStream/stream-chat-flutter/issues/1642) Fixed `StreamMessageWidget.widthFactor` not
+- [[#1642]](https://github.com/GetStream/stream-chat-flutter/issues/1642)
+  Fixed `StreamMessageWidget.widthFactor` not
   working on web and desktop platforms.
 
 ✅ Added
 
-- Added support for customizing attachments in `StreamMessageInput`. Use various properties mentioned
+- Added support for customizing attachments in `StreamMessageInput`. Use various properties
+  mentioned
   below. [#1511](https://github.com/GetStream/stream-chat-flutter/issues/1511)
     * `StreamMessageInput.attachmentListBuilder` to customize the attachment list.
     * `StreamMessageInput.fileAttachmentListBuilder` to customize the file attachment list.
-    * `StreamMessageInput.mediaAttachmentListBuilder` to customize the media attachment list. Includes images, videos
+    * `StreamMessageInput.mediaAttachmentListBuilder` to customize the media attachment list.
+      Includes images, videos
       and gifs.
-    * `StreamMessageInput.fileAttachmentBuilder` to customize the file attachment item shown in `FileAttachmentList`.
+    * `StreamMessageInput.fileAttachmentBuilder` to customize the file attachment item shown
+      in `FileAttachmentList`.
     * `StreamMessageInput.mediaAttachmentBuilder` to customize the media attachment item shown in
       `MediaAttachmentList`.
 
 
-- Added `StreamMessageInput.quotedMessageAttachmentThumbnailBuilders` to customize the thumbnail builders for quoted
+- Added `StreamMessageInput.quotedMessageAttachmentThumbnailBuilders` to customize the thumbnail
+  builders for quoted
   message attachments.
 
 🔄 Changed
 
-- Deprecated `StreamMessageInput.attachmentThumbnailBuilders` in favor of `StreamMessageInput.mediaAttachmentBuilder`.
-- Deprecated `StreamMessageListView.onMessageSwiped`. Try wrapping the `MessageWidget` with a `Swipeable`, `Dismissible`
+- Deprecated `StreamMessageInput.attachmentThumbnailBuilders` in favor
+  of `StreamMessageInput.mediaAttachmentBuilder`.
+- Deprecated `StreamMessageListView.onMessageSwiped`. Try wrapping the `MessageWidget` with
+  a `Swipeable`, `Dismissible`
   or a custom widget to achieve the swipe to reply behaviour.
 
   ```dart
@@ -169,7 +225,8 @@
     },
   )
   ```
-- Deprecated `StreamMessageWidget.showReactionPickerIndicator` in favor of `StreamMessageWidget.showReactionPicker`.
+- Deprecated `StreamMessageWidget.showReactionPickerIndicator` in favor
+  of `StreamMessageWidget.showReactionPicker`.
 
   ```diff
   StreamMessageWidget(
@@ -186,16 +243,20 @@
 
 🐞 Fixed
 
-- [[#1600]](https://github.com/GetStream/stream-chat-flutter/issues/1600) Fixed type `ImageDecoderCallback` not found
+- [[#1600]](https://github.com/GetStream/stream-chat-flutter/issues/1600) Fixed
+  type `ImageDecoderCallback` not found
   error on pre-Flutter 3.10.0 versions.
-- [[#1605]](https://github.com/GetStream/stream-chat-flutter/issues/1605) Fixed Null exception is thrown on message list
+- [[#1605]](https://github.com/GetStream/stream-chat-flutter/issues/1605) Fixed Null exception is
+  thrown on message list
   for unread messages when `ScrollToBottomButton` is pressed.
-- [[#1615]](https://github.com/GetStream/stream-chat-flutter/issues/1615) Fixed `StreamAttachmentPickerBottomSheet` not
+- [[#1615]](https://github.com/GetStream/stream-chat-flutter/issues/1615)
+  Fixed `StreamAttachmentPickerBottomSheet` not
   able to find the `StreamChatTheme` when used in nested MaterialApp.
 
 ✅ Added
 
-- Added support for `StreamMessageInput.allowedAttachmentPickerTypes` to specify the allowed attachment picker types.
+- Added support for `StreamMessageInput.allowedAttachmentPickerTypes` to specify the allowed
+  attachment picker types.
   [#1601](https://github.com/GetStream/stream-chat-flutter/issues/1376)
 
   ```dart
@@ -208,7 +269,8 @@
   )
   ```
 
-- Added support for `StreamMessageWidget.onConfirmDeleteTap` to override the default action on delete confirmation.
+- Added support for `StreamMessageWidget.onConfirmDeleteTap` to override the default action on
+  delete confirmation.
   [#1604](https://github.com/GetStream/stream-chat-flutter/issues/1604)
 
   ```dart
@@ -221,8 +283,10 @@
   )
   ```
 
-- Added support for `StreamMessageWidget.quotedMessageBuilder` and `StreamMessageInput.quotedMessageBuilder` to override
-  the default quoted message widget. [#1547](https://github.com/GetStream/stream-chat-flutter/issues/1547)
+- Added support for `StreamMessageWidget.quotedMessageBuilder`
+  and `StreamMessageInput.quotedMessageBuilder` to override
+  the default quoted message
+  widget. [#1547](https://github.com/GetStream/stream-chat-flutter/issues/1547)
 
   ```dart
   StreamMessageWidget(
@@ -236,7 +300,8 @@
   )
   ```
 
-- Added support for `StreamChannelAvatar.ownSpaceAvatarBuilder`, `StreamChannelAvatar.oneToOneAvatarBuilder` and
+- Added support
+  for `StreamChannelAvatar.ownSpaceAvatarBuilder`, `StreamChannelAvatar.oneToOneAvatarBuilder` and
   `StreamChannelAvatar.groupAvatarBuilder` to override the default avatar
   widget.[#1614](https://github.com/GetStream/stream-chat-flutter/issues/1614)
 
@@ -268,10 +333,13 @@
 
 🐞 Fixed
 
-- [[#1592]](https://github.com/GetStream/stream-chat-flutter/issues/1592) Fixed broken attachment download on web.
-- [[#1591]](https://github.com/GetStream/stream-chat-flutter/issues/1591) Fixed `StreamChannelInfoBottomSheet` not
+- [[#1592]](https://github.com/GetStream/stream-chat-flutter/issues/1592) Fixed broken attachment
+  download on web.
+- [[#1591]](https://github.com/GetStream/stream-chat-flutter/issues/1591)
+  Fixed `StreamChannelInfoBottomSheet` not
   rendering member list properly.
-- [[#1427]](https://github.com/GetStream/stream-chat-flutter/issues/1427) Fixed unable to load asset error for
+- [[#1427]](https://github.com/GetStream/stream-chat-flutter/issues/1427) Fixed unable to load asset
+  error for
   `packages/stream_chat_flutter/lib/svgs/video_call_icon.svg`.
 
 🔄 Changed
@@ -284,30 +352,40 @@
 
 - [[#1546]](https://github.com/GetStream/stream-chat-flutter/issues/1546)
   Fixed `StreamMessageInputTheme.linkHighlightColor` returning null for default theme.
-- [[#1548]](https://github.com/GetStream/stream-chat-flutter/issues/1548) Fixed `StreamMessageInput` urlRegex only
+- [[#1548]](https://github.com/GetStream/stream-chat-flutter/issues/1548) Fixed `StreamMessageInput`
+  urlRegex only
   matching the lowercase `http(s)|ftp`.
-- [[#1542]](https://github.com/GetStream/stream-chat-flutter/issues/1542) Handle error thrown in `StreamMessageInput`
+- [[#1542]](https://github.com/GetStream/stream-chat-flutter/issues/1542) Handle error thrown
+  in `StreamMessageInput`
   when unable to fetch a link preview.
-- [[#1540]](https://github.com/GetStream/stream-chat-flutter/issues/1540) Use `CircularProgressIndicator.adaptive`
+- [[#1540]](https://github.com/GetStream/stream-chat-flutter/issues/1540)
+  Use `CircularProgressIndicator.adaptive`
   instead of material indicator.
-- [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490) Fixed `editMessageInputBuilder` property not
+- [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490)
+  Fixed `editMessageInputBuilder` property not
   used in `MessageActionsModal.editMessage` option.
-- [[#1544]](https://github.com/GetStream/stream-chat-flutter/issues/1544) Fixed error thrown when unable to fetch
+- [[#1544]](https://github.com/GetStream/stream-chat-flutter/issues/1544) Fixed error thrown when
+  unable to fetch
   image/data in Message link preview.
-- [[#1482]](https://github.com/GetStream/stream-chat-flutter/issues/1482) Fixed `StreaChannelListTile` not showing
+- [[#1482]](https://github.com/GetStream/stream-chat-flutter/issues/1482)
+  Fixed `StreaChannelListTile` not showing
   unread indicator when `currentUser` is not present in the initial member list.
 - [[#1487]](https://github.com/GetStream/stream-chat-flutter/issues/1487) Use localized title
   for `WebOrDesktopAttachmentPickerOption` in `StreamMessageInput`.
-- [[#1250]](https://github.com/GetStream/stream-chat-flutter/issues/1250) Fixed bottomRow widgetSpans getting resized
+- [[#1250]](https://github.com/GetStream/stream-chat-flutter/issues/1250) Fixed bottomRow
+  widgetSpans getting resized
   twice when `textScaling` is enabled.
-- [[#1498]](https://github.com/GetStream/stream-chat-flutter/issues/1498) Fixed `MessageInput` autocomplete not working
+- [[#1498]](https://github.com/GetStream/stream-chat-flutter/issues/1498) Fixed `MessageInput`
+  autocomplete not working
   on non-mobile platforms.
-- [[#1576]](https://github.com/GetStream/stream-chat-flutter/issues/1576) Temporary fix for `StreamMessageListView`
+- [[#1576]](https://github.com/GetStream/stream-chat-flutter/issues/1576) Temporary fix
+  for `StreamMessageListView`
   getting broken when loaded at a particular message and a new message is added.
 
 ✅ Added
 
-- Added support for `StreamMessageThemeData.urlAttachmentTextMaxLine` to specify the `.maxLines` for the url attachment
+- Added support for `StreamMessageThemeData.urlAttachmentTextMaxLine` to specify the `.maxLines` for
+  the url attachment
   text. [#1543](https://github.com/GetStream/stream-chat-flutter/issues/1543)
 
 🔄 Changed
@@ -322,24 +400,33 @@
 
 🐞 Fixed
 
-- [[#1502]](https://github.com/GetStream/stream-chat-flutter/issues/1502) Fixed `isOnlyEmoji` method Detects Single
+- [[#1502]](https://github.com/GetStream/stream-chat-flutter/issues/1502) Fixed `isOnlyEmoji` method
+  Detects Single
   Hangul
   Consonants as Emoji.
-- [[#1505]](https://github.com/GetStream/stream-chat-flutter/issues/1505) Fixed Message bubble disappears for Hangul
+- [[#1505]](https://github.com/GetStream/stream-chat-flutter/issues/1505) Fixed Message bubble
+  disappears for Hangul
   Consonants.
-- [[#1476]](https://github.com/GetStream/stream-chat-flutter/issues/1476) Fixed `UserAvatarTransform.userAvatarBuilder`
+- [[#1476]](https://github.com/GetStream/stream-chat-flutter/issues/1476)
+  Fixed `UserAvatarTransform.userAvatarBuilder`
   works only for otherUser.
-- [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490) Fixed `editMessageInputBuilder` property not
+- [[#1490]](https://github.com/GetStream/stream-chat-flutter/issues/1490)
+  Fixed `editMessageInputBuilder` property not
   used in message edit widget.
-- [[#1523]](https://github.com/GetStream/stream-chat-flutter/issues/1523) Fixed `StreamMessageThemeData` not being
+- [[#1523]](https://github.com/GetStream/stream-chat-flutter/issues/1523)
+  Fixed `StreamMessageThemeData` not being
   applied correctly.
-- [[#1525]](https://github.com/GetStream/stream-chat-flutter/issues/1525) Fixed `StreamQuotedMessageWidget` message for
+- [[#1525]](https://github.com/GetStream/stream-chat-flutter/issues/1525)
+  Fixed `StreamQuotedMessageWidget` message for
   deleted messages not being shown correctly.
-- [[#1529]](https://github.com/GetStream/stream-chat-flutter/issues/1529) Fixed `ClipboardData` requires non-nullable
+- [[#1529]](https://github.com/GetStream/stream-chat-flutter/issues/1529) Fixed `ClipboardData`
+  requires non-nullable
   string as text on Flutter 3.10.
-- [[#1533]](https://github.com/GetStream/stream-chat-flutter/issues/1533) Fixed `StreamMessageListView` messages grouped
+- [[#1533]](https://github.com/GetStream/stream-chat-flutter/issues/1533)
+  Fixed `StreamMessageListView` messages grouped
   incorrectly w.r.t. timestamp.
-- [[#1532]](https://github.com/GetStream/stream-chat-flutter/issues/1532) Fixed `StreamMessageWidget` actions dialog
+- [[#1532]](https://github.com/GetStream/stream-chat-flutter/issues/1532)
+  Fixed `StreamMessageWidget` actions dialog
   backdrop filter is cut off by safe area.
 
 ✅ Added
@@ -387,7 +474,8 @@
 🔄 Changed
 
 - Updated `dart` sdk environment range to support `3.0.0`.
-- Deprecated `MessageTheme.linkBackgroundColor` in favor of `MessageTheme.urlAttachmentBackgroundColor`.
+- Deprecated `MessageTheme.linkBackgroundColor` in favor
+  of `MessageTheme.urlAttachmentBackgroundColor`.
 - Updated `stream_chat_flutter_core` dependency
   to [`6.1.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
@@ -395,18 +483,23 @@
 
 🐞 Fixed
 
-- [[#1456]](https://github.com/GetStream/stream-chat-flutter/issues/1456) Fixed logic for showing that a message was
+- [[#1456]](https://github.com/GetStream/stream-chat-flutter/issues/1456) Fixed logic for showing
+  that a message was
   read using sending indicator.
-- [[#1462]](https://github.com/GetStream/stream-chat-flutter/issues/1462) Fixed support for iPad in the share button for
+- [[#1462]](https://github.com/GetStream/stream-chat-flutter/issues/1462) Fixed support for iPad in
+  the share button for
   images.
-- [[#1475]](https://github.com/GetStream/stream-chat-flutter/issues/1475) Fixed typo to fix compilation.
+- [[#1475]](https://github.com/GetStream/stream-chat-flutter/issues/1475) Fixed typo to fix
+  compilation.
 
 ✅ Added
 
-- Now it is possible to customize the max lines of the title of a url attachment. Before it was always 1 line.
+- Now it is possible to customize the max lines of the title of a url attachment. Before it was
+  always 1 line.
 - Added `attachmentActionsModalBuilder` parameter to `StreamMessageWidget` that allows to
   customize `AttachmentActionsModal`.
-- Added `StreamMessageInput.sendMessageKeyPredicate` and `StreamMessageInput.clearQuotedMessageKeyPredicate` to
+- Added `StreamMessageInput.sendMessageKeyPredicate`
+  and `StreamMessageInput.clearQuotedMessageKeyPredicate` to
   customize the keys used to send and clear the quoted message.
 
 🔄 Changed
@@ -415,7 +508,8 @@
 
 🚀 Improved
 
-- Improved draw of reaction options. [#1455](https://github.com/GetStream/stream-chat-flutter/pull/1455)
+- Improved draw of reaction
+  options. [#1455](https://github.com/GetStream/stream-chat-flutter/pull/1455)
 
 ## 5.3.0
 
@@ -425,7 +519,8 @@
 
 🐞 Fixed
 
-- [[#1424]](https://github.com/GetStream/stream-chat-flutter/issues/1424) Fixed a render issue when showing messages
+- [[#1424]](https://github.com/GetStream/stream-chat-flutter/issues/1424) Fixed a render issue when
+  showing messages
   starting with 4 whitespaces.
 - Fixed a bug where the `AttachmentPickerBottomSheet` was not able to identify the mobile browser.
 - Fixed uploading files on Windows - fixed temp file path.
@@ -438,7 +533,8 @@
 
 ✅ Added
 
-- Added a new `bottomRowBuilderWithDefaultWidget` parameter to `StreamMessageWidget` which contains a third parameter (
+- Added a new `bottomRowBuilderWithDefaultWidget` parameter to `StreamMessageWidget` which contains
+  a third parameter (
   default `BottomRow` widget with `copyWith` method available) to allow easier customization.
 
 🔄 Changed
@@ -448,18 +544,23 @@
 - Updated `connectivity_plus` dependency to `^3.0.2`
 - Updated `dart_vlc` dependency to `^0.4.0`
 - Updated `file_picker` dependency to `^5.2.4`
-- Deprecated `StreamMessageWidget.bottomRowBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
+- Deprecated `StreamMessageWidget.bottomRowBuilder` in favor
+  of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
 - Deprecated `StreamMessageWidget.deletedBottomRowBuilder` in favor
   of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
-- Deprecated `StreamMessageWidget.usernameBuilder` in favor of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
+- Deprecated `StreamMessageWidget.usernameBuilder` in favor
+  of `StreamMessageWidget.bottomRowBuilderWithDefaultWidget`.
 
 🐞 Fixed
 
-- [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo attachments on web",
+- [[#1379]](https://github.com/GetStream/stream-chat-flutter/issues/1379) Fixed "Issues with photo
+  attachments on web",
   where the cached image attachment would not render while uploading.
-- Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead of `Row`. Better default
+- Fix render overflow issue with `MessageSearchListTileTitle`. It now uses `Text.rich` instead
+  of `Row`. Better default
   behaviour and allows `TextOverflow`.
-- [[1346]](https://github.com/GetStream/stream-chat-flutter/issues/1346) Fixed a render issue while uploading video on
+- [[1346]](https://github.com/GetStream/stream-chat-flutter/issues/1346) Fixed a render issue while
+  uploading video on
   web.
 - [[#1347]](https://github.com/GetStream/stream-chat-flutter/issues/1347) `onReply` not working
   in `AttachmentActionsModal` which is used by `StreamImageAttachment` and `StreamImageGroup`.
@@ -502,7 +603,8 @@
     * `textInputAction`
     * `keyboardType`
     * `textCapitalization`
-- Added `showStreamAttachmentPickerModalBottomSheet` to show the attachment picker modal bottom sheet.
+- Added `showStreamAttachmentPickerModalBottomSheet` to show the attachment picker modal bottom
+  sheet.
 
 🔄 Changed
 
