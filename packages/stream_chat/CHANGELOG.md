@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1716]](https://github.com/GetStream/stream-chat-flutter/issues/1716) Fixed client not able to
+  update message with `type: reply`.
+
 ## 6.8.0
 
 🐞 Fixed
