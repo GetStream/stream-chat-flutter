@@ -97,7 +97,7 @@ jobs:
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Flutter Test"
-        run: melos run test:all
+      - uses: bluefireteam/spec-action@v3
       - name: "Collect Coverage"
         run: melos run coverage:ignore-file --no-select
       - name: "Upload Coverage"
