@@ -23,7 +23,7 @@ dependencies:
   rate_limiter: ^1.0.0
   rxdart: ^0.27.7
   synchronized: ^3.1.0
-  uuid: ^3.0.7
+  uuid: ">=3.0.7 <5.0.0"
   web_socket_channel: ^2.4.0
 
 dev_dependencies:
