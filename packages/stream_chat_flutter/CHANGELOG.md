@@ -1,5 +1,10 @@
 ## Upcoming
 
+🐞 Fixed
+
+- [[#1721]](https://github.com/GetStream/stream-chat-flutter/issues/1721)
+  Fixed `StreamMessageInput.allowedAttachmentPickerTypes` not working on mobile devices.
+
 ✅ Added
 
 - Added support for overriding the `MessageWidget.onReactionsHover` callback.
