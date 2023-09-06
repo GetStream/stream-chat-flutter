@@ -1,11 +1,11 @@
+// ignore_for_file: cascade_invocations
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_card.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-// ignore_for_file: cascade_invocations
 
 /// {@template desktopReactionsBuilder}
 /// Builds a list of reactions to a message on desktop & web.
@@ -16,15 +16,12 @@ class DesktopReactionsBuilder extends StatefulWidget {
   /// {@macro desktopReactionsBuilder}
   const DesktopReactionsBuilder({
     super.key,
-    required this.shouldShowReactions,
     required this.message,
     required this.messageTheme,
+    this.onHover,
     this.borderSide,
     required this.reverse,
   });
-
-  /// Whether reactions should be shown.
-  final bool shouldShowReactions;
 
   /// The message to show reactions for.
   final Message message;
@@ -34,6 +31,9 @@ class DesktopReactionsBuilder extends StatefulWidget {
   /// [StreamMessageThemeData] is used because the design spec for desktop
   /// reactions matches the design spec for messages.
   final StreamMessageThemeData messageTheme;
+
+  /// Callback to run when the mouse enters or exits the reactions.
+  final OnReactionsHover? onHover;
 
   /// {@macro borderSide}
   final BorderSide? borderSide;
@@ -48,12 +48,6 @@ class DesktopReactionsBuilder extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'shouldShowReactions',
-        shouldShowReactions,
-      ),
-    );
     properties.add(
       DiagnosticsProperty<Message>('message', message),
     );
@@ -81,18 +75,15 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
     final streamChatTheme = StreamChatTheme.of(context);
 
     final reactionsMap = <String, Reaction>{};
-    var reactionsList = <Reaction>[];
-    if (widget.shouldShowReactions) {
-      widget.message.latestReactions?.forEach((element) {
-        if (!reactionsMap.containsKey(element.type) ||
-            element.user!.id == currentUser.id) {
-          reactionsMap[element.type] = element;
-        }
-      });
+    widget.message.latestReactions?.forEach((element) {
+      if (!reactionsMap.containsKey(element.type) ||
+          element.user!.id == currentUser.id) {
+        reactionsMap[element.type] = element;
+      }
+    });
 
-      reactionsList = reactionsMap.values.toList()
-        ..sort((a, b) => a.user!.id == currentUser.id ? 1 : -1);
-    }
+    final reactionsList = reactionsMap.values.toList()
+      ..sort((a, b) => a.user!.id == currentUser.id ? 1 : -1);
 
     return PortalTarget(
       visible: _showReactionsPopup,
@@ -100,17 +91,11 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
       anchor: Aligned(
         target: widget.reverse ? Alignment.topRight : Alignment.topLeft,
         follower: widget.reverse ? Alignment.bottomRight : Alignment.bottomLeft,
-        shiftToWithinBound: const AxisFlag(
-          y: true,
-        ),
+        shiftToWithinBound: const AxisFlag(y: true),
       ),
       portalFollower: MouseRegion(
-        onEnter: (event) async {
-          setState(() => _showReactionsPopup = !_showReactionsPopup);
-        },
-        onExit: (event) {
-          setState(() => _showReactionsPopup = !_showReactionsPopup);
-        },
+        onEnter: (_) => _onReactionsHover(true),
+        onExit: (_) => _onReactionsHover(false),
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             maxWidth: 336,
@@ -125,12 +110,8 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
       ),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        onEnter: (event) async {
-          setState(() => _showReactionsPopup = !_showReactionsPopup);
-        },
-        onExit: (event) {
-          setState(() => _showReactionsPopup = !_showReactionsPopup);
-        },
+        onEnter: (_) => _onReactionsHover(true),
+        onExit: (_) => _onReactionsHover(false),
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: 2,
@@ -160,6 +141,14 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
         ),
       ),
     );
+  }
+
+  void _onReactionsHover(bool isHovering) {
+    if (widget.onHover != null) {
+      return widget.onHover!(isHovering);
+    }
+
+    setState(() => _showReactionsPopup = isHovering);
   }
 }
 

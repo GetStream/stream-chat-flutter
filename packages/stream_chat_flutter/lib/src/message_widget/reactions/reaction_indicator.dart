@@ -13,7 +13,6 @@ class ReactionIndicator extends StatelessWidget {
     super.key,
     required this.ownId,
     required this.message,
-    required this.shouldShowReactions,
     required this.onTap,
     required this.reverse,
     required this.messageTheme,
@@ -24,9 +23,6 @@ class ReactionIndicator extends StatelessWidget {
 
   /// {@macro message}
   final Message message;
-
-  /// {@macro shouldShowReactions}
-  final bool shouldShowReactions;
 
   /// The callback to perform when the widget is tapped or clicked.
   final VoidCallback onTap;
@@ -50,34 +46,27 @@ class ReactionIndicator extends StatelessWidget {
       ..sort((a, b) => a.user!.id == ownId ? 1 : -1);
 
     return Transform(
-      transform: Matrix4.translationValues(
-        reverse ? 12 : -12,
-        0,
-        0,
-      ),
+      transform: Matrix4.translationValues(reverse ? 12 : -12, 0, 0),
       child: ConstrainedBox(
         constraints: const BoxConstraints(
           maxWidth: 22 * 6.0,
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          child: shouldShowReactions
-              ? GestureDetector(
-                  onTap: onTap,
-                  child: StreamReactionBubble(
-                    key: ValueKey('${message.id}.reactions'),
-                    reverse: reverse,
-                    flipTail: reverse,
-                    backgroundColor: messageTheme.reactionsBackgroundColor ??
-                        Colors.transparent,
-                    borderColor:
-                        messageTheme.reactionsBorderColor ?? Colors.transparent,
-                    maskColor:
-                        messageTheme.reactionsMaskColor ?? Colors.transparent,
-                    reactions: reactionsList,
-                  ),
-                )
-              : const SizedBox(),
+          child: GestureDetector(
+            onTap: onTap,
+            child: StreamReactionBubble(
+              key: ValueKey('${message.id}.reactions'),
+              reverse: reverse,
+              flipTail: reverse,
+              backgroundColor:
+                  messageTheme.reactionsBackgroundColor ?? Colors.transparent,
+              borderColor:
+                  messageTheme.reactionsBorderColor ?? Colors.transparent,
+              maskColor: messageTheme.reactionsMaskColor ?? Colors.transparent,
+              reactions: reactionsList,
+            ),
+          ),
         ),
       ),
     );
