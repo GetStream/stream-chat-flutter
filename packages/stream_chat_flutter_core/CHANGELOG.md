@@ -1,3 +1,8 @@
+## Upcoming
+
+- Added support for `StreamChannel.loadingBuilder` and `StreamChannel.errorBuilder` to customize
+  loading and error states.
+
 ## 6.8.0
 
 - Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
@@ -35,9 +40,11 @@
 
 - Updated `dart` sdk environment range to support `3.0.0`.
 - Updated `stream_chat` dependency to [`6.1.0`](https://pub.dev/packages/stream_chat/changelog).
-- [[#1356]](https://github.com/GetStream/stream-chat-flutter/issues/1356) Channel doesn't auto display again after being
+- [[#1356]](https://github.com/GetStream/stream-chat-flutter/issues/1356) Channel doesn't auto
+  display again after being
   hidden.
-- [[#1540]](https://github.com/GetStream/stream-chat-flutter/issues/1540) Use `CircularProgressIndicator.adaptive`
+- [[#1540]](https://github.com/GetStream/stream-chat-flutter/issues/1540)
+  Use `CircularProgressIndicator.adaptive`
   instead of material indicator.
 
 ## 6.0.0
@@ -56,7 +63,8 @@
 
 ## 5.1.0
 
-- Deprecated the `sort` parameter in the `StreamChannelListController` in favor of `channelStateSort`.
+- Deprecated the `sort` parameter in the `StreamChannelListController` in favor
+  of `channelStateSort`.
 
 ## 5.0.0
 
