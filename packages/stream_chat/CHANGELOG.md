@@ -4,6 +4,8 @@
 
 - [[#1716]](https://github.com/GetStream/stream-chat-flutter/issues/1716) Fixed client not able to
   update message with `type: reply`.
+- [[#1724]](https://github.com/GetStream/stream-chat-flutter/issues/1724) Fixed sendFile error
+  on `AttachmentFile` with `bytes` and no `name`.
 
 ## 6.8.0
 

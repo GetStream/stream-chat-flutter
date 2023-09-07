@@ -74,13 +74,13 @@ class AttachmentFile {
     if (CurrentPlatform.isWeb) {
       multiPartFile = MultipartFile.fromBytes(
         bytes!,
-        filename: name,
+        filename: name ?? 'file',
         contentType: mimeType,
       );
     } else {
       multiPartFile = await MultipartFile.fromFile(
         path!,
-        filename: name,
+        filename: name ?? 'file',
         contentType: mimeType,
       );
     }
