@@ -193,15 +193,6 @@ typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
   Attachment,
 );
 
-/// {@template onMessageWidgetAttachmentTap}
-/// The action to perform when an attachment in an [StreamMessageWidget]
-/// is tapped or clicked.
-/// {@endtemplate}
-typedef OnMessageWidgetAttachmentTap = void Function(
-  Message message,
-  Attachment attachment,
-);
-
 /// {@template attachmentBuilder}
 /// A widget builder for representing attachments.
 /// {@endtemplate}
@@ -269,6 +260,14 @@ typedef ParentMessageBuilder = Widget Function(
 /// A widget builder for creating custom system messages.
 /// {@endtemplate}
 typedef SystemMessageBuilder = Widget Function(
+  BuildContext,
+  Message,
+);
+
+/// {@template ephemeralMessageBuilder}
+/// A widget builder for creating custom ephemeral messages.
+/// {@endtemplate}
+typedef EphemeralMessageBuilder = Widget Function(
   BuildContext,
   Message,
 );

@@ -240,10 +240,10 @@ class WebOrDesktopAttachmentPickerOption extends AttachmentPickerOption {
 extension AttachmentPickerOptionTypeX on StreamAttachmentPickerController {
   /// Returns the list of available attachment picker options.
   Set<AttachmentPickerType> get currentAttachmentPickerTypes {
-    final containsImage = value.any((it) => it.type == 'image');
-    final containsVideo = value.any((it) => it.type == 'video');
-    final containsAudio = value.any((it) => it.type == 'audio');
-    final containsFile = value.any((it) => it.type == 'file');
+    final containsImage = value.any((it) => it.type == AttachmentType.image);
+    final containsVideo = value.any((it) => it.type == AttachmentType.video);
+    final containsAudio = value.any((it) => it.type == AttachmentType.audio);
+    final containsFile = value.any((it) => it.type == AttachmentType.file);
 
     return {
       if (containsImage) AttachmentPickerType.images,

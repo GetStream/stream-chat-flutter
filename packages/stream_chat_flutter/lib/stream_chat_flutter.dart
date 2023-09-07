@@ -6,10 +6,9 @@ export 'package:stream_chat_flutter/src/message_widget/quoted_message.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'src/attachment/attachment.dart';
-export 'src/attachment/attachment_title.dart';
+export 'src/attachment/gallery_attachment.dart';
 export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
-export 'src/attachment/image_group.dart';
 export 'src/attachment/stream_attachment_package.dart';
 export 'src/attachment/url_attachment.dart';
 export 'src/attachment/video_attachment.dart';
@@ -96,4 +95,5 @@ export 'src/utils/device_segmentation.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
 export 'src/utils/typedefs.dart';
+// TODO: Remove this in favor of StreamVideoAttachmentThumbnail.
 export 'src/video/video_thumbnail_image.dart';

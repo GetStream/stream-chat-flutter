@@ -215,6 +215,9 @@ class Message extends Equatable {
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
+  /// True if the message is a error.
+  bool get isError => type == 'error';
+
   /// True if the message is a system info.
   bool get isSystem => type == 'system';
 

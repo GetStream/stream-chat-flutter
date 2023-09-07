@@ -27,7 +27,7 @@ void main() {
 
     test('should serialize to json correctly', () {
       final channel = Attachment(
-        type: 'image',
+        type: 'giphy',
         title: 'soo',
         titleLink:
             'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
@@ -36,7 +36,7 @@ void main() {
       expect(
         channel.toJson(),
         {
-          'type': 'image',
+          'type': 'giphy',
           'title': 'soo',
           'title_link':
               'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',

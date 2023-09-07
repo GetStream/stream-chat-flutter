@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
@@ -37,7 +38,9 @@ void main() {
 
         // Expect 2 file attachments and 1 media attachment
         expect(find.byType(MessageInputFileAttachments), findsOneWidget);
+        expect(find.byType(StreamFileAttachment), findsNWidgets(2));
         expect(find.byType(MessageInputMediaAttachments), findsOneWidget);
+        expect(find.byType(StreamMediaAttachmentThumbnail), findsOneWidget);
       },
     );
 
@@ -111,7 +114,7 @@ void main() {
         );
 
         // Expect 2 file attachments
-        expect(find.byType(ClipRRect), findsNWidgets(2));
+        expect(find.byType(StreamFileAttachment), findsNWidgets(2));
       },
     );
 

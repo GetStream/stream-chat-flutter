@@ -1,13 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/file_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template streamFileAttachment}
@@ -15,209 +12,145 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// Used in [MessageWidget].
 /// {@endtemplate}
-class StreamFileAttachment extends StreamAttachmentWidget {
+class StreamFileAttachment extends StatelessWidget {
   /// {@macro streamFileAttachment}
   const StreamFileAttachment({
     super.key,
-    required super.message,
-    required super.attachment,
-    super.constraints,
+    required this.message,
+    required this.file,
     this.title,
     this.trailing,
-    this.onAttachmentTap,
+    this.shape,
+    this.backgroundColor,
+    this.constraints = const BoxConstraints(),
   });
 
-  /// Title for the attachment
+  /// The [Message] that the file is attached to.
+  final Message message;
+
+  /// The [Attachment] object containing the file information.
+  final Attachment file;
+
+  /// The shape of the attachment.
+  ///
+  /// Defaults to [RoundedRectangleBorder] with a radius of 12.
+  final ShapeBorder? shape;
+
+  /// The background color of the attachment.
+  ///
+  /// Defaults to [StreamChatTheme.colorTheme.barsBg].
+  final Color? backgroundColor;
+
+  /// The constraints to use when displaying the file.
+  final BoxConstraints constraints;
+
+  /// Widget for displaying the title of the attachment.
+  /// (usually the file name)
   final Widget? title;
 
-  /// Widget for displaying at the end of the attachment
+  /// Widget for displaying at the end of the attachment.
   /// (such as a download button)
   final Widget? trailing;
 
-  /// {@macro onAttachmentTap}
-  final OnAttachmentTap? onAttachmentTap;
-
-  /// Checks if the attachment is a video
-  bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';
-
-  /// Checks if the attachment is an image
-  bool get isImageAttachment => attachment.title?.mimeType?.type == 'image';
-
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-    return Material(
-      child: GestureDetector(
-        onTap: onAttachmentTap,
-        child: Container(
-          constraints: constraints ?? const BoxConstraints.tightFor(width: 100),
-          height: 56,
-          decoration: BoxDecoration(
-            color: colorTheme.barsBg,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colorTheme.borders,
+    final chatTheme = StreamChatTheme.of(context);
+    final textTheme = chatTheme.textTheme;
+    final colorTheme = chatTheme.colorTheme;
+
+    final backgroundColor = this.backgroundColor ?? colorTheme.barsBg;
+    final shape = this.shape ??
+        RoundedRectangleBorder(
+          side: BorderSide(
+            color: colorTheme.borders,
+            strokeAlign: BorderSide.strokeAlignOutside,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        );
+
+    return Container(
+      constraints: constraints,
+      clipBehavior: Clip.hardEdge,
+      decoration: ShapeDecoration(
+        shape: shape,
+        color: backgroundColor,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 40,
+            margin: const EdgeInsets.all(8),
+            child: _FileTypeImage(file: file),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  file.title ?? context.translations.fileText,
+                  maxLines: 1,
+                  style: textTheme.bodyBold,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 3),
+                _FileAttachmentSubtitle(attachment: file),
+              ],
             ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 40,
-                width: 33.33,
-                margin: const EdgeInsets.all(8),
-                child: _FileTypeImage(
-                  isImageAttachment: isImageAttachment,
-                  isVideoAttachment: isVideoAttachment,
-                  source: source,
-                  attachment: attachment,
+          const SizedBox(width: 8),
+          Material(
+            type: MaterialType.transparency,
+            child: trailing ??
+                _Trailing(
+                  attachment: file,
+                  message: message,
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      attachment.title ?? context.translations.fileText,
-                      style: StreamChatTheme.of(context).textTheme.bodyBold,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    _FileAttachmentSubtitle(attachment: attachment),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Material(
-                type: MaterialType.transparency,
-                child: trailing ??
-                    _Trailing(
-                      attachment: attachment,
-                      message: message,
-                    ),
-              ),
-            ],
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
 class _FileTypeImage extends StatelessWidget {
-  const _FileTypeImage({
-    required this.isImageAttachment,
-    required this.isVideoAttachment,
-    required this.source,
-    required this.attachment,
-  });
+  const _FileTypeImage({required this.file});
 
-  final bool isImageAttachment;
-  final bool isVideoAttachment;
-  final AttachmentSource source;
-  final Attachment attachment;
-
-  ShapeBorder _getDefaultShape(BuildContext context) {
-    return RoundedRectangleBorder(
-      side: const BorderSide(width: 0, color: Colors.transparent),
-      borderRadius: BorderRadius.circular(8),
-    );
-  }
+  final Attachment file;
 
   // TODO: Improve image memory.
   // This is using the full image instead of a smaller version (thumbnail)
   @override
   Widget build(BuildContext context) {
-    if (isImageAttachment) {
-      return Material(
-        clipBehavior: Clip.hardEdge,
-        type: MaterialType.transparency,
-        shape: _getDefaultShape(context),
-        child: source.when(
-          local: () {
-            if (attachment.file?.bytes == null) {
-              return getFileTypeImage(
-                attachment.extraData['mime_type'] as String?,
-              );
-            }
-            return Image.memory(
-              attachment.file!.bytes!,
-              fit: BoxFit.cover,
-              errorBuilder: (_, obj, trace) => getFileTypeImage(
-                attachment.extraData['mime_type'] as String?,
-              ),
-            );
-          },
-          network: () {
-            if ((attachment.imageUrl ??
-                    attachment.assetUrl ??
-                    attachment.thumbUrl) ==
-                null) {
-              return getFileTypeImage(
-                attachment.extraData['mime_type'] as String?,
-              );
-            }
-            return CachedNetworkImage(
-              imageUrl: attachment.imageUrl ??
-                  attachment.assetUrl ??
-                  attachment.thumbUrl!,
-              fit: BoxFit.cover,
-              errorWidget: (_, obj, trace) => getFileTypeImage(
-                attachment.extraData['mime_type'] as String?,
-              ),
-              placeholder: (_, __) {
-                final image = Image.asset(
-                  'images/placeholder.png',
-                  fit: BoxFit.cover,
-                  package: 'stream_chat_flutter',
-                );
+    Widget child = StreamFileAttachmentThumbnail(
+      file: file,
+      width: double.infinity,
+      height: double.infinity,
+    );
 
-                final colorTheme = StreamChatTheme.of(context).colorTheme;
-                return Shimmer.fromColors(
-                  baseColor: colorTheme.disabled,
-                  highlightColor: colorTheme.inputBg,
-                  child: image,
-                );
-              },
-            );
-          },
+    final mediaType = file.title?.mediaType;
+    final isImage = mediaType?.type == AttachmentType.image;
+    final isVideo = mediaType?.type == AttachmentType.video;
+    if (isImage || isVideo) {
+      final colorTheme = StreamChatTheme.of(context).colorTheme;
+      child = Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: ShapeDecoration(
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: colorTheme.borders,
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
+        child: child,
       );
     }
 
-    if (isVideoAttachment) {
-      return Material(
-        clipBehavior: Clip.hardEdge,
-        type: MaterialType.transparency,
-        shape: _getDefaultShape(context),
-        child: source.when(
-          local: () => StreamVideoThumbnailImage(
-            video: attachment.file!.path,
-            placeholderBuilder: (_) => const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator.adaptive(),
-              ),
-            ),
-          ),
-          network: () => StreamVideoThumbnailImage(
-            video: attachment.assetUrl,
-            placeholderBuilder: (_) => const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator.adaptive(),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return getFileTypeImage(attachment.extraData['mime_type'] as String?);
+    return child;
   }
 }
 
@@ -346,7 +279,6 @@ class _FileAttachmentSubtitle extends StatelessWidget {
         uploaded: sent,
         total: total,
         showBackground: false,
-        padding: EdgeInsets.zero,
         textStyle: textStyle,
         progressIndicatorColor: theme.colorTheme.accentPrimary,
       ),

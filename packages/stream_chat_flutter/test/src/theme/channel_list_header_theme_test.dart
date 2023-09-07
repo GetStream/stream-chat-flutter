@@ -73,7 +73,7 @@ final _channelListHeaderThemeControlMidLerp = StreamChannelListHeaderThemeData(
       width: 40,
     ),
   ),
-  color: const Color(0xff87898b),
+  color: const Color(0xff88898a),
   titleStyle: const TextStyle(
     color: Color(0xff7f7f7f),
     fontSize: 16,
