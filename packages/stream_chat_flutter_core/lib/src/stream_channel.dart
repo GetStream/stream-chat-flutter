@@ -15,6 +15,15 @@ enum QueryDirection {
   bottom,
 }
 
+/// Signature used by [StreamChannel.errorBuilder] to create a replacement
+/// widget for an error that occurs while asynchronously building the channel.
+// TODO: Remove once ErrorBuilder supports passing stacktrace.
+typedef ErrorWidgetBuilder = Widget Function(
+  BuildContext context,
+  Object error,
+  StackTrace? stackTrace,
+);
+
 /// Widget used to provide information about the channel to the widget tree
 ///
 /// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
@@ -27,6 +36,8 @@ class StreamChannel extends StatefulWidget {
     required this.channel,
     this.showLoading = true,
     this.initialMessageId,
+    this.errorBuilder = _defaultErrorBuilder,
+    this.loadingBuilder = _defaultLoadingBuilder,
   });
 
   /// The child of the widget
@@ -40,6 +51,31 @@ class StreamChannel extends StatefulWidget {
 
   /// If passed the channel will load from this particular message.
   final String? initialMessageId;
+
+  /// Widget builder used in case the channel is initialising.
+  final WidgetBuilder loadingBuilder;
+
+  /// Widget builder used in case an error occurs while building the channel.
+  final ErrorWidgetBuilder errorBuilder;
+
+  static Widget _defaultLoadingBuilder(BuildContext context) {
+    return const Center(child: CircularProgressIndicator.adaptive());
+  }
+
+  static Widget _defaultErrorBuilder(
+    BuildContext context,
+    Object error,
+    StackTrace? stackTrace,
+  ) {
+    if (error is DioException) {
+      if (error.type == DioExceptionType.badResponse) {
+        return Center(child: Text(error.message ?? 'Bad response'));
+      }
+      return const Center(child: Text('Check your connection and retry'));
+    }
+
+    return Center(child: Text(error.toString()));
+  }
 
   /// Use this method to get the current [StreamChannelState] instance
   static StreamChannelState of(BuildContext context) {
@@ -430,22 +466,14 @@ class StreamChannelState extends State<StreamChannel> {
       ],
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          final error = snapshot.error;
-          if (error is DioException) {
-            if (error.type == DioExceptionType.badResponse) {
-              return Center(child: Text(error.message ?? 'Bad response'));
-            }
-            return const Center(child: Text('Check your connection and retry'));
-          }
-
-          return Center(child: Text(error.toString()));
+          final error = snapshot.error!;
+          final stackTrace = snapshot.stackTrace;
+          return widget.errorBuilder(context, error, stackTrace);
         }
 
         final dataLoaded = snapshot.data?.every((it) => it) == true;
         if (widget.showLoading && !dataLoaded) {
-          return const Center(
-            child: CircularProgressIndicator.adaptive(),
-          );
+          return widget.loadingBuilder(context);
         }
         return widget.child;
       },

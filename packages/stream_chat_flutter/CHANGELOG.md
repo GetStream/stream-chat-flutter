@@ -1,3 +1,11 @@
+## Upcoming
+
+✅ Added
+
+- Added support for overriding the `MessageWidget.onReactionsHover` callback.
+  > **Note**
+  > Used only in desktop devices (web and desktop).
+  
 ## 7.0.0-beta.4
 
 - Included the changes from version [6.9.0](#681).
@@ -18,7 +26,8 @@
 
 - Added support for listening error events in AttachmentPickerBottomSheet.
 - Added support for overriding the `MessageWidget.onReactionTap` callback.
-- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content insertion configuration.
+- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content
+  insertion configuration.
   [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
 
   ```dart

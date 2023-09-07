@@ -87,7 +87,15 @@ class Message extends Equatable {
   final MessageState state;
 
   /// The message type.
+  @JsonKey(includeIfNull: false, toJson: _typeToJson)
   final String type;
+
+  // We need to skip passing type if it's not regular or system as the API
+  // does not expect it.
+  static String? _typeToJson(String type) {
+    if (['regular', 'system'].contains(type)) return type;
+    return null;
+  }
 
   /// The list of attachments, either provided by the user or generated from a
   /// command or as a result of URL scraping.

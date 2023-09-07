@@ -55,6 +55,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onMentionTap,
     this.onMessageTap,
     this.onReactionsTap,
+    this.onReactionsHover,
     this.showReactionPicker = true,
     @internal this.showReactionPickerTail = false,
     this.showUserAvatar = DisplayWidget.show,
@@ -486,7 +487,15 @@ class StreamMessageWidget extends StatefulWidget {
   final void Function(Message)? onMessageTap;
 
   /// {@macro onReactionsTap}
+  ///
+  /// Note: Only used in mobile devices (iOS and Android). Do not confuse this
+  /// with the tap action on the reactions picker.
   final OnReactionsTap? onReactionsTap;
+
+  /// {@template onReactionsHover}
+  ///
+  /// Note: Only used in desktop devices (web and desktop).
+  final OnReactionsHover? onReactionsHover;
 
   /// {@template customActions}
   /// List of custom actions shown on message long tap
@@ -547,6 +556,7 @@ class StreamMessageWidget extends StatefulWidget {
     bool? showInChannelIndicator,
     void Function(User)? onUserAvatarTap,
     void Function(String)? onLinkTap,
+    bool? showReactionBrowser,
     bool? showReactionPicker,
     @internal bool? showReactionPickerTail,
     List<Read>? readList,
@@ -567,6 +577,7 @@ class StreamMessageWidget extends StatefulWidget {
     OnQuotedMessageTap? onQuotedMessageTap,
     void Function(Message)? onMessageTap,
     OnReactionsTap? onReactionsTap,
+    OnReactionsHover? onReactionsHover,
     List<StreamMessageAction>? customActions,
     void Function(Message message, Attachment attachment)? onAttachmentTap,
     Widget Function(BuildContext, User)? userAvatarBuilder,
@@ -629,6 +640,7 @@ class StreamMessageWidget extends StatefulWidget {
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
       onMessageTap: onMessageTap ?? this.onMessageTap,
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
+      onReactionsHover: onReactionsHover ?? this.onReactionsHover,
       customActions: customActions ?? this.customActions,
       onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
       userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
@@ -839,7 +851,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       reverse: widget.reverse,
                       message: widget.message,
                       hasNonUrlAttachments: hasNonUrlAttachments,
-                      shouldShowReactions: shouldShowReactions,
                       hasQuotedMessage: hasQuotedMessage,
                       textPadding: widget.textPadding,
                       attachmentBuilders: widget.attachmentBuilders,
@@ -864,6 +875,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                             ? widget.onReactionsTap!(widget.message)
                             : _showMessageReactionsModal(context);
                       },
+                      onReactionsHover: widget.onReactionsHover,
                       showUserAvatar: widget.showUserAvatar,
                       streamChat: _streamChat,
                       translateUserAvatar: widget.translateUserAvatar,
@@ -1125,7 +1137,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               translateUserAvatar: false,
               showSendingIndicator: false,
               padding: EdgeInsets.zero,
-              // Show both the tail and indicator if the indicator is shown.
+              // Show both the tail if the picker is shown.
+              showReactionPicker: widget.showReactionPicker,
               showReactionPickerTail: widget.showReactionPicker,
               showPinHighlight: false,
               showUserAvatar: widget.message.user!.id ==
