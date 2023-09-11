@@ -1,4 +1,4 @@
-## Upcoming
+## 6.9.0
 
 - Added support for `StreamChannel.loadingBuilder` and `StreamChannel.errorBuilder` to customize
   loading and error states.
