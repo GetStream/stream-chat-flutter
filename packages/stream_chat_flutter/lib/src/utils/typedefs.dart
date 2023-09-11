@@ -235,6 +235,12 @@ typedef OnMessageTap = void Function(Message);
 /// {@endtemplate}
 typedef OnReactionsTap = void Function(Message);
 
+/// {@template onReactionsHover}
+/// The action to perform when a message's reactions are hovered.
+/// {@endtemplate}
+// ignore: avoid_positional_boolean_parameters
+typedef OnReactionsHover = void Function(bool isHovering);
+
 /// {@template messageSearchItemTapCallback}
 /// The action to perform when tapping or clicking on a user in a
 // ignore: deprecated_member_use_from_same_package

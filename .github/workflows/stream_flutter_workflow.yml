@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: "Install Flutter"
@@ -57,14 +57,14 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
           cache: true
-          flutter-version: ${{ env.flutter_version }}
+          channel: ${{ env.flutter_channel }}
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
@@ -82,14 +82,14 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
           cache: true
-          flutter-version: ${{ env.flutter_version }}
+          channel: ${{ env.flutter_channel }}
       - name: "Install Tools"
         run: |
           flutter pub global activate melos

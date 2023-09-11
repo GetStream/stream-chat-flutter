@@ -36,8 +36,8 @@ class MessageWidgetContent extends StatelessWidget {
     required this.avatarWidth,
     required this.showReactions,
     required this.onReactionsTap,
+    required this.onReactionsHover,
     required this.messageTheme,
-    required this.shouldShowReactions,
     required this.streamChatTheme,
     required this.isFailedState,
     required this.hasQuotedMessage,
@@ -114,16 +114,14 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro showReactions}
   final bool showReactions;
 
-  /// Callback called when the reactions icon is tapped.
-  ///
-  /// Do not confuse this with the tap action on the reactions picker.
+  /// {@macro onReactionsTap}
   final VoidCallback onReactionsTap;
+
+  /// {@macro onReactionsHover}
+  final OnReactionsHover? onReactionsHover;
 
   /// {@macro messageTheme}
   final StreamMessageThemeData messageTheme;
-
-  /// {@macro shouldShowReactions}
-  final bool shouldShowReactions;
 
   /// {@macro onUserAvatarTap}
   final void Function(User)? onUserAvatarTap;
@@ -295,7 +293,6 @@ class MessageWidgetContent extends StatelessWidget {
                                   messageTheme: messageTheme,
                                   ownId: streamChat.currentUser!.id,
                                   reverse: reverse,
-                                  shouldShowReactions: shouldShowReactions,
                                   onTap: onReactionsTap,
                                 )
                               : null,
@@ -314,25 +311,15 @@ class MessageWidgetContent extends StatelessWidget {
                             children: [
                               Padding(
                                 padding: showReactions
-                                    ? EdgeInsets.only(
-                                        top: message.reactionCounts
-                                                    ?.isNotEmpty ==
-                                                true
-                                            ? 18
-                                            : 0,
-                                      )
+                                    ? const EdgeInsets.only(top: 18)
                                     : EdgeInsets.zero,
                                 child: (message.isDeleted && !isFailedState)
                                     ? Container(
-                                        // ignore: lines_longer_than_80_chars
                                         margin: EdgeInsets.symmetric(
-                                          horizontal:
-                                              // ignore: lines_longer_than_80_chars
-                                              showUserAvatar ==
-                                                      // ignore: lines_longer_than_80_chars
-                                                      DisplayWidget.gone
-                                                  ? 0
-                                                  : 4.0,
+                                          horizontal: showUserAvatar ==
+                                                  DisplayWidget.gone
+                                              ? 0
+                                              : 4.0,
                                         ),
                                         child: StreamDeletedMessage(
                                           borderRadiusGeometry:
@@ -405,7 +392,7 @@ class MessageWidgetContent extends StatelessWidget {
                         SizedBox(width: avatarWidth + 4),
                     ],
                   ),
-                  if (isDesktopDeviceOrWeb && shouldShowReactions) ...[
+                  if (isDesktopDeviceOrWeb && showReactions) ...[
                     Padding(
                       padding: showUserAvatar != DisplayWidget.gone
                           ? EdgeInsets.only(
@@ -416,7 +403,7 @@ class MessageWidgetContent extends StatelessWidget {
                       child: DesktopReactionsBuilder(
                         message: message,
                         messageTheme: messageTheme,
-                        shouldShowReactions: shouldShowReactions,
+                        onHover: onReactionsHover,
                         borderSide: borderSide,
                         reverse: reverse,
                       ),
