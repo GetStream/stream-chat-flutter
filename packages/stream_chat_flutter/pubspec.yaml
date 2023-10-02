@@ -43,7 +43,6 @@ dependencies:
   thumblr: ^0.0.4
   url_launcher: ^6.1.12
   video_player: ^2.7.0
-  video_player_macos: ^2.0.1
   video_thumbnail: ^0.5.3
 
 flutter:
