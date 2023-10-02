@@ -1,3 +1,7 @@
+## 6.10.0
+
+- Added mixin support to `StreamChannelListEventHandler`.
+
 ## 6.9.0
 
 - Added support for `StreamChannel.loadingBuilder` and `StreamChannel.errorBuilder` to customize

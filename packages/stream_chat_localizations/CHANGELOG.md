@@ -1,3 +1,7 @@
+## 5.11.0
+
+* Updated `stream_chat_flutter` dependency to [`6.11.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 5.10.0
 
 * Updated `stream_chat_flutter` dependency to [`6.10.0`](https://pub.dev/packages/stream_chat_flutter/changelog).

@@ -1,4 +1,11 @@
-## 6.10.0
+# 6.11.0
+
+🐞 Fixed
+
+- [[#1740]](https://github.com/GetStream/stream-chat-flutter/issues/1740) Fixed
+  Plugin `video_player:macos` has multiple possible implementations.
+
+# 6.10.0
 
 🐞 Fixed
 
