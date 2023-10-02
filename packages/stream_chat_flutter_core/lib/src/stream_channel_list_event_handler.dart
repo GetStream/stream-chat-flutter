@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart
 /// certain [Event]s.
 ///
 /// This class can be mixed in or extended to create custom overrides.
-class StreamChannelListEventHandler {
+mixin class StreamChannelListEventHandler {
   /// Function which gets called for the event
   /// [EventType.channelDeleted].
   ///
