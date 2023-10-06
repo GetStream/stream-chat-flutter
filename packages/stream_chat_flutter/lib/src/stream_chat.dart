@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:video_player_media_kit/video_player_media_kit.dart';
 
 /// {@template streamChat}
 /// Widget used to provide information about the chat to the widget tree
@@ -95,12 +95,21 @@ class StreamChatState extends State<StreamChat> {
   StreamChatConfigurationData get streamChatConfigData =>
       widget.streamChatConfigData ?? StreamChatConfigurationData();
 
+  /// Whether [VideoPlayerMediaKit.ensureInitialized] has been invoked.
+  static bool _mediaKitInitialized = false;
+
   @override
   void initState() {
     super.initState();
-    // Ensures that VLC only initializes in real desktop environments
-    if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
-      VlcManager.instance.initialize();
+    // package:video_player does not support Microsoft Windows & GNU/Linux.
+    // package:video_player_media_kit bridges support for these platforms using
+    // package:media_kit.
+    if (!_mediaKitInitialized && isDesktopVideoPlayerSupported) {
+      _mediaKitInitialized = true;
+      VideoPlayerMediaKit.ensureInitialized(
+        windows: true,
+        linux: true,
+      );
     }
   }
 
