@@ -35,9 +35,9 @@ Message(
   text: 'This is my location',
   attachments: [
     Attachment(
-      uploadState: UploadState.success(),
+      uploadState: const UploadState.success(),
       type: 'location',
-      extraData: {
+      extraData: const {
         'latitude': 'fetched_latitude',
         'longitude': 'fetched_longitude',
       },
@@ -62,14 +62,13 @@ First, we add a button which when clicked fetches and shares location into the `
 StreamMessageInput(
   actions: [
     InkWell(
-      child: Icon(
+      child: const Icon(
         Icons.location_on,
-        size: 20.0,
-        color: StreamChatTheme.of(context).colorTheme.grey,
+        size: 20,
+        color: Colors.grey,
       ),
       onTap: () {
-       var channel = StreamChannel.of(context).channel;
-       var user = StreamChat.of(context).user;
+       final channel = StreamChannel.of(context).channel;
 
        _determinePosition().then((value) {
          channel.sendMessage(
@@ -77,7 +76,7 @@ StreamMessageInput(
              text: 'This is my location',
              attachments: [
                Attachment(
-                 uploadState: UploadState.success(),
+                 uploadState: const UploadState.success(),
                  type: 'location',
                  extraData: {
                    'latitude': value.latitude.toString(),
@@ -126,8 +125,7 @@ Next, we build the Static Maps URL (Add your API key before using the code snipp
 
 ```dart
   String _buildMapAttachment(String lat, String long) {
-    var baseURL = 'https://maps.googleapis.com/maps/api/staticmap?';
-    var url = Uri(
+    final url = Uri(
         scheme: 'https',
         host: 'maps.googleapis.com',
         port: 443,
@@ -155,8 +153,8 @@ StreamMessageListView(
           'location': (context, message, attachments) {
             final attachmentWidget = Image.network(
               _buildMapAttachment(
-                attachments[0].extraData['latitude'],
-                attachments[0].extraData['longitude'],
+                attachments[0].extraData['latitude'].toString(),
+                attachments[0].extraData['longitude'].toString(),
               ),
             );
 
@@ -194,14 +192,14 @@ First, we add the attachment when the location button is clicked:
      InkWell(
        child: Icon(
          Icons.location_on,
-         size: 20.0,
-         color: StreamChatTheme.of(context).colorTheme.grey,
+         size: 20,
+         color: Colors.grey,
         ),
       onTap: () {
         _determinePosition().then((value) {
            _messageInputController.addAttachment(
               Attachment(
-                uploadState: UploadState.success(),
+                uploadState: const UploadState.success(),
                 type: 'location',
                 extraData: {
                   'latitude': value.latitude.toString(),
@@ -227,14 +225,14 @@ StreamMessageInput(
     InkWell(
       child: Icon(
         Icons.location_on,
-        size: 20.0,
-        color: StreamChatTheme.of(context).colorTheme.grey,
+        size: 20,
+        color: Colors.grey,
       ),
      onTap: () {
        _determinePosition().then((value) {
          _messageInputController.addAttachment(
            Attachment(
-             uploadState: UploadState.success(),
+             uploadState: const UploadState.success(),
              type: 'location',
              extraData: {
                'latitude': value.latitude.toString(),
@@ -248,16 +246,21 @@ StreamMessageInput(
      },
    ),
   ],
-  attachmentThumbnailBuilders: {
-    'location': (context, attachment) {
-      return Image.network(
-        _buildMapAttachment(
-          attachment.extraData['latitude'],
-          attachment.extraData['longitude'],
-        ),
-      );
-    },
-  },
+  mediaAttachmentBuilder: (
+   BuildContext context,
+   Attachment attachment,
+   ValueSetter<Attachment>? onRemovePressed,
+   ) {
+     if (attachment.type == 'location') {
+       return Image.network(
+         _buildMapAttachment(
+           attachment.extraData['latitude'].toString(),
+           attachment.extraData['longitude'].toString(),
+         ),
+       );
+     }
+     return const SizedBox();
+   },  
 ),
 ```
 

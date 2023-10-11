@@ -21,9 +21,9 @@ Make sure to check the [StreamMessageSearchListView](./stream_message_search_lis
 ```dart
 class StreamMessageSearchPage extends StatefulWidget {
   const StreamMessageSearchPage({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);`
+  });
 
   final StreamChatClient client;
 
@@ -35,7 +35,10 @@ class _StreamMessageSearchState extends State<StreamMessageSearchPage> {
   late final _controller = StreamMessageSearchListController(
     client: widget.client,
     limit: 20,
-    filters: Filter.in_('members', [StreamChat.of(context).user!.id],),
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).user!.id],
+    ),
     searchQuery: 'your query here',
   );
 
@@ -49,6 +52,9 @@ class _StreamMessageSearchState extends State<StreamMessageSearchPage> {
   Widget build(BuildContext context) => Scaffold(
         body: StreamMessageSearchGridView(
           controller: _controller,
+          itemBuilder: (context, values, index) {
+           // return your custom widget here
+          },
         ),
       );
 }

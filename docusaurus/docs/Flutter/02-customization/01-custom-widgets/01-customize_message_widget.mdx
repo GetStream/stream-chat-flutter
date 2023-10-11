@@ -21,8 +21,9 @@ provided inside the `messageBuilder` parameter of the `StreamMessageListView` li
 ```dart
 StreamMessageListView(
     messageBuilder: (context, details, messageList, defaultImpl) {
-        // Your implementation of the message here
-        // E.g: return Text(details.message.text ?? '');
+        return defaultWidget.copyWith(
+            ...
+        );
     },
 ),
 ```

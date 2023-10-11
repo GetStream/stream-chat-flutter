@@ -25,7 +25,7 @@ First of all we should create an instance of the `StreamChannelListController` a
 You can also add a `Filter`, a list of `SortOption`s and other pagination-related parameters.
 
 ```dart
-class ChannelListPageState extends State<HomeScreen> {
+class _MyChannelListPageState extends State<MyChannelListPage> {
   /// Controller used for loading more data and controlling pagination in
   /// [StreamChannelListController].
   late final channelListController = StreamChannelListController(
@@ -40,6 +40,8 @@ class ChannelListPageState extends State<HomeScreen> {
       ),
     ]),
   );
+  ...
+}  
 ```
 
 Make sure you call `channelListController.doInitialLoad()` to load the initial data and `channelListController.dispose()` when the controller is no longer required.
@@ -92,7 +94,7 @@ Widget build(BuildContext context) => Scaffold(
                           child: Text(error.message),
                         );
                     }
-                    return CircularProgressIndicator();
+                    return const CircularProgressIndicator();
                   }
 
                   final _item = channels[index];

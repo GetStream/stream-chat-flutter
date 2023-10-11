@@ -33,9 +33,9 @@ Here is a basic example of the `StreamChannelListView` widget. It consists of th
 ```dart
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 

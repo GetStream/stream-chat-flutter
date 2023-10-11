@@ -25,8 +25,8 @@ If you're new to Stream Chat Flutter, we recommend looking at our [getting start
 dependencies:
   flutter:
     sdk: flutter
-  stream_chat_flutter: ^4.0.0
-  flutter_slidable: ^1.2.0
+  stream_chat_flutter: ^6.0.0
+  flutter_slidable: ^3.0.0
 ```
 
 ⚠️ Note: The examples shown in this guide use the above packages and versions.
@@ -120,7 +120,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
             onRefresh: _controller.refresh,
             child: StreamChannelListView(
               controller: _controller,
-              itemBuilder: (context, channel, tile) {
+              itemBuilder: (context, channels, index, tile) {
+                final channel = channels[index];
                 final chatTheme = StreamChatTheme.of(context);
                 final backgroundColor = chatTheme.colorTheme.inputBg;
                 final canDeleteChannel = channel.ownCapabilities
