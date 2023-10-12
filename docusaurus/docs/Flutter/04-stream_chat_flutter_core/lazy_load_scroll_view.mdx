@@ -35,7 +35,7 @@ LazyLoadScrollView(
   /// The child could be any widget which dispatches [ScrollNotification]s.
   /// For example [ListView], [GridView] or [CustomScrollView].
   child: ListView.builder(
-    itemBuilder: ((context, index) => _buildListTile),
+    itemBuilder: (context, index) => _buildListTile,
   ),
 )
 ```

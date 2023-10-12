@@ -25,11 +25,14 @@ The initial attachments can be passed to the Attachment Picker Modal in two ways
  * By passing the `initialAttachments` parameter.
 
  ```dart
+ StreamMessageInputController _messageInputController =
+       StreamMessageInputController();
+ ...
  showStreamAttachmentPickerModalBottomSheet(
    context: context,
    initialAttachments: [
      // Pass the initial attachments to the modal here if any are available already (optional)
-     ...messageInputController.attachments,
+     ..._messageInputController.attachments,
    ],
  );
  ```
@@ -65,7 +68,7 @@ However, you can also customize the options by passing the `customOptions` param
    customOptions: [
      // Pass the custom attachment picker options here
      AttachmentPickerOption(
-       icon: Icon(Icons.audiotrack),
+       icon: const Icon(Icons.audiotrack),
        supportedTypes: [AttachmentPickerType.audios],
        optionViewBuilder: (context, attachmentPickerController) {
          return AudioPicker(
@@ -87,7 +90,7 @@ The size of the attachment thumbnail item shown in the gallery picker can be def
  ```dart
  showStreamAttachmentPickerModalBottomSheet(
    context: context,
-   attachmentThumbnailSize: ThumbnailSize.square(600),
+   attachmentThumbnailSize: const ThumbnailSize.square(600),
  );
  ```
 
@@ -121,13 +124,13 @@ Possible values are between 0 and 100.
 
 The scale of the attachment thumbnail item shown in the gallery picker can be defined by passing the `attachmentThumbnailScale` parameter.
 
-For example, if this is 2.0, it means that there are four image pixels for every one logical pixel, and the image's actual width and height are
+For example, if this is 2, it means that there are four image pixels for every one logical pixel, and the image's actual width and height are
 double the height and width that should be used when painting the image.
 
  ```dart
  showStreamAttachmentPickerModalBottomSheet(
    context: context,
-   attachmentThumbnailScale: 2.0,
+   attachmentThumbnailScale: 2,
  );
  ```
 
@@ -145,13 +148,13 @@ The `showStreamAttachmentPickerModalBottomSheet` function also accepts the param
    isDismissible: true,
    clipBehavior: Clip.antiAlias,
    barrierColor: Colors.black.withOpacity(0.5),
-   constraints: BoxConstraints(
+   constraints: const BoxConstraints(
      maxHeight: 500,
      maxWidth: 500,
    ),
    shape: RoundedRectangleBorder(
      borderRadius: BorderRadius.vertical(
-       top: Radius.circular(16.0),
+       top: Radius.circular(16),
      ),
    ),
  );

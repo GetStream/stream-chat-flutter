@@ -91,7 +91,7 @@ StreamMessageListView(
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
         return defaultWidget.copyWith(
             textBuilder: (context, message) {
-                return Text(message.text);
+                return Text(message.text ?? '');
             },
         );
     },
@@ -108,14 +108,16 @@ StreamMessageListView(
     messageBuilder: (context, messageDetails, messageList, defaultWidget) {
         return defaultWidget.copyWith(
             textBuilder: (context, message) {
-                final text = _replaceHashtags(message.text).replaceAll('\n', '\\\n');
+                final text = _replaceHashtags(message.text)?.replaceAll('\n', '\\\n');
                 final messageTheme = StreamChatTheme.of(context).ownMessageTheme;
+
+                if (text == null) return const SizedBox();
 
                 return MarkdownBody(
                     data: text,
                     onTapLink: (
                         String link,
-                        String href,
+                        String? href,
                         String title,
                         ) {
                       // Do something with tapped hashtag
@@ -123,16 +125,16 @@ StreamMessageListView(
                     styleSheet: MarkdownStyleSheet.fromTheme(
                       Theme.of(context).copyWith(
                         textTheme: Theme.of(context).textTheme.apply(
-                          bodyColor: messageTheme.messageText.color,
-                          decoration: messageTheme.messageText.decoration,
-                          decorationColor: messageTheme.messageText.decorationColor,
-                          decorationStyle: messageTheme.messageText.decorationStyle,
-                          fontFamily: messageTheme.messageText.fontFamily,
+                          bodyColor: messageTheme.messageTextStyle?.color,
+                          decoration: messageTheme.messageTextStyle?.decoration,
+                          decorationColor: messageTheme.messageTextStyle?.decorationColor,
+                          decorationStyle: messageTheme.messageTextStyle?.decorationStyle,
+                          fontFamily: messageTheme.messageTextStyle?.fontFamily,
                         ),
                       ),
                     ).copyWith(
-                      a: messageTheme.messageLinks,
-                      p: messageTheme.messageText,
+                      a: messageTheme.messageLinksStyle,
+                      p: messageTheme.messageTextStyle,
                     ),
                 );
             },
@@ -140,13 +142,16 @@ StreamMessageListView(
     },
 )
 
-String _replaceHashtags(String text) {
-  RegExp exp = new RegExp(r"\B#\w\w+");
+String? _replaceHashtags(String? text) {
+  if (text == null) return null;
+  
+  final exp = RegExp(r"\B#\w\w+");
+  String result = text;
   exp.allMatches(text).forEach((match){
-    text = text.replaceAll(
-        '${match.group(0)}', '[${match.group(0)}](${match.group(0).replaceAll(' ', '')})');
+    text = text!.replaceAll(
+        '${match.group(0)}', '[${match.group(0)}](${match.group(0)?.replaceAll(' ', '')})');
   });
-  return text;
+  return result;
 }
 ```
 

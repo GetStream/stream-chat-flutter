@@ -29,41 +29,44 @@ factory StreamChatThemeData({
     Brightness? brightness,
     TextTheme? textTheme,
     ColorTheme? colorTheme,
-    ChannelListHeaderTheme? channelListHeaderTheme,
-    ChannelPreviewTheme? channelPreviewTheme,
-    ChannelTheme? channelTheme,
-    MessageTheme? otherMessageTheme,
-    MessageTheme? ownMessageTheme,
-    MessageInputTheme? messageInputTheme,
-    Widget Function(BuildContext, Channel)? defaultChannelImage,
+    StreamChannelListHeaderThemeData? channelListHeaderTheme,
+    StreamChannelPreviewThemeData? channelPreviewTheme,
+    StreamChannelHeaderThemeData? channelHeaderTheme,
+    StreamMessageThemeData? otherMessageTheme,
+    StreamMessageThemeData? ownMessageTheme,
+    StreamMessageInputThemeData? messageInputTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
+    PlaceholderUserImage? placeholderUserImage,  
     IconThemeData? primaryIconTheme,
-    List<ReactionIcon>? reactionIcons,
+    List<StreamReactionIcon>? reactionIcons,
+    StreamGalleryHeaderThemeData? imageHeaderTheme,
+    StreamGalleryFooterThemeData? imageFooterTheme,
+    StreamMessageListViewThemeData? messageListViewTheme,
   }); 
 ```
 
 ### Stream Chat Theme in use
 
-Let's take a look at customizing widgets using `StreamChatTheme`. In the example below, we can change the default color theme to yellow and override the channel header's typography and colors.
+Let's take a look at customizing widgets using `StreamChatThemeData`. In the example below, we can change the default color theme to yellow and override the channel header's typography and colors.
 
 ```dart
-builder: (context, child) => StreamChat( 
-        client: client, 
-        child: child, 
-        streamChatThemeData: StreamChatThemeData( 
-          colorTheme: ColorTheme.light( 
-            primaryAccent: const Color(0xffffe072), 
-          ), 
-          channelTheme: ChannelTheme( 
-            channelHeaderTheme: ChannelHeaderTheme( 
-              color: const Color(0xffd34646), 
-              title: TextStyle( 
-                color: Colors.white, 
-              ), 
-            ), 
+MaterialApp(
+  builder: (context, child) => StreamChat( 
+    client: client, 
+    streamChatThemeData: StreamChatThemeData( 
+      colorTheme: StreamColorTheme.light( 
+        accentPrimary: const Color(0xffffe072), 
+      ), 
+        channelHeaderTheme: const ChannelHeaderThemeData( 
+          color: const Color(0xffd34646), 
+          titleStyle: TextStyle( 
+            color: Colors.white, 
           ), 
         ), 
-      ),
+    ),
+    child: child,  
+  ),
+);
 ```
 
 We are creating this class at the very top of our widget tree using the `streamChatThemeData` parameter found in the `StreamChat` widget.
