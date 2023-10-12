@@ -65,7 +65,7 @@ StreamMessageInput(
       child: const Icon(
         Icons.location_on,
         size: 20,
-        color: Colors.grey,
+        color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
       ),
       onTap: () {
        final channel = StreamChannel.of(context).channel;
@@ -193,7 +193,7 @@ First, we add the attachment when the location button is clicked:
        child: Icon(
          Icons.location_on,
          size: 20,
-         color: Colors.grey,
+         color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
         ),
       onTap: () {
         _determinePosition().then((value) {
@@ -226,7 +226,7 @@ StreamMessageInput(
       child: Icon(
         Icons.location_on,
         size: 20,
-        color: Colors.grey,
+        color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
       ),
      onTap: () {
        _determinePosition().then((value) {
