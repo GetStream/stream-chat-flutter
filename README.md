@@ -18,13 +18,12 @@ Stream allows developers to rapidly deploy scalable feeds and chat messaging wit
 
 **V4 Migration Guide**
 
-For upgrading from V3 to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+If you're upgrading from version 3 to version 4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
 
 ## Sample apps and demos 
 Our team maintains a dedicated repository for full fledged sample applications and demos. Consider checking out [GetStream/flutter-samples](https://github.com/GetStream/flutter-samples) to learn more or get started by looking at our latest [Stream Chat demo](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1). 
 
 ## Free for Makers
-
 Stream is free for most side and hobby projects. To qualify your project/company needs to have < 5 team members and < $10k in monthly revenue.
 For complete pricing details visit our [Chat Pricing Page](https://getstream.io/chat/pricing/)
 
