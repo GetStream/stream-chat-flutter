@@ -116,40 +116,52 @@ class StreamChatState extends State<StreamChat> {
   @override
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
-    return Portal(
-      child: StreamChatConfiguration(
-        data: streamChatConfigData,
-        child: StreamChatTheme(
-          data: theme,
-          child: Builder(
-            builder: (context) {
-              final materialTheme = Theme.of(context);
-              final streamTheme = StreamChatTheme.of(context);
-              return Theme(
-                data: materialTheme.copyWith(
-                  primaryIconTheme: streamTheme.primaryIconTheme,
-                  colorScheme: materialTheme.colorScheme.copyWith(
-                    secondary: streamTheme.colorTheme.accentPrimary,
+    return Theme(
+      // package:media_kit or [Texture] can have issues with
+      // [ZoomPageTransitionsBuilder] on GNU/Linux. Thus, we use use
+      // [FadeUpwardsPageTransitionsBuilder] instead.
+      data: Theme.of(context).copyWith(
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+          },
+        ),
+      ),
+      child: Portal(
+        child: StreamChatConfiguration(
+          data: streamChatConfigData,
+          child: StreamChatTheme(
+            data: theme,
+            child: Builder(
+              builder: (context) {
+                final materialTheme = Theme.of(context);
+                final streamTheme = StreamChatTheme.of(context);
+                return Theme(
+                  data: materialTheme.copyWith(
+                    primaryIconTheme: streamTheme.primaryIconTheme,
+                    colorScheme: materialTheme.colorScheme.copyWith(
+                      secondary: streamTheme.colorTheme.accentPrimary,
+                    ),
                   ),
-                ),
-                child: StreamChatCore(
-                  client: client,
-                  onBackgroundEventReceived: widget.onBackgroundEventReceived,
-                  backgroundKeepAlive: widget.backgroundKeepAlive,
-                  connectivityStream: widget.connectivityStream,
-                  child: Builder(
-                    builder: (context) {
-                      StreamChatClient.additionalHeaders = {
-                        'X-Stream-Client':
-                            '${StreamChatClient.defaultUserAgent}-'
-                                'ui-${StreamChatClient.packageVersion}',
-                      };
-                      return widget.child ?? const Offstage();
-                    },
+                  child: StreamChatCore(
+                    client: client,
+                    onBackgroundEventReceived: widget.onBackgroundEventReceived,
+                    backgroundKeepAlive: widget.backgroundKeepAlive,
+                    connectivityStream: widget.connectivityStream,
+                    child: Builder(
+                      builder: (context) {
+                        StreamChatClient.additionalHeaders = {
+                          'X-Stream-Client':
+                              '${StreamChatClient.defaultUserAgent}-'
+                                  'ui-${StreamChatClient.packageVersion}',
+                        };
+                        return widget.child ?? const Offstage();
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

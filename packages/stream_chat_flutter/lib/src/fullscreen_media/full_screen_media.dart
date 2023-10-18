@@ -4,14 +4,13 @@ import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
-import 'package:stream_chat_flutter/src/fullscreen_media/gallery_navigation_item.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 /// A full screen image widget
-class StreamFullScreenMedia extends FullScreenMediaWidget {
+class StreamFullScreenMedia extends StatefulWidget {
   /// Instantiate a new FullScreenImage
   const StreamFullScreenMedia({
     super.key,
