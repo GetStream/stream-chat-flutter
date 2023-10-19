@@ -98,10 +98,12 @@ class StreamChatState extends State<StreamChat> {
   @override
   void initState() {
     super.initState();
-    VideoPlayerMediaKit.ensureInitialized(
-      windows: true,
-      linux: true,
-    );
+    if (isDesktopVideoPlayerSupported) {
+      VideoPlayerMediaKit.ensureInitialized(
+        windows: true,
+        linux: true,
+      );
+    }
   }
 
   @override
