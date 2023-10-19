@@ -95,22 +95,13 @@ class StreamChatState extends State<StreamChat> {
   StreamChatConfigurationData get streamChatConfigData =>
       widget.streamChatConfigData ?? StreamChatConfigurationData();
 
-  /// Whether [VideoPlayerMediaKit.ensureInitialized] has been invoked.
-  static bool _mediaKitInitialized = false;
-
   @override
   void initState() {
     super.initState();
-    // package:video_player does not support Microsoft Windows & GNU/Linux.
-    // package:video_player_media_kit bridges support for these platforms using
-    // package:media_kit.
-    if (!_mediaKitInitialized && isDesktopVideoPlayerSupported) {
-      _mediaKitInitialized = true;
-      VideoPlayerMediaKit.ensureInitialized(
-        windows: true,
-        linux: true,
-      );
-    }
+    VideoPlayerMediaKit.ensureInitialized(
+      windows: true,
+      linux: true,
+    );
   }
 
   @override
