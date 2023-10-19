@@ -30,6 +30,7 @@ export 'src/channel/stream_channel_avatar.dart';
 export 'src/channel/stream_channel_name.dart';
 export 'src/channel/stream_message_preview_text.dart';
 export 'src/fullscreen_media/full_screen_media.dart';
+export 'src/fullscreen_media/full_screen_media_builder.dart';
 export 'src/gallery/gallery_footer.dart';
 export 'src/gallery/gallery_header.dart';
 export 'src/indicators/sending_indicator.dart';

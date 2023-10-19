@@ -9,9 +9,9 @@ import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_buil
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
-/// A full screen image widget
+/// A full screen media widget
 class StreamFullScreenMedia extends StatefulWidget {
-  /// Instantiate a new FullScreenImage
+  /// Instantiate a new StreamFullScreenMedia
   const StreamFullScreenMedia({
     super.key,
     required this.mediaAttachmentPackages,
