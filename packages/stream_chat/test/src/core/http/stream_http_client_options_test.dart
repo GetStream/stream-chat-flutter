@@ -5,8 +5,8 @@ void main() {
   test('should return the all default set params', () {
     const options = StreamHttpClientOptions();
     expect(options.baseUrl, 'https://chat.stream-io-api.com');
-    expect(options.connectTimeout, const Duration(seconds: 6));
-    expect(options.receiveTimeout, const Duration(seconds: 6));
+    expect(options.connectTimeout, const Duration(seconds: 30));
+    expect(options.receiveTimeout, const Duration(seconds: 30));
     expect(options.queryParameters, const {});
     expect(options.headers, const {});
   });
