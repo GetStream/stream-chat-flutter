@@ -1,3 +1,10 @@
+# Upcoming
+
+🐞 Fixed
+
+- [[#1759]](https://github.com/GetStream/stream-chat-flutter/issues/1759) Fixed
+  The Reaction Picker is not being removed when I set showReactionPicker to false.
+
 # 6.11.0
 
 🐞 Fixed
