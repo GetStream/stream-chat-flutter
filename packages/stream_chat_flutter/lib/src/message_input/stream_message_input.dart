@@ -817,7 +817,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   /// this will open the native file system and allow the user to select one
   /// or more files.
   Future<void> _onAttachmentButtonPressed() async {
-    final attachments = await showStreamAttachmentPickerModalBottomSheet(
+    final attachments =
+        await showStreamAttachmentPickerModalBottomSheet<List<Attachment>>(
       context: context,
       onError: widget.onError,
       allowedTypes: widget.allowedAttachmentPickerTypes,
@@ -886,10 +887,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     maxHeight: widget.maxHeight,
                     child: PlatformWidgetBuilder(
                       web: (context, child) => Focus(
+                        skipTraversal: true,
                         onKeyEvent: _handleKeyPressed,
                         child: child!,
                       ),
                       desktop: (context, child) => Focus(
+                        skipTraversal: true,
                         onKeyEvent: _handleKeyPressed,
                         child: child!,
                       ),
@@ -1408,25 +1411,26 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final channel = StreamChannel.of(context).channel;
 
     try {
-      Future sendingFuture;
+      Message new_message;
       if (_isEditing) {
-        sendingFuture = channel.updateMessage(
+        new_message = (await channel.updateMessage(
           message,
           skipEnrichUrl: skipEnrichUrl,
-        );
+        ))
+            .message;
       } else {
-        sendingFuture = channel.sendMessage(
+        new_message = (await channel.sendMessage(
           message,
           skipEnrichUrl: skipEnrichUrl,
-        );
+        ))
+            .message;
       }
 
-      final resp = await sendingFuture;
-      if (resp.message?.type == 'error') {
+      if (message?.type == 'error') {
         _effectiveController.message = message;
       }
       _startSlowMode();
-      widget.onMessageSent?.call(resp.message);
+      widget.onMessageSent?.call(message);
     } catch (e, stk) {
       if (widget.onError != null) {
         widget.onError?.call(e, stk);
