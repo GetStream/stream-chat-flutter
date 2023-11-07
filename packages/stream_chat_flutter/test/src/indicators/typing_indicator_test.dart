@@ -87,6 +87,7 @@ void main() {
       ));
 
       expect(find.byKey(typingKey), findsOneWidget);
+      expect(find.byType(Flexible), findsOneWidget);
     },
   );
 }
