@@ -6,6 +6,8 @@
   update message with `type: reply`.
 - [[#1724]](https://github.com/GetStream/stream-chat-flutter/issues/1724) Fixed sendFile error
   on `AttachmentFile` with `bytes` and no `name`.
+- [[#1753]](https://github.com/GetStream/stream-chat-flutter/issues/1753) Fixed Unhandled null 
+  check operator exception when user is removed from a channel.
 
 ## 6.8.0
 
