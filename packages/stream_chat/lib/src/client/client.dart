@@ -1658,7 +1658,7 @@ class ClientState {
       )
           .listen((event) async {
         final isCurrentUser = event.user!.id == currentUser!.id;
-        if (isCurrentUser) {
+        if (isCurrentUser && event.channel != null) {
           final eventChannel = event.channel!;
           await _client.chatPersistenceClient
               ?.deleteChannels([eventChannel.cid]);
