@@ -28,13 +28,13 @@ and send messages.
 ```dart
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: StreaChannelHeader(),
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -46,7 +46,7 @@ class ChannelPage extends StatelessWidget {
               },
             ),
           ),
-          StreamMessageInput(),
+          const StreamMessageInput(),
         ],
       ),
     );

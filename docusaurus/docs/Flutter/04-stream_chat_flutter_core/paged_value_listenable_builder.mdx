@@ -65,7 +65,7 @@ class _MyHomePageState extends State {
                   const Text('Usernames:'),
                   Expanded(
                     child: ListView(
-                      children: userNames.map((it) => Text(it)).toList(),
+                      children: userNames.map(Text.new).toList(),
                     ),
                   ),
                   if (nextPageKey != null)
@@ -75,7 +75,7 @@ class _MyHomePageState extends State {
                     ),
                 ],
               ),
-              loading: () => CircularProgressIndicator(),
+              loading: CircularProgressIndicator.new,
               error: (e) => Text('Error: $e'),
             );
           },

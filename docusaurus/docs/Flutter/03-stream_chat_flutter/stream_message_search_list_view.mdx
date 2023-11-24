@@ -27,9 +27,9 @@ While the `StreamMessageListView` is tied to a certain `StreamChannel`, a `Strea
 ```dart
 class StreamMessageSearchPage extends StatefulWidget {
   const StreamMessageSearchPage({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);`
+  });
 
   final StreamChatClient client;
 
@@ -41,7 +41,10 @@ class _StreamMessageSearchState extends State<StreamMessageSearchPage> {
   late final _controller = StreamMessageSearchListController(
     client: widget.client,
     limit: 20,
-    filters: Filter.in_('members', [StreamChat.of(context).user!.id],),
+    filter: Filter.in_(
+      'members',
+      [StreamChat.of(context).user!.id],
+    ),
     searchQuery: 'your query here',
   );
 

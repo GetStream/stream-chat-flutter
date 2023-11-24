@@ -59,8 +59,7 @@ Widget build(BuildContext context) => Scaffold(
             /// In a real-world app you should throttle the search requests.
             /// You can use our library [rate_limiter](https://pub.dev/packages/rate_limiter).
             onChanged: (s) {
-              messageSearchListController.searchQuery = s;
-              messageSearchListController.doInitialLoad();
+              messageSearchListController..searchQuery = s..doInitialLoad();
             },
           ),
           Expanded(
@@ -92,7 +91,7 @@ Widget build(BuildContext context) => Scaffold(
                               child: Text(error.message),
                             );
                           }
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                         }
 
                         final _item = responses[index];

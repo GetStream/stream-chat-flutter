@@ -26,7 +26,7 @@ class MemberListPageState extends State<MemberListPage> {
   /// Controller used for loading more data and controlling pagination in
   /// [StreamMemberListController].
   late final memberListController = StreamMemberListController(
-    client: StreamChatCore.of(context).client,
+    channel: StreamChannel.of(context).channel,
   );
 ```
 
@@ -52,7 +52,7 @@ You can use a [`PagedValueListenableBuilder`](./paged_value_listenable_builder.m
 ```dart
 @override
 Widget build(BuildContext context) => Scaffold(
-      body: PagedValueListenableBuilder<int, List<Member>>(
+      body: PagedValueListenableBuilder<int, Member>(
         valueListenable: memberListController,
         builder: (context, value, child) {
           return value.when(
@@ -80,12 +80,12 @@ Widget build(BuildContext context) => Scaffold(
                           child: Text(error.message),
                         );
                     }
-                    return CircularProgressIndicator();
+                    return const CircularProgressIndicator();
                   }
 
                   final _item = members[index];
                   return ListTile(
-                    title: Text(_item.name ?? ''),
+                    title: Text(_item.user?.name ?? ''),
                   );
                 },
               ),

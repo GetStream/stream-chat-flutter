@@ -63,19 +63,19 @@ class StreamEmojiAutocompleteOptions extends StatelessWidget {
           horizontalTitleGap: 0,
           leading: Text(
             emoji.char,
-            style: themeData.textTheme.headline6!.copyWith(
+            style: themeData.textTheme.titleLarge!.copyWith(
               fontSize: 24,
             ),
           ),
           title: SubstringHighlight(
             text: emoji.shortName,
             term: query,
-            textStyleHighlight: themeData.textTheme.headline6!.copyWith(
+            textStyleHighlight: themeData.textTheme.titleLarge!.copyWith(
               color: Colors.yellow,
               fontSize: 14.5,
               fontWeight: FontWeight.bold,
             ),
-            textStyle: themeData.textTheme.headline6!.copyWith(
+            textStyle: themeData.textTheme.titleLarge!.copyWith(
               fontSize: 14.5,
             ),
           ),
