@@ -38,12 +38,7 @@ dependencies:
   rxdart: ^0.27.7
   share_plus: ^7.1.0
   shimmer: ^3.0.0
-  # stream_chat_flutter_core: ^6.11.0
-  stream_chat_flutter_core:
-    git: 
-      url: https://github.com/Intune-Communications-LTD/stream-chat-flutter.git
-      path: packages/stream_chat_flutter_core
-      ref: app_customizations
+  stream_chat_flutter_core: ^6.11.0
   synchronized: ^3.1.0
   thumblr: ^0.0.4
   url_launcher: ^6.1.12
