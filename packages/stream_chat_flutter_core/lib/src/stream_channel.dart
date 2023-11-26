@@ -436,7 +436,7 @@ class StreamChannelState extends State<StreamChannel> {
       // Only load messages if the unread message is in-between the messages.
       // Otherwise, we can just load the channel normally.
       if (hasNewMessages && hasOldMessages) {
-        _futures.add(_loadChannelAtTimestamp(lastRead));
+        // _futures.add(_loadChannelAtTimestamp(lastRead));
       }
     }
   }
@@ -479,7 +479,7 @@ class StreamChannelState extends State<StreamChannel> {
       },
     );
     if (_futures.length > 1) {
-      child = Material(child: child);
+      child = child;
     }
     return child;
   }
