@@ -125,6 +125,7 @@ class StreamMessageListView extends StatefulWidget {
     this.paginationLoadingIndicatorBuilder,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.spacingWidgetBuilder = _defaultSpacingWidgetBuilder,
+    this.padding,
   });
 
   /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
@@ -282,6 +283,9 @@ class StreamMessageListView extends StatefulWidget {
 
   /// {@macro spacingWidgetBuilder}
   final SpacingWidgetBuilder spacingWidgetBuilder;
+
+  /// List padding
+  final EdgeInsets? padding;
 
   static Widget _defaultSpacingWidgetBuilder(
     BuildContext context,
@@ -571,7 +575,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   reverse: widget.reverse,
                   shrinkWrap: widget.shrinkWrap,
                   itemCount: itemCount,
-
+                  padding: widget.padding,
                   // Commented out as it is not working as expected.
                   // The list view gets broken in the following case:
                   // * The list view is loaded at a particular message (eg: Last Read, or a quoted message)
