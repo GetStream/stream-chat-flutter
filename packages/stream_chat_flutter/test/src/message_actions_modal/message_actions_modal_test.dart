@@ -65,6 +65,101 @@ void main() {
   );
 
   testWidgets(
+    'it should show the reaction picker',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel(
+        ownCapabilities: ['send-message', 'send-reaction'],
+      );
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+
+      final themeData = ThemeData();
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: StreamChat(
+            streamChatThemeData: streamTheme,
+            client: client,
+            child: SizedBox(
+              child: StreamChannel(
+                channel: channel,
+                child: MessageActionsModal(
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
+                    state: MessageState.sent,
+                  ),
+                  messageWidget: const Text(
+                    'test',
+                    key: Key('MessageWidget'),
+                  ),
+                  messageTheme: streamTheme.ownMessageTheme,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamReactionPicker), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'it should not show the reaction picker',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+
+      final themeData = ThemeData();
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: StreamChat(
+            streamChatThemeData: streamTheme,
+            client: client,
+            child: SizedBox(
+              child: StreamChannel(
+                channel: channel,
+                child: MessageActionsModal(
+                  showReactionPicker: false,
+                  message: Message(
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
+                    state: MessageState.sent,
+                  ),
+                  messageWidget: const Text(
+                    'test',
+                    key: Key('MessageWidget'),
+                  ),
+                  messageTheme: streamTheme.ownMessageTheme,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamReactionPicker), findsNothing);
+    },
+  );
+
+  testWidgets(
     'it should show some actions',
     (WidgetTester tester) async {
       final client = MockClient();

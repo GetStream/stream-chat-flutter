@@ -31,8 +31,8 @@ A `MessageListController` is used to paginate data.
 ```dart
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,20 +42,20 @@ class ChannelPage extends StatelessWidget {
           Expanded(
             child: MessageListCore(
         emptyBuilder: (context) {
-          return Center(
+          return const Center(
             child: Text('Nothing here...'),
           );
         },
         loadingBuilder: (context) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         },
         messageListBuilder: (context, list) {
           return MessagesPage(list);
         },
-        errorWidgetBuilder: (context, err) {
-          return Center(
+        errorBuilder: (context, err) {
+          return const Center(
             child: Text('Error'),
           );
         },

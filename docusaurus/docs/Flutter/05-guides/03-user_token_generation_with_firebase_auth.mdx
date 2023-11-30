@@ -15,16 +15,16 @@ In this guide, you'll explore how you can use Firebase Auth as an authentication
 generate Stream Chat user tokens.
 
 You will use Stream's [NodeJS client](https://getstream.io/chat/docs/node/?language=javascript) for Stream account creation and
-token generation, and [Flutter Cloud Functions for Firebase](https://firebase.flutter.dev/docs/functions/overview) to invoke the cloud functions
+token generation, and [Flutter Cloud Functions for Firebase](https://firebase.google.com/docs/functions/callable?gen=2nd#dart) to invoke the cloud functions
 from your Flutter app.
 
 Stream supports several different [backend clients](https://getstream.io/chat/sdk/#backend-clients) to integrate with your server. This guide only shows an easy way to integrate Stream Chat authentication using Firebase and Flutter.
 
 ### Flutter Firebase
 
-See the [Flutter Firebase getting started](https://firebase.flutter.dev/docs/overview) docs for setup and installation instructions.
+See the [Flutter Firebase getting started](https://firebase.google.com/docs/flutter/setup) docs for setup and installation instructions.
 
-You will also need to add the [Flutter Firebase Authentication](https://firebase.flutter.dev/docs/auth/overview), and [Flutter Firebase Cloud Functions](https://firebase.flutter.dev/docs/functions/overview) packages to your app. Depending on the platform that you target, there may be specific configurations that you need to do.
+You will also need to add the [Flutter Firebase Authentication](https://firebase.google.com/docs/auth/flutter/start), and [Flutter Firebase Cloud Functions](https://firebase.google.com/docs/functions/callable?gen=2nd#dart) packages to your app. Depending on the platform that you target, there may be specific configurations that you need to do.
 
 #### Starting Code
 
@@ -35,20 +35,20 @@ You will extend this later to execute cloud functions.
 ```dart
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         body: Auth(),
       ),
@@ -57,20 +57,20 @@ class MyApp extends StatelessWidget {
 }
 
 class Auth extends StatefulWidget {
-  Auth({Key? key}) : super(key: key);
+  const Auth({super.key});
 
   @override
   _AuthState createState() => _AuthState();
 }
 
 class _AuthState extends State<Auth> {
-  late FirebaseAuth auth;
+  late firebase_auth.FirebaseAuth auth;
   late FirebaseFunctions functions;
 
   @override
   void initState() {
     super.initState();
-    auth = FirebaseAuth.instance;
+    auth = firebase_auth.FirebaseAuth.instance;
     functions = FirebaseFunctions.instance;
   }
 
@@ -103,19 +103,26 @@ class _AuthState extends State<Auth> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           AuthenticationState(
-            streamUser: auth.authStateChanges(),
+            streamUser: auth.authStateChanges().map(
+                  (firebaseUser) => firebaseUser != null
+                      ? User(
+                          id: firebaseUser.uid,
+                          // Map other user fields here
+                        )
+                      : null,
+                ),
           ),
           ElevatedButton(
             onPressed: createAccount,
-            child: Text('Create account'),
+            child: const Text('Create account'),
           ),
           ElevatedButton(
             onPressed: signIn,
-            child: Text('Sign in'),
+            child: const Text('Sign in'),
           ),
           ElevatedButton(
             onPressed: signOut,
-            child: Text('Sign out'),
+            child: const Text('Sign out'),
           ),
         ],
       ),
@@ -125,9 +132,9 @@ class _AuthState extends State<Auth> {
 
 class AuthenticationState extends StatelessWidget {
   const AuthenticationState({
-    Key? key,
+    super.key,
     required this.streamUser,
-  }) : super(key: key);
+  });
 
   final Stream<User?> streamUser;
 
@@ -138,10 +145,10 @@ class AuthenticationState extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return (snapshot.data != null)
-              ? Text('Authenticated')
-              : Text('Not Authenticated');
+              ? const Text('Authenticated')
+              : const Text('Not Authenticated');
         }
-        return Text('Not Authenticated');
+        return const Text('Not Authenticated');
       },
     );
   }
@@ -158,8 +165,8 @@ in the `createAccount`, `signIn` and `signOut` methods. There is a button to inv
 
 The `FirebaseFunctions.instance` will be used later in this guide.
 
-The `AuthenticationState` widget listens to `auth.authStateChanges()` to display a message
-indicating if a user is authenticated.
+The `AuthenticationState`` widget listens to `auth.authStateChanges()` (mapped to Stream's `User`) 
+to display a message indicating if a user is authenticated.
 
 ### Firebase Cloud Functions
 
@@ -168,7 +175,7 @@ Firebase Cloud Functions allows you to extend Firebase with custom operations th
 - **External event**: For example, directly calling a cloud function from your Flutter application.
 
 To set up your local environment to deploy cloud functions, please see the
-[Cloud Functions getting started](https://firebase.flutter.dev/docs/overview) docs.
+[Cloud Functions getting started](https://firebase.google.com/docs/flutter/setup) docs.
 
 After initializing your project with cloud functions, you should have a **functions** folder in your project, including a `package.json` file.
 

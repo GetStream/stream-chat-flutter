@@ -44,20 +44,11 @@ Pass it down to the controller:
 * Mix the `StreamChannelListEventHandler` into your widget state.
 
 ```dart
-class _ChannelListPageState extends State<ChannelListPage>
-    with StreamChannelListEventHandler {
-  
-  @override
-  void onConnectionRecovered(
-    Event event,
-    StreamChannelListController controller,
-  ) {
-    // Write your own custom implementation here
-  }
+class _ChannelListPageState extends State<ChannelListPage> {
 
   late final _listController = StreamChannelListController(
     client: StreamChat.of(context).client,
-    eventHandler: this,
+    eventHandler: MyCustomEventHandler(),
   );
 }
 ```

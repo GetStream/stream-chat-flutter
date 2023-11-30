@@ -21,9 +21,9 @@ Make sure to check the [StreamUserListView](./stream_user_list_view.mdx) documen
 ```dart
 class UserGridPage extends StatefulWidget {
   const UserGridPage({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
@@ -39,7 +39,7 @@ class _UserGridPageState extends State<UserGridPage> {
       Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
     ]),
     sort: [
-      SortOption(
+      const SortOption(
         'name',
         direction: 1,
       ),
@@ -58,12 +58,15 @@ class _UserGridPageState extends State<UserGridPage> {
           onRefresh: _controller.refresh,
           child: StreamUserGridView(
             controller: _controller,
-            onChannelTap: (channel) => Navigator.push(
+            onMemberTap: (member) => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => StreamChannel(
-                  channel: channel,
-                  child: const ChannelPage(),
+                builder: (_) => Scaffold(
+                  body: Center(
+                    child: StreamUserAvatar(
+                      user: member.user!,
+                    ),
+                  ),
                 ),
               ),
             ),

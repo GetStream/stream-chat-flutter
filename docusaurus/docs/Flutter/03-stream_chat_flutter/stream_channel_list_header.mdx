@@ -27,9 +27,9 @@ common Channels Page.
 ```dart
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   final StreamChatClient client;
 
@@ -55,7 +55,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: StreamChannelListHeader(),
+        appBar: const StreamChannelListHeader(),
         body: RefreshIndicator(
           onRefresh: _controller.refresh,
           child: StreamChannelListView(

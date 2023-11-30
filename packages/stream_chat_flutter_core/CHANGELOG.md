@@ -1,3 +1,9 @@
+## 6.11.0
+
+🐞 Fixed
+
+- Fixed video attachment uploading. [#1754](https://github.com/GetStream/stream-chat-flutter/pull/1754)
+
 ## 6.10.0
 
 - Added mixin support to `StreamChannelListEventHandler`.

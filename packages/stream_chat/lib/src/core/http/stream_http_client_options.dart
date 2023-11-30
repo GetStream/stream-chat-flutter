@@ -7,8 +7,8 @@ class StreamHttpClientOptions {
   /// Instantiates a new [StreamHttpClientOptions]
   const StreamHttpClientOptions({
     String? baseUrl,
-    this.connectTimeout = const Duration(seconds: 6),
-    this.receiveTimeout = const Duration(seconds: 6),
+    this.connectTimeout = const Duration(seconds: 30),
+    this.receiveTimeout = const Duration(seconds: 30),
     this.queryParameters = const {},
     this.headers = const {},
   }) : baseUrl = baseUrl ?? _defaultBaseURL;
@@ -16,10 +16,10 @@ class StreamHttpClientOptions {
   /// base url to use with client.
   final String baseUrl;
 
-  /// connect timeout, default to 6s
+  /// connect timeout, default to 30s
   final Duration connectTimeout;
 
-  /// received timeout, default to 6s
+  /// received timeout, default to 30s
   final Duration receiveTimeout;
 
   /// Common query parameters.
