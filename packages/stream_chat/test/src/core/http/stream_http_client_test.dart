@@ -164,7 +164,8 @@ void main() {
       expect(
         e.message,
         "The connection errored: Dio can't establish a new connection"
-        ' after it was closed.',
+        ' after it was closed. This indicates an error which most likely'
+        ' cannot be solved by the library.',
       );
     }
   });
