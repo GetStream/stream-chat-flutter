@@ -19,7 +19,7 @@ dependencies:
   diacritic: ^0.1.4
   dio: ^5.3.2
   ezanimation: ^0.6.0
-  file_picker: ^5.3.3
+  file_picker: ">=5.3.3 <7.0.0"
   file_selector: ^1.0.0
   flutter:
     sdk: flutter
