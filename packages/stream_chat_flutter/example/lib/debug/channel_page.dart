@@ -4,9 +4,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_example/debug/actions/add_user.dart';
 import 'package:stream_chat_flutter_example/debug/actions/ban_user.dart';
 import 'package:stream_chat_flutter_example/debug/actions/mute_user.dart';
 import 'package:stream_chat_flutter_example/debug/actions/remove_shadow_ban.dart';
+import 'package:stream_chat_flutter_example/debug/actions/remove_user.dart';
 import 'package:stream_chat_flutter_example/debug/actions/shadow_ban.dart';
 import 'package:stream_chat_flutter_example/debug/actions/unban_user.dart';
 import 'package:stream_chat_flutter_example/debug/actions/unmute_user.dart';
@@ -82,6 +84,10 @@ class _DebugChannelPageState extends State<DebugChannelPage> {
             DebugShadowBan(client: _channel.client),
             const SizedBox(height: 8),
             DebugRemoveShadowBan(client: _channel.client),
+            const SizedBox(height: 8),
+            DebugAddUser(client: _channel.client, channel: _channel),
+            const SizedBox(height: 8),
+            DebugRemoveUser(client: _channel.client, channel: _channel),
           ],
         ),
       ),
