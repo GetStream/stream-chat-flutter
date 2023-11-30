@@ -1,3 +1,10 @@
+# 6.10.0
+
+🐞 Fixed
+
+- [[#1753]](https://github.com/GetStream/stream-chat-flutter/issues/1753) Fixed Unhandled null 
+  check operator exception when user is removed from a channel.
+
 ## 6.9.0
 
 🐞 Fixed
