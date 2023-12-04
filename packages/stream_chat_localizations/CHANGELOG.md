@@ -1,4 +1,6 @@
-## Unreleased
+## 8.0.0-beta.1
+
+- Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2
 
 ## 7.0.2
 

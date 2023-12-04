@@ -1,4 +1,7 @@
-## Unreleased
+## 8.0.0-beta.1
+
+- Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2
+- Bump `photo_manager` dependency to `^3.0.0-dev.4`.
 
 ## 7.0.2
 
