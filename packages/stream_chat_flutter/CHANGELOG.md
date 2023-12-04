@@ -1,3 +1,9 @@
+## Unereleased
+
+🐞 Fixed
+
+- [[#1804]](https://github.com/GetStream/stream-chat-flutter/issues/1804) Fixed `StreamAttachmentWidgetBuilder`` is not accessible in 7.0.0.
+
 ## 7.0.0
 
 🛑️ Breaking
