@@ -201,8 +201,8 @@ class BottomRow extends StatelessWidget {
             ),
     ];
 
-    final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
-        (showThreadReplyIndicator || showInChannel);
+    final showThreadTail =
+        (showThreadReplyIndicator || showInChannel) && !isOnlyEmoji;
 
     final threadIndicatorWidgets = [
       if (showThreadTail)

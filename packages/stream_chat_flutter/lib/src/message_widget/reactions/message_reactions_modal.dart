@@ -50,45 +50,47 @@ class StreamMessageReactionsModal extends StatelessWidget {
 
     final child = Center(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (showReactionPicker && hasReactionPermission)
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Align(
-                      alignment: Alignment(
-                        calculateReactionsHorizontalAlignment(
-                          user,
-                          message,
-                          constraints,
-                          fontSize,
-                          orientation,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                if (showReactionPicker && hasReactionPermission)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Align(
+                        alignment: Alignment(
+                          calculateReactionsHorizontalAlignment(
+                            user,
+                            message,
+                            constraints,
+                            fontSize,
+                            orientation,
+                          ),
+                          0,
                         ),
-                        0,
-                      ),
-                      child: StreamReactionPicker(
-                        message: message,
-                      ),
-                    );
-                  },
+                        child: StreamReactionPicker(
+                          message: message,
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 10),
+                IgnorePointer(
+                  child: messageWidget,
                 ),
-              const SizedBox(height: 10),
-              IgnorePointer(
-                child: messageWidget,
-              ),
-              if (message.latestReactions?.isNotEmpty == true) ...[
-                const SizedBox(height: 8),
-                ReactionsCard(
-                  currentUser: user!,
-                  message: message,
-                  messageTheme: messageTheme,
-                ),
+                if (message.latestReactions?.isNotEmpty == true) ...[
+                  const SizedBox(height: 8),
+                  ReactionsCard(
+                    currentUser: user!,
+                    message: message,
+                    messageTheme: messageTheme,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

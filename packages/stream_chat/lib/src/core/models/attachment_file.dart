@@ -62,7 +62,7 @@ class AttachmentFile {
   String? get extension => name?.split('.').last;
 
   /// The mime type of this file.
-  MediaType? get mimeType => name?.mimeType;
+  MediaType? get mediaType => name?.mediaType;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$AttachmentFileToJson(this);
@@ -74,14 +74,14 @@ class AttachmentFile {
     if (CurrentPlatform.isWeb) {
       multiPartFile = MultipartFile.fromBytes(
         bytes!,
-        filename: name ?? 'file',
-        contentType: mimeType,
+        filename: name,
+        contentType: mediaType,
       );
     } else {
       multiPartFile = await MultipartFile.fromFile(
         path!,
-        filename: name ?? 'file',
-        contentType: mimeType,
+        filename: name,
+        contentType: mediaType,
       );
     }
     return multiPartFile;

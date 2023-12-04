@@ -68,12 +68,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             _context = context;
-            return Scaffold(
-              body: StreamChannel(
-                channel: MockChannel(),
-                child: const StreamMessageListView(),
-              ),
-            );
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -98,12 +93,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             _context = context;
-            return Scaffold(
-              body: StreamChannel(
-                channel: MockChannel(),
-                child: const StreamMessageListView(),
-              ),
-            );
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -151,7 +141,7 @@ final _messageListViewThemeDataControl = StreamMessageListViewThemeData(
 );
 
 const _messageListViewThemeDataControlHalfLerp = StreamMessageListViewThemeData(
-  backgroundColor: Color(0xff87898b),
+  backgroundColor: Color(0xff88898a),
 );
 
 final _messageListViewThemeDataControlDark = StreamMessageListViewThemeData(

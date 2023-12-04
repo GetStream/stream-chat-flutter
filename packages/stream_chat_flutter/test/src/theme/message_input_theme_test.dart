@@ -68,7 +68,7 @@ final _messageInputThemeControl = StreamMessageInputThemeData(
 final _messageInputThemeControlMidLerp = StreamMessageInputThemeData(
   borderRadius: BorderRadius.circular(20),
   sendAnimationDuration: const Duration(milliseconds: 300),
-  inputBackgroundColor: const Color(0xff87898b),
+  inputBackgroundColor: const Color(0xff88898a),
   actionButtonColor: const Color(0xff196eff),
   actionButtonIdleColor: const Color(0xff7a7a7a),
   sendButtonColor: const Color(0xff196eff),

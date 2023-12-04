@@ -17,7 +17,6 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
@@ -572,8 +571,6 @@ class StreamChatClient {
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
-    @Deprecated('Use channelStateSort instead.')
-    List<SortOption<ChannelModel>>? sort,
     List<SortOption<ChannelState>>? channelStateSort,
     bool state = true,
     bool watch = true,
@@ -590,7 +587,7 @@ class StreamChatClient {
 
     final hash = generateHash([
       filter,
-      sort,
+      channelStateSort,
       state,
       watch,
       presence,
@@ -604,8 +601,6 @@ class StreamChatClient {
     } else {
       final channels = await queryChannelsOffline(
         filter: filter,
-        // ignore: deprecated_member_use_from_same_package
-        sort: sort,
         channelStateSort: channelStateSort,
         paginationParams: paginationParams,
       );
@@ -614,7 +609,7 @@ class StreamChatClient {
       try {
         final newQueryChannelsFuture = queryChannelsOnline(
           filter: filter,
-          sort: channelStateSort ?? sort,
+          sort: channelStateSort,
           state: state,
           watch: watch,
           presence: presence,
@@ -731,17 +726,11 @@ class StreamChatClient {
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
     Filter? filter,
-    @Deprecated('''
-    sort has been deprecated. 
-    Please use channelStateSort instead.''')
-    List<SortOption<ChannelModel>>? sort,
     List<SortOption<ChannelState>>? channelStateSort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final offlineChannels = (await chatPersistenceClient?.getChannelStates(
           filter: filter,
-          // ignore: deprecated_member_use_from_same_package
-          sort: sort,
           channelStateSort: channelStateSort,
           paginationParams: paginationParams,
         )) ??

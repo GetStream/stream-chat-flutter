@@ -1,3 +1,10 @@
+## 7.0.0
+
+- 🛑 **BREAKING** Removed deprecated `StreamChannelListController.sort` parameter.
+  Use `StreamChannelListController.channelStateSort` instead.
+- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
+- Updated `stream_chat` dependency to [`7.0.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 6.11.0
 
 🐞 Fixed

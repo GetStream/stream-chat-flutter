@@ -1,7 +1,5 @@
 // ignore_for_file: lines_longer_than_80_chars
 import 'dart:async';
-import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,7 @@ import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
+import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
@@ -97,11 +96,6 @@ class StreamMessageListView extends StatefulWidget {
     this.initialAlignment,
     this.scrollController,
     this.itemPositionListener,
-    @Deprecated(
-      'Try wrapping the `MessageWidget` with a `Swipeable`, `Dismissible` or a '
-      'custom widget to achieve the swipe to reply behaviour.',
-    )
-    this.onMessageSwiped,
     this.highlightInitialMessage = false,
     this.messageHighlightColor,
     this.showConnectionStateTile = false,
@@ -110,6 +104,7 @@ class StreamMessageListView extends StatefulWidget {
     this.loadingBuilder,
     this.emptyBuilder,
     this.systemMessageBuilder,
+    this.ephemeralMessageBuilder,
     this.messageListBuilder,
     this.errorBuilder,
     this.messageFilter,
@@ -154,6 +149,9 @@ class StreamMessageListView extends StatefulWidget {
 
   /// {@macro systemMessageBuilder}
   final SystemMessageBuilder? systemMessageBuilder;
+
+  /// {@macro ephemeralMessageBuilder}
+  final EphemeralMessageBuilder? ephemeralMessageBuilder;
 
   /// {@macro parentMessageBuilder}
   final ParentMessageBuilder? parentMessageBuilder;
@@ -214,9 +212,6 @@ class StreamMessageListView extends StatefulWidget {
 
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics? scrollPhysics;
-
-  /// {@macro onMessageSwiped}
-  final OnMessageSwiped? onMessageSwiped;
 
   /// If true the list will highlight the initialMessage if there is any.
   ///
@@ -815,13 +810,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             ),
           ),
         if (widget.showFloatingDateDivider)
-          FloatingDateDivider(
-            itemCount: itemCount,
-            reverse: widget.reverse,
-            itemPositionListener: _itemPositionListener,
-            messages: messages,
-            dateDividerBuilder: widget.dateDividerBuilder,
-            isThreadConversation: _isThreadConversation,
+          Positioned(
+            top: 20,
+            left: 0,
+            right: 0,
+            child: FloatingDateDivider(
+              itemCount: itemCount,
+              reverse: widget.reverse,
+              itemPositionListener: _itemPositionListener.itemPositions,
+              messages: messages,
+              dateDividerBuilder: widget.dateDividerBuilder,
+              isThreadConversation: _isThreadConversation,
+            ),
           ),
       ],
     );
@@ -924,13 +924,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
+    final hasFileAttachment =
+        message.attachments.any((it) => it.type == AttachmentType.file);
+
     final hasUrlAttachment =
-        message.attachments.any((it) => it.ogScrapeUrl != null);
+        message.attachments.any((it) => it.type == AttachmentType.urlPreview);
 
-    final isEphemeral = message.isEphemeral;
+    final attachmentBorderRadius = hasUrlAttachment
+        ? 8.0
+        : hasFileAttachment
+            ? 12.0
+            : 14.0;
 
-    final borderSide =
-        isOnlyEmoji || hasUrlAttachment || isEphemeral ? BorderSide.none : null;
+    final borderSide = isOnlyEmoji ? BorderSide.none : null;
 
     final defaultMessageWidget = StreamMessageWidget(
       showReplyMessage: false,
@@ -944,13 +950,34 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showUsername: !isMyMessage,
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
+      attachmentPadding: EdgeInsets.all(
+        hasUrlAttachment
+            ? 8
+            : hasFileAttachment
+                ? 4
+                : 2,
+      ),
+      attachmentShape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: _streamTheme.colorTheme.borders,
+          strokeAlign: BorderSide.strokeAlignOutside,
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(attachmentBorderRadius),
+          bottomLeft: isMyMessage
+              ? Radius.circular(attachmentBorderRadius)
+              : Radius.zero,
+          topRight: Radius.circular(attachmentBorderRadius),
+          bottomRight: isMyMessage
+              ? Radius.zero
+              : Radius.circular(attachmentBorderRadius),
+        ),
+      ),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: const Radius.circular(16),
-        bottomLeft:
-            isMyMessage ? const Radius.circular(16) : const Radius.circular(2),
+        bottomLeft: isMyMessage ? const Radius.circular(16) : Radius.zero,
         topRight: const Radius.circular(16),
-        bottomRight:
-            isMyMessage ? const Radius.circular(2) : const Radius.circular(16),
+        bottomRight: isMyMessage ? Radius.zero : const Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
         vertical: 8,
@@ -1057,7 +1084,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget buildMessage(Message message, List<Message> messages, int index) {
-    if ((message.type == 'system' || message.type == 'error') &&
+    if ((message.isSystem || message.isError) &&
         message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
           StreamSystemMessage(
@@ -1067,6 +1094,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               FocusScope.of(context).unfocus();
             },
           );
+    }
+
+    if (message.isEphemeral) {
+      return widget.ephemeralMessageBuilder?.call(context, message) ??
+          StreamEphemeralMessage(message: message);
     }
 
     final userId = StreamChat.of(context).currentUser!.id;
@@ -1086,14 +1118,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
 
     final hasFileAttachment =
-        message.attachments.any((it) => it.type == 'file');
+        message.attachments.any((it) => it.type == AttachmentType.file);
+
+    final hasUrlAttachment =
+        message.attachments.any((it) => it.type == AttachmentType.urlPreview);
 
     final isThreadMessage =
         message.parentId != null && message.showInChannel == true;
 
     final hasReplies = message.replyCount! > 0;
 
-    final attachmentBorderRadius = hasFileAttachment ? 12.0 : 14.0;
+    final attachmentBorderRadius = hasUrlAttachment
+        ? 8.0
+        : hasFileAttachment
+            ? 12.0
+            : 14.0;
 
     final showTimeStamp = (!isThreadMessage || _isThreadConversation) &&
         !hasReplies &&
@@ -1117,13 +1156,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
 
-    final isEphemeral = message.isEphemeral;
-
-    final hasUrlAttachment =
-        message.attachments.any((it) => it.ogScrapeUrl != null);
-
-    final borderSide =
-        isOnlyEmoji || hasUrlAttachment || isEphemeral ? BorderSide.none : null;
+    final borderSide = isOnlyEmoji ? BorderSide.none : null;
 
     final currentUser = StreamChat.of(context).currentUser;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
@@ -1168,27 +1201,39 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showFlagButton: !isMyMessage,
       borderSide: borderSide,
       onThreadTap: _onThreadTap,
-      attachmentBorderRadiusGeometry: BorderRadius.only(
-        topLeft: Radius.circular(attachmentBorderRadius),
-        bottomLeft: isMyMessage
-            ? Radius.circular(attachmentBorderRadius)
-            : Radius.circular(
-                (hasTimeDiff || !isNextUserSame) &&
-                        !(hasReplies || isThreadMessage || hasFileAttachment)
-                    ? 0
-                    : attachmentBorderRadius,
-              ),
-        topRight: Radius.circular(attachmentBorderRadius),
-        bottomRight: isMyMessage
-            ? Radius.circular(
-                (hasTimeDiff || !isNextUserSame) &&
-                        !(hasReplies || isThreadMessage || hasFileAttachment)
-                    ? 0
-                    : attachmentBorderRadius,
-              )
-            : Radius.circular(attachmentBorderRadius),
+      attachmentShape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: _streamTheme.colorTheme.borders,
+          strokeAlign: BorderSide.strokeAlignOutside,
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(attachmentBorderRadius),
+          bottomLeft: isMyMessage
+              ? Radius.circular(attachmentBorderRadius)
+              : Radius.circular(
+                  (hasTimeDiff || !isNextUserSame) &&
+                          !(hasReplies || isThreadMessage || hasFileAttachment)
+                      ? 0
+                      : attachmentBorderRadius,
+                ),
+          topRight: Radius.circular(attachmentBorderRadius),
+          bottomRight: isMyMessage
+              ? Radius.circular(
+                  (hasTimeDiff || !isNextUserSame) &&
+                          !(hasReplies || isThreadMessage || hasFileAttachment)
+                      ? 0
+                      : attachmentBorderRadius,
+                )
+              : Radius.circular(attachmentBorderRadius),
+        ),
       ),
-      attachmentPadding: EdgeInsets.all(hasFileAttachment ? 4 : 2),
+      attachmentPadding: EdgeInsets.all(
+        hasUrlAttachment
+            ? 8
+            : hasFileAttachment
+                ? 4
+                : 2,
+      ),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: const Radius.circular(16),
         bottomLeft: isMyMessage
@@ -1260,76 +1305,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: child,
         ),
-      );
-    }
-
-    // Add swipeable if the callback is provided and the message is not deleted,
-    // system or ephemeral.
-    final onMessageSwiped = widget.onMessageSwiped;
-    if (onMessageSwiped != null &&
-        !message.isDeleted &&
-        !message.isSystem &&
-        !message.isEphemeral) {
-      // The threshold after which the message is considered swiped.
-      const threshold = 0.2;
-
-      // The direction in which the message can be swiped.
-      final swipeDirection = isMyMessage
-          ? SwipeDirection.endToStart //
-          : SwipeDirection.startToEnd;
-
-      child = Swipeable(
-        key: ValueKey(message.id),
-        direction: swipeDirection,
-        swipeThreshold: threshold,
-        onSwiped: (_) => onMessageSwiped(message),
-        backgroundBuilder: (context, details) {
-          // The alignment of the swipe action.
-          final alignment = isMyMessage
-              ? Alignment.centerRight //
-              : Alignment.centerLeft;
-
-          // The progress of the swipe action.
-          final progress = math.min(details.progress, threshold) / threshold;
-
-          // The offset for the reply icon.
-          var offset = Offset.lerp(
-            const Offset(-24, 0),
-            const Offset(12, 0),
-            progress,
-          )!;
-
-          // If the message is mine, we need to flip the offset.
-          if (isMyMessage) {
-            offset = Offset(-offset.dx, -offset.dy);
-          }
-
-          return Align(
-            alignment: alignment,
-            child: Transform.translate(
-              offset: offset,
-              child: Opacity(
-                opacity: progress,
-                child: SizedBox.square(
-                  dimension: 30,
-                  child: CustomPaint(
-                    painter: AnimatedCircleBorderPainter(
-                      progress: progress,
-                      color: _streamTheme.colorTheme.borders,
-                    ),
-                    child: Center(
-                      child: StreamSvgIcon.reply(
-                        size: lerpDouble(0, 18, progress),
-                        color: _streamTheme.colorTheme.accentPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-        child: child,
       );
     }
 

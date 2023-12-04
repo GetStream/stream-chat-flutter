@@ -66,22 +66,7 @@ void main() {
         home: Builder(
           builder: (context) {
             _context = context;
-            final attachment = Attachment(
-              type: 'video',
-              title: 'video.mp4',
-            );
-            final _message = Message(
-              createdAt: DateTime.now(),
-              attachments: [
-                attachment,
-              ],
-            );
-            return Scaffold(
-              appBar: StreamGalleryHeader(
-                message: _message,
-                attachment: _message.attachments[0],
-              ),
-            );
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -116,22 +101,7 @@ void main() {
         home: Builder(
           builder: (context) {
             _context = context;
-            final attachment = Attachment(
-              type: 'video',
-              title: 'video.mp4',
-            );
-            final _message = Message(
-              createdAt: DateTime.now(),
-              attachments: [
-                attachment,
-              ],
-            );
-            return Scaffold(
-              appBar: StreamGalleryHeader(
-                message: _message,
-                attachment: _message.attachments[0],
-              ),
-            );
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -175,7 +145,7 @@ final _galleryHeaderThemeDataControl = StreamGalleryHeaderThemeData(
 // Light theme test control.
 final _galleryHeaderThemeDataHalfLerpControl = StreamGalleryHeaderThemeData(
   closeButtonColor: const Color(0xff7f7f7f),
-  backgroundColor: const Color(0xff87898b),
+  backgroundColor: const Color(0xff88898a),
   iconMenuPointColor: const Color(0xff7f7f7f),
   titleTextStyle: const TextStyle(
     fontSize: 16,
@@ -194,7 +164,7 @@ final _galleryHeaderThemeDataHalfLerpControl = StreamGalleryHeaderThemeData(
 // Dark theme test control.
 final _galleryHeaderThemeDataDarkControl = StreamGalleryHeaderThemeData(
   closeButtonColor: const Color(0xffffffff),
-  backgroundColor: const Color(0xff101418),
+  backgroundColor: const Color(0xff121416),
   iconMenuPointColor: const Color(0xffffffff),
   titleTextStyle: const TextStyle(
     fontSize: 16,

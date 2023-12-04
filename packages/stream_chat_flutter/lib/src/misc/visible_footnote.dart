@@ -18,14 +18,15 @@ class StreamVisibleFootnote extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         StreamSvgIcon.eye(
-          color: chatThemeData.colorTheme.textLowEmphasis,
           size: 16,
+          color: chatThemeData.colorTheme.textLowEmphasis,
         ),
         const SizedBox(width: 8),
         Text(
           context.translations.onlyVisibleToYouText,
-          style: chatThemeData.textTheme.footnote
-              .copyWith(color: chatThemeData.colorTheme.textLowEmphasis),
+          style: chatThemeData.textTheme.footnote.copyWith(
+            color: chatThemeData.colorTheme.textLowEmphasis,
+          ),
         ),
       ],
     );

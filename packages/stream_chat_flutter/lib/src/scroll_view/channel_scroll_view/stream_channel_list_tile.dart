@@ -228,8 +228,7 @@ class StreamChannelListTile extends StatelessWidget {
                   }
 
                   final hasNonUrlAttachments = lastMessage.attachments
-                      .where((it) => it.titleLink == null || it.type == 'giphy')
-                      .isNotEmpty;
+                      .any((it) => it.type != AttachmentType.urlPreview);
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 4),

@@ -1,3 +1,17 @@
+## 7.0.0
+  
+- 🛑️ Breaking
+
+- Removed deprecated `channelQuery.sort` property. Use `channelStateSort` instead.
+- Removed deprecated `RetryPolicy.retryTimeout` property. Use `delayFactor` instead.
+- Removed deprecated `StreamChatNetworkError.fromDioError` constructor. Use `StreamChatNetworkError.fromDioException`
+  instead.
+- Removed deprecated `MessageSendingStatus` enum. Use `MessageState` instead.
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
+  
 # 6.10.0
 
 🐞 Fixed

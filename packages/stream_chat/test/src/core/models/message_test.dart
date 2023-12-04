@@ -38,7 +38,7 @@ void main() {
             'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
         attachments: [
           Attachment.fromJson(const {
-            'type': 'video',
+            'type': 'giphy',
             'author_name': 'GIPHY',
             'title': 'The Lion King Disney GIF - Find \u0026 Share on GIPHY',
             'title_link':
