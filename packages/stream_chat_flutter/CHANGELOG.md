@@ -1,96 +1,4 @@
-# 6.12.0
-
-🐞 Fixed
-
-- [[#1759]](https://github.com/GetStream/stream-chat-flutter/issues/1759) Fixed
-  The Reaction Picker is not being removed when I set showReactionPicker to false.
-
-# 6.11.0
-
-🐞 Fixed
-
-- [[#1740]](https://github.com/GetStream/stream-chat-flutter/issues/1740) Fixed
-  Plugin `video_player:macos` has multiple possible implementations.
-
-# 6.10.0
-
-🐞 Fixed
-
-- [[#1721]](https://github.com/GetStream/stream-chat-flutter/issues/1721)
-  Fixed `StreamMessageInput.allowedAttachmentPickerTypes` not working on mobile devices.
-
-✅ Added
-
-- Added support for overriding the `MessageWidget.onReactionsHover` callback.
-  > **Note**
-  > Used only in desktop devices (web and desktop).
-  
-## 7.0.0-beta.4
-
-- Included the changes from version [6.9.0](#681).
-- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
-- Updated `stream_chat_flutter_core` dependency
-  to [`7.0.0-beta.3`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
-
-## 6.9.0
-
-🐞 Fixed
-
-- [[#1702]](https://github.com/GetStream/stream-chat-flutter/issues/1702)
-  Fixed `Message.replaceMentions` not treating `@usernames` as mentions.
-- [[#1694]](https://github.com/GetStream/stream-chat-flutter/issues/1694) Fixed Video player buttons
-  getting covered by bottom toolbar.
-
-✅ Added
-
-- Added support for listening error events in AttachmentPickerBottomSheet.
-- Added support for overriding the `MessageWidget.onReactionTap` callback.
-- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content
-  insertion configuration.
-  [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
-
-  ```dart
-  StreamMessageInput(
-    ...,
-    contentInsertionConfiguration: ContentInsertionConfiguration(
-      onContentInserted: (content) {
-        // Do something with the content.
-        controller.addAttachment(...);
-      },
-    ),
-  )
-  ```
-
-🔄 Changed
-
-- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
-- Updated `stream_chat_flutter_core` dependency
-  to [`6.8.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
-- Updated jiffy dependency to ^6.2.1.
-
-## 7.0.0-beta.3
-
-- Included the changes from version [6.8.1](#681).
-
-## 6.8.1
-
-🐞 Fixed
-
-- Fixed `StreamMessageInput` always sending message as `system`.
-
-## 7.0.0-beta.2
-
-- Updated `stream_chat_flutter_core` dependency
-  to [`7.0.0-beta.2`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
-
-## 6.8.0
-
-🔄 Changed
-
-- Updated `stream_chat_flutter_core` dependency
-  to [`6.7.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
-
-## 7.0.0-beta.1
+## 7.0.0
 
 🛑️ Breaking
 
@@ -135,8 +43,86 @@
 
 🔄 Changed
 
-- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
 - Updated `jiffy` dependency to `^6.2.1`.
+- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
+- Updated `stream_chat_flutter_core` dependency
+  to [`7.0.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+# 6.12.0
+
+🐞 Fixed
+
+- [[#1759]](https://github.com/GetStream/stream-chat-flutter/issues/1759) Fixed
+  The Reaction Picker is not being removed when I set showReactionPicker to false.
+
+# 6.11.0
+
+🐞 Fixed
+
+- [[#1740]](https://github.com/GetStream/stream-chat-flutter/issues/1740) Fixed
+  Plugin `video_player:macos` has multiple possible implementations.
+
+# 6.10.0
+
+🐞 Fixed
+
+- [[#1721]](https://github.com/GetStream/stream-chat-flutter/issues/1721)
+  Fixed `StreamMessageInput.allowedAttachmentPickerTypes` not working on mobile devices.
+
+✅ Added
+
+- Added support for overriding the `MessageWidget.onReactionsHover` callback.
+  > **Note**
+  > Used only in desktop devices (web and desktop).
+  
+## 6.9.0
+
+🐞 Fixed
+
+- [[#1702]](https://github.com/GetStream/stream-chat-flutter/issues/1702)
+  Fixed `Message.replaceMentions` not treating `@usernames` as mentions.
+- [[#1694]](https://github.com/GetStream/stream-chat-flutter/issues/1694) Fixed Video player buttons
+  getting covered by bottom toolbar.
+
+✅ Added
+
+- Added support for listening error events in AttachmentPickerBottomSheet.
+- Added support for overriding the `MessageWidget.onReactionTap` callback.
+- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content
+  insertion configuration.
+  [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
+
+  ```dart
+  StreamMessageInput(
+    ...,
+    contentInsertionConfiguration: ContentInsertionConfiguration(
+      onContentInserted: (content) {
+        // Do something with the content.
+        controller.addAttachment(...);
+      },
+    ),
+  )
+  ```
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
+- Updated `stream_chat_flutter_core` dependency
+  to [`6.8.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated jiffy dependency to ^6.2.1.
+
+## 6.8.1
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` always sending message as `system`.
+
+## 6.8.0
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency
+  to [`6.7.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 6.7.0
 
