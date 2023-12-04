@@ -23,6 +23,7 @@
 - Removed deprecated `showConfirmationDialog` method. Use `showConfirmationBottomSheet` instead.
 - Removed deprecated `showInfoDialog` method. Use `showInfoBottomSheet` instead.
 - Removed deprecated `wrapAttachmentWidget` method. Use `WrapAttachmentWidget` class instead.
+- Removed deprecated `showReactionPickerTail` parameter. Use `showReactionPicker` instead.
 
 ✅ Added
 

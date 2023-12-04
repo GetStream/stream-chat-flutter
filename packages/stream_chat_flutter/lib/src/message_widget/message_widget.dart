@@ -2,7 +2,6 @@ import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:meta/meta.dart';
 import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
@@ -57,7 +56,6 @@ class StreamMessageWidget extends StatefulWidget {
     this.onReactionsTap,
     this.onReactionsHover,
     this.showReactionPicker = true,
-    @internal this.showReactionPickerTail = false,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
     this.showThreadReplyIndicator = false,
@@ -400,13 +398,6 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showReactionPicker;
 
-  /// {@template showReactionPickerTail}
-  /// Whether or not to show the reaction picker tail
-  /// {@endtemplate}
-  @internal
-  @Deprecated('Use `showReactionPicker` instead')
-  final bool? showReactionPickerTail;
-
   /// {@template onShowMessage}
   /// Callback when show message is tapped
   /// {@endtemplate}
@@ -559,7 +550,6 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(String)? onLinkTap,
     bool? showReactionBrowser,
     bool? showReactionPicker,
-    @internal bool? showReactionPickerTail,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
@@ -621,8 +611,6 @@ class StreamMessageWidget extends StatefulWidget {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
-      showReactionPickerTail:
-          showReactionPickerTail ?? this.showReactionPickerTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
@@ -1084,9 +1072,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             translateUserAvatar: false,
             showSendingIndicator: false,
             padding: EdgeInsets.zero,
-            // Show both the tail if the picker is shown.
             showReactionPicker: widget.showReactionPicker,
-            showReactionPickerTail: widget.showReactionPicker,
             showPinHighlight: false,
             showUserAvatar:
                 widget.message.user!.id == channel.client.state.currentUser!.id
