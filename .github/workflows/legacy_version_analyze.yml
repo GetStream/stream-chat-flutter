@@ -3,7 +3,7 @@ name: legacy_version_analyze
 env:
   # Note: The versions below should be manually updated after a new stable
   # version comes out.
-  flutter_version: "3.10.6"
+  flutter_version: "3.13.9"
 
 on:
   push:
