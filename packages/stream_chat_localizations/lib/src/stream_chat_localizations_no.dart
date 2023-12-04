@@ -385,7 +385,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Se bibliotek';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) => 'Nye meldinger.';
+  String unreadMessagesSeparatorText() => 'Nye meldinger.';
 
   @override
   String get couldNotReadBytesFromFileError =>

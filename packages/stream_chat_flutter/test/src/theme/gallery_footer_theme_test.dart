@@ -73,11 +73,7 @@ void main() {
         home: Builder(
           builder: (context) {
             _context = context;
-            return Scaffold(
-              appBar: StreamGalleryFooter(
-                mediaAttachmentPackages: Message().getAttachmentPackageList(),
-              ),
-            );
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -116,11 +112,7 @@ void main() {
         home: Builder(
           builder: (context) {
             _context = context;
-            return Scaffold(
-              appBar: StreamGalleryFooter(
-                mediaAttachmentPackages: Message().getAttachmentPackageList(),
-              ),
-            );
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -160,7 +152,7 @@ final _galleryFooterThemeDataControl = StreamGalleryFooterThemeData(
 
 // Mid-lerp theme control
 const _galleryFooterThemeDataControlMidLerp = StreamGalleryFooterThemeData(
-  backgroundColor: Color(0xff87898b),
+  backgroundColor: Color(0xff88898a),
   shareIconColor: Color(0xff7f7f7f),
   titleTextStyle: TextStyle(
     color: Color(0xff7f7f7f),
@@ -169,7 +161,7 @@ const _galleryFooterThemeDataControlMidLerp = StreamGalleryFooterThemeData(
   ),
   gridIconButtonColor: Color(0xff7f7f7f),
   bottomSheetBarrierColor: Color(0x4c000000),
-  bottomSheetBackgroundColor: Color(0xff87898b),
+  bottomSheetBackgroundColor: Color(0xff88898a),
   bottomSheetPhotosTextStyle: TextStyle(
     color: Color(0xff7f7f7f),
     fontSize: 16,

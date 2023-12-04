@@ -14,6 +14,11 @@
 - [[#1724]](https://github.com/GetStream/stream-chat-flutter/issues/1724) Fixed sendFile error
   on `AttachmentFile` with `bytes` and no `name`.
 
+## 7.0.0-beta.3
+
+- Included the changes from version [6.8.0](#670).
+- Updated minimum supported `SDK` version to Dart 3.1
+
 ## 6.8.0
 
 🐞 Fixed
@@ -29,6 +34,10 @@
 
 - Updated minimum supported `SDK` version to Dart 3.0
 
+## 7.0.0-beta.2
+
+- Included the changes from version [6.7.0](#670).
+
 ## 6.7.0
 
 ✅ Added
@@ -40,6 +49,20 @@
   able to send it as well by specifying type: 'system' with the message. The user who sends a system message client-side
   should have the Create System Message permission. Server-side system messages don't need that permission.
   ```
+
+## 7.0.0-beta.1
+
+🛑️ Breaking
+
+- Removed deprecated `channelQuery.sort` property. Use `channelStateSort` instead.
+- Removed deprecated `RetryPolicy.retryTimeout` property. Use `delayFactor` instead.
+- Removed deprecated `StreamChatNetworkError.fromDioError` constructor. Use `StreamChatNetworkError.fromDioException`
+  instead.
+- Removed deprecated `MessageSendingStatus` enum. Use `MessageState` instead.
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Dart 3.0
 
 ## 6.6.0
 

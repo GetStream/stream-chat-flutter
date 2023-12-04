@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -47,6 +48,11 @@ class MessageWidgetContent extends StatelessWidget {
     required this.isGiphy,
     required this.attachmentBuilders,
     required this.attachmentPadding,
+    required this.attachmentShape,
+    required this.onAttachmentTap,
+    required this.onShowMessage,
+    required this.onReplyTap,
+    required this.attachmentActionsModalBuilder,
     required this.textPadding,
     required this.showReactionPickerTail,
     required this.translateUserAvatar,
@@ -67,28 +73,9 @@ class MessageWidgetContent extends StatelessWidget {
     this.onLinkTap,
     this.textBuilder,
     this.quotedMessageBuilder,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.bottomRowBuilder,
     this.bottomRowBuilderWithDefaultWidget,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.onThreadTap,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.deletedBottomRowBuilder,
     this.userAvatarBuilder,
-    @Deprecated('''
-    Use [bottomRowBuilderWithDefaultWidget] instead.
-    Will be removed in the next major version.
-    ''') this.usernameBuilder,
-  }) : assert(
-          bottomRowBuilder == null || bottomRowBuilderWithDefaultWidget == null,
-          'You can only use one of the two bottom row builders',
-        );
+  });
 
   /// {@macro reverse}
   final bool reverse;
@@ -157,10 +144,25 @@ class MessageWidgetContent extends StatelessWidget {
   final bool isGiphy;
 
   /// {@macro attachmentBuilders}
-  final Map<String, AttachmentBuilder> attachmentBuilders;
+  final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
 
   /// {@macro attachmentPadding}
   final EdgeInsetsGeometry attachmentPadding;
+
+  /// {@macro attachmentShape}
+  final ShapeBorder? attachmentShape;
+
+  /// {@macro onAttachmentTap}
+  final StreamAttachmentWidgetTapCallback? onAttachmentTap;
+
+  /// {@macro onShowMessage}
+  final ShowMessageCallback? onShowMessage;
+
+  /// {@macro onReplyTap}
+  final void Function(Message)? onReplyTap;
+
+  /// {@macro attachmentActionsBuilder}
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// {@macro textPadding}
   final EdgeInsets textPadding;
@@ -189,9 +191,6 @@ class MessageWidgetContent extends StatelessWidget {
   /// The padding to use for this widget.
   final double bottomRowPadding;
 
-  /// {@macro bottomRowBuilder}
-  final BottomRowBuilder? bottomRowBuilder;
-
   /// {@macro bottomRowBuilderWithDefaultWidget}
   final BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget;
 
@@ -213,20 +212,11 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro showUsername}
   final bool showUsername;
 
-  /// {@macro onThreadTap}
-  final void Function(Message)? onThreadTap;
-
-  /// {@macro deletedBottomRowBuilder}
-  final Widget Function(BuildContext, Message)? deletedBottomRowBuilder;
-
   /// {@macro messageWidget}
   final StreamMessageWidget messageWidget;
 
   /// {@macro userAvatarBuilder}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
-
-  /// {@macro usernameBuilder}
-  final Widget Function(BuildContext, Message)? usernameBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -342,6 +332,12 @@ class MessageWidgetContent extends StatelessWidget {
                                         isGiphy: isGiphy,
                                         attachmentBuilders: attachmentBuilders,
                                         attachmentPadding: attachmentPadding,
+                                        attachmentShape: attachmentShape,
+                                        onAttachmentTap: onAttachmentTap,
+                                        onReplyTap: onReplyTap,
+                                        onShowMessage: onShowMessage,
+                                        attachmentActionsModalBuilder:
+                                            attachmentActionsModalBuilder,
                                         textPadding: textPadding,
                                         reverse: reverse,
                                         onQuotedMessageTap: onQuotedMessageTap,
@@ -444,16 +440,11 @@ class MessageWidgetContent extends StatelessWidget {
       showTimeStamp: showTimeStamp,
       showUsername: showUsername,
       streamChatTheme: streamChatTheme,
-      onThreadTap: onThreadTap,
-      deletedBottomRowBuilder: deletedBottomRowBuilder,
       streamChat: streamChat,
       hasNonUrlAttachments: hasNonUrlAttachments,
-      usernameBuilder: usernameBuilder,
     );
 
-    if (bottomRowBuilder != null) {
-      return bottomRowBuilder!(context, message);
-    } else if (bottomRowBuilderWithDefaultWidget != null) {
+    if (bottomRowBuilderWithDefaultWidget != null) {
       return bottomRowBuilderWithDefaultWidget!(
         context,
         message,

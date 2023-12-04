@@ -251,38 +251,35 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    @Deprecated('Use channelStateSort instead.')
-    List<SortOption<ChannelModel>>? sort,
     List<SortOption<ChannelState>>? channelStateSort,
     PaginationParams? paginationParams,
   }) async {
     assert(_debugIsConnected, '');
-    assert(
-      sort == null || channelStateSort == null,
-      'sort and channelStateSort cannot be used together',
-    );
+    assert(() {
+      if (channelStateSort?.any((it) => it.comparator == null) ?? false) {
+        throw ArgumentError(
+          'SortOption requires a comparator in order to sort',
+        );
+      }
+      return true;
+    }(), '');
+
     _logger.info('getChannelStates');
 
-    final channels = await db!.channelQueryDao.getChannels(
-      filter: filter,
-      sort: sort,
-    );
+    final channels = await db!.channelQueryDao.getChannels(filter: filter);
 
     final channelStates = await Future.wait(
       channels.map((e) => getChannelStateByCid(e.cid)),
     );
 
-    // Only sort the channel states if the channels are not already sorted.
-    if (sort == null) {
-      var comparator = _defaultChannelStateComparator;
-      if (channelStateSort != null && channelStateSort.isNotEmpty) {
-        comparator = _combineComparators(
-          channelStateSort.map((it) => it.comparator).withNullifyer,
-        );
-      }
-
-      channelStates.sort(comparator);
+    // Sort the channel states
+    var comparator = _defaultChannelStateComparator;
+    if (channelStateSort != null && channelStateSort.isNotEmpty) {
+      comparator = _combineComparators(
+        channelStateSort.map((it) => it.comparator).withNullifyer,
+      );
     }
+    channelStates.sort(comparator);
 
     final offset = paginationParams?.offset;
     if (offset != null && offset > 0 && channelStates.isNotEmpty) {

@@ -22,16 +22,13 @@ class StreamMessageThemeData with Diagnosticable {
     this.reactionsMaskColor,
     this.avatarTheme,
     this.createdAtStyle,
-    @Deprecated('Use urlAttachmentBackgroundColor instead')
-    Color? linkBackgroundColor,
-    Color? urlAttachmentBackgroundColor,
+    this.urlAttachmentBackgroundColor,
     this.urlAttachmentHostStyle,
     this.urlAttachmentTitleStyle,
     this.urlAttachmentTextStyle,
     this.urlAttachmentTitleMaxLine,
     this.urlAttachmentTextMaxLine,
-  }) : urlAttachmentBackgroundColor =
-            urlAttachmentBackgroundColor ?? linkBackgroundColor;
+  });
 
   /// Text style for message text
   final TextStyle? messageTextStyle;
@@ -67,10 +64,6 @@ class StreamMessageThemeData with Diagnosticable {
   final StreamAvatarThemeData? avatarTheme;
 
   /// Background color for messages with url attachments.
-  @Deprecated('Use urlAttachmentBackgroundColor instead')
-  Color? get linkBackgroundColor => urlAttachmentBackgroundColor;
-
-  /// Background color for messages with url attachments.
   final Color? urlAttachmentBackgroundColor;
 
   /// Color for url attachment host.
@@ -101,8 +94,6 @@ class StreamMessageThemeData with Diagnosticable {
     Color? reactionsBackgroundColor,
     Color? reactionsBorderColor,
     Color? reactionsMaskColor,
-    @Deprecated('Use urlAttachmentBackgroundColor instead')
-    Color? linkBackgroundColor,
     Color? urlAttachmentBackgroundColor,
     TextStyle? urlAttachmentHostStyle,
     TextStyle? urlAttachmentTitleStyle,
@@ -124,9 +115,8 @@ class StreamMessageThemeData with Diagnosticable {
           reactionsBackgroundColor ?? this.reactionsBackgroundColor,
       reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
       reactionsMaskColor: reactionsMaskColor ?? this.reactionsMaskColor,
-      urlAttachmentBackgroundColor: urlAttachmentBackgroundColor ??
-          linkBackgroundColor ??
-          this.urlAttachmentBackgroundColor,
+      urlAttachmentBackgroundColor:
+          urlAttachmentBackgroundColor ?? this.urlAttachmentBackgroundColor,
       urlAttachmentHostStyle:
           urlAttachmentHostStyle ?? this.urlAttachmentHostStyle,
       urlAttachmentTitleStyle:

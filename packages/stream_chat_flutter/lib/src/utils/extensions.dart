@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:diacritic/diacritic.dart';
@@ -5,6 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_size_getter/file_input.dart'; // For compatibility with flutter web.
+import 'package:image_size_getter/image_size_getter.dart' hide Size;
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -114,7 +117,7 @@ extension PlatformFileX on PlatformFile {
     final file = toAttachmentFile;
     final extraDataMap = <String, Object>{};
 
-    final mimeType = file.mimeType?.mimeType;
+    final mimeType = file.mediaType?.mimeType;
 
     if (mimeType != null) {
       extraDataMap['mime_type'] = mimeType;
@@ -151,7 +154,7 @@ extension XFileX on XFile {
 
     final extraDataMap = <String, Object>{};
 
-    final mimeType = this.mimeType ?? file.mimeType?.mimeType;
+    final mimeType = this.mimeType ?? file.mediaType?.mimeType;
 
     if (mimeType != null) {
       extraDataMap['mime_type'] = mimeType;
@@ -367,7 +370,7 @@ extension MessageX on Message {
 
   /// Returns an approximation of message size
   double roughMessageSize(double? fontSize) {
-    var messageTextLength = min(text!.biggestLine().length, 65);
+    var messageTextLength = min(text?.biggestLine().length ?? 0, 65);
 
     if (quotedMessage != null) {
       var quotedMessageLength =
@@ -473,5 +476,61 @@ extension StreamSvgIconX on StreamSvgIcon {
   /// Converts the [StreamSvgIcon] to a [StreamIconThemeSvgIcon].
   StreamIconThemeSvgIcon toIconThemeSvgIcon() {
     return StreamIconThemeSvgIcon.fromStreamSvgIcon(this);
+  }
+}
+
+/// Useful extensions on [BoxConstraints].
+extension ConstraintsX on BoxConstraints {
+  /// Returns new box constraints that tightens the max width and max height
+  /// to the given [size].
+  BoxConstraints tightenMaxSize(Size? size) {
+    if (size == null) return this;
+    return copyWith(
+      maxWidth: clampDouble(size.width, minWidth, maxWidth),
+      maxHeight: clampDouble(size.height, minHeight, maxHeight),
+    );
+  }
+}
+
+/// Useful extensions on [Attachment].
+extension OriginalSizeX on Attachment {
+  /// Returns the size of the attachment if it is an image or giffy.
+  /// Otherwise, returns null.
+  Size? get originalSize {
+    // Return null if the attachment is not an image or giffy.
+    if (type != AttachmentType.image && type != AttachmentType.giphy) {
+      return null;
+    }
+
+    // Calculate size locally if the attachment is not uploaded yet.
+    final file = this.file;
+    if (file != null) {
+      ImageInput? input;
+      if (file.bytes != null) {
+        input = MemoryInput(file.bytes!);
+      } else if (file.path != null) {
+        input = FileInput(File(file.path!));
+      }
+
+      // Return null if the file does not contain enough information.
+      if (input == null) return null;
+
+      try {
+        final size = ImageSizeGetter.getSize(input);
+        if (size.needRotate) {
+          return Size(size.height.toDouble(), size.width.toDouble());
+        }
+        return Size(size.width.toDouble(), size.height.toDouble());
+      } catch (e, stk) {
+        debugPrint('Error getting image size: $e\n$stk');
+        return null;
+      }
+    }
+
+    // Otherwise, use the size provided by the server.
+    final width = originalWidth;
+    final height = originalHeight;
+    if (width == null || height == null) return null;
+    return Size(width.toDouble(), height.toDouble());
   }
 }

@@ -13,7 +13,6 @@ class RetryPolicy {
   /// Instantiate a new RetryPolicy
   RetryPolicy({
     required this.shouldRetry,
-    @Deprecated("Use 'delayFactor' instead.") this.retryTimeout,
     this.maxRetryAttempts = 6,
     this.delayFactor = const Duration(milliseconds: 200),
     this.randomizationFactor = 0.25,
@@ -53,13 +52,4 @@ class RetryPolicy {
     int attempt,
     StreamChatError? error,
   ) shouldRetry;
-
-  /// In the case that we want to retry a failed request the retryTimeout
-  /// method is called to determine the timeout
-  @Deprecated("Use 'delayFactor' instead.")
-  final Duration Function(
-    StreamChatClient client,
-    int attempt,
-    StreamChatError? error,
-  )? retryTimeout;
 }

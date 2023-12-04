@@ -26,13 +26,12 @@ void main() {
               channel: channel,
               child: SizedBox(
                 child: StreamImageAttachment(
-                  messageTheme: streamTheme.ownMessageTheme,
                   constraints: BoxConstraints.tight(const Size(
                     300,
                     300,
                   )),
                   message: Message(),
-                  attachment: Attachment(
+                  image: Attachment(
                     type: 'image',
                     title: 'example.png',
                     imageUrl:

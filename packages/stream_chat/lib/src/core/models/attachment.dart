@@ -10,13 +10,25 @@ import 'package:uuid/uuid.dart';
 
 part 'attachment.g.dart';
 
+mixin AttachmentType {
+  /// Backend specified types.
+  static const image = 'image';
+  static const file = 'file';
+  static const giphy = 'giphy';
+  static const video = 'video';
+  static const audio = 'audio';
+
+  /// Application custom types.
+  static const urlPreview = 'url_preview';
+}
+
 /// The class that contains the information about an attachment
 @JsonSerializable(includeIfNull: false)
 class Attachment extends Equatable {
   /// Constructor used for json serialization
   Attachment({
     String? id,
-    this.type,
+    String? type,
     this.titleLink,
     String? title,
     this.thumbUrl,
@@ -33,26 +45,24 @@ class Attachment extends Equatable {
     this.authorLink,
     this.authorIcon,
     this.assetUrl,
-    List<Action>? actions,
+    this.actions = const [],
+    this.originalWidth,
+    this.originalHeight,
     Map<String, Object?> extraData = const {},
     this.file,
     UploadState? uploadState,
   })  : id = id ?? const Uuid().v4(),
+        _type = type,
         title = title ?? file?.name,
+        _uploadState = uploadState,
         localUri = file?.path != null ? Uri.parse(file!.path!) : null,
-        actions = actions ?? [],
         // For backwards compatibility,
         // set 'file_size', 'mime_type' in [extraData].
         extraData = {
           ...extraData,
           if (file?.size != null) 'file_size': file?.size,
-          if (file?.mimeType != null) 'mime_type': file?.mimeType?.mimeType,
-        } {
-    this.uploadState = uploadState ??
-        ((assetUrl != null || imageUrl != null || thumbUrl != null)
-            ? const UploadState.success()
-            : const UploadState.preparing());
-  }
+          if (file?.mediaType != null) 'mime_type': file?.mediaType?.mimeType,
+        };
 
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) =>
@@ -69,7 +79,8 @@ class Attachment extends Equatable {
 
   factory Attachment.fromOGAttachment(OGAttachmentResponse ogAttachment) =>
       Attachment(
-        type: ogAttachment.type,
+        // If the type is not specified, we default to urlPreview.
+        type: ogAttachment.type ?? AttachmentType.urlPreview,
         title: ogAttachment.title,
         titleLink: ogAttachment.titleLink,
         text: ogAttachment.text,
@@ -84,7 +95,20 @@ class Attachment extends Equatable {
 
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
-  final String? type;
+  String? get type {
+    // If the attachment contains titleLink but is not of type giphy, we
+    // consider it as a urlPreview.
+    if (_type != AttachmentType.giphy && titleLink != null) {
+      return AttachmentType.urlPreview;
+    }
+
+    return _type;
+  }
+
+  final String? _type;
+
+  /// The raw attachment type.
+  String? get rawType => _type;
 
   ///The link to which the attachment message points to.
   final String? titleLink;
@@ -126,13 +150,27 @@ class Attachment extends Equatable {
   /// Actions from a command
   final List<Action>? actions;
 
+  /// The original width of the attached image.
+  final int? originalWidth;
+
+  /// The original height of the attached image.
+  final int? originalHeight;
+
   final Uri? localUri;
 
   /// The file present inside this attachment.
   final AttachmentFile? file;
 
   /// The current upload state of the attachment
-  late final UploadState uploadState;
+  UploadState get uploadState {
+    if (_uploadState case final state?) return state;
+
+    return ((assetUrl != null || imageUrl != null || thumbUrl != null)
+        ? const UploadState.success()
+        : const UploadState.preparing());
+  }
+
+  final UploadState? _uploadState;
 
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
@@ -175,6 +213,8 @@ class Attachment extends Equatable {
     'author_icon',
     'asset_url',
     'actions',
+    'original_width',
+    'original_height',
   ];
 
   /// Known db specific top level fields.
@@ -214,6 +254,8 @@ class Attachment extends Equatable {
     String? authorIcon,
     String? assetUrl,
     List<Action>? actions,
+    int? originalWidth,
+    int? originalHeight,
     AttachmentFile? file,
     UploadState? uploadState,
     Map<String, Object?>? extraData,
@@ -238,6 +280,8 @@ class Attachment extends Equatable {
         authorIcon: authorIcon ?? this.authorIcon,
         assetUrl: assetUrl ?? this.assetUrl,
         actions: actions ?? this.actions,
+        originalWidth: originalWidth ?? this.originalWidth,
+        originalHeight: originalHeight ?? this.originalHeight,
         file: file ?? this.file,
         uploadState: uploadState ?? this.uploadState,
         extraData: extraData ?? this.extraData,
@@ -264,6 +308,8 @@ class Attachment extends Equatable {
       authorIcon: other.authorIcon,
       assetUrl: other.assetUrl,
       actions: other.actions,
+      originalWidth: other.originalWidth,
+      originalHeight: other.originalHeight,
       file: other.file,
       uploadState: other.uploadState,
       extraData: other.extraData,
@@ -291,6 +337,8 @@ class Attachment extends Equatable {
         authorIcon,
         assetUrl,
         actions,
+        originalWidth,
+        originalHeight,
         file,
         uploadState,
         extraData,
