@@ -2,6 +2,8 @@ name: pana
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+  flutter_channel: "stable"
+  flutter_version: "3.13.9"
 
 on:
   pull_request:
@@ -24,10 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: axel-op/dart-package-analyzer@v3
+      - uses: flutterings/dart-package-analyzer@v1
         id: analysis
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          flutter_version: ${{ env.flutter_version }}
+          flutter_channel: ${{ env.flutter_channel }}
           relativePath: packages/stream_chat
       - name: Check scores
         env:
@@ -44,10 +47,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: axel-op/dart-package-analyzer@v3
+      - uses: flutterings/dart-package-analyzer@v1
         id: analysis
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          flutter_version: ${{ env.flutter_version }}
+          flutter_channel: ${{ env.flutter_channel }}
           relativePath: packages/stream_chat_persistence
       - name: Check scores
         env:
@@ -65,10 +69,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: axel-op/dart-package-analyzer@v3
+      - uses: flutterings/dart-package-analyzer@v1
         id: analysis
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          flutter_version: ${{ env.flutter_version }}
+          flutter_channel: ${{ env.flutter_channel }}
           relativePath: packages/stream_chat_flutter_core
       - name: Check scores
         env:
@@ -85,10 +90,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: axel-op/dart-package-analyzer@v3
+      - uses: flutterings/dart-package-analyzer@v1
         id: analysis
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          flutter_version: ${{ env.flutter_version }}
+          flutter_channel: ${{ env.flutter_channel }}
           relativePath: packages/stream_chat_flutter
       - name: Check scores
         env:
@@ -105,10 +111,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: axel-op/dart-package-analyzer@v3
+      - uses: flutterings/dart-package-analyzer@v1
         id: analysis
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          flutter_version: ${{ env.flutter_version }}
+          flutter_channel: ${{ env.flutter_channel }}
           relativePath: packages/stream_chat_localizations
       - name: Check scores
         env:
