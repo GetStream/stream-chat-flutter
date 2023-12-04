@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// /// {@template confirmationDialog}
+/// {@template confirmationDialog}
 /// A dialog that prompts the user to take an action or cancel.
 /// {@endtemplate}
 class ConfirmationDialog extends StatelessWidget {
