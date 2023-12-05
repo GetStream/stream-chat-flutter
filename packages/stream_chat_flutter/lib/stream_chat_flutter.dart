@@ -6,6 +6,7 @@ export 'package:stream_chat_flutter/src/message_widget/quoted_message.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'src/attachment/attachment.dart';
+export 'src/attachment/builder/attachment_widget_builder.dart';
 export 'src/attachment/gallery_attachment.dart';
 export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
