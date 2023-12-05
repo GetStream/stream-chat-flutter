@@ -1,4 +1,4 @@
-## Unereleased
+## Unreleased
 
 🐞 Fixed
 
