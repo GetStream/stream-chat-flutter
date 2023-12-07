@@ -1,3 +1,10 @@
+## 7.0.1
+
+🐞 Fixed
+
+- [[#1811]](https://github.com/GetStream/stream-chat-flutter/issues/1811) Bumped `UUID` dependency to `^4.2.1`. This
+  **might** produce a **breaking change** if you your code depends in `UUID` `3.x.x` directly or indirectly.
+
 ## 7.0.0
   
 - 🛑️ Breaking
