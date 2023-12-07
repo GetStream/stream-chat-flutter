@@ -3,6 +3,15 @@
 - Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2
 - Bump `photo_manager` dependency to `^3.0.0-dev.4`.
 
+## 7.0.1
+
+🐞 Fixed
+
+- [[#1804]](https://github.com/GetStream/stream-chat-flutter/issues/1804) Fixed 
+  `StreamAttachmentWidgetBuilder`` is not accessible in 7.0.0.
+- Updated `stream_chat_flutter_core` dependency
+  to [`7.0.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 7.0.0
 
 🛑️ Breaking

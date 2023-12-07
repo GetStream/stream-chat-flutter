@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget_catalog.dart';
-import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
