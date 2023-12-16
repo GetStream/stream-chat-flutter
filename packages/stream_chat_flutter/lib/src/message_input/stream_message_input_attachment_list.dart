@@ -261,48 +261,9 @@ class MessageInputMediaAttachments extends StatelessWidget {
               return builder(context, attachment, onRemovePressed);
             }
 
-            final colorTheme = StreamChatTheme.of(context).colorTheme;
-            final shape = RoundedRectangleBorder(
-              side: BorderSide(
-                color: colorTheme.borders,
-                strokeAlign: BorderSide.strokeAlignOutside,
-              ),
-              borderRadius: BorderRadius.circular(14),
-            );
-
-            return Container(
-              key: Key(attachment.id),
-              clipBehavior: Clip.hardEdge,
-              decoration: ShapeDecoration(shape: shape),
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    StreamMediaAttachmentThumbnail(
-                      media: attachment,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                    if (attachment.type == AttachmentType.video)
-                      Positioned(
-                        left: 8,
-                        bottom: 8,
-                        child: StreamSvgIcon.videoCall(),
-                      ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: RemoveAttachmentButton(
-                        onPressed: onRemovePressed != null
-                            ? () => onRemovePressed!(attachment)
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            return StreamMediaAttachmentBuilder(
+              attachment: attachment,
+              onRemovePressed: onRemovePressed,
             );
           },
         ).insertBetween(const SizedBox(width: 8)),
@@ -310,6 +271,70 @@ class MessageInputMediaAttachments extends StatelessWidget {
     );
   }
 }
+
+/// Widget used to display a media type attachment item.
+class StreamMediaAttachmentBuilder extends StatelessWidget {
+  /// Creates a new media attachment item.
+  const StreamMediaAttachmentBuilder({
+    super.key,
+    required this.attachment,
+    this.onRemovePressed
+  });
+
+  /// The media attachment to display.
+  final Attachment attachment;
+
+  /// Callback called when the remove button is pressed.
+  final ValueSetter<Attachment>? onRemovePressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    final shape = RoundedRectangleBorder(
+      side: BorderSide(
+        color: colorTheme.borders,
+        strokeAlign: BorderSide.strokeAlignOutside,
+      ),
+      borderRadius: BorderRadius.circular(14),
+    );
+
+    return Container(
+      key: Key(attachment.id),
+      clipBehavior: Clip.hardEdge,
+      decoration: ShapeDecoration(shape: shape),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            StreamMediaAttachmentThumbnail(
+              media: attachment,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            if (attachment.type == AttachmentType.video)
+              Positioned(
+                left: 8,
+                bottom: 8,
+                child: StreamSvgIcon.videoCall(),
+              ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: RemoveAttachmentButton(
+                onPressed: onRemovePressed != null
+                    ? () => onRemovePressed!(attachment)
+                    : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 /// Material Button used for removing attachments.
 class RemoveAttachmentButton extends StatelessWidget {
