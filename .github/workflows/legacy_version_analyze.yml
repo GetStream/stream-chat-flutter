@@ -9,14 +9,12 @@ on:
   push:
     branches:
       - master
-      - develop
     paths:
       - 'packages/**'
       - '.github/workflows/legacy_version_analyze.yml'
   pull_request:
     branches:
       - master
-      - develop
     paths:
       - 'packages/**'
       - '.github/workflows/legacy_version_analyze.yml'

@@ -5,13 +5,15 @@ env:
 
 on:
   push:
+    tags:
+      - '*.*.*'
+      - 'v*.*.*'
     branches:
-      - develop
       - master
 
 jobs:
   dispatch_nightly:
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: benc-uk/workflow-dispatch@v121
@@ -20,7 +22,7 @@ jobs:
           repo: GetStream/flutter-samples
           token: ${{ secrets.GH_TOKEN }}
   dispatch_stable:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/tags/*.*.*'
     runs-on: ubuntu-latest
     steps:
       - uses: benc-uk/workflow-dispatch@v121

@@ -6,7 +6,7 @@ on:
       - edited
       - synchronize
     branches:
-      - develop
+      - master
         
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
