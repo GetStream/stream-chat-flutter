@@ -346,12 +346,14 @@ class StreamMessageSearchListView extends StatelessWidget {
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
       ),
-      loadMoreIndicatorBuilder: (context) => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: StreamScrollViewLoadMoreIndicator(),
-        ),
-      ),
+      loadMoreIndicatorBuilder: (context) =>
+          loadingBuilder?.call(context) ??
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: StreamScrollViewLoadMoreIndicator(),
+            ),
+          ),
       loadingBuilder: (context) =>
           loadingBuilder?.call(context) ??
           const Center(
