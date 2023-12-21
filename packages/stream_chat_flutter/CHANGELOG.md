@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added `ActionsBuilder` signature for function which will return default actions and allows past custom actions.
+- Added `spaceBetweenActions` parameter for `StreamMessageInput` to control distance between actions
+
 ## 7.0.1
 
 🐞 Fixed
