@@ -1,0 +1,120 @@
+---
+id: migration_guide_7_0
+sidebar_position: 2
+title: v7.0
+slug: /guides/migration_guide_7_0/
+---
+
+This guide enumerates and better explains the SDK changes introduced in v7.
+
+If you find any bugs or have any questions, please file an [issue on our GitHub repository](https://github.com/GetStream/stream-chat-flutter/issues). We want to support you as much as we can with this migration.
+
+Code examples:
+
+- See our [Stream Chat Flutter tutorial](https://getstream.io/chat/flutter/tutorial/) for an up-to-date guide using the latest Stream Chat version.
+- See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our full fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
+
+Our documentation has also been updated to support v7, so all guides and examples will have updated code.
+
+### Dependencies
+
+To migrate to v7.0.0, update your `pubspec.yaml` with the correct Stream chat package you're using:
+
+```yaml
+dependencies:
+	stream_chat_flutter: ^7.0.0 # full UI, core and client packages
+	stream_chat: ^7.0.0 # client package
+```
+
+---
+
+## What's New?
+
+We improved the overall user experience of the Stream Chat Flutter SDK and added new features to make it easier to customize the SDK to your needs.
+
+We've also fixed several bugs and improved the overall stability of the SDK.
+
+Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content insertion configuration.
+
+  ```dart
+  StreamMessageInput(
+    ...,
+    contentInsertionConfiguration: ContentInsertionConfiguration(
+      onContentInserted: (content) {
+        // Do something with the content.
+        controller.addAttachment(...);
+      },
+    ),
+  )
+  ```
+## Breaking changes
+
+The following components have been removed in v7.0.0:
+
+- `ChatPersistenceClient.getChannelStates.sort` has been removed in favor of `ChatPersistenceClient.getChannelStates.channelStateSort`.
+```dart
+/// BEFORE
+chatPersistenceClient.getChannelStates(
+  ...
+  sort: [SortOption('last_message_at')],
+)
+
+/// AFTER
+chatPersistenceClient.getChannelStates(
+  ...
+  channelStateSort: [SortOption('last_message_at')],
+)
+```
+- `StreamChatClient.queryChannels.sort` has been removed in favor of `StreamChatClient.queryChannels.channelStateSort`.
+```dart
+/// BEFORE
+streamChatClient.getChannelStates(
+  ...
+  sort: [SortOption('last_message_at')],
+)
+
+/// AFTER
+streamChatClient.getChannelStates(
+  ...
+  channelStateSort: [SortOption('last_message_at')],
+)
+```
+- `RetryPolicy.retryTimeout` has been removed in favor of `RetryPolicy.delayFactor`.
+- `StreamChatNetworkError.fromDioError` has been removed in favor of `StreamChatNetworkError.fromDioException`.
+- `MessageSendingStatus` has been removed in favor of `MessageState`.
+- `StreamChannelListController.sort` has been removed in favor of `StreamChannelListController.channelStateSort`.
+- `ChannelPreview` has been removed in favor of `StreamChannelListTile`.
+- `ChannelPreviewBuilder` has been removed in favor of `StreamChannelListViewIndexedWidgetBuilder`.
+- `StreamUserItem` has been removed in favor of `StreamUserListTile`.
+- `ReturnActionType` has been removed and no longer used.
+- `StreamMessageInput.attachmentThumbnailBuilders` has been removed in favor of `StreamMessageInput.mediaAttachmentBuilder`.
+- `MessageWidget.showReactionPickerIndicator` has been removed in favor of `MessageWidget.showReactionPicker`.
+- `MessageWidget.bottomRowBuilder` has been removed in favor of `MessageWidget.bottomRowBuilderWithDefaultWidget`.
+- `MessageWidget.deletedBottomRowBuilder` has been removed in favor of `MessageWidget.deletedBottomRowBuilderWithDefaultWidget`.
+- `MessageWidget.usernameBuilder` has been removed in favor of `MessageWidget.usernameBuilderWithDefaultWidget`.
+- `MessageWidget.showReactionPickerTail` has been removed in favor of `MessageWidget.showReactionPicker`.
+- `MessageTheme.linkBackgroundColor` has been removed in favor of `MessageTheme.urlAttachmentBackgroundColor`.
+- `showConfirmationDialog` has been removed in favor of `showConfirmationBottomSheet`.
+- `showInfoDialog` has been removed in favor of `showInfoBottomSheet`.
+- `wrapAttachmentWidget` has been removed in favor of `WrapAttachmentWidget`.
+- `MessageListView.onMessageSwiped` parameter. Try wrapping the `MessageWidget` with a `Swipeable`, `Dismissible` or a custom widget to achieve the swipe to reply behaviour.
+```dart
+/// BEFORE
+MessageListView(
+  onMessageSwiped: (Message message) => // handle swipe,
+  ...
+)
+
+/// AFTER
+MessageListView(
+  messageBuilder: (BuildContext context, Message message) =>
+    Swipeable(
+      key: ValueKey(message.id),
+      onSwiped: (_) => // handle swipe,
+      child: StreamMessageWidget(
+        message: message,
+        ...
+      ),
+    ),
+)
+```
