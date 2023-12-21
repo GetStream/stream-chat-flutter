@@ -275,11 +275,8 @@ class MessageInputMediaAttachments extends StatelessWidget {
 /// Widget used to display a media type attachment item.
 class StreamMediaAttachmentBuilder extends StatelessWidget {
   /// Creates a new media attachment item.
-  const StreamMediaAttachmentBuilder({
-    super.key,
-    required this.attachment,
-    this.onRemovePressed
-  });
+  const StreamMediaAttachmentBuilder(
+      {super.key, required this.attachment, this.onRemovePressed});
 
   /// The media attachment to display.
   final Attachment attachment;
@@ -334,7 +331,6 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
     );
   }
 }
-
 
 /// Material Button used for removing attachments.
 class RemoveAttachmentButton extends StatelessWidget {

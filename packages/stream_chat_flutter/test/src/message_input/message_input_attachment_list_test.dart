@@ -213,7 +213,7 @@ void main() {
 
     testWidgets(
       'StreamMediaAttachmentBuilder should call onRemovePressed callback',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
         Attachment? removedAttachment;
 
         final attachment = Attachment(type: 'file', id: 'file1');
