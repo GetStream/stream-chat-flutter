@@ -288,11 +288,6 @@ typedef ThreadBuilder = Widget Function(BuildContext context, Message? parent);
 /// {@endtemplate}
 typedef ThreadTapCallback = void Function(Message, Widget?);
 
-/// {@template onMessageSwiped}
-/// The action to perform when a message is swiped.
-/// {@endtemplate}
-typedef OnMessageSwiped = void Function(Message);
-
 /// {@template spacingWidgetBuilder}
 /// A widget builder for creating certain spacing after widgets.
 ///
