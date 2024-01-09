@@ -1,3 +1,7 @@
+## 8.0.0-beta.2
+
+* Updated `stream_chat_flutter` dependency to [`8.0.0-beta.2`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 8.0.0-beta.1
 
 - Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2

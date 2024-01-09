@@ -1,3 +1,7 @@
+## 8.0.0-beta.2
+
+- Aligned version with other Stream Chat packages
+
 ## 8.0.0-beta.1
 
 - Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2

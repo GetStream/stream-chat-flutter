@@ -1,3 +1,8 @@
+## 8.0.0-beta.2
+
+- Bump `photo_manager` dependency to `^3.0.0-dev.5`.
+- Updated `stream_chat_flutter_core` dependency to [`8.0.0-beta.2`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 8.0.0-beta.1
 
 - Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2
