@@ -18,7 +18,7 @@ on:
   push:
     branches:
       - master
-      - develop
+      - beta
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
