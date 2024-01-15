@@ -31,7 +31,7 @@ dependencies:
   image_picker: ^1.0.2
   image_size_getter: ^2.1.2
   jiffy: ^6.2.1
-  lottie: ^2.6.0
+  lottie: ">=2.6.0 <4.0.0"
   meta: ^1.9.1
   path_provider: ^2.1.0
   photo_manager: ^2.7.1
