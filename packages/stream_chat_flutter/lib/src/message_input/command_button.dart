@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 
+const double _kDefaultCommandButtonSize = 24;
+
 /// {@template commandButton}
 /// The button that allows a user to use commands in a chat.
 /// {@endtemplate}
@@ -11,8 +13,11 @@ class CommandButton extends StatelessWidget {
     required this.onPressed,
     this.color,
     this.icon,
-    this.size = 24,
-  });
+    this.size = _kDefaultCommandButtonSize,
+  })  : assert((icon == null && color == null) ||
+      (icon != null && color == null) ||
+      (icon == null && color != null),
+  'Either icon or color should be provided');
 
   /// The color of the button.
   /// Should be set if no [icon] is provided.
