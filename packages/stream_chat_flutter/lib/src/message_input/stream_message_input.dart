@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
+import 'package:stream_chat_flutter/src/message_input/audio_message_send_button/stream_audio_message_send_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
@@ -711,13 +712,31 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return Flex(
       direction: Axis.horizontal,
       children: <Widget>[
-        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.left)
+        if (!_commandEnabled &&
+            widget.actionsLocation == ActionsLocation.left &&
+            !_effectiveController.isRecordingAudio)
           _buildExpandActionsButton(context),
-        _buildTextInput(context),
-        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
+        if (!_effectiveController.isRecordingAudio) _buildTextInput(context),
+        if (!_commandEnabled &&
+            widget.actionsLocation == ActionsLocation.right &&
+            !_effectiveController.isRecordingAudio)
           _buildExpandActionsButton(context),
         if (widget.sendButtonLocation == SendButtonLocation.outside)
-          _buildSendButton(context),
+          if (_effectiveController.textEditingValue.text.isNotEmpty ||
+              _effectiveController.attachments.isNotEmpty)
+            _buildSendButton(context)
+          else
+            StreamAudioMessageSendButton(
+              onRecordingStart: () {
+                _effectiveController.isRecordingAudio = true;
+              },
+              onRecordingEnd: () {
+                _effectiveController.isRecordingAudio = false;
+              },
+              onRecordingCanceled: () {
+                _effectiveController.isRecordingAudio = false;
+              },
+            ),
       ],
     );
   }
