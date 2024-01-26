@@ -1067,6 +1067,32 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.iconMic({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_Mic.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.iconLock({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_Lock.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
   /// Name of icon asset
   final String? assetName;
 

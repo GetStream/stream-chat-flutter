@@ -64,6 +64,8 @@ class StreamMessageInputThemeData with Diagnosticable {
     this.sendButtonColor,
     this.actionButtonIdleColor,
     this.sendButtonIdleColor,
+    this.audioButtonColor,
+    this.audioButtonBannerColor,
     this.inputBackgroundColor,
     this.inputTextStyle,
     this.inputDecoration,
@@ -97,6 +99,12 @@ class StreamMessageInputThemeData with Diagnosticable {
 
   /// Background color of [MessageInput] expand button
   final Color? expandButtonColor;
+
+  /// Background color of [MessageInput] audio button
+  final Color? audioButtonColor;
+
+  /// Background color of [MessageInput] audio button banner
+  final Color? audioButtonBannerColor;
 
   /// Background color of [MessageInput]
   final Color? inputBackgroundColor;
@@ -135,6 +143,8 @@ class StreamMessageInputThemeData with Diagnosticable {
     Color? actionButtonIdleColor,
     Color? linkHighlightColor,
     Color? sendButtonIdleColor,
+    Color? audioButtonColor,
+    Color? audioButtonBannerColor,
     Color? expandButtonColor,
     TextStyle? inputTextStyle,
     InputDecoration? inputDecoration,
@@ -157,6 +167,9 @@ class StreamMessageInputThemeData with Diagnosticable {
       expandButtonColor: expandButtonColor ?? this.expandButtonColor,
       inputTextStyle: inputTextStyle ?? this.inputTextStyle,
       sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
+      audioButtonColor: audioButtonColor ?? this.audioButtonColor,
+      audioButtonBannerColor:
+          audioButtonBannerColor ?? this.audioButtonBannerColor,
       inputDecoration: inputDecoration ?? this.inputDecoration,
       activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
       idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
@@ -191,6 +204,9 @@ class StreamMessageInputThemeData with Diagnosticable {
       sendButtonColor: Color.lerp(a.sendButtonColor, b.sendButtonColor, t),
       sendButtonIdleColor:
           Color.lerp(a.sendButtonIdleColor, b.sendButtonIdleColor, t),
+      audioButtonColor: Color.lerp(a.audioButtonColor, b.audioButtonColor, t),
+      audioButtonBannerColor:
+          Color.lerp(a.audioButtonBannerColor, b.audioButtonBannerColor, t),
       sendAnimationDuration: a.sendAnimationDuration,
       inputDecoration: a.inputDecoration,
       enableSafeArea: a.enableSafeArea,
@@ -209,6 +225,8 @@ class StreamMessageInputThemeData with Diagnosticable {
       actionButtonIdleColor: other.actionButtonIdleColor,
       sendButtonColor: other.sendButtonColor,
       sendButtonIdleColor: other.sendButtonIdleColor,
+      audioButtonColor: other.audioButtonColor,
+      audioButtonBannerColor: other.audioButtonBannerColor,
       inputTextStyle:
           inputTextStyle?.merge(other.inputTextStyle) ?? other.inputTextStyle,
       inputDecoration: inputDecoration?.merge(other.inputDecoration) ??
@@ -233,6 +251,8 @@ class StreamMessageInputThemeData with Diagnosticable {
           sendButtonColor == other.sendButtonColor &&
           actionButtonColor == other.actionButtonColor &&
           sendButtonIdleColor == other.sendButtonIdleColor &&
+          audioButtonColor == other.audioButtonColor &&
+          audioButtonBannerColor == other.audioButtonBannerColor &&
           actionButtonIdleColor == other.actionButtonIdleColor &&
           expandButtonColor == other.expandButtonColor &&
           inputBackgroundColor == other.inputBackgroundColor &&
@@ -252,6 +272,8 @@ class StreamMessageInputThemeData with Diagnosticable {
       sendButtonColor.hashCode ^
       actionButtonColor.hashCode ^
       sendButtonIdleColor.hashCode ^
+      audioButtonColor.hashCode ^
+      audioButtonBannerColor.hashCode ^
       actionButtonIdleColor.hashCode ^
       expandButtonColor.hashCode ^
       inputBackgroundColor.hashCode ^
@@ -275,6 +297,8 @@ class StreamMessageInputThemeData with Diagnosticable {
       ..add(ColorProperty('actionButtonIdleColor', actionButtonIdleColor))
       ..add(ColorProperty('sendButtonColor', sendButtonColor))
       ..add(ColorProperty('sendButtonIdleColor', sendButtonIdleColor))
+      ..add(ColorProperty('audioButtonColor', audioButtonColor))
+      ..add(ColorProperty('audioButtonBannerColor', audioButtonBannerColor))
       ..add(DiagnosticsProperty('inputTextStyle', inputTextStyle))
       ..add(DiagnosticsProperty('inputDecoration', inputDecoration))
       ..add(DiagnosticsProperty('activeBorderGradient', activeBorderGradient))
