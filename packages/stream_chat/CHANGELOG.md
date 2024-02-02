@@ -1,3 +1,10 @@
+## Unreleased
+
+🐞 Fixed
+
+- [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file 
+  attachments from the CDN, when the message get's hard deleted.
+
 ## 7.0.1
 
 🐞 Fixed
