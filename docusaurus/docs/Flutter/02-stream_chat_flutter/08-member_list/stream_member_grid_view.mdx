@@ -1,39 +1,39 @@
 ---
-id: stream_user_grid_view
-sidebar_position: 7
-title: StreamUserGridView
+id: stream_member_grid_view
+sidebar_position: 2
+title: StreamMemberGridView
 ---
 
-A Widget For Displaying And Selecting Users
+A widget for displaying and selecting members in a grid view.
 
-Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamUserGridView-class.html)
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamMemberGridView-class.html)
 
 ### Background
 
-The `StreamUserGridView` widget allows displaying a list of users in a `GridView`.
+The `StreamMemberGridView` widget allows displaying a list of members in a `GridView`.
 
 :::note
-Make sure to check the [StreamUserListView](./stream_user_list_view.mdx) documentation to know how to show results in a `ListView`.
+See the [StreamMemberListView](./stream_member_list_view.mdx) documentation for displaying members in a `ListView`.
 :::
 
 ### Basic Example
 
 ```dart
-class UserGridPage extends StatefulWidget {
-  const UserGridPage({
+class MemberGridPage extends StatefulWidget {
+  const MemberGridPage({
     super.key,
     required this.client,
   });
 
-  final StreamChatClient client;
+  final Channel channel;
 
   @override
-  State<UserGridPage> createState() => _UserGridPageState();
+  State<MemberGridPage> createState() => _MemberGridPageState();
 }
 
-class _UserGridPageState extends State<UserGridPage> {
-  late final _controller = StreamUserListController(
-    client: widget.client,
+class _MemberGridPageState extends State<MemberGridPage> {
+  late final _controller = StreamMemberListController(
+    channel: widget.channel,
     limit: 25,
     filter: Filter.and([
       Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
@@ -56,7 +56,7 @@ class _UserGridPageState extends State<UserGridPage> {
   Widget build(BuildContext context) => Scaffold(
         body: RefreshIndicator(
           onRefresh: _controller.refresh,
-          child: StreamUserGridView(
+          child: StreamMemberGridView(
             controller: _controller,
             onMemberTap: (member) => Navigator.push(
               context,
@@ -66,8 +66,8 @@ class _UserGridPageState extends State<UserGridPage> {
                     child: StreamUserAvatar(
                       user: member.user!,
                     ),
-                  ),
-                ),
+                 ),
+               ),
               ),
             ),
           ),

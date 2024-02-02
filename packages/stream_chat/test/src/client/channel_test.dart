@@ -772,6 +772,47 @@ void main() {
         verify(() => client.deleteMessage(messageId)).called(1);
       });
 
+      test('should delete attachments for hard delete', () async {
+        final attachments = List.generate(
+          3,
+          (index) => Attachment(
+            id: 'test-attachment-id-$index',
+            type: index.isEven ? 'image' : 'file',
+            file: AttachmentFile(size: index * 33, path: 'test-file-path'),
+            imageUrl: index.isEven ? 'test-image-url-$index' : null,
+            assetUrl: index.isOdd ? 'test-asset-url-$index' : null,
+            uploadState: const UploadState.success(),
+          ),
+        );
+        const messageId = 'test-message-id';
+        final message = Message(
+          attachments: attachments,
+          id: messageId,
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+
+        when(() => client.deleteMessage(messageId, hard: true))
+            .thenAnswer((_) async => EmptyResponse());
+
+        when(() => client.deleteImage(any(), channelId, channelType))
+            .thenAnswer((_) async => EmptyResponse());
+
+        when(() => client.deleteFile(any(), channelId, channelType))
+            .thenAnswer((_) async => EmptyResponse());
+
+        final res = await channel.deleteMessage(message, hard: true);
+
+        expect(res, isNotNull);
+
+        verify(() => client.deleteMessage(messageId, hard: true)).called(1);
+        verify(() => client.deleteImage(
+              any(),
+              channelId,
+              channelType,
+            )).called(2);
+      });
+
       test(
         '''should directly update the state with message as deleted if the state is sending or failed''',
         () async {
