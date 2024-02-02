@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-const double _kDefaultCommandButtonSize = 24;
+const double _kDefaultAttachmentButtonSize = 24;
 
 /// {@template attachmentButton}
 /// A button for adding attachments to a chat on mobile.
@@ -13,7 +13,7 @@ class AttachmentButton extends StatelessWidget {
     required this.onPressed,
     this.color,
     this.icon,
-    this.size = 24,
+    this.size = _kDefaultAttachmentButtonSize,
   }) : assert(
             (icon == null && color == null) ||
                 (icon != null && color == null) ||
