@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamMediaAttachmentBuilder` widget to show media attachments in a message.
+
 ## 7.0.1
 
 🐞 Fixed
