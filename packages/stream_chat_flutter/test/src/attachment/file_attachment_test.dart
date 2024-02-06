@@ -30,7 +30,7 @@ void main() {
                     300,
                   )),
                   message: Message(),
-                  attachment: Attachment(
+                  file: Attachment(
                     type: 'file',
                     title: 'example.pdf',
                     extraData: const {

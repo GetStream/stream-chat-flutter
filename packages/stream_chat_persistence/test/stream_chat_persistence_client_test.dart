@@ -245,64 +245,81 @@ void main() {
           .called(1);
     });
 
-    test('getChannelStates', () async {
-      const cid = 'testType:testId';
-      final channels = List.generate(3, (index) => ChannelModel(cid: cid));
-      final messages = List.generate(3, (index) => Message());
-      final members = List.generate(3, (index) => Member());
-      final reads = List.generate(
-        3,
-        (index) => Read(
-          user: User(id: 'testUserId$index'),
-          lastRead: DateTime.now(),
-        ),
-      );
-      final channel = ChannelModel(cid: cid);
-      final channelStates = channels
-          .map(
-            (channel) => ChannelState(
-              channel: channel,
-              messages: messages,
-              pinnedMessages: messages,
-              members: members,
-              read: reads,
-            ),
-          )
-          .toList(growable: false);
+    group('getChannelState', () {
+      test('should throw if sort is provided without comparator', () async {
+        final sort = [
+          const SortOption<ChannelState>(
+            'testField',
+            direction: SortOption.ASC,
+          ),
+        ];
 
-      when(() => mockDatabase.channelQueryDao.getChannels())
-          .thenAnswer((_) async => channels);
-      when(() => mockDatabase.memberDao.getMembersByCid(cid))
-          .thenAnswer((_) async => members);
-      when(() => mockDatabase.readDao.getReadsByCid(cid))
-          .thenAnswer((_) async => reads);
-      when(() => mockDatabase.channelDao.getChannelByCid(cid))
-          .thenAnswer((_) async => channel);
-      when(() => mockDatabase.messageDao.getMessagesByCid(cid))
-          .thenAnswer((_) async => messages);
-      when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
-          .thenAnswer((_) async => messages);
+        expect(
+          () => client.getChannelStates(channelStateSort: sort),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
 
-      final fetchedChannelStates = await client.getChannelStates();
-      expect(fetchedChannelStates.length, channelStates.length);
+      test('should work fine', () async {
+        const cid = 'testType:testId';
+        final channels = List.generate(3, (index) => ChannelModel(cid: cid));
+        final messages = List.generate(3, (index) => Message());
+        final members = List.generate(3, (index) => Member());
+        final reads = List.generate(
+          3,
+          (index) => Read(
+            user: User(id: 'testUserId$index'),
+            lastRead: DateTime.now(),
+          ),
+        );
+        final channel = ChannelModel(cid: cid);
+        final channelStates = channels
+            .map(
+              (channel) => ChannelState(
+                channel: channel,
+                messages: messages,
+                pinnedMessages: messages,
+                members: members,
+                read: reads,
+              ),
+            )
+            .toList(growable: false);
 
-      for (var i = 0; i < fetchedChannelStates.length; i++) {
-        final original = channelStates[i];
-        final fetched = fetchedChannelStates[i];
-        expect(fetched.members?.length, original.members?.length);
-        expect(fetched.messages?.length, original.messages?.length);
-        expect(fetched.pinnedMessages?.length, original.pinnedMessages?.length);
-        expect(fetched.read?.length, original.read?.length);
-        expect(fetched.channel!.cid, original.channel!.cid);
-      }
+        when(() => mockDatabase.channelQueryDao.getChannels())
+            .thenAnswer((_) async => channels);
+        when(() => mockDatabase.memberDao.getMembersByCid(cid))
+            .thenAnswer((_) async => members);
+        when(() => mockDatabase.readDao.getReadsByCid(cid))
+            .thenAnswer((_) async => reads);
+        when(() => mockDatabase.channelDao.getChannelByCid(cid))
+            .thenAnswer((_) async => channel);
+        when(() => mockDatabase.messageDao.getMessagesByCid(cid))
+            .thenAnswer((_) async => messages);
+        when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
+            .thenAnswer((_) async => messages);
 
-      verify(() => mockDatabase.channelQueryDao.getChannels()).called(1);
-      verify(() => mockDatabase.memberDao.getMembersByCid(cid)).called(3);
-      verify(() => mockDatabase.readDao.getReadsByCid(cid)).called(3);
-      verify(() => mockDatabase.channelDao.getChannelByCid(cid)).called(3);
-      verify(() => mockDatabase.messageDao.getMessagesByCid(cid)).called(3);
-      verify(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
-          .called(3);
+        final fetchedChannelStates = await client.getChannelStates();
+        expect(fetchedChannelStates.length, channelStates.length);
+
+        for (var i = 0; i < fetchedChannelStates.length; i++) {
+          final original = channelStates[i];
+          final fetched = fetchedChannelStates[i];
+          expect(fetched.members?.length, original.members?.length);
+          expect(fetched.messages?.length, original.messages?.length);
+          expect(
+              fetched.pinnedMessages?.length, original.pinnedMessages?.length);
+          expect(fetched.read?.length, original.read?.length);
+          expect(fetched.channel!.cid, original.channel!.cid);
+        }
+
+        verify(() => mockDatabase.channelQueryDao.getChannels()).called(1);
+        verify(() => mockDatabase.memberDao.getMembersByCid(cid)).called(3);
+        verify(() => mockDatabase.readDao.getReadsByCid(cid)).called(3);
+        verify(() => mockDatabase.channelDao.getChannelByCid(cid)).called(3);
+        verify(() => mockDatabase.messageDao.getMessagesByCid(cid)).called(3);
+        verify(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
+            .called(3);
+      });
     });
 
     test('updateChannelQueries', () async {

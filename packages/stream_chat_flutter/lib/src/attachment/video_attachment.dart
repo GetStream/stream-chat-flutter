@@ -1,123 +1,72 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/video_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamVideoAttachment}
 /// Shows a video attachment in a [StreamMessageWidget].
 /// {@endtemplate}
-class StreamVideoAttachment extends StreamAttachmentWidget {
+class StreamVideoAttachment extends StatelessWidget {
   /// {@macro streamVideoAttachment}
   const StreamVideoAttachment({
     super.key,
-    required super.message,
-    required super.attachment,
-    required this.messageTheme,
-    super.constraints,
-    this.onShowMessage,
-    this.onReplyMessage,
-    this.onAttachmentTap,
-    this.attachmentActionsModalBuilder,
+    required this.message,
+    required this.video,
+    this.shape,
+    this.constraints = const BoxConstraints(),
   });
 
-  /// The [StreamMessageThemeData] to use for the title
-  final StreamMessageThemeData messageTheme;
+  /// The [Message] that the video is attached to.
+  final Message message;
 
-  /// {@macro showMessageCallback}
-  final ShowMessageCallback? onShowMessage;
+  /// The [Attachment] object containing the video information.
+  final Attachment video;
 
-  /// {@macro replyMessageCallback}
-  final ReplyMessageCallback? onReplyMessage;
+  /// The shape of the attachment.
+  ///
+  /// Defaults to [RoundedRectangleBorder] with a radius of 14.
+  final ShapeBorder? shape;
 
-  /// {@macro onAttachmentTap}
-  final OnAttachmentTap? onAttachmentTap;
-
-  /// {@macro attachmentActionsBuilder}
-  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
+  /// The constraints to use when displaying the video.
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
-    return source.when(
-      local: () {
-        if (attachment.file == null) {
-          return AttachmentError(constraints: constraints);
-        }
-        return _buildVideoAttachment(
-          context,
-          StreamVideoThumbnailImage(
-            video: attachment.file!.path,
-            thumbUrl: attachment.thumbUrl,
-            constraints: constraints,
+    final chatTheme = StreamChatTheme.of(context);
+    final colorTheme = chatTheme.colorTheme;
+    final shape = this.shape ??
+        RoundedRectangleBorder(
+          side: BorderSide(
+            color: colorTheme.borders,
+            strokeAlign: BorderSide.strokeAlignOutside,
           ),
+          borderRadius: BorderRadius.circular(14),
         );
-      },
-      network: () {
-        if (attachment.assetUrl == null) {
-          return AttachmentError(constraints: constraints);
-        }
-        return _buildVideoAttachment(
-          context,
-          StreamVideoThumbnailImage(
-            video: attachment.assetUrl,
-            thumbUrl: attachment.thumbUrl,
-            constraints: constraints,
-          ),
-        );
-      },
-    );
-  }
 
-  Widget _buildVideoAttachment(BuildContext context, Widget videoWidget) {
-    return ConstrainedBox(
-      constraints: constraints ?? const BoxConstraints.expand(),
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: GestureDetector(
-              onTap: onAttachmentTap ??
-                  () async {
-                    if (attachment.uploadState == const UploadState.success()) {
-                      final channel = StreamChannel.of(context).channel;
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => StreamChannel(
-                            channel: channel,
-                            child: StreamFullScreenMediaBuilder(
-                              mediaAttachmentPackages:
-                                  message.getAttachmentPackageList(),
-                              startIndex:
-                                  message.attachments.indexOf(attachment),
-                              userName: message.user!.name,
-                              onShowMessage: onShowMessage,
-                              onReplyMessage: onReplyMessage,
-                              attachmentActionsModalBuilder:
-                                  attachmentActionsModalBuilder,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-              child: Stack(
-                children: [
-                  videoWidget,
-                  const Center(
-                    child: Material(
-                      shape: CircleBorder(),
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Icon(Icons.play_arrow),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: StreamAttachmentUploadStateBuilder(
-                      message: message,
-                      attachment: attachment,
-                    ),
-                  ),
-                ],
-              ),
+    return Container(
+      constraints: constraints,
+      clipBehavior: Clip.hardEdge,
+      decoration: ShapeDecoration(shape: shape),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          StreamVideoAttachmentThumbnail(
+            video: video,
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.cover,
+          ),
+          const Material(
+            shape: CircleBorder(),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Icon(Icons.play_arrow),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: StreamAttachmentUploadStateBuilder(
+              message: message,
+              attachment: video,
             ),
           ),
         ],

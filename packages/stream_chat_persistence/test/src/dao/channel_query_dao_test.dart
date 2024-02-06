@@ -148,7 +148,6 @@ void main() {
       // Should match with the inserted channels
       final updatedChannels = await channelQueryDao.getChannels(
         filter: filter,
-        // ignore: deprecated_member_use_from_same_package
         sort: [
           SortOption(
             'member_count',
@@ -196,7 +195,6 @@ void main() {
       // Should match with the inserted channels
       final updatedChannels = await channelQueryDao.getChannels(
         filter: filter,
-        // ignore: deprecated_member_use_from_same_package
         sort: [SortOption('test_custom_field', comparator: sortComparator)],
       );
 

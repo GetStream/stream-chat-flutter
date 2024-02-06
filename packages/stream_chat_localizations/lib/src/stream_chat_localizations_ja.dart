@@ -420,7 +420,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'リンクが無効になっています';
 
   @override
-  String unreadMessagesSeparatorText(int unreadCount) => '新しいメッセージ。';
+  String unreadMessagesSeparatorText() => '新しいメッセージ。';
 
   @override
   String get enableFileAccessMessage =>

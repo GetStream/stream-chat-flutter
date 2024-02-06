@@ -3,6 +3,7 @@ name: stream_flutter_workflow
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
   flutter_channel: "stable"
+  flutter_version: "3.13.9"
 
 on:
   pull_request:
@@ -17,7 +18,6 @@ on:
   push:
     branches:
       - master
-      - develop
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,6 +36,7 @@ jobs:
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: ${{ env.flutter_version }}
           cache: true
           channel: ${{ env.flutter_channel }}
       - name: "Install Tools"
@@ -63,6 +64,7 @@ jobs:
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: ${{ env.flutter_version }}
           cache: true
           channel: ${{ env.flutter_channel }}
       - name: "Install Tools"
@@ -88,6 +90,7 @@ jobs:
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: ${{ env.flutter_version }}
           cache: true
           channel: ${{ env.flutter_channel }}
       - name: "Install Tools"
@@ -106,27 +109,27 @@ jobs:
           token: ${{secrets.CODECOV_TOKEN}}
           files: packages/*/coverage/lcov.info
       - name: "Stream Chat Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.1.0
+        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
         with:
           path: packages/stream_chat/coverage/lcov.info
           min_coverage: 79
       - name: "Stream Chat Localizations Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.1.0
+        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
         with:
           path: packages/stream_chat_localizations/coverage/lcov.info
           min_coverage: 100
       - name: "Stream Chat Persistence Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.1.0
+        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
           min_coverage: 95
       - name: "Stream Chat Flutter Core Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.1.0
+        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
           min_coverage: 30
       - name: "Stream Chat Flutter Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.1.0
+        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
           min_coverage: 44

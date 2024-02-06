@@ -499,7 +499,7 @@ class Channel {
         ]);
       }
 
-      final isImage = it.type == 'image';
+      final isImage = it.type == AttachmentType.image;
       final cancelToken = CancelToken();
       Future<SendAttachmentResponse> future;
       if (isImage) {
@@ -861,6 +861,18 @@ class Channel {
       );
 
       state?.deleteMessage(deletedMessage, hardDelete: hard);
+
+      if (hard) {
+        deletedMessage.attachments.forEach((attachment) {
+          if (attachment.uploadState.isSuccess) {
+            if (attachment.type == AttachmentType.image) {
+              deleteImage(attachment.imageUrl!);
+            } else if (attachment.type == AttachmentType.file) {
+              deleteFile(attachment.assetUrl!);
+            }
+          }
+        });
+      }
 
       return response;
     } catch (e) {

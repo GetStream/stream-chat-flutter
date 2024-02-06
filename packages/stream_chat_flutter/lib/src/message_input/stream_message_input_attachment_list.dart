@@ -1,10 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/file_attachment.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// WidgetBuilder used to build the message input attachment list.
@@ -91,7 +90,7 @@ class _StreamMessageInputAttachmentListState
 
     // Split the attachments into file and media attachments.
     for (final attachment in widget.attachments) {
-      if (attachment.type == 'file') {
+      if (attachment.type == AttachmentType.file) {
         fileAttachments.add(attachment);
       } else {
         mediaAttachments.add(attachment);
@@ -121,7 +120,7 @@ class _StreamMessageInputAttachmentListState
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -201,23 +200,19 @@ class MessageInputFileAttachments extends StatelessWidget {
           }
 
           // Otherwise, use the default builder.
-          return ClipRRect(
-            key: Key(attachment.id),
-            borderRadius: BorderRadius.circular(10),
-            child: StreamFileAttachment(
-              message: Message(), // dummy message
-              attachment: attachment,
-              constraints: BoxConstraints.loose(Size(
-                MediaQuery.of(context).size.width * 0.65,
-                56,
-              )),
-              trailing: Padding(
-                padding: const EdgeInsets.all(8),
-                child: RemoveAttachmentButton(
-                  onPressed: onRemovePressed != null
-                      ? () => onRemovePressed!(attachment)
-                      : null,
-                ),
+          return StreamFileAttachment(
+            message: Message(), // Dummy message
+            file: attachment,
+            constraints: BoxConstraints.loose(Size(
+              MediaQuery.of(context).size.width * 0.65,
+              56,
+            )),
+            trailing: Padding(
+              padding: const EdgeInsets.all(8),
+              child: RemoveAttachmentButton(
+                onPressed: onRemovePressed != null
+                    ? () => onRemovePressed!(attachment)
+                    : null,
               ),
             ),
           );
@@ -256,7 +251,8 @@ class MessageInputMediaAttachments extends StatelessWidget {
       height: 104,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+        cacheExtent: 104 * 10, // Cache 10 items ahead.
         children: attachments.map<Widget>(
           (attachment) {
             // If a custom builder is provided, use it.
@@ -265,90 +261,53 @@ class MessageInputMediaAttachments extends StatelessWidget {
               return builder(context, attachment, onRemovePressed);
             }
 
-            return ClipRRect(
+            final colorTheme = StreamChatTheme.of(context).colorTheme;
+            final shape = RoundedRectangleBorder(
+              side: BorderSide(
+                color: colorTheme.borders,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+              borderRadius: BorderRadius.circular(14),
+            );
+
+            return Container(
               key: Key(attachment.id),
-              borderRadius: BorderRadius.circular(10),
-              child: Stack(
-                children: <Widget>[
-                  AspectRatio(
-                    aspectRatio: 1,
-                    child: MessageInputMediaAttachmentThumbnail(
-                      attachment: attachment,
+              clipBehavior: Clip.hardEdge,
+              decoration: ShapeDecoration(shape: shape),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    StreamMediaAttachmentThumbnail(
+                      media: attachment,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
                     ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: RemoveAttachmentButton(
-                      onPressed: onRemovePressed != null
-                          ? () => onRemovePressed!(attachment)
-                          : null,
+                    if (attachment.type == AttachmentType.video)
+                      Positioned(
+                        left: 8,
+                        bottom: 8,
+                        child: StreamSvgIcon.videoCall(),
+                      ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: RemoveAttachmentButton(
+                        onPressed: onRemovePressed != null
+                            ? () => onRemovePressed!(attachment)
+                            : null,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
         ).insertBetween(const SizedBox(width: 8)),
       ),
     );
-  }
-}
-
-/// A widget that displays a thumbnail for a media attachment.
-class MessageInputMediaAttachmentThumbnail extends StatelessWidget {
-  /// Creates a new media attachment widget.
-  const MessageInputMediaAttachmentThumbnail({
-    super.key,
-    required this.attachment,
-  });
-
-  /// The attachment to display.
-  final Attachment attachment;
-
-  @override
-  Widget build(BuildContext context) {
-    switch (attachment.type) {
-      case 'image':
-      case 'giphy':
-        return attachment.file != null
-            ? Image.memory(
-                attachment.file!.bytes!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, _, __) => Image.asset(
-                  'images/placeholder.png',
-                  package: 'stream_chat_flutter',
-                ),
-              )
-            : CachedNetworkImage(
-                imageUrl: attachment.imageUrl ??
-                    attachment.assetUrl ??
-                    attachment.thumbUrl!,
-                fit: BoxFit.cover,
-                errorWidget: (_, obj, trace) => Image.asset(
-                  'images/placeholder.png',
-                  package: 'stream_chat_flutter',
-                ),
-              );
-      case 'video':
-        return Stack(
-          children: [
-            StreamVideoThumbnailImage(
-              video: attachment.file?.path ?? attachment.assetUrl,
-            ),
-            Positioned(
-              left: 8,
-              bottom: 10,
-              child: StreamSvgIcon.videoCall(),
-            ),
-          ],
-        );
-      default:
-        return const ColoredBox(
-          color: Colors.black26,
-          child: Icon(Icons.insert_drive_file),
-        );
-    }
   }
 }
 

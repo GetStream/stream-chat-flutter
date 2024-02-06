@@ -114,119 +114,121 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
     final child = Center(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (widget.showReactionPicker && hasReactionPermission)
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Align(
-                      alignment: Alignment(
-                        calculateReactionsHorizontalAlignment(
-                          user,
-                          widget.message,
-                          constraints,
-                          fontSize,
-                          orientation,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                if (widget.showReactionPicker && hasReactionPermission)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Align(
+                        alignment: Alignment(
+                          calculateReactionsHorizontalAlignment(
+                            user,
+                            widget.message,
+                            constraints,
+                            fontSize,
+                            orientation,
+                          ),
+                          0,
                         ),
-                        0,
-                      ),
-                      child: StreamReactionPicker(
-                        message: widget.message,
-                      ),
-                    );
-                  },
+                        child: StreamReactionPicker(
+                          message: widget.message,
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 10),
+                IgnorePointer(
+                  child: widget.messageWidget,
                 ),
-              const SizedBox(height: 10),
-              IgnorePointer(
-                child: widget.messageWidget,
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: EdgeInsets.only(
-                  left: widget.reverse ? 0 : 40,
-                ),
-                child: SizedBox(
-                  width: mediaQueryData.size.width * 0.75,
-                  child: Material(
-                    color: streamChatThemeData.colorTheme.appBg,
-                    clipBehavior: Clip.hardEdge,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (widget.showReplyMessage &&
-                            widget.message.state.isCompleted)
-                          ReplyButton(
-                            onTap: () {
-                              Navigator.of(context).pop();
-                              if (widget.onReplyTap != null) {
-                                widget.onReplyTap?.call(widget.message);
-                              }
-                            },
+                const SizedBox(height: 8),
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: widget.reverse ? 0 : 40,
+                  ),
+                  child: SizedBox(
+                    width: mediaQueryData.size.width * 0.75,
+                    child: Material(
+                      color: streamChatThemeData.colorTheme.appBg,
+                      clipBehavior: Clip.hardEdge,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (widget.showReplyMessage &&
+                              widget.message.state.isCompleted)
+                            ReplyButton(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                if (widget.onReplyTap != null) {
+                                  widget.onReplyTap?.call(widget.message);
+                                }
+                              },
+                            ),
+                          if (widget.showThreadReplyMessage &&
+                              (widget.message.state.isCompleted) &&
+                              widget.message.parentId == null)
+                            ThreadReplyButton(
+                              message: widget.message,
+                              onThreadReplyTap: widget.onThreadReplyTap,
+                            ),
+                          if (widget.showResendMessage)
+                            ResendMessageButton(
+                              message: widget.message,
+                              channel: channel,
+                            ),
+                          if (widget.showEditMessage)
+                            EditMessageButton(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                _showEditBottomSheet(context);
+                              },
+                            ),
+                          if (widget.showCopyMessage)
+                            CopyMessageButton(
+                              onTap: () {
+                                widget.onCopyTap?.call(widget.message);
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          if (widget.showFlagButton)
+                            FlagMessageButton(
+                              onTap: _showFlagDialog,
+                            ),
+                          if (widget.showPinButton)
+                            PinMessageButton(
+                              onTap: _togglePin,
+                              pinned: widget.message.pinned,
+                            ),
+                          if (widget.showDeleteMessage)
+                            DeleteMessageButton(
+                              isDeleteFailed:
+                                  widget.message.state.isDeletingFailed,
+                              onTap: _showDeleteBottomSheet,
+                            ),
+                          ...widget.customActions
+                              .map((action) => _buildCustomAction(
+                                    context,
+                                    action,
+                                  )),
+                        ].insertBetween(
+                          Container(
+                            height: 1,
+                            color: streamChatThemeData.colorTheme.borders,
                           ),
-                        if (widget.showThreadReplyMessage &&
-                            (widget.message.state.isCompleted) &&
-                            widget.message.parentId == null)
-                          ThreadReplyButton(
-                            message: widget.message,
-                            onThreadReplyTap: widget.onThreadReplyTap,
-                          ),
-                        if (widget.showResendMessage)
-                          ResendMessageButton(
-                            message: widget.message,
-                            channel: channel,
-                          ),
-                        if (widget.showEditMessage)
-                          EditMessageButton(
-                            onTap: () {
-                              Navigator.of(context).pop();
-                              _showEditBottomSheet(context);
-                            },
-                          ),
-                        if (widget.showCopyMessage)
-                          CopyMessageButton(
-                            onTap: () {
-                              widget.onCopyTap?.call(widget.message);
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        if (widget.showFlagButton)
-                          FlagMessageButton(
-                            onTap: _showFlagDialog,
-                          ),
-                        if (widget.showPinButton)
-                          PinMessageButton(
-                            onTap: _togglePin,
-                            pinned: widget.message.pinned,
-                          ),
-                        if (widget.showDeleteMessage)
-                          DeleteMessageButton(
-                            isDeleteFailed:
-                                widget.message.state.isDeletingFailed,
-                            onTap: _showDeleteBottomSheet,
-                          ),
-                        ...widget.customActions
-                            .map((action) => _buildCustomAction(
-                                  context,
-                                  action,
-                                )),
-                      ].insertBetween(
-                        Container(
-                          height: 1,
-                          color: streamChatThemeData.colorTheme.borders,
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

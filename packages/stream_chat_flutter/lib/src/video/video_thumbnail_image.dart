@@ -1,162 +1,149 @@
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/video/video_service.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:video_thumbnail/video_thumbnail.dart' show ImageFormat;
 
-/// {@template streamVideoThumbnailImage}
-/// Displays a video thumbnail for video attachments.
+/// {@template video_thumbnail_image}
+/// A custom [ImageProvider] class for loading video thumbnails as images in
+/// Flutter.
 ///
-/// [thumbUrl] is used if provided.
+/// Use this class to load a video thumbnail as an image. It takes a video URL
+/// or path and generates a thumbnail image from the video. The generated
+/// thumbnail image can be used with the [Image] widget.
 ///
-/// Else [video] (path to local or remote video) is used to generate
-/// a thumbnail from the video asset.
+/// {@tool snippet}
+/// Load a video thumbnail from a URL:
 ///
-/// WARNING! a local path does not work on web.
+/// ```dart
+/// Image(
+///   image: StreamVideoThumbnailImage(
+///     video: 'https://example.com/video.mp4',
+///     maxHeight: 200,
+///     maxWidth: 200,
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
-/// If both [thumbUrl] and [video] are null, or if a thumbnail can't be
-/// generated, a stock default image will be used.
+/// {@tool snippet}
+/// Load a video thumbnail from a local file path:
+///
+/// ```dart
+/// Image(
+///   image: StreamVideoThumbnailImage(
+///     video: '/path/to/video.mp4',
+///     maxHeight: 200,
+///     maxWidth: 200,
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 /// {@endtemplate}
-class StreamVideoThumbnailImage extends StatefulWidget {
-  /// {@macro streamVideoThumbnailImage}
+class StreamVideoThumbnailImage
+    extends ImageProvider<StreamVideoThumbnailImage> {
+  /// {@macro video_thumbnail_image}
   const StreamVideoThumbnailImage({
-    super.key,
-    this.video,
-    this.thumbUrl,
-    this.constraints,
-    this.fit = BoxFit.cover,
-    this.format = ImageFormat.PNG,
-    this.errorBuilder,
-    this.placeholderBuilder,
+    required this.video,
+    this.headers,
+    this.imageFormat = ImageFormat.PNG,
+    this.maxHeight = 0,
+    this.maxWidth = 0,
+    this.timeMs = 0,
+    this.quality = 10,
+    this.scale = 1.0,
   });
 
-  /// Video path or url
-  final String? video;
+  /// The URL or path of the video from which to generate the thumbnail.
+  final String video;
 
-  /// Video thumbnail url
-  final String? thumbUrl;
+  /// Additional headers to include in the HTTP request when fetching the video.
+  final Map<String, String>? headers;
 
-  /// Contraints of attachments
-  final BoxConstraints? constraints;
+  /// The format of the generated thumbnail image.
+  final ImageFormat imageFormat;
 
-  /// Fit of image
-  final BoxFit? fit;
+  /// The maximum height of the generated thumbnail image.
+  final int maxHeight;
 
-  /// Image format
-  final ImageFormat format;
+  /// The maximum width of the generated thumbnail image.
+  final int maxWidth;
 
-  /// A builder for building a custom error widget when the thumbnail
-  /// creation fails
-  final Widget Function(BuildContext, Object?)? errorBuilder;
+  /// The timestamp in milliseconds at which to generate the thumbnail.
+  final int timeMs;
 
-  /// A builder for building custom thumbnail loading UI
-  final WidgetBuilder? placeholderBuilder;
+  /// The quality of the generated thumbnail image.
+  final int quality;
+
+  /// The scale to place in the [ImageInfo] object of the image.
+  final double scale;
 
   @override
-  _StreamVideoThumbnailImageState createState() =>
-      _StreamVideoThumbnailImageState();
-}
-
-class _StreamVideoThumbnailImageState extends State<StreamVideoThumbnailImage> {
-  late Future<Uint8List?> thumbnailFuture;
-  late StreamChatThemeData _streamChatTheme;
-
-  void _generateThumbnail() {
-    // Only generate thumbnail if the thumbnail url is not provided.
-    if (widget.thumbUrl == null) {
-      thumbnailFuture = StreamVideoService.generateVideoThumbnail(
-        video: widget.video,
-        imageFormat: widget.format,
-      );
-    }
+  Future<StreamVideoThumbnailImage> obtainKey(
+    ImageConfiguration configuration,
+  ) {
+    return SynchronousFuture<StreamVideoThumbnailImage>(this);
   }
 
   @override
-  void initState() {
-    super.initState();
-    _generateThumbnail();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _streamChatTheme = StreamChatTheme.of(context);
-  }
-
-  @override
-  void didUpdateWidget(covariant StreamVideoThumbnailImage oldWidget) {
-    if (oldWidget.video != widget.video || oldWidget.format != widget.format) {
-      _generateThumbnail();
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final placeHolderWidget = widget.placeholderBuilder?.call(context) ??
-        Shimmer.fromColors(
-          baseColor: _streamChatTheme.colorTheme.disabled,
-          highlightColor: _streamChatTheme.colorTheme.inputBg,
-          child: Image.asset(
-            'images/placeholder.png',
-            fit: BoxFit.cover,
-            height: widget.constraints?.maxHeight,
-            width: widget.constraints?.maxWidth,
-            package: 'stream_chat_flutter',
-          ),
-        );
-
-    final errorWidget = widget.errorBuilder?.call(context, null) ??
-        AttachmentError(constraints: widget.constraints);
-
-    final thumbUrl = widget.thumbUrl;
-    if (thumbUrl != null) {
-      return CachedNetworkImage(
-        imageUrl: thumbUrl,
-        fit: widget.fit,
-        height: widget.constraints?.maxHeight,
-        width: widget.constraints?.maxWidth,
-        placeholder: (context, __) => placeHolderWidget,
-        errorWidget: (context, url, error) => errorWidget,
-      );
-    }
-
-    return ConstrainedBox(
-      constraints: widget.constraints ?? const BoxConstraints.expand(),
-      child: FutureBuilder<Uint8List?>(
-        future: thumbnailFuture,
-        builder: (context, snapshot) => AnimatedSwitcher(
-          duration: const Duration(milliseconds: 350),
-          child: Builder(
-            key: ValueKey<AsyncSnapshot<Uint8List?>>(snapshot),
-            builder: (_) {
-              if (snapshot.hasError) return errorWidget;
-
-              if (!snapshot.hasData) {
-                return SizedBox(
-                  height: double.maxFinite,
-                  width: double.maxFinite,
-                  child: placeHolderWidget,
-                );
-              }
-
-              return SizedBox(
-                height: double.maxFinite,
-                width: double.maxFinite,
-                child: Image.memory(
-                  snapshot.data!,
-                  fit: widget.fit,
-                  height: widget.constraints?.maxHeight ?? double.infinity,
-                  width: widget.constraints?.maxWidth ?? double.infinity,
-                ),
-              );
-            },
-          ),
-        ),
-      ),
+  @Deprecated('Will get replaced by loadImage in the next major version.')
+  ImageStreamCompleter loadBuffer(
+    StreamVideoThumbnailImage key,
+    DecoderBufferCallback decode,
+  ) {
+    return MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, decode),
+      scale: key.scale,
+      debugLabel: key.video,
+      informationCollector: () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<StreamVideoThumbnailImage>('Image key', key),
+      ],
     );
+  }
+
+  @Deprecated('Will get replaced by loadImage in the next major version.')
+  Future<ui.Codec> _loadAsync(
+    StreamVideoThumbnailImage key,
+    DecoderBufferCallback decode,
+  ) async {
+    assert(key == this, '$key is not $this');
+
+    final bytes = await StreamVideoService.generateVideoThumbnail(
+      video: key.video,
+      headers: key.headers,
+      imageFormat: key.imageFormat,
+      maxHeight: key.maxHeight,
+      maxWidth: key.maxWidth,
+      timeMs: key.timeMs,
+      quality: key.quality,
+    );
+
+    if (bytes == null || bytes.lengthInBytes == 0) {
+      throw Exception('VideoThumbnailImage is an empty file: ${key.video}');
+    }
+
+    final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    return decode(buffer);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is StreamVideoThumbnailImage &&
+        other.video == video &&
+        other.scale == scale;
+  }
+
+  @override
+  int get hashCode => Object.hash(video, scale);
+
+  @override
+  String toString() {
+    final runtimeType = objectRuntimeType(this, 'StreamVideoThumbnailImage');
+    return '$runtimeType($video, scale: $scale)';
   }
 }

@@ -4,8 +4,8 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.10.0"
+  sdk: ">=3.1.0 <4.0.0"
+  flutter: ">=3.13.0"
 
 dependencies:
   collection: ^1.15.0
@@ -13,9 +13,9 @@ dependencies:
   flutter:
     sdk: flutter
   responsive_builder: ^0.7.0
-  stream_chat_flutter: ^6.4.0
-  stream_chat_localizations: ^5.4.0
-  stream_chat_persistence: ^6.4.0
+  stream_chat_flutter: ^7.0.1
+  stream_chat_localizations: ^7.0.1
+  stream_chat_persistence: ^7.0.1
 
 flutter:
   uses-material-design: true

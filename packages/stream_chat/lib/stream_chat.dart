@@ -28,6 +28,7 @@ export 'src/core/http/interceptor/logging_interceptor.dart';
 export 'src/core/models/action.dart';
 export 'src/core/models/attachment.dart';
 export 'src/core/models/attachment_file.dart';
+export 'src/core/models/attachment_giphy_info.dart';
 export 'src/core/models/channel_config.dart';
 export 'src/core/models/channel_model.dart';
 export 'src/core/models/channel_mute.dart';
