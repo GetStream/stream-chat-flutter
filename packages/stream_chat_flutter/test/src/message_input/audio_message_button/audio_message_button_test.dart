@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_message_send_button/stream_audio_message_overlays.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_message_send_button/stream_audio_message_send_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class MockVoidCallback extends Mock {
