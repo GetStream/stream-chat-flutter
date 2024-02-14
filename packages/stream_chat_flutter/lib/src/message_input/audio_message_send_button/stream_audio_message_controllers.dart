@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_message_send_button/stream_audio_message_gesture_state.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget that displays the audio recording controls.
