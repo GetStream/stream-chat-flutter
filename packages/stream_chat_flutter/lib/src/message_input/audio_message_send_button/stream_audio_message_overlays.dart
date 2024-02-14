@@ -84,6 +84,12 @@ class _LockButtonState extends State<_LockButton>
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final audioRecordingMessageTheme = AudioRecordingMessageTheme.of(context);
 
