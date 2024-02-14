@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_message_send_button/stream_audio_message_send_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
