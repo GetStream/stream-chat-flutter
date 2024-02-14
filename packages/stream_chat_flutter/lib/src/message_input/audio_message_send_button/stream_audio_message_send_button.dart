@@ -74,6 +74,7 @@ class _StreamAudioMessageSendButtonState
     if (_lockButtonOverlayController.isShowing) {
       _lockButtonOverlayController.hide();
     }
+    _lockButtonTimer?.cancel();
     super.dispose();
   }
 
@@ -178,12 +179,15 @@ class _StreamAudioMessageSendButtonState
                         child: const StreamAudioMessageControllers(),
                       ),
                     ),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: iconBackgroundColor,
-                        shape: BoxShape.circle,
+                    Padding(
+                      padding: const EdgeInsets.all(1.5),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: iconBackgroundColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: icon,
                       ),
-                      child: icon,
                     ),
                   ],
                 ),
