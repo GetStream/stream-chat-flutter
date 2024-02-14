@@ -33,10 +33,9 @@ class _StreamAudioMessageControllersState
     );
     _controller.forward();
 
-    Timer.periodic(
+    Future.delayed(
       const Duration(seconds: 1),
-      (timer) {
-        timer.cancel();
+      () {
         if (mounted) {
           setState(() {
             iconColor =
