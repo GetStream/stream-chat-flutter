@@ -20,6 +20,7 @@ void main() {
                   onRecordingStart: () {},
                   onRecordingEnd: () {},
                   onRecordingCanceled: () {},
+                  onRecordingLocked: () {},
                 ),
               ),
             ),
@@ -57,6 +58,7 @@ void main() {
                   onRecordingStart: () {},
                   onRecordingEnd: () {},
                   onRecordingCanceled: () {},
+                  onRecordingLocked: () {},
                 ),
               ),
             ),
@@ -93,6 +95,7 @@ void main() {
                   onRecordingStart: onRecordingStart,
                   onRecordingEnd: () {},
                   onRecordingCanceled: () {},
+                  onRecordingLocked: () {},
                 ),
               ),
             ),
@@ -124,6 +127,7 @@ void main() {
                   onRecordingStart: () {},
                   onRecordingEnd: () {},
                   onRecordingCanceled: onRecordingCanceled,
+                  onRecordingLocked: () {},
                 ),
               ),
             ),
@@ -139,6 +143,39 @@ void main() {
       );
       await gesture.moveTo(position + const Offset(-300, 0));
       verify(onRecordingCanceled.call);
+    });
+
+    testWidgets('should show call the locked callback', (tester) async {
+      final onRecordingLocked = MockVoidCallback();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: StreamChatTheme(
+                data: StreamChatThemeData(
+                  audioRecordingMessageTheme: AudioRecordingMessageThemeData(),
+                ),
+                child: StreamAudioMessageSendButton(
+                  onRecordingStart: () {},
+                  onRecordingEnd: () {},
+                  onRecordingCanceled: () {},
+                  onRecordingLocked: onRecordingLocked,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final position =
+          tester.getCenter(find.byType(StreamAudioMessageSendButton));
+      final gesture = await tester.startGesture(position, pointer: 1);
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 500),
+      );
+      await gesture.moveTo(position + const Offset(-300, 0));
+      verify(onRecordingLocked.call);
     });
   });
 }

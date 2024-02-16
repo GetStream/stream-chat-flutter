@@ -1,5 +1,9 @@
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+const double _kLockButtonShrinkHeight = 24;
+const double _kOffsetVelocityMultiplier = 0.3;
 
 /// A widget that displays a banner with usage information message.
 class AudioMessageInfoBannerOverlay extends StatelessWidget {
@@ -50,8 +54,18 @@ class LockButtonOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = GestureStateProvider.maybeOf(context);
+    final offset = state?.offset ?? Offset.zero;
+    final isRecordingLocked = context.select(
+      (StreamRecordingController c) => c.isLocked,
+    );
+    final lowerLimit =
+        isRecordingLocked == true ? _kLockButtonShrinkHeight : 0;
+
     return Positioned(
-      bottom: bottomOffset,
+      bottom: bottomOffset +
+          (offset.dy.abs() * _kOffsetVelocityMultiplier)
+              .clamp(lowerLimit, _kLockButtonShrinkHeight),
       right: 0,
       child: const _LockButton(
         key: ValueKey('lockButton'),
@@ -93,6 +107,22 @@ class _LockButtonState extends State<_LockButton>
   Widget build(BuildContext context) {
     final audioRecordingMessageTheme = AudioRecordingMessageTheme.of(context);
 
+    final state = GestureStateProvider.maybeOf(context);
+    final offset = state?.offset;
+    final calculatedSize = _kLockButtonShrinkHeight -
+        ((offset?.dy ?? 0).abs() * _kOffsetVelocityMultiplier)
+            .clamp(0.0, _kLockButtonShrinkHeight);
+
+    final isRecordingLocked = context.select(
+      (StreamRecordingController c) => c.isLocked,
+    );
+    if (calculatedSize == 0 && !isRecordingLocked) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        context.dispatchNotification(const RecordingLockedNotification());
+      });
+    }
+    final arrowSize = isRecordingLocked == true ? 0.0 : calculatedSize;
+
     return SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(0, 1),
@@ -109,12 +139,17 @@ class _LockButtonState extends State<_LockButton>
           children: [
             StreamSvgIcon.iconLock(
               size: 24,
-              color: audioRecordingMessageTheme.lockButtonForegroundColor,
+              color: arrowSize <= 0
+                  ? audioRecordingMessageTheme.lockButtonForegroundColorLocked
+                  : audioRecordingMessageTheme.lockButtonForegroundColor,
             ),
             const SizedBox(height: 8),
-            StreamSvgIcon.up(
-              size: 24,
-              color: audioRecordingMessageTheme.lockButtonForegroundColor,
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              child: StreamSvgIcon.up(
+                size: arrowSize,
+                color: audioRecordingMessageTheme.lockButtonForegroundColor,
+              ),
             ),
           ],
         ),

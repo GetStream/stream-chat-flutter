@@ -2,16 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-/// A callback called when the user starts recording an audio message.
-typedef OnRecordingStart = void Function();
-
-/// A callback called when the user ends recording an audio message.
-typedef OnRecordingEnd = void Function();
-
-/// A callback called when the user cancels recording an audio message.
-typedef OnRecordingCanceled = void Function();
 
 /// A widget that displays a sending button.
 /// This widget is used when the user is recording an audio message.
@@ -23,9 +15,7 @@ class StreamAudioMessageSendButton extends StatefulWidget {
     this.overlayOffset = 15,
     this.overlayDuration = const Duration(milliseconds: 500),
     this.useHapticFeedback = true,
-    required this.onRecordingStart,
-    required this.onRecordingEnd,
-    required this.onRecordingCanceled,
+    required this.recordingController,
   });
 
   /// The offset to apply to the overlay.
@@ -34,15 +24,7 @@ class StreamAudioMessageSendButton extends StatefulWidget {
   /// The duration of the overlay banner.
   final Duration overlayDuration;
 
-  /// The callback called when the user long presses the button.
-  final OnRecordingStart onRecordingStart;
-
-  /// The callback called when the user stops pressing the button.
-  final OnRecordingEnd onRecordingEnd;
-
-  /// The callback called when the user cancels the recording.
-  final OnRecordingCanceled onRecordingCanceled;
-
+  final StreamRecordingController recordingController;
   /// If true, the button will use haptic feedback when
   /// the user long presses it.
   final bool useHapticFeedback;
@@ -58,8 +40,6 @@ class _StreamAudioMessageSendButtonState
   final _infoBarOverlayController = OverlayPortalController();
   final _lockButtonOverlayController = OverlayPortalController();
   Timer? _lockButtonTimer;
-
-  bool _isRecording = false;
 
   Color? iconColor;
   Color? iconBackgroundColor;
@@ -82,117 +62,140 @@ class _StreamAudioMessageSendButtonState
   Widget build(BuildContext context) {
     final audioRecordingMessageTheme = AudioRecordingMessageTheme.of(context);
 
-    return GestureDetector(
-      onTap: () => _onTap(context),
-      onLongPressMoveUpdate: (details) {
-        setState(() {
-          _offset = details.offsetFromOrigin;
-        });
-        if (details.offsetFromOrigin.dx < -(width / 3)) {
-          if (widget.useHapticFeedback) {
-            HapticFeedback.heavyImpact();
-          }
+    return ListenableBuilder(
+      listenable: widget.recordingController,
+      builder: (context, _) => GestureDetector(
+        onTap: () => _onTap(context),
+        onLongPressMoveUpdate: (details) {
           setState(() {
-            iconColor = null;
-            iconBackgroundColor = null;
-            _offset = Offset.zero;
-            _isRecording = false;
+            _offset = details.offsetFromOrigin;
           });
+          if (details.offsetFromOrigin.dx < -(width / 3)) {
+            if (widget.useHapticFeedback) {
+              HapticFeedback.heavyImpact();
+            }
+            setState(() {
+              iconColor = null;
+              iconBackgroundColor = null;
+              _offset = Offset.zero;
+            });
 
+            if (_lockButtonOverlayController.isShowing) {
+              _lockButtonOverlayController.hide();
+            }
+          }
+        },
+        onLongPressStart: (details) {
+          setState(() {
+            iconColor = audioRecordingMessageTheme.audioButtonPressedColor;
+            iconBackgroundColor =
+                audioRecordingMessageTheme.audioButtonPressedBackgroundColor;
+          });
+          if (widget.useHapticFeedback) {
+            HapticFeedback.selectionClick();
+          }
+      
+          widget.recordingController.record();
+
+          _lockButtonTimer =
+              Timer.periodic(const Duration(seconds: 1), (timer) {
+            _lockButtonOverlayController.show();
+            timer.cancel();
+          });
+        },
+        onLongPressEnd: (details) {
+          if (_lockButtonTimer != null && _lockButtonTimer!.isActive) {
+            _lockButtonTimer!.cancel();
+          }
           if (_lockButtonOverlayController.isShowing) {
             _lockButtonOverlayController.hide();
           }
+          if (widget.recordingController.isLocked) {
+            return;
+          }
 
-          widget.onRecordingCanceled();
-        }
-      },
-      onLongPressStart: (details) {
-        setState(() {
-          iconColor = audioRecordingMessageTheme.audioButtonPressedColor;
-          iconBackgroundColor =
-              audioRecordingMessageTheme.audioButtonPressedBackgroundColor;
-        });
-        if (widget.useHapticFeedback) {
-          HapticFeedback.selectionClick();
-        }
-        widget.onRecordingStart();
-        setState(() {
-          _isRecording = true;
-        });
+          setState(() {
+            iconColor = null;
+            iconBackgroundColor = null;
+          });
+      
+          widget.recordingController.stop();
 
-        _lockButtonTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          _lockButtonOverlayController.show();
-          timer.cancel();
-        });
-      },
-      onLongPressEnd: (details) {
-        if (_lockButtonTimer != null && _lockButtonTimer!.isActive) {
-          _lockButtonTimer!.cancel();
-        }
-        if (_lockButtonOverlayController.isShowing) {
-          _lockButtonOverlayController.hide();
-        }
-
-        setState(() {
-          iconColor = null;
-          iconBackgroundColor = null;
-        });
-        widget.onRecordingEnd();
-        setState(() {
-          _isRecording = false;
-          _offset = Offset.zero;
-        });
-      },
-      child: OverlayPortal(
-        controller: _lockButtonOverlayController,
-        overlayChildBuilder: (context) => LockButtonOverlay(
-          bottomOffset: _overlayOffset,
-        ),
-        child: OverlayPortal(
-          controller: _infoBarOverlayController,
-          overlayChildBuilder: (context) => AudioMessageInfoBannerOverlay(
-            bottomOffset: _overlayOffset,
-          ),
-          child: Builder(
-            builder: (context) {
-              final icon = Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamSvgIcon.iconMic(
-                  size: 24,
-                  color: iconColor,
+          setState(() {
+            _offset = Offset.zero;
+          });
+        },
+        child: ChangeNotifierProvider(
+          create: (_) => widget.recordingController,
+          child: AnimatedCrossFade(
+            duration: const Duration(milliseconds: 300),
+            crossFadeState: widget.recordingController.isLocked
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            secondChild: const MyWidget(),
+            firstChild: NotificationListener(
+              onNotification: (AudioMessageNotification notification) {
+                if (notification is RecordingLockedNotification) {
+                  widget.recordingController.lock();
+                  return true;
+                }
+                return false;
+              },
+              child: GestureStateProvider(
+                state: GestureState(
+                  offset: _offset,
                 ),
-              );
-
-              if (!_isRecording) {
-                return icon;
-              }
-              return SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: GestureStateProvider(
-                        state: GestureState(
-                          offset: _offset,
-                        ),
-                        child: const StreamAudioMessageControllers(),
-                      ),
+                child: OverlayPortal(
+                  controller: _lockButtonOverlayController,
+                  overlayChildBuilder: (context) => LockButtonOverlay(
+                    bottomOffset: _overlayOffset,
+                  ),
+                  child: OverlayPortal(
+                    controller: _infoBarOverlayController,
+                    overlayChildBuilder: (context) =>
+                        AudioMessageInfoBannerOverlay(
+                      bottomOffset: _overlayOffset,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(1.5),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: iconBackgroundColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: icon,
-                      ),
+                    child: Builder(
+                      builder: (context) {
+                        final icon = Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: StreamSvgIcon.iconMic(
+                            size: 24,
+                            color: iconColor,
+                          ),
+                        );
+      
+                        if (!widget.recordingController.isRecording) {
+                          return icon;
+                        }
+                        return SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Expanded(
+                                child: StreamAudioMessageControllers(),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(1.5),
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: iconBackgroundColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: icon,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  ],
+                  ),
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
@@ -220,6 +223,45 @@ class _StreamAudioMessageSendButtonState
         timer.cancel();
         _infoBarOverlayController.hide();
       },
+    );
+  }
+}
+
+class MyWidget extends StatelessWidget {
+  const MyWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final audioRecordingMessageTheme = AudioRecordingMessageTheme.of(context);
+    final iconColor = audioRecordingMessageTheme.recordingIndicatorColorActive;
+
+    return Container(
+      height: 60,
+      width: MediaQuery.of(context).size.width,
+      child:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Row(
+          children: [],
+        ),
+        Row(
+          children: [
+            const SizedBox(width: 8),
+            StreamSvgIcon.iconMic(
+              color: iconColor,
+              size: 24,
+            ),
+            Expanded(
+              child: StreamSvgIcon.iconPause(
+                color: iconColor,
+                size: 24,
+              ),
+            ),
+            StreamSvgIcon.circleUp(
+              size: 24,
+            ),
+          ],
+        ),
+      ]),
     );
   }
 }

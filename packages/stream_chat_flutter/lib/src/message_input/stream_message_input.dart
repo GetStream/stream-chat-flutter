@@ -736,15 +736,24 @@ class StreamMessageInputState extends State<StreamMessageInput>
             _buildSendButton(context)
           else
             StreamAudioMessageSendButton(
-              onRecordingStart: () {
-                _effectiveController.isRecordingAudio = true;
-              },
-              onRecordingEnd: () {
-                _effectiveController.isRecordingAudio = false;
-              },
-              onRecordingCanceled: () {
-                _effectiveController.isRecordingAudio = false;
-              },
+              recordingController: StreamDefaultRecordingController(
+                onRecordingLocked: () {
+                  _effectiveController.isRecordingLocked = true;
+                },
+                onRecordingStart: () {
+                  _effectiveController.isRecordingAudio = true;
+                },
+                onRecordingEnd: () {
+                  _effectiveController
+                    ..isRecordingAudio = false
+                    ..isRecordingLocked = false;
+                },
+                onRecordingCanceled: () {
+                  _effectiveController
+                    ..isRecordingAudio = false
+                    ..isRecordingLocked = false;
+                },
+              ),
             ),
       ],
     );

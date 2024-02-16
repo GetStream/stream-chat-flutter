@@ -63,5 +63,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Some message to describe why you need this permission</string>
 </dict>
 </plist>

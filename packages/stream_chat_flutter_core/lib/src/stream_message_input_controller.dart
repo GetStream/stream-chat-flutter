@@ -66,6 +66,7 @@ class StreamMessageInputController extends ValueNotifier<Message> {
 
   Message _initialMessage;
   bool _isRecordingAudio = false;
+  bool _isRecordingLocked = false;
 
   static TextEditingValue _textEditingValueFromMessage(Message message) {
     final messageText = message.text;
@@ -96,6 +97,15 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   /// Sets the [isRecordingAudio] flag of the message.
   set isRecordingAudio(bool isRecordingAudio) {
     _isRecordingAudio = isRecordingAudio;
+    notifyListeners();
+  }
+
+  /// Returns true if the user locked the audio recording.
+  bool get isRecordingLocked => _isRecordingLocked;
+
+  /// Sets the [isRecordingLocked] flag of the message.
+  set isRecordingLocked(bool isRecordingLocked) {
+    _isRecordingLocked = isRecordingLocked;
     notifyListeners();
   }
 

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget that displays the audio recording controls.
@@ -18,14 +19,15 @@ class StreamAudioMessageControllers extends StatefulWidget {
 class _StreamAudioMessageControllersState
     extends State<StreamAudioMessageControllers> with TickerProviderStateMixin {
   Color? iconColor;
-  DateTime? _startTime;
-  Timer? _timer;
   late final AnimationController _controller;
+  late final StreamRecordingController _recordingController;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final audioRecordingMessageTheme = AudioRecordingMessageTheme.of(context);
+
+    _recordingController = context.watch<StreamRecordingController>();
 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 500),
@@ -40,36 +42,24 @@ class _StreamAudioMessageControllersState
           setState(() {
             iconColor =
                 audioRecordingMessageTheme.recordingIndicatorColorActive;
-            _startTime = DateTime.now();
           });
         }
-      },
-    );
-
-    _timer = Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) {
-        if (_startTime == null) {
-          return;
-        }
-        setState(() {});
       },
     );
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   String get duration {
-    if (_startTime == null) {
+    if (!_recordingController.isRecording) {
       return '0:00';
     }
-    final diff = DateTime.now().difference(_startTime!);
-    return '${diff.inMinutes}:${diff.inSeconds.toString().padLeft(2, '0')}';
+    final duration = _recordingController.duration;
+    return '${duration.inMinutes}:${duration.inSeconds.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -93,7 +83,7 @@ class _StreamAudioMessageControllersState
             color: iconColor,
             size: 24,
           ),
-          if (_startTime != null) ...[
+          if (_recordingController.isRecording) ...[
             const SizedBox(width: 8),
             SizedBox(
               width: 50,

@@ -51,6 +51,7 @@ class AudioRecordingMessageThemeData with Diagnosticable {
     this.audioButtonPressedColor = const Color(0xFF015DFF),
     this.audioButtonPressedBackgroundColor = const Color(0xFFDBDDE1),
     this.lockButtonForegroundColor = const Color(0xFF747881),
+    this.lockButtonForegroundColorLocked = const Color(0xFF015DFF),
     this.lockButtonBackgroundColor = const Color(0xFFDBDDE1),
     this.recordingIndicatorColorIdle = const Color(0xFF747881),
     this.recordingIndicatorColorActive = const Color(0xFFFF515A),
@@ -71,6 +72,9 @@ class AudioRecordingMessageThemeData with Diagnosticable {
 
   /// The color of the lock button foreground
   final Color lockButtonForegroundColor;
+  
+  /// The color of the lock button foreground when locked
+  final Color lockButtonForegroundColorLocked;
 
   /// The color of the lock button background
   final Color lockButtonBackgroundColor;
@@ -92,6 +96,7 @@ class AudioRecordingMessageThemeData with Diagnosticable {
     Color? audioButtonPressedColor,
     Color? audioButtonPressedBackgroundColor,
     Color? lockButtonForegroundColor,
+    Color? lockButtonForegroundColorLocked,
     Color? lockButtonBackgroundColor,
     Color? recordingIndicatorColorIdle,
     Color? recordingIndicatorColorActive,
@@ -107,6 +112,8 @@ class AudioRecordingMessageThemeData with Diagnosticable {
           this.audioButtonPressedBackgroundColor,
       lockButtonForegroundColor:
           lockButtonForegroundColor ?? this.lockButtonForegroundColor,
+      lockButtonForegroundColorLocked: lockButtonForegroundColorLocked ??
+          this.lockButtonForegroundColorLocked,
       lockButtonBackgroundColor:
           lockButtonBackgroundColor ?? this.lockButtonBackgroundColor,
       recordingIndicatorColorIdle:
@@ -139,6 +146,10 @@ class AudioRecordingMessageThemeData with Diagnosticable {
           t)!,
       lockButtonForegroundColor: Color.lerp(
           lockButtonForegroundColor, other.lockButtonForegroundColor, t)!,
+      lockButtonForegroundColorLocked: Color.lerp(
+          lockButtonForegroundColorLocked,
+          other.lockButtonForegroundColorLocked,
+          t)!,
       lockButtonBackgroundColor: Color.lerp(
           lockButtonBackgroundColor, other.lockButtonBackgroundColor, t)!,
       recordingIndicatorColorIdle: Color.lerp(
@@ -160,6 +171,8 @@ class AudioRecordingMessageThemeData with Diagnosticable {
         other.audioButtonPressedBackgroundColor ==
             audioButtonPressedBackgroundColor &&
         other.lockButtonForegroundColor == lockButtonForegroundColor &&
+        other.lockButtonForegroundColorLocked ==
+            lockButtonForegroundColorLocked &&
         other.lockButtonBackgroundColor == lockButtonBackgroundColor &&
         other.recordingIndicatorColorIdle == recordingIndicatorColorIdle &&
         other.recordingIndicatorColorActive == recordingIndicatorColorActive &&
@@ -173,6 +186,7 @@ class AudioRecordingMessageThemeData with Diagnosticable {
       audioButtonPressedColor.hashCode ^
       audioButtonPressedBackgroundColor.hashCode ^
       lockButtonForegroundColor.hashCode ^
+      lockButtonForegroundColorLocked.hashCode ^
       lockButtonBackgroundColor.hashCode ^
       recordingIndicatorColorIdle.hashCode ^
       recordingIndicatorColorActive.hashCode ^
@@ -188,6 +202,7 @@ class AudioRecordingMessageThemeData with Diagnosticable {
       audioButtonPressedBackgroundColor:
           other.audioButtonPressedBackgroundColor,
       lockButtonForegroundColor: other.lockButtonForegroundColor,
+      lockButtonForegroundColorLocked: other.lockButtonForegroundColorLocked,
       lockButtonBackgroundColor: other.lockButtonBackgroundColor,
       recordingIndicatorColorIdle: other.recordingIndicatorColorIdle,
       recordingIndicatorColorActive: other.recordingIndicatorColorActive,
@@ -208,6 +223,8 @@ class AudioRecordingMessageThemeData with Diagnosticable {
           audioButtonPressedBackgroundColor))
       ..add(DiagnosticsProperty(
           'lockButtonForegroundColor', lockButtonForegroundColor))
+      ..add(DiagnosticsProperty(
+          'lockButtonForegroundColorLocked', lockButtonForegroundColorLocked))
       ..add(DiagnosticsProperty(
           'lockButtonBackgroundColor', lockButtonBackgroundColor))
       ..add(DiagnosticsProperty(
