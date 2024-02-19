@@ -60,23 +60,27 @@ abstract class StreamAttachmentWidgetBuilder {
   /// Example:
   ///
   /// ```dart
-  /// final myBuilders = [
-  ///  ...StreamAttachmentWidgetBuilder.defaultBuilders,
-  ///  MyCustomAttachmentBuilder(),
-  ///  MyOtherCustomAttachmentBuilder(),
-  ///  ...
-  /// ];
+  /// final myBuilders = StreamAttachmentWidgetBuilder.defaultBuilders(
+  ///     customAttachmentBuilders: [
+  ///       MyCustomAttachmentBuilder(),
+  ///       MyOtherCustomAttachmentBuilder(),
+  ///     ]
+  ///   );
   /// ```
   ///
   /// **Note**: The order of the builders in the list is important. The first
   /// builder that returns `true` from [canHandle] will be used to build the
   /// widget.
-  static List<StreamAttachmentWidgetBuilder> defaultBuilders({
-    required Message message,
-    ShapeBorder? shape,
-    EdgeInsetsGeometry padding = const EdgeInsets.all(4),
-    StreamAttachmentWidgetTapCallback? onAttachmentTap,
-  }) {
+  ///
+  /// **Note**: Builders provided with [customAttachmentBuilders] will not be
+  /// included into [MixedAttachmentBuilder] and [GalleryAttachmentBuilder],
+  /// use custom attachments in standalone messages.
+  static List<StreamAttachmentWidgetBuilder> defaultBuilders(
+      {required Message message,
+      ShapeBorder? shape,
+      EdgeInsetsGeometry padding = const EdgeInsets.all(4),
+      StreamAttachmentWidgetTapCallback? onAttachmentTap,
+      List<StreamAttachmentWidgetBuilder>? customAttachmentBuilders}) {
     return [
       // Handles a mix of image, gif, video, url and file attachments.
       MixedAttachmentBuilder(
@@ -127,6 +131,9 @@ abstract class StreamAttachmentWidgetBuilder {
           padding: padding,
           onAttachmentTap: onAttachmentTap,
         ),
+
+      // Handles attachment types provided by the user
+      ...?customAttachmentBuilders,
 
       // Fallback builder should always be the last builder in the list.
       const FallbackAttachmentBuilder(),

@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added `customAttachmentBuilders` parameter for `StreamAttachmentWidgetBuilder.defaultBuilders`. 
+  This will allow more easily provide custom attachment builders and will fix problem with providing `onAttachmentTap` method
+
 ## 7.0.1
 
 🐞 Fixed
