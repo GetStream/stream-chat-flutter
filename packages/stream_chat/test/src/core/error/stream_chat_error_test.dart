@@ -87,6 +87,75 @@ void main() {
       expect(error.data?.message, data.message);
     });
 
+    test('.fromDioException with String data', () {
+      const code = 333;
+      const statusCode = 666;
+      const message = 'test-error-message';
+      final options = RequestOptions(path: 'test-path');
+      const data = '''
+      {
+        "code": $code,
+        "StatusCode": $statusCode,
+        "message": "$message"
+      }''';
+      final dioError = DioException(
+        requestOptions: options,
+        response: Response(
+          requestOptions: options,
+          statusCode: statusCode,
+          data: data,
+        ),
+      );
+      final error = StreamChatNetworkError.fromDioException(dioError);
+      expect(error, isNotNull);
+      expect(error.code, code);
+      expect(error.message, message);
+      expect(error.statusCode, statusCode);
+      expect(error.data?.code, code);
+      expect(error.data?.statusCode, statusCode);
+      expect(error.data?.message, message);
+    });
+
+    test('.fromDioException with null data and existing response message', () {
+      const statusCode = 666;
+      const message = 'test-error-message';
+      final options = RequestOptions(path: 'test-path');
+      final dioError = DioException(
+        requestOptions: options,
+        response: Response(
+          requestOptions: options,
+          statusCode: statusCode,
+          statusMessage: message,
+        ),
+      );
+      final error = StreamChatNetworkError.fromDioException(dioError);
+      expect(error, isNotNull);
+      expect(error.code, -1);
+      expect(error.message, message);
+      expect(error.statusCode, statusCode);
+      expect(error.data, isNull);
+    });
+
+    test('.fromDioException with null data and existing exception message', () {
+      const statusCode = 666;
+      const message = 'test-error-message';
+      final options = RequestOptions(path: 'test-path');
+      final dioError = DioException(
+        requestOptions: options,
+        message: message,
+        response: Response(
+          requestOptions: options,
+          statusCode: statusCode,
+        ),
+      );
+      final error = StreamChatNetworkError.fromDioException(dioError);
+      expect(error, isNotNull);
+      expect(error.code, -1);
+      expect(error.message, message);
+      expect(error.statusCode, statusCode);
+      expect(error.data, isNull);
+    });
+
     test('should match if message, code and statusCode is same', () {
       const code = 333;
       const statusCode = 666;
