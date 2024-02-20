@@ -5,6 +5,9 @@
 - Added `ActionsBuilder` signature for function which will return default actions and allows past custom actions.
 - Added `spaceBetweenActions` parameter for `StreamMessageInput` to control distance between actions
 
+🐞 Fixed
+- Removed double focus on `StreamMessageInput` when `focusNode` is provided for web and desktop.
+
 ## 7.0.1
 
 🐞 Fixed
