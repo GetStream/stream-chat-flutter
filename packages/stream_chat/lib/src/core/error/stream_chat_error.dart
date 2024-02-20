@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -89,17 +91,14 @@ class StreamChatNetworkError extends StreamChatError {
   }) : super(message);
 
   ///
-  @Deprecated('Use `StreamChatNetworkError.fromDioException` instead')
-  factory StreamChatNetworkError.fromDioError(DioException error) =
-      StreamChatNetworkError.fromDioException;
-
-  ///
   factory StreamChatNetworkError.fromDioException(DioException exception) {
     final response = exception.response;
     ErrorResponse? errorResponse;
     final data = response?.data;
-    if (data != null) {
+    if (data is Map<String, Object?>) {
       errorResponse = ErrorResponse.fromJson(data);
+    } else if (data is String) {
+      errorResponse = ErrorResponse.fromJson(jsonDecode(data));
     }
     return StreamChatNetworkError.raw(
       code: errorResponse?.code ?? -1,

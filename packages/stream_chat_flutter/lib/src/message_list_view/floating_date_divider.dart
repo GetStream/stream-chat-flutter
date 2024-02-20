@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
@@ -22,7 +23,7 @@ class FloatingDateDivider extends StatelessWidget {
   final bool isThreadConversation;
 
   // ignore: public_member_api_docs
-  final ItemPositionsListener itemPositionListener;
+  final ValueListenable<Iterable<ItemPosition>> itemPositionListener;
 
   // ignore: public_member_api_docs
   final bool reverse;
@@ -38,61 +39,38 @@ class FloatingDateDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 20,
-      left: 0,
-      right: 0,
-      child: BetterStreamBuilder<Iterable<ItemPosition>>(
-        initialData: itemPositionListener.itemPositions.value,
-        stream: valueListenableToStreamAdapter(
-          itemPositionListener.itemPositions,
-        ),
-        comparator: (a, b) {
-          if (a == null || b == null) {
-            return false;
-          }
+    return ValueListenableBuilder(
+      valueListenable: itemPositionListener,
+      builder: (context, positions, child) {
+        if (positions.isEmpty || messages.isEmpty) {
+          return const Offstage();
+        }
+
+        int? index;
+        if (reverse) {
+          index = getTopElementIndex(positions);
+        } else {
+          index = getBottomElementIndex(positions);
+        }
+
+        if ((index == null) ||
+            (!isThreadConversation && index == itemCount - 2) ||
+            (isThreadConversation && index == itemCount - 1)) {
+          return const Offstage();
+        }
+
+        if (index <= 2 || index >= itemCount - 3) {
           if (reverse) {
-            final aTop = getTopElementIndex(a);
-            final bTop = getTopElementIndex(b);
-            return aTop == bTop;
+            index = itemCount - 4;
           } else {
-            final aBottom = getBottomElementIndex(a);
-            final bBottom = getBottomElementIndex(b);
-            return aBottom == bBottom;
+            index = 2;
           }
-        },
-        builder: (context, values) {
-          if (values.isEmpty || messages.isEmpty) {
-            return const Offstage();
-          }
+        }
 
-          int? index;
-          if (reverse) {
-            index = getTopElementIndex(values);
-          } else {
-            index = getBottomElementIndex(values);
-          }
-
-          if ((index == null) ||
-              (!isThreadConversation && index == itemCount - 2) ||
-              (isThreadConversation && index == itemCount - 1)) {
-            return const Offstage();
-          }
-
-          if (index <= 2 || index >= itemCount - 3) {
-            if (reverse) {
-              index = itemCount - 4;
-            } else {
-              index = 2;
-            }
-          }
-
-          final message = messages[index - 2];
-          return dateDividerBuilder != null
-              ? dateDividerBuilder!(message.createdAt.toLocal())
-              : StreamDateDivider(dateTime: message.createdAt.toLocal());
-        },
-      ),
+        final message = messages[index - 2];
+        return dateDividerBuilder?.call(message.createdAt.toLocal()) ??
+            StreamDateDivider(dateTime: message.createdAt.toLocal());
+      },
     );
   }
 }

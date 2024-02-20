@@ -201,6 +201,7 @@ class StreamChatThemeData {
         urlAttachmentTitleStyle: textTheme.footnoteBold,
         urlAttachmentTextStyle: textTheme.footnote,
         urlAttachmentTitleMaxLine: 1,
+        urlAttachmentTextMaxLine: 3,
       ),
       otherMessageTheme: StreamMessageThemeData(
         reactionsBackgroundColor: colorTheme.borders,
@@ -227,6 +228,7 @@ class StreamChatThemeData {
         urlAttachmentTitleStyle: textTheme.footnoteBold,
         urlAttachmentTextStyle: textTheme.footnote,
         urlAttachmentTitleMaxLine: 1,
+        urlAttachmentTextMaxLine: 3,
       ),
       messageInputTheme: StreamMessageInputThemeData(
         borderRadius: BorderRadius.circular(20),

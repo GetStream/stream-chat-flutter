@@ -20,8 +20,8 @@ extension MapX<K, V> on Map<K?, V?> {
 
 /// Useful extension functions for [String]
 extension StringX on String {
-  /// returns the mime type from the passed file name.
-  MediaType? get mimeType {
+  /// returns the media type from the passed file name.
+  MediaType? get mediaType {
     if (toLowerCase().endsWith('heic')) {
       return MediaType.parse('image/heic');
     } else {

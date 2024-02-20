@@ -12,7 +12,7 @@ This guide demonstrates three alternative ways for you to initialize Stream Chat
 
 Before investigating potential solutions, let’s first take a look at the relevant Stream Chat widgets and classes.
 
-Most of the Stream Chat Flutter UI widgets rely on having a [StreamChat](../../customization/stream_chat_and_theming/) ancestor in the widget tree.
+Most of the Stream Chat Flutter UI widgets rely on having a [StreamChat](../02-stream_chat_flutter/stream_chat_and_theming.mdx) ancestor in the widget tree.
 The **StreamChat** widget is an [InheritedWidget](https://api.flutter.dev/flutter/widgets/InheritedWidget-class.html) that exposes the **StreamChatClient** through **BuildContext**.
 This widget also initializes the [StreamChatCore](../04-stream_chat_flutter_core/stream_chat_core.mdx) widget and the **StreamChatTheme**.
 
@@ -489,47 +489,51 @@ class _MyAppState extends State<MyApp> {
 
   late final _router = GoRouter(
     initialLocation: '/',
-    navigatorBuilder: (context, state, child) {
-      if (state.location.startsWith('/chat')) {
-        wasPreviousRouteChat = true;
-        return StreamChat(
-          client: _client,
-          child: ChatSetup(client: _client, child: child),
-        );
-      } else {
-        if (wasPreviousRouteChat) {
-          wasPreviousRouteChat = false;
-          return StreamChat(
-            client: _client,
-            child: child,
-          );
-        } else {
-          return child;
-        }
-      }
-    },
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const HomeScreen(),
+      ShellRoute(
+        builder: (context, state, child) {
+          if (state.uri.host.startsWith('/chat')) {
+            wasPreviousRouteChat = true;
+            return StreamChat(
+              client: _client,
+              child: ChatSetup(client: _client, child: child),
+            );
+          } else {
+            if (wasPreviousRouteChat) {
+              wasPreviousRouteChat = false;
+              return StreamChat(
+                client: _client,
+                child: child,
+              );
+            } else {
+              return child;
+            }
+          }
+        },
         routes: [
           GoRoute(
-            path: 'settings',
-            builder: (context, state) => const SettingsPage(),
-          ),
-          GoRoute(
-            path: 'chat',
-            builder: (context, state) => const ChannelListPage(),
+            path: '/',
+            builder: (context, state) => const HomeScreen(),
             routes: [
               GoRoute(
-                path: 'channel',
-                builder: (context, state) {
-                  final channel = state.extra as Channel;
-                  return StreamChannel(
-                    channel: channel,
-                    child: const ChannelPage(),
-                  );
-                },
+                path: 'settings',
+                builder: (context, state) => const SettingsPage(),
+              ),
+              GoRoute(
+                path: 'chat',
+                builder: (context, state) => const ChannelListPage(),
+                routes: [
+                  GoRoute(
+                    path: 'channel',
+                    builder: (context, state) {
+                      final channel = state.extra as Channel;
+                      return StreamChannel(
+                        channel: channel,
+                        child: const ChannelPage(),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),

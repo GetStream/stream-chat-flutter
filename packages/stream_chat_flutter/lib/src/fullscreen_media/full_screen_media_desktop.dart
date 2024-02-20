@@ -1,13 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:contextmenu/contextmenu.dart';
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
+import 'package:stream_chat_flutter/src/fullscreen_media/gallery_navigation_item.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Returns an instance of [FullScreenMediaDesktop].
@@ -94,7 +92,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
     _pageController = PageController(initialPage: widget.startIndex);
     for (var i = 0; i < widget.mediaAttachmentPackages.length; i++) {
       final attachment = widget.mediaAttachmentPackages[i].attachment;
-      if (attachment.type != 'video') continue;
+      if (attachment.type != AttachmentType.video) continue;
       final package = DesktopVideoPackage(attachment);
       videoPackages[attachment.id] = package;
     }
@@ -298,7 +296,8 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                   p.player.pause();
                 }
               }
-              if (widget.autoplayVideos && currentAttachment.type == 'video') {
+              if (widget.autoplayVideos &&
+                  currentAttachment.type == AttachmentType.video) {
                 final package = videoPackages[currentAttachment.id]!;
                 package.player.play();
               }
@@ -318,44 +317,21 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                         : Colors.black,
                     child: Builder(
                       builder: (context) {
-                        if (attachment.type == 'image' ||
-                            attachment.type == 'giphy') {
-                          final imageUrl = attachment.imageUrl ??
-                              attachment.assetUrl ??
-                              attachment.thumbUrl;
-
-                          return PhotoView(
-                            imageProvider: (imageUrl == null &&
-                                    attachment.localUri != null &&
-                                    attachment.file?.bytes != null)
-                                ? Image.memory(attachment.file!.bytes!).image
-                                : CachedNetworkImageProvider(imageUrl!),
-                            errorBuilder: (_, __, ___) =>
-                                const AttachmentError(),
-                            loadingBuilder: (context, _) {
-                              final image = Image.asset(
-                                'images/placeholder.png',
-                                fit: BoxFit.cover,
-                                package: 'stream_chat_flutter',
-                              );
-                              final colorTheme =
-                                  StreamChatTheme.of(context).colorTheme;
-                              return Shimmer.fromColors(
-                                baseColor: colorTheme.disabled,
-                                highlightColor: colorTheme.inputBg,
-                                child: image,
-                              );
-                            },
+                        if (attachment.type == AttachmentType.image ||
+                            attachment.type == AttachmentType.giphy) {
+                          return PhotoView.customChild(
                             maxScale: PhotoViewComputedScale.covered,
                             minScale: PhotoViewComputedScale.contained,
-                            heroAttributes: PhotoViewHeroAttributes(
-                              tag: widget.mediaAttachmentPackages,
-                            ),
                             backgroundDecoration: const BoxDecoration(
                               color: Colors.transparent,
                             ),
+                            child: StreamMediaAttachmentThumbnail(
+                              media: attachment,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
                           );
-                        } else if (attachment.type == 'video') {
+                        } else if (attachment.type == AttachmentType.video) {
                           final package = videoPackages[attachment.id]!;
                           package.player.open(
                             Playlist(
@@ -397,74 +373,6 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                 },
               );
             },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A widget for desktop and web users to be able to navigate left and right
-/// through a gallery of images.
-class GalleryNavigationItem extends StatelessWidget {
-  /// Builds a [GalleryNavigationItem].
-  const GalleryNavigationItem({
-    super.key,
-    required this.icon,
-    this.iconSize = 48,
-    required this.onPressed,
-    required this.opacityAnimation,
-    this.left,
-    this.right,
-  });
-
-  /// The icon to display.
-  final Widget icon;
-
-  /// The size of the icon.
-  ///
-  /// Defaults to 48.
-  final double iconSize;
-
-  /// The callback to perform when the button is clicked.
-  final VoidCallback onPressed;
-
-  /// The animation for showing & hiding this widget.
-  final ValueListenable<bool> opacityAnimation;
-
-  /// The left-hand placement of the button.
-  final double? left;
-
-  /// The right-hand placement of the button.
-  final double? right;
-
-  @override
-  Widget build(BuildContext context) {
-    return PlatformWidgetBuilder(
-      desktop: (_, child) => child,
-      web: (_, child) => child,
-      child: Positioned(
-        left: left,
-        right: right,
-        top: MediaQuery.of(context).size.height / 2,
-        child: ValueListenableBuilder<bool>(
-          valueListenable: opacityAnimation,
-          builder: (context, shouldShow, child) {
-            return AnimatedOpacity(
-              opacity: shouldShow ? 1 : 0,
-              duration: kThemeAnimationDuration,
-              child: child,
-            );
-          },
-          child: Material(
-            color: Colors.transparent,
-            type: MaterialType.circle,
-            clipBehavior: Clip.antiAlias,
-            child: IconButton(
-              icon: icon,
-              iconSize: iconSize,
-              onPressed: onPressed,
-            ),
           ),
         ),
       ),

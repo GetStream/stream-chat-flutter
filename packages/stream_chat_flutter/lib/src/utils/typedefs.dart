@@ -60,14 +60,12 @@ typedef OnUserAvatarPress = void Function(User);
 typedef PlaceholderUserImage = Widget Function(BuildContext, User);
 
 /// {@template editMessageInputBuilder}
-// ignore: deprecated_member_use_from_same_package
 /// A widget builder for building a pre-populated [MessageInput] for use in
 /// editing messages.
 /// {@endtemplate}
 typedef EditMessageInputBuilder = Widget Function(BuildContext, Message);
 
 /// {@template channelListHeaderTitleBuilder}
-// ignore: deprecated_member_use_from_same_package
 /// A widget builder for custom [ChannelListHeader] title widgets.
 /// {@endtemplate}
 typedef ChannelListHeaderTitleBuilder = Widget Function(
@@ -86,12 +84,6 @@ typedef ChannelTapCallback = void Function(Channel, Widget?);
 /// or clicked.
 /// {@endtemplate}
 typedef ChannelInfoCallback = void Function(Channel);
-
-/// {@template channelPreviewBuilder}
-/// Builder used to create a custom ChannelPreview for a [Channel]
-/// {@endtemplate}
-@Deprecated('Use StreamChannelListViewIndexedWidgetBuilder instead')
-typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
 /// {@template viewInfoCallback}
 /// Callback for when 'View Info' is tapped
@@ -164,7 +156,6 @@ typedef MentionTileOverlayBuilder = Widget Function(
 /// {@template userMentionTileBuilder}
 /// A builder function for representing a custom user mention tile.
 ///
-// ignore: deprecated_member_use_from_same_package
 /// Use [UserMentionTile] for the default implementation.
 /// {@endtemplate}
 typedef UserMentionTileBuilder = Widget Function(
@@ -202,15 +193,6 @@ typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
   Attachment,
 );
 
-/// {@template onMessageWidgetAttachmentTap}
-/// The action to perform when an attachment in an [StreamMessageWidget]
-/// is tapped or clicked.
-/// {@endtemplate}
-typedef OnMessageWidgetAttachmentTap = void Function(
-  Message message,
-  Attachment attachment,
-);
-
 /// {@template attachmentBuilder}
 /// A widget builder for representing attachments.
 /// {@endtemplate}
@@ -243,7 +225,6 @@ typedef OnReactionsHover = void Function(bool isHovering);
 
 /// {@template messageSearchItemTapCallback}
 /// The action to perform when tapping or clicking on a user in a
-// ignore: deprecated_member_use_from_same_package
 /// [MessageSearchListView].
 /// {@endtemplate}
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
@@ -289,6 +270,14 @@ typedef SystemMessageBuilder = Widget Function(
   Message,
 );
 
+/// {@template ephemeralMessageBuilder}
+/// A widget builder for creating custom ephemeral messages.
+/// {@endtemplate}
+typedef EphemeralMessageBuilder = Widget Function(
+  BuildContext,
+  Message,
+);
+
 /// {@template threadBuilder}
 /// A widget builder for creating custom thread UI.
 /// {@endtemplate}
@@ -298,11 +287,6 @@ typedef ThreadBuilder = Widget Function(BuildContext context, Message? parent);
 /// The action to perform when threads are tapped.
 /// {@endtemplate}
 typedef ThreadTapCallback = void Function(Message, Widget?);
-
-/// {@template onMessageSwiped}
-/// The action to perform when a message is swiped.
-/// {@endtemplate}
-typedef OnMessageSwiped = void Function(Message);
 
 /// {@template spacingWidgetBuilder}
 /// A widget builder for creating certain spacing after widgets.

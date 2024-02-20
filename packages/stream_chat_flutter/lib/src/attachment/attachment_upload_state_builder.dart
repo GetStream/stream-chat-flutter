@@ -198,6 +198,7 @@ class _FailedState extends StatelessWidget {
       children: [
         _IconButton(
           icon: StreamSvgIcon.retry(
+            size: 14,
             color: theme.colorTheme.barsBg,
           ),
           onPressed: () {
@@ -217,6 +218,7 @@ class _FailedState extends StatelessWidget {
               ),
               child: Text(
                 context.translations.uploadErrorLabel,
+                textAlign: TextAlign.center,
                 style: theme.textTheme.footnote.copyWith(
                   color: theme.colorTheme.barsBg,
                 ),

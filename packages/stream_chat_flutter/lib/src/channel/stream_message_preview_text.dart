@@ -36,11 +36,11 @@ class StreamMessagePreviewText extends StatelessWidget {
 
     final messageTextParts = [
       ...messageAttachments.map((it) {
-        if (it.type == 'image') {
+        if (it.type == AttachmentType.image) {
           return '📷';
-        } else if (it.type == 'video') {
+        } else if (it.type == AttachmentType.video) {
           return '🎬';
-        } else if (it.type == 'giphy') {
+        } else if (it.type == AttachmentType.giphy) {
           return '[GIF]';
         }
         return it == message.attachments.last

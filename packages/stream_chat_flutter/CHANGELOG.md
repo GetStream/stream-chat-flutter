@@ -1,3 +1,80 @@
+## Upcoming
+
+✅ Added
+
+- Added `ActionsBuilder` signature for function which will return default actions and allows past custom actions.
+- Added `spaceBetweenActions` parameter for `StreamMessageInput` to control distance between actions
+
+## 7.0.1
+
+🐞 Fixed
+
+- [[#1804]](https://github.com/GetStream/stream-chat-flutter/issues/1804) Fixed 
+  `StreamAttachmentWidgetBuilder`` is not accessible in 7.0.0.
+- Updated `stream_chat_flutter_core` dependency
+  to [`7.0.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+## 7.0.0
+
+🛑️ Breaking
+
+- Removed deprecated `ChannelPreview` widget. Use `StreamChannelListTile` instead.
+- Removed deprecated `ChannelPreviewBuilder`, Use `StreamChannelListViewIndexedWidgetBuilder` instead.
+- Removed deprecated `StreamUserItem` widget. Use `StreamUserListTile` instead.
+- Removed deprecated `ReturnActionType` enum, No longer used.
+- Removed deprecated `StreamMessageInput.attachmentThumbnailBuilders` parameter. Use
+  `StreamMessageInput.mediaAttachmentBuilder` instead.
+- Removed deprecated `MessageListView.onMessageSwiped` parameter. Try wrapping the `MessageWidget` with
+  a `Swipeable`, `Dismissible` or a custom widget to achieve the swipe to reply behaviour.
+- Removed deprecated `MessageWidget.showReactionPickerIndicator` parameter. Use `MessageWidget.showReactionPicker`
+  instead.
+- Removed deprecated `MessageWidget.bottomRowBuilder` parameter. Use `MessageWidget.bottomRowBuilderWithDefaultWidget`
+  instead.
+- Removed deprecated `MessageWidget.deletedBottomRowBuilder` parameter.
+  Use `MessageWidget.deletedBottomRowBuilderWithDefaultWidget` instead.
+- Removed deprecated `MessageWidget.usernameBuilder` parameter. Use `MessageWidget.usernameBuilderWithDefaultWidget`
+  instead.
+- Removed deprecated `MessageTheme.linkBackgroundColor` parameter. Use `MessageTheme.urlAttachmentBackgroundColor`
+  instead.
+- Removed deprecated `showConfirmationDialog` method. Use `showConfirmationBottomSheet` instead.
+- Removed deprecated `showInfoDialog` method. Use `showInfoBottomSheet` instead.
+- Removed deprecated `wrapAttachmentWidget` method. Use `WrapAttachmentWidget` class instead.
+- Removed deprecated `showReactionPickerTail` parameter. Use `showReactionPicker` instead.
+
+✅ Added
+
+- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content insertion configuration.
+  [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
+
+  ```dart
+  StreamMessageInput(
+    ...,
+    contentInsertionConfiguration: ContentInsertionConfiguration(
+      onContentInserted: (content) {
+        // Do something with the content.
+        controller.addAttachment(...);
+      },
+    ),
+  )
+  ```
+
+🔄 Changed
+
+- Updated `jiffy` dependency to `^6.2.1`.
+- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
+- Updated `stream_chat_flutter_core` dependency
+  to [`7.0.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+# 6.12.0
+
+🐞 Fixed
+
+- Fix render overflow issue with `StreamTypingIndicator`. It now uses `Flexible` 
+  inside `Row`.
+
+- [[#1759]](https://github.com/GetStream/stream-chat-flutter/issues/1759) Fixed
+  The Reaction Picker is not being removed when I set showReactionPicker to false.
+
 # 6.11.0
 
 🐞 Fixed
@@ -17,7 +94,7 @@
 - Added support for overriding the `MessageWidget.onReactionsHover` callback.
   > **Note**
   > Used only in desktop devices (web and desktop).
-
+  
 ## 6.9.0
 
 🐞 Fixed

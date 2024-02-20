@@ -1,3 +1,40 @@
+## Unreleased
+
+🐞 Fixed
+
+- [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file 
+  attachments from the CDN, when the message get's hard deleted.
+- [[#1819]](https://github.com/GetStream/stream-chat-flutter/issues/1819) Handle network errors
+  with String payload.
+
+## 7.0.1
+
+🐞 Fixed
+
+- [[#1811]](https://github.com/GetStream/stream-chat-flutter/issues/1811) Bumped `UUID` dependency to `^4.2.1`. This
+  **might** produce a **breaking change** if you your code depends in `UUID` `3.x.x` directly or indirectly.
+
+## 7.0.0
+  
+- 🛑️ Breaking
+
+- Removed deprecated `channelQuery.sort` property. Use `channelStateSort` instead.
+- Removed deprecated `RetryPolicy.retryTimeout` property. Use `delayFactor` instead.
+- Removed deprecated `StreamChatNetworkError.fromDioError` constructor. Use `StreamChatNetworkError.fromDioException`
+  instead.
+- Removed deprecated `MessageSendingStatus` enum. Use `MessageState` instead.
+
+🔄 Changed
+
+- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
+  
+# 6.10.0
+
+🐞 Fixed
+
+- [[#1753]](https://github.com/GetStream/stream-chat-flutter/issues/1753) Fixed Unhandled null 
+  check operator exception when user is removed from a channel.
+
 ## 6.9.0
 
 🐞 Fixed

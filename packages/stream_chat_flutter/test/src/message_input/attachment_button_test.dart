@@ -14,7 +14,7 @@ void main() {
             child: AttachmentButton(
               color: StreamChatThemeData.light()
                   .messageInputTheme
-                  .actionButtonIdleColor!,
+                  .actionButtonIdleColor,
               onPressed: () {
                 count++;
               },
@@ -39,7 +39,7 @@ void main() {
             child: AttachmentButton(
               color: StreamChatThemeData.light()
                   .messageInputTheme
-                  .actionButtonIdleColor!,
+                  .actionButtonIdleColor,
               onPressed: () {},
             ),
           ),
