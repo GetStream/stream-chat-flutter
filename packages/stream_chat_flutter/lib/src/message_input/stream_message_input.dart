@@ -899,10 +899,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     maxHeight: widget.maxHeight,
                     child: PlatformWidgetBuilder(
                       web: (context, child) => Focus(
+                        skipTraversal: true,
                         onKeyEvent: _handleKeyPressed,
                         child: child!,
                       ),
                       desktop: (context, child) => Focus(
+                        skipTraversal: true,
                         onKeyEvent: _handleKeyPressed,
                         child: child!,
                       ),
