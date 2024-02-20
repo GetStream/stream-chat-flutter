@@ -4,6 +4,8 @@
 
 - [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file 
   attachments from the CDN, when the message get's hard deleted.
+- [[#1819]](https://github.com/GetStream/stream-chat-flutter/issues/1819) Handle network errors
+  with String payload.
 
 ## 7.0.1
 
