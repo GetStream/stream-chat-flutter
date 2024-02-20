@@ -46,6 +46,10 @@ class MockVoidCallback extends Mock {
   void call();
 }
 
+class MockVoidSingleParamCallback<T> extends Mock {
+  void call(T param);
+}
+
 class MockAttachmentHandler extends Mock implements StreamAttachmentHandler {}
 
 class MockMember extends Mock implements Member {}
