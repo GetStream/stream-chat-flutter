@@ -137,28 +137,46 @@ StreamMessageWidget(
 
 ### Building attachments
 
-The `customAttachmentBuilders` property allows you to build any kind of attachment (inbuilt or custom)
+The `attachmentBuilders` property allows you to build any kind of attachment (inbuilt or custom)
 in your own way. While a separate guide is written for this, it is included here because of relevance.
 
 ```dart
+class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
+  @override
+  bool canHandle(
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    final imageAttachments = attachments['location'];
+    return imageAttachments != null && imageAttachments.length == 1;
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    final attachmentWidget = Image.network(
+      _buildMapAttachment(
+        attachments[0].extraData['latitude'],
+        attachments[0].extraData['longitude'],
+      ),
+    );
+
+    return WrapAttachmentWidget(
+      attachmentWidget: attachmentWidget, 
+      attachmentShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    );
+  }
+}
+
 StreamMessageListView(
   messageBuilder: (context, details, messages, defaultMessage) {
     return defaultMessage.copyWith(
-        customAttachmentBuilders: {
-          'location': (context, message, attachments) {
-            final attachmentWidget = Image.network(
-              _buildMapAttachment(
-                attachments[0].extraData['latitude'],
-                attachments[0].extraData['longitude'],
-              ),
-            );
-
-            return WrapAttachmentWidget(
-              attachmentWidget: attachmentWidget, 
-              attachmentShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            );
-          }
-        },
+        attachmentBuilders: const [
+            LocationAttachmentBuilder(),
+        ],
     );
   },
 ),
