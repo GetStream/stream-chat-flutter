@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 7.0.2
+
 🐞 Fixed
 
 - [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file 

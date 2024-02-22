@@ -1,3 +1,9 @@
+## Unreleased
+
+## 7.0.2
+
+* Updated `stream_chat_flutter` dependency to [`7.0.2`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 7.0.1
 
 * Updated `stream_chat_flutter` dependency to [`7.0.1`](https://pub.dev/packages/stream_chat_flutter/changelog).
