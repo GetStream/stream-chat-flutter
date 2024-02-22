@@ -79,6 +79,45 @@ streamChatClient.getChannelStates(
   channelStateSort: [SortOption('last_message_at')],
 )
 ```
+- `MessageWidget.customAttachmentBuilders` has been removed in favor of `MessageWidget.attachmentBuilders`.
+```dart
+/// BEFORE
+MessageWidget(
+  customAttachmentBuilders: {
+    'image': (context, message, attachment) => // build image attachment,
+  },
+  ...
+)
+```
+```dart
+/// AFTER
+class CustomImageAttachmentBuilder extends StreamAttachmentWidgetBuilder {
+  @override
+  bool canHandle(
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    // Custom logic to check 
+    // if the attachment can be handled by this builder
+    ...
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    // custom build implementation
+    ...
+  }
+}
+
+MessageWidget(
+  attachmentBuilders: const [CustomImageAttachmentBuilder()],
+  ...
+)
+```
 - `RetryPolicy.retryTimeout` has been removed in favor of `RetryPolicy.delayFactor`.
 - `StreamChatNetworkError.fromDioError` has been removed in favor of `StreamChatNetworkError.fromDioException`.
 - `MessageSendingStatus` has been removed in favor of `MessageState`.
