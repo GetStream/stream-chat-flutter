@@ -1700,8 +1700,6 @@ class ClientState {
   /// The current user as a stream
   Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
 
-  // coverage:ignore-end
-
   /// The current user
   Map<String, User> get users => _usersController.value;
 

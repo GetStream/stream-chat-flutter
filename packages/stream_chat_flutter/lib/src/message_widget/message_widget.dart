@@ -486,6 +486,7 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@template onReactionsHover}
   ///
   /// Note: Only used in desktop devices (web and desktop).
+  /// {@endtemplate}
   final OnReactionsHover? onReactionsHover;
 
   /// {@template customActions}

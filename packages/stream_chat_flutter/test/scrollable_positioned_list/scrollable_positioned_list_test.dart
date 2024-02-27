@@ -1308,15 +1308,15 @@ void main() {
     final itemPositionsListener = ItemPositionsListener.create();
     await setUpWidgetTest(tester, itemPositionsListener: itemPositionsListener);
 
-    final root = WidgetsBinding
-        .instance.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    tester.binding.renderViews.forEach((renderView) {
+      final root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
+      final semanticNodes = <SemanticsNode>[root];
 
-    final semanticNodes = <SemanticsNode>[root];
+      collectSemanticNodes(root, semanticNodes);
 
-    collectSemanticNodes(root, semanticNodes);
-
-    expect(semanticNodes.where((element) => element.label == 'Item 10'),
-        isNotEmpty);
+      expect(semanticNodes.where((element) => element.label == 'Item 10'),
+          isNotEmpty);
+    });
   });
 
   testWidgets('padding test - centered at top', (WidgetTester tester) async {
