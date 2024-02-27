@@ -138,7 +138,6 @@ typedef AttachmentThumbnailBuilder = Widget Function(
 
 /// {@macro mentionTileBuilder}
 /// A widget builder for representing a custom mention tile.
-/// {@endtemplate}
 typedef MentionTileBuilder = Widget Function(
   BuildContext context,
   Member member,

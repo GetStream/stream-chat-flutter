@@ -9,7 +9,6 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@macro streamGalleryHeader}
 /// Header/AppBar widget for media display screen
-/// {@endtemplate}
 class StreamGalleryHeader extends StatelessWidget
     implements PreferredSizeWidget {
   /// {@macro streamGalleryHeader}
