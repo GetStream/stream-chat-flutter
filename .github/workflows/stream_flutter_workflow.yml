@@ -87,6 +87,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: "Install required native library"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmpv-dev
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
