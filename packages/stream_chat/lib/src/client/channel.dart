@@ -2101,56 +2101,59 @@ class ChannelClientState {
     }));
   }
 
-  /// Updates the [message] in the state if it exists. Adds it otherwise.
+  /// Updates the message in the state if it exists. Adds it otherwise.
   void updateMessage(Message message) {
-    // Regular messages, which are shown in channel.
+    // Determine if the message should be displayed in the channel view.
     if (message.parentId == null || message.showInChannel == true) {
+      // Create a new list of messages to avoid modifying the original
+      // list directly.
       var newMessages = [...messages];
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
+
       if (oldIndex != -1) {
+        // If the message already exists, prepare it for update.
         final oldMessage = newMessages[oldIndex];
         var updatedMessage = message.syncWith(oldMessage);
-        // Add quoted message to the message if it is not present.
-        if (message.quotedMessageId != null && message.quotedMessage == null) {
+
+        // Preserve quotedMessage if the update doesn't include a new
+        // quotedMessage.
+        if (message.quotedMessageId != null &&
+            message.quotedMessage == null &&
+            oldMessage.quotedMessage != null) {
           updatedMessage = updatedMessage.copyWith(
             quotedMessage: oldMessage.quotedMessage,
           );
         }
+
+        // Update the message in the list.
         newMessages[oldIndex] = updatedMessage;
 
-        // Update quoted message reference for every message if available.
-        newMessages = [...newMessages].map((it) {
-          // Early return if the message doesn't have a quoted message.
+        // Update quotedMessage references in all messages.
+        newMessages = newMessages.map((it) {
+          // Skip if the current message does not quote the updated message.
           if (it.quotedMessageId != message.id) return it;
 
-          // Setting it to null will remove the quoted message from the message
-          // So, we are setting the same message but with the deleted state.
-          return it.copyWith(
-            quotedMessage: updatedMessage.copyWith(
-              type: 'deleted',
-              deletedAt: DateTime.now(),
-            ),
-          );
+          // Update the quotedMessage only if the updatedMessage indicates
+          // deletion.
+          if (message.type == 'deleted') {
+            return it.copyWith(
+              quotedMessage: updatedMessage.copyWith(
+                type: message.type,
+                deletedAt: message.deletedAt,
+              ),
+            );
+          }
+          return it;
         }).toList();
       } else {
+        // If the message is new, add it to the list.
         newMessages.add(message);
       }
 
-      final newPinnedMessages = [...pinnedMessages];
-      final oldPinnedIndex =
-          newPinnedMessages.indexWhere((m) => m.id == message.id);
+      // Handle updates to pinned messages.
+      final newPinnedMessages = _updatePinnedMessages(message);
 
-      // Handle pinned messages
-      if (message.pinned) {
-        if (oldPinnedIndex != -1) {
-          newPinnedMessages[oldPinnedIndex] = message;
-        } else {
-          newPinnedMessages.add(message);
-        }
-      } else {
-        newPinnedMessages.removeWhere((m) => m.id == message.id);
-      }
-
+      // Apply the updated lists to the channel state.
       _channelState = _channelState.copyWith(
         messages: newMessages.sorted(_sortByCreatedAt),
         pinnedMessages: newPinnedMessages,
@@ -2160,10 +2163,34 @@ class ChannelClientState {
       );
     }
 
-    // Thread messages, which are shown in thread page.
+    // If the message is part of a thread, update thread information.
     if (message.parentId != null) {
       updateThreadInfo(message.parentId!, [message]);
     }
+  }
+
+  /// Updates the list of pinned messages based on the current message's
+  /// pinned status.
+  List<Message> _updatePinnedMessages(Message message) {
+    var newPinnedMessages = [...pinnedMessages];
+    final oldPinnedIndex =
+        newPinnedMessages.indexWhere((m) => m.id == message.id);
+
+    if (message.pinned) {
+      // If the message is pinned, add or update it in the list of pinned
+      // messages.
+      if (oldPinnedIndex != -1) {
+        newPinnedMessages[oldPinnedIndex] = message;
+      } else {
+        newPinnedMessages.add(message);
+      }
+    } else {
+      // If the message is not pinned, remove it from the list of pinned
+      // messages.
+      newPinnedMessages.removeWhere((m) => m.id == message.id);
+    }
+
+    return newPinnedMessages;
   }
 
   /// Remove a [message] from this [channelState].
