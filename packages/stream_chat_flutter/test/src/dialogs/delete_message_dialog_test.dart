@@ -4,6 +4,8 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/dialogs/delete_message_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
+
 void main() {
   testWidgets('DeleteMessageDialog', (tester) async {
     await tester.pumpWidget(
@@ -30,7 +32,7 @@ void main() {
 
   testGoldens('golden test for DeleteMessageDialog', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: Scaffold(
           body: Builder(
             builder: (context) {

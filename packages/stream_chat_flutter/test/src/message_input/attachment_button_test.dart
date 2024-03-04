@@ -4,6 +4,8 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
+
 void main() {
   testWidgets('SendButton onPressed works', (tester) async {
     var count = 0;
@@ -33,7 +35,7 @@ void main() {
 
   testGoldens('golden test for AttachmentButton', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: Scaffold(
           body: Center(
             child: AttachmentButton(

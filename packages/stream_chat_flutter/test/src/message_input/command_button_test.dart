@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 
+import '../material_app_wrapper.dart';
+
 void main() {
   testWidgets('CommandButton onPressed works', (tester) async {
     var count = 0;
@@ -72,7 +74,7 @@ void main() {
 
   testGoldens('golden test for CommandButton', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: Scaffold(
           body: Center(
             child: CommandButton(
