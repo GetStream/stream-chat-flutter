@@ -3,6 +3,9 @@
 🐞 Fixed
 - Fixed quoted message having 0 bottom padding. All sides now have 8 padding 
 
+🔄 Changed
+- Updated `photo_manager` dependency to `^3.0.0`
+
 ## 7.0.2
 
 ✅ Added
