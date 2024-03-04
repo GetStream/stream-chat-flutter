@@ -2101,7 +2101,7 @@ class ChannelClientState {
     }));
   }
 
-  /// Updates the message in the state if it exists. Adds it otherwise.
+  /// Updates the [message] in the state if it exists. Adds it otherwise.
   void updateMessage(Message message) {
     // Determine if the message should be displayed in the channel view.
     if (message.parentId == null || message.showInChannel == true) {
@@ -2172,7 +2172,7 @@ class ChannelClientState {
   /// Updates the list of pinned messages based on the current message's
   /// pinned status.
   List<Message> _updatePinnedMessages(Message message) {
-    var newPinnedMessages = [...pinnedMessages];
+    final newPinnedMessages = [...pinnedMessages];
     final oldPinnedIndex =
         newPinnedMessages.indexWhere((m) => m.id == message.id);
 
