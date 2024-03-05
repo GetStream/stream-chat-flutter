@@ -5,6 +5,7 @@
 
 🔄 Changed
 - Updated `photo_manager` dependency to `^3.0.0`
+- Updated `lottie` to `>=2.6.0 <4.0.0`
 
 ## 7.0.2
 
