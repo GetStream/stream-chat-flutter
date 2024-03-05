@@ -84,7 +84,7 @@ class ParseAttachments extends StatelessWidget {
             builder: (context) {
               return StreamChannel(
                 channel: channel,
-                child: StreamFullScreenMediaBuilder(
+                child: StreamFullScreenMedia(
                   userName: message.user!.name,
                   mediaAttachmentPackages: attachments,
                   startIndex: attachments.indexWhere(

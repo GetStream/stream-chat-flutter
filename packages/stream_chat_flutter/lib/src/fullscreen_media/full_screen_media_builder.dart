@@ -1,30 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/fullscreen_media/fsm_stub.dart'
-    if (dart.library.io) 'full_screen_media_desktop.dart' as desktop_fsm;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template fsmBuilder}
-/// A wrapper widget for conditionally providing the proper
-/// StreamFullScreenMedia widget when writing an application that targets
-/// all available Flutter platforms (Android, iOS, macOS, Windows, Linux,
-/// & Web).
-///
-/// This is required because:
-/// * `package:video_player` and `package:chewie` do not support macOS, Windows,
-/// & Linux, but _do_ support Android, iOS, & Web.
-/// * `package:dart_vlc` _does_ support macOS, Windows, & Linux via FFI. This
-/// has the unfortunate consequence of not supporting Web.
-///
-/// This widget makes use of dart's conditional imports to ensure that Stream's
-/// desktop implementation of StreamFullScreenMedia is not imported when
-/// building applications that target web. Additionally, this widget ensures
-/// that applications targeting mobile platforms do not build the version of
-/// StreamFullScreenMedia that targets desktop platforms (even though
-/// `package:dart_vlc` technically supports iOS).
-/// {@endtemplate}
+/// A full screen media widget
+@Deprecated('Use StreamFullScreenMedia instead.')
 class StreamFullScreenMediaBuilder extends StatelessWidget {
-  /// {@macro fsmBuilder}
+  /// Instantiate a new StreamFullScreenMediaBuilder
   const StreamFullScreenMediaBuilder({
     super.key,
     required this.mediaAttachmentPackages,
@@ -61,18 +41,6 @@ class StreamFullScreenMediaBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb && isDesktopVideoPlayerSupported) {
-      return desktop_fsm.getFsm(
-        mediaAttachmentPackages: mediaAttachmentPackages,
-        startIndex: startIndex,
-        userName: userName,
-        autoplayVideos: autoplayVideos,
-        onShowMessage: onShowMessage,
-        onReplyMessage: onReplyMessage,
-        attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-      );
-    }
-
     return StreamFullScreenMedia(
       mediaAttachmentPackages: mediaAttachmentPackages,
       startIndex: startIndex,

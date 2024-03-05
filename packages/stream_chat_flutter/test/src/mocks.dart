@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat_flutter/src/video/vlc/vlc_manager_desktop.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class MockClient extends Mock implements StreamChatClient {
@@ -59,8 +58,6 @@ class MockUser extends Mock implements User {}
 class MockOwnUser extends Mock implements OwnUser {}
 
 class MockAttachment extends Mock implements Attachment {}
-
-class MockVlcManagerDesktop extends Mock implements VlcManagerDesktop {}
 
 class MockStreamMemberListController extends Mock
     implements StreamMemberListController {

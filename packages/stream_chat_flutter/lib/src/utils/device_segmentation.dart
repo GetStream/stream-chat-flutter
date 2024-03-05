@@ -12,9 +12,9 @@ bool get isDesktopDevice =>
     CurrentPlatform.isWindows ||
     CurrentPlatform.isLinux;
 
-/// Returns true if the app is running on windows or linux platform.
+/// Returns true if the app is running on Microsoft Windows or GNU/Linux.
 bool get isDesktopVideoPlayerSupported =>
-    // Dart VLC is not supported on MacOS.
+    // package:media_kit is not used on macOS.
     !CurrentPlatform.isMacOS &&
     (CurrentPlatform.isWindows || CurrentPlatform.isLinux);
 
