@@ -1,5 +1,8 @@
 ## Unreleased
 
+🐞 Fixed
+- Fixes a thread message causing reply messages on the main thread to be considered deleted
+
 ## 7.0.2
 
 🐞 Fixed
