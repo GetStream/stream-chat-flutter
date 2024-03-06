@@ -1,4 +1,4 @@
-## Unreleased
+## 7.1.0
 
 🐞 Fixed
 - Fixed quoted message having 0 bottom padding. All sides now have 8 padding 
