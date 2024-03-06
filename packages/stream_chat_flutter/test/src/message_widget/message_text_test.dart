@@ -5,6 +5,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 import '../simple_frame.dart';
 
@@ -216,7 +217,8 @@ and a list:
 cool.''';
 
       await tester.pumpWidgetBuilder(
-        materialAppWrapper()(SimpleFrame(
+        MaterialAppWrapper(
+            home: SimpleFrame(
           child: StreamChat(
             client: client,
             connectivityStream: Stream.value(ConnectivityResult.wifi),

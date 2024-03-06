@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
+
 void main() {
   testWidgets(
     'StreamSendingIndicator shows sizedBox if messsage state is initial',
@@ -54,7 +56,7 @@ void main() {
       'golden test for StreamSendingIndicator with StreamSvgIcon.checkAll',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(
@@ -75,7 +77,7 @@ void main() {
   testGoldens('golden test for StreamSendingIndicator with StreamSvgIcon.check',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(
@@ -96,7 +98,7 @@ void main() {
       'golden test for StreamSendingIndicator with Icon(Icons.access_time)',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(

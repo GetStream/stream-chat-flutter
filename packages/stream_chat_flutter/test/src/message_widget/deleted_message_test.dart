@@ -4,7 +4,9 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
+import '../widget_tester_extension.dart';
 
 void main() {
   testWidgets(
@@ -65,20 +67,20 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(10));
 
-      final materialTheme = ThemeData.light();
+      final materialTheme = ThemeData.light(
+        useMaterial3: false,
+      );
       final theme = StreamChatThemeData.fromTheme(materialTheme);
       await tester.pumpWidgetBuilder(
-        materialAppWrapper(
-          theme: materialTheme,
-        )(
-          StreamChat(
-            streamChatThemeData: theme,
-            client: client,
-            connectivityStream: Stream.value(ConnectivityResult.mobile),
-            child: StreamChannel(
-              showLoading: false,
-              channel: channel,
-              child: Center(
+        StreamChat(
+          streamChatThemeData: theme,
+          client: client,
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          child: StreamChannel(
+            showLoading: false,
+            channel: channel,
+            child: Scaffold(
+              body: Center(
                 child: StreamDeletedMessage(
                   messageTheme: theme.ownMessageTheme,
                 ),
@@ -87,6 +89,10 @@ void main() {
           ),
         ),
         surfaceSize: const Size.square(200),
+        wrapper: (child) => MaterialAppWrapper(
+          theme: materialTheme,
+          home: child,
+        ),
       );
 
       await screenMatchesGolden(tester, 'deleted_message_light');
@@ -120,28 +126,31 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(10));
 
-      final materialTheme = ThemeData.dark();
+      final materialTheme = ThemeData.dark(
+        useMaterial3: false,
+      );
       final theme = StreamChatThemeData.fromTheme(materialTheme);
-      await tester.pumpWidgetBuilder(
-        materialAppWrapper(
+      await tester.pumpWidgetWithSize(
+        MaterialAppWrapper(
           theme: materialTheme,
-        )(
-          StreamChat(
+          home: StreamChat(
             streamChatThemeData: theme,
             client: client,
             connectivityStream: Stream.value(ConnectivityResult.mobile),
             child: StreamChannel(
               showLoading: false,
               channel: channel,
-              child: Center(
-                child: StreamDeletedMessage(
-                  messageTheme: theme.ownMessageTheme,
+              child: Scaffold(
+                body: Center(
+                  child: StreamDeletedMessage(
+                    messageTheme: theme.ownMessageTheme,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-        surfaceSize: const Size.square(200),
+        size: const Size.square(200),
       );
 
       await screenMatchesGolden(tester, 'deleted_message_dark');
@@ -175,32 +184,35 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(10));
 
-      final materialTheme = ThemeData.light();
+      final materialTheme = ThemeData.light(
+        useMaterial3: false,
+      );
       final theme = StreamChatThemeData.fromTheme(materialTheme);
-      await tester.pumpWidgetBuilder(
-        materialAppWrapper(
+      await tester.pumpWidgetWithSize(
+        MaterialAppWrapper(
           theme: materialTheme,
-        )(
-          StreamChat(
+          home: StreamChat(
             streamChatThemeData: theme,
             client: client,
             connectivityStream: Stream.value(ConnectivityResult.mobile),
             child: StreamChannel(
               showLoading: false,
               channel: channel,
-              child: Center(
-                child: StreamDeletedMessage(
-                  messageTheme: theme.ownMessageTheme,
-                  reverse: true,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              child: Scaffold(
+                body: Center(
+                  child: StreamDeletedMessage(
+                    messageTheme: theme.ownMessageTheme,
+                    reverse: true,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-        surfaceSize: const Size.square(200),
+        size: const Size.square(200),
       );
 
       await screenMatchesGolden(tester, 'deleted_message_custom');

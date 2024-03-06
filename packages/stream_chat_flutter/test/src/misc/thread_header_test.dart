@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -112,7 +113,7 @@ void main() {
       ]);
 
       var tapped = false;
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(MaterialAppWrapper(
         home: StreamChat(
           client: client,
           child: StreamChannel(
