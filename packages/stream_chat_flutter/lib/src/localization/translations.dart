@@ -208,6 +208,9 @@ abstract class Translations {
   /// based on [pinned]
   String togglePinUnpinText({required bool pinned});
 
+  /// The text for marking message as unread functionality in [MessageWidget]
+  String get markAsUnreadLabel;
+
   /// The text for showing delete/retry-delete based on [isDeleteFailed]
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed});
 
@@ -574,6 +577,9 @@ class DefaultTranslations implements Translations {
     if (pinned) return 'Unpin from Conversation';
     return 'Pin to Conversation';
   }
+
+  @override
+  String get markAsUnreadLabel => 'Mark as Unread';
 
   @override
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed}) {

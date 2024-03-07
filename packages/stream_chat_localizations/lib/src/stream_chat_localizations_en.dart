@@ -445,4 +445,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
+
+  @override
+  String get markAsUnreadLabel => 'Mark as Unread';
 }

@@ -468,6 +468,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
+
+  @override
+  String get markAsUnreadLabel => 'Mark as unread';
 }
 
 void main() async {

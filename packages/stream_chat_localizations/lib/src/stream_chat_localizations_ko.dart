@@ -428,4 +428,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => '파일에 대한 액세스 허용';
+
+  @override
+  String get markAsUnreadLabel => '읽지 않음으로 표시';
 }

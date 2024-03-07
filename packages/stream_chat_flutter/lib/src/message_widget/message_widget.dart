@@ -69,6 +69,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.showEditMessage = true,
     this.showReplyMessage = true,
     this.showThreadReplyMessage = true,
+    this.showMarkUnreadMessage = true,
     this.showResendMessage = true,
     this.showCopyMessage = true,
     this.showFlagButton = true,
@@ -271,6 +272,12 @@ class StreamMessageWidget extends StatefulWidget {
   /// Show thread reply action
   /// {@endtemplate}
   final bool showThreadReplyMessage;
+
+  /// {@template showMarkUnreadMessage}
+  /// Show mark unread action
+  /// {@endtemplate}
+  final bool showMarkUnreadMessage;
+
 
   /// {@template showEditMessage}
   /// Show edit action
@@ -763,6 +770,15 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           },
         ),
       ],
+      if(widget.showMarkUnreadMessage)
+       StreamChatContextMenuItem(
+          leading: StreamSvgIcon.messageUnread(),
+          title: Text(context.translations.markAsUnreadLabel),
+          onClick: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            channel.markUnread(widget.message.id);
+          },
+        ),
       if (shouldShowThreadReplyAction)
         StreamChatContextMenuItem(
           leading: StreamSvgIcon.thread(),

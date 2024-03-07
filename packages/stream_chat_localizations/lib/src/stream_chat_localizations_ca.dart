@@ -448,4 +448,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => "Permet l'accés als fitxers";
+
+  @override
+  String get markAsUnreadLabel => 'Marcar com no llegit';
 }

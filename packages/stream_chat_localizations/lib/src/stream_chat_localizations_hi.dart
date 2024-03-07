@@ -443,4 +443,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'फाइलों तक पहुंच की अनुमति दें';
+
+  @override
+  String get markAsUnreadLabel => 'अपठित चिह्नित करें';
 }

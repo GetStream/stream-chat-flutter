@@ -337,6 +337,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       widget.messageListController ?? _defaultController;
 
   StreamSubscription? _messageNewListener;
+  StreamSubscription? _userReadListener;
 
   Read? _userRead;
   Message? _oldestUnreadMessage;
@@ -368,7 +369,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         (it) =>
             it.user.id == streamChannel?.channel.client.state.currentUser?.id,
       );
+
       _messageNewListener?.cancel();
+      _userReadListener?.cancel();
+
       unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
       initialIndex = getInitialIndex(
         widget.initialScrollIndex,
@@ -404,6 +408,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
       });
 
+      _userReadListener =
+          streamChannel!.channel.state?.readStream.listen((event) {
+        setState(() {
+          unreadCount = streamChannel!.channel.state?.unreadCount ?? 0;
+          _userRead = streamChannel!.channel.state?.currentUserRead;
+        });
+      });
+
       if (_isThreadConversation) {
         streamChannel!.getReplies(widget.parentMessage!.id);
       }
@@ -418,6 +430,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       streamChannel!.reloadChannel();
     }
     _messageNewListener?.cancel();
+    _userReadListener?.cancel();
     _itemPositionListener.itemPositions
         .removeListener(_handleItemPositionsChanged);
     super.dispose();
