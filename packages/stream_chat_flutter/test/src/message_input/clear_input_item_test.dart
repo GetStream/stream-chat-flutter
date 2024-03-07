@@ -4,6 +4,8 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
+
 void main() {
   testWidgets('ClearInputItemButton onPressed works', (tester) async {
     var count = 0;
@@ -33,7 +35,7 @@ void main() {
 
   testGoldens('golden test for ClearInputItemButton', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(

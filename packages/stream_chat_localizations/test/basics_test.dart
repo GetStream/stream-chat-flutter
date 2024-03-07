@@ -7,6 +7,9 @@ import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 void main() {
   testWidgets('Nested Localizations', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        useMaterial3: false,
+      ),
       // Creates the outer Localizations widget.
       home: ListView(
         children: <Widget>[

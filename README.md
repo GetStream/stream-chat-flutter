@@ -18,7 +18,26 @@ Stream allows developers to rapidly deploy scalable feeds and chat messaging wit
 
 **V4 Migration Guide**
 
-For upgrading from V3 to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+> [!WARNING]
+> Flutter `> = v3.16.x` uses material 3 by default which breaks the UI of some of the components.
+> If you want to use these versions, you need to set the `useMaterial3` parameter to `false` 
+> in the `ThemeData`.
+>
+> eg.
+>
+> ```dart
+> MaterialApp(
+>   theme: ThemeData(
+>     useMaterial3: false,
+>   ),
+>   ...
+> );
+> ```
+> 
+> `StreamChat` widget overrides the `useMaterial3` parameter to `false` by default 
+> so if you are using `StreamChat` widget, you **don't** need to set it manually.
+
+For upgrading from V6 to V7, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_7_0/)
 
 ## Sample apps and demos 
 Our team maintains a dedicated repository for full fledged sample applications and demos. Consider checking out [GetStream/flutter-samples](https://github.com/GetStream/flutter-samples) to learn more or get started by looking at our latest [Stream Chat demo](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1). 

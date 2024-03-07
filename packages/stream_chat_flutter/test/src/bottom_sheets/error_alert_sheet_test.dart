@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -77,7 +78,7 @@ void main() {
       'golden test for ErrorAlertSheet',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          MaterialAppWrapper(
             builder: (context, child) => StreamChat(
               client: MockClient(),
               child: child,

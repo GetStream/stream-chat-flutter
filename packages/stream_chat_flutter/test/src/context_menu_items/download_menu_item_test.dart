@@ -4,6 +4,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -31,7 +32,7 @@ void main() {
     'golden test for DownloadMenuItem',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialAppWrapper(
           builder: (context, child) => StreamChatTheme(
             data: StreamChatThemeData.light(),
             child: child!,
