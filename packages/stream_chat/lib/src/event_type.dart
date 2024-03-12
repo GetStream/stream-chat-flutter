@@ -21,6 +21,9 @@ class EventType {
   /// Event sent when the unread count changes
   static const String notificationMarkRead = 'notification.mark_read';
 
+  /// Event sent when the unread count changes
+  static const String notificationMarkUnread = 'notification.mark_unread';
+
   /// Event sent when deleting a new message
   static const String messageDeleted = 'message.deleted';
 

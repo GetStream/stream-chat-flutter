@@ -1184,6 +1184,20 @@ class StreamChatClient {
         messageId: messageId,
       );
 
+  /// Mark [channelId] of type [channelType] all messages as read
+  /// Optionally provide a [messageId] if you want to mark a
+  /// particular message as read
+  Future<EmptyResponse> markChannelUnread(
+    String channelId,
+    String channelType,
+    String messageId,
+  ) =>
+      _chatApi.channel.markUnread(
+        channelId,
+        channelType,
+        messageId,
+      );
+
   /// Update or Create the given user object.
   Future<UpdateUsersResponse> updateUser(User user) => updateUsers([user]);
 

@@ -18,6 +18,9 @@ class Reads extends Table {
   /// Number of unread messages
   IntColumn get unreadMessages => integer().withDefault(const Constant(0))();
 
+  /// Id of the last read message
+  TextColumn get lastReadMessageId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {
         userId,

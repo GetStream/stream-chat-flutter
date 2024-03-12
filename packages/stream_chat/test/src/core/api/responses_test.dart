@@ -246,7 +246,8 @@ void main() {
                         "image": "https://randomuser.me/api/portraits/women/2.jpg",
                         "name": "Mia Denys"
                     },
-                    "last_read": "2020-01-28T22:17:31.016937728Z"
+                    "last_read": "2020-01-28T22:17:31.016937728Z",
+                    "last_read_message_id": "5b02535a-0c3c-45fa-9cf8-16f840c5123f"
                 },
                 {
                     "user": {
@@ -259,7 +260,8 @@ void main() {
                         "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
                         "name": "Spring voice"
                     },
-                    "last_read": "2020-01-28T22:17:31.018856448Z"
+                    "last_read": "2020-01-28T22:17:31.018856448Z",
+                    "last_read_message_id": "5b02535a-0c3c-45fa-9cf8-16f840c5123f"
                 }
             ],
             "members": [
@@ -797,7 +799,8 @@ void main() {
                         "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
                         "name": "Robin Papa"
                     },
-                    "last_read": "2020-01-28T22:17:30.966485504Z"
+                    "last_read": "2020-01-28T22:17:30.966485504Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -810,7 +813,8 @@ void main() {
                         "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
                         "name": "Spring voice"
                     },
-                    "last_read": "2020-01-28T22:17:30.968339456Z"
+                    "last_read": "2020-01-28T22:17:30.968339456Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 }
             ],
             "members": [
@@ -1078,7 +1082,8 @@ void main() {
                         "name": "Spring voice",
                         "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice"
                     },
-                    "last_read": "2020-01-28T22:17:30.916570624Z"
+                    "last_read": "2020-01-28T22:17:30.916570624Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -1091,7 +1096,8 @@ void main() {
                         "name": "Daisy Morgan",
                         "image": "https://randomuser.me/api/portraits/women/45.jpg"
                     },
-                    "last_read": "2020-01-28T22:17:30.90931712Z"
+                    "last_read": "2020-01-28T22:17:30.90931712Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -1104,7 +1110,8 @@ void main() {
                         "image": "https://randomuser.me/api/portraits/men/95.jpg",
                         "name": "Micheal Murphy"
                     },
-                    "last_read": "2020-01-28T22:17:30.911188736Z"
+                    "last_read": "2020-01-28T22:17:30.911188736Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -1117,7 +1124,8 @@ void main() {
                         "image": "https://images.unsplash.com/photo-1502378735452-bc7d86632805?ixlib=rb-0.3.5\u0026q=80\u0026fm=jpg\u0026crop=entropy\u0026cs=tinysrgb\u0026w=200\u0026fit=max\u0026s=aa3a807e1bbdfd4364d1f449eaa96d82",
                         "name": "Carys Metz"
                     },
-                    "last_read": "2020-01-28T22:17:30.912969472Z"
+                    "last_read": "2020-01-28T22:17:30.912969472Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -1130,7 +1138,8 @@ void main() {
                         "image": "https://images-na.ssl-images-amazon.com/images/M/MV5BMjAwNjM3NjY5MF5BMl5BanBnXkFtZTcwMjM4NTYwOQ@@._V1_UY256_CR0,0,172,256_AL_.jpg",
                         "name": "Dakota Fanning"
                     },
-                    "last_read": "2020-01-28T22:17:30.914806272Z"
+                    "last_read": "2020-01-28T22:17:30.914806272Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 }
             ],
             "members": [
@@ -1737,7 +1746,8 @@ void main() {
                         "image": "https://images-na.ssl-images-amazon.com/images/M/MV5BMDc2M2NkMTctNmQ0MS00MjQxLWFkMGItNGY1Y2Y3NzYzZjg1XkEyXkFqcGdeQXVyNjAzMTgxNjY@._V1_UY256_CR74,0,172,256_AL_.jpg",
                         "name": "Zoe McLellan"
                     },
-                    "last_read": "2020-01-24T14:46:18.863312384Z"
+                    "last_read": "2020-01-24T14:46:18.863312384Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -1750,7 +1760,8 @@ void main() {
                         "image": "https://randomuser.me/api/portraits/women/44.jpg",
                         "name": "June Cha"
                     },
-                    "last_read": "2020-01-24T14:46:18.8644352Z"
+                    "last_read": "2020-01-24T14:46:18.8644352Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -1763,7 +1774,8 @@ void main() {
                         "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
                         "name": "Robin Papa"
                     },
-                    "last_read": "2020-01-24T14:46:18.866511104Z"
+                    "last_read": "2020-01-24T14:46:18.866511104Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -1777,7 +1789,8 @@ void main() {
                         "image": "https://getstream.io/random_svg/?id=still-union-5\u0026amp;name=Still+union",
                         "name": "Still union"
                     },
-                    "last_read": "2020-01-24T14:46:18.867566336Z"
+                    "last_read": "2020-01-24T14:46:18.867566336Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -1790,7 +1803,8 @@ void main() {
                         "image": "https://pbs.twimg.com/profile_images/1108790938640531456/Bl2JvdG_.png",
                         "name": "Adelle Charles"
                     },
-                    "last_read": "2020-01-24T14:46:18.865476096Z"
+                    "last_read": "2020-01-24T14:46:18.865476096Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 }
             ],
             "members": [
@@ -2121,7 +2135,8 @@ void main() {
                         "image": "https://getstream.io/random_svg/?id=still-union-5\u0026amp;name=Still+union",
                         "name": "Still union"
                     },
-                    "last_read": "2020-01-24T14:46:18.969139712Z"
+                    "last_read": "2020-01-24T14:46:18.969139712Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -2134,7 +2149,8 @@ void main() {
                         "image": "https://randomuser.me/api/portraits/women/8.jpg",
                         "name": "Jennifer Fritz"
                     },
-                    "last_read": "2020-01-24T14:46:18.96800512Z"
+                    "last_read": "2020-01-24T14:46:18.96800512Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 }
             ],
             "members": [
@@ -2400,7 +2416,8 @@ void main() {
                         "image": "https://getstream.io/random_svg/?id=still-union-5\u0026amp;name=Still+union",
                         "name": "Still union"
                     },
-                    "last_read": "2020-01-24T14:46:18.92038528Z"
+                    "last_read": "2020-01-24T14:46:18.92038528Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -2413,7 +2430,8 @@ void main() {
                         "image": "https://images-na.ssl-images-amazon.com/images/M/MV5BMjA3NjYzMzE1MV5BMl5BanBnXkFtZTgwNTA4NDY4OTE@._V1_UX172_CR0,0,172,256_AL_.jpg",
                         "name": "Ana De Armas"
                     },
-                    "last_read": "2020-01-24T14:46:18.919357952Z"
+                    "last_read": "2020-01-24T14:46:18.919357952Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 }
             ],
             "members": [
@@ -2919,7 +2937,8 @@ void main() {
                         "name": "Renee Sims",
                         "image": "https://randomuser.me/api/portraits/women/65.jpg"
                     },
-                    "last_read": "2020-01-23T00:52:39.570845184Z"
+                    "last_read": "2020-01-23T00:52:39.570845184Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -2932,7 +2951,8 @@ void main() {
                         "image": "https://getstream.io/random_svg/?id=holy-sun-6\u0026name=Holy+sun",
                         "name": "Holy sun"
                     },
-                    "last_read": "2020-01-23T00:52:39.572206592Z"
+                    "last_read": "2020-01-23T00:52:39.572206592Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 }
             ],
             "members": [
@@ -3213,7 +3233,8 @@ void main() {
                         "image": "https://randomuser.me/api/portraits/women/2.jpg",
                         "name": "Mia Denys"
                     },
-                    "last_read": "2020-01-28T22:17:31.016937728Z"
+                    "last_read": "2020-01-28T22:17:31.016937728Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 },
                 {
                     "user": {
@@ -3226,7 +3247,8 @@ void main() {
                         "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
                         "name": "Spring voice"
                     },
-                    "last_read": "2020-01-28T22:17:31.018856448Z"
+                    "last_read": "2020-01-28T22:17:31.018856448Z",
+                    "last_read_message_id": "c6076f11-7768-4a04-bdf2-c43dddd6d666"
                 }
             ],
             "members": [

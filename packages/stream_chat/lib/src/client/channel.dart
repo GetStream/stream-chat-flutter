@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart'
@@ -1341,14 +1342,45 @@ class Channel {
 
   /// Mark all messages as read.
   ///
-  /// Optionally provide a [messageId] if you want to mark a
-  /// particular message as read.
+  /// Optionally provide a [messageId] if you want to mark channel as
+  /// read from a particular message onwards.
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
     client.state.totalUnreadCount =
         max(0, (client.state.totalUnreadCount) - (state!.unreadCount));
     state!.unreadCount = 0;
     return _client.markChannelRead(id!, type, messageId: messageId);
+  }
+
+  /// Mark message as unread.
+  ///
+  /// You have to provide a [messageId] from which you want the channel
+  /// to be marked as unread.
+  Future<EmptyResponse> markUnread(String messageId) async {
+    _checkInitialized();
+
+    final response = await _client.markChannelUnread(id!, type, messageId);
+
+    final lastReadDate = state!.currentUserRead?.lastRead;
+    final currentUnread = state!.currentUserRead?.unreadMessages ?? 0;
+
+    final messagesFromMarked = state!.messages
+        .where((message) => message.user?.id != client.state.currentUser?.id)
+        .skipWhile((message) => message.id != messageId)
+        .toList();
+    final channelUnreadCount = max(currentUnread, messagesFromMarked.length);
+    final additionlTotalUnreadCount = currentUnread > 0
+        ? messagesFromMarked
+            .takeWhile((message) =>
+                lastReadDate == null ||
+                message.createdAt.isBefore(lastReadDate))
+            .length
+        : messagesFromMarked.length;
+
+    client.state.totalUnreadCount += additionlTotalUnreadCount;
+    state!.unreadCount = channelUnreadCount;
+
+    return response;
   }
 
   void _initState(ChannelState channelState) {
@@ -1760,6 +1792,8 @@ class ChannelClientState {
     _listenReactionDeleted();
 
     _listenReadEvents();
+
+    _listenUnreadEvents();
 
     _listenChannelTruncated();
 
@@ -2242,6 +2276,31 @@ class ChannelClientState {
     return updateMessage(message);
   }
 
+  void _listenUnreadEvents() {
+    if (_channelState.channel?.config.readEvents == false) {
+      return;
+    }
+
+    _subscriptions.add(
+        _channel.on(EventType.notificationMarkUnread).listen((Event event) {
+      if (event.user?.id != _channel._client.state.currentUser!.id) return;
+
+      final readList = <Read>[
+        ..._channelState.read?.where((r) => r.user.id != event.user!.id) ??
+            <Read>[],
+        if (event.lastReadAt != null)
+          Read(
+            user: event.user!,
+            lastRead: event.lastReadAt!,
+            unreadMessages: event.unreadMessages ?? 0,
+            lastReadMessageId: event.lastReadMessageId,
+          )
+      ];
+
+      _channelState = _channelState.copyWith(read: readList);
+    }));
+  }
+
   void _listenReadEvents() {
     if (_channelState.channel?.config.readEvents == false) {
       return;
@@ -2262,6 +2321,7 @@ class ChannelClientState {
             readList.add(Read(
               user: event.user!,
               lastRead: event.createdAt,
+              lastReadMessageId: messages.lastOrNull?.id,
             ));
             _channelState = _channelState.copyWith(read: readList);
           }
