@@ -443,4 +443,8 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String unreadCountIndicatorLabel({required int unreadCount}) {
     return '$unreadCount uleste';
   }
+
+  @override
+  String get markUnreadError =>
+      'Feil ved merking av melding som ulest. Kan ikke merke meldinger som uleste som er eldre enn de 100 nyeste kanalmeldingene.';
 }

@@ -214,6 +214,9 @@ abstract class Translations {
   /// The text for unread count indicator
   String unreadCountIndicatorLabel({required int unreadCount});
 
+  /// The text of an error shown when marking a message as unread fails
+  String get markUnreadError;
+
   /// The text for showing delete/retry-delete based on [isDeleteFailed]
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed});
 
@@ -821,4 +824,8 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
+
+  @override
+  String get markUnreadError =>
+      'Error marking message unread. Cannot mark unread messages older than the newest 100 channel messages.';
 }

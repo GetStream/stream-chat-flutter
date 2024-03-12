@@ -776,9 +776,20 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
        StreamChatContextMenuItem(
           leading: StreamSvgIcon.messageUnread(),
           title: Text(context.translations.markAsUnreadLabel),
-          onClick: () {
+          onClick: () async {
+            try {
+              await channel.markUnread(widget.message.id);
+            } catch (ex) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    context.translations.markUnreadError,
+                  ),
+                ),
+              );
+            }
+
             Navigator.of(context, rootNavigator: true).pop();
-            channel.markUnread(widget.message.id);
           },
         ),
       if (shouldShowThreadReplyAction)

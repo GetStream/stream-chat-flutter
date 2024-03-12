@@ -184,9 +184,20 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               onThreadReplyTap: widget.onThreadReplyTap,
                             ),
                           if (widget.showMarkUnreadMessage)
-                            MarkUnreadMessageButton(onTap: () {
+                            MarkUnreadMessageButton(onTap: () async {
+                              try {
+                                await channel.markUnread(widget.message.id);
+                              } catch (ex) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      context.translations.markUnreadError,
+                                    ),
+                                  ),
+                                );
+                              }
+
                               Navigator.of(context).pop();
-                              channel.markUnread(widget.message.id);
                             }),
                           if (widget.showResendMessage)
                             ResendMessageButton(

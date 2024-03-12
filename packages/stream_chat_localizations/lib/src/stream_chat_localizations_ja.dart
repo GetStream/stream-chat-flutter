@@ -436,4 +436,8 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String unreadCountIndicatorLabel({required int unreadCount}) {
     return '$unreadCount 未読';
   }
+
+  @override
+  String get markUnreadError =>
+      'メッセージを未読にする際にエラーが発生しました。最新の100件のチャンネルメッセージより古い未読メッセージはマークできません。';
 }

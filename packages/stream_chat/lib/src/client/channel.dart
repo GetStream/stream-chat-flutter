@@ -1359,6 +1359,8 @@ class Channel {
   Future<EmptyResponse> markUnread(String messageId) async {
     _checkInitialized();
 
+    final response = await _client.markChannelUnread(id!, type, messageId);
+
     final lastReadDate = state!.currentUserRead?.lastRead;
     final currentUnread = state!.currentUserRead?.unreadMessages ?? 0;
 
@@ -1378,7 +1380,7 @@ class Channel {
     client.state.totalUnreadCount += additionlTotalUnreadCount;
     state!.unreadCount = channelUnreadCount;
 
-    return _client.markChannelUnread(id!, type, messageId);
+    return response;
   }
 
   void _initState(ChannelState channelState) {
