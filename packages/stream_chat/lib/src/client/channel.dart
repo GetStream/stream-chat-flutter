@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart'
@@ -1369,7 +1368,7 @@ class Channel {
         .skipWhile((message) => message.id != messageId)
         .toList();
     final channelUnreadCount = max(currentUnread, messagesFromMarked.length);
-    final additionlTotalUnreadCount = currentUnread > 0
+    final additionalTotalUnreadCount = currentUnread > 0
         ? messagesFromMarked
             .takeWhile((message) =>
                 lastReadDate == null ||
@@ -1377,7 +1376,7 @@ class Channel {
             .length
         : messagesFromMarked.length;
 
-    client.state.totalUnreadCount += additionlTotalUnreadCount;
+    client.state.totalUnreadCount += additionalTotalUnreadCount;
     state!.unreadCount = channelUnreadCount;
 
     return response;
