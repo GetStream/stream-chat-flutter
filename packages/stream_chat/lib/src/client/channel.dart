@@ -1773,10 +1773,6 @@ class ChannelClientState {
       ),
     );
 
-    _subscriptions.add(_channel.on().listen((Event event) {
-      print(jsonEncode(event.toJson()));
-    }));
-
     _checkExpiredAttachmentMessages(channelState);
 
     _channelStateController = BehaviorSubject.seeded(channelState);
