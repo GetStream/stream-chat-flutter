@@ -435,4 +435,16 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'Gi tilgang til filer';
+
+  @override
+  String get markAsUnreadLabel => 'Merk som ulest';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount uleste';
+  }
+
+  @override
+  String get markUnreadError =>
+      'Feil ved merking av melding som ulest. Kan ikke merke meldinger som uleste som er eldre enn de 100 nyeste kanalmeldingene.';
 }

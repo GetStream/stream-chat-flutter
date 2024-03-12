@@ -448,4 +448,16 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get allowFileAccessMessage => 'Permitir acesso aos arquivos';
+
+  @override
+  String get markAsUnreadLabel => 'Marcar como não lida';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount não lidas';
+  }
+
+  @override
+  String get markUnreadError =>
+      'Erro ao marcar a mensagem como não lida. Não é possível marcar mensagens não lidas mais antigas do que as 100 mensagens mais recentes do canal.';
 }
