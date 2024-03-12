@@ -446,4 +446,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get markAsUnreadLabel => 'अपठित चिह्नित करें';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount अपठित';
+  }
 }

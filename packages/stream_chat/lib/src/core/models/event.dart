@@ -111,6 +111,10 @@ class Event {
   @JsonKey(includeToJson: false, includeFromJson: false)
   int? get unreadMessages => extraData['unread_messages'] as int?;
 
+  /// The id of the last read message (notification.mark_read)
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  String? get lastReadMessageId => extraData['last_read_message_id'] as String?;
+
   /// Known top level fields.
   /// Useful for [Serializer] methods.
   static final topLevelFields = [

@@ -451,4 +451,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get markAsUnreadLabel => 'Marcar como não lida';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount não lidas';
+  }
 }

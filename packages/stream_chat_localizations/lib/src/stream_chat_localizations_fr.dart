@@ -453,4 +453,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get markAsUnreadLabel => 'Marquer comme non lu';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount non lus';
+  }
 }

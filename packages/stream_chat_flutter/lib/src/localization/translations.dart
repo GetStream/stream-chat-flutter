@@ -211,6 +211,9 @@ abstract class Translations {
   /// The text for marking message as unread functionality in [MessageWidget]
   String get markAsUnreadLabel;
 
+  /// The text for unread count indicator
+  String unreadCountIndicatorLabel({required int unreadCount});
+
   /// The text for showing delete/retry-delete based on [isDeleteFailed]
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed});
 
@@ -580,6 +583,11 @@ class DefaultTranslations implements Translations {
 
   @override
   String get markAsUnreadLabel => 'Mark as Unread';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount unread';
+  }
 
   @override
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed}) {

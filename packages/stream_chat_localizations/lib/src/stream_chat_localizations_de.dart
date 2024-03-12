@@ -445,4 +445,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get markAsUnreadLabel => 'Als ungelesen markieren';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount ungelesen';
+  }
 }

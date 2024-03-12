@@ -115,9 +115,10 @@ class $ChannelsTable extends Channels
         extraData
       ];
   @override
-  String get aliasedName => _alias ?? 'channels';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'channels';
+  String get actualTableName => $name;
+  static const String $name = 'channels';
   @override
   VerificationContext validateIntegrity(Insertable<ChannelEntity> instance,
       {bool isInserting = false}) {
@@ -580,11 +581,13 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     }
     if (ownCapabilities.present) {
       final converter = $ChannelsTable.$converterownCapabilitiesn;
+
       map['own_capabilities'] =
           Variable<String>(converter.toSql(ownCapabilities.value));
     }
     if (config.present) {
       final converter = $ChannelsTable.$converterconfig;
+
       map['config'] = Variable<String>(converter.toSql(config.value));
     }
     if (frozen.present) {
@@ -610,6 +613,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     }
     if (extraData.present) {
       final converter = $ChannelsTable.$converterextraDatan;
+
       map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     if (rowid.present) {
@@ -868,9 +872,10 @@ class $MessagesTable extends Messages
         extraData
       ];
   @override
-  String get aliasedName => _alias ?? 'messages';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'messages';
+  String get actualTableName => $name;
+  static const String $name = 'messages';
   @override
   VerificationContext validateIntegrity(Insertable<MessageEntity> instance,
       {bool isInserting = false}) {
@@ -1779,6 +1784,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     }
     if (attachments.present) {
       final converter = $MessagesTable.$converterattachments;
+
       map['attachments'] = Variable<String>(converter.toSql(attachments.value));
     }
     if (state.present) {
@@ -1789,16 +1795,19 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     }
     if (mentionedUsers.present) {
       final converter = $MessagesTable.$convertermentionedUsers;
+
       map['mentioned_users'] =
           Variable<String>(converter.toSql(mentionedUsers.value));
     }
     if (reactionCounts.present) {
       final converter = $MessagesTable.$converterreactionCountsn;
+
       map['reaction_counts'] =
           Variable<String>(converter.toSql(reactionCounts.value));
     }
     if (reactionScores.present) {
       final converter = $MessagesTable.$converterreactionScoresn;
+
       map['reaction_scores'] =
           Variable<String>(converter.toSql(reactionScores.value));
     }
@@ -1858,10 +1867,12 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     }
     if (i18n.present) {
       final converter = $MessagesTable.$converteri18n;
+
       map['i18n'] = Variable<String>(converter.toSql(i18n.value));
     }
     if (extraData.present) {
       final converter = $MessagesTable.$converterextraDatan;
+
       map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     if (rowid.present) {
@@ -2087,10 +2098,7 @@ class $PinnedMessagesTable extends PinnedMessages
   @override
   late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES channels (cid) ON DELETE CASCADE'));
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
@@ -2138,9 +2146,10 @@ class $PinnedMessagesTable extends PinnedMessages
         extraData
       ];
   @override
-  String get aliasedName => _alias ?? 'pinned_messages';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'pinned_messages';
+  String get actualTableName => $name;
+  static const String $name = 'pinned_messages';
   @override
   VerificationContext validateIntegrity(
       Insertable<PinnedMessageEntity> instance,
@@ -3052,6 +3061,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     }
     if (attachments.present) {
       final converter = $PinnedMessagesTable.$converterattachments;
+
       map['attachments'] = Variable<String>(converter.toSql(attachments.value));
     }
     if (state.present) {
@@ -3062,16 +3072,19 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     }
     if (mentionedUsers.present) {
       final converter = $PinnedMessagesTable.$convertermentionedUsers;
+
       map['mentioned_users'] =
           Variable<String>(converter.toSql(mentionedUsers.value));
     }
     if (reactionCounts.present) {
       final converter = $PinnedMessagesTable.$converterreactionCountsn;
+
       map['reaction_counts'] =
           Variable<String>(converter.toSql(reactionCounts.value));
     }
     if (reactionScores.present) {
       final converter = $PinnedMessagesTable.$converterreactionScoresn;
+
       map['reaction_scores'] =
           Variable<String>(converter.toSql(reactionScores.value));
     }
@@ -3131,10 +3144,12 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     }
     if (i18n.present) {
       final converter = $PinnedMessagesTable.$converteri18n;
+
       map['i18n'] = Variable<String>(converter.toSql(i18n.value));
     }
     if (extraData.present) {
       final converter = $PinnedMessagesTable.$converterextraDatan;
+
       map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     if (rowid.present) {
@@ -3232,9 +3247,10 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
   List<GeneratedColumn> get $columns =>
       [userId, messageId, type, createdAt, score, extraData];
   @override
-  String get aliasedName => _alias ?? 'pinned_message_reactions';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'pinned_message_reactions';
+  String get actualTableName => $name;
+  static const String $name = 'pinned_message_reactions';
   @override
   VerificationContext validateIntegrity(
       Insertable<PinnedMessageReactionEntity> instance,
@@ -3502,6 +3518,7 @@ class PinnedMessageReactionsCompanion
     }
     if (extraData.present) {
       final converter = $PinnedMessageReactionsTable.$converterextraDatan;
+
       map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     if (rowid.present) {
@@ -3577,9 +3594,10 @@ class $ReactionsTable extends Reactions
   List<GeneratedColumn> get $columns =>
       [userId, messageId, type, createdAt, score, extraData];
   @override
-  String get aliasedName => _alias ?? 'reactions';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'reactions';
+  String get actualTableName => $name;
+  static const String $name = 'reactions';
   @override
   VerificationContext validateIntegrity(Insertable<ReactionEntity> instance,
       {bool isInserting = false}) {
@@ -3843,6 +3861,7 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
     }
     if (extraData.present) {
       final converter = $ReactionsTable.$converterextraDatan;
+
       map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     if (rowid.present) {
@@ -3943,9 +3962,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
         extraData
       ];
   @override
-  String get aliasedName => _alias ?? 'users';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'users';
+  String get actualTableName => $name;
+  static const String $name = 'users';
   @override
   VerificationContext validateIntegrity(Insertable<UserEntity> instance,
       {bool isInserting = false}) {
@@ -4294,6 +4314,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     }
     if (extraData.present) {
       final converter = $UsersTable.$converterextraData;
+
       map['extra_data'] = Variable<String>(converter.toSql(extraData.value));
     }
     if (rowid.present) {
@@ -4428,9 +4449,10 @@ class $MembersTable extends Members
         updatedAt
       ];
   @override
-  String get aliasedName => _alias ?? 'members';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'members';
+  String get actualTableName => $name;
+  static const String $name = 'members';
   @override
   VerificationContext validateIntegrity(Insertable<MemberEntity> instance,
       {bool isInserting = false}) {
@@ -4914,13 +4936,20 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _lastReadMessageIdMeta =
+      const VerificationMeta('lastReadMessageId');
+  @override
+  late final GeneratedColumn<String> lastReadMessageId =
+      GeneratedColumn<String>('last_read_message_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [lastRead, userId, channelCid, unreadMessages];
+      [lastRead, userId, channelCid, unreadMessages, lastReadMessageId];
   @override
-  String get aliasedName => _alias ?? 'reads';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'reads';
+  String get actualTableName => $name;
+  static const String $name = 'reads';
   @override
   VerificationContext validateIntegrity(Insertable<ReadEntity> instance,
       {bool isInserting = false}) {
@@ -4952,6 +4981,12 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
           unreadMessages.isAcceptableOrUnknown(
               data['unread_messages']!, _unreadMessagesMeta));
     }
+    if (data.containsKey('last_read_message_id')) {
+      context.handle(
+          _lastReadMessageIdMeta,
+          lastReadMessageId.isAcceptableOrUnknown(
+              data['last_read_message_id']!, _lastReadMessageIdMeta));
+    }
     return context;
   }
 
@@ -4969,6 +5004,8 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
           .read(DriftSqlType.string, data['${effectivePrefix}channel_cid'])!,
       unreadMessages: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}unread_messages'])!,
+      lastReadMessageId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}last_read_message_id']),
     );
   }
 
@@ -4990,11 +5027,15 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
 
   /// Number of unread messages
   final int unreadMessages;
+
+  /// Id of the last read message
+  final String? lastReadMessageId;
   const ReadEntity(
       {required this.lastRead,
       required this.userId,
       required this.channelCid,
-      required this.unreadMessages});
+      required this.unreadMessages,
+      this.lastReadMessageId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -5002,6 +5043,9 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
     map['user_id'] = Variable<String>(userId);
     map['channel_cid'] = Variable<String>(channelCid);
     map['unread_messages'] = Variable<int>(unreadMessages);
+    if (!nullToAbsent || lastReadMessageId != null) {
+      map['last_read_message_id'] = Variable<String>(lastReadMessageId);
+    }
     return map;
   }
 
@@ -5013,6 +5057,8 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
       userId: serializer.fromJson<String>(json['userId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
       unreadMessages: serializer.fromJson<int>(json['unreadMessages']),
+      lastReadMessageId:
+          serializer.fromJson<String?>(json['lastReadMessageId']),
     );
   }
   @override
@@ -5023,6 +5069,7 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
       'userId': serializer.toJson<String>(userId),
       'channelCid': serializer.toJson<String>(channelCid),
       'unreadMessages': serializer.toJson<int>(unreadMessages),
+      'lastReadMessageId': serializer.toJson<String?>(lastReadMessageId),
     };
   }
 
@@ -5030,12 +5077,16 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
           {DateTime? lastRead,
           String? userId,
           String? channelCid,
-          int? unreadMessages}) =>
+          int? unreadMessages,
+          Value<String?> lastReadMessageId = const Value.absent()}) =>
       ReadEntity(
         lastRead: lastRead ?? this.lastRead,
         userId: userId ?? this.userId,
         channelCid: channelCid ?? this.channelCid,
         unreadMessages: unreadMessages ?? this.unreadMessages,
+        lastReadMessageId: lastReadMessageId.present
+            ? lastReadMessageId.value
+            : this.lastReadMessageId,
       );
   @override
   String toString() {
@@ -5043,13 +5094,15 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
           ..write('lastRead: $lastRead, ')
           ..write('userId: $userId, ')
           ..write('channelCid: $channelCid, ')
-          ..write('unreadMessages: $unreadMessages')
+          ..write('unreadMessages: $unreadMessages, ')
+          ..write('lastReadMessageId: $lastReadMessageId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(lastRead, userId, channelCid, unreadMessages);
+  int get hashCode => Object.hash(
+      lastRead, userId, channelCid, unreadMessages, lastReadMessageId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5057,7 +5110,8 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
           other.lastRead == this.lastRead &&
           other.userId == this.userId &&
           other.channelCid == this.channelCid &&
-          other.unreadMessages == this.unreadMessages);
+          other.unreadMessages == this.unreadMessages &&
+          other.lastReadMessageId == this.lastReadMessageId);
 }
 
 class ReadsCompanion extends UpdateCompanion<ReadEntity> {
@@ -5065,12 +5119,14 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
   final Value<String> userId;
   final Value<String> channelCid;
   final Value<int> unreadMessages;
+  final Value<String?> lastReadMessageId;
   final Value<int> rowid;
   const ReadsCompanion({
     this.lastRead = const Value.absent(),
     this.userId = const Value.absent(),
     this.channelCid = const Value.absent(),
     this.unreadMessages = const Value.absent(),
+    this.lastReadMessageId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReadsCompanion.insert({
@@ -5078,6 +5134,7 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
     required String userId,
     required String channelCid,
     this.unreadMessages = const Value.absent(),
+    this.lastReadMessageId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : lastRead = Value(lastRead),
         userId = Value(userId),
@@ -5087,6 +5144,7 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
     Expression<String>? userId,
     Expression<String>? channelCid,
     Expression<int>? unreadMessages,
+    Expression<String>? lastReadMessageId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5094,6 +5152,7 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
       if (userId != null) 'user_id': userId,
       if (channelCid != null) 'channel_cid': channelCid,
       if (unreadMessages != null) 'unread_messages': unreadMessages,
+      if (lastReadMessageId != null) 'last_read_message_id': lastReadMessageId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5103,12 +5162,14 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
       Value<String>? userId,
       Value<String>? channelCid,
       Value<int>? unreadMessages,
+      Value<String?>? lastReadMessageId,
       Value<int>? rowid}) {
     return ReadsCompanion(
       lastRead: lastRead ?? this.lastRead,
       userId: userId ?? this.userId,
       channelCid: channelCid ?? this.channelCid,
       unreadMessages: unreadMessages ?? this.unreadMessages,
+      lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5128,6 +5189,9 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
     if (unreadMessages.present) {
       map['unread_messages'] = Variable<int>(unreadMessages.value);
     }
+    if (lastReadMessageId.present) {
+      map['last_read_message_id'] = Variable<String>(lastReadMessageId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5141,6 +5205,7 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
           ..write('userId: $userId, ')
           ..write('channelCid: $channelCid, ')
           ..write('unreadMessages: $unreadMessages, ')
+          ..write('lastReadMessageId: $lastReadMessageId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5168,9 +5233,10 @@ class $ChannelQueriesTable extends ChannelQueries
   @override
   List<GeneratedColumn> get $columns => [queryHash, channelCid];
   @override
-  String get aliasedName => _alias ?? 'channel_queries';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'channel_queries';
+  String get actualTableName => $name;
+  static const String $name = 'channel_queries';
   @override
   VerificationContext validateIntegrity(Insertable<ChannelQueryEntity> instance,
       {bool isInserting = false}) {
@@ -5392,9 +5458,10 @@ class $ConnectionEventsTable extends ConnectionEvents
         lastSyncAt
       ];
   @override
-  String get aliasedName => _alias ?? 'connection_events';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'connection_events';
+  String get actualTableName => $name;
+  static const String $name = 'connection_events';
   @override
   VerificationContext validateIntegrity(
       Insertable<ConnectionEventEntity> instance,
@@ -5680,6 +5747,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
     }
     if (ownUser.present) {
       final converter = $ConnectionEventsTable.$converterownUsern;
+
       map['own_user'] = Variable<String>(converter.toSql(ownUser.value));
     }
     if (totalUnreadCount.present) {
@@ -5764,13 +5832,6 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('messages', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('channels',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('pinned_messages', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(

@@ -471,6 +471,11 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get markAsUnreadLabel => 'Mark as unread';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount unread';
+  }
 }
 
 void main() async {

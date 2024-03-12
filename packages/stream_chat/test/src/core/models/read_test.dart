@@ -11,6 +11,7 @@ void main() {
       expect(read.lastRead, DateTime.parse('2020-01-28T22:17:30.966485504Z'));
       expect(read.user.id, 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e');
       expect(read.unreadMessages, 10);
+      expect(read.lastReadMessageId, '8cc1301d-2d47-4305-945a-cd8e19b736d6');
     });
 
     test('should serialize to json correctly', () {
@@ -18,12 +19,14 @@ void main() {
         lastRead: DateTime.parse('2020-01-28T22:17:30.966485504Z'),
         user: User(id: 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e'),
         unreadMessages: 10,
+        lastReadMessageId: '8cc1301d-2d47-4305-945a-cd8e19b736d6',
       );
 
       expect(read.toJson(), {
         'user': {'id': 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e'},
         'last_read': '2020-01-28T22:17:30.966485Z',
         'unread_messages': 10,
+        'last_read_message_id': '8cc1301d-2d47-4305-945a-cd8e19b736d6',
       });
     });
 
@@ -36,11 +39,13 @@ void main() {
       );
       expect(newRead.user.id, 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e');
       expect(newRead.unreadMessages, 10);
+      expect(read.lastReadMessageId, '8cc1301d-2d47-4305-945a-cd8e19b736d6');
 
       newRead = read.copyWith(
         user: User(id: 'test'),
         lastRead: DateTime.parse('2021-01-28T22:17:30.966485504Z'),
         unreadMessages: 2,
+        lastReadMessageId: 'last_test',
       );
 
       expect(
@@ -49,6 +54,7 @@ void main() {
       );
       expect(newRead.user.id, 'test');
       expect(newRead.unreadMessages, 2);
+      expect(newRead.lastReadMessageId, 'last_test');
     });
   });
 }

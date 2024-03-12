@@ -453,4 +453,9 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get markAsUnreadLabel => 'Marcar como no leído';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount no leídos';
+  }
 }

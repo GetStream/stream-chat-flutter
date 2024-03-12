@@ -455,4 +455,9 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get markAsUnreadLabel => 'Contrassegna come non letto';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount non letti';
+  }
 }
