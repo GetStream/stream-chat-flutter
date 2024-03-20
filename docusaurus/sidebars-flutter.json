@@ -1,0 +1,97 @@
+{
+    "docs": [
+      {
+        "Basics": [
+          "basics/installation",
+          "basics/introduction"
+        ]
+      },
+      {
+        "UI Components": [
+          "stream_chat_flutter/introduction",
+          "stream_chat_flutter/stream_chat_and_theming",
+          {
+            "Channel List": [
+              "stream_chat_flutter/channel_list/stream_channel_list_view",
+              "stream_chat_flutter/channel_list/stream_channel_list_header",
+              "stream_chat_flutter/channel_list/stream_channel_grid_view",
+              "stream_chat_flutter/custom_widgets/slidable_channel_list_preview"
+            ]
+          },
+          "stream_chat_flutter/stream_channel_header",
+          {
+            "Message List": [
+              "stream_chat_flutter/message_list/stream_message_list_view",
+              "stream_chat_flutter/custom_widgets/customize_text_messages",
+              "stream_chat_flutter/message_list/stream_message_widget",
+              "stream_chat_flutter/message_list/stream_message_search_list_view",
+              "stream_chat_flutter/message_list/stream_message_search_grid_view",
+              "stream_chat_flutter/custom_widgets/customize_message_widget"
+            ]
+          },
+          {
+            "Message Composer": [
+              "stream_chat_flutter/message_composer/stream_message_input",
+              "stream_chat_flutter/custom_widgets/customize_message_actions",
+              "stream_chat_flutter/custom_widgets/autocomplete_triggers",
+              "stream_chat_flutter/custom_widgets/adding_custom_attachments",
+              "stream_chat_flutter/custom_widgets/customize_attachment_picker_modal"
+            ]
+          },
+          {
+            "Member List": [
+              "stream_chat_flutter/member_list/stream_member_list_view",
+              "stream_chat_flutter/member_list/stream_member_grid_view"
+            ]
+          },
+          {
+            "User List": [
+              "stream_chat_flutter/user_list/stream_user_list_view",
+              "stream_chat_flutter/user_list/stream_user_grid_view"
+            ]
+          }
+        ]
+      },
+      {
+        "State & Offline": [
+          "stream_chat_flutter_core/introduction",
+          "stream_chat_flutter_core/setup",
+          "stream_chat_flutter_core/stream_chat_core",
+          "stream_chat_flutter_core/stream_channel_list_controller",
+          "stream_chat_flutter_core/stream_channel_list_event_handler",
+          "stream_chat_flutter_core/message_list_core",
+          "stream_chat_flutter_core/stream_message_input_controller",
+          "stream_chat_flutter_core/stream_message_search_list_controller",
+          "stream_chat_flutter_core/stream_member_list_controller",
+          "stream_chat_flutter_core/stream_user_list_controller",
+          "stream_chat_flutter_core/lazy_load_scroll_view",
+          "stream_chat_flutter_core/paged_value_listenable_builder",
+          "guides/adding_local_data_persistence"
+        ]
+      },
+      {
+        "Advanced Guides": [
+            "guides/understanding_filters",
+            "guides/token_generation_with_firebase",
+            "guides/adding_localization",
+            {
+                "Push Notifications": [
+                    "guides/push-notifications/adding_push_notifications_v2",
+                    "guides/push-notifications/adding_push_notifications"
+                ]
+            },
+            "guides/end_to_end_chat_encryption",
+            "guides/error_reporting_with_sentry",
+            "guides/adding_chat_to_video_livestreams",
+            "guides/initialize_stream_chat_widget_tree"
+        ]
+      },
+      {
+        "Migration Guides": [
+          "guides/migrations/migration_guide_4_0",
+          "guides/migrations/migration_guide_5_0",
+          "guides/migrations/migration_guide_7_0"
+        ]
+      }
+    ]
+  }
