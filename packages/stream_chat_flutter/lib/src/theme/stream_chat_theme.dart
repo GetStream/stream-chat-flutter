@@ -54,6 +54,7 @@ class StreamChatThemeData {
     StreamGalleryHeaderThemeData? imageHeaderTheme,
     StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
+    AudioRecordingMessageThemeData? audioRecordingMessageTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -79,6 +80,7 @@ class StreamChatThemeData {
       galleryHeaderTheme: imageHeaderTheme,
       galleryFooterTheme: imageFooterTheme,
       messageListViewTheme: messageListViewTheme,
+      audioRecordingMessageTheme: audioRecordingMessageTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -106,6 +108,7 @@ class StreamChatThemeData {
     required this.galleryHeaderTheme,
     required this.galleryFooterTheme,
     required this.messageListViewTheme,
+    required this.audioRecordingMessageTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -275,6 +278,7 @@ class StreamChatThemeData {
       messageListViewTheme: StreamMessageListViewThemeData(
         backgroundColor: colorTheme.barsBg,
       ),
+      audioRecordingMessageTheme: AudioRecordingMessageThemeData(),
     );
   }
 
@@ -316,6 +320,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamMessageListView] widget.
   final StreamMessageListViewThemeData messageListViewTheme;
 
+  /// The theme and configuration for audio recording message components
+  final AudioRecordingMessageThemeData audioRecordingMessageTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -334,6 +341,7 @@ class StreamChatThemeData {
     StreamGalleryHeaderThemeData? galleryHeaderTheme,
     StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
+    AudioRecordingMessageThemeData? audioRecordingMessageTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -350,6 +358,8 @@ class StreamChatThemeData {
         galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
         galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
+        audioRecordingMessageTheme:
+            audioRecordingMessageTheme ?? this.audioRecordingMessageTheme,
       );
 
   /// Merge themes
@@ -370,6 +380,8 @@ class StreamChatThemeData {
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
       messageListViewTheme:
           messageListViewTheme.merge(other.messageListViewTheme),
+      audioRecordingMessageTheme:
+          audioRecordingMessageTheme.merge(other.audioRecordingMessageTheme),
     );
   }
 }
