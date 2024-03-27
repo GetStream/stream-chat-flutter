@@ -169,5 +169,9 @@ void main() {
     expect(translations.galleryPaginationText, isNotNull);
     expect(translations.fileText, isNotNull);
     expect(translations.replyToMessageLabel, isNotNull);
+    expect(translations.unreadCountIndicatorLabel(unreadCount: 2), isNotNull);
+    expect(translations.unreadMessagesSeparatorText(), isNotNull);
+    expect(translations.markUnreadError, isNotNull);
+    expect(translations.markAsUnreadLabel, isNotNull);
   });
 }
