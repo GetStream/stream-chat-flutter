@@ -827,5 +827,6 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get markUnreadError =>
-      'Error marking message unread. Cannot mark unread messages older than the newest 100 channel messages.';
+      'Error marking message unread. Cannot mark unread messages older than the'
+      ' newest 100 channel messages.';
 }
