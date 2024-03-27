@@ -86,7 +86,11 @@ void main() {
     expect(updatedMessages.first.id, messageId);
 
     // Saving a dummy read
-    final dummyRead = Read(lastRead: DateTime.now(), user: dummyUser);
+    final dummyRead = Read(
+      lastRead: DateTime.now(),
+      user: dummyUser,
+      lastReadMessageId: messageId,
+    );
     await database.readDao.updateReads(cid, [dummyRead]);
 
     // Should match the dummy read

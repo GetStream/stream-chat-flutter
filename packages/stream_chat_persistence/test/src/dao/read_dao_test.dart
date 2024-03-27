@@ -24,6 +24,7 @@ void main() {
         lastRead: DateTime.now(),
         user: users[index],
         unreadMessages: index + 10,
+        lastReadMessageId: 'lastMessageId$index',
       ),
     );
 
@@ -69,6 +70,7 @@ void main() {
       lastRead: DateTime.now(),
       user: newUser,
       unreadMessages: 30,
+      lastReadMessageId: 'lastMessageId3',
     );
     await database.userDao.updateUsers([newUser]);
     await readDao.updateReads(cid, [copyRead, newRead]);

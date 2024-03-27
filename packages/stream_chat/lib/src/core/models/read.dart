@@ -11,6 +11,7 @@ class Read extends Equatable {
   const Read({
     required this.lastRead,
     required this.user,
+    this.lastReadMessageId,
     this.unreadMessages = 0,
   });
 
@@ -26,17 +27,22 @@ class Read extends Equatable {
   /// Number of unread messages
   final int unreadMessages;
 
+  /// The id of the last read message
+  final String? lastReadMessageId;
+
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ReadToJson(this);
 
   /// Creates a copy of [Read] with specified attributes overridden.
   Read copyWith({
     DateTime? lastRead,
+    String? lastReadMessageId,
     User? user,
     int? unreadMessages,
   }) =>
       Read(
         lastRead: lastRead ?? this.lastRead,
+        lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
         user: user ?? this.user,
         unreadMessages: unreadMessages ?? this.unreadMessages,
       );
@@ -44,6 +50,7 @@ class Read extends Equatable {
   @override
   List<Object?> get props => [
         lastRead,
+        lastReadMessageId,
         user,
         unreadMessages,
       ];
