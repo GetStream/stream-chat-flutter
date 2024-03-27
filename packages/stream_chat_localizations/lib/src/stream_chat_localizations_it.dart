@@ -463,5 +463,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get markUnreadError =>
-      'Errore durante la marcatura del messaggio come non letto. Impossibile marcare messaggi non letti più vecchi dei più recenti 100 messaggi del canale.';
+      'Errore durante la marcatura del messaggio come non letto. Impossibile'
+      ' marcare messaggi non letti più vecchi dei più recenti 100 messaggi'
+      ' del canale.';
 }

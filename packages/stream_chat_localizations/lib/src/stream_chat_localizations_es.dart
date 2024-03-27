@@ -461,5 +461,6 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get markUnreadError =>
-      'Error al marcar el mensaje como no leído. No se pueden marcar mensajes no leídos más antiguos que los últimos 100 mensajes del canal.';
+      'Error al marcar el mensaje como no leído. No se pueden marcar mensajes'
+      ' no leídos más antiguos que los últimos 100 mensajes del canal.';
 }

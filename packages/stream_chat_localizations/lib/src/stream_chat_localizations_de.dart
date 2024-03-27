@@ -453,5 +453,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get markUnreadError =>
-      'Fehler beim Markieren der Nachricht als ungelesen. Kann keine älteren ungelesenen Nachrichten markieren als die neuesten 100 Kanalnachrichten.';
+      'Fehler beim Markieren der Nachricht als ungelesen. Kann keine älteren'
+      ' ungelesenen Nachrichten markieren als die neuesten 100'
+      ' Kanalnachrichten.';
 }

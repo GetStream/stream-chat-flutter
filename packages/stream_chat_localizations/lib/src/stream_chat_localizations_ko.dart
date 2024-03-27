@@ -439,5 +439,6 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get markUnreadError =>
-      '메시지를 읽지 않음으로 표시하는 중 오류가 발생했습니다. 가장 최근 100개의 채널 메시지보다 오래된 읽지 않은 메시지는 표시할 수 없습니다.';
+      '메시지를 읽지 않음으로 표시하는 중 오류가 발생했습니다. 가장 최근 100개의 채널 메시지보다 오래된 읽지 않은 메시지는'
+      ' 표시할 수 없습니다.';
 }

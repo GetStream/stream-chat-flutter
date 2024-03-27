@@ -459,5 +459,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get markUnreadError =>
-      'Error en marcar el missatge com a no llegit. No es poden marcar missatges no llegits més antics que els 100 missatges més recents del canal.';
+      'Error en marcar el missatge com a no llegit. No es poden marcar'
+      ' missatges no llegits més antics que els 100 missatges més recents del'
+      ' canal.';
 }
