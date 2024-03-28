@@ -418,6 +418,19 @@ class StreamSvgIcon extends StatelessWidget {
   }
 
   /// [StreamSvgIcon] type
+  factory StreamSvgIcon.messageUnread({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_message_unread.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  /// [StreamSvgIcon] type
   factory StreamSvgIcon.thread({
     double? size,
     Color? color,

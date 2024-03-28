@@ -29,9 +29,16 @@ By default we render the following message actions:
 
 * pin message
 
+* mark unread
+
 :::note
 Edit and delete message are only available on messages sent by the user.
 Additionally, pinning a message requires you to add the roles which are allowed to pin messages.
+:::
+
+:::note
+Mark unread message is only available on messages sent by other users and only when read events are enabled for the channel.
+Additionally, it's not possible to mark messages inside threads as unread.
 :::
 
 ### Partially remove some message actions
@@ -49,6 +56,7 @@ StreamMessageListView(
         showDeleteMessage: details.isMyMessage,
         showReplyMessage: false,
         showThreadReplyMessage: false,
+        showMarkUnreadMessage: false,
     );
   },
 )

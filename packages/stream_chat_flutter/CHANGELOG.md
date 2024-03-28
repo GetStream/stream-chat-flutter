@@ -1,3 +1,20 @@
+## Unreleased
+
+✅ Added
+`StreamMessageListView` will now by default show unread indicator floating on top of the message list that will scroll to last read message when tapped and mark channel as unread when dismissed.
+
+- Added `showUnreadIndicator` parameter to `StreamMessageListView` that controls visibility of new channel unread indicator
+- Added `unreadIndicatorBuilder` parameter to `StreamMessageListView` that allows to provide custom unread indicator builder
+- Added `markReadWhenAtTheBottom` parameter to `StreamMessageListView` that will toggle, previously default, behaviour of marking channel as read when message list is scrolled to the bottom (now default is `false`)
+- Added `showUnreadCountOnScrollToBottom` parameter to `StreamMessageListView` that will toggle, previously shown by default, unread messages counter on the scroll to bottom button (no default is `false`)
+
+Added Mark as Unread option to `StreamMessageWidget` context menu that will show for non-thread messages of other users and mark channel as unread from selected message onwards.
+
+- Added `showMarkUnreadMessage` to  `StreamMessageWidget` that controls visibility of Mark as Unread option.
+
+🔄 Changed
+
+
 ## 7.1.0
 
 🐞 Fixed

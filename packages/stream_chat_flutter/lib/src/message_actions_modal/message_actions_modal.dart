@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/mark_unread_message_button.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -25,6 +26,7 @@ class MessageActionsModal extends StatefulWidget {
     this.showReplyMessage = true,
     this.showResendMessage = true,
     this.showThreadReplyMessage = true,
+    this.showMarkUnreadMessage = true,
     this.showFlagButton = true,
     this.showPinButton = true,
     this.editMessageInputBuilder,
@@ -71,6 +73,9 @@ class MessageActionsModal extends StatefulWidget {
 
   /// Flag for showing resend action
   final bool showResendMessage;
+
+  /// Flag for showing mark unread action
+  final bool showMarkUnreadMessage;
 
   /// Flag for showing reply action
   final bool showReplyMessage;
@@ -178,6 +183,22 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               message: widget.message,
                               onThreadReplyTap: widget.onThreadReplyTap,
                             ),
+                          if (widget.showMarkUnreadMessage)
+                            MarkUnreadMessageButton(onTap: () async {
+                              try {
+                                await channel.markUnread(widget.message.id);
+                              } catch (ex) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      context.translations.markUnreadError,
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              Navigator.of(context).pop();
+                            }),
                           if (widget.showResendMessage)
                             ResendMessageButton(
                               message: widget.message,

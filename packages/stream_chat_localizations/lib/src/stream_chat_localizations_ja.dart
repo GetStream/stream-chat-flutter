@@ -428,4 +428,16 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'ファイルへのアクセスを許可する';
+
+  @override
+  String get markAsUnreadLabel => '未読としてマーク';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount 未読';
+  }
+
+  @override
+  String get markUnreadError =>
+      'メッセージを未読にする際にエラーが発生しました。最新の100件のチャンネルメッセージより古い未読メッセージはマークできません。';
 }

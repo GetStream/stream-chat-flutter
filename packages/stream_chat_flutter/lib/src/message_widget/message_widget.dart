@@ -69,6 +69,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.showEditMessage = true,
     this.showReplyMessage = true,
     this.showThreadReplyMessage = true,
+    this.showMarkUnreadMessage = true,
     this.showResendMessage = true,
     this.showCopyMessage = true,
     this.showFlagButton = true,
@@ -272,6 +273,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showThreadReplyMessage;
 
+  /// {@template showMarkUnreadMessage}
+  /// Show mark unread action
+  /// {@endtemplate}
+  final bool showMarkUnreadMessage;
+
   /// {@template showEditMessage}
   /// Show edit action
   /// {@endtemplate}
@@ -412,6 +418,7 @@ class StreamMessageWidget extends StatefulWidget {
     bool? showFlagButton,
     bool? showPinButton,
     bool? showPinHighlight,
+    bool? showMarkUnreadMessage,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     bool? translateUserAvatar,
     OnQuotedMessageTap? onQuotedMessageTap,
@@ -473,6 +480,8 @@ class StreamMessageWidget extends StatefulWidget {
       showFlagButton: showFlagButton ?? this.showFlagButton,
       showPinButton: showPinButton ?? this.showPinButton,
       showPinHighlight: showPinHighlight ?? this.showPinHighlight,
+      showMarkUnreadMessage:
+          showMarkUnreadMessage ?? this.showMarkUnreadMessage,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
@@ -763,6 +772,26 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           },
         ),
       ],
+      if (widget.showMarkUnreadMessage)
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.messageUnread(),
+          title: Text(context.translations.markAsUnreadLabel),
+          onClick: () async {
+            try {
+              await channel.markUnread(widget.message.id);
+            } catch (ex) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    context.translations.markUnreadError,
+                  ),
+                ),
+              );
+            }
+
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+        ),
       if (shouldShowThreadReplyAction)
         StreamChatContextMenuItem(
           leading: StreamSvgIcon.thread(),
@@ -1000,6 +1029,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             showThreadReplyMessage: shouldShowThreadReplyAction,
             showFlagButton: widget.showFlagButton,
             showPinButton: widget.showPinButton,
+            showMarkUnreadMessage: widget.showMarkUnreadMessage,
             customActions: widget.customActions,
           ),
         );
