@@ -70,6 +70,7 @@ flutter:
   uses-material-design: true
 
 dev_dependencies:
+  faker_dart: ^0.2.1
   flutter_test:
     sdk: flutter
   golden_toolkit: ^0.15.0
