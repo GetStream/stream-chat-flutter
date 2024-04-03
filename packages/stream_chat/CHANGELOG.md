@@ -1,4 +1,4 @@
-## Unreleased
+## 7.2.0
 
 ✅ Added
 - Added `markUnread` method to `Channel` that marks messages from the provided message id onwards as unread
