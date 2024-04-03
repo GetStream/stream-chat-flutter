@@ -310,8 +310,8 @@ class ChannelApi {
   }
 
   /// Mark [channelId] of type [channelType] all messages as read
-  /// Optionally provide a [messageId] if you want to mark a
-  /// particular message as read
+  /// Optionally provide a [messageId] if you want to mark channel as
+  /// read from particular message onwards
   Future<EmptyResponse> markRead(
     String channelId,
     String channelType, {
@@ -320,6 +320,19 @@ class ChannelApi {
     final response = await _client.post(
       '${_getChannelUrl(channelId, channelType)}/read',
       data: {if (messageId != null) 'message_id': messageId},
+    );
+    return EmptyResponse.fromJson(response.data);
+  }
+
+  /// Marks all messages from the provided [messageId] onwards as unread
+  Future<EmptyResponse> markUnread(
+    String channelId,
+    String channelType,
+    String? messageId,
+  ) async {
+    final response = await _client.post(
+      '${_getChannelUrl(channelId, channelType)}/unread',
+      data: {'message_id': messageId},
     );
     return EmptyResponse.fromJson(response.data);
   }

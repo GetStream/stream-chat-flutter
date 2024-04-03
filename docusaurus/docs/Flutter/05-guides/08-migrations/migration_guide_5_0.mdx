@@ -1,6 +1,5 @@
 ---
 id: migration_guide_5_0
-sidebar_position: 2
 title: v5.0
 slug: /guides/migration_guide_5_0/
 ---
@@ -39,7 +38,7 @@ This section highlights our efforts on Desktop (macOS, Windows, and Linux) and W
 
 ### Setup
 
-See the [setup guide](../../03-stream_chat_flutter/setup.mdx) for platform specific instructions.
+See the [setup guide](/flutter/v5/stream_chat_flutter/setup) for platform specific instructions.
 
 ### Supporting Larger Screens
 
@@ -50,7 +49,7 @@ We've added support for larger screens and have made changes to the UI to suppor
 
 Below is an example running on macOS, with a split-screen view showing channels on the left and messages on the right.
 
-![MacOS split](../../assets/mac_os_split.png)
+![MacOS split](../../../../flutter_versioned_docs/version-5.x.x/assets/mac_os_split.png)
 
 ### Native Platform Interactions
 
@@ -106,13 +105,13 @@ For additional information, see [#1125](https://github.com/GetStream/stream-chat
 
 The `StreamMemberListView` and `StreamMemberGridView` widgets are new widgets that allow you to display a list of members in a channel.
 
-Check out the dedicated [documentation](../../03-stream_chat_flutter/stream_member_list_view.mdx) for more information.
+Check out the dedicated [documentation](/flutter/v5/stream_chat_flutter/stream_member_list_view) for more information.
 
 ### Attachment Picker
 
 As part of the v5 release, we've refactored the `AttachmentPicker` to be more flexible and customizable. This allows you to use the `AttachmentPicker` in various ways and customize the UI to your liking.
 
-Check out the dedicated [guide](../../02-customization/01-custom-widgets/05-customize_attachment_picker_modal.mdx) for more information.
+Check out the dedicated [guide](/flutter/v5/customization/custom-widgets/customize_attachment_picker_modal) for more information.
 
 ### Other Changes
 
@@ -170,6 +169,6 @@ StreamImageAttachment(
 )
 ```
 
-- Removed `StreamMessageInput.customOverlays` in favor of `StreamMessageInput.customAutocompleteTriggers`. Read the guide on [Adding Custom Autocomplete Triggers](../../02-customization/01-custom-widgets/06-autocomplete_triggers.mdx) to learn how to migrate your code.
+- Removed `StreamMessageInput.customOverlays` in favor of `StreamMessageInput.customAutocompleteTriggers`. Read the guide on [Adding Custom Autocomplete Triggers](/flutter/v5/customization/custom-widgets/autocomplete_triggers) to learn how to migrate your code.
 
-- Removed the default emoji overlay picker. Read the guide on [Adding Custom Autocomplete Triggers](../../02-customization/01-custom-widgets/06-autocomplete_triggers.mdx) to learn how to migrate your code.
+- Removed the default emoji overlay picker. Read the guide on [Adding Custom Autocomplete Triggers](/flutter/v5/customization/custom-widgets/autocomplete_triggers) to learn how to migrate your code.

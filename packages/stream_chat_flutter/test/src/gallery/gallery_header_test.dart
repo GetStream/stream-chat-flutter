@@ -5,6 +5,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -88,7 +89,7 @@ void main() {
 
   testGoldens('golden test for GalleryHeader', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChat(
           client: client,
           child: StreamChannel(

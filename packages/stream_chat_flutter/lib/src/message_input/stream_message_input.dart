@@ -45,6 +45,12 @@ enum HintType {
 /// [type].
 typedef HintGetter = String? Function(BuildContext context, HintType type);
 
+/// The signature for the function that builds the list of actions.
+typedef ActionsBuilder = List<Widget> Function(
+  BuildContext context,
+  List<Widget> defaultActions,
+);
+
 /// Inactive state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input.png)
@@ -101,7 +107,8 @@ class StreamMessageInput extends StatefulWidget {
     this.textCapitalization = TextCapitalization.sentences,
     this.disableAttachments = false,
     this.messageInputController,
-    this.actions = const [],
+    this.actionsBuilder,
+    this.spaceBetweenActions = 8,
     this.actionsLocation = ActionsLocation.left,
     this.attachmentListBuilder,
     this.fileAttachmentListBuilder,
@@ -202,7 +209,10 @@ class StreamMessageInput extends StatefulWidget {
   final StreamMessageInputController? messageInputController;
 
   /// List of action widgets.
-  final List<Widget> actions;
+  final ActionsBuilder? actionsBuilder;
+
+  /// Space between the actions.
+  final double spaceBetweenActions;
 
   /// The location of the custom actions.
   final ActionsLocation actionsLocation;
@@ -738,7 +748,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildExpandActionsButton(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: AnimatedCrossFade(
@@ -771,21 +780,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
         ),
         secondChild: widget.disableAttachments &&
                 !widget.showCommandsButton &&
-                !widget.actions.isNotEmpty
+                !(widget.actionsBuilder != null)
             ? const Offstage()
             : Wrap(
-                children: <Widget>[
-                  if (!widget.disableAttachments &&
-                      channel.ownCapabilities
-                          .contains(PermissionType.uploadFile))
-                    _buildAttachmentButton(context),
-                  if (widget.showCommandsButton &&
-                      !_isEditing &&
-                      channel.state != null &&
-                      channel.config?.commands.isNotEmpty == true)
-                    _buildCommandButton(context),
-                  ...widget.actions,
-                ].insertBetween(const SizedBox(width: 8)),
+                children: _actionsList()
+                    .insertBetween(SizedBox(width: widget.spaceBetweenActions)),
               ),
         duration: const Duration(milliseconds: 300),
         alignment: Alignment.center,
@@ -793,9 +792,31 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
+  List<Widget> _actionsList() {
+    final channel = StreamChannel.of(context).channel;
+    final defaultActions = <Widget>[
+      if (!widget.disableAttachments &&
+          channel.ownCapabilities.contains(PermissionType.uploadFile))
+        _buildAttachmentButton(context),
+      if (widget.showCommandsButton &&
+          !_isEditing &&
+          channel.state != null &&
+          channel.config?.commands.isNotEmpty == true)
+        _buildCommandButton(context),
+    ];
+    if (widget.actionsBuilder != null) {
+      return widget.actionsBuilder!(
+        context,
+        defaultActions,
+      );
+    } else {
+      return defaultActions;
+    }
+  }
+
   Widget _buildAttachmentButton(BuildContext context) {
     final defaultButton = AttachmentButton(
-      color: _messageInputTheme.actionButtonIdleColor!,
+      color: _messageInputTheme.actionButtonIdleColor,
       onPressed: _onAttachmentButtonPressed,
     );
 
@@ -878,10 +899,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     maxHeight: widget.maxHeight,
                     child: PlatformWidgetBuilder(
                       web: (context, child) => Focus(
+                        skipTraversal: true,
                         onKeyEvent: _handleKeyPressed,
                         child: child!,
                       ),
                       desktop: (context, child) => Focus(
+                        skipTraversal: true,
                         onKeyEvent: _handleKeyPressed,
                         child: child!,
                       ),
@@ -1053,7 +1076,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
         );
       }
 
-      var actionsLength = widget.actions.length;
+      int actionsLength;
+      if (widget.actionsBuilder != null) {
+        actionsLength = widget.actionsBuilder!(context, []).length;
+      } else {
+        actionsLength = 0;
+      }
       if (widget.showCommandsButton) actionsLength += 1;
       if (!widget.disableAttachments) actionsLength += 1;
 
@@ -1178,7 +1206,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
       showBorder: !containsUrl,
       message: quotedMessage,
       messageTheme: _streamChatTheme.otherMessageTheme,
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       onQuotedMessageClear: widget.onQuotedMessageCleared,
       attachmentThumbnailBuilders:
           widget.quotedMessageAttachmentThumbnailBuilders,

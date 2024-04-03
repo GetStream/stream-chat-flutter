@@ -6,6 +6,18 @@
 
 - Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2
   
+## 7.2.0
+
+- Updated `stream_chat` dependency to [`7.2.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.1.0
+
+- Updated `stream_chat` dependency to [`7.1.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.0.2
+
+- Updated `stream_chat` dependency to [`7.0.2`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 7.0.1
 
 - Updated `stream_chat` dependency to [`7.0.1`](https://pub.dev/packages/stream_chat/changelog).

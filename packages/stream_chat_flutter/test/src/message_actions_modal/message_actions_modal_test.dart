@@ -61,6 +61,7 @@ void main() {
       expect(find.text('Edit Message'), findsOneWidget);
       expect(find.text('Delete Message'), findsOneWidget);
       expect(find.text('Copy Message'), findsOneWidget);
+      expect(find.text('Mark as Unread'), findsOneWidget);
     },
   );
 
@@ -850,6 +851,57 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Something went wrong'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'tapping on unread message should call client.unread',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+
+      final themeData = ThemeData();
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => StreamChat(
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
+          theme: themeData,
+          home: Scaffold(
+            body: StreamChannel(
+              showLoading: false,
+              channel: channel,
+              child: SizedBox(
+                child: MessageActionsModal(
+                  messageWidget: const Text('test'),
+                  message: Message(
+                    id: 'testid',
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
+                    ),
+                  ),
+                  messageTheme: streamTheme.ownMessageTheme,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mark as Unread'));
+      await tester.pumpAndSettle();
+
+      verify(() => channel.markUnread(any())).called(1);
     },
   );
 }

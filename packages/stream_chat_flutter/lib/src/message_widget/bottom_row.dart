@@ -169,7 +169,7 @@ class BottomRow extends StatelessWidget {
           final channel = StreamChannel.of(context);
           message = await channel.getMessage(message.parentId!);
         }
-        return onThreadTap!(message);
+        return onThreadTap?.call(message);
       } catch (e, stk) {
         debugPrint('Error while fetching message: $e, $stk');
       }

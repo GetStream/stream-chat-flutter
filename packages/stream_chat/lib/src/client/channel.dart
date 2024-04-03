@@ -862,6 +862,18 @@ class Channel {
 
       state?.deleteMessage(deletedMessage, hardDelete: hard);
 
+      if (hard) {
+        deletedMessage.attachments.forEach((attachment) {
+          if (attachment.uploadState.isSuccess) {
+            if (attachment.type == AttachmentType.image) {
+              deleteImage(attachment.imageUrl!);
+            } else if (attachment.type == AttachmentType.file) {
+              deleteFile(attachment.assetUrl!);
+            }
+          }
+        });
+      }
+
       return response;
     } catch (e) {
       if (e is StreamChatNetworkError && e.isRetriable) {
@@ -1329,14 +1341,45 @@ class Channel {
 
   /// Mark all messages as read.
   ///
-  /// Optionally provide a [messageId] if you want to mark a
-  /// particular message as read.
+  /// Optionally provide a [messageId] if you want to mark channel as
+  /// read from a particular message onwards.
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
     client.state.totalUnreadCount =
         max(0, (client.state.totalUnreadCount) - (state!.unreadCount));
     state!.unreadCount = 0;
     return _client.markChannelRead(id!, type, messageId: messageId);
+  }
+
+  /// Mark message as unread.
+  ///
+  /// You have to provide a [messageId] from which you want the channel
+  /// to be marked as unread.
+  Future<EmptyResponse> markUnread(String messageId) async {
+    _checkInitialized();
+
+    final response = await _client.markChannelUnread(id!, type, messageId);
+
+    final lastReadDate = state!.currentUserRead?.lastRead;
+    final currentUnread = state!.currentUserRead?.unreadMessages ?? 0;
+
+    final messagesFromMarked = state!.messages
+        .where((message) => message.user?.id != client.state.currentUser?.id)
+        .skipWhile((message) => message.id != messageId)
+        .toList();
+    final channelUnreadCount = max(currentUnread, messagesFromMarked.length);
+    final additionalTotalUnreadCount = currentUnread > 0
+        ? messagesFromMarked
+            .takeWhile((message) =>
+                lastReadDate == null ||
+                message.createdAt.isBefore(lastReadDate))
+            .length
+        : messagesFromMarked.length;
+
+    client.state.totalUnreadCount += additionalTotalUnreadCount;
+    state!.unreadCount = channelUnreadCount;
+
+    return response;
   }
 
   void _initState(ChannelState channelState) {
@@ -1749,6 +1792,8 @@ class ChannelClientState {
 
     _listenReadEvents();
 
+    _listenUnreadEvents();
+
     _listenChannelTruncated();
 
     _listenChannelUpdated();
@@ -2091,54 +2136,57 @@ class ChannelClientState {
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
   void updateMessage(Message message) {
-    // Regular messages, which are shown in channel.
+    // Determine if the message should be displayed in the channel view.
     if (message.parentId == null || message.showInChannel == true) {
+      // Create a new list of messages to avoid modifying the original
+      // list directly.
       var newMessages = [...messages];
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
+
       if (oldIndex != -1) {
+        // If the message already exists, prepare it for update.
         final oldMessage = newMessages[oldIndex];
         var updatedMessage = message.syncWith(oldMessage);
-        // Add quoted message to the message if it is not present.
-        if (message.quotedMessageId != null && message.quotedMessage == null) {
+
+        // Preserve quotedMessage if the update doesn't include a new
+        // quotedMessage.
+        if (message.quotedMessageId != null &&
+            message.quotedMessage == null &&
+            oldMessage.quotedMessage != null) {
           updatedMessage = updatedMessage.copyWith(
             quotedMessage: oldMessage.quotedMessage,
           );
         }
+
+        // Update the message in the list.
         newMessages[oldIndex] = updatedMessage;
 
-        // Update quoted message reference for every message if available.
-        newMessages = [...newMessages].map((it) {
-          // Early return if the message doesn't have a quoted message.
+        // Update quotedMessage references in all messages.
+        newMessages = newMessages.map((it) {
+          // Skip if the current message does not quote the updated message.
           if (it.quotedMessageId != message.id) return it;
 
-          // Setting it to null will remove the quoted message from the message
-          // So, we are setting the same message but with the deleted state.
-          return it.copyWith(
-            quotedMessage: updatedMessage.copyWith(
-              type: 'deleted',
-              deletedAt: DateTime.now(),
-            ),
-          );
+          // Update the quotedMessage only if the updatedMessage indicates
+          // deletion.
+          if (message.type == 'deleted') {
+            return it.copyWith(
+              quotedMessage: updatedMessage.copyWith(
+                type: message.type,
+                deletedAt: message.deletedAt,
+              ),
+            );
+          }
+          return it;
         }).toList();
       } else {
+        // If the message is new, add it to the list.
         newMessages.add(message);
       }
 
-      final newPinnedMessages = [...pinnedMessages];
-      final oldPinnedIndex =
-          newPinnedMessages.indexWhere((m) => m.id == message.id);
+      // Handle updates to pinned messages.
+      final newPinnedMessages = _updatePinnedMessages(message);
 
-      // Handle pinned messages
-      if (message.pinned) {
-        if (oldPinnedIndex != -1) {
-          newPinnedMessages[oldPinnedIndex] = message;
-        } else {
-          newPinnedMessages.add(message);
-        }
-      } else {
-        newPinnedMessages.removeWhere((m) => m.id == message.id);
-      }
-
+      // Apply the updated lists to the channel state.
       _channelState = _channelState.copyWith(
         messages: newMessages.sorted(_sortByCreatedAt),
         pinnedMessages: newPinnedMessages,
@@ -2148,10 +2196,34 @@ class ChannelClientState {
       );
     }
 
-    // Thread messages, which are shown in thread page.
+    // If the message is part of a thread, update thread information.
     if (message.parentId != null) {
       updateThreadInfo(message.parentId!, [message]);
     }
+  }
+
+  /// Updates the list of pinned messages based on the current message's
+  /// pinned status.
+  List<Message> _updatePinnedMessages(Message message) {
+    final newPinnedMessages = [...pinnedMessages];
+    final oldPinnedIndex =
+        newPinnedMessages.indexWhere((m) => m.id == message.id);
+
+    if (message.pinned) {
+      // If the message is pinned, add or update it in the list of pinned
+      // messages.
+      if (oldPinnedIndex != -1) {
+        newPinnedMessages[oldPinnedIndex] = message;
+      } else {
+        newPinnedMessages.add(message);
+      }
+    } else {
+      // If the message is not pinned, remove it from the list of pinned
+      // messages.
+      newPinnedMessages.removeWhere((m) => m.id == message.id);
+    }
+
+    return newPinnedMessages;
   }
 
   /// Remove a [message] from this [channelState].
@@ -2203,6 +2275,31 @@ class ChannelClientState {
     return updateMessage(message);
   }
 
+  void _listenUnreadEvents() {
+    if (_channelState.channel?.config.readEvents == false) {
+      return;
+    }
+
+    _subscriptions.add(
+        _channel.on(EventType.notificationMarkUnread).listen((Event event) {
+      if (event.user?.id != _channel._client.state.currentUser!.id) return;
+
+      final readList = <Read>[
+        ..._channelState.read?.where((r) => r.user.id != event.user!.id) ??
+            <Read>[],
+        if (event.lastReadAt != null)
+          Read(
+            user: event.user!,
+            lastRead: event.lastReadAt!,
+            unreadMessages: event.unreadMessages ?? 0,
+            lastReadMessageId: event.lastReadMessageId,
+          )
+      ];
+
+      _channelState = _channelState.copyWith(read: readList);
+    }));
+  }
+
   void _listenReadEvents() {
     if (_channelState.channel?.config.readEvents == false) {
       return;
@@ -2223,6 +2320,7 @@ class ChannelClientState {
             readList.add(Read(
               user: event.user!,
               lastRead: event.createdAt,
+              lastReadMessageId: messages.lastOrNull?.id,
             ));
             _channelState = _channelState.copyWith(read: readList);
           }

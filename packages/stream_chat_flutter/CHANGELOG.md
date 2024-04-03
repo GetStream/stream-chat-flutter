@@ -8,6 +8,44 @@
 - Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2
 - Bump `photo_manager` dependency to `^3.0.0-dev.4`.
 
+## 7.2.0
+
+✅ Added
+`StreamMessageListView` will now by default show unread indicator floating on top of the message list that will scroll to last read message when tapped and mark channel as unread when dismissed.
+
+- Added `showUnreadIndicator` parameter to `StreamMessageListView` that controls visibility of new channel unread indicator
+- Added `unreadIndicatorBuilder` parameter to `StreamMessageListView` that allows to provide custom unread indicator builder
+- Added `markReadWhenAtTheBottom` parameter to `StreamMessageListView` that will toggle, previously default, behaviour of marking channel as read when message list is scrolled to the bottom (now default is `false`)
+- Added `showUnreadCountOnScrollToBottom` parameter to `StreamMessageListView` that will toggle, previously shown by default, unread messages counter on the scroll to bottom button (no default is `false`)
+
+Added Mark as Unread option to `StreamMessageWidget` context menu that will show for non-thread messages of other users and mark channel as unread from selected message onwards.
+
+- Added `showMarkUnreadMessage` to  `StreamMessageWidget` that controls visibility of Mark as Unread option.
+
+🔄 Changed
+- Updated `connectivity_plus` dependency to `>=4.0.2 <7.0.0`
+
+## 7.1.0
+
+🐞 Fixed
+- Fixed quoted message having 0 bottom padding. All sides now have 8 padding 
+
+🔄 Changed
+- Updated `photo_manager` dependency to `^3.0.0`
+- Updated `lottie` to `>=2.6.0 <4.0.0`
+
+## 7.0.2
+
+✅ Added
+
+- Added `ActionsBuilder` signature for function which will return default actions and allows past custom actions.
+- Added `spaceBetweenActions` parameter for `StreamMessageInput` to control distance between actions
+
+🐞 Fixed
+- Removed double focus on `StreamMessageInput` when `focusNode` is provided for web and desktop.
+- Optionally call `onThreadTap` in `BottomRow` to avoid `Null check operator used on a null value`
+
+
 ## 7.0.1
 
 🐞 Fixed
@@ -71,6 +109,9 @@
 # 6.12.0
 
 🐞 Fixed
+
+- Fix render overflow issue with `StreamTypingIndicator`. It now uses `Flexible` 
+  inside `Row`.
 
 - [[#1759]](https://github.com/GetStream/stream-chat-flutter/issues/1759) Fixed
   The Reaction Picker is not being removed when I set showReactionPicker to false.

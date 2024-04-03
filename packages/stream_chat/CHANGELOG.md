@@ -6,6 +6,25 @@
 
 - Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2
   
+## 7.2.0
+
+✅ Added
+- Added `markUnread` method to `Channel` that marks messages from the provided message id onwards as unread
+
+## 7.1.0
+
+🐞 Fixed
+- Fixes a thread message causing reply messages on the main thread to be considered deleted
+
+## 7.0.2
+
+🐞 Fixed
+
+- [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file 
+  attachments from the CDN, when the message get's hard deleted.
+- [[#1819]](https://github.com/GetStream/stream-chat-flutter/issues/1819) Handle network errors
+  with String payload.
+
 ## 7.0.1
 
 🐞 Fixed

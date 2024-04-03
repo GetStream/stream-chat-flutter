@@ -2,6 +2,9 @@ name: docusaurus
 
 on:
   push:
+    tags:
+      - '*.*.*'
+      - 'v*.*.*'
     branches:
       - master
     paths:
@@ -19,6 +22,6 @@ jobs:
       - name: push
         uses: GetStream/push-stream-chat-docusaurus-action@main
         with: 
-          target-branch: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+          target-branch: ${{ github.ref == 'refs/heads/master' && 'staging' || 'production' }}
         env:
           DOCUSAURUS_GH_TOKEN: ${{ secrets.DOCUSAURUS_GH_TOKEN }}

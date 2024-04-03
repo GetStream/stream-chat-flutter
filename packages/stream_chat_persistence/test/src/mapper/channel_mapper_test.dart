@@ -50,6 +50,7 @@ void main() {
         (index) => Read(
           user: User(id: 'testUserId$index'),
           lastRead: DateTime.now(),
+          lastReadMessageId: 'lastMessageId$index',
         ),
       );
       final messages = List.generate(3, (index) => Message());

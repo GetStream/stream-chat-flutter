@@ -4,6 +4,8 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
+
 void main() {
   testWidgets('DmCheckbox onTap works', (tester) async {
     var count = 0;
@@ -45,7 +47,7 @@ void main() {
 
   testGoldens('golden test for checked DmCheckbox with border', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(
@@ -77,7 +79,7 @@ void main() {
   testGoldens('golden test for checked DmCheckbox without border',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(
@@ -102,7 +104,7 @@ void main() {
   testGoldens('golden test for unchecked DmCheckbox with border',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: Scaffold(

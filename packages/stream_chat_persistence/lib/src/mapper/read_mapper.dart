@@ -8,6 +8,7 @@ extension ReadEntityX on ReadEntity {
         user: user,
         lastRead: lastRead,
         unreadMessages: unreadMessages,
+        lastReadMessageId: lastReadMessageId,
       );
 }
 
@@ -19,5 +20,6 @@ extension ReadX on Read {
         userId: user.id,
         channelCid: cid,
         unreadMessages: unreadMessages,
+        lastReadMessageId: lastReadMessageId,
       );
 }
