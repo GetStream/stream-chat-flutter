@@ -1,4 +1,4 @@
-## Unreleased
+## 7.2.0
 
 ✅ Added
 `StreamMessageListView` will now by default show unread indicator floating on top of the message list that will scroll to last read message when tapped and mark channel as unread when dismissed.
@@ -13,7 +13,7 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 - Added `showMarkUnreadMessage` to  `StreamMessageWidget` that controls visibility of Mark as Unread option.
 
 🔄 Changed
-
+- Updated `connectivity_plus` dependency to `>=4.0.2 <7.0.0`
 
 ## 7.1.0
 
