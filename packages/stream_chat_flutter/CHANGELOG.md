@@ -1,3 +1,9 @@
+## 7.2.0-hotfix.1
+
+  🔄 Changed
+  - Updated `stream_chat_flutter_core` dependency to [`7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
+
+
 ## 7.2.0
 
 ✅ Added
@@ -11,9 +17,6 @@
 Added Mark as Unread option to `StreamMessageWidget` context menu that will show for non-thread messages of other users and mark channel as unread from selected message onwards.
 
 - Added `showMarkUnreadMessage` to  `StreamMessageWidget` that controls visibility of Mark as Unread option.
-
-🔄 Changed
-- Updated `connectivity_plus` dependency to `>=4.0.2 <7.0.0`
 
 ## 7.1.0
 
