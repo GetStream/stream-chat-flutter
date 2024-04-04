@@ -6,6 +6,10 @@
 
 - Updated minimum supported `SDK` version to Flutter 3.16/Dart 3.2
   
+## 7.2.0-hotfix.1
+
+ - Version to keep in sync with the rest of the packages
+  
 ## 7.2.0
 
 ✅ Added
