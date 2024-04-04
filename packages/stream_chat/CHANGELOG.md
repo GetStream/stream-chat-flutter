@@ -1,3 +1,7 @@
+## 7.2.0-hotfix.1
+
+ - Version to keep in sync with the rest of the packages
+  
 ## 7.2.0
 
 ✅ Added
