@@ -97,6 +97,8 @@ class StreamGalleryHeader extends StatelessWidget
           : const SizedBox(),
       backgroundColor:
           backgroundColor ?? galleryHeaderThemeData.backgroundColor,
+      surfaceTintColor: 
+          backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
         if (!message.isEphemeral)
           IconButton(

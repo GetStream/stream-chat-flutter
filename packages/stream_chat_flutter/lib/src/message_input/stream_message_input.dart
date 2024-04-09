@@ -609,10 +609,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                         _effectiveFocusNode.unfocus();
                       },
                     ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: _buildTextField(context),
-                  ),
+                  _buildTextField(context),
                   if (_effectiveController.message.parentId != null &&
                       !widget.hideSendAsDm)
                     Padding(
