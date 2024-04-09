@@ -28,6 +28,45 @@ StreamMessageListView(
 ),
 ```
 
+### Providing Custom Reaction Icons
+
+By default the `StreamReactionIcon` widgets provided by the SDK are `love`, `like`, `sad`, `haha`, and `wow`.
+Howerver, you can provide your own custom reaction icons by providing a `reactionIcons` parameter to the `StreamChatConfigurationData`.
+
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({
+    required this.client,
+  });
+  final StreamChatClient client;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Container(
+        child: StreamChat(
+          client: client,
+          streamChatConfigData: StreamChatConfigurationData(
+            reactionIcons: [
+              StreamReactionIcon(
+                type: 'custom',
+                builder: (context, isHighlighted, iconSize) {
+                  return Icon(
+                    Icons.star,
+                    size: iconSize,
+                    color: isHighlighted ? Colors.red : Colors.black,
+                  );
+                },
+              ),
+            ]
+          ),
+          child: ChannelListPage(),
+        ),
+      ),
+    );
+  }
+}
+```
+
 ### Theming
 
 You can customize the `StreamMessageWidget` using the `StreamChatTheme` class, so that you can change the

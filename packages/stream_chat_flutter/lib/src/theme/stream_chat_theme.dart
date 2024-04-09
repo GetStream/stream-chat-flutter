@@ -50,6 +50,7 @@ class StreamChatThemeData {
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
+    @Deprecated('Use StreamChatConfigurationData.reactionIcons instead')
     List<StreamReactionIcon>? reactionIcons,
     StreamGalleryHeaderThemeData? imageHeaderTheme,
     StreamGalleryFooterThemeData? imageFooterTheme,
@@ -330,6 +331,7 @@ class StreamChatThemeData {
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     StreamChannelListHeaderThemeData? channelListHeaderTheme,
+    @Deprecated('Use StreamChatConfigurationData.reactionIcons instead')
     List<StreamReactionIcon>? reactionIcons,
     StreamGalleryHeaderThemeData? galleryHeaderTheme,
     StreamGalleryFooterThemeData? galleryFooterTheme,
