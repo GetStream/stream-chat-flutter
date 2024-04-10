@@ -339,7 +339,7 @@ class StreamMessageWidget extends StatefulWidget {
   /// with the tap action on the reactions picker.
   final OnReactionsTap? onReactionsTap;
 
-  /// {@template onReactionsHover}
+  /// {@macro onReactionsHover}
   ///
   /// Note: Only used in desktop devices (web and desktop).
   final OnReactionsHover? onReactionsHover;

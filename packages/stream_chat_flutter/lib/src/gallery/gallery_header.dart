@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// {@macro streamGalleryHeader}
+/// {@template streamGalleryHeader}
 /// Header/AppBar widget for media display screen
 /// {@endtemplate}
 class StreamGalleryHeader extends StatelessWidget
@@ -97,7 +97,7 @@ class StreamGalleryHeader extends StatelessWidget
           : const SizedBox(),
       backgroundColor:
           backgroundColor ?? galleryHeaderThemeData.backgroundColor,
-      surfaceTintColor: 
+      surfaceTintColor:
           backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
         if (!message.isEphemeral)
