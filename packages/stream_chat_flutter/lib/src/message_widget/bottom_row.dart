@@ -263,6 +263,7 @@ class BottomRow extends StatelessWidget {
                 // textScaleFactor is already applied to the textSpan.
                 //
                 // issue: https://github.com/GetStream/stream-chat-flutter/issues/1250
+                // ignore: deprecated_member_use
                 data: mediaQueryData.copyWith(textScaleFactor: 1),
                 child: child,
               ),

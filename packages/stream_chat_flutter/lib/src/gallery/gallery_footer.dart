@@ -75,6 +75,8 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
         context: context,
         removeTop: true,
         child: BottomAppBar(
+          surfaceTintColor:
+              widget.backgroundColor ?? galleryFooterThemeData.backgroundColor,
           color:
               widget.backgroundColor ?? galleryFooterThemeData.backgroundColor,
           child: Row(

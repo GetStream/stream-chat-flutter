@@ -1,3 +1,7 @@
+## Unreleased
+
+- Migrate to Material 3 and remove `useMaterial3` flag interception.
+  
 ## 8.0.0-beta.2
 
 - Bump `photo_manager` dependency to `^3.0.0-dev.5`.
