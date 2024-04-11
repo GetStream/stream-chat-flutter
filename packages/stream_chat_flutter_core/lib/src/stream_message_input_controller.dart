@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-
 import 'package:stream_chat_flutter_core/src/message_text_field_controller.dart';
 
 /// A value listenable builder related to a [Message].
@@ -66,6 +65,7 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   MessageTextFieldController _textFieldController;
 
   Message _initialMessage;
+  bool _isRecordingAudio = false;
 
   static TextEditingValue _textEditingValueFromMessage(Message message) {
     final messageText = message.text;
@@ -89,6 +89,15 @@ class StreamMessageInputController extends ValueNotifier<Message> {
 
   /// Sets the current message associated with this controller.
   set message(Message message) => value = message;
+
+  /// Returns true if the message is empty.
+  bool get isRecordingAudio => _isRecordingAudio;
+
+  /// Sets the [isRecordingAudio] flag of the message.
+  set isRecordingAudio(bool isRecordingAudio) {
+    _isRecordingAudio = isRecordingAudio;
+    notifyListeners();
+  }
 
   @override
   set value(Message message) {

@@ -721,13 +721,31 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return Flex(
       direction: Axis.horizontal,
       children: <Widget>[
-        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.left)
+        if (!_commandEnabled &&
+            widget.actionsLocation == ActionsLocation.left &&
+            !_effectiveController.isRecordingAudio)
           _buildExpandActionsButton(context),
-        _buildTextInput(context),
-        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
+        if (!_effectiveController.isRecordingAudio) _buildTextInput(context),
+        if (!_commandEnabled &&
+            widget.actionsLocation == ActionsLocation.right &&
+            !_effectiveController.isRecordingAudio)
           _buildExpandActionsButton(context),
         if (widget.sendButtonLocation == SendButtonLocation.outside)
-          _buildSendButton(context),
+          if (_effectiveController.textEditingValue.text.isNotEmpty ||
+              _effectiveController.attachments.isNotEmpty)
+            _buildSendButton(context)
+          else
+            StreamAudioMessageSendButton(
+              onRecordingStart: () {
+                _effectiveController.isRecordingAudio = true;
+              },
+              onRecordingEnd: () {
+                _effectiveController.isRecordingAudio = false;
+              },
+              onRecordingCanceled: () {
+                _effectiveController.isRecordingAudio = false;
+              },
+            ),
       ],
     );
   }
