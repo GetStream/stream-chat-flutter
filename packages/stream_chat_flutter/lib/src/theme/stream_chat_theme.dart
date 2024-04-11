@@ -76,6 +76,7 @@ class StreamChatThemeData {
       defaultUserImage: defaultUserImage,
       placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
+      //ignore: deprecated_member_use_from_same_package
       reactionIcons: reactionIcons,
       galleryHeaderTheme: imageHeaderTheme,
       galleryFooterTheme: imageFooterTheme,

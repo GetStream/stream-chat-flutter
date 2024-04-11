@@ -114,6 +114,7 @@ class StreamChatState extends State<StreamChat> {
     final theme = _getTheme(context, widget.streamChatThemeData);
     return Theme(
       data: Theme.of(context).copyWith(
+        // ignore: deprecated_member_use
         useMaterial3: widget.useMaterial3,
       ),
       child: Portal(
