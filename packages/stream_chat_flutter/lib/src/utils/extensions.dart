@@ -230,6 +230,7 @@ extension InputDecorationX on InputDecoration {
 extension BuildContextX on BuildContext {
   // ignore: public_member_api_docs
   double get textScaleFactor =>
+      // ignore: deprecated_member_use
       MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
 
   /// Retrieves current translations according to locale
