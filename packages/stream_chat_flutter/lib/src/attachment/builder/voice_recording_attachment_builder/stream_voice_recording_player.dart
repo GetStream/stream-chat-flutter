@@ -161,12 +161,12 @@ class _StreamVoiceRecordingPlayerState
   Widget _speedAndActionButton() {
     final theme = StreamChatTheme.of(context).voiceRecordingTheme.playerTheme;
 
-    final showSpeed = _playingThisStream().flatMap((showSpeed) =>
+    final speedStream = _playingThisStream().flatMap((showSpeed) =>
         widget.player.speedStream.map((speed) => showSpeed ? speed : -1.0));
 
     return StreamBuilder<double>(
       initialData: -1,
-      stream: showSpeed,
+      stream: speedStream,
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data! > 0) {
           final speed = snapshot.data!;
@@ -297,7 +297,7 @@ class _StreamVoiceRecordingPlayerState
   Stream<bool> _playingThisStream() {
     return widget.player.playingStream.flatMap((playing) {
       return widget.player.currentIndexStream.map(
-        (index) => playing && index == widget.index,
+        (index) => true, //playing && index == widget.index,
       );
     });
   }
