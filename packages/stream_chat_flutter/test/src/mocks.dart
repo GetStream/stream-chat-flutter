@@ -1,3 +1,4 @@
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager_desktop.dart';
@@ -66,4 +67,16 @@ class MockStreamMemberListController extends Mock
     implements StreamMemberListController {
   @override
   PagedValue<int, Member> value = const PagedValue.loading();
+}
+
+class MockConnectivityPlatform extends ConnectivityPlatform {
+  @override
+  Future<List<ConnectivityResult>> checkConnectivity() {
+    return Future.value([ConnectivityResult.wifi]);
+  }
+
+  @override
+  Stream<List<ConnectivityResult>> get onConnectivityChanged {
+    return Stream.value([ConnectivityResult.wifi]);
+  }
 }

@@ -34,7 +34,7 @@ void main() {
 
     testWidgets('appears on tap', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialAppWrapper(
           builder: (context, child) => StreamChat(
             client: MockClient(),
             child: child,

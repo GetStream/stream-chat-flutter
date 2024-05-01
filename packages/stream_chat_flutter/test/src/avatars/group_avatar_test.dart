@@ -67,7 +67,7 @@ void main() {
     'control test',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialAppWrapper(
           home: StreamChat(
             client: client,
             streamChatThemeData: StreamChatThemeData.light(),
