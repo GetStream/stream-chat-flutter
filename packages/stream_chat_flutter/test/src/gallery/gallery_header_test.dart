@@ -64,7 +64,7 @@ void main() {
     'it should show channel typing',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialAppWrapper(
           home: StreamChat(
             client: client,
             child: StreamChannel(

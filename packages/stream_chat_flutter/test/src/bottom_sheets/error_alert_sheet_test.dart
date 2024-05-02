@@ -36,7 +36,7 @@ void main() {
       void failFunction() => throw Exception('Something went wrong');
 
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialAppWrapper(
           builder: (context, child) => StreamChat(
             client: MockClient(),
             child: child,

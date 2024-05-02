@@ -1,6 +1,9 @@
 // ignore_for_file: public_member_api_docs, use_super_parameters
 
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
+
+import 'mocks.dart';
 
 class MaterialAppWrapper extends MaterialApp {
   MaterialAppWrapper({
@@ -24,5 +27,7 @@ class MaterialAppWrapper extends MaterialApp {
           navigatorObservers: [
             if (navigatorObserver != null) navigatorObserver,
           ],
-        );
+        ) {
+    ConnectivityPlatform.instance = MockConnectivityPlatform();
+  }
 }

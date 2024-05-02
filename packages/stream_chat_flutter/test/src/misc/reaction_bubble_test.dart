@@ -26,7 +26,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: theme,
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: Center(
               child: StreamReactionBubble(
@@ -69,7 +69,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: ColoredBox(
             color: Colors.black,
             child: StreamReactionBubble(
@@ -106,7 +106,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: ColoredBox(
             color: Colors.black,
             child: StreamReactionBubble(
@@ -151,7 +151,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: ColoredBox(
             color: Colors.black,
             child: StreamReactionBubble(
@@ -196,7 +196,7 @@ void main() {
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           child: Scaffold(
             body: Center(
