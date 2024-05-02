@@ -1,3 +1,7 @@
+## 8.0.0-beta.3
+
+- Aligned version with other Stream Chat packages
+  
 ## 8.0.0-beta.2
 
 - Aligned version with other Stream Chat packages

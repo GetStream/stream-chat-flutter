@@ -1,6 +1,13 @@
-## Unreleased
+## 8.0.0-beta.3
 
+🐞 Fixed
 - Migrate to Material 3 and remove `useMaterial3` flag interception.
+
+🔄 Changed
+- Updated `stream_chat_flutter_core` dependency to [`8.0.0-beta.3`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+🛑️ Breaking
+- Updated `connectivity_plus` library to `>= 6.0.0`.
   
 ## 8.0.0-beta.2
 

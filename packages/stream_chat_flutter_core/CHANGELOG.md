@@ -1,6 +1,7 @@
-## Unreleased
+## 8.0.0-beta.3
 
 - 🛑 **BREAKING** Updated `connectivity_plus` library to `>= 6.0.0`.
+- Updated `stream_chat` dependency to [`8.0.0-beta.3`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 8.0.0-beta.2
 
