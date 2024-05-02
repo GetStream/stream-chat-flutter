@@ -315,7 +315,7 @@ class StreamMessageWidget extends StatefulWidget {
   final bool showPinHighlight;
 
   /// {@template showTopUserAvatar}
-  /// Show user image on top of the chat bubble
+  /// Show user avatar to align top with message bubble
   /// {@endtemplate}
   final bool showTopUserAvatar;
 
