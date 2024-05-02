@@ -99,6 +99,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
     this.attachmentActionsModalBuilder,
+    this.showTopUserAvatar = false,
   });
 
   /// {@template onMentionTap}
@@ -313,6 +314,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showPinHighlight;
 
+  /// {@template showTopUserAvatar}
+  /// Show user image on top of the chat bubble
+  /// {@endtemplate}
+  final bool showTopUserAvatar;
+
   /// {@template attachmentBuilders}
   /// List of attachment builders for rendering attachment widgets pre-defined
   /// and custom attachment types.
@@ -419,6 +425,7 @@ class StreamMessageWidget extends StatefulWidget {
     bool? showPinButton,
     bool? showPinHighlight,
     bool? showMarkUnreadMessage,
+    bool? showTopUserAvatar,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     bool? translateUserAvatar,
     OnQuotedMessageTap? onQuotedMessageTap,
@@ -482,6 +489,7 @@ class StreamMessageWidget extends StatefulWidget {
       showPinHighlight: showPinHighlight ?? this.showPinHighlight,
       showMarkUnreadMessage:
           showMarkUnreadMessage ?? this.showMarkUnreadMessage,
+      showTopUserAvatar: showTopUserAvatar ?? this.showTopUserAvatar,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
@@ -738,6 +746,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                           widget.bottomRowBuilderWithDefaultWidget,
                       onUserAvatarTap: widget.onUserAvatarTap,
                       userAvatarBuilder: widget.userAvatarBuilder,
+                      showTopUserAvatar: widget.showTopUserAvatar,
                     );
                   }),
                 ),

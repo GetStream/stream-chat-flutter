@@ -74,6 +74,7 @@ class MessageWidgetContent extends StatelessWidget {
     this.quotedMessageBuilder,
     this.bottomRowBuilderWithDefaultWidget,
     this.userAvatarBuilder,
+    required this.showTopUserAvatar,
   });
 
   /// {@macro reverse}
@@ -211,6 +212,9 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro showUsername}
   final bool showUsername;
 
+  /// {@macro showTopUserAvatar}
+  final bool showTopUserAvatar;
+
   /// {@macro messageWidget}
   final StreamMessageWidget messageWidget;
 
@@ -256,7 +260,9 @@ class MessageWidgetContent extends StatelessWidget {
                       currentUser: streamChat.currentUser!,
                     ),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: showTopUserAvatar
+                        ? CrossAxisAlignment.start
+                        : CrossAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (!reverse &&
@@ -265,7 +271,8 @@ class MessageWidgetContent extends StatelessWidget {
                         UserAvatarTransform(
                           onUserAvatarTap: onUserAvatarTap,
                           userAvatarBuilder: userAvatarBuilder,
-                          translateUserAvatar: translateUserAvatar,
+                          translateUserAvatar:
+                              showTopUserAvatar == false && translateUserAvatar,
                           messageTheme: messageTheme,
                           message: message,
                         ),
