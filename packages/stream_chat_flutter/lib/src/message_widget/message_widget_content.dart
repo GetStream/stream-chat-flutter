@@ -281,101 +281,71 @@ class MessageWidgetContent extends StatelessWidget {
                       if (showUserAvatar == DisplayWidget.hide)
                         SizedBox(width: avatarWidth + 4),
                       Flexible(
-                        child: PortalTarget(
-                          visible: isMobileDevice && showReactions,
-                          portalFollower: isMobileDevice && showReactions
-                              ? ReactionIndicator(
-                                  message: message,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            if (message.isDeleted && !isFailedState)
+                              Container(
+                                margin: EdgeInsets.symmetric(
+                                  horizontal:
+                                      showUserAvatar == DisplayWidget.gone
+                                          ? 0
+                                          : 4.0,
+                                ),
+                                child: StreamDeletedMessage(
+                                  borderRadiusGeometry: borderRadiusGeometry,
+                                  borderSide: borderSide,
+                                  shape: shape,
                                   messageTheme: messageTheme,
-                                  ownId: streamChat.currentUser!.id,
-                                  reverse: reverse,
-                                  onTap: onReactionsTap,
-                                )
-                              : null,
-                          anchor: Aligned(
-                            follower: Alignment(
-                              reverse ? 1 : -1,
-                              -1,
-                            ),
-                            target: Alignment(
-                              reverse ? -1 : 1,
-                              -1,
-                            ),
-                          ),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Padding(
-                                padding: showReactions
-                                    ? const EdgeInsets.only(top: 18)
-                                    : EdgeInsets.zero,
-                                child: (message.isDeleted && !isFailedState)
-                                    ? Container(
-                                        margin: EdgeInsets.symmetric(
-                                          horizontal: showUserAvatar ==
-                                                  DisplayWidget.gone
-                                              ? 0
-                                              : 4.0,
-                                        ),
-                                        child: StreamDeletedMessage(
-                                          borderRadiusGeometry:
-                                              borderRadiusGeometry,
-                                          borderSide: borderSide,
-                                          shape: shape,
-                                          messageTheme: messageTheme,
-                                        ),
-                                      )
-                                    : MessageCard(
-                                        message: message,
-                                        isFailedState: isFailedState,
-                                        showUserAvatar: showUserAvatar,
-                                        messageTheme: messageTheme,
-                                        hasQuotedMessage: hasQuotedMessage,
-                                        hasUrlAttachments: hasUrlAttachments,
-                                        hasNonUrlAttachments:
-                                            hasNonUrlAttachments,
-                                        isOnlyEmoji: isOnlyEmoji,
-                                        isGiphy: isGiphy,
-                                        attachmentBuilders: attachmentBuilders,
-                                        attachmentPadding: attachmentPadding,
-                                        attachmentShape: attachmentShape,
-                                        onAttachmentTap: onAttachmentTap,
-                                        onReplyTap: onReplyTap,
-                                        onShowMessage: onShowMessage,
-                                        attachmentActionsModalBuilder:
-                                            attachmentActionsModalBuilder,
-                                        textPadding: textPadding,
-                                        reverse: reverse,
-                                        onQuotedMessageTap: onQuotedMessageTap,
-                                        onMentionTap: onMentionTap,
-                                        onLinkTap: onLinkTap,
-                                        textBuilder: textBuilder,
-                                        quotedMessageBuilder:
-                                            quotedMessageBuilder,
-                                        borderRadiusGeometry:
-                                            borderRadiusGeometry,
-                                        borderSide: borderSide,
-                                        shape: shape,
-                                      ),
+                                ),
+                              )
+                            else
+                              MessageCard(
+                                message: message,
+                                isFailedState: isFailedState,
+                                showUserAvatar: showUserAvatar,
+                                messageTheme: messageTheme,
+                                hasQuotedMessage: hasQuotedMessage,
+                                hasUrlAttachments: hasUrlAttachments,
+                                hasNonUrlAttachments: hasNonUrlAttachments,
+                                isOnlyEmoji: isOnlyEmoji,
+                                isGiphy: isGiphy,
+                                attachmentBuilders: attachmentBuilders,
+                                attachmentPadding: attachmentPadding,
+                                attachmentShape: attachmentShape,
+                                onAttachmentTap: onAttachmentTap,
+                                onReplyTap: onReplyTap,
+                                onShowMessage: onShowMessage,
+                                attachmentActionsModalBuilder:
+                                    attachmentActionsModalBuilder,
+                                textPadding: textPadding,
+                                reverse: reverse,
+                                onQuotedMessageTap: onQuotedMessageTap,
+                                onMentionTap: onMentionTap,
+                                onLinkTap: onLinkTap,
+                                textBuilder: textBuilder,
+                                quotedMessageBuilder: quotedMessageBuilder,
+                                borderRadiusGeometry: borderRadiusGeometry,
+                                borderSide: borderSide,
+                                shape: shape,
                               ),
-                              // TODO: Make tail part of the Reaction Picker.
-                              if (showReactionPickerTail)
-                                Positioned(
-                                  right: reverse ? null : 4,
-                                  left: reverse ? 4 : null,
-                                  top: -8,
-                                  child: CustomPaint(
-                                    painter: ReactionBubblePainter(
-                                      streamChatTheme.colorTheme.barsBg,
-                                      Colors.transparent,
-                                      Colors.transparent,
-                                      tailCirclesSpace: 1,
-                                      flipTail: !reverse,
-                                    ),
+                            // TODO: Make tail part of the Reaction Picker.
+                            if (showReactionPickerTail)
+                              Positioned(
+                                right: reverse ? null : 4,
+                                left: reverse ? 4 : null,
+                                top: -8,
+                                child: CustomPaint(
+                                  painter: ReactionBubblePainter(
+                                    streamChatTheme.colorTheme.barsBg,
+                                    Colors.transparent,
+                                    Colors.transparent,
+                                    tailCirclesSpace: 1,
+                                    flipTail: !reverse,
                                   ),
                                 ),
-                            ],
-                          ),
+                              ),
+                          ],
                         ),
                       ),
                       if (reverse &&
@@ -394,7 +364,7 @@ class MessageWidgetContent extends StatelessWidget {
                         SizedBox(width: avatarWidth + 4),
                     ],
                   ),
-                  if (isDesktopDeviceOrWeb && showReactions) ...[
+                  if (showReactions) ...[
                     Padding(
                       padding: showUserAvatar != DisplayWidget.gone
                           ? EdgeInsets.only(
