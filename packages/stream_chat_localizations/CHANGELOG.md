@@ -1,3 +1,7 @@
+## 8.0.0-beta.3
+
+* Updated `stream_chat_flutter` dependency to [`8.0.0-beta.3`](https://pub.dev/packages/stream_chat_flutter/changelog).
+  
 ## 8.0.0-beta.2
 
 * Updated `stream_chat_flutter` dependency to [`8.0.0-beta.2`](https://pub.dev/packages/stream_chat_flutter/changelog).
