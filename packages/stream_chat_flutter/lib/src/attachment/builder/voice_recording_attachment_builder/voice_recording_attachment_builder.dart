@@ -1,6 +1,5 @@
 part of '../attachment_widget_builder.dart';
 
-
 /// The default attachment builder for voice recordings
 class VoiceRecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   @override
@@ -29,7 +28,6 @@ class VoiceRecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
         .toList();
   }
 
-
   @override
   Widget build(BuildContext context, Message message,
       Map<String, List<Attachment>> attachments) {
@@ -37,7 +35,8 @@ class VoiceRecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
 
     return StreamVoiceRecordingListPlayer(
       playList: recordings
-          .map((r) => PlayListItem(
+          .map(
+            (r) => PlayListItem(
               assetUrl: r.assetUrl,
               duration: _resolveDuration(r),
               waveForm: _resolveWaveform(r),

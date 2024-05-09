@@ -111,7 +111,7 @@ abstract class StreamAttachmentWidgetBuilder {
         padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
-      
+
       VoiceRecordingAttachmentBuilder(),
 
       // We don't handle URL attachments if the message is a reply.

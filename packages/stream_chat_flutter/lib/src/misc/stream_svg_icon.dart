@@ -677,7 +677,6 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-
   /// [StreamSvgIcon] type
   factory StreamSvgIcon.filetype7z({
     double? size,

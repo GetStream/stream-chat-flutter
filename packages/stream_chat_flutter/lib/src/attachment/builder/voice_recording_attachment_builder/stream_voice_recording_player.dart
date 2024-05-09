@@ -83,7 +83,6 @@ class _StreamVoiceRecordingPlayerState
   }
 
   Widget _content(Duration totalDuration) {
-
     return Container(
       padding: const EdgeInsets.all(8),
       height: 60,
