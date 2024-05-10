@@ -1,26 +1,17 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/stream_chat.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 part 'fallback_attachment_builder.dart';
-
 part 'file_attachment_builder.dart';
-
 part 'gallery_attachment_builder.dart';
-
 part 'giphy_attachment_builder.dart';
-
 part 'image_attachment_builder.dart';
-
 part 'mixed_attachment_builder.dart';
-
 part 'url_attachment_builder.dart';
-
 part 'video_attachment_builder.dart';
+part 'voice_recording_attachment_builder/voice_recording_attachment_builder.dart';
 
 /// {@template streamAttachmentWidgetTapCallback}
 /// Signature for a function that's called when the user taps on an attachment.
@@ -120,6 +111,9 @@ abstract class StreamAttachmentWidgetBuilder {
         padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
+
+      VoiceRecordingAttachmentBuilder(),
+
       // We don't handle URL attachments if the message is a reply.
       if (message.quotedMessage == null)
         UrlAttachmentBuilder(
