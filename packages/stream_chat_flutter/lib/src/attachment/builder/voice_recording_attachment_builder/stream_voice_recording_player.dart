@@ -296,7 +296,7 @@ class _StreamVoiceRecordingPlayerState
   Stream<bool> _playingThisStream() {
     return widget.player.playingStream.flatMap((playing) {
       return widget.player.currentIndexStream.map(
-        (index) => true, //playing && index == widget.index,
+        (index) => playing && index == widget.index,
       );
     });
   }
