@@ -4,6 +4,7 @@ description: Stream Chat official Flutter SDK. Build your own chat experience us
 version: 7.2.0-hotfix.1
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
+publish_to: 'none'
 
 environment:
   sdk: ">=3.1.0 <4.0.0"
@@ -14,7 +15,8 @@ dependencies:
   chewie: ^1.7.0
   collection: ^1.17.2
   contextmenu: ^3.0.0
-  dart_vlc: ^0.4.0
+  dart_vlc:
+    path: ../../../dart_vlc
   desktop_drop: ^0.4.1
   diacritic: ^0.1.4
   dio: ^5.3.2
