@@ -16,7 +16,9 @@ dependencies:
   collection: ^1.17.2
   contextmenu: ^3.0.0
   dart_vlc:
-    path: ../../../dart_vlc
+    git:
+      url: https://github.com/qdhayana/dart_vlc.git
+      ref: master
   desktop_drop: ^0.4.1
   diacritic: ^0.1.4
   dio: ^5.3.2
