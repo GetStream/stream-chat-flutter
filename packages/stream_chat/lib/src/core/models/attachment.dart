@@ -17,7 +17,6 @@ mixin AttachmentType {
   static const giphy = 'giphy';
   static const video = 'video';
   static const audio = 'audio';
-  static const voiceRecording = 'voiceRecording';
 
   /// Application custom types.
   static const urlPreview = 'url_preview';

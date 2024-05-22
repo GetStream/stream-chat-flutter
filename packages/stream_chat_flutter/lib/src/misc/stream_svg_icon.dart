@@ -665,19 +665,6 @@ class StreamSvgIcon extends StatelessWidget {
   }
 
   /// [StreamSvgIcon] type
-  factory StreamSvgIcon.filetypeAac({
-    double? size,
-    Color? color,
-  }) {
-    return StreamSvgIcon(
-      assetName: 'filetype_AAC.svg',
-      color: color,
-      width: size,
-      height: size,
-    );
-  }
-
-  /// [StreamSvgIcon] type
   factory StreamSvgIcon.filetype7z({
     double? size,
     Color? color,

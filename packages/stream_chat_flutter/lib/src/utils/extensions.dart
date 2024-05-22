@@ -11,34 +11,6 @@ import 'package:image_size_getter/image_size_getter.dart' hide Size;
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-int _byteUnitConversionFactor = 1024;
-
-/// int extensions
-extension IntExtension on int {
-  /// Parses int in bytes to human readable size. Like: 17 KB
-  /// instead of 17524 bytes;
-  String toHumanReadableSize() {
-    if (this <= 0) return '0 B';
-    const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    final i = (log(this) / log(_byteUnitConversionFactor)).floor();
-    final numberValue =
-        (this / pow(_byteUnitConversionFactor, i)).toStringAsFixed(2);
-    final suffix = suffixes[i];
-    return '$numberValue $suffix';
-  }
-}
-
-/// Durations extensions.
-extension DurationExtension on Duration {
-  /// Transforms Duration to a minutes and seconds time. Like: 04:13.
-  String toMinutesAndSeconds() {
-    final minutes = inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = inSeconds.remainder(60).toString().padLeft(2, '0');
-
-    return '$minutes:$seconds';
-  }
-}
-
 /// String extension
 extension StringExtension on String {
   /// Returns the capitalized string

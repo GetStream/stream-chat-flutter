@@ -67,5 +67,3 @@ class MockStreamMemberListController extends Mock
   @override
   PagedValue<int, Member> value = const PagedValue.loading();
 }
-
-class MocMessage extends Mock implements Message {}

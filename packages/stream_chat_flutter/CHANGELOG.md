@@ -1,8 +1,3 @@
-## Unreleased
-
-✅ Added
-- Added `VoiceRecordingAttachmentBuilder`, for displaying voice recording attachments in the chat.
-
 ## 7.2.0-hotfix.1
 
   🔄 Changed
