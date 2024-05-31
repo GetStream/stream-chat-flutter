@@ -520,17 +520,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget _buildListView(List<Message> data) {
     messages = data;
 
-    if (_userRead != null &&
-        messages.isNotEmpty &&
-        messages.first.createdAt.isAfter(_userRead!.lastRead) &&
-        messages.last.createdAt.isBefore(_userRead!.lastRead)) {
-      _oldestUnreadMessage = messages.lastWhereOrNull(
-        (it) =>
-            it.user?.id !=
-                streamChannel?.channel.client.state.currentUser?.id &&
-            it.createdAt.compareTo(_userRead!.lastRead) > 0,
-      );
-    }
+    _oldestUnreadMessage = messages.lastUnreadMessage(_userRead);
 
     for (var index = 0; index < messages.length; index++) {
       messagesIndex[messages[index].id] = index;

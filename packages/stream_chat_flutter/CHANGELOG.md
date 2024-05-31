@@ -3,6 +3,9 @@
 ✅ Added
 - Added `VoiceRecordingAttachmentBuilder`, for displaying voice recording attachments in the chat.
 
+🐞 Fixed
+- Fixed wrong calculation of the last unread message indicator.
+
 ## 7.2.0-hotfix.1
 
   🔄 Changed

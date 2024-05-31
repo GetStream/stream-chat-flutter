@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -561,5 +562,31 @@ extension OriginalSizeX on Attachment {
     final height = originalHeight;
     if (width == null || height == null) return null;
     return Size(width.toDouble(), height.toDouble());
+  }
+}
+
+/// Useful extensions on [List<Message>].
+extension MessageListX on Iterable<Message> {
+  /// Returns the last unread message in the list.
+  /// Returns null if the list is empty or the userRead is null.
+  ///
+  /// The [userRead] is the last read message by the user.
+  ///
+  /// The last unread message is the last message in the list that is not
+  /// sent by the current user and is sent after the last read message.
+  Message? lastUnreadMessage(Read? userRead) {
+    if (isEmpty || userRead == null) return null;
+
+    if (first.createdAt.isAfter(userRead.lastRead) &&
+        last.createdAt.isBefore(userRead.lastRead)) {
+      return lastWhereOrNull(
+        (it) =>
+            it.user?.id != userRead.user.id &&
+            it.id != userRead.lastReadMessageId &&
+            it.createdAt.compareTo(userRead.lastRead) > 0,
+      );
+    }
+
+    return null;
   }
 }
