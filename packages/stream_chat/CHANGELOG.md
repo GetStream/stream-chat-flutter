@@ -1,4 +1,4 @@
-## Unreleased
+## 7.2.1
 
 ✅ Added
 - Added `voiceRecording` attachment type
