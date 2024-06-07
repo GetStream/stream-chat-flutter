@@ -44,7 +44,10 @@ dependencies:
   share_plus: ">=7.1.0 <9.0.0"
   shimmer: ^3.0.0
   stream_chat_flutter_core:
-    path: ../stream_chat_flutter_core
+    git:
+      url: https://github.com/qdhayana/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat_flutter_core
   synchronized: ^3.1.0
   thumblr: ^0.0.4
   url_launcher: ^6.1.12

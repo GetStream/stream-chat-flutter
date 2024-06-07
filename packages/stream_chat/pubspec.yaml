@@ -4,6 +4,7 @@ description: The official Dart client for Stream Chat, a service for building ch
 version: 7.2.0-hotfix.1
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
+publish_to: 'none'
 
 environment:
   sdk: '>=3.1.0 <4.0.0'
