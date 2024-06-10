@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `customAttachmentBuilders` parameter for `StreamAttachmentWidgetBuilder.defaultBuilders`.
 - Added `StreamMediaAttachmentBuilder` widget to show media attachments in a message.
 
 ## 7.2.1

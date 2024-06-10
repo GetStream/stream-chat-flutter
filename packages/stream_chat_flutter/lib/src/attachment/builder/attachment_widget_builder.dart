@@ -67,8 +67,11 @@ abstract class StreamAttachmentWidgetBuilder {
     ShapeBorder? shape,
     EdgeInsetsGeometry padding = const EdgeInsets.all(4),
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
+    List<StreamAttachmentWidgetBuilder>? customAttachmentBuilders,
   }) {
     return [
+      ...?customAttachmentBuilders,
+
       // Handles a mix of image, gif, video, url and file attachments.
       MixedAttachmentBuilder(
         padding: padding,
