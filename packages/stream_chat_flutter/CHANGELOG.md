@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamMediaAttachmentBuilder` widget to show media attachments in a message.
+
 ## 7.2.1
 
 ✅ Added
@@ -45,7 +51,6 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 🐞 Fixed
 - Removed double focus on `StreamMessageInput` when `focusNode` is provided for web and desktop.
 - Optionally call `onThreadTap` in `BottomRow` to avoid `Null check operator used on a null value`
-
 
 ## 7.0.1
 
