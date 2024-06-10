@@ -69,6 +69,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.showEditMessage = true,
     this.showReplyMessage = true,
     this.showThreadReplyMessage = true,
+    this.showMarkUnreadMessage = true,
     this.showResendMessage = true,
     this.showCopyMessage = true,
     this.showFlagButton = true,
@@ -99,156 +100,6 @@ class StreamMessageWidget extends StatefulWidget {
     this.imageAttachmentThumbnailCropType = 'center',
     this.attachmentActionsModalBuilder,
   });
-
-  // attachmentBuilders = {
-  //   // Add all default builders
-  //   'image': (context, message, attachments) {
-  //     final color = StreamChatTheme.of(context).colorTheme.borders;
-  //     final border = RoundedRectangleBorder(
-  //       side: attachmentBorderSide ?? BorderSide(color: color),
-  //       borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-  //     );
-  //
-  //     if (attachments.length > 1) {
-  //       return WrapAttachmentWidget(
-  //         attachmentShape: border,
-  //         attachmentWidget: Material(
-  //           color: messageTheme.messageBackgroundColor,
-  //           child: StreamGalleryAttachment(
-  //             constraints: const BoxConstraints.tightFor(
-  //               width: 256,
-  //               height: 195,
-  //             ),
-  //             attachments: attachments,
-  //             message: message,
-  //             itemBuilder: (context, index) {
-  //               return Placeholder();
-  //             },
-  //             // onShowMessage: onShowMessage,
-  //             // onReplyMessage: onReplyTap,
-  //             // onAttachmentTap: onAttachmentTap,
-  //             // imageThumbnailSize: imageAttachmentThumbnailSize,
-  //             // imageThumbnailResizeType:
-  //             //     imageAttachmentThumbnailResizeType,
-  //             // imageThumbnailCropType: imageAttachmentThumbnailCropType,
-  //             // attachmentActionsModalBuilder:
-  //             //     attachmentActionsModalBuilder,
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //
-  //     return WrapAttachmentWidget(
-  //       attachmentShape: border,
-  //       attachmentWidget: StreamImageAttachment(
-  //         message: message,
-  //         image: attachments.first,
-  //         constraints: const BoxConstraints(
-  //           minWidth: 170,
-  //           maxWidth: 256,
-  //           minHeight: 100,
-  //           maxHeight: 300,
-  //         ),
-  //         // onShowMessage: onShowMessage,
-  //         // onReplyMessage: onReplyTap,
-  //         imageThumbnailSize: imageAttachmentThumbnailSize,
-  //         imageThumbnailResizeType: imageAttachmentThumbnailResizeType,
-  //         imageThumbnailCropType: imageAttachmentThumbnailCropType,
-  //         // attachmentActionsModalBuilder: attachmentActionsModalBuilder,
-  //         // onAttachmentTap: onAttachmentTap != null
-  //         //     ? () => onAttachmentTap.call(message, attachments.first)
-  //         //     : null,
-  //       ),
-  //     );
-  //   },
-  //   'video': (context, message, attachments) {
-  //     final color = StreamChatTheme.of(context).colorTheme.borders;
-  //     final border = RoundedRectangleBorder(
-  //       side: attachmentBorderSide ?? BorderSide(color: color),
-  //       borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-  //     );
-  //
-  //     return WrapAttachmentWidget(
-  //       attachmentShape: border,
-  //       attachmentWidget: Column(
-  //         children: [
-  //           ...attachments.map((attachment) {
-  //             return StreamVideoAttachment(
-  //               video: attachment,
-  //               constraints: const BoxConstraints.tightFor(
-  //                 width: 256,
-  //                 height: 195,
-  //               ),
-  //               message: message,
-  //             );
-  //           }),
-  //         ],
-  //       ),
-  //     );
-  //   },
-  //   'giphy': (context, message, attachments) {
-  //     final color = StreamChatTheme.of(context).colorTheme.borders;
-  //     final border = RoundedRectangleBorder(
-  //       side: attachmentBorderSide ?? BorderSide(color: color),
-  //       borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-  //     );
-  //
-  //     return WrapAttachmentWidget(
-  //       attachmentShape: border,
-  //       attachmentWidget: Column(
-  //         children: [
-  //           ...attachments.map((attachment) {
-  //             return StreamGiphyAttachment(
-  //               giphy: attachment,
-  //               message: message,
-  //               constraints: const BoxConstraints(
-  //                 minWidth: 170,
-  //                 maxWidth: 256,
-  //                 minHeight: 100,
-  //                 maxHeight: 300,
-  //               ),
-  //             );
-  //           }),
-  //         ],
-  //       ),
-  //     );
-  //   },
-  //   'file': (context, message, attachments) {
-  //     final color = StreamChatTheme.of(context).colorTheme.borders;
-  //     final border = RoundedRectangleBorder(
-  //       side: attachmentBorderSide ?? BorderSide(color: color),
-  //       borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-  //     );
-  //
-  //     return Column(
-  //       children: [
-  //         ...attachments.map<Widget>((attachment) {
-  //           final mediaQueryData = MediaQuery.of(context);
-  //           return WrapAttachmentWidget(
-  //             attachmentShape: border,
-  //             attachmentWidget: StreamFileAttachment(
-  //               message: message,
-  //               file: attachment,
-  //               constraints: BoxConstraints(
-  //                 maxWidth: 400,
-  //                 minWidth: 400,
-  //                 maxHeight: mediaQueryData.size.height * 0.3,
-  //               ),
-  //               // onAttachmentTap: onAttachmentTap != null
-  //               //     ? () => onAttachmentTap(message, attachment)
-  //               //     : null,
-  //             ),
-  //           );
-  //         }).insertBetween(
-  //           SizedBox(height: attachmentPadding.vertical / 2),
-  //         ),
-  //       ],
-  //     );
-  //   },
-  //
-  //   // Add all custom builders, overriding the defaults if needed.
-  //   ...?customAttachmentBuilders,
-  // };
 
   /// {@template onMentionTap}
   /// Function called on mention tap
@@ -422,6 +273,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showThreadReplyMessage;
 
+  /// {@template showMarkUnreadMessage}
+  /// Show mark unread action
+  /// {@endtemplate}
+  final bool showMarkUnreadMessage;
+
   /// {@template showEditMessage}
   /// Show edit action
   /// {@endtemplate}
@@ -483,7 +339,7 @@ class StreamMessageWidget extends StatefulWidget {
   /// with the tap action on the reactions picker.
   final OnReactionsTap? onReactionsTap;
 
-  /// {@template onReactionsHover}
+  /// {@macro onReactionsHover}
   ///
   /// Note: Only used in desktop devices (web and desktop).
   final OnReactionsHover? onReactionsHover;
@@ -562,6 +418,7 @@ class StreamMessageWidget extends StatefulWidget {
     bool? showFlagButton,
     bool? showPinButton,
     bool? showPinHighlight,
+    bool? showMarkUnreadMessage,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     bool? translateUserAvatar,
     OnQuotedMessageTap? onQuotedMessageTap,
@@ -623,6 +480,8 @@ class StreamMessageWidget extends StatefulWidget {
       showFlagButton: showFlagButton ?? this.showFlagButton,
       showPinButton: showPinButton ?? this.showPinButton,
       showPinHighlight: showPinHighlight ?? this.showPinHighlight,
+      showMarkUnreadMessage:
+          showMarkUnreadMessage ?? this.showMarkUnreadMessage,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
@@ -913,6 +772,26 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           },
         ),
       ],
+      if (widget.showMarkUnreadMessage)
+        StreamChatContextMenuItem(
+          leading: StreamSvgIcon.messageUnread(),
+          title: Text(context.translations.markAsUnreadLabel),
+          onClick: () async {
+            try {
+              await channel.markUnread(widget.message.id);
+            } catch (ex) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    context.translations.markUnreadError,
+                  ),
+                ),
+              );
+            }
+
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+        ),
       if (shouldShowThreadReplyAction)
         StreamChatContextMenuItem(
           leading: StreamSvgIcon.thread(),
@@ -1150,6 +1029,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             showThreadReplyMessage: shouldShowThreadReplyAction,
             showFlagButton: widget.showFlagButton,
             showPinButton: widget.showPinButton,
+            showMarkUnreadMessage: widget.showMarkUnreadMessage,
             customActions: widget.customActions,
           ),
         );

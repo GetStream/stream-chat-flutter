@@ -4,6 +4,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -49,7 +50,7 @@ void main() {
     (WidgetTester tester) async {
       when(() => user.online).thenReturn(true);
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialAppWrapper(
           builder: (context, child) {
             return StreamChatConfiguration(
               data: StreamChatConfigurationData(),
@@ -82,7 +83,7 @@ void main() {
     (WidgetTester tester) async {
       when(() => user.online).thenReturn(false);
       await tester.pumpWidget(
-        MaterialApp(
+        MaterialAppWrapper(
           builder: (context, child) {
             return StreamChatConfiguration(
               data: StreamChatConfigurationData(),

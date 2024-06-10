@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -10,6 +11,34 @@ import 'package:image_size_getter/file_input.dart'; // For compatibility with fl
 import 'package:image_size_getter/image_size_getter.dart' hide Size;
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+int _byteUnitConversionFactor = 1024;
+
+/// int extensions
+extension IntExtension on int {
+  /// Parses int in bytes to human readable size. Like: 17 KB
+  /// instead of 17524 bytes;
+  String toHumanReadableSize() {
+    if (this <= 0) return '0 B';
+    const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    final i = (log(this) / log(_byteUnitConversionFactor)).floor();
+    final numberValue =
+        (this / pow(_byteUnitConversionFactor, i)).toStringAsFixed(2);
+    final suffix = suffixes[i];
+    return '$numberValue $suffix';
+  }
+}
+
+/// Durations extensions.
+extension DurationExtension on Duration {
+  /// Transforms Duration to a minutes and seconds time. Like: 04:13.
+  String toMinutesAndSeconds() {
+    final minutes = inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = inSeconds.remainder(60).toString().padLeft(2, '0');
+
+    return '$minutes:$seconds';
+  }
+}
 
 /// String extension
 extension StringExtension on String {
@@ -230,6 +259,7 @@ extension InputDecorationX on InputDecoration {
 extension BuildContextX on BuildContext {
   // ignore: public_member_api_docs
   double get textScaleFactor =>
+      // ignore: deprecated_member_use
       MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
 
   /// Retrieves current translations according to locale
@@ -532,5 +562,31 @@ extension OriginalSizeX on Attachment {
     final height = originalHeight;
     if (width == null || height == null) return null;
     return Size(width.toDouble(), height.toDouble());
+  }
+}
+
+/// Useful extensions on [List<Message>].
+extension MessageListX on Iterable<Message> {
+  /// Returns the last unread message in the list.
+  /// Returns null if the list is empty or the userRead is null.
+  ///
+  /// The [userRead] is the last read message by the user.
+  ///
+  /// The last unread message is the last message in the list that is not
+  /// sent by the current user and is sent after the last read message.
+  Message? lastUnreadMessage(Read? userRead) {
+    if (isEmpty || userRead == null) return null;
+
+    if (first.createdAt.isAfter(userRead.lastRead) &&
+        last.createdAt.isBefore(userRead.lastRead)) {
+      return lastWhereOrNull(
+        (it) =>
+            it.user?.id != userRead.user.id &&
+            it.id != userRead.lastReadMessageId &&
+            it.createdAt.compareTo(userRead.lastRead) > 0,
+      );
+    }
+
+    return null;
   }
 }

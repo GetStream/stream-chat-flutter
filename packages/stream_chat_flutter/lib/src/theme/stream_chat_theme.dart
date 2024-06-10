@@ -50,10 +50,12 @@ class StreamChatThemeData {
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
+    @Deprecated('Use StreamChatConfigurationData.reactionIcons instead')
     List<StreamReactionIcon>? reactionIcons,
     StreamGalleryHeaderThemeData? imageHeaderTheme,
     StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
+    StreamVoiceRecordingThemeData? voiceRecordingTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -75,10 +77,12 @@ class StreamChatThemeData {
       defaultUserImage: defaultUserImage,
       placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
+      //ignore: deprecated_member_use_from_same_package
       reactionIcons: reactionIcons,
       galleryHeaderTheme: imageHeaderTheme,
       galleryFooterTheme: imageFooterTheme,
       messageListViewTheme: messageListViewTheme,
+      voiceRecordingTheme: voiceRecordingTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -106,6 +110,7 @@ class StreamChatThemeData {
     required this.galleryHeaderTheme,
     required this.galleryFooterTheme,
     required this.messageListViewTheme,
+    required this.voiceRecordingTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -275,6 +280,9 @@ class StreamChatThemeData {
       messageListViewTheme: StreamMessageListViewThemeData(
         backgroundColor: colorTheme.barsBg,
       ),
+      voiceRecordingTheme: colorTheme.brightness == Brightness.dark
+          ? StreamVoiceRecordingThemeData.dark()
+          : StreamVoiceRecordingThemeData.light(),
     );
   }
 
@@ -316,6 +324,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamMessageListView] widget.
   final StreamMessageListViewThemeData messageListViewTheme;
 
+  /// Theme configuration for the [StreamVoiceRecordingListPLayer] widget.
+  final StreamVoiceRecordingThemeData voiceRecordingTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -330,10 +341,12 @@ class StreamChatThemeData {
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     StreamChannelListHeaderThemeData? channelListHeaderTheme,
+    @Deprecated('Use StreamChatConfigurationData.reactionIcons instead')
     List<StreamReactionIcon>? reactionIcons,
     StreamGalleryHeaderThemeData? galleryHeaderTheme,
     StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
+    StreamVoiceRecordingThemeData? voiceRecordingTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -350,6 +363,7 @@ class StreamChatThemeData {
         galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
         galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
+        voiceRecordingTheme: voiceRecordingTheme ?? this.voiceRecordingTheme,
       );
 
   /// Merge themes
@@ -370,6 +384,7 @@ class StreamChatThemeData {
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
       messageListViewTheme:
           messageListViewTheme.merge(other.messageListViewTheme),
+      voiceRecordingTheme: voiceRecordingTheme.merge(other.voiceRecordingTheme),
     );
   }
 }

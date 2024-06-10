@@ -33,6 +33,7 @@ void main() {
       (index) => Read(
         lastRead: DateTime.now(),
         user: User(id: 'test-user-id-$index'),
+        lastReadMessageId: 'last-message-id-$index',
       ),
     );
     final watchers = List.generate(

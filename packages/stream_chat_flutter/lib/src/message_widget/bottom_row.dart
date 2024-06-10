@@ -169,7 +169,7 @@ class BottomRow extends StatelessWidget {
           final channel = StreamChannel.of(context);
           message = await channel.getMessage(message.parentId!);
         }
-        return onThreadTap!(message);
+        return onThreadTap?.call(message);
       } catch (e, stk) {
         debugPrint('Error while fetching message: $e, $stk');
       }
@@ -263,6 +263,7 @@ class BottomRow extends StatelessWidget {
                 // textScaleFactor is already applied to the textSpan.
                 //
                 // issue: https://github.com/GetStream/stream-chat-flutter/issues/1250
+                // ignore: deprecated_member_use
                 data: mediaQueryData.copyWith(textScaleFactor: 1),
                 child: child,
               ),

@@ -28,6 +28,32 @@ StreamMessageListView(
 ),
 ```
 
+### Providing Custom Reaction Icons
+
+By default the `StreamReactionIcon` widgets provided by the SDK are `love`, `like`, `sad`, `haha`, and `wow`.
+However, you can provide your own custom reaction icons by providing a `reactionIcons` parameter to the `StreamChatConfigurationData`.
+
+```dart
+StreamChat(
+  client: client,
+  streamChatConfigData: StreamChatConfigurationData(
+    reactionIcons: [
+      StreamReactionIcon(
+        type: 'custom',
+        builder: (context, isHighlighted, iconSize) {
+          return Icon(
+            Icons.star,
+            size: iconSize,
+            color: isHighlighted ? Colors.red : Colors.black,
+          );
+        },
+      ),
+    ]
+  ),
+  child: //Your widget here
+)
+```
+
 ### Theming
 
 You can customize the `StreamMessageWidget` using the `StreamChatTheme` class, so that you can change the
@@ -137,28 +163,46 @@ StreamMessageWidget(
 
 ### Building attachments
 
-The `customAttachmentBuilders` property allows you to build any kind of attachment (inbuilt or custom)
+The `attachmentBuilders` property allows you to build any kind of attachment (inbuilt or custom)
 in your own way. While a separate guide is written for this, it is included here because of relevance.
 
 ```dart
+class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
+  @override
+  bool canHandle(
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    final imageAttachments = attachments['location'];
+    return imageAttachments != null && imageAttachments.length == 1;
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    final attachmentWidget = Image.network(
+      _buildMapAttachment(
+        attachments[0].extraData['latitude'],
+        attachments[0].extraData['longitude'],
+      ),
+    );
+
+    return WrapAttachmentWidget(
+      attachmentWidget: attachmentWidget, 
+      attachmentShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    );
+  }
+}
+
 StreamMessageListView(
   messageBuilder: (context, details, messages, defaultMessage) {
     return defaultMessage.copyWith(
-        customAttachmentBuilders: {
-          'location': (context, message, attachments) {
-            final attachmentWidget = Image.network(
-              _buildMapAttachment(
-                attachments[0].extraData['latitude'],
-                attachments[0].extraData['longitude'],
-              ),
-            );
-
-            return WrapAttachmentWidget(
-              attachmentWidget: attachmentWidget, 
-              attachmentShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            );
-          }
-        },
+        attachmentBuilders: const [
+            LocationAttachmentBuilder(),
+        ],
     );
   },
 ),

@@ -104,32 +104,32 @@ jobs:
       - name: "Collect Coverage"
         run: melos run coverage:ignore-file --no-select
       - name: "Upload Coverage"
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           files: packages/*/coverage/lcov.info
       - name: "Stream Chat Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
+        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat/coverage/lcov.info
           min_coverage: 79
       - name: "Stream Chat Localizations Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
+        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_localizations/coverage/lcov.info
           min_coverage: 100
       - name: "Stream Chat Persistence Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
+        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
           min_coverage: 95
       - name: "Stream Chat Flutter Core Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
+        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
           min_coverage: 30
       - name: "Stream Chat Flutter Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v2.2.0
+        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
           min_coverage: 44

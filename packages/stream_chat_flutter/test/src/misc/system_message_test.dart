@@ -4,6 +4,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -88,16 +89,14 @@ void main() {
           .thenAnswer((i) => Stream.value(10));
 
       await tester.pumpWidgetBuilder(
-        materialAppWrapper(
-          theme: ThemeData.light(),
-        )(
-          StreamChat(
-            client: client,
-            connectivityStream: Stream.value(ConnectivityResult.mobile),
-            child: StreamChannel(
-              showLoading: false,
-              channel: channel,
-              child: Center(
+        StreamChat(
+          client: client,
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          child: StreamChannel(
+            showLoading: false,
+            channel: channel,
+            child: Scaffold(
+              body: Center(
                 child: StreamSystemMessage(
                   message: Message(
                     text: 'demo message',
@@ -108,6 +107,9 @@ void main() {
           ),
         ),
         surfaceSize: const Size.square(200),
+        wrapper: (child) => MaterialAppWrapper(
+          home: child,
+        ),
       );
 
       await screenMatchesGolden(tester, 'system_message_light');
@@ -142,16 +144,14 @@ void main() {
           .thenAnswer((i) => Stream.value(10));
 
       await tester.pumpWidgetBuilder(
-        materialAppWrapper(
-          theme: ThemeData.dark(),
-        )(
-          StreamChat(
-            client: client,
-            connectivityStream: Stream.value(ConnectivityResult.mobile),
-            child: StreamChannel(
-              showLoading: false,
-              channel: channel,
-              child: Center(
+        StreamChat(
+          client: client,
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          child: StreamChannel(
+            showLoading: false,
+            channel: channel,
+            child: Scaffold(
+              body: Center(
                 child: StreamSystemMessage(
                   message: Message(
                     text: 'demo message',
@@ -162,6 +162,12 @@ void main() {
           ),
         ),
         surfaceSize: const Size.square(200),
+        wrapper: (child) => MaterialAppWrapper(
+          theme: ThemeData.dark(
+            useMaterial3: false,
+          ),
+          home: child,
+        ),
       );
 
       await screenMatchesGolden(tester, 'system_message_dark');
