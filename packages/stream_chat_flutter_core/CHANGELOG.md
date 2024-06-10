@@ -1,3 +1,24 @@
+## 7.2.1
+
+  - Updated `stream_chat` dependency to [`7.2.1`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.2.0-hotfix.1
+
+  - Updated `stream_chat` dependency to [`7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
+  - Reverted the `connectivity_plus` dependency bump causing [1889](https://github.com/GetStream/stream-chat-flutter/issues/1889)
+
+## 7.2.0
+
+- Updated `stream_chat` dependency to [`7.2.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.1.0
+
+- Updated `stream_chat` dependency to [`7.1.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.0.2
+
+- Updated `stream_chat` dependency to [`7.0.2`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 7.0.1
 
 - Updated `stream_chat` dependency to [`7.0.1`](https://pub.dev/packages/stream_chat/changelog).

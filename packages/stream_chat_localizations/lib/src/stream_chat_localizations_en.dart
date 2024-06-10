@@ -445,4 +445,17 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
+
+  @override
+  String get markAsUnreadLabel => 'Mark as Unread';
+
+  @override
+  String unreadCountIndicatorLabel({required int unreadCount}) {
+    return '$unreadCount unread';
+  }
+
+  @override
+  String get markUnreadError =>
+      'Error marking message unread. Cannot mark unread messages older'
+      ' than the newest 100 channel messages.';
 }

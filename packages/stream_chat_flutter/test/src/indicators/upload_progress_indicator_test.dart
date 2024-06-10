@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
+
 void main() {
   testWidgets('StreamUploadProgressIndicator at 0% with no background',
       (tester) async {
@@ -100,7 +102,7 @@ void main() {
       'golden test for StreamUploadProgressIndicator at 0% with background',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: const Scaffold(
@@ -123,7 +125,7 @@ void main() {
       'golden test for StreamUploadProgressIndicator at 50% with background',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: const Scaffold(
@@ -146,7 +148,7 @@ void main() {
       'golden test for StreamUploadProgressIndicator at 100% with background',
       (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialAppWrapper(
         home: StreamChatTheme(
           data: StreamChatThemeData.light(),
           child: const Scaffold(

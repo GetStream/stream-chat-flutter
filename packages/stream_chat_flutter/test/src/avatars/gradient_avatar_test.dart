@@ -4,6 +4,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -42,8 +43,8 @@ void main() {
     'golden test for the name "demo user"',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialAppWrapper(
+          home: const Scaffold(
             body: Center(
               child: SizedBox(
                 width: 100,
@@ -64,8 +65,8 @@ void main() {
     'golden test for the name "demo"',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialAppWrapper(
+          home: const Scaffold(
             body: Center(
               child: SizedBox(
                 width: 100,
@@ -85,8 +86,8 @@ void main() {
     'control special character test',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialAppWrapper(
+          home: const Scaffold(
             body: Center(
               child: SizedBox(
                 width: 100,
@@ -109,8 +110,8 @@ void main() {
     'control special character test 2',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialAppWrapper(
+          home: const Scaffold(
             body: Center(
               child: SizedBox(
                 width: 100,

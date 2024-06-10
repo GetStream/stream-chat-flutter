@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
+
 void main() {
   group('AttachmentModalSheet tests', () {
     testWidgets('Appears on tap', (tester) async {
@@ -117,7 +119,7 @@ void main() {
       'golden test for AttachmentModalSheet',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          MaterialAppWrapper(
             home: Scaffold(
               body: Builder(builder: (context) {
                 return Center(

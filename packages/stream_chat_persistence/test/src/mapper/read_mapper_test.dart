@@ -8,12 +8,14 @@ import '../utils/date_matcher.dart';
 void main() {
   test('toRead should map entity into Read', () {
     const cid = 'testCid';
+    const lastMessageId = 'lastMessageId';
     final user = User(id: 'testUserId');
     final entity = ReadEntity(
       lastRead: DateTime.now(),
       userId: user.id,
       channelCid: cid,
       unreadMessages: 33,
+      lastReadMessageId: lastMessageId,
     );
 
     final read = entity.toRead(user: user);
@@ -21,15 +23,18 @@ void main() {
     expect(read.lastRead, isSameDateAs(entity.lastRead));
     expect(read.user.id, entity.userId);
     expect(read.unreadMessages, entity.unreadMessages);
+    expect(read.lastReadMessageId, lastMessageId);
   });
 
   test('toEntity should map read into ReadEntity', () {
     const cid = 'testCid';
+    const lastMessageId = 'lastMessageId';
     final user = User(id: 'testUserId');
     final read = Read(
       lastRead: DateTime.now(),
       user: user,
       unreadMessages: 33,
+      lastReadMessageId: lastMessageId,
     );
 
     final entity = read.toEntity(cid: cid);
@@ -37,5 +42,6 @@ void main() {
     expect(entity.lastRead, isSameDateAs(read.lastRead));
     expect(entity.userId, read.user.id);
     expect(entity.unreadMessages, read.unreadMessages);
+    expect(entity.lastReadMessageId, lastMessageId);
   });
 }

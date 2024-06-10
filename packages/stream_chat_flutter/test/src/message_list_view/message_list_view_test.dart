@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../../test_utils/data_generator.dart';
 import '../mocks.dart';
 
 void main() {
@@ -127,5 +128,108 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('renders a non empty message list view with unread messages',
+      (tester) async {
+    final user = OwnUser(id: 'testid');
+    final message = Message(
+      id: 'message1',
+      text: 'Hello world!',
+      user: User(
+        id: 'testid',
+        name: 'Test User',
+      ),
+    );
+
+    when(() => channelClientState.read)
+        .thenReturn([Read(lastRead: DateTime.now(), user: user)]);
+
+    when(() => channelClientState.messagesStream).thenAnswer(
+      (_) => Stream.value([message]),
+    );
+    when(() => channelClientState.messages).thenReturn([message]);
+
+    const nonEmptyWidgetKey = Key('non_empty_widget');
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultAssetBundle(
+            bundle: rootBundle,
+            child: StreamChat(
+              client: client,
+              streamChatThemeData: StreamChatThemeData.light().copyWith(
+                messageListViewTheme: const StreamMessageListViewThemeData(
+                  backgroundColor: Colors.grey,
+                  backgroundImage: DecorationImage(
+                    image: AssetImage('images/placeholder.png'),
+                    fit: BoxFit.none,
+                  ),
+                ),
+              ),
+              child: StreamChannel(
+                channel: channel,
+                child: const StreamMessageListView(
+                  key: nonEmptyWidgetKey,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    });
+
+    expect(find.byType(StreamMessageListView), findsOneWidget);
+    expect(find.byKey(nonEmptyWidgetKey), findsOneWidget);
+  });
+
+  testWidgets('scrolls to bottom when arrow button is pressed', (tester) async {
+    final own = OwnUser(id: 'ownid');
+    final other = User(id: 'otherid');
+    final messages = generateConversation(20, users: [own, other]);
+
+    when(() => channelClientState.messagesStream).thenAnswer(
+      (_) => Stream.value(messages),
+    );
+    when(() => channelClientState.messages).thenReturn(messages);
+
+    const nonEmptyWidgetKey = Key('non_empty_widget');
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultAssetBundle(
+            bundle: rootBundle,
+            child: StreamChat(
+              client: client,
+              streamChatThemeData: StreamChatThemeData.light().copyWith(
+                messageListViewTheme: const StreamMessageListViewThemeData(
+                  backgroundColor: Colors.grey,
+                  backgroundImage: DecorationImage(
+                    image: AssetImage('images/placeholder.png'),
+                    fit: BoxFit.none,
+                  ),
+                ),
+              ),
+              child: StreamChannel(
+                channel: channel,
+                child: const StreamMessageListView(
+                  key: nonEmptyWidgetKey,
+                  initialScrollIndex: 5,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    });
+
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FloatingActionButton), findsNothing);
   });
 }

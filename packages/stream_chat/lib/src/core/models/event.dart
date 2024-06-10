@@ -97,6 +97,24 @@ class Event {
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
 
+  /// Create date of the last read message (notification.mark_unread)
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  DateTime? get lastReadAt {
+    if (extraData.containsKey('last_read_at')) {
+      return DateTime.parse(extraData['last_read_at']! as String);
+    }
+
+    return null;
+  }
+
+  /// The number of unread messages (notification.mark_unread)
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  int? get unreadMessages => extraData['unread_messages'] as int?;
+
+  /// The id of the last read message (notification.mark_read)
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  String? get lastReadMessageId => extraData['last_read_message_id'] as String?;
+
   /// Known top level fields.
   /// Useful for [Serializer] methods.
   static final topLevelFields = [

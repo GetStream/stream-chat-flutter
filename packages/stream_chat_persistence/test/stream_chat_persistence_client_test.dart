@@ -173,6 +173,7 @@ void main() {
         (index) => Read(
           user: User(id: 'testUserId$index'),
           lastRead: DateTime.now(),
+          lastReadMessageId: 'lastMessageId$index',
         ),
       );
       when(() => mockDatabase.readDao.getReadsByCid(cid))
@@ -215,6 +216,7 @@ void main() {
         (index) => Read(
           user: User(id: 'testUserId$index'),
           lastRead: DateTime.now(),
+          lastReadMessageId: 'lastMessageId$index',
         ),
       );
       final channel = ChannelModel(cid: cid);
@@ -270,6 +272,7 @@ void main() {
           (index) => Read(
             user: User(id: 'testUserId$index'),
             lastRead: DateTime.now(),
+            lastReadMessageId: 'lastMessageId$index',
           ),
         );
         final channel = ChannelModel(cid: cid);
@@ -504,6 +507,7 @@ void main() {
         (index) => Read(
           user: User(id: 'testUserId$index'),
           lastRead: DateTime.now(),
+          lastReadMessageId: 'lastMessageId$index',
         ),
       );
       when(() => mockDatabase.readDao.bulkUpdateReads({cid: reads}))

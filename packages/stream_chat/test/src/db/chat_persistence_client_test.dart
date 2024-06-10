@@ -214,7 +214,12 @@ void main() {
             latestReactions: [Reaction(type: 'test', user: user)],
           )
         ],
-        read: [Read(lastRead: DateTime.now(), user: user)],
+        read: [
+          Read(
+              lastRead: DateTime.now(),
+              user: user,
+              lastReadMessageId: 'last-test-message'),
+        ],
         members: [Member(user: user)],
       );
       persistenceClient.updateChannelStates([channelState]);

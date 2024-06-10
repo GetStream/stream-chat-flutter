@@ -9,3 +9,4 @@ export 'message_input_theme.dart';
 export 'message_list_view_theme.dart';
 export 'message_theme.dart';
 export 'text_theme.dart';
+export 'voice_attachment_theme.dart';

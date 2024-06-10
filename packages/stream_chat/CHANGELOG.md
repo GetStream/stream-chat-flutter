@@ -1,9 +1,30 @@
-## Unreleased
+## 7.2.1
+
+✅ Added
+- Added `voiceRecording` attachment type
+
+## 7.2.0-hotfix.1
+
+ - Version to keep in sync with the rest of the packages
+  
+## 7.2.0
+
+✅ Added
+- Added `markUnread` method to `Channel` that marks messages from the provided message id onwards as unread
+
+## 7.1.0
+
+🐞 Fixed
+- Fixes a thread message causing reply messages on the main thread to be considered deleted
+
+## 7.0.2
 
 🐞 Fixed
 
 - [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file 
   attachments from the CDN, when the message get's hard deleted.
+- [[#1819]](https://github.com/GetStream/stream-chat-flutter/issues/1819) Handle network errors
+  with String payload.
 
 ## 7.0.1
 

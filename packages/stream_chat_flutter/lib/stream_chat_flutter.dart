@@ -7,6 +7,9 @@ export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'src/attachment/attachment.dart';
 export 'src/attachment/builder/attachment_widget_builder.dart';
+export 'src/attachment/builder/voice_recording_attachment_builder/stream_voice_recording_list_player.dart';
+export 'src/attachment/builder/voice_recording_attachment_builder/stream_voice_recording_loading.dart';
+export 'src/attachment/builder/voice_recording_attachment_builder/stream_voice_recording_player.dart';
 export 'src/attachment/gallery_attachment.dart';
 export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
@@ -91,6 +94,7 @@ export 'src/stream_chat.dart';
 export 'src/stream_chat_configuration.dart';
 export 'src/theme/stream_chat_theme.dart';
 export 'src/theme/themes.dart';
+export 'src/theme/voice_attachment_theme.dart';
 export 'src/user/user_mention_tile.dart';
 export 'src/utils/device_segmentation.dart';
 export 'src/utils/extensions.dart';
