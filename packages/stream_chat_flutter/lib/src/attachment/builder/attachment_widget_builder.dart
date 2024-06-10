@@ -51,12 +51,12 @@ abstract class StreamAttachmentWidgetBuilder {
   /// Example:
   ///
   /// ```dart
-  /// final myBuilders = [
-  ///  ...StreamAttachmentWidgetBuilder.defaultBuilders,
-  ///  MyCustomAttachmentBuilder(),
-  ///  MyOtherCustomAttachmentBuilder(),
-  ///  ...
-  /// ];
+  ///   final myBuilders = StreamAttachmentWidgetBuilder.defaultBuilders(
+  ///     customAttachmentBuilders: [
+  ///       MyCustomAttachmentBuilder(),
+  ///       MyOtherCustomAttachmentBuilder(),
+  ///     ]
+  ///   );
   /// ```
   ///
   /// **Note**: The order of the builders in the list is important. The first
