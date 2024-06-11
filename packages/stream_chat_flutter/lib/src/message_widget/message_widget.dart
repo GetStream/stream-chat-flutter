@@ -53,7 +53,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onReactionsTap,
     this.onReactionsHover,
     this.showReactionPicker = true,
-    this.showReactionPickerTail = true,
+    this.showReactionTail = true,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
     this.showThreadReplyIndicator = false,
@@ -250,7 +250,7 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@template showReactionPickerTail}
   /// Whether or not to show the reaction picker tail.
   /// {@endtemplate}
-  final bool showReactionPickerTail;
+  final bool showReactionTail;
 
   /// {@template onShowMessage}
   /// Callback when show message is tapped
@@ -409,7 +409,7 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(String)? onLinkTap,
     bool? showReactionBrowser,
     bool? showReactionPicker,
-    bool? showReactionPickerTail,
+    bool? showReactionTail,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
@@ -472,7 +472,7 @@ class StreamMessageWidget extends StatefulWidget {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
-  showReactionPickerTail: showReactionPickerTail ?? this.showReactionPickerTail,
+      showReactionTail: showReactionTail ?? this.showReactionTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
@@ -721,7 +721,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       messageWidget: widget,
                       showBottomRow: showBottomRow,
                       showPinHighlight: widget.showPinHighlight,
-                      showReactionPickerTail: widget.showReactionPickerTail,
+                      showReactionPickerTail: widget.showReactionTail,
                       showReactions: showReactions,
                       onReactionsTap: () {
                         widget.onReactionsTap != null
