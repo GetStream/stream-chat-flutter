@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Copying a message now replaces the User IDs with user names.
 - Exported thumbnail widgets from the package.
 - Added `customAttachmentBuilders` parameter for `StreamAttachmentWidgetBuilder.defaultBuilders`.
 - `attachmentBuilders` parameter for `StreamMessageWidget` now only expects custom builders.
