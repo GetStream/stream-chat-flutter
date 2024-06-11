@@ -808,7 +808,22 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
             final text = widget.message.text;
-            if (text != null) Clipboard.setData(ClipboardData(text: text));
+            String? messageToCopy;
+            for (final user in widget.message.mentionedUsers.toSet()) {
+              final userId = user.id;
+              final userName = user.name;
+              messageToCopy = text?.replaceAll(
+                    RegExp('@($userId|$userName)'),
+                    '@$userName',
+                  ) ??
+                  '';
+            }
+
+            if (messageToCopy != null) {
+              Clipboard.setData(
+                ClipboardData(text: messageToCopy),
+              );
+            }
           },
         ),
       if (shouldShowEditAction) ...[
@@ -1011,7 +1026,21 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             ),
             onCopyTap: (message) {
               final text = message.text;
-              if (text != null) Clipboard.setData(ClipboardData(text: text));
+              String? messageToCopy;
+              for (final user in widget.message.mentionedUsers.toSet()) {
+                final userId = user.id;
+                final userName = user.name;
+                messageToCopy = text?.replaceAll(
+                      RegExp('@($userId|$userName)'),
+                      '@$userName',
+                    ) ??
+                    '';
+              }
+              if (messageToCopy != null) {
+                Clipboard.setData(
+                  ClipboardData(text: messageToCopy),
+                );
+              }
             },
             messageTheme: widget.messageTheme,
             reverse: widget.reverse,
