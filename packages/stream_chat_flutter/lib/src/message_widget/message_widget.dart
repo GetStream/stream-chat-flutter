@@ -53,6 +53,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onReactionsTap,
     this.onReactionsHover,
     this.showReactionPicker = true,
+    this.showReactionPickerTail = true,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
     this.showThreadReplyIndicator = false,
@@ -246,6 +247,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showReactionPicker;
 
+  /// {@template showReactionPickerTail}
+  /// Whether or not to show the reaction picker tail.
+  /// {@endtemplate}
+  final bool showReactionPickerTail;
+
   /// {@template onShowMessage}
   /// Callback when show message is tapped
   /// {@endtemplate}
@@ -403,6 +409,7 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(String)? onLinkTap,
     bool? showReactionBrowser,
     bool? showReactionPicker,
+    bool? showReactionPickerTail,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
@@ -465,6 +472,8 @@ class StreamMessageWidget extends StatefulWidget {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
+      showReactionPickerTail:
+          showReactionPickerTail ?? this.showReactionPickerTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
@@ -713,7 +722,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       messageWidget: widget,
                       showBottomRow: showBottomRow,
                       showPinHighlight: widget.showPinHighlight,
-                      showReactionPickerTail: widget.showReactionPicker,
+                      showReactionPickerTail: widget.showReactionPickerTail,
                       showReactions: showReactions,
                       onReactionsTap: () {
                         widget.onReactionsTap != null
@@ -752,6 +761,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
     return [
       if (widget.showReactionPicker)
+        // TODO: Use the [showReactionPickerTail] property to show the tail.
+        // It should not be part of the MessageWidgetContent.
         StreamChatContextMenuItem(
           child: StreamChannel(
             channel: channel,

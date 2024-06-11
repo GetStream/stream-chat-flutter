@@ -8,6 +8,7 @@
 - `attachmentBuilders` parameter for `StreamMessageWidget` now only expects custom builders.
 - Added `StreamMediaAttachmentBuilder` widget to show media attachments in a message.
 - Added export for `message_widget_content_components.dart` to allow for easier customization of message content components.
+- Added `showReactionPickerTail` parameter for `MessageWidgetContent` to be able to disable the reaction picker tail at will.
 
 ## 7.2.1
 
