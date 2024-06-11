@@ -100,5 +100,6 @@ export 'src/utils/device_segmentation.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
 export 'src/utils/typedefs.dart';
+export 'src/message_widget/message_widget_content_components.dart';
 // TODO: Remove this in favor of StreamVideoAttachmentThumbnail.
 export 'src/video/video_thumbnail_image.dart';
