@@ -104,12 +104,12 @@ class ParseAttachments extends StatelessWidget {
     };
 
     // Create a default attachmentBuilders list if not provided.
-    var builders = attachmentBuilders;
-    builders ??= StreamAttachmentWidgetBuilder.defaultBuilders(
+    final builders = StreamAttachmentWidgetBuilder.defaultBuilders(
       message: message,
       shape: attachmentShape,
       padding: attachmentPadding,
       onAttachmentTap: onAttachmentTap,
+      customAttachmentBuilders: attachmentBuilders,
     );
 
     final catalog = AttachmentWidgetCatalog(builders: builders);
