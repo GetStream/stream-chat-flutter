@@ -472,8 +472,7 @@ class StreamMessageWidget extends StatefulWidget {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
-      showReactionPickerTail:
-          showReactionPickerTail ?? this.showReactionPickerTail,
+      showReactionPickerTail: showReactionPickerTail ?? this.showReactionPickerTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
