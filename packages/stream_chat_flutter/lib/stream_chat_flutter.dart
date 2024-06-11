@@ -1,8 +1,6 @@
 export 'package:jiffy/jiffy.dart';
 export 'package:photo_manager/photo_manager.dart'
     show ThumbnailSize, ThumbnailFormat;
-export 'package:stream_chat_flutter/src/message_widget/parse_attachments.dart';
-export 'package:stream_chat_flutter/src/message_widget/quoted_message.dart';
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'src/attachment/attachment.dart';
@@ -63,6 +61,7 @@ export 'src/message_list_view/message_list_view.dart';
 export 'src/message_widget/deleted_message.dart';
 export 'src/message_widget/message_text.dart';
 export 'src/message_widget/message_widget.dart';
+export 'src/message_widget/message_widget_content_components.dart';
 export 'src/message_widget/reactions/reaction_picker.dart';
 export 'src/message_widget/text_bubble.dart';
 export 'src/misc/animated_circle_border_painter.dart';

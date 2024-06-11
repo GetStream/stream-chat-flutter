@@ -7,6 +7,7 @@
 - Added `customAttachmentBuilders` parameter for `StreamAttachmentWidgetBuilder.defaultBuilders`.
 - `attachmentBuilders` parameter for `StreamMessageWidget` now only expects custom builders.
 - Added `StreamMediaAttachmentBuilder` widget to show media attachments in a message.
+- Added export for `message_widget_content_components.dart` to allow for easier customization of message content components.
 
 ## 7.2.1
 
