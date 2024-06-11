@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamImageAttachment}

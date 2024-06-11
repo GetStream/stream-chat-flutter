@@ -63,7 +63,6 @@ export 'src/message_list_view/message_list_view.dart';
 export 'src/message_widget/deleted_message.dart';
 export 'src/message_widget/message_text.dart';
 export 'src/message_widget/message_widget.dart';
-export 'src/message_widget/message_widget_content_components.dart';
 export 'src/message_widget/reactions/reaction_picker.dart';
 export 'src/message_widget/text_bubble.dart';
 export 'src/misc/animated_circle_border_painter.dart';
