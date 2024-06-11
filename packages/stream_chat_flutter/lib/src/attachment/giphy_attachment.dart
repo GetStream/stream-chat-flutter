@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/misc/giphy_chip.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
