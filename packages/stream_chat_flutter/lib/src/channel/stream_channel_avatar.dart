@@ -106,6 +106,16 @@ class StreamChannelAvatar extends StatelessWidget {
     final colorTheme = chatThemeData.colorTheme;
     final previewTheme = chatThemeData.channelPreviewTheme.avatarTheme;
 
+    final fallbackWidget = Center(
+      child: Text(
+        channel.name?[0] ?? '',
+        style: TextStyle(
+          color: colorTheme.barsBg,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+
     return BetterStreamBuilder<String>(
       stream: channel.imageStream,
       initialData: channel.image,
@@ -118,19 +128,13 @@ class StreamChannelAvatar extends StatelessWidget {
             decoration: BoxDecoration(color: colorTheme.accentPrimary),
             child: InkWell(
               onTap: onTap,
-              child: CachedNetworkImage(
-                imageUrl: channelImage,
-                errorWidget: (_, __, ___) => Center(
-                  child: Text(
-                    channel.name?[0] ?? '',
-                    style: TextStyle(
-                      color: colorTheme.barsBg,
-                      fontWeight: FontWeight.bold,
+              child: channelImage.isEmpty
+                  ? fallbackWidget
+                  : CachedNetworkImage(
+                      imageUrl: channelImage,
+                      errorWidget: (_, __, ___) => fallbackWidget,
+                      fit: BoxFit.cover,
                     ),
-                  ),
-                ),
-                fit: BoxFit.cover,
-              ),
             ),
           ),
         );
