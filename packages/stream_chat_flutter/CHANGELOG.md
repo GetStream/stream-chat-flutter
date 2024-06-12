@@ -10,6 +10,7 @@
 - Added export for `message_widget_content_components.dart` to allow for easier customization of message content components.
 
 🔄 Changed
+
 - Forced dependency override of `audio_video_progress_bar` to version `^2.0.2` [to enable compatibility with flutter 3.22](https://github.com/GetStream/stream-chat-flutter/issues/1920).
 
 ## 7.2.1
