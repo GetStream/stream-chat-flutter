@@ -47,6 +47,10 @@ dependencies:
   video_player: ^2.7.0
   video_thumbnail: ^0.5.3
 
+dependency_overrides:
+  # Compatibility with flutter 3.22: https://github.com/GetStream/stream-chat-flutter/issues/1920
+  audio_video_progress_bar: ^2.0.2
+
 flutter:
   plugin:
     platforms:
