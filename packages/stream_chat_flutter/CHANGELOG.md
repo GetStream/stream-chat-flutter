@@ -9,6 +9,7 @@
 - Added `StreamMediaAttachmentBuilder` widget to show media attachments in a message.
 - Added export for `message_widget_content_components.dart` to allow for easier customization of message content components.
 - Fixed error when channel image is not set.
+- Extends predicates for sending and clearing messages to mobile.
 
 ## 7.2.1
 
