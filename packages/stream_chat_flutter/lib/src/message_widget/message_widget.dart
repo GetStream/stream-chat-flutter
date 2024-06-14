@@ -8,6 +8,7 @@ import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
+import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -1100,7 +1101,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 /// Enum for declaring the location of the message for which the reaction picker
 /// is to be enabled.
 enum ReactionTailType {
+  /// Message is in the [StreamMessageListView]
   list,
+  /// Message is in the [MessageActionsModal]
   messageActions,
+  /// Message is in the message reactions modal
   reactions,
 }
