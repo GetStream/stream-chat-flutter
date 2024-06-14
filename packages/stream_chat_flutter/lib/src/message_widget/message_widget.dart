@@ -1097,6 +1097,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   }
 }
 
+/// Enum for declaring the location of the message for which the reaction picker
+/// is to be enabled.
 enum ReactionTailType {
   list,
   messageActions,
