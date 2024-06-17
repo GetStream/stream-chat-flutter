@@ -53,6 +53,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onReactionsTap,
     this.onReactionsHover,
     this.showReactionPicker = true,
+    this.showReactionTail,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
     this.showThreadReplyIndicator = false,
@@ -246,6 +247,12 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showReactionPicker;
 
+  /// {@template showReactionPickerTail}
+  /// Whether or not to show the reaction picker tail.
+  /// This is calculated internally in most cases and does not need to be set.
+  /// {@endtemplate}
+  final bool? showReactionTail;
+
   /// {@template onShowMessage}
   /// Callback when show message is tapped
   /// {@endtemplate}
@@ -403,6 +410,7 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(String)? onLinkTap,
     bool? showReactionBrowser,
     bool? showReactionPicker,
+    bool? showReactionTail,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
@@ -465,6 +473,7 @@ class StreamMessageWidget extends StatefulWidget {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
+      showReactionTail: showReactionTail ?? this.showReactionTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
@@ -713,7 +722,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       messageWidget: widget,
                       showBottomRow: showBottomRow,
                       showPinHighlight: widget.showPinHighlight,
-                      showReactionPickerTail: widget.showReactionPicker,
+                      showReactionPickerTail: calculateReactionTailEnabled(
+                        ReactionTailType.list,
+                      ),
                       showReactions: showReactions,
                       onReactionsTap: () {
                         widget.onReactionsTap != null
@@ -958,6 +969,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                   : widget.message.text,
             ),
             showReactions: false,
+            showReactionTail: calculateReactionTailEnabled(
+              ReactionTailType.reactions,
+            ),
             showUsername: false,
             showTimestamp: false,
             translateUserAvatar: false,
@@ -1011,6 +1025,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     : widget.message.text,
               ),
               showReactions: false,
+              showReactionTail: calculateReactionTailEnabled(
+                ReactionTailType.messageActions,
+              ),
               showUsername: false,
               showTimestamp: false,
               translateUserAvatar: false,
@@ -1063,4 +1080,31 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       },
     );
   }
+
+  /// Calculates if the reaction picker tail should be enabled.
+  bool calculateReactionTailEnabled(ReactionTailType type) {
+    if (widget.showReactionTail != null) return widget.showReactionTail!;
+
+    switch (type) {
+      case ReactionTailType.list:
+        return false;
+      case ReactionTailType.messageActions:
+        return widget.showReactionPicker;
+      case ReactionTailType.reactions:
+        return widget.showReactionPicker;
+    }
+  }
+}
+
+/// Enum for declaring the location of the message for which the reaction picker
+/// is to be enabled.
+enum ReactionTailType {
+  /// Message is in the [StreamMessageListView]
+  list,
+
+  /// Message is in the [MessageActionsModal]
+  messageActions,
+
+  /// Message is in the message reactions modal
+  reactions,
 }

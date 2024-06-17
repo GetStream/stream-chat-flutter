@@ -2,13 +2,17 @@
 
 ✅ Added
 
-- Copying a message now replaces the User IDs with user names.
-- Exported thumbnail widgets from the package.
 - Added `customAttachmentBuilders` parameter for `StreamAttachmentWidgetBuilder.defaultBuilders`.
 - `attachmentBuilders` parameter for `StreamMessageWidget` now only expects custom builders.
 - Added `StreamMediaAttachmentBuilder` widget to show media attachments in a message.
+
+🐞 Fixed
+
 - Added export for `message_widget_content_components.dart` to allow for easier customization of message content components.
 - Fixed error when channel image is not set.
+- Fixes reaction picker tail showing up unexpectedly.
+- Copying a message now replaces the User IDs with user names.
+- Exported thumbnail widgets from the package.
 - Extends predicates for sending and clearing messages to mobile.
 
 ## 7.2.1
