@@ -14,6 +14,7 @@
 - Copying a message now replaces the User IDs with user names.
 - Exported thumbnail widgets from the package.
 - Extends predicates for sending and clearing messages to mobile.
+- Fixed null errors in web from markdown.
 
 ## 7.2.1
 
