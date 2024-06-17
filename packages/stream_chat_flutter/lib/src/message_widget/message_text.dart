@@ -46,6 +46,8 @@ class StreamMessageText extends StatelessWidget {
         return MarkdownBody(
           data: messageText ?? '',
           selectable: isDesktopDeviceOrWeb,
+          onTapText: () {},
+          onSelectionChanged: (val, selection, cause) {},
           onTapLink: (
             String link,
             String? href,
