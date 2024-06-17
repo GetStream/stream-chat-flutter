@@ -23,7 +23,7 @@ dependencies:
   file_selector: ^1.0.0
   flutter:
     sdk: flutter
-  flutter_markdown: ^0.6.17+1
+  flutter_markdown: ">=0.6.17+1 <0.8.0"
   flutter_portal: ^1.1.4
   flutter_svg: ^2.0.7
   http_parser: ^4.0.2
