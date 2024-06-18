@@ -1,4 +1,4 @@
-## Upcoming
+## 7.2.2
 
 ✅ Added
 
@@ -14,6 +14,10 @@
 - Copying a message now replaces the User IDs with user names.
 - Exported thumbnail widgets from the package.
 - Extends predicates for sending and clearing messages to mobile.
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency to [`7.2.2`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.2.1
 
