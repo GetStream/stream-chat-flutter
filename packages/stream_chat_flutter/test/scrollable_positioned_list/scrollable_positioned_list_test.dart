@@ -1307,7 +1307,7 @@ void main() {
   // testWidgets('Semantic tree contains items in cache',
   //     (WidgetTester tester) async {
   //   final itemPositionsListener = ItemPositionsListener.create();
-  //   await setUpWidgetTest(tester, itemPositionsListener: itemPositionsListener);
+  //await setUpWidgetTest(tester, itemPositionsListener: itemPositionsListener);
   //
   //   final root = WidgetsBinding
   //       .instance.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
