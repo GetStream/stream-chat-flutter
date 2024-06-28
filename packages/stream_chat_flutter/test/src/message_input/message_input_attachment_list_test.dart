@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
@@ -187,6 +186,56 @@ void main() {
 
         // Expect an empty box
         expect(find.byType(SizedBox), findsOneWidget);
+      },
+    );
+  });
+
+  group('StreamMediaAttachmentBuilder tests', () {
+    testWidgets(
+      'StreamMediaAttachmentBuilder should render media attachment',
+      (WidgetTester tester) async {
+        final attachment = Attachment(type: 'media', id: 'media1');
+
+        await tester.pumpWidget(
+          wrapWithStreamChat(
+            StreamMediaAttachmentBuilder(
+              attachment: attachment,
+              onRemovePressed: (attachment) {},
+            ),
+          ),
+        );
+
+        // Expect one media attachment widget
+        expect(find.byType(StreamMediaAttachmentBuilder), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'StreamMediaAttachmentBuilder should call onRemovePressed callback',
+      (WidgetTester tester) async {
+        Attachment? removedAttachment;
+
+        final attachment = Attachment(type: 'file', id: 'file1');
+
+        await tester.pumpWidget(
+          wrapWithStreamChat(
+            StreamMediaAttachmentBuilder(
+              attachment: attachment,
+              onRemovePressed: (attachment) {
+                removedAttachment = attachment;
+              },
+            ),
+          ),
+        );
+
+        final removeButton = find.byType(RemoveAttachmentButton);
+
+        // Tap the remove button
+        await tester.tap(removeButton);
+        await tester.pump();
+
+        // Expect the onRemovePressed callback to be called with the attachment
+        expect(removedAttachment, attachment);
       },
     );
   });
