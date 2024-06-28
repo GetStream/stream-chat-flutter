@@ -170,6 +170,7 @@ class StreamChannelHeader extends StatelessWidget
             elevation: elevation,
             leading: leadingWidget,
             backgroundColor: backgroundColor ?? channelHeaderTheme.color,
+            forceMaterialTransparency: true,
             actions: actions ??
                 <Widget>[
                   Padding(

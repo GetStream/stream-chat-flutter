@@ -46,7 +46,7 @@ dependencies:
   stream_chat_flutter_core:
     git:
       url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: sync-fork
+      ref: master
       path: packages/stream_chat_flutter_core
   synchronized: ^3.1.0
   thumblr: ^0.0.4
