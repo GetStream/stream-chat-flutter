@@ -1,3 +1,32 @@
+## 7.2.2
+
+✅ Added
+
+- Added `customAttachmentBuilders` parameter for `StreamAttachmentWidgetBuilder.defaultBuilders`.
+- `attachmentBuilders` parameter for `StreamMessageWidget` now only expects custom builders.
+- Added `StreamMediaAttachmentBuilder` widget to show media attachments in a message.
+
+🐞 Fixed
+
+- Added export for `message_widget_content_components.dart` to allow for easier customization of message content components.
+- Fixed error when channel image is not set.
+- Fixes reaction picker tail showing up unexpectedly.
+- Copying a message now replaces the User IDs with user names.
+- Exported thumbnail widgets from the package.
+- Extends predicates for sending and clearing messages to mobile.
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency to [`7.2.2`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.2.1
+
+✅ Added
+- Added `VoiceRecordingAttachmentBuilder`, for displaying voice recording attachments in the chat.
+
+🐞 Fixed
+- Fixed wrong calculation of the last unread message indicator.
+
 ## 7.2.0-hotfix.1
 
   🔄 Changed
@@ -37,7 +66,6 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 🐞 Fixed
 - Removed double focus on `StreamMessageInput` when `focusNode` is provided for web and desktop.
 - Optionally call `onThreadTap` in `BottomRow` to avoid `Null check operator used on a null value`
-
 
 ## 7.0.1
 
