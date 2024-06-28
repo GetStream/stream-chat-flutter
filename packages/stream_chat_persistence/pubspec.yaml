@@ -4,6 +4,7 @@ description: Official Stream Chat Persistence library. Build your own chat exper
 version: 7.2.2
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
+publish_to: 'none'
 
 environment:
   sdk: ">=3.1.0 <4.0.0"
@@ -19,7 +20,10 @@ dependencies:
   path_provider: ^2.1.0
   sqlite3_flutter_libs: ^0.5.15
   stream_chat:
-    path: ../stream_chat
+    git:
+      url: https://github.com/qdhayana/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat
 
 dev_dependencies:
   build_runner: ^2.4.6
