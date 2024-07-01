@@ -385,7 +385,7 @@ class StreamChatClient {
   /// Creates a new WebSocket connection with the current user.
   /// If [includeUserDetailsInConnectCall] is true it will include the current
   /// user details in the connect call.
-  Future<OwnUser> openConnection({
+  Future<OwnUser?> openConnection({
     bool includeUserDetailsInConnectCall = false,
   }) async {
     assert(
@@ -399,11 +399,13 @@ class StreamChatClient {
     logger.info('Opening web-socket connection for ${user.id}');
 
     if (wsConnectionStatus == ConnectionStatus.connecting) {
-      throw StreamChatError('Connection already in progress for ${user.id}');
+      logger.warning('Connection already in progress for ${user.id}');
+      return null;
     }
 
     if (wsConnectionStatus == ConnectionStatus.connected) {
-      throw StreamChatError('Connection already available for ${user.id}');
+      logger.warning('Connection already available for ${user.id}');
+      return null;
     }
 
     _wsConnectionStatus = ConnectionStatus.connecting;
