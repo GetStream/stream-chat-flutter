@@ -146,6 +146,10 @@
 
 ## 8.0.0
 
+✅ Added
+
+- Added `showFailedIndicator` parameter for `StreamMessageWidget` to toggle displaying the failed message icon.
+
 🐞 Fixed
 
 - Fixed null errors in web from markdown.
