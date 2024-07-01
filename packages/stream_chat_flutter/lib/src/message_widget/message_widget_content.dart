@@ -64,6 +64,7 @@ class MessageWidgetContent extends StatelessWidget {
     required this.showEditedLabel,
     required this.messageWidget,
     required this.onThreadTap,
+    required this.showFailedIndicator,
     this.onUserAvatarTap,
     this.borderRadiusGeometry,
     this.borderSide,
@@ -223,6 +224,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro userAvatarBuilder}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
+
+  /// {@macro showFailedIndicator}
+  final bool showFailedIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -418,7 +422,7 @@ class MessageWidgetContent extends StatelessWidget {
                 ],
               ),
             ),
-            if (isFailedState)
+            if (isFailedState && showFailedIndicator)
               Positioned(
                 right: reverse ? 0 : null,
                 left: reverse ? null : 0,
