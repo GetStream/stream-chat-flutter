@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget_catalog.dart';
-import 'package:stream_chat_flutter/src/message_widget/message_widget_content_components.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template parseAttachments}
@@ -104,12 +103,12 @@ class ParseAttachments extends StatelessWidget {
     };
 
     // Create a default attachmentBuilders list if not provided.
-    var builders = attachmentBuilders;
-    builders ??= StreamAttachmentWidgetBuilder.defaultBuilders(
+    final builders = StreamAttachmentWidgetBuilder.defaultBuilders(
       message: message,
       shape: attachmentShape,
       padding: attachmentPadding,
       onAttachmentTap: onAttachmentTap,
+      customAttachmentBuilders: attachmentBuilders,
     );
 
     final catalog = AttachmentWidgetCatalog(builders: builders);

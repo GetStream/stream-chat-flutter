@@ -1,3 +1,11 @@
+## 7.2.2
+
+- Updated `stream_chat_flutter` dependency to [`7.2.2`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.2.1
+
+- Updated `stream_chat_flutter` dependency to [`7.2.1`](https://pub.dev/packages/stream_chat/changelog).
+  
 ## 7.2.0-hotfix.1
 
 - Updated `stream_chat_flutter` dependency to [`7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).

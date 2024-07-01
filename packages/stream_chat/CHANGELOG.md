@@ -1,3 +1,12 @@
+## 7.2.2
+
+- Version to keep in sync with the rest of the packages
+
+## 7.2.1
+
+✅ Added
+- Added `voiceRecording` attachment type
+
 ## 7.2.0-hotfix.1
 
  - Version to keep in sync with the rest of the packages
