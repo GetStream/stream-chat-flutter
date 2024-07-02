@@ -1039,12 +1039,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                   : DisplayWidget.show,
             ),
             onCopyTap: (message) {
-              final text = message.text;
-              String? messageToCopy;
+              var messageToCopy = message.text;
               for (final user in widget.message.mentionedUsers.toSet()) {
                 final userId = user.id;
                 final userName = user.name;
-                messageToCopy = text?.replaceAll(
+                messageToCopy = messageToCopy?.replaceAll(
                       RegExp('@($userId|$userName)'),
                       '@$userName',
                     ) ??
