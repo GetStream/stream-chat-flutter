@@ -14,7 +14,8 @@ dependencies:
   chewie: ^1.8.1
   collection: ^1.17.2
   contextmenu: ^3.0.0
-  dart_vlc: ^0.4.0
+  # dart_vlc: ^0.4.0
+  media_kit: ^1.1.10+1
   desktop_drop: ^0.4.4
   diacritic: ^0.1.5
   dio: ^5.4.3+1
@@ -46,6 +47,7 @@ dependencies:
   url_launcher: ^6.3.0
   video_player: ^2.8.7
   video_thumbnail: ^0.5.3
+  media_kit_video: ^1.2.4
 
 flutter:
   plugin:
