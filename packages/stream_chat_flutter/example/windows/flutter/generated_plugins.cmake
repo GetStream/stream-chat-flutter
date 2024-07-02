@@ -4,9 +4,10 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
-  dart_vlc
   desktop_drop
   file_selector_windows
+  media_kit_video
+  screen_brightness_windows
   share_plus
   sqlite3_flutter_libs
   thumblr_windows

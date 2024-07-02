@@ -3,9 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  dart_vlc
   desktop_drop
   file_selector_linux
+  media_kit_video
   sqlite3_flutter_libs
   url_launcher_linux
 )
