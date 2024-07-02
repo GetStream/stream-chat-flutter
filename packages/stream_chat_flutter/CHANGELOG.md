@@ -1,3 +1,9 @@
+## Upcoming 
+
+🐞 Fixed
+
+- Fixed copy message function.
+
 ## 7.2.2
 
 ✅ Added
