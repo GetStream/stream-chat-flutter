@@ -816,12 +816,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           title: Text(context.translations.copyMessageLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
-            final text = widget.message.text;
-            String? messageToCopy;
+            var messageToCopy = widget.message.text;
             for (final user in widget.message.mentionedUsers.toSet()) {
               final userId = user.id;
               final userName = user.name;
-              messageToCopy = text?.replaceAll(
+              messageToCopy = messageToCopy?.replaceAll(
                     RegExp('@($userId|$userName)'),
                     '@$userName',
                   ) ??
