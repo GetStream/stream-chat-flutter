@@ -1,6 +1,7 @@
 import 'package:contextmenu/contextmenu.dart';
-import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
@@ -332,14 +333,16 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                           );
                         } else if (attachment.type == AttachmentType.video) {
                           final package = videoPackages[attachment.id]!;
-                          package.player.open(
-                            Playlist(
-                              medias: [
-                                Media.network(package.attachment.assetUrl),
-                              ],
-                            ),
-                            autoStart: widget.autoplayVideos,
-                          );
+                          if (package.attachment.assetUrl != null) {
+                            package.player.open(
+                              Playlist(
+                                [
+                                  Media(package.attachment.assetUrl!),
+                                ],
+                              ),
+                              play: widget.autoplayVideos,
+                            );
+                          }
 
                           final mediaQuery = MediaQuery.of(context);
                           final bottomPadding = mediaQuery.padding.bottom;
@@ -359,7 +362,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                                 ),
                               ],
                               child: Video(
-                                player: package.player,
+                                controller: package.controller,
                               ),
                             ),
                           );
@@ -382,23 +385,35 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
 /// Class for packaging up things required for videos
 class DesktopVideoPackage {
   /// Constructor for creating [VideoPackage]
-  DesktopVideoPackage(
-    this.attachment, {
-    this.showControls = true,
-  }) : player = Player(
-          id: int.parse(
-            attachment.id.characters
-                .getRange(0, 10)
-                .toString()
-                .replaceAll(RegExp('[^0-9]'), ''),
-          ),
-        );
+  factory DesktopVideoPackage(
+    Attachment attachment, {
+    bool showControls = true,
+  }) {
+    final player = Player();
+    final controller = VideoController(player);
+    return DesktopVideoPackage._internal(
+      attachment,
+      player,
+      controller,
+      showControls,
+    );
+  }
+
+  DesktopVideoPackage._internal(
+    this.attachment,
+    this.player,
+    this.controller,
+    this.showControls,
+  );
 
   /// The video attachment to play.
   final Attachment attachment;
 
   /// The VLC player to use.
   final Player player;
+
+  /// The VLC video controller to use.
+  final VideoController controller;
 
   /// Whether to show the player controls or not.
   final bool showControls;
@@ -417,16 +432,18 @@ class _PlaylistPlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final _media = <Media>[];
     for (final package in packages) {
-      _media.add(Media.network(package.attachment.assetUrl));
+      if (package.attachment.assetUrl != null) {
+        _media.add(Media(package.attachment.assetUrl!));
+      }
     }
     packages.first.player.open(
       Playlist(
-        medias: _media,
+        _media,
       ),
-      autoStart: autoStart,
+      play: autoStart,
     );
     return Video(
-      player: packages.first.player,
+      controller: packages.first.controller,
       fit: BoxFit.cover,
     );
   }

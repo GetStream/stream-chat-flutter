@@ -1,4 +1,15 @@
-## Upcoming
+## 7.3.0 
+
+🐞 Fixed
+
+- Fixed copy message function. 
+
+🔄 Changed
+
+- Changed minimum Flutter version to 3.19 for the SDK.
+- Updated `stream_chat_flutter_core` dependency to [`7.3.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 7.2.2
 
 ✅ Added
 
@@ -15,6 +26,10 @@
 - Exported thumbnail widgets from the package.
 - Extends predicates for sending and clearing messages to mobile.
 - Fixed null errors in web from markdown.
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency to [`7.2.2`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.2.1
 
