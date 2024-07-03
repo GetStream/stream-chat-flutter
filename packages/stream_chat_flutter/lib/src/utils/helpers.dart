@@ -70,7 +70,6 @@ Future<bool?> showConfirmationBottomSheet(
 }) {
   final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
-    useRootNavigator: false,
     backgroundColor: chatThemeData.colorTheme.barsBg,
     context: context,
     shape: const RoundedRectangleBorder(
@@ -157,7 +156,6 @@ Future<bool?> showInfoBottomSheet(
 }) {
   final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
-    useRootNavigator: false,
     backgroundColor:
         theme?.colorTheme.barsBg ?? chatThemeData.colorTheme.barsBg,
     context: context,
