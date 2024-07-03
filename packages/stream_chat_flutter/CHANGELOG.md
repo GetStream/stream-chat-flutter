@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed null errors in web from markdown.
+
 ## 7.3.0 
 
 🐞 Fixed
