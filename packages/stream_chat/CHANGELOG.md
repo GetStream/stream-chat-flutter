@@ -1,3 +1,7 @@
+🐞 Fixed
+
+- [[#1964]](https://github.com/GetStream/stream-chat-flutter/issues/1964) Channel.membership field is not updated
+
 ## 7.3.0
 
 🔄 Changed
