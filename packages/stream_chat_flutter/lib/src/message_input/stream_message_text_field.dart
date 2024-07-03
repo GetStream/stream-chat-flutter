@@ -434,21 +434,6 @@ class StreamMessageTextField extends StatefulWidget {
   /// {@endtemplate}
   final GestureTapCallback? onTap;
 
-  /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// widget.
-  ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
-  ///
-  ///  * [MaterialState.error].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
-  ///
-  /// If this property is null, [MaterialStateMouseCursor.textable] will be
-  /// used.
-  ///
   /// The [mouseCursor] is the only property of [TextField] that controls the
   /// appearance of the mouse pointer. All other properties related to "cursor"
   /// stand for the text cursor, which is usually a blinking vertical line at
