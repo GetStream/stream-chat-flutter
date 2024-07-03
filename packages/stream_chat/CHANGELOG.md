@@ -1,3 +1,9 @@
+## 7.3.0
+
+🔄 Changed
+
+- Changed minimum Flutter version to 3.19 for the SDK.
+
 ## 7.2.2
 
 - Version to keep in sync with the rest of the packages
