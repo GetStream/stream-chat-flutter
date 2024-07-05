@@ -1,4 +1,6 @@
-import 'package:stream_chat/stream_chat.dart' show ChannelState, Event;
+import 'package:collection/collection.dart';
+import 'package:stream_chat/stream_chat.dart'
+    show Channel, ChannelState, Event, Filter;
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
@@ -60,8 +62,9 @@ mixin class StreamChannelListEventHandler {
   /// By default, this adds the channel to the list of channels.
   void onChannelVisible(
     Event event,
-    StreamChannelListController controller,
-  ) async {
+    StreamChannelListController controller, {
+    Filter? filter,
+  }) async {
     final channelId = event.channelId;
     final channelType = event.channelType;
 
@@ -72,6 +75,11 @@ mixin class StreamChannelListEventHandler {
       type: channelType,
     );
 
+    if (filter != null) {
+      final passedFilter = filterChannelType(channel, filter);
+      if (passedFilter == false) return;
+    }
+
     final currentChannels = [...controller.currentItems];
 
     final updatedChannels = [
@@ -80,6 +88,17 @@ mixin class StreamChannelListEventHandler {
     ];
 
     controller.channels = updatedChannels;
+  }
+
+  bool? filterChannelType(Channel channel, Filter filter) {
+    var passedFilter = false;
+    final filterList = filter.value as List;
+    final filterType =
+        filterList.firstWhereOrNull((filter) => filter.key == 'type') as Filter;
+    if (filterType.value == channel.type) {
+      passedFilter = true;
+    }
+    return passedFilter;
   }
 
   /// Function which gets called for the event
@@ -129,9 +148,10 @@ mixin class StreamChannelListEventHandler {
   /// By default, this adds the channel and moves it to the top of list.
   void onNotificationAddedToChannel(
     Event event,
-    StreamChannelListController controller,
-  ) {
-    onChannelVisible(event, controller);
+    StreamChannelListController controller, {
+    Filter? filter,
+  }) {
+    onChannelVisible(event, controller, filter: filter);
   }
 
   /// Function which gets called for the event

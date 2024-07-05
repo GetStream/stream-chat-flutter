@@ -246,7 +246,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       } else if (eventType == EventType.messageNew) {
         _eventHandler.onMessageNew(event, this);
       } else if (eventType == EventType.notificationAddedToChannel) {
-        _eventHandler.onNotificationAddedToChannel(event, this);
+        _eventHandler.onNotificationAddedToChannel(event, this, filter: filter);
       } else if (eventType == EventType.notificationMessageNew) {
         _eventHandler.onNotificationMessageNew(event, this);
       } else if (eventType == EventType.notificationRemovedFromChannel) {
