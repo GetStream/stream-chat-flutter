@@ -195,6 +195,7 @@ class StreamChatCoreState extends State<StreamChatCore>
       return;
     }
 
+    _eventSubscription?.cancel();
     _eventSubscription = client.on().listen(widget.onBackgroundEventReceived);
 
     void onTimerComplete() {
@@ -202,6 +203,7 @@ class StreamChatCoreState extends State<StreamChatCore>
       client.closeConnection();
     }
 
+    _disconnectTimer?.cancel();
     _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
     return;
   }
