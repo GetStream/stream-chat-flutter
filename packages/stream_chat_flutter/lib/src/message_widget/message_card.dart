@@ -29,6 +29,7 @@ class MessageCard extends StatefulWidget {
     required this.attachmentActionsModalBuilder,
     required this.textPadding,
     required this.reverse,
+    required this.showFailedIndicator,
     this.shape,
     this.borderSide,
     this.borderRadiusGeometry,
@@ -120,6 +121,9 @@ class MessageCard extends StatefulWidget {
   /// {@macro reverse}
   final bool reverse;
 
+  /// {@macro showFailedIndicator}
+  final bool showFailedIndicator;
+
   @override
   State<MessageCard> createState() => _MessageCardState();
 }
@@ -165,8 +169,9 @@ class _MessageCardState extends State<MessageCard> {
     return Container(
       constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
       margin: EdgeInsets.symmetric(
-        horizontal: (widget.isFailedState ? 15.0 : 0.0) +
-            (widget.showUserAvatar == DisplayWidget.gone ? 0 : 4.0),
+        horizontal:
+            (widget.isFailedState && widget.showFailedIndicator ? 15.0 : 0.0) +
+                (widget.showUserAvatar == DisplayWidget.gone ? 0 : 4.0),
       ),
       clipBehavior: Clip.hardEdge,
       decoration: ShapeDecoration(

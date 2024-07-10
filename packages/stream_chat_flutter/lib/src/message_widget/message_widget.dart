@@ -451,6 +451,7 @@ class StreamMessageWidget extends StatefulWidget {
     String? imageAttachmentThumbnailResizeType,
     String? imageAttachmentThumbnailCropType,
     AttachmentActionsBuilder? attachmentActionsModalBuilder,
+    bool? showFailedIndicator
   }) {
     return StreamMessageWidget(
       key: key ?? this.key,
@@ -520,6 +521,7 @@ class StreamMessageWidget extends StatefulWidget {
           this.imageAttachmentThumbnailCropType,
       attachmentActionsModalBuilder:
           attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
+      showFailedIndicator: showFailedIndicator ?? this.showFailedIndicator,
     );
   }
 
