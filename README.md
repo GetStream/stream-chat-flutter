@@ -18,7 +18,7 @@ Stream allows developers to rapidly deploy scalable feeds and chat messaging wit
 
 **V8 Migration Guide**
 
-For upgrading from V7 to V8, please refer to the [V8 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_7_0/)
+For upgrading from V7 to V8, please refer to the [V8 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_8_0/)
 
 ## Sample apps and demos 
 Our team maintains a dedicated repository for full fledged sample applications and demos. Consider checking out [GetStream/flutter-samples](https://github.com/GetStream/flutter-samples) to learn more or get started by looking at our latest [Stream Chat demo](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1). 
