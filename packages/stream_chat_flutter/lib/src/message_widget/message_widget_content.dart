@@ -332,6 +332,8 @@ class MessageWidgetContent extends StatelessWidget {
                                     : MessageCard(
                                         message: message,
                                         isFailedState: isFailedState,
+                                        showFailedIndicator:
+                                            showFailedIndicator,
                                         showUserAvatar: showUserAvatar,
                                         messageTheme: messageTheme,
                                         hasQuotedMessage: hasQuotedMessage,
