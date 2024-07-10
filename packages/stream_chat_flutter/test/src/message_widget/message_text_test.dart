@@ -221,7 +221,7 @@ cool.''';
             home: SimpleFrame(
           child: StreamChat(
             client: client,
-            connectivityStream: Stream.value(ConnectivityResult.wifi),
+            connectivityStream: Stream.value([ConnectivityResult.wifi]),
             child: StreamChannel(
               channel: channel,
               child: Scaffold(
