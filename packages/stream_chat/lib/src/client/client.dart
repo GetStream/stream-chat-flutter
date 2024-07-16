@@ -1633,7 +1633,7 @@ class ClientState {
     _eventsSubscription?.add(
       _client.on(EventType.userUpdated).listen((event) {
         if (event.user!.id == currentUser!.id) {
-          currentUser = OwnUser.fromJson(event.user!.toJson());
+          currentUser = OwnUser.fromUser(event.user!);
         }
         updateUser(event.user);
       }),
