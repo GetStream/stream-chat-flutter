@@ -1,3 +1,9 @@
+## Upcoming 
+
+🐞 Fixed
+
+- Fixed bug causing background events to be sent in foreground.
+
 ## 7.3.0
 
 🔄 Changed
