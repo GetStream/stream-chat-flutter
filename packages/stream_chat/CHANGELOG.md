@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed incorrect user object and online presence when user is updated.
+
 ## 7.3.0
 
 🔄 Changed
