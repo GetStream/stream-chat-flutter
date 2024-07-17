@@ -127,7 +127,7 @@ class StreamChatCoreState extends State<StreamChatCore>
       connectivityStream ??= Connectivity().onConnectivityChanged;
       _connectivitySubscription =
           connectivityStream.distinct().listen((result) {
-        _isConnectionAvailable = result != ConnectivityResult.none;
+        _isConnectionAvailable = !result.contains(ConnectivityResult.none);
         if (!_isInForeground) return;
         if (_isConnectionAvailable) {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
