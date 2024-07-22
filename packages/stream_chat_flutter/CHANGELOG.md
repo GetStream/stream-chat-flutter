@@ -1,4 +1,4 @@
-## Upcoming
+## 8.0.0
 
 🐞 Fixed
 
