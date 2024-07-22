@@ -91,7 +91,7 @@ void main() {
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChannel(
             showLoading: false,
             channel: channel,
@@ -146,7 +146,7 @@ void main() {
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
-          connectivityStream: Stream.value(ConnectivityResult.mobile),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChannel(
             showLoading: false,
             channel: channel,

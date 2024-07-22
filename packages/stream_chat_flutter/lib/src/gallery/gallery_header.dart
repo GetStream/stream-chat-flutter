@@ -95,6 +95,8 @@ class StreamGalleryHeader extends StatelessWidget
               onPressed: onBackPressed,
             )
           : const SizedBox(),
+      surfaceTintColor:
+          backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       backgroundColor:
           backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[

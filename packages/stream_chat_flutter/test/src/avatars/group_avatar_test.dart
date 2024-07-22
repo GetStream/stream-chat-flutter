@@ -50,7 +50,7 @@ void main() {
                 .instance.defaultBinaryMessenger
                 .handlePlatformMessage(
               methodChannel.name,
-              methodChannel.codec.encodeSuccessEnvelope('wifi'),
+              methodChannel.codec.encodeSuccessEnvelope(['wifi']),
               (_) {},
             );
           } catch (e) {
