@@ -1,3 +1,7 @@
+## 8.0.0
+
+- Updated `stream_chat` dependency to [`8.0.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 7.3.0
 
 🔄 Changed

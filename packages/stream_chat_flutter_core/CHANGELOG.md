@@ -1,8 +1,12 @@
-## Upcoming 
+## 8.0.0 
 
 🐞 Fixed
 
 - Fixed bug causing background events to be sent in foreground.
+
+🔄 Changed
+
+- Updated `stream_chat` dependency to [`8.0.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.3.0
 
