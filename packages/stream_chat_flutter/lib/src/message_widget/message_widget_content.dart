@@ -11,10 +11,10 @@ typedef BottomRowBuilder = Widget Function(BuildContext, Message);
 /// Signature for the builder function that will be called when the message
 /// bottom row is built. Includes the [Message] and the default [BottomRow].
 typedef BottomRowBuilderWithDefaultWidget = Widget Function(
-  BuildContext,
-  Message,
-  BottomRow,
-);
+    BuildContext,
+    Message,
+    BottomRow,
+    );
 
 /// {@template messageWidgetContent}
 /// The main content of a [StreamMessageWidget].
@@ -224,7 +224,7 @@ class MessageWidgetContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment:
-          reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Stack(
@@ -244,11 +244,11 @@ class MessageWidgetContent extends StatelessWidget {
               ),
             Padding(
               padding: EdgeInsets.only(
-                bottom: isPinned && showPinHighlight ? 8.0 : 0.0,
+                bottom: isPinned && showPinHighlight ? 8.0 : 4,
               ),
               child: Column(
                 crossAxisAlignment:
-                    reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (message.pinned &&
@@ -271,7 +271,7 @@ class MessageWidgetContent extends StatelessWidget {
                           onUserAvatarTap: onUserAvatarTap,
                           userAvatarBuilder: userAvatarBuilder,
                           translateUserAvatar:
-                              showTopUserAvatar == false && translateUserAvatar,
+                          showTopUserAvatar == false && translateUserAvatar,
                           messageTheme: messageTheme,
                           message: message,
                         ),
@@ -279,6 +279,9 @@ class MessageWidgetContent extends StatelessWidget {
                       ],
                       if (showUserAvatar == DisplayWidget.hide)
                         SizedBox(width: avatarWidth + 4),
+
+                      if (showUserAvatar == DisplayWidget.gone)
+                        SizedBox(width: 12),
                       Flexible(
                         child: Stack(
                           clipBehavior: Clip.none,
@@ -287,9 +290,9 @@ class MessageWidgetContent extends StatelessWidget {
                               Container(
                                 margin: EdgeInsets.symmetric(
                                   horizontal:
-                                      showUserAvatar == DisplayWidget.gone
-                                          ? 0
-                                          : 4.0,
+                                  showUserAvatar == DisplayWidget.gone
+                                      ? 0
+                                      : 4.0,
                                 ),
                                 child: StreamDeletedMessage(
                                   borderRadiusGeometry: borderRadiusGeometry,
@@ -316,7 +319,7 @@ class MessageWidgetContent extends StatelessWidget {
                                 onReplyTap: onReplyTap,
                                 onShowMessage: onShowMessage,
                                 attachmentActionsModalBuilder:
-                                    attachmentActionsModalBuilder,
+                                attachmentActionsModalBuilder,
                                 textPadding: textPadding,
                                 reverse: reverse,
                                 onQuotedMessageTap: onQuotedMessageTap,
@@ -367,9 +370,9 @@ class MessageWidgetContent extends StatelessWidget {
                     Padding(
                       padding: showUserAvatar != DisplayWidget.gone
                           ? EdgeInsets.only(
-                              left: avatarWidth + 4,
-                              right: avatarWidth + 4,
-                            )
+                        left: avatarWidth + 4,
+                        right: avatarWidth + 4,
+                      )
                           : EdgeInsets.zero,
                       child: DesktopReactionsBuilder(
                         message: message,
