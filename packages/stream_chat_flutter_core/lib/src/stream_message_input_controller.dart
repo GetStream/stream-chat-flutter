@@ -134,6 +134,9 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     );
   }
 
+  /// Returns the quoted message.
+  Message? get getQuotedMessage => message.quotedMessage;
+
   /// Clears the quoted message.
   void clearQuotedMessage() {
     message = message.copyWith(
