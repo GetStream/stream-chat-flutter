@@ -49,7 +49,7 @@ void main() {
               .instance.defaultBinaryMessenger
               .handlePlatformMessage(
             methodChannel.name,
-            methodChannel.codec.encodeSuccessEnvelope('wifi'),
+            methodChannel.codec.encodeSuccessEnvelope(['wifi']),
             (_) {},
           );
         } catch (e) {
@@ -69,8 +69,8 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: WillPopScope(
-                onWillPop: () async => false,
+              child: PopScope(
+                onPopInvoked: (bool didPop) async => false,
                 child: Scaffold(
                   appBar: StreamGalleryHeader(
                     attachment: MockAttachment(),
@@ -94,8 +94,8 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: WillPopScope(
-              onWillPop: () async => false,
+            child: PopScope(
+              onPopInvoked: (bool didPop) async => false,
               child: Scaffold(
                 appBar: StreamGalleryHeader(
                   userName: 'User',

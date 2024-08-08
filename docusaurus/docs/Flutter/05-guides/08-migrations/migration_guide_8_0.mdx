@@ -1,0 +1,57 @@
+---
+id: migration_guide_8_0
+title: v8.0
+slug: /guides/migration_guide_8_0/
+---
+
+This guide enumerates and better explains the SDK changes introduced in v8.
+
+If you find any bugs or have any questions, please file an [issue on our GitHub repository](https://github.com/GetStream/stream-chat-flutter/issues). We want to support you as much as we can with this migration.
+
+Code examples:
+
+- See our [Stream Chat Flutter tutorial](https://getstream.io/chat/flutter/tutorial/) for an up-to-date guide using the latest Stream Chat version.
+- See the [Stream Flutter Samples repository](https://github.com/GetStream/flutter-samples) with our full fledged messaging [sample application](https://github.com/GetStream/flutter-samples/tree/main/packages/stream_chat_v1).
+
+Our documentation has also been updated to support v8, so all guides and examples will have updated code.
+
+### Dependencies
+
+To migrate to v8.0.0, update your `pubspec.yaml` with the correct Stream chat package you're using:
+
+```yaml
+dependencies:
+	stream_chat_flutter: ^8.0.0 # full UI, core and client packages
+	stream_chat: ^8.0.0 # client package
+```
+
+---
+
+## Important notes
+
+- The package from recent versions has been restricted to Flutter 3.19+ as we generally aim to support
+the latest and the previous version of Flutter when possible.
+
+- The `attachmentBuilders` parameter in the `StreamMessageListView` now only expect custom attachments
+and does not need the default attachment builders. You can also use `StreamAttachmentWidgetBuilder.defaultBuilders`
+to add the default builders if necessary.
+
+## Breaking changes
+
+Version 8.0 has two main breaking changes.
+
+### Removal of the `useMaterial3` flag
+
+In v7, we introduced a temporary `useMaterial3` flag that allows users to optionally use Material3 styling in Stream components.
+This was necessary at the time for various reasons.
+
+However, this flag is now removed and Material3 will be the default styling for all components.
+
+### Connectivity stream changes
+
+While this is a not directly a user-facing change, it is added here for completeness of the list.
+
+The `StreamChat` widget has a `connectivityStream` parameter to allow testing of various scenarios.
+Due to changes in the relevant package, it was necessary to change the type of the stream from
+`Stream<ConnectivityResult>?` to `Stream<List<ConnectivityResult>>?`.
+

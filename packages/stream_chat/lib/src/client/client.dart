@@ -1635,7 +1635,7 @@ class ClientState {
     _eventsSubscription?.add(
       _client.on(EventType.userUpdated).listen((event) {
         if (event.user!.id == currentUser!.id) {
-          currentUser = OwnUser.fromJson(event.user!.toJson());
+          currentUser = OwnUser.fromUser(event.user!);
         }
         updateUser(event.user);
       }),
@@ -1715,8 +1715,6 @@ class ClientState {
 
   /// The current user as a stream
   Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
-
-  // coverage:ignore-end
 
   /// The current user
   Map<String, User> get users => _usersController.value;

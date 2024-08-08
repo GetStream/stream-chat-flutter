@@ -65,7 +65,7 @@ class StreamChatCore extends StatefulWidget {
   /// Stream of connectivity result
   /// Visible for testing
   @visibleForTesting
-  final Stream<ConnectivityResult>? connectivityStream;
+  final Stream<List<ConnectivityResult>>? connectivityStream;
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
@@ -108,7 +108,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   /// The current user as a stream
   Stream<User?> get currentUserStream => client.state.currentUserStream;
 
-  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   var _isInForeground = true;
   var _isConnectionAvailable = true;
@@ -121,13 +121,13 @@ class StreamChatCoreState extends State<StreamChatCore>
   }
 
   void _subscribeToConnectivityChange([
-    Stream<ConnectivityResult>? connectivityStream,
+    Stream<List<ConnectivityResult>>? connectivityStream,
   ]) {
     if (_connectivitySubscription == null) {
       connectivityStream ??= Connectivity().onConnectivityChanged;
       _connectivitySubscription =
           connectivityStream.distinct().listen((result) {
-        _isConnectionAvailable = result != ConnectivityResult.none;
+        _isConnectionAvailable = !result.contains(ConnectivityResult.none);
         if (!_isInForeground) return;
         if (_isConnectionAvailable) {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
@@ -195,6 +195,7 @@ class StreamChatCoreState extends State<StreamChatCore>
       return;
     }
 
+    _eventSubscription?.cancel();
     _eventSubscription = client.on().listen(widget.onBackgroundEventReceived);
 
     void onTimerComplete() {
@@ -202,6 +203,7 @@ class StreamChatCoreState extends State<StreamChatCore>
       client.closeConnection();
     }
 
+    _disconnectTimer?.cancel();
     _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
     return;
   }
