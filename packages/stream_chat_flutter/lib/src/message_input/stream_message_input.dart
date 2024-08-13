@@ -942,23 +942,30 @@ class StreamMessageInputState extends State<StreamMessageInput>
                             onKeyEvent: _handleKeyPressed,
                             child: child!,
                           ),
-                      child: StreamMessageTextField(
-                        key: const Key('messageInputText'),
-                        maxLines: widget.maxLines,
-                        minLines: widget.minLines,
-                        textInputAction: widget.textInputAction,
-                        onSubmitted: (_) => sendMessage(),
-                        keyboardType: widget.keyboardType,
-                        controller: _effectiveController,
-                        focusNode: _effectiveFocusNode,
-                        style: _messageInputTheme.inputTextStyle,
-                        autofocus: widget.autofocus,
-                        textAlignVertical: TextAlignVertical.center,
-                        decoration: _getInputDecoration(context),
-                        textCapitalization: widget.textCapitalization,
-                        autocorrect: widget.autoCorrect,
-                        contentInsertionConfiguration:
-                        widget.contentInsertionConfiguration,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: StreamMessageTextField(
+                              key: const Key('messageInputText'),
+                              maxLines: widget.maxLines,
+                              minLines: widget.minLines,
+                              textInputAction: widget.textInputAction,
+                              onSubmitted: (_) => sendMessage(),
+                              keyboardType: widget.keyboardType,
+                              controller: _effectiveController,
+                              focusNode: _effectiveFocusNode,
+                              style: _messageInputTheme.inputTextStyle,
+                              autofocus: widget.autofocus,
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: _getInputDecoration(context),
+                              textCapitalization: widget.textCapitalization,
+                              autocorrect: widget.autoCorrect,
+                              contentInsertionConfiguration:
+                              widget.contentInsertionConfiguration,
+                            ),
+                          ),
+                          if (widget.suffix != null) widget.suffix!,
+                        ],
                       ),
                     ),
                   ),
@@ -1085,7 +1092,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
             _buildExpandActionsButton(context),
           if (widget.sendButtonLocation == SendButtonLocation.inside)
             _buildSendButton(context),
-          if (widget.suffix != null) widget.suffix!,
         ],
       ),
     ).merge(passedDecoration);
