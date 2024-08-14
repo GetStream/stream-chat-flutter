@@ -6,7 +6,7 @@ module.exports = {
                 lastVersion: 'current',
                 versions: {
                     current: {
-                        label: 'v7'
+                        label: 'v8'
                     },
                     '3.x.x': {
                         label: 'v3',
@@ -19,6 +19,10 @@ module.exports = {
                     '5.x.x': {
                         label: 'v5',
                         path: 'v5'
+                    },
+                    '7.x.x': {
+                        label: 'v7',
+                        path: 'v7'
                     }
                 }
             }
