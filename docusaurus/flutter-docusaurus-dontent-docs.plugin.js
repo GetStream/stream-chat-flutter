@@ -19,6 +19,10 @@ module.exports = {
                     '5.x.x': {
                         label: 'v5',
                         path: 'v5'
+                    },
+                    '7.x.x': {
+                        label: 'v7',
+                        path: 'v7'
                     }
                 }
             }
