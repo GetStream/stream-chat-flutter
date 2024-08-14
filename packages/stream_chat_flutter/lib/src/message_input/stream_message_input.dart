@@ -153,6 +153,7 @@ class StreamMessageInput extends StatefulWidget {
     this.contentInsertionConfiguration,
     this.prefix,
     this.suffix,
+    this.hintStyle,
   });
 
   /// The predicate used to send a message on desktop/web
@@ -353,6 +354,9 @@ class StreamMessageInput extends StatefulWidget {
 
   /// A list of widgets to show as suffix of the text field.
   final Widget? suffix;
+
+  /// A style for hint text that appears when the input is empty.
+  final TextStyle? hintStyle;
 
   static String? _defaultHintGetter(BuildContext context,
       HintType type,) {
@@ -1002,7 +1006,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return InputDecoration(
       isDense: true,
       hintText: _getHint(context),
-      hintStyle: _messageInputTheme.inputTextStyle!.copyWith(
+      hintStyle: widget.hintStyle ?? _messageInputTheme.inputTextStyle!.copyWith(
         color: _streamChatTheme.colorTheme.textLowEmphasis,
       ),
       border: const OutlineInputBorder(
