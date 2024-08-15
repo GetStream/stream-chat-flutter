@@ -121,6 +121,7 @@ class StreamMessageTextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contentInsertionConfiguration,
+    this.onTextChange,
   })  : assert(obscuringCharacter.length == 1, ''),
         smartDashesType = smartDashesType ??
             (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -515,6 +516,9 @@ class StreamMessageTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
   final ContentInsertionConfiguration? contentInsertionConfiguration;
 
+  ///Handle onTextfield Change
+  final Function(String)? onTextChange;
+
   @override
   _StreamMessageTextFieldState createState() => _StreamMessageTextFieldState();
 
@@ -734,6 +738,7 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
                   widget.enableIMEPersonalizedLearning,
               contentInsertionConfiguration:
                   widget.contentInsertionConfiguration,
+              onChanged: widget.onTextChange,
             ),
           ),
         ),
