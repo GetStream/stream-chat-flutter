@@ -18,7 +18,8 @@ Check the [`StreamMessageSearchListView` documentation](../02-stream_chat_flutte
 Building a custom message search feature is a common task. Here is an example of how to use the `StreamMessageSearchListController` to build a simple search list with pagination.
 
 First of all we should create an instance of the `StreamMessageSearchListController` and provide it with the `StreamChatClient` instance.
-You can also add a `Filter`, a list of `SortOption`s and other pagination-related parameters.
+We can then add a filter to only get the channels that the current user is a part of.
+You can also add a list of `SortOption`s and other pagination-related parameters.
 
 ```dart
 class SearchListPageState extends State<SearchListPage> {
@@ -26,6 +27,7 @@ class SearchListPageState extends State<SearchListPage> {
   /// [StreamMessageSearchListController].
   late final messageSearchListController = StreamMessageSearchListController(
     client: StreamChatCore.of(context).client,
+    filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
   );
 ```
 
