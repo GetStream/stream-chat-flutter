@@ -11,19 +11,19 @@ dependencies:
   flutter_app_badger: ^1.5.0
   flutter:
     sdk: flutter
-  stream_chat_flutter: ^6.9.0
-  stream_chat_persistence: ^6.8.0
-  stream_chat_localizations: ^5.9.0
+  stream_chat_flutter: ^8.0.0
+  stream_chat_persistence: ^8.0.0
+  stream_chat_localizations: ^8.0.0
   flutter_local_notifications: ^15.1.0+1
   flutter_svg: ^2.0.7
   flutter_secure_storage: ^8.0.0
   yaml: ^3.1.2
-  uuid: ^3.0.7
+  uuid: ^4.4.2
   streaming_shared_preferences: ^2.0.0
-  lottie: ^2.6.0
+  lottie: ^3.1.2
   collection: ^1.17.1
   sentry_flutter: ^7.9.0
-  flutter_slidable: ^3.0.0
+  flutter_slidable: ^3.1.1
   go_router: ^10.1.0
   provider: ^6.0.5
   video_player: ^2.7.0

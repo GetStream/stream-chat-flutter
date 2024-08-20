@@ -1082,6 +1082,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     if (user.online) {
       return AppLocalizations.of(context).online;
     } else {
+      if(user.lastActive == null) {
+        return "";
+      }
+
       return '${AppLocalizations.of(context).lastSeen} ${Jiffy.parseFromDateTime(user.lastActive!).fromNow()}';
     }
   }
