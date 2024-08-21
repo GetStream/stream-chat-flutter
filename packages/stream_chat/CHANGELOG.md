@@ -1,3 +1,8 @@
+## unreleased
+
+✅ Added
+- Add `httpClientAdapter` in order to use native http implementations
+
 ## 8.0.0
 
 🐞 Fixed
