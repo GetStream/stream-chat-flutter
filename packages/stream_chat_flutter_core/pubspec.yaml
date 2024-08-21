@@ -12,10 +12,10 @@ environment:
 
 dependencies:
   collection: ^1.17.2
-  connectivity_plus: ^6.0.3
   flutter:
     sdk: flutter
   freezed_annotation: ^2.4.1
+  internet_connection_checker_plus: ^2.5.1
   meta: ^1.9.1
   rxdart: ^0.27.7
   stream_chat:

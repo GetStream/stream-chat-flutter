@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
@@ -65,7 +66,7 @@ class StreamChatCore extends StatefulWidget {
   /// Stream of connectivity result
   /// Visible for testing
   @visibleForTesting
-  final Stream<List<ConnectivityResult>>? connectivityStream;
+  final Stream<InternetStatus>? connectivityStream;
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
@@ -108,7 +109,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   /// The current user as a stream
   Stream<User?> get currentUserStream => client.state.currentUserStream;
 
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  StreamSubscription<InternetStatus>? _connectivitySubscription;
 
   var _isInForeground = true;
   var _isConnectionAvailable = true;
@@ -121,13 +122,12 @@ class StreamChatCoreState extends State<StreamChatCore>
   }
 
   void _subscribeToConnectivityChange([
-    Stream<List<ConnectivityResult>>? connectivityStream,
+    Stream<InternetStatus>? connectivityStream,
   ]) {
     if (_connectivitySubscription == null) {
-      connectivityStream ??= Connectivity().onConnectivityChanged;
-      _connectivitySubscription =
-          connectivityStream.distinct().listen((result) {
-        _isConnectionAvailable = !result.contains(ConnectivityResult.none);
+      connectivityStream ??= InternetConnection().onStatusChange;
+      _connectivitySubscription = connectivityStream.listen((status) {
+        _isConnectionAvailable = status == InternetStatus.connected;
         if (!_isInForeground) return;
         if (_isConnectionAvailable) {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
@@ -140,6 +140,21 @@ class StreamChatCoreState extends State<StreamChatCore>
           }
         }
       });
+      // _connectivitySubscription =
+      //     connectivityStream.distinct().listen((result) {
+      //   _isConnectionAvailable = !result.contains(ConnectivityResult.none);
+      //   if (!_isInForeground) return;
+      //   if (_isConnectionAvailable) {
+      //     if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
+      //         currentUser != null) {
+      //       client.openConnection();
+      //     }
+      //   } else {
+      //     if (client.wsConnectionStatus == ConnectionStatus.connected) {
+      //       client.closeConnection();
+      //     }
+      //   }
+      // });
     }
   }
 

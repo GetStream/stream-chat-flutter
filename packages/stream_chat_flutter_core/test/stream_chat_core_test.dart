@@ -102,7 +102,7 @@ void main() {
           client: mockClient,
           onBackgroundEventReceived: mockOnBackgroundEventReceived,
           backgroundKeepAlive: backgroundKeepAlive,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: const Offstage(key: childKey),
         );
 
@@ -197,7 +197,7 @@ void main() {
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: const Offstage(key: childKey),
         );
 
@@ -261,7 +261,7 @@ void main() {
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
-          connectivityStream: Stream.value([ConnectivityResult.none]),
+          connectivityStream: Stream.value(InternetStatus.disconnected),
           child: const Offstage(key: childKey),
         );
 
@@ -346,7 +346,7 @@ void main() {
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: const Offstage(key: childKey),
         );
 
@@ -402,7 +402,7 @@ void main() {
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
-          connectivityStream: Stream.value([ConnectivityResult.none]),
+          connectivityStream: Stream.value(InternetStatus.disconnected),
           child: const Offstage(key: childKey),
         );
 
@@ -478,7 +478,7 @@ void main() {
         const streamChatCoreKey = Key('streamChatCore');
         const childKey = Key('child');
         final _connectivityController =
-            BehaviorSubject.seeded([ConnectivityResult.none]);
+            BehaviorSubject.seeded(InternetStatus.disconnected);
 
         final event = Event();
         when(mockClient.on).thenAnswer((_) => Stream.value(event));
@@ -504,7 +504,7 @@ void main() {
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
 
-        _connectivityController.add([ConnectivityResult.mobile]);
+        _connectivityController.add(InternetStatus.connected);
 
         await Future.delayed(const Duration(seconds: 1));
 
@@ -523,7 +523,7 @@ void main() {
         const streamChatCoreKey = Key('streamChatCore');
         const childKey = Key('child');
         final _connectivityController =
-            BehaviorSubject.seeded([ConnectivityResult.mobile]);
+            BehaviorSubject.seeded(InternetStatus.connected);
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
@@ -548,7 +548,7 @@ void main() {
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.connected);
 
-        _connectivityController.add([ConnectivityResult.none]);
+        _connectivityController.add(InternetStatus.disconnected);
 
         await Future.delayed(const Duration(seconds: 1));
 
@@ -567,7 +567,7 @@ void main() {
         const streamChatCoreKey = Key('streamChatCore');
         const childKey = Key('child');
         final _connectivityController =
-            BehaviorSubject.seeded([ConnectivityResult.none]);
+            BehaviorSubject.seeded(InternetStatus.disconnected);
 
         final event = Event();
         when(mockClient.on).thenAnswer((_) => Stream.value(event));
@@ -603,7 +603,7 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        _connectivityController.add([ConnectivityResult.mobile]);
+        _connectivityController.add(InternetStatus.connected);
 
         await Future.delayed(const Duration(seconds: 1));
 
