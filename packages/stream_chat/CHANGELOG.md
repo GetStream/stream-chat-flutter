@@ -1,3 +1,8 @@
+## unreleased
+
+✅ Added
+- Added `httpClientAdapter` to `StreamHttpClient` that enables the use native http implementations
+
 ## 8.0.0
 
 🐞 Fixed

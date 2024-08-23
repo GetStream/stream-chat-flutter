@@ -28,6 +28,7 @@ class StreamChatApi {
         StreamAttachmentFileUploader.new,
     Logger? logger,
     Iterable<Interceptor>? interceptors,
+    HttpClientAdapter? httpClientAdapter,
   })  : _fileUploaderProvider = attachmentFileUploaderProvider,
         _client = client ??
             StreamHttpClient(
@@ -37,6 +38,7 @@ class StreamChatApi {
               connectionIdManager: connectionIdManager,
               logger: logger,
               interceptors: interceptors,
+              httpClientAdapter: httpClientAdapter,
             );
 
   final StreamHttpClient _client;
