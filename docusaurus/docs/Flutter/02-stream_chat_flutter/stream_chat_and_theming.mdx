@@ -17,23 +17,6 @@ Similar to the `Theme` and `ThemeData` in Flutter, Stream Chat uses a top level 
 
 If you'd like to customize the look and feel of Stream chat across your entire application, we recommend setting your theme at the top level. Conversely, users can customize specific screens or widgets by wrapping components in a `StreamChatTheme`.
 
-### A note on Material 3
-
-Material 3 is a new design system from Google that Flutter versions >= 3.16.0 are using by default. Stream Chat SDK is using Material 2 by default. If you are using an older version of Flutter, you should be fine, but if you are using a newer version of Flutter, you should know that all components that are lower than `StreamChat` widget will only use Material 2.
-
-If you are using Material 3 in your app, keep in mind that any widget under StreamChat will use Material 2 by default. You can change it by providing useMaterial3: true to StreamChat widget.
-
-```dart
-StreamChat(
-  client: client,
-  useMaterial3: true,
-  child: child,
-)
-```
-
-> [!WARNING]
-> If you set `useMaterial3` to `true`, all components that are lower than `StreamChat` widget will use Material 3 which is **not supported** by our widgets yet.
-
 ### A closer look at StreamChatThemeData 
 
 Looking at the constructor for `StreamChatThemeData`, we can see the full list of properties and widgets available for customization.
