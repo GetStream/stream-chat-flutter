@@ -176,10 +176,10 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                         child: media[position].attachment.type == 'image'
                             ? IgnorePointer(
                                 child: StreamImageAttachment(
-                                  attachment: media[position].attachment,
+                                  image: media[position].attachment,
                                   message: media[position].message,
-                                  showTitle: false,
-                                  messageTheme: widget.messageTheme,
+                                  // showTitle: false,
+                                  // messageTheme: widget.messageTheme,
                                 ),
                               )
                             : VideoPlayer(media[position].videoPlayer!),

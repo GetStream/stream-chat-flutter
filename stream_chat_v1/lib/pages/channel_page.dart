@@ -85,7 +85,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   initialScrollIndex: widget.initialScrollIndex,
                   initialAlignment: widget.initialAlignment,
                   highlightInitialMessage: widget.highlightInitialMessage,
-                  onMessageSwiped: _reply,
+                  //onMessageSwiped: _reply,
                   messageFilter: defaultFilter,
                   messageBuilder: (context, details, messages, defaultMessage) {
                     final router = GoRouter.of(context);
