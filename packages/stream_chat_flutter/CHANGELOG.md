@@ -1,3 +1,7 @@
+## Upcoming
+
+- Added option to use the native attachment picker on mobile
+
 ## 8.0.0
 
 🐞 Fixed

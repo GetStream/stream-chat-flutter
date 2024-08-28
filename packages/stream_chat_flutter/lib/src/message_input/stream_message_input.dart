@@ -151,6 +151,7 @@ class StreamMessageInput extends StatefulWidget {
     this.ogPreviewFilter = _defaultOgPreviewFilter,
     this.hintGetter = _defaultHintGetter,
     this.contentInsertionConfiguration,
+    this.useNativeAttachmentPickerOnMobile = false,
   });
 
   /// The predicate used to send a message on desktop/web
@@ -345,6 +346,9 @@ class StreamMessageInput extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
   final ContentInsertionConfiguration? contentInsertionConfiguration;
+
+  /// Use native attachment picker on mobile instead of the inbuilt attachment picker
+  final bool useNativeAttachmentPickerOnMobile;
 
   static String? _defaultHintGetter(
     BuildContext context,
@@ -851,6 +855,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       onError: widget.onError,
       allowedTypes: widget.allowedAttachmentPickerTypes,
       initialAttachments: _effectiveController.attachments,
+      useNativeAttachmentPickerOnMobile:
+          widget.useNativeAttachmentPickerOnMobile,
     );
 
     if (attachments != null) {
