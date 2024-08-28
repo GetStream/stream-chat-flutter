@@ -347,7 +347,8 @@ class StreamMessageInput extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
   final ContentInsertionConfiguration? contentInsertionConfiguration;
 
-  /// Use native attachment picker on mobile instead of the inbuilt attachment picker
+  /// Forces use of native attachment picker on mobile instead of the custom
+  /// Stream attachment picker.
   final bool useNativeAttachmentPickerOnMobile;
 
   static String? _defaultHintGetter(
