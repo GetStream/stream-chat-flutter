@@ -238,7 +238,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       } else if (eventType == EventType.channelTruncated) {
         _eventHandler.onChannelTruncated(event, this);
       } else if (eventType == EventType.channelUpdated) {
-        _eventHandler.onChannelUpdated(event, this);
+        _eventHandler.onChannelUpdated(event, this, filter: filter);
       } else if (eventType == EventType.channelVisible) {
         _eventHandler.onChannelVisible(event, this);
       } else if (eventType == EventType.connectionRecovered) {

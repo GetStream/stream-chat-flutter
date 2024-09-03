@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart'
     show Channel, ChannelState, Event, Filter;
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
 /// certain [Event]s.
@@ -19,7 +20,7 @@ mixin class StreamChannelListEventHandler {
 
     final updatedChannels = channels
       ..removeWhere(
-            (it) => it.cid == (event.cid ?? event.channel?.cid),
+        (it) => it.cid == (event.cid ?? event.channel?.cid),
       );
 
     controller.channels = updatedChannels;
@@ -52,7 +53,21 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this updates the channel received in the event.
   // ignore: no-empty-block
-  void onChannelUpdated(Event event, StreamChannelListController controller) {}
+  void onChannelUpdated(
+    Event event,
+    StreamChannelListController controller, {
+    Filter? filter,
+  }) {
+    if (filter != null) {
+      if (event.channel?.type == 'team') return;
+      final passedFilter = filterChannelStatus(channel: event.channel, filter);
+      if (passedFilter == false) {
+        onChannelDeleted(event, controller);
+      } else {
+        onChannelVisible(event, controller, filter: filter);
+      }
+    }
+  }
 
   /// Function which gets called for the event
   /// [EventType.channelVisible].
@@ -60,10 +75,11 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a channel is made visible.
   ///
   /// By default, this adds the channel to the list of channels.
-  void onChannelVisible(Event event,
-      StreamChannelListController controller, {
-        Filter? filter,
-      }) async {
+  void onChannelVisible(
+    Event event,
+    StreamChannelListController controller, {
+    Filter? filter,
+  }) async {
     final channelId = event.channelId;
     final channelType = event.channelType;
 
@@ -89,14 +105,28 @@ mixin class StreamChannelListEventHandler {
     controller.channels = updatedChannels;
   }
 
+  /// Function which gets called to check if the channel type is in the filter
   bool? filterChannelType(Channel channel, Filter filter) {
     var passedFilter = false;
     final filterList = filter.value as List;
     final filterType =
-    filterList.firstWhereOrNull((filter) => filter.key == 'type') as Filter;
+        filterList.firstWhereOrNull((filter) => filter.key == 'type') as Filter;
     if (filterType.value == channel.type) {
       passedFilter = true;
     }
+    return passedFilter;
+  }
+
+  /// Function which gets called to check if the channel status
+  /// contain in the filter
+  bool? filterChannelStatus(Filter filter, {EventChannel? channel}) {
+    final filterList = filter.value as List;
+    final filterType = filterList
+        .firstWhereOrNull((filter) => filter.key == 'status') as Filter;
+
+    final passedFilter =
+        (filterType.value as List).contains(channel?.extraData['status']) ==
+            true;
     return passedFilter;
   }
 
@@ -106,8 +136,10 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when the client web-socket connection recovers.
   ///
   /// By default, this refreshes the whole channel list.
-  void onConnectionRecovered(Event event,
-      StreamChannelListController controller,) {
+  void onConnectionRecovered(
+    Event event,
+    StreamChannelListController controller,
+  ) {
     controller.refresh();
   }
 
@@ -143,10 +175,11 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a channel is added which we are not watching.
   ///
   /// By default, this adds the channel and moves it to the top of list.
-  void onNotificationAddedToChannel(Event event,
-      StreamChannelListController controller, {
-        Filter? filter,
-      }) {
+  void onNotificationAddedToChannel(
+    Event event,
+    StreamChannelListController controller, {
+    Filter? filter,
+  }) {
     onChannelVisible(event, controller, filter: filter);
   }
 
@@ -157,10 +190,11 @@ mixin class StreamChannelListEventHandler {
   /// which we are not currently watching.
   ///
   /// By default, this adds the channel and moves it to the top of list.
-  void onNotificationMessageNew(Event event,
-      StreamChannelListController controller, {
-        Filter? filter,
-      }) {
+  void onNotificationMessageNew(
+    Event event,
+    StreamChannelListController controller, {
+    Filter? filter,
+  }) {
     onChannelVisible(event, controller, filter: filter);
   }
 
@@ -171,11 +205,13 @@ mixin class StreamChannelListEventHandler {
   /// not currently watching.
   ///
   /// By default, this removes the event channel from the list.
-  void onNotificationRemovedFromChannel(Event event,
-      StreamChannelListController controller,) {
+  void onNotificationRemovedFromChannel(
+    Event event,
+    StreamChannelListController controller,
+  ) {
     final channels = [...controller.currentItems];
     final updatedChannels =
-    channels.where((it) => it.cid != event.channel?.cid);
+        channels.where((it) => it.cid != event.channel?.cid);
     final listChanged = channels.length != updatedChannels.length;
 
     if (!listChanged) return;
@@ -189,8 +225,10 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a user's presence changes or gets updated.
   ///
   /// By default, this updates the channel member with the event user.
-  void onUserPresenceChanged(Event event,
-      StreamChannelListController controller,) {
+  void onUserPresenceChanged(
+    Event event,
+    StreamChannelListController controller,
+  ) {
     final user = event.user;
     if (user == null) return;
 
@@ -199,7 +237,7 @@ mixin class StreamChannelListEventHandler {
     final updatedChannels = channels.map((channel) {
       final members = [...channel.state!.members];
       final memberIndex = members.indexWhere(
-            (it) => user.id == (it.userId ?? it.user?.id),
+        (it) => user.id == (it.userId ?? it.user?.id),
       );
 
       if (memberIndex < 0) return channel;
