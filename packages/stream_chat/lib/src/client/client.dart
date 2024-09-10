@@ -203,6 +203,8 @@ class StreamChatClient {
   set _wsConnectionStatus(ConnectionStatus status) =>
       _wsConnectionStatusController.add(status);
 
+  bool isInForeground = true;
+
   /// The current status value of the [_ws] connection
   ConnectionStatus get wsConnectionStatus =>
       _wsConnectionStatusController.value;
@@ -388,11 +390,10 @@ class StreamChatClient {
   Future<OwnUser?> openConnection({
     bool includeUserDetailsInConnectCall = false,
   }) async {
-    assert(
-      state.currentUser != null,
-      'User is not set on client, '
-      'use `connectUser` or `connectAnonymousUser` instead',
-    );
+    if (state.currentUser == null) {
+      logger.warning('User is not set on client');
+      return null;
+    }
 
     final user = state.currentUser!;
 
@@ -400,12 +401,12 @@ class StreamChatClient {
 
     if (wsConnectionStatus == ConnectionStatus.connecting) {
       logger.warning('Connection already in progress for ${user.id}');
-      return null;
+      return user;
     }
 
     if (wsConnectionStatus == ConnectionStatus.connected) {
       logger.warning('Connection already available for ${user.id}');
-      return null;
+      return user;
     }
 
     _wsConnectionStatus = ConnectionStatus.connecting;

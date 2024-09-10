@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -140,21 +139,6 @@ class StreamChatCoreState extends State<StreamChatCore>
           }
         }
       });
-      // _connectivitySubscription =
-      //     connectivityStream.distinct().listen((result) {
-      //   _isConnectionAvailable = !result.contains(ConnectivityResult.none);
-      //   if (!_isInForeground) return;
-      //   if (_isConnectionAvailable) {
-      //     if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
-      //         currentUser != null) {
-      //       client.openConnection();
-      //     }
-      //   } else {
-      //     if (client.wsConnectionStatus == ConnectionStatus.connected) {
-      //       client.closeConnection();
-      //     }
-      //   }
-      // });
     }
   }
 
@@ -193,6 +177,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   }
 
   void _onForeground() {
+    client.isInForeground = true;
     if (_disconnectTimer?.isActive == true) {
       _eventSubscription?.cancel();
       _disconnectTimer?.cancel();
@@ -203,6 +188,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   }
 
   void _onBackground() {
+    client.isInForeground = false;
     if (widget.onBackgroundEventReceived == null) {
       if (client.wsConnectionStatus != ConnectionStatus.disconnected) {
         client.closeConnection();

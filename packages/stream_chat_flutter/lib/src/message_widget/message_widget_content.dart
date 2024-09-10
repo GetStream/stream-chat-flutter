@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -281,7 +280,7 @@ class MessageWidgetContent extends StatelessWidget {
                         SizedBox(width: avatarWidth + 4),
 
                       if (showUserAvatar == DisplayWidget.gone)
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                       Flexible(
                         child: Stack(
                           clipBehavior: Clip.none,
