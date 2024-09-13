@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed enrichment errors causing some URLs to enrich twice.
+
 ## 8.0.0
 
 🐞 Fixed
