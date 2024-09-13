@@ -78,6 +78,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
+  bool useNativeAttachmentPickerOnMobile = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Clip? clipBehavior = Clip.hardEdge,
@@ -115,7 +116,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
               currentPlatform == TargetPlatform.linux ||
               currentPlatform == TargetPlatform.windows;
 
-          if (isWebOrDesktop) {
+          if (isWebOrDesktop || useNativeAttachmentPickerOnMobile) {
             return webOrDesktopAttachmentPickerBuilder.call(
               context: context,
               onError: onError,
