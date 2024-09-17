@@ -27,7 +27,7 @@ dependencies:
   web_socket_channel: ^3.0.1
 
 dev_dependencies:
-  build_runner: ^2.4.6
+  build_runner: ^2.4.9
   freezed: ^2.4.2
   json_serializable: ^6.7.1
   mocktail: ^1.0.0
