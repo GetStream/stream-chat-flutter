@@ -1,5 +1,8 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Fixed enrichment errors causing some URLs to enrich twice.
 - Added option to use the native attachment picker on mobile
 
 ## 8.0.0
