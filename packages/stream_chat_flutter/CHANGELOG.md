@@ -1,9 +1,13 @@
-## Upcoming
+## 8.1.0
 
 🐞 Fixed
 
 - Fixed enrichment errors causing some URLs to enrich twice.
 - Added option to use the native attachment picker on mobile
+
+🔄 Changed
+
+- Changed minimum Flutter version to 3.22 for the SDK.
 
 ## 8.0.0
 
