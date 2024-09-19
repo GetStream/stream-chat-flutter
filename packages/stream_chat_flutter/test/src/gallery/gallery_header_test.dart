@@ -70,7 +70,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: PopScope(
-                onPopInvoked: (bool didPop) async => false,
+                onPopInvokedWithResult: (bool didPop, res) async => false,
                 child: Scaffold(
                   appBar: StreamGalleryHeader(
                     attachment: MockAttachment(),
@@ -95,7 +95,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: PopScope(
-              onPopInvoked: (bool didPop) async => false,
+              onPopInvokedWithResult: (bool didPop, res) async => false,
               child: Scaffold(
                 appBar: StreamGalleryHeader(
                   userName: 'User',

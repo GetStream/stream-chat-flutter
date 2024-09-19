@@ -1,4 +1,6 @@
 // coverage:ignore-file
+// TODO: Replace with WASM implementation
+// ignore: deprecated_member_use
 import 'package:drift/web.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';

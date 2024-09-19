@@ -1,5 +1,3 @@
-// ignore_for_file: prefer-trailing-comma, cascade_invocations, lines_longer_than_80_chars
-
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
@@ -150,7 +148,8 @@ class StreamMessageTextField extends StatefulWidget {
           !identical(textInputAction, TextInputAction.newline) ||
               maxLines == 1 ||
               !identical(keyboardType, TextInputType.text),
-          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+          'Use keyboardType TextInputType.multiline when using '
+          'TextInputAction.newline on a multiline TextField.',
         ),
         keyboardType = keyboardType ??
             (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
@@ -509,6 +508,7 @@ class StreamMessageTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scribbleEnabled}
   final bool scribbleEnabled;
 
+  // ignore: lines_longer_than_80_chars
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
@@ -521,99 +521,87 @@ class StreamMessageTextField extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<StreamMessageInputController>(
-        'controller', controller,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
-        defaultValue: null));
     properties
-        .add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null));
-    properties.add(DiagnosticsProperty<InputDecoration>(
-        'decoration', decoration,
-        defaultValue: const InputDecoration()));
-    properties.add(DiagnosticsProperty<TextInputType>(
-        'keyboardType', keyboardType,
-        defaultValue: TextInputType.text));
-    properties.add(
-        DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(DiagnosticsProperty<String>(
-        'obscuringCharacter', obscuringCharacter,
-        defaultValue: '•'));
-    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText,
-        defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect,
-        defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>(
-        'smartDashesType', smartDashesType,
-        defaultValue:
-            obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>(
-        'smartQuotesType', smartQuotesType,
-        defaultValue:
-            obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
-    properties.add(DiagnosticsProperty<bool>(
-        'enableSuggestions', enableSuggestions,
-        defaultValue: true));
-    properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
-    properties.add(IntProperty('minLines', minLines, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
-    properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(EnumProperty<MaxLengthEnforcement>(
-        'maxLengthEnforcement', maxLengthEnforcement,
-        defaultValue: null));
-    properties.add(EnumProperty<TextInputAction>(
-        'textInputAction', textInputAction,
-        defaultValue: null));
-    properties.add(EnumProperty<TextCapitalization>(
-        'textCapitalization', textCapitalization,
-        defaultValue: TextCapitalization.none));
-    properties.add(EnumProperty<TextAlign>('textAlign', textAlign,
-        defaultValue: TextAlign.start));
-    properties.add(DiagnosticsProperty<TextAlignVertical>(
-        'textAlignVertical', textAlignVertical,
-        defaultValue: null));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
-    properties
-        .add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
-    properties
-        .add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
-    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius,
-        defaultValue: null));
-    properties
-        .add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Brightness>(
-        'keyboardAppearance', keyboardAppearance,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>(
-        'scrollPadding', scrollPadding,
-        defaultValue: const EdgeInsets.all(20)));
-    properties.add(FlagProperty('selectionEnabled',
-        value: selectionEnabled,
-        defaultValue: true,
-        ifFalse: 'selection disabled'));
-    properties.add(DiagnosticsProperty<TextSelectionControls>(
-        'selectionControls', selectionControls,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<ScrollController>(
-        'scrollController', scrollController,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<ScrollPhysics>(
-        'scrollPhysics', scrollPhysics,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior,
-        defaultValue: Clip.hardEdge));
-    properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled,
-        defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>(
-        'enableIMEPersonalizedLearning', enableIMEPersonalizedLearning,
-        defaultValue: true));
-    properties.add(DiagnosticsProperty<ContentInsertionConfiguration>(
-        'contentInsertionConfiguration', contentInsertionConfiguration,
-        defaultValue: null));
+      ..add(DiagnosticsProperty<StreamMessageInputController>(
+          'controller', controller,
+          defaultValue: null))
+      ..add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
+          defaultValue: null))
+      ..add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null))
+      ..add(DiagnosticsProperty<InputDecoration>('decoration', decoration,
+          defaultValue: const InputDecoration()))
+      ..add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType,
+          defaultValue: TextInputType.text))
+      ..add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null))
+      ..add(DiagnosticsProperty<bool>('autofocus', autofocus,
+          defaultValue: false))
+      ..add(DiagnosticsProperty<String>(
+          'obscuringCharacter', obscuringCharacter,
+          defaultValue: '•'))
+      ..add(DiagnosticsProperty<bool>('obscureText', obscureText,
+          defaultValue: false))
+      ..add(DiagnosticsProperty<bool>('autocorrect', autocorrect,
+          defaultValue: true))
+      ..add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType,
+          defaultValue:
+              obscureText ? SmartDashesType.disabled : SmartDashesType.enabled))
+      ..add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType,
+          defaultValue:
+              obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled))
+      ..add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions,
+          defaultValue: true))
+      ..add(IntProperty('maxLines', maxLines, defaultValue: 1))
+      ..add(IntProperty('minLines', minLines, defaultValue: null))
+      ..add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false))
+      ..add(IntProperty('maxLength', maxLength, defaultValue: null))
+      ..add(EnumProperty<MaxLengthEnforcement>(
+          'maxLengthEnforcement', maxLengthEnforcement,
+          defaultValue: null))
+      ..add(EnumProperty<TextInputAction>('textInputAction', textInputAction,
+          defaultValue: null))
+      ..add(EnumProperty<TextCapitalization>(
+          'textCapitalization', textCapitalization,
+          defaultValue: TextCapitalization.none))
+      ..add(EnumProperty<TextAlign>('textAlign', textAlign,
+          defaultValue: TextAlign.start))
+      ..add(DiagnosticsProperty<TextAlignVertical>(
+          'textAlignVertical', textAlignVertical,
+          defaultValue: null))
+      ..add(EnumProperty<TextDirection>('textDirection', textDirection,
+          defaultValue: null))
+      ..add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0))
+      ..add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null))
+      ..add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius,
+          defaultValue: null))
+      ..add(ColorProperty('cursorColor', cursorColor, defaultValue: null))
+      ..add(DiagnosticsProperty<Brightness>(
+          'keyboardAppearance', keyboardAppearance,
+          defaultValue: null))
+      ..add(DiagnosticsProperty<EdgeInsetsGeometry>(
+          'scrollPadding', scrollPadding,
+          defaultValue: const EdgeInsets.all(20)))
+      ..add(FlagProperty('selectionEnabled',
+          value: selectionEnabled,
+          defaultValue: true,
+          ifFalse: 'selection disabled'))
+      ..add(DiagnosticsProperty<TextSelectionControls>(
+          'selectionControls', selectionControls,
+          defaultValue: null))
+      ..add(DiagnosticsProperty<ScrollController>(
+          'scrollController', scrollController,
+          defaultValue: null))
+      ..add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics,
+          defaultValue: null))
+      ..add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior,
+          defaultValue: Clip.hardEdge))
+      ..add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled,
+          defaultValue: true))
+      ..add(DiagnosticsProperty<bool>(
+          'enableIMEPersonalizedLearning', enableIMEPersonalizedLearning,
+          defaultValue: true))
+      ..add(DiagnosticsProperty<ContentInsertionConfiguration>(
+          'contentInsertionConfiguration', contentInsertionConfiguration,
+          defaultValue: null));
   }
 }
 

@@ -6,8 +6,8 @@ repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
-  flutter: ">=3.19.0"
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
 
 dependencies:
   drift: ^2.18.0
@@ -21,7 +21,7 @@ dependencies:
   stream_chat: ^8.0.0
 
 dev_dependencies:
-  build_runner: ^2.4.6
+  build_runner: ^2.4.9
   drift_dev: ^2.11.0
   flutter_test:
     sdk: flutter
