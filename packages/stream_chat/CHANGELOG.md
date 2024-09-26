@@ -1,3 +1,12 @@
+## 8.1.0
+
+✅ Added
+- Added `httpClientAdapter` to `StreamHttpClient` that enables the use native http implementations
+
+🔄 Changed
+
+- Changed minimum Flutter version to 3.22 for the SDK.
+
 ## 8.0.0
 
 🐞 Fixed

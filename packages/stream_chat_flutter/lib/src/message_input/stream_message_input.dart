@@ -151,6 +151,7 @@ class StreamMessageInput extends StatefulWidget {
     this.ogPreviewFilter = _defaultOgPreviewFilter,
     this.hintGetter = _defaultHintGetter,
     this.contentInsertionConfiguration,
+    this.useNativeAttachmentPickerOnMobile = false,
     this.prefix,
     this.suffix,
     this.hintStyle,
@@ -349,6 +350,10 @@ class StreamMessageInput extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
   final ContentInsertionConfiguration? contentInsertionConfiguration;
+
+  /// Forces use of native attachment picker on mobile instead of the custom
+  /// Stream attachment picker.
+  final bool useNativeAttachmentPickerOnMobile;
 
   /// A list of widgets to show as prefix of the text field.
   final Widget? prefix;
@@ -867,6 +872,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       onError: widget.onError,
       allowedTypes: widget.allowedAttachmentPickerTypes,
       initialAttachments: _effectiveController.attachments,
+      useNativeAttachmentPickerOnMobile:
+          widget.useNativeAttachmentPickerOnMobile,
     );
 
     if (attachments != null) {
@@ -1153,7 +1160,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   String? _lastSearchedContainsUrlText;
   CancelableOperation? _enrichUrlOperation;
   final _urlRegex = RegExp(
-    r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',
+    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
     caseSensitive: false,
   );
 

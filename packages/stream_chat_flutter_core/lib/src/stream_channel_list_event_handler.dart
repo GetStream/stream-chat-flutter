@@ -1,7 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:stream_chat/stream_chat.dart'
-    show Channel, ChannelState, Event, Filter;
-import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for

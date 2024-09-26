@@ -26,6 +26,7 @@ class StreamHttpClient {
     ConnectionIdManager? connectionIdManager,
     Logger? logger,
     Iterable<Interceptor>? interceptors,
+    HttpClientAdapter? httpClientAdapter,
   })  : _options = options ?? const StreamHttpClientOptions(),
         httpClient = dio ?? Dio() {
     httpClient
@@ -66,6 +67,9 @@ class StreamHttpClient {
                 ),
             ],
       ]);
+    if (httpClientAdapter != null) {
+      httpClient.httpClientAdapter = httpClientAdapter;
+    }
   }
 
   /// Your project Stream Chat api key.
