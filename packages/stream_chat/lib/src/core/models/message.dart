@@ -44,6 +44,7 @@ class Message extends Equatable {
     this.localUpdatedAt,
     DateTime? deletedAt,
     this.localDeletedAt,
+    this.messageTextUpdatedAt,
     this.user,
     this.pinned = false,
     this.pinnedAt,
@@ -192,6 +193,10 @@ class Message extends Equatable {
   @JsonKey(includeToJson: false)
   DateTime? get deletedAt => localDeletedAt ?? remoteDeletedAt;
 
+  /// Reserved field indicating when the message text was edited.
+  @JsonKey(includeToJson: false)
+  final DateTime? messageTextUpdatedAt;
+
   /// Indicates when the message was deleted locally.
   @JsonKey(includeToJson: false, includeFromJson: false)
   final DateTime? localDeletedAt;
@@ -265,6 +270,7 @@ class Message extends Equatable {
     'created_at',
     'updated_at',
     'deleted_at',
+    'message_text_updated_at',
     'user',
     'pinned',
     'pinned_at',
@@ -304,6 +310,7 @@ class Message extends Equatable {
     DateTime? localUpdatedAt,
     DateTime? deletedAt,
     DateTime? localDeletedAt,
+    DateTime? messageTextUpdatedAt,
     User? user,
     bool? pinned,
     DateTime? pinnedAt,
@@ -373,6 +380,7 @@ class Message extends Equatable {
       localUpdatedAt: localUpdatedAt ?? this.localUpdatedAt,
       deletedAt: deletedAt ?? remoteDeletedAt,
       localDeletedAt: localDeletedAt ?? this.localDeletedAt,
+      messageTextUpdatedAt: messageTextUpdatedAt ?? this.messageTextUpdatedAt,
       user: user ?? this.user,
       pinned: pinned ?? this.pinned,
       pinnedAt: pinnedAt ?? this.pinnedAt,
@@ -413,6 +421,7 @@ class Message extends Equatable {
       localUpdatedAt: other.localUpdatedAt,
       deletedAt: other.remoteDeletedAt,
       localDeletedAt: other.localDeletedAt,
+      messageTextUpdatedAt: other.messageTextUpdatedAt,
       user: other.user,
       pinned: other.pinned,
       pinnedAt: other.pinnedAt,
@@ -472,6 +481,7 @@ class Message extends Equatable {
         remoteUpdatedAt,
         localDeletedAt,
         remoteDeletedAt,
+        messageTextUpdatedAt,
         user,
         pinned,
         pinnedAt,
