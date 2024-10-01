@@ -33,6 +33,7 @@ void main() {
       );
       expect(localizations.threadReplyLabel, isNotNull);
       expect(localizations.onlyVisibleToYouText, isNotNull);
+      expect(localizations.editedMessageLabel, isNotNull);
       expect(localizations.threadReplyCountText(3), isNotNull);
       expect(
         localizations.attachmentsUploadProgressText(remaining: 3, total: 10),

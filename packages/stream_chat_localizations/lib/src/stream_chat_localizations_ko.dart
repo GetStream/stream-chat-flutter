@@ -84,6 +84,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => '메시지가 삭제되었습니다';
 
   @override
+  String get editedMessageLabel => '편집됨';
+
+  @override
   String get messageReactionsLabel => '메시지에 대한 응답';
 
   @override

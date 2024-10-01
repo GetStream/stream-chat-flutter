@@ -84,6 +84,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'メッセージ削除';
 
   @override
+  String get editedMessageLabel => '編集済み';
+
+  @override
   String get messageReactionsLabel => 'メッセージのリアクション';
 
   @override

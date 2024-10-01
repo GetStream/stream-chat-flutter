@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Messages by default now show an "Edited" label if text is edited. Use `showEditedLabel` to disable this functionality. 
+
 ## 8.1.0
 
 🐞 Fixed

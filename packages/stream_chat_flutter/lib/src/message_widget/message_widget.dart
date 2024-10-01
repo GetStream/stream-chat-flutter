@@ -63,6 +63,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onConfirmDeleteTap,
     this.showUsername = true,
     this.showTimestamp = true,
+    this.showEditedLabel = true,
     this.showReactions = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
@@ -268,6 +269,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showTimestamp;
 
+  /// {@template showTimestamp}
+  /// Show edited label if message is edited
+  /// {@endtemplate}
+  final bool showEditedLabel;
+
   /// {@template showReplyMessage}
   /// Show reply action
   /// {@endtemplate}
@@ -415,6 +421,7 @@ class StreamMessageWidget extends StatefulWidget {
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
     bool? showTimestamp,
+    bool? showEditedLabel,
     bool? showReplyMessage,
     bool? showThreadReplyMessage,
     bool? showEditMessage,
@@ -465,6 +472,7 @@ class StreamMessageWidget extends StatefulWidget {
       widthFactor: widthFactor ?? this.widthFactor,
       showUserAvatar: showUserAvatar ?? this.showUserAvatar,
       showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
+      showEditedLabel: showEditedLabel ?? this.showEditedLabel,
       showReactions: showReactions ?? this.showReactions,
       showThreadReplyIndicator:
           showThreadReplyIndicator ?? this.showThreadReplyIndicator,
@@ -525,6 +533,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
   bool get showTimeStamp => widget.showTimestamp;
 
+  bool get showEditedLabel => widget.showEditedLabel;
+
+  bool get isTextEdited => widget.message.messageTextUpdatedAt != null;
+
   bool get showInChannel => widget.showInChannelIndicator;
 
   /// {@template hasQuotedMessage}
@@ -582,7 +594,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       showUsername ||
       showTimeStamp ||
       showInChannel ||
-      showSendingIndicator;
+      showSendingIndicator ||
+      isTextEdited;
 
   /// {@template isPinned}
   /// Whether [StreamMessageWidget.message] is pinned or not.
@@ -695,6 +708,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       streamChatTheme: _streamChatTheme,
                       showUsername: showUsername,
                       showTimeStamp: showTimeStamp,
+                      showEditedLabel: showEditedLabel,
                       showThreadReplyIndicator: showThreadReplyIndicator,
                       showSendingIndicator: showSendingIndicator,
                       showInChannel: showInChannel,
