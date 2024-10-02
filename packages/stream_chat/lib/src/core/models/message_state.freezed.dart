@@ -12,7 +12,7 @@ part of 'message_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 MessageState _$MessageStateFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType']) {
@@ -83,6 +83,8 @@ mixin _$MessageState {
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
+
+  /// Serializes this MessageState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 }
 
@@ -102,31 +104,38 @@ class _$MessageStateCopyWithImpl<$Res, $Val extends MessageState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
-abstract class _$$MessageInitialCopyWith<$Res> {
-  factory _$$MessageInitialCopyWith(
-          _$MessageInitial value, $Res Function(_$MessageInitial) then) =
-      __$$MessageInitialCopyWithImpl<$Res>;
+abstract class _$$MessageInitialImplCopyWith<$Res> {
+  factory _$$MessageInitialImplCopyWith(_$MessageInitialImpl value,
+          $Res Function(_$MessageInitialImpl) then) =
+      __$$MessageInitialImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$MessageInitialCopyWithImpl<$Res>
-    extends _$MessageStateCopyWithImpl<$Res, _$MessageInitial>
-    implements _$$MessageInitialCopyWith<$Res> {
-  __$$MessageInitialCopyWithImpl(
-      _$MessageInitial _value, $Res Function(_$MessageInitial) _then)
+class __$$MessageInitialImplCopyWithImpl<$Res>
+    extends _$MessageStateCopyWithImpl<$Res, _$MessageInitialImpl>
+    implements _$$MessageInitialImplCopyWith<$Res> {
+  __$$MessageInitialImplCopyWithImpl(
+      _$MessageInitialImpl _value, $Res Function(_$MessageInitialImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MessageInitial implements MessageInitial {
-  const _$MessageInitial({final String? $type}) : $type = $type ?? 'initial';
+class _$MessageInitialImpl implements MessageInitial {
+  const _$MessageInitialImpl({final String? $type})
+      : $type = $type ?? 'initial';
 
-  factory _$MessageInitial.fromJson(Map<String, dynamic> json) =>
-      _$$MessageInitialFromJson(json);
+  factory _$MessageInitialImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MessageInitialImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -137,12 +146,12 @@ class _$MessageInitial implements MessageInitial {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$MessageInitial);
+        (other.runtimeType == runtimeType && other is _$MessageInitialImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -222,24 +231,24 @@ class _$MessageInitial implements MessageInitial {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$MessageInitialToJson(
+    return _$$MessageInitialImplToJson(
       this,
     );
   }
 }
 
 abstract class MessageInitial implements MessageState {
-  const factory MessageInitial() = _$MessageInitial;
+  const factory MessageInitial() = _$MessageInitialImpl;
 
   factory MessageInitial.fromJson(Map<String, dynamic> json) =
-      _$MessageInitial.fromJson;
+      _$MessageInitialImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$MessageOutgoingCopyWith<$Res> {
-  factory _$$MessageOutgoingCopyWith(
-          _$MessageOutgoing value, $Res Function(_$MessageOutgoing) then) =
-      __$$MessageOutgoingCopyWithImpl<$Res>;
+abstract class _$$MessageOutgoingImplCopyWith<$Res> {
+  factory _$$MessageOutgoingImplCopyWith(_$MessageOutgoingImpl value,
+          $Res Function(_$MessageOutgoingImpl) then) =
+      __$$MessageOutgoingImplCopyWithImpl<$Res>;
   @useResult
   $Res call({OutgoingState state});
 
@@ -247,19 +256,21 @@ abstract class _$$MessageOutgoingCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$MessageOutgoingCopyWithImpl<$Res>
-    extends _$MessageStateCopyWithImpl<$Res, _$MessageOutgoing>
-    implements _$$MessageOutgoingCopyWith<$Res> {
-  __$$MessageOutgoingCopyWithImpl(
-      _$MessageOutgoing _value, $Res Function(_$MessageOutgoing) _then)
+class __$$MessageOutgoingImplCopyWithImpl<$Res>
+    extends _$MessageStateCopyWithImpl<$Res, _$MessageOutgoingImpl>
+    implements _$$MessageOutgoingImplCopyWith<$Res> {
+  __$$MessageOutgoingImplCopyWithImpl(
+      _$MessageOutgoingImpl _value, $Res Function(_$MessageOutgoingImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? state = null,
   }) {
-    return _then(_$MessageOutgoing(
+    return _then(_$MessageOutgoingImpl(
       state: null == state
           ? _value.state
           : state // ignore: cast_nullable_to_non_nullable
@@ -267,6 +278,8 @@ class __$$MessageOutgoingCopyWithImpl<$Res>
     ));
   }
 
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $OutgoingStateCopyWith<$Res> get state {
@@ -278,12 +291,12 @@ class __$$MessageOutgoingCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$MessageOutgoing implements MessageOutgoing {
-  const _$MessageOutgoing({required this.state, final String? $type})
+class _$MessageOutgoingImpl implements MessageOutgoing {
+  const _$MessageOutgoingImpl({required this.state, final String? $type})
       : $type = $type ?? 'outgoing';
 
-  factory _$MessageOutgoing.fromJson(Map<String, dynamic> json) =>
-      _$$MessageOutgoingFromJson(json);
+  factory _$MessageOutgoingImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MessageOutgoingImplFromJson(json);
 
   @override
   final OutgoingState state;
@@ -297,22 +310,25 @@ class _$MessageOutgoing implements MessageOutgoing {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$MessageOutgoing &&
+            other is _$MessageOutgoingImpl &&
             (identical(other.state, state) || other.state == state));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, state);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$MessageOutgoingCopyWith<_$MessageOutgoing> get copyWith =>
-      __$$MessageOutgoingCopyWithImpl<_$MessageOutgoing>(this, _$identity);
+  _$$MessageOutgoingImplCopyWith<_$MessageOutgoingImpl> get copyWith =>
+      __$$MessageOutgoingImplCopyWithImpl<_$MessageOutgoingImpl>(
+          this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -390,7 +406,7 @@ class _$MessageOutgoing implements MessageOutgoing {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$MessageOutgoingToJson(
+    return _$$MessageOutgoingImplToJson(
       this,
     );
   }
@@ -398,22 +414,25 @@ class _$MessageOutgoing implements MessageOutgoing {
 
 abstract class MessageOutgoing implements MessageState {
   const factory MessageOutgoing({required final OutgoingState state}) =
-      _$MessageOutgoing;
+      _$MessageOutgoingImpl;
 
   factory MessageOutgoing.fromJson(Map<String, dynamic> json) =
-      _$MessageOutgoing.fromJson;
+      _$MessageOutgoingImpl.fromJson;
 
   OutgoingState get state;
-  @JsonKey(ignore: true)
-  _$$MessageOutgoingCopyWith<_$MessageOutgoing> get copyWith =>
+
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MessageOutgoingImplCopyWith<_$MessageOutgoingImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$MessageCompletedCopyWith<$Res> {
-  factory _$$MessageCompletedCopyWith(
-          _$MessageCompleted value, $Res Function(_$MessageCompleted) then) =
-      __$$MessageCompletedCopyWithImpl<$Res>;
+abstract class _$$MessageCompletedImplCopyWith<$Res> {
+  factory _$$MessageCompletedImplCopyWith(_$MessageCompletedImpl value,
+          $Res Function(_$MessageCompletedImpl) then) =
+      __$$MessageCompletedImplCopyWithImpl<$Res>;
   @useResult
   $Res call({CompletedState state});
 
@@ -421,19 +440,21 @@ abstract class _$$MessageCompletedCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$MessageCompletedCopyWithImpl<$Res>
-    extends _$MessageStateCopyWithImpl<$Res, _$MessageCompleted>
-    implements _$$MessageCompletedCopyWith<$Res> {
-  __$$MessageCompletedCopyWithImpl(
-      _$MessageCompleted _value, $Res Function(_$MessageCompleted) _then)
+class __$$MessageCompletedImplCopyWithImpl<$Res>
+    extends _$MessageStateCopyWithImpl<$Res, _$MessageCompletedImpl>
+    implements _$$MessageCompletedImplCopyWith<$Res> {
+  __$$MessageCompletedImplCopyWithImpl(_$MessageCompletedImpl _value,
+      $Res Function(_$MessageCompletedImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? state = null,
   }) {
-    return _then(_$MessageCompleted(
+    return _then(_$MessageCompletedImpl(
       state: null == state
           ? _value.state
           : state // ignore: cast_nullable_to_non_nullable
@@ -441,6 +462,8 @@ class __$$MessageCompletedCopyWithImpl<$Res>
     ));
   }
 
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $CompletedStateCopyWith<$Res> get state {
@@ -452,12 +475,12 @@ class __$$MessageCompletedCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$MessageCompleted implements MessageCompleted {
-  const _$MessageCompleted({required this.state, final String? $type})
+class _$MessageCompletedImpl implements MessageCompleted {
+  const _$MessageCompletedImpl({required this.state, final String? $type})
       : $type = $type ?? 'completed';
 
-  factory _$MessageCompleted.fromJson(Map<String, dynamic> json) =>
-      _$$MessageCompletedFromJson(json);
+  factory _$MessageCompletedImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MessageCompletedImplFromJson(json);
 
   @override
   final CompletedState state;
@@ -471,22 +494,25 @@ class _$MessageCompleted implements MessageCompleted {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$MessageCompleted &&
+            other is _$MessageCompletedImpl &&
             (identical(other.state, state) || other.state == state));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, state);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$MessageCompletedCopyWith<_$MessageCompleted> get copyWith =>
-      __$$MessageCompletedCopyWithImpl<_$MessageCompleted>(this, _$identity);
+  _$$MessageCompletedImplCopyWith<_$MessageCompletedImpl> get copyWith =>
+      __$$MessageCompletedImplCopyWithImpl<_$MessageCompletedImpl>(
+          this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -564,7 +590,7 @@ class _$MessageCompleted implements MessageCompleted {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$MessageCompletedToJson(
+    return _$$MessageCompletedImplToJson(
       this,
     );
   }
@@ -572,22 +598,25 @@ class _$MessageCompleted implements MessageCompleted {
 
 abstract class MessageCompleted implements MessageState {
   const factory MessageCompleted({required final CompletedState state}) =
-      _$MessageCompleted;
+      _$MessageCompletedImpl;
 
   factory MessageCompleted.fromJson(Map<String, dynamic> json) =
-      _$MessageCompleted.fromJson;
+      _$MessageCompletedImpl.fromJson;
 
   CompletedState get state;
-  @JsonKey(ignore: true)
-  _$$MessageCompletedCopyWith<_$MessageCompleted> get copyWith =>
+
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MessageCompletedImplCopyWith<_$MessageCompletedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$MessageFailedCopyWith<$Res> {
-  factory _$$MessageFailedCopyWith(
-          _$MessageFailed value, $Res Function(_$MessageFailed) then) =
-      __$$MessageFailedCopyWithImpl<$Res>;
+abstract class _$$MessageFailedImplCopyWith<$Res> {
+  factory _$$MessageFailedImplCopyWith(
+          _$MessageFailedImpl value, $Res Function(_$MessageFailedImpl) then) =
+      __$$MessageFailedImplCopyWithImpl<$Res>;
   @useResult
   $Res call({FailedState state, Object? reason});
 
@@ -595,20 +624,22 @@ abstract class _$$MessageFailedCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$MessageFailedCopyWithImpl<$Res>
-    extends _$MessageStateCopyWithImpl<$Res, _$MessageFailed>
-    implements _$$MessageFailedCopyWith<$Res> {
-  __$$MessageFailedCopyWithImpl(
-      _$MessageFailed _value, $Res Function(_$MessageFailed) _then)
+class __$$MessageFailedImplCopyWithImpl<$Res>
+    extends _$MessageStateCopyWithImpl<$Res, _$MessageFailedImpl>
+    implements _$$MessageFailedImplCopyWith<$Res> {
+  __$$MessageFailedImplCopyWithImpl(
+      _$MessageFailedImpl _value, $Res Function(_$MessageFailedImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? state = null,
     Object? reason = freezed,
   }) {
-    return _then(_$MessageFailed(
+    return _then(_$MessageFailedImpl(
       state: null == state
           ? _value.state
           : state // ignore: cast_nullable_to_non_nullable
@@ -617,6 +648,8 @@ class __$$MessageFailedCopyWithImpl<$Res>
     ));
   }
 
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $FailedStateCopyWith<$Res> get state {
@@ -628,12 +661,13 @@ class __$$MessageFailedCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$MessageFailed implements MessageFailed {
-  const _$MessageFailed({required this.state, this.reason, final String? $type})
+class _$MessageFailedImpl implements MessageFailed {
+  const _$MessageFailedImpl(
+      {required this.state, this.reason, final String? $type})
       : $type = $type ?? 'failed';
 
-  factory _$MessageFailed.fromJson(Map<String, dynamic> json) =>
-      _$$MessageFailedFromJson(json);
+  factory _$MessageFailedImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MessageFailedImplFromJson(json);
 
   @override
   final FailedState state;
@@ -649,24 +683,26 @@ class _$MessageFailed implements MessageFailed {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$MessageFailed &&
+            other is _$MessageFailedImpl &&
             (identical(other.state, state) || other.state == state) &&
             const DeepCollectionEquality().equals(other.reason, reason));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType, state, const DeepCollectionEquality().hash(reason));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$MessageFailedCopyWith<_$MessageFailed> get copyWith =>
-      __$$MessageFailedCopyWithImpl<_$MessageFailed>(this, _$identity);
+  _$$MessageFailedImplCopyWith<_$MessageFailedImpl> get copyWith =>
+      __$$MessageFailedImplCopyWithImpl<_$MessageFailedImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -744,7 +780,7 @@ class _$MessageFailed implements MessageFailed {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$MessageFailedToJson(
+    return _$$MessageFailedImplToJson(
       this,
     );
   }
@@ -753,15 +789,18 @@ class _$MessageFailed implements MessageFailed {
 abstract class MessageFailed implements MessageState {
   const factory MessageFailed(
       {required final FailedState state,
-      final Object? reason}) = _$MessageFailed;
+      final Object? reason}) = _$MessageFailedImpl;
 
   factory MessageFailed.fromJson(Map<String, dynamic> json) =
-      _$MessageFailed.fromJson;
+      _$MessageFailedImpl.fromJson;
 
   FailedState get state;
   Object? get reason;
-  @JsonKey(ignore: true)
-  _$$MessageFailedCopyWith<_$MessageFailed> get copyWith =>
+
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MessageFailedImplCopyWith<_$MessageFailedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -826,6 +865,8 @@ mixin _$OutgoingState {
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
+
+  /// Serializes this OutgoingState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 }
 
@@ -845,29 +886,37 @@ class _$OutgoingStateCopyWithImpl<$Res, $Val extends OutgoingState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
-abstract class _$$SendingCopyWith<$Res> {
-  factory _$$SendingCopyWith(_$Sending value, $Res Function(_$Sending) then) =
-      __$$SendingCopyWithImpl<$Res>;
+abstract class _$$SendingImplCopyWith<$Res> {
+  factory _$$SendingImplCopyWith(
+          _$SendingImpl value, $Res Function(_$SendingImpl) then) =
+      __$$SendingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$SendingCopyWithImpl<$Res>
-    extends _$OutgoingStateCopyWithImpl<$Res, _$Sending>
-    implements _$$SendingCopyWith<$Res> {
-  __$$SendingCopyWithImpl(_$Sending _value, $Res Function(_$Sending) _then)
+class __$$SendingImplCopyWithImpl<$Res>
+    extends _$OutgoingStateCopyWithImpl<$Res, _$SendingImpl>
+    implements _$$SendingImplCopyWith<$Res> {
+  __$$SendingImplCopyWithImpl(
+      _$SendingImpl _value, $Res Function(_$SendingImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$Sending implements Sending {
-  const _$Sending({final String? $type}) : $type = $type ?? 'sending';
+class _$SendingImpl implements Sending {
+  const _$SendingImpl({final String? $type}) : $type = $type ?? 'sending';
 
-  factory _$Sending.fromJson(Map<String, dynamic> json) =>
-      _$$SendingFromJson(json);
+  factory _$SendingImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SendingImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -878,12 +927,12 @@ class _$Sending implements Sending {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Sending);
+        (other.runtimeType == runtimeType && other is _$SendingImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -957,40 +1006,44 @@ class _$Sending implements Sending {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SendingToJson(
+    return _$$SendingImplToJson(
       this,
     );
   }
 }
 
 abstract class Sending implements OutgoingState {
-  const factory Sending() = _$Sending;
+  const factory Sending() = _$SendingImpl;
 
-  factory Sending.fromJson(Map<String, dynamic> json) = _$Sending.fromJson;
+  factory Sending.fromJson(Map<String, dynamic> json) = _$SendingImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$UpdatingCopyWith<$Res> {
-  factory _$$UpdatingCopyWith(
-          _$Updating value, $Res Function(_$Updating) then) =
-      __$$UpdatingCopyWithImpl<$Res>;
+abstract class _$$UpdatingImplCopyWith<$Res> {
+  factory _$$UpdatingImplCopyWith(
+          _$UpdatingImpl value, $Res Function(_$UpdatingImpl) then) =
+      __$$UpdatingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$UpdatingCopyWithImpl<$Res>
-    extends _$OutgoingStateCopyWithImpl<$Res, _$Updating>
-    implements _$$UpdatingCopyWith<$Res> {
-  __$$UpdatingCopyWithImpl(_$Updating _value, $Res Function(_$Updating) _then)
+class __$$UpdatingImplCopyWithImpl<$Res>
+    extends _$OutgoingStateCopyWithImpl<$Res, _$UpdatingImpl>
+    implements _$$UpdatingImplCopyWith<$Res> {
+  __$$UpdatingImplCopyWithImpl(
+      _$UpdatingImpl _value, $Res Function(_$UpdatingImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$Updating implements Updating {
-  const _$Updating({final String? $type}) : $type = $type ?? 'updating';
+class _$UpdatingImpl implements Updating {
+  const _$UpdatingImpl({final String? $type}) : $type = $type ?? 'updating';
 
-  factory _$Updating.fromJson(Map<String, dynamic> json) =>
-      _$$UpdatingFromJson(json);
+  factory _$UpdatingImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdatingImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -1001,12 +1054,12 @@ class _$Updating implements Updating {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Updating);
+        (other.runtimeType == runtimeType && other is _$UpdatingImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -1080,40 +1133,44 @@ class _$Updating implements Updating {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$UpdatingToJson(
+    return _$$UpdatingImplToJson(
       this,
     );
   }
 }
 
 abstract class Updating implements OutgoingState {
-  const factory Updating() = _$Updating;
+  const factory Updating() = _$UpdatingImpl;
 
-  factory Updating.fromJson(Map<String, dynamic> json) = _$Updating.fromJson;
+  factory Updating.fromJson(Map<String, dynamic> json) =
+      _$UpdatingImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$DeletingCopyWith<$Res> {
-  factory _$$DeletingCopyWith(
-          _$Deleting value, $Res Function(_$Deleting) then) =
-      __$$DeletingCopyWithImpl<$Res>;
+abstract class _$$DeletingImplCopyWith<$Res> {
+  factory _$$DeletingImplCopyWith(
+          _$DeletingImpl value, $Res Function(_$DeletingImpl) then) =
+      __$$DeletingImplCopyWithImpl<$Res>;
   @useResult
   $Res call({bool hard});
 }
 
 /// @nodoc
-class __$$DeletingCopyWithImpl<$Res>
-    extends _$OutgoingStateCopyWithImpl<$Res, _$Deleting>
-    implements _$$DeletingCopyWith<$Res> {
-  __$$DeletingCopyWithImpl(_$Deleting _value, $Res Function(_$Deleting) _then)
+class __$$DeletingImplCopyWithImpl<$Res>
+    extends _$OutgoingStateCopyWithImpl<$Res, _$DeletingImpl>
+    implements _$$DeletingImplCopyWith<$Res> {
+  __$$DeletingImplCopyWithImpl(
+      _$DeletingImpl _value, $Res Function(_$DeletingImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? hard = null,
   }) {
-    return _then(_$Deleting(
+    return _then(_$DeletingImpl(
       hard: null == hard
           ? _value.hard
           : hard // ignore: cast_nullable_to_non_nullable
@@ -1124,12 +1181,12 @@ class __$$DeletingCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$Deleting implements Deleting {
-  const _$Deleting({this.hard = false, final String? $type})
+class _$DeletingImpl implements Deleting {
+  const _$DeletingImpl({this.hard = false, final String? $type})
       : $type = $type ?? 'deleting';
 
-  factory _$Deleting.fromJson(Map<String, dynamic> json) =>
-      _$$DeletingFromJson(json);
+  factory _$DeletingImpl.fromJson(Map<String, dynamic> json) =>
+      _$$DeletingImplFromJson(json);
 
   @override
   @JsonKey()
@@ -1144,22 +1201,24 @@ class _$Deleting implements Deleting {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$Deleting &&
+            other is _$DeletingImpl &&
             (identical(other.hard, hard) || other.hard == hard));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, hard);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$DeletingCopyWith<_$Deleting> get copyWith =>
-      __$$DeletingCopyWithImpl<_$Deleting>(this, _$identity);
+  _$$DeletingImplCopyWith<_$DeletingImpl> get copyWith =>
+      __$$DeletingImplCopyWithImpl<_$DeletingImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -1231,20 +1290,24 @@ class _$Deleting implements Deleting {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DeletingToJson(
+    return _$$DeletingImplToJson(
       this,
     );
   }
 }
 
 abstract class Deleting implements OutgoingState {
-  const factory Deleting({final bool hard}) = _$Deleting;
+  const factory Deleting({final bool hard}) = _$DeletingImpl;
 
-  factory Deleting.fromJson(Map<String, dynamic> json) = _$Deleting.fromJson;
+  factory Deleting.fromJson(Map<String, dynamic> json) =
+      _$DeletingImpl.fromJson;
 
   bool get hard;
-  @JsonKey(ignore: true)
-  _$$DeletingCopyWith<_$Deleting> get copyWith =>
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DeletingImplCopyWith<_$DeletingImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -1309,6 +1372,8 @@ mixin _$CompletedState {
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
+
+  /// Serializes this CompletedState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 }
 
@@ -1328,28 +1393,36 @@ class _$CompletedStateCopyWithImpl<$Res, $Val extends CompletedState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  /// Create a copy of CompletedState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
-abstract class _$$SentCopyWith<$Res> {
-  factory _$$SentCopyWith(_$Sent value, $Res Function(_$Sent) then) =
-      __$$SentCopyWithImpl<$Res>;
+abstract class _$$SentImplCopyWith<$Res> {
+  factory _$$SentImplCopyWith(
+          _$SentImpl value, $Res Function(_$SentImpl) then) =
+      __$$SentImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$SentCopyWithImpl<$Res>
-    extends _$CompletedStateCopyWithImpl<$Res, _$Sent>
-    implements _$$SentCopyWith<$Res> {
-  __$$SentCopyWithImpl(_$Sent _value, $Res Function(_$Sent) _then)
+class __$$SentImplCopyWithImpl<$Res>
+    extends _$CompletedStateCopyWithImpl<$Res, _$SentImpl>
+    implements _$$SentImplCopyWith<$Res> {
+  __$$SentImplCopyWithImpl(_$SentImpl _value, $Res Function(_$SentImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of CompletedState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$Sent implements Sent {
-  const _$Sent({final String? $type}) : $type = $type ?? 'sent';
+class _$SentImpl implements Sent {
+  const _$SentImpl({final String? $type}) : $type = $type ?? 'sent';
 
-  factory _$Sent.fromJson(Map<String, dynamic> json) => _$$SentFromJson(json);
+  factory _$SentImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SentImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -1360,12 +1433,12 @@ class _$Sent implements Sent {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Sent);
+        (other.runtimeType == runtimeType && other is _$SentImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -1439,39 +1512,44 @@ class _$Sent implements Sent {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SentToJson(
+    return _$$SentImplToJson(
       this,
     );
   }
 }
 
 abstract class Sent implements CompletedState {
-  const factory Sent() = _$Sent;
+  const factory Sent() = _$SentImpl;
 
-  factory Sent.fromJson(Map<String, dynamic> json) = _$Sent.fromJson;
+  factory Sent.fromJson(Map<String, dynamic> json) = _$SentImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$UpdatedCopyWith<$Res> {
-  factory _$$UpdatedCopyWith(_$Updated value, $Res Function(_$Updated) then) =
-      __$$UpdatedCopyWithImpl<$Res>;
+abstract class _$$UpdatedImplCopyWith<$Res> {
+  factory _$$UpdatedImplCopyWith(
+          _$UpdatedImpl value, $Res Function(_$UpdatedImpl) then) =
+      __$$UpdatedImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$UpdatedCopyWithImpl<$Res>
-    extends _$CompletedStateCopyWithImpl<$Res, _$Updated>
-    implements _$$UpdatedCopyWith<$Res> {
-  __$$UpdatedCopyWithImpl(_$Updated _value, $Res Function(_$Updated) _then)
+class __$$UpdatedImplCopyWithImpl<$Res>
+    extends _$CompletedStateCopyWithImpl<$Res, _$UpdatedImpl>
+    implements _$$UpdatedImplCopyWith<$Res> {
+  __$$UpdatedImplCopyWithImpl(
+      _$UpdatedImpl _value, $Res Function(_$UpdatedImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of CompletedState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$Updated implements Updated {
-  const _$Updated({final String? $type}) : $type = $type ?? 'updated';
+class _$UpdatedImpl implements Updated {
+  const _$UpdatedImpl({final String? $type}) : $type = $type ?? 'updated';
 
-  factory _$Updated.fromJson(Map<String, dynamic> json) =>
-      _$$UpdatedFromJson(json);
+  factory _$UpdatedImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdatedImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -1482,12 +1560,12 @@ class _$Updated implements Updated {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Updated);
+        (other.runtimeType == runtimeType && other is _$UpdatedImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -1561,39 +1639,43 @@ class _$Updated implements Updated {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$UpdatedToJson(
+    return _$$UpdatedImplToJson(
       this,
     );
   }
 }
 
 abstract class Updated implements CompletedState {
-  const factory Updated() = _$Updated;
+  const factory Updated() = _$UpdatedImpl;
 
-  factory Updated.fromJson(Map<String, dynamic> json) = _$Updated.fromJson;
+  factory Updated.fromJson(Map<String, dynamic> json) = _$UpdatedImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$DeletedCopyWith<$Res> {
-  factory _$$DeletedCopyWith(_$Deleted value, $Res Function(_$Deleted) then) =
-      __$$DeletedCopyWithImpl<$Res>;
+abstract class _$$DeletedImplCopyWith<$Res> {
+  factory _$$DeletedImplCopyWith(
+          _$DeletedImpl value, $Res Function(_$DeletedImpl) then) =
+      __$$DeletedImplCopyWithImpl<$Res>;
   @useResult
   $Res call({bool hard});
 }
 
 /// @nodoc
-class __$$DeletedCopyWithImpl<$Res>
-    extends _$CompletedStateCopyWithImpl<$Res, _$Deleted>
-    implements _$$DeletedCopyWith<$Res> {
-  __$$DeletedCopyWithImpl(_$Deleted _value, $Res Function(_$Deleted) _then)
+class __$$DeletedImplCopyWithImpl<$Res>
+    extends _$CompletedStateCopyWithImpl<$Res, _$DeletedImpl>
+    implements _$$DeletedImplCopyWith<$Res> {
+  __$$DeletedImplCopyWithImpl(
+      _$DeletedImpl _value, $Res Function(_$DeletedImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of CompletedState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? hard = null,
   }) {
-    return _then(_$Deleted(
+    return _then(_$DeletedImpl(
       hard: null == hard
           ? _value.hard
           : hard // ignore: cast_nullable_to_non_nullable
@@ -1604,12 +1686,12 @@ class __$$DeletedCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$Deleted implements Deleted {
-  const _$Deleted({this.hard = false, final String? $type})
+class _$DeletedImpl implements Deleted {
+  const _$DeletedImpl({this.hard = false, final String? $type})
       : $type = $type ?? 'deleted';
 
-  factory _$Deleted.fromJson(Map<String, dynamic> json) =>
-      _$$DeletedFromJson(json);
+  factory _$DeletedImpl.fromJson(Map<String, dynamic> json) =>
+      _$$DeletedImplFromJson(json);
 
   @override
   @JsonKey()
@@ -1624,22 +1706,24 @@ class _$Deleted implements Deleted {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$Deleted &&
+            other is _$DeletedImpl &&
             (identical(other.hard, hard) || other.hard == hard));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, hard);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of CompletedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$DeletedCopyWith<_$Deleted> get copyWith =>
-      __$$DeletedCopyWithImpl<_$Deleted>(this, _$identity);
+  _$$DeletedImplCopyWith<_$DeletedImpl> get copyWith =>
+      __$$DeletedImplCopyWithImpl<_$DeletedImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -1711,20 +1795,23 @@ class _$Deleted implements Deleted {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DeletedToJson(
+    return _$$DeletedImplToJson(
       this,
     );
   }
 }
 
 abstract class Deleted implements CompletedState {
-  const factory Deleted({final bool hard}) = _$Deleted;
+  const factory Deleted({final bool hard}) = _$DeletedImpl;
 
-  factory Deleted.fromJson(Map<String, dynamic> json) = _$Deleted.fromJson;
+  factory Deleted.fromJson(Map<String, dynamic> json) = _$DeletedImpl.fromJson;
 
   bool get hard;
-  @JsonKey(ignore: true)
-  _$$DeletedCopyWith<_$Deleted> get copyWith =>
+
+  /// Create a copy of CompletedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DeletedImplCopyWith<_$DeletedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -1789,6 +1876,8 @@ mixin _$FailedState {
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
+
+  /// Serializes this FailedState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 }
 
@@ -1808,32 +1897,38 @@ class _$FailedStateCopyWithImpl<$Res, $Val extends FailedState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
-abstract class _$$SendingFailedCopyWith<$Res> {
-  factory _$$SendingFailedCopyWith(
-          _$SendingFailed value, $Res Function(_$SendingFailed) then) =
-      __$$SendingFailedCopyWithImpl<$Res>;
+abstract class _$$SendingFailedImplCopyWith<$Res> {
+  factory _$$SendingFailedImplCopyWith(
+          _$SendingFailedImpl value, $Res Function(_$SendingFailedImpl) then) =
+      __$$SendingFailedImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$SendingFailedCopyWithImpl<$Res>
-    extends _$FailedStateCopyWithImpl<$Res, _$SendingFailed>
-    implements _$$SendingFailedCopyWith<$Res> {
-  __$$SendingFailedCopyWithImpl(
-      _$SendingFailed _value, $Res Function(_$SendingFailed) _then)
+class __$$SendingFailedImplCopyWithImpl<$Res>
+    extends _$FailedStateCopyWithImpl<$Res, _$SendingFailedImpl>
+    implements _$$SendingFailedImplCopyWith<$Res> {
+  __$$SendingFailedImplCopyWithImpl(
+      _$SendingFailedImpl _value, $Res Function(_$SendingFailedImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$SendingFailed implements SendingFailed {
-  const _$SendingFailed({final String? $type})
+class _$SendingFailedImpl implements SendingFailed {
+  const _$SendingFailedImpl({final String? $type})
       : $type = $type ?? 'sendingFailed';
 
-  factory _$SendingFailed.fromJson(Map<String, dynamic> json) =>
-      _$$SendingFailedFromJson(json);
+  factory _$SendingFailedImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SendingFailedImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -1844,12 +1939,12 @@ class _$SendingFailed implements SendingFailed {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$SendingFailed);
+        (other.runtimeType == runtimeType && other is _$SendingFailedImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -1923,43 +2018,46 @@ class _$SendingFailed implements SendingFailed {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SendingFailedToJson(
+    return _$$SendingFailedImplToJson(
       this,
     );
   }
 }
 
 abstract class SendingFailed implements FailedState {
-  const factory SendingFailed() = _$SendingFailed;
+  const factory SendingFailed() = _$SendingFailedImpl;
 
   factory SendingFailed.fromJson(Map<String, dynamic> json) =
-      _$SendingFailed.fromJson;
+      _$SendingFailedImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$UpdatingFailedCopyWith<$Res> {
-  factory _$$UpdatingFailedCopyWith(
-          _$UpdatingFailed value, $Res Function(_$UpdatingFailed) then) =
-      __$$UpdatingFailedCopyWithImpl<$Res>;
+abstract class _$$UpdatingFailedImplCopyWith<$Res> {
+  factory _$$UpdatingFailedImplCopyWith(_$UpdatingFailedImpl value,
+          $Res Function(_$UpdatingFailedImpl) then) =
+      __$$UpdatingFailedImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$UpdatingFailedCopyWithImpl<$Res>
-    extends _$FailedStateCopyWithImpl<$Res, _$UpdatingFailed>
-    implements _$$UpdatingFailedCopyWith<$Res> {
-  __$$UpdatingFailedCopyWithImpl(
-      _$UpdatingFailed _value, $Res Function(_$UpdatingFailed) _then)
+class __$$UpdatingFailedImplCopyWithImpl<$Res>
+    extends _$FailedStateCopyWithImpl<$Res, _$UpdatingFailedImpl>
+    implements _$$UpdatingFailedImplCopyWith<$Res> {
+  __$$UpdatingFailedImplCopyWithImpl(
+      _$UpdatingFailedImpl _value, $Res Function(_$UpdatingFailedImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$UpdatingFailed implements UpdatingFailed {
-  const _$UpdatingFailed({final String? $type})
+class _$UpdatingFailedImpl implements UpdatingFailed {
+  const _$UpdatingFailedImpl({final String? $type})
       : $type = $type ?? 'updatingFailed';
 
-  factory _$UpdatingFailed.fromJson(Map<String, dynamic> json) =>
-      _$$UpdatingFailedFromJson(json);
+  factory _$UpdatingFailedImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdatingFailedImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -1970,12 +2068,12 @@ class _$UpdatingFailed implements UpdatingFailed {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$UpdatingFailed);
+        (other.runtimeType == runtimeType && other is _$UpdatingFailedImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -2049,42 +2147,44 @@ class _$UpdatingFailed implements UpdatingFailed {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$UpdatingFailedToJson(
+    return _$$UpdatingFailedImplToJson(
       this,
     );
   }
 }
 
 abstract class UpdatingFailed implements FailedState {
-  const factory UpdatingFailed() = _$UpdatingFailed;
+  const factory UpdatingFailed() = _$UpdatingFailedImpl;
 
   factory UpdatingFailed.fromJson(Map<String, dynamic> json) =
-      _$UpdatingFailed.fromJson;
+      _$UpdatingFailedImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$DeletingFailedCopyWith<$Res> {
-  factory _$$DeletingFailedCopyWith(
-          _$DeletingFailed value, $Res Function(_$DeletingFailed) then) =
-      __$$DeletingFailedCopyWithImpl<$Res>;
+abstract class _$$DeletingFailedImplCopyWith<$Res> {
+  factory _$$DeletingFailedImplCopyWith(_$DeletingFailedImpl value,
+          $Res Function(_$DeletingFailedImpl) then) =
+      __$$DeletingFailedImplCopyWithImpl<$Res>;
   @useResult
   $Res call({bool hard});
 }
 
 /// @nodoc
-class __$$DeletingFailedCopyWithImpl<$Res>
-    extends _$FailedStateCopyWithImpl<$Res, _$DeletingFailed>
-    implements _$$DeletingFailedCopyWith<$Res> {
-  __$$DeletingFailedCopyWithImpl(
-      _$DeletingFailed _value, $Res Function(_$DeletingFailed) _then)
+class __$$DeletingFailedImplCopyWithImpl<$Res>
+    extends _$FailedStateCopyWithImpl<$Res, _$DeletingFailedImpl>
+    implements _$$DeletingFailedImplCopyWith<$Res> {
+  __$$DeletingFailedImplCopyWithImpl(
+      _$DeletingFailedImpl _value, $Res Function(_$DeletingFailedImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? hard = null,
   }) {
-    return _then(_$DeletingFailed(
+    return _then(_$DeletingFailedImpl(
       hard: null == hard
           ? _value.hard
           : hard // ignore: cast_nullable_to_non_nullable
@@ -2095,12 +2195,12 @@ class __$$DeletingFailedCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$DeletingFailed implements DeletingFailed {
-  const _$DeletingFailed({this.hard = false, final String? $type})
+class _$DeletingFailedImpl implements DeletingFailed {
+  const _$DeletingFailedImpl({this.hard = false, final String? $type})
       : $type = $type ?? 'deletingFailed';
 
-  factory _$DeletingFailed.fromJson(Map<String, dynamic> json) =>
-      _$$DeletingFailedFromJson(json);
+  factory _$DeletingFailedImpl.fromJson(Map<String, dynamic> json) =>
+      _$$DeletingFailedImplFromJson(json);
 
   @override
   @JsonKey()
@@ -2115,22 +2215,25 @@ class _$DeletingFailed implements DeletingFailed {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$DeletingFailed &&
+            other is _$DeletingFailedImpl &&
             (identical(other.hard, hard) || other.hard == hard));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, hard);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$DeletingFailedCopyWith<_$DeletingFailed> get copyWith =>
-      __$$DeletingFailedCopyWithImpl<_$DeletingFailed>(this, _$identity);
+  _$$DeletingFailedImplCopyWith<_$DeletingFailedImpl> get copyWith =>
+      __$$DeletingFailedImplCopyWithImpl<_$DeletingFailedImpl>(
+          this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -2202,20 +2305,23 @@ class _$DeletingFailed implements DeletingFailed {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DeletingFailedToJson(
+    return _$$DeletingFailedImplToJson(
       this,
     );
   }
 }
 
 abstract class DeletingFailed implements FailedState {
-  const factory DeletingFailed({final bool hard}) = _$DeletingFailed;
+  const factory DeletingFailed({final bool hard}) = _$DeletingFailedImpl;
 
   factory DeletingFailed.fromJson(Map<String, dynamic> json) =
-      _$DeletingFailed.fromJson;
+      _$DeletingFailedImpl.fromJson;
 
   bool get hard;
-  @JsonKey(ignore: true)
-  _$$DeletingFailedCopyWith<_$DeletingFailed> get copyWith =>
+
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DeletingFailedImplCopyWith<_$DeletingFailedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -1,3 +1,8 @@
+## Upcoming
+
+✅ Added
+- Added user blocking to the client.
+
 ## 8.1.0
 
 ✅ Added

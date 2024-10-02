@@ -29,8 +29,8 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
               ?.map((e) => Action.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      originalWidth: json['original_width'] as int?,
-      originalHeight: json['original_height'] as int?,
+      originalWidth: (json['original_width'] as num?)?.toInt(),
+      originalHeight: (json['original_height'] as num?)?.toInt(),
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       file: json['file'] == null
           ? null

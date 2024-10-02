@@ -8,7 +8,7 @@ part of 'attachment_file.dart';
 
 AttachmentFile _$AttachmentFileFromJson(Map<String, dynamic> json) =>
     AttachmentFile(
-      size: json['size'] as int?,
+      size: (json['size'] as num?)?.toInt(),
       path: json['path'] as String?,
       name: json['name'] as String?,
     );
@@ -20,42 +20,47 @@ Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) =>
       'size': instance.size,
     };
 
-_$Preparing _$$PreparingFromJson(Map<String, dynamic> json) => _$Preparing(
+_$PreparingImpl _$$PreparingImplFromJson(Map<String, dynamic> json) =>
+    _$PreparingImpl(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$PreparingToJson(_$Preparing instance) =>
+Map<String, dynamic> _$$PreparingImplToJson(_$PreparingImpl instance) =>
     <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$InProgress _$$InProgressFromJson(Map<String, dynamic> json) => _$InProgress(
-      uploaded: json['uploaded'] as int,
-      total: json['total'] as int,
+_$InProgressImpl _$$InProgressImplFromJson(Map<String, dynamic> json) =>
+    _$InProgressImpl(
+      uploaded: (json['uploaded'] as num).toInt(),
+      total: (json['total'] as num).toInt(),
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$InProgressToJson(_$InProgress instance) =>
+Map<String, dynamic> _$$InProgressImplToJson(_$InProgressImpl instance) =>
     <String, dynamic>{
       'uploaded': instance.uploaded,
       'total': instance.total,
       'runtimeType': instance.$type,
     };
 
-_$Success _$$SuccessFromJson(Map<String, dynamic> json) => _$Success(
+_$SuccessImpl _$$SuccessImplFromJson(Map<String, dynamic> json) =>
+    _$SuccessImpl(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$SuccessToJson(_$Success instance) => <String, dynamic>{
+Map<String, dynamic> _$$SuccessImplToJson(_$SuccessImpl instance) =>
+    <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$Failed _$$FailedFromJson(Map<String, dynamic> json) => _$Failed(
+_$FailedImpl _$$FailedImplFromJson(Map<String, dynamic> json) => _$FailedImpl(
       error: json['error'] as String,
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$FailedToJson(_$Failed instance) => <String, dynamic>{
+Map<String, dynamic> _$$FailedImplToJson(_$FailedImpl instance) =>
+    <String, dynamic>{
       'error': instance.error,
       'runtimeType': instance.$type,
     };

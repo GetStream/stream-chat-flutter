@@ -9,9 +9,9 @@ part of 'responses.dart';
 ErrorResponse _$ErrorResponseFromJson(Map<String, dynamic> json) =>
     ErrorResponse()
       ..duration = json['duration'] as String?
-      ..code = json['code'] as int?
+      ..code = (json['code'] as num?)?.toInt()
       ..message = json['message'] as String?
-      ..statusCode = json['StatusCode'] as int?
+      ..statusCode = (json['StatusCode'] as num?)?.toInt()
       ..moreInfo = json['more_info'] as String?;
 
 Map<String, dynamic> _$ErrorResponseToJson(ErrorResponse instance) =>
@@ -279,7 +279,7 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
               ?.map((e) => Member.fromJson(e as Map<String, dynamic>))
               .toList() ??
           []
-      ..watcherCount = json['watcher_count'] as int? ?? 0
+      ..watcherCount = (json['watcher_count'] as num?)?.toInt() ?? 0
       ..read = (json['read'] as List<dynamic>?)
               ?.map((e) => Read.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -304,7 +304,7 @@ CallTokenPayload _$CallTokenPayloadFromJson(Map<String, dynamic> json) =>
     CallTokenPayload()
       ..duration = json['duration'] as String?
       ..token = json['token'] as String?
-      ..agoraUid = json['agora_uid'] as int?
+      ..agoraUid = (json['agora_uid'] as num?)?.toInt()
       ..agoraAppId = json['agora_app_id'] as String?;
 
 CreateCallPayload _$CreateCallPayloadFromJson(Map<String, dynamic> json) =>
@@ -313,3 +313,27 @@ CreateCallPayload _$CreateCallPayloadFromJson(Map<String, dynamic> json) =>
       ..call = json['call'] == null
           ? null
           : CallPayload.fromJson(json['call'] as Map<String, dynamic>);
+
+UserBlockResponse _$UserBlockResponseFromJson(Map<String, dynamic> json) =>
+    UserBlockResponse()
+      ..duration = json['duration'] as String?
+      ..blockedByUserId = json['blocked_by_user_id'] as String? ?? ''
+      ..blockedUserId = json['blocked_user_id'] as String? ?? ''
+      ..createdAt = DateTime.parse(json['created_at'] as String);
+
+Map<String, dynamic> _$UserBlockResponseToJson(UserBlockResponse instance) =>
+    <String, dynamic>{
+      'duration': instance.duration,
+      'blocked_by_user_id': instance.blockedByUserId,
+      'blocked_user_id': instance.blockedUserId,
+      'created_at': instance.createdAt.toIso8601String(),
+    };
+
+BlockedUsersResponse _$BlockedUsersResponseFromJson(
+        Map<String, dynamic> json) =>
+    BlockedUsersResponse()
+      ..duration = json['duration'] as String?
+      ..blocks = (json['blocks'] as List<dynamic>?)
+              ?.map((e) => UserBlock.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
