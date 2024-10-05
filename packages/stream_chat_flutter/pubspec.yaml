@@ -47,7 +47,6 @@ dependencies:
   url_launcher: ^6.3.0
   video_player: ^2.8.7
   video_thumbnail: ^0.5.3
-  hexcolor: ^3.0.1
 
 flutter:
   plugin:
