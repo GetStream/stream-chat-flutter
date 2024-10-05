@@ -1060,7 +1060,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         bottomRight: isMyMessage ? Radius.zero : const Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
-        vertical: 8,
+        vertical: 4,
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       borderSide: borderSide,
@@ -1409,7 +1409,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             : const Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
-        vertical: 8,
+        vertical: 4,
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       messageTheme: isMyMessage

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:stream_chat_flutter/extention_theme/theme.i.dart';
+
 /// An implementation that defines the color scheme used in the dark app theme.
 class DarkThemeColors implements IThemeColors {
   @override
@@ -16,7 +17,7 @@ class DarkThemeColors implements IThemeColors {
   Color get dividerColor => HexColor('#292A3B');
 
   @override
-  Color get darkGreyColor => HexColor('#808080');
+  Color get darkGreyColor => const Color.fromRGBO(34, 34, 34, 1);
 
   @override
   Color get whiteHintTextColor => HexColor('#CCCCCC').withOpacity(0.8);
@@ -83,4 +84,10 @@ class DarkThemeColors implements IThemeColors {
 
   @override
   Color get darkHintColor => const Color(0xFFAAA6B9);
+
+  @override
+  Color get markAsReadColor => Colors.blue;
+
+  @override
+  Color get messageSentIndicatorColor => Colors.white;
 }

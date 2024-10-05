@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/extention_theme/theme.i.dart';
+
 /// An implementation that defines the color scheme used in the light app theme.
 class LightThemeColors implements IThemeColors {
   @override
-  Color get greyColor => const Color(0xFFFAFCFF);
+  Color get greyColor => const Color.fromRGBO(250, 252, 255, 1);
 
   @override
   Color get redColor => const Color(0xFFFAFCFF);
@@ -12,10 +13,7 @@ class LightThemeColors implements IThemeColors {
   Color get greenPrimaryColor => const Color(0xFFFAFCFF);
 
   @override
-  Color get dividerColor => const Color(0xFFFAFCFF);
-
-  @override
-  Color get darkGreyColor => const Color(0xFFFAFCFF);
+  Color get dividerColor => const Color.fromRGBO(250, 252, 255, 1);
 
   @override
   Color get whiteHintTextColor => const Color(0xFFFAFCFF).withOpacity(0.8);
@@ -82,4 +80,13 @@ class LightThemeColors implements IThemeColors {
 
   @override
   Color get darkHintColor => const Color(0xFF8D5604);
+
+  @override
+  Color get markAsReadColor => Colors.blue;
+
+  @override
+  Color get messageSentIndicatorColor => Colors.white;
+
+  @override
+  Color get darkGreyColor => const Color.fromRGBO(34, 34, 34, 1);
 }

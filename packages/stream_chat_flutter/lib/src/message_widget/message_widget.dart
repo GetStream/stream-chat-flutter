@@ -87,7 +87,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
       horizontal: 16,
-      vertical: 8,
+      vertical: 4,
     ),
     this.attachmentPadding = EdgeInsets.zero,
     this.widthFactor = 0.78,
@@ -696,7 +696,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       showUsername: showUsername,
                       showTimeStamp: showTimeStamp,
                       showThreadReplyIndicator: showThreadReplyIndicator,
-                      showSendingIndicator: showSendingIndicator,
                       showInChannel: showInChannel,
                       isGiphy: isGiphy,
                       isOnlyEmoji: isOnlyEmoji,

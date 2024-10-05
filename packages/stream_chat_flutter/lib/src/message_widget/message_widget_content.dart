@@ -57,7 +57,6 @@ class MessageWidgetContent extends StatelessWidget {
     required this.bottomRowPadding,
     required this.showInChannel,
     required this.streamChat,
-    required this.showSendingIndicator,
     required this.showThreadReplyIndicator,
     required this.showTimeStamp,
     required this.showUsername,
@@ -197,9 +196,6 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro streamChat}
   final StreamChatState streamChat;
-
-  /// {@macro showSendingIndicator}
-  final bool showSendingIndicator;
 
   /// {@macro showThreadReplyIndicator}
   final bool showThreadReplyIndicator;
@@ -348,6 +344,8 @@ class MessageWidgetContent extends StatelessWidget {
                                             borderRadiusGeometry,
                                         borderSide: borderSide,
                                         shape: shape,
+                                        showSendingIndicator:
+                                            messageWidget.showSendingIndicator,
                                       ),
                               ),
                               // TODO: Make tail part of the Reaction Picker.
@@ -433,7 +431,6 @@ class MessageWidgetContent extends StatelessWidget {
       isDeleted: message.isDeleted,
       isGiphy: isGiphy,
       showInChannel: showInChannel,
-      showSendingIndicator: showSendingIndicator,
       showThreadReplyIndicator: showThreadReplyIndicator,
       showTimeStamp: showTimeStamp,
       showUsername: showUsername,

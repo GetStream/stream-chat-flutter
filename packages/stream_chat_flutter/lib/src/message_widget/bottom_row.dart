@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/sending_indicator_builder.dart';
 import 'package:stream_chat_flutter/src/message_widget/thread_painter.dart';
 import 'package:stream_chat_flutter/src/message_widget/thread_participants.dart';
 import 'package:stream_chat_flutter/src/message_widget/username.dart';
@@ -21,7 +20,6 @@ class BottomRow extends StatelessWidget {
     required this.showTimeStamp,
     required this.showUsername,
     required this.reverse,
-    required this.showSendingIndicator,
     required this.hasUrlAttachments,
     required this.isGiphy,
     required this.isOnlyEmoji,
@@ -59,8 +57,6 @@ class BottomRow extends StatelessWidget {
   /// {@macro reverse}
   final bool reverse;
 
-  /// {@macro showSendingIndicator}
-  final bool showSendingIndicator;
 
   /// {@macro hasUrlAttachments}
   final bool hasUrlAttachments;
@@ -105,7 +101,6 @@ class BottomRow extends StatelessWidget {
     bool? showTimeStamp,
     bool? showUsername,
     bool? reverse,
-    bool? showSendingIndicator,
     bool? hasUrlAttachments,
     bool? isGiphy,
     bool? isOnlyEmoji,
@@ -128,7 +123,6 @@ class BottomRow extends StatelessWidget {
         showTimeStamp: showTimeStamp ?? this.showTimeStamp,
         showUsername: showUsername ?? this.showUsername,
         reverse: reverse ?? this.reverse,
-        showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
         hasUrlAttachments: hasUrlAttachments ?? this.hasUrlAttachments,
         isGiphy: isGiphy ?? this.isGiphy,
         isOnlyEmoji: isOnlyEmoji ?? this.isOnlyEmoji,
@@ -190,15 +184,6 @@ class BottomRow extends StatelessWidget {
           Jiffy.parseFromDateTime(message.createdAt.toLocal()).jm,
           style: messageTheme.createdAtStyle,
         ),
-      if (showSendingIndicator)
-        sendingIndicatorBuilder?.call(context, message) ??
-            SendingIndicatorBuilder(
-              messageTheme: messageTheme,
-              message: message,
-              hasNonUrlAttachments: hasNonUrlAttachments,
-              streamChat: streamChat,
-              streamChatTheme: streamChatTheme,
-            ),
     ];
 
     final showThreadTail =

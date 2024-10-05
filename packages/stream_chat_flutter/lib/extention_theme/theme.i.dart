@@ -84,8 +84,13 @@ abstract class IThemeColors {
 
   /// The color used for dark hints in the theme.
   Color get darkHintColor;
-}
 
+  /// The color used for dark hints in the theme.
+  Color get markAsReadColor;
+
+  /// The color used for dark hints in the theme.
+  Color get messageSentIndicatorColor;
+}
 
 //Adding ChatTheme extension to StreamChatThemeData
 extension ChatTheme on StreamChatThemeData {
