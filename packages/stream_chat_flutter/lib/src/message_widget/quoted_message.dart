@@ -34,6 +34,7 @@ class QuotedMessage extends StatelessWidget {
     final isMyQuotedMessage =
         message.quotedMessage?.user?.id == streamChat.currentUser?.id;
     return StreamQuotedMessageWidget(
+      isMyMessage: isMyMessage,
       message: message.quotedMessage!,
       messageTheme: isMyMessage
           ? chatThemeData.otherMessageTheme

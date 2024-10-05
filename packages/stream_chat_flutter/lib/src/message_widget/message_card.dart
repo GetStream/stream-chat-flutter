@@ -164,6 +164,7 @@ class _MessageCardState extends State<MessageCard> {
     final quotedMessageBuilder = widget.quotedMessageBuilder;
     final streamChat = StreamChat.of(context);
     final streamChatTheme = StreamChatTheme.of(context);
+    final isMyMessage = widget.message.user?.id == streamChat.currentUser?.id;
     return Container(
       constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
       margin: EdgeInsets.symmetric(
@@ -187,45 +188,51 @@ class _MessageCardState extends State<MessageCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (widget.hasQuotedMessage)
-            InkWell(
-              onTap: !widget.message.quotedMessage!.isDeleted &&
-                      onQuotedMessageTap != null
-                  ? () => onQuotedMessageTap(widget.message.quotedMessageId)
-                  : null,
-              child: quotedMessageBuilder?.call(
-                    context,
-                    widget.message.quotedMessage!,
-                  ) ??
-                  QuotedMessage(
-                    message: widget.message,
-                    textBuilder: widget.textBuilder,
-                    hasNonUrlAttachments: widget.hasNonUrlAttachments,
-                  ),
-            ),
-          if (hasAttachments)
-            ParseAttachments(
-              key: attachmentsKey,
-              message: widget.message,
-              attachmentBuilders: widget.attachmentBuilders,
-              attachmentPadding: widget.attachmentPadding,
-              attachmentShape: widget.attachmentShape,
-              onAttachmentTap: widget.onAttachmentTap,
-              onShowMessage: widget.onShowMessage,
-              onReplyTap: widget.onReplyTap,
-              attachmentActionsModalBuilder:
-                  widget.attachmentActionsModalBuilder,
-            ),
-          TextBubble(
-            messageTheme: widget.messageTheme,
-            message: widget.message,
-            textPadding: widget.textPadding,
-            textBuilder: widget.textBuilder,
-            isOnlyEmoji: widget.isOnlyEmoji,
-            hasQuotedMessage: widget.hasQuotedMessage,
-            hasUrlAttachments: widget.hasUrlAttachments,
-            onLinkTap: widget.onLinkTap,
-            onMentionTap: widget.onMentionTap,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (widget.hasQuotedMessage)
+                InkWell(
+                  onTap: !widget.message.quotedMessage!.isDeleted &&
+                          onQuotedMessageTap != null
+                      ? () => onQuotedMessageTap(widget.message.quotedMessageId)
+                      : null,
+                  child: quotedMessageBuilder?.call(
+                        context,
+                        widget.message.quotedMessage!,
+                      ) ??
+                      QuotedMessage(
+                        message: widget.message,
+                        textBuilder: widget.textBuilder,
+                        hasNonUrlAttachments: widget.hasNonUrlAttachments,
+                      ),
+                ),
+              if (hasAttachments)
+                ParseAttachments(
+                  key: attachmentsKey,
+                  message: widget.message,
+                  attachmentBuilders: widget.attachmentBuilders,
+                  attachmentPadding: widget.attachmentPadding,
+                  attachmentShape: widget.attachmentShape,
+                  onAttachmentTap: widget.onAttachmentTap,
+                  onShowMessage: widget.onShowMessage,
+                  onReplyTap: widget.onReplyTap,
+                  attachmentActionsModalBuilder:
+                      widget.attachmentActionsModalBuilder,
+                ),
+              TextBubble(
+                messageTheme: widget.messageTheme,
+                message: widget.message,
+                textPadding: widget.textPadding,
+                textBuilder: widget.textBuilder,
+                isOnlyEmoji: widget.isOnlyEmoji,
+                hasQuotedMessage: widget.hasQuotedMessage,
+                hasUrlAttachments: widget.hasUrlAttachments,
+                onLinkTap: widget.onLinkTap,
+                onMentionTap: widget.onMentionTap,
+              ),
+            ],
           ),
           if (widget.showSendingIndicator)
             Padding(

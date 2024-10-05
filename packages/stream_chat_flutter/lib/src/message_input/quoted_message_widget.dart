@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/extention_theme/color_theme.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -20,6 +21,7 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.attachmentThumbnailBuilders,
     this.padding = const EdgeInsets.all(8),
     this.onQuotedMessageClear,
+    required this.isMyMessage,
   });
 
   /// The message
@@ -49,38 +51,22 @@ class StreamQuotedMessageWidget extends StatelessWidget {
   /// {@macro textBuilder}
   final Widget Function(BuildContext, Message)? textBuilder;
 
+  final bool isMyMessage;
+
   @override
   Widget build(BuildContext context) {
-    final children = [
-      Flexible(
-        child: _QuotedMessage(
-          message: message,
-          textLimit: textLimit,
-          messageTheme: messageTheme,
-          showBorder: showBorder,
-          reverse: reverse,
-          textBuilder: textBuilder,
-          onQuotedMessageClear: onQuotedMessageClear,
-          attachmentThumbnailBuilders: attachmentThumbnailBuilders,
-        ),
-      ),
-      const SizedBox(width: 8),
-      if (message.user != null)
-        StreamUserAvatar(
-          user: message.user!,
-          constraints: const BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          showOnlineStatus: false,
-        ),
-    ];
     return Padding(
       padding: padding,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: reverse ? children.reversed.toList() : children,
+      child: _QuotedMessage(
+        message: message,
+        textLimit: textLimit,
+        messageTheme: messageTheme,
+        showBorder: showBorder,
+        reverse: reverse,
+        textBuilder: textBuilder,
+        onQuotedMessageClear: onQuotedMessageClear,
+        attachmentThumbnailBuilders: attachmentThumbnailBuilders,
+        isMyMessage: isMyMessage,
       ),
     );
   }
@@ -96,6 +82,7 @@ class _QuotedMessage extends StatelessWidget {
     this.textBuilder,
     this.onQuotedMessageClear,
     this.attachmentThumbnailBuilders,
+    required this.isMyMessage,
   });
 
   final Message message;
@@ -105,6 +92,7 @@ class _QuotedMessage extends StatelessWidget {
   final bool showBorder;
   final bool reverse;
   final Widget Function(BuildContext, Message)? textBuilder;
+  final bool isMyMessage;
 
   final _Builders? attachmentThumbnailBuilders;
 
@@ -187,34 +175,39 @@ class _QuotedMessage extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: _getBackgroundColor(context),
-        border: showBorder
-            ? Border.all(
-                color: StreamChatTheme.of(context).colorTheme.disabled,
-              )
-            : null,
-        borderRadius: BorderRadius.only(
-          topRight: const Radius.circular(12),
-          topLeft: const Radius.circular(12),
-          bottomRight: reverse ? const Radius.circular(12) : Radius.zero,
-          bottomLeft: reverse ? Radius.zero : const Radius.circular(12),
-        ),
+        color: isMyMessage
+            ? UnikonColorTheme.replyQuotedMessageBGColor2
+            : UnikonColorTheme.replyQuotedMessageBGColor,
+        border: Border(
+            left: BorderSide(
+          color: !isMyMessage
+              ? UnikonColorTheme.primaryColor
+              : UnikonColorTheme.whiteHintTextColor,
+          width: 2,
+        )),
+        borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(8),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment:
-            reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: reverse ? children.reversed.toList() : children,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (message.user != null)
+            Text(
+              message.user!.name,
+              style: messageTheme.messageTextStyle?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment:
+                reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
+            children: reverse ? children.reversed.toList() : children,
+          ),
+        ],
       ),
     );
-  }
-
-  Color? _getBackgroundColor(BuildContext context) {
-    if (_containsLinkAttachment && !_isDeleted) {
-      return messageTheme.urlAttachmentBackgroundColor;
-    }
-    return messageTheme.messageBackgroundColor;
   }
 }
 

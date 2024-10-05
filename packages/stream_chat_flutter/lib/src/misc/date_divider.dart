@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/extention_theme/theme.i.dart';
+import 'package:stream_chat_flutter/extention_theme/color_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamDateDivider}
@@ -42,13 +42,13 @@ class StreamDateDivider extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
         decoration: BoxDecoration(
-          color: chatThemeData.chatTheme.darkGreyColor,
+          color: UnikonColorTheme.darkGreyColor,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           dayInfo,
           style: chatThemeData.textTheme.footnote.copyWith(
-            color: chatThemeData.chatTheme.greyColor,
+            color: UnikonColorTheme.greyColor,
           ),
         ),
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/extention_theme/theme.i.dart';
+import 'package:stream_chat_flutter/extention_theme/color_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamSendingIndicator}
@@ -28,20 +28,20 @@ class StreamSendingIndicator extends StatelessWidget {
     if (isMessageRead) {
       return StreamSvgIcon.checkAll(
         size: size,
-        color: StreamChatTheme.of(context).chatTheme.messageSentIndicatorColor,
+        color: UnikonColorTheme.messageSentIndicatorColor,
       );
     }
     if (message.state.isCompleted) {
       return StreamSvgIcon.check(
         size: size,
-        color: StreamChatTheme.of(context).chatTheme.messageSentIndicatorColor,
+        color: UnikonColorTheme.messageSentIndicatorColor,
       );
     }
     if (message.state.isOutgoing) {
       return Icon(
         Icons.access_time,
         size: size,
-        color: StreamChatTheme.of(context).chatTheme.messageSentIndicatorColor,
+        color: UnikonColorTheme.messageSentIndicatorColor,
       );
     }
     return const SizedBox();

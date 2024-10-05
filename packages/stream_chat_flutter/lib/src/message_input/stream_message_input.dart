@@ -1229,6 +1229,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     });
 
     return StreamQuotedMessageWidget(
+      isMyMessage: true,
       reverse: true,
       showBorder: !containsUrl,
       message: quotedMessage,
