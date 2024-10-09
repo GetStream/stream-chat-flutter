@@ -116,7 +116,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('banUser', () async {
+  test('blockUser', () async {
     const targetUserId = 'test-target-user-id';
 
     const path = '/users/block';
@@ -144,7 +144,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('unbanUser', () async {
+  test('unblockUser', () async {
     const targetUserId = 'test-target-user-id';
 
     const path = '/users/unblock';
