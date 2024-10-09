@@ -20,7 +20,7 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) =>
       updatedAt: json['updated_at'] == null
           ? null
           : DateTime.parse(json['updated_at'] as String),
-      maxMessageLength: json['max_message_length'] as int? ?? 0,
+      maxMessageLength: (json['max_message_length'] as num?)?.toInt() ?? 0,
       messageRetention: json['message_retention'] as String? ?? '',
       mutes: json['mutes'] as bool? ?? false,
       reactions: json['reactions'] as bool? ?? false,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:stream_chat/src/core/models/call_payload.dart';
+import 'package:stream_chat/src/core/models/user_block.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -4388,6 +4389,57 @@ void main() {
       ''';
       final response = CreateCallPayload.fromJson(json.decode(jsonExample));
       expect(response.call, isA<CallPayload>());
+    });
+
+    test('UserBlockResponse', () {
+      const jsonExample = '''
+      {
+        "blocked_user_id":"c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+        "blocked_by_user_id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+        "created_at": "2020-01-28T22:17:30.83015Z"
+      }
+      ''';
+      final response = UserBlockResponse.fromJson(json.decode(jsonExample));
+      expect(response.blockedUserId, isA<String>());
+      expect(response.blockedByUserId, isA<String>());
+      expect(response.createdAt, isA<DateTime>());
+    });
+
+    test('BlockedUsersResponse', () {
+      const jsonExample = '''
+      {
+        "blocks": [
+          {
+            "user": {
+              "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+              "role": "test-role",
+              "name": "John",
+              "image": "https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow",
+              "banned": true,
+              "online": true,
+              "created_at": "2021-08-03 12:39:21.817646",
+              "updated_at": "2021-08-04 12:39:21.817646",
+              "last_active": "2021-08-05 12:39:21.817646"
+            },
+            "blocked_user": {
+              "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+              "role": "user",
+              "created_at": "2020-01-28T22:17:30.83015Z",
+              "updated_at": "2020-01-28T22:17:31.19435Z",
+              "banned": false,
+              "online": false,
+              "image": "https://randomuser.me/api/portraits/women/2.jpg",
+              "name": "Mia Denys"
+            },
+            "user_id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+            "blocked_user_id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+            "created_at": "2020-01-28T22:17:30.83015Z"
+          }
+        ]
+      }
+      ''';
+      final response = BlockedUsersResponse.fromJson(json.decode(jsonExample));
+      expect(response.blocks, isA<List<UserBlock>>());
     });
   });
 }
