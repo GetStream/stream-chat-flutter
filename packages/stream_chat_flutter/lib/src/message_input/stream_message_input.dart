@@ -741,12 +741,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             children: value
                 ? <Widget>[_buildAudioRecordingWidget(context)]
                 : <Widget>[
-                    // if (!_commandEnabled && widget.actionsLocation == ActionsLocation.left)
-                    //   _buildExpandActionsButton(context),
                     _buildTextInput(context),
-                    // if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
-                    //   _buildExpandActionsButton(context),
-                    // if (widget.sendButtonLocation == SendButtonLocation.outside)
                     if (_effectiveController.text.isNotEmpty)
                       _buildSendButton(context)
                     else
@@ -930,11 +925,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   /// this will open the native file system and allow the user to select one
   /// or more files.
   Future<void> _onAttachmentButtonPressed() async {
-    _effectiveController.addListener(
-      () {
-        setState(() {});
-      },
-    );
     final attachments = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
       onError: widget.onError,
