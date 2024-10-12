@@ -5,15 +5,16 @@ import 'dart:math';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart' as image_picker;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/custom_theme/unikon_theme.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_preview/attachment_preview_screen.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
-import 'package:stream_chat_flutter/src/message_input/gallery_picker_screen.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_preview/gallery_picker_screen.dart';
 import 'package:stream_chat_flutter/src/message_input/quoted_message_widget.dart';
-import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/message_input/voice_notes/voice_recording_widget.dart';
@@ -961,109 +962,114 @@ class StreamMessageInputState extends State<StreamMessageInput>
         : UnikonColorTheme.unfocusTextfieldBorderRadius;
 
     return Expanded(
-      child: DropTarget(
-        onDragDone: (details) async {
-          final files = details.files;
-          final attachments = <Attachment>[];
-          for (final file in files) {
-            final attachment = await file.toAttachment(type: 'file');
-            attachments.add(attachment);
-          }
-
-          if (attachments.isNotEmpty) _addAttachments(attachments);
-        },
-        onDragEntered: (details) {
-          setState(() {
-            _draggingBorder = Border.all(
-              color: _streamChatTheme.colorTheme.accentPrimary,
-            );
-          });
-        },
-        onDragExited: (details) {
-          setState(() => _draggingBorder = null);
-        },
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          margin: margin,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
-            color: UnikonColorTheme.messageSentIndicatorColor,
-            border: _draggingBorder,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(1.5),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(borderRadius),
-              ),
-              child: LimitedBox(
-                maxHeight: widget.maxHeight,
-                child: PlatformWidgetBuilder(
-                  web: (context, child) => Focus(
-                    skipTraversal: true,
-                    onKeyEvent: _handleKeyPressed,
-                    child: child!,
-                  ),
-                  desktop: (context, child) => Focus(
-                    skipTraversal: true,
-                    onKeyEvent: _handleKeyPressed,
-                    child: child!,
-                  ),
-                  mobile: (context, child) => Focus(
-                    skipTraversal: true,
-                    onKeyEvent: _handleKeyPressed,
-                    child: child!,
-                  ),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: StreamMessageTextField(
-                          key: const Key('messageInputText'),
-                          maxLines: widget.maxLines,
-                          minLines: widget.minLines,
-                          textInputAction: widget.textInputAction,
-                          onSubmitted: (_) => sendMessage(),
-                          keyboardType: widget.keyboardType,
-                          controller: _effectiveController,
-                          focusNode: _effectiveFocusNode,
-                          style: _messageInputTheme.inputTextStyle?.copyWith(
-                            color: UnikonColorTheme.messageInputHintColor,
-                          ),
-                          autofocus: widget.autofocus,
-                          textAlignVertical: TextAlignVertical.center,
-                          decoration: _getInputDecoration(context),
-                          textCapitalization: widget.textCapitalization,
-                          autocorrect: widget.autoCorrect,
-                          contentInsertionConfiguration:
-                              widget.contentInsertionConfiguration,
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        margin: margin,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          color: UnikonColorTheme.messageSentIndicatorColor,
+          border: _draggingBorder,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(1.5),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            child: LimitedBox(
+              maxHeight: widget.maxHeight,
+              child: PlatformWidgetBuilder(
+                web: (context, child) => Focus(
+                  skipTraversal: true,
+                  onKeyEvent: _handleKeyPressed,
+                  child: child!,
+                ),
+                desktop: (context, child) => Focus(
+                  skipTraversal: true,
+                  onKeyEvent: _handleKeyPressed,
+                  child: child!,
+                ),
+                mobile: (context, child) => Focus(
+                  skipTraversal: true,
+                  onKeyEvent: _handleKeyPressed,
+                  child: child!,
+                ),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: StreamMessageTextField(
+                        key: const Key('messageInputText'),
+                        maxLines: widget.maxLines,
+                        minLines: widget.minLines,
+                        textInputAction: widget.textInputAction,
+                        onSubmitted: (_) => sendMessage(),
+                        keyboardType: widget.keyboardType,
+                        controller: _effectiveController,
+                        focusNode: _effectiveFocusNode,
+                        style: _messageInputTheme.inputTextStyle?.copyWith(
+                          color: UnikonColorTheme.messageInputHintColor,
+                        ),
+                        autofocus: widget.autofocus,
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: _getInputDecoration(context),
+                        textCapitalization: widget.textCapitalization,
+                        autocorrect: widget.autoCorrect,
+                        contentInsertionConfiguration:
+                            widget.contentInsertionConfiguration,
+                      ),
+                    ),
+                    if (_effectiveController.message.quotedMessage == null)
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GalleryPickerScreen(
+                                  effectiveController: _effectiveController,
+                                ),
+                              ));
+                        },
+                        icon: const Icon(
+                          Icons.attachment,
+                          color: UnikonColorTheme.darkGreyColor,
                         ),
                       ),
-                      if (_effectiveController.message.quotedMessage == null)
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const GalleryPickerScreen(),
-                                ));
-                          },
-                          icon: const Icon(
-                            Icons.attachment,
-                            color: UnikonColorTheme.darkGreyColor,
-                          ),
+                    if (_effectiveController.message.quotedMessage == null &&
+                        _effectiveController.text.isEmpty)
+                      IconButton(
+                        onPressed: () async {
+                          StreamAttachmentPickerController
+                              attachmentController =
+                              StreamAttachmentPickerController();
+
+                          final pickedImage =
+                              await runInPermissionRequestLock(() {
+                            return StreamAttachmentHandler.instance.pickImage(
+                              source: image_picker.ImageSource.camera,
+                              preferredCameraDevice:
+                                  image_picker.CameraDevice.rear,
+                            );
+                          });
+                          if (pickedImage != null) {
+                            await attachmentController
+                                .addAttachment(pickedImage);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AttachmentPreviewScreen(
+                                  attachmentController: attachmentController,
+                                  effectiveController: _effectiveController,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.camera_alt,
+                          color: UnikonColorTheme.darkGreyColor,
                         ),
-                      if (_effectiveController.message.quotedMessage == null &&
-                          _effectiveController.text.isEmpty)
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.camera_alt,
-                            color: UnikonColorTheme.darkGreyColor,
-                          ),
-                        ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
             ),

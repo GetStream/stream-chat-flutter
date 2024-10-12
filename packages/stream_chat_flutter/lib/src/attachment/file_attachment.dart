@@ -81,7 +81,7 @@ class StreamFileAttachment extends StatelessWidget {
             width: 34,
             height: 40,
             margin: const EdgeInsets.all(8),
-            child: _FileTypeImage(file: file),
+            child: FileTypeImage(file: file),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -115,8 +115,8 @@ class StreamFileAttachment extends StatelessWidget {
   }
 }
 
-class _FileTypeImage extends StatelessWidget {
-  const _FileTypeImage({required this.file});
+class FileTypeImage extends StatelessWidget {
+  const FileTypeImage({required this.file});
 
   final Attachment file;
 
@@ -139,10 +139,6 @@ class _FileTypeImage extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: colorTheme.borders,
-              strokeAlign: BorderSide.strokeAlignOutside,
-            ),
             borderRadius: BorderRadius.circular(8),
           ),
         ),

@@ -32,9 +32,19 @@ class UnikonColorTheme {
 
   static const Color stopAudioRecordingMessage = Color.fromRGBO(226, 44, 44, 1);
 
+  static const Color backButtonLinearGradientColor1 =
+      Color.fromRGBO(68, 68, 68, 0.16);
+
+  static const Color backButtonLinearGradientColor2 =
+      Color.fromRGBO(170, 170, 170, 0.15);
+
+  static const Color optionsCardBGColor = Color.fromRGBO(29, 30, 37, 1);
+
   static const replyIcon = "images/reply.png";
 
   static const deleteIcon = "images/delete.png";
 
   static const recordingIcon = "images/recording.png";
+
+  static const folderIcon = "images/folder.png";
 }
