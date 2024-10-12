@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/custom_theme/unikon_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a sending button.
@@ -63,34 +64,55 @@ class StreamMessageSendButton extends StatelessWidget {
   }
 
   Widget _buildIdleSendButton(BuildContext context) {
-    final _messageInputTheme = StreamMessageInputTheme.of(context);
-
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: StreamSvgIcon(
-        assetName: _getIdleSendIcon(),
-        color: _messageInputTheme.sendButtonIdleColor,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: UnikonColorTheme.sendMessageInactiveStateColor,
+          borderRadius: BorderRadius.circular(
+            UnikonColorTheme.unfocusTextfieldBorderRadius,
+          ),
+        ),
+        child: IconButton(
+            onPressed: () {},
+            padding: EdgeInsets.zero,
+            splashRadius: 24,
+            constraints: const BoxConstraints.tightFor(
+              height: 24,
+              width: 24,
+            ),
+            icon: const Icon(
+              Icons.send,
+              size: 20,
+              color: UnikonColorTheme.messageSentIndicatorColor,
+            )),
       ),
     );
   }
 
   Widget _buildSendButton(BuildContext context) {
-    final _messageInputTheme = StreamMessageInputTheme.of(context);
-
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: IconButton(
-        onPressed: onSendMessage,
-        padding: EdgeInsets.zero,
-        splashRadius: 24,
-        constraints: const BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: UnikonColorTheme.primaryColor,
+          borderRadius: BorderRadius.circular(
+            UnikonColorTheme.unfocusTextfieldBorderRadius,
+          ),
         ),
-        icon: StreamSvgIcon(
-          assetName: _getSendIcon(),
-          color: _messageInputTheme.sendButtonColor,
-        ),
+        child: IconButton(
+            onPressed: onSendMessage,
+            padding: EdgeInsets.zero,
+            splashRadius: 24,
+            constraints: const BoxConstraints.tightFor(
+              height: 24,
+              width: 24,
+            ),
+            icon: const Icon(
+              Icons.send,
+              size: 20,
+              color: UnikonColorTheme.messageSentIndicatorColor,
+            )),
       ),
     );
   }

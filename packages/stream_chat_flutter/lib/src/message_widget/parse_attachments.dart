@@ -102,8 +102,11 @@ class ParseAttachments extends StatelessWidget {
       }
     };
 
+    final userId = StreamChat.of(context).currentUser?.id;
+
     // Create a default attachmentBuilders list if not provided.
     final builders = StreamAttachmentWidgetBuilder.defaultBuilders(
+      userId: userId,
       message: message,
       shape: attachmentShape,
       padding: attachmentPadding,

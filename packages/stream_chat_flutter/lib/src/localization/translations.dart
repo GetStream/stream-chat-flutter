@@ -480,13 +480,13 @@ class DefaultTranslations implements Translations {
   String get alsoSendAsDirectMessageLabel => 'Also send as direct message';
 
   @override
-  String get addACommentOrSendLabel => 'Add a comment or send';
+  String get addACommentOrSendLabel => 'Type your message...';
 
   @override
   String get searchGifLabel => 'Search GIFs';
 
   @override
-  String get writeAMessageLabel => 'Write a message';
+  String get writeAMessageLabel => 'Type your message...';
 
   @override
   String get instantCommandsLabel => 'Instant Commands';

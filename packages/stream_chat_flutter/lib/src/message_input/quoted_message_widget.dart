@@ -22,6 +22,8 @@ class StreamQuotedMessageWidget extends StatelessWidget {
     this.padding = const EdgeInsets.all(8),
     this.onQuotedMessageClear,
     required this.isMyMessage,
+    this.onQuotedMessageCleared,
+    this.isReplying = false,
   });
 
   /// The message
@@ -53,21 +55,43 @@ class StreamQuotedMessageWidget extends StatelessWidget {
 
   final bool isMyMessage;
 
+  final VoidCallback? onQuotedMessageCleared;
+
+  final bool isReplying;
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: _QuotedMessage(
-        message: message,
-        textLimit: textLimit,
-        messageTheme: messageTheme,
-        showBorder: showBorder,
-        reverse: reverse,
-        textBuilder: textBuilder,
-        onQuotedMessageClear: onQuotedMessageClear,
-        attachmentThumbnailBuilders: attachmentThumbnailBuilders,
-        isMyMessage: isMyMessage,
-      ),
+    return Stack(
+      children: [
+        Padding(
+          padding: padding,
+          child: _QuotedMessage(
+            message: message,
+            textLimit: textLimit,
+            messageTheme: messageTheme,
+            showBorder: showBorder,
+            reverse: reverse,
+            textBuilder: textBuilder,
+            onQuotedMessageClear: onQuotedMessageClear,
+            attachmentThumbnailBuilders: attachmentThumbnailBuilders,
+            isMyMessage: isMyMessage,
+            isReplying: isReplying,
+          ),
+        ),
+        if (onQuotedMessageCleared != null)
+          Positioned(
+            right: 0,
+            top: 0,
+            child: IconButton(
+              onPressed: onQuotedMessageCleared,
+              icon: const Icon(
+                Icons.close,
+                color: UnikonColorTheme.whiteHintTextColor,
+                size: 16,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -83,6 +107,7 @@ class _QuotedMessage extends StatelessWidget {
     this.onQuotedMessageClear,
     this.attachmentThumbnailBuilders,
     required this.isMyMessage,
+    this.isReplying = false,
   });
 
   final Message message;
@@ -93,6 +118,7 @@ class _QuotedMessage extends StatelessWidget {
   final bool reverse;
   final Widget Function(BuildContext, Message)? textBuilder;
   final bool isMyMessage;
+  final bool isReplying;
 
   final _Builders? attachmentThumbnailBuilders;
 
@@ -178,11 +204,9 @@ class _QuotedMessage extends StatelessWidget {
         color: isMyMessage
             ? UnikonColorTheme.replyQuotedMessageBGColor2
             : UnikonColorTheme.replyQuotedMessageBGColor,
-        border: Border(
+        border: const Border(
             left: BorderSide(
-          color: !isMyMessage
-              ? UnikonColorTheme.primaryColor
-              : UnikonColorTheme.whiteHintTextColor,
+          color: UnikonColorTheme.greyColor,
           width: 2,
         )),
         borderRadius: BorderRadius.circular(12),
@@ -191,14 +215,52 @@ class _QuotedMessage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (message.user != null)
-            Text(
-              message.user!.name,
-              style: messageTheme.messageTextStyle?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
+          Row(
+            children: [
+              if (message.user != null)
+                Text(
+                  isMyMessage ? 'You' : message.user!.name,
+                  style: messageTheme.messageTextStyle?.copyWith(
+                    color: isMyMessage
+                        ? UnikonColorTheme.primaryColor
+                        : UnikonColorTheme.messageSentIndicatorColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              if (isReplying)
+                Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: SizedBox(
+                        height: 10,
+                        width: 10,
+                        child: VerticalDivider(
+                          color: UnikonColorTheme.dividerColor,
+                          thickness: 1,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Image.asset(
+                        UnikonColorTheme.replyIcon,
+                      ),
+                    ),
+                    Text(
+                      'Replying',
+                      style: messageTheme.messageTextStyle?.copyWith(
+                        color: UnikonColorTheme.dividerColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
           Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment:

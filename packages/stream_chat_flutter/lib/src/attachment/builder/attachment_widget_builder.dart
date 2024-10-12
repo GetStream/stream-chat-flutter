@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/message_input/voice_notes/audio_attachment_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 part 'fallback_attachment_builder.dart';
@@ -63,14 +64,19 @@ abstract class StreamAttachmentWidgetBuilder {
   /// widget.
   static List<StreamAttachmentWidgetBuilder> defaultBuilders({
     required Message message,
+    required String? userId,
     ShapeBorder? shape,
     EdgeInsetsGeometry padding = const EdgeInsets.all(4),
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
     List<StreamAttachmentWidgetBuilder>? customAttachmentBuilders,
   }) {
+    final isMyMessage = message.user?.id == userId;
     return [
       ...?customAttachmentBuilders,
 
+      AudioAttachmentBuilder(
+        isMyMessage: isMyMessage,
+      ),
       // Handles a mix of image, gif, video, url and file attachments.
       MixedAttachmentBuilder(
         padding: padding,
