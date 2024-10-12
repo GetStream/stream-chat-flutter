@@ -79,7 +79,7 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> {
           ),
           actions: [
             Text(
-              '(${widget.attachmentController.value.length}) media selected',
+              '${widget.attachmentController.value.length} media selected',
               style: const TextStyle(color: UnikonColorTheme.dividerColor),
             ),
           ],

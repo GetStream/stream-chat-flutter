@@ -1053,7 +1053,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                           if (pickedImage != null) {
                             await attachmentController
                                 .addAttachment(pickedImage);
-                            Navigator.pushReplacement(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => AttachmentPreviewScreen(
