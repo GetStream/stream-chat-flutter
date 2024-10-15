@@ -6,11 +6,13 @@ class TranslucentScaffold extends StatelessWidget {
     required this.body,
     this.appBar,
     this.bottomNavigationBar,
+    this.resizeToAvoidBottomInset = true,
   });
 
   final Widget? body;
   final Widget? appBar;
   final Widget? bottomNavigationBar;
+  final bool resizeToAvoidBottomInset;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +87,7 @@ class TranslucentScaffold extends StatelessWidget {
           ),
         ),
         Scaffold(
+          resizeToAvoidBottomInset: resizeToAvoidBottomInset,
           backgroundColor: Colors.transparent,
           body: body,
           appBar: appBar != null

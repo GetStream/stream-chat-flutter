@@ -119,26 +119,29 @@ class _StreamMessageInputAttachmentListState
       return const SizedBox();
     }
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        if (mediaAttachments.isNotEmpty)
-          Flexible(
-            child: MessageInputMediaAttachments(
-              attachments: mediaAttachments,
-              attachmentBuilder: widget.mediaAttachmentBuilder,
-              onRemovePressed: widget.onRemovePressed,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 80.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          if (mediaAttachments.isNotEmpty)
+            Flexible(
+              child: MessageInputMediaAttachments(
+                attachments: mediaAttachments,
+                attachmentBuilder: widget.mediaAttachmentBuilder,
+                onRemovePressed: widget.onRemovePressed,
+              ),
             ),
-          ),
-        if (fileAttachments.isNotEmpty)
-          Flexible(
-            child: MessageInputFileAttachments(
-              attachments: fileAttachments,
-              attachmentBuilder: widget.fileAttachmentBuilder,
-              onRemovePressed: widget.onRemovePressed,
+          if (fileAttachments.isNotEmpty)
+            Flexible(
+              child: MessageInputFileAttachments(
+                attachments: fileAttachments,
+                attachmentBuilder: widget.fileAttachmentBuilder,
+                onRemovePressed: widget.onRemovePressed,
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

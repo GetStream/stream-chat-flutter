@@ -947,7 +947,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             ? const EdgeInsets.only(left: 8)
             : EdgeInsets.zero);
 
-    final double borderRadius = _effectiveController.text.isNotEmpty
+    final double borderRadius = _effectiveController.text.trim().isNotEmpty
         ? UnikonColorTheme.focusTextfieldBorderRadius
         : UnikonColorTheme.unfocusTextfieldBorderRadius;
 
@@ -1011,11 +1011,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     if (_effectiveController.message.quotedMessage == null)
                       IconButton(
                         onPressed: () {
+                          final channel = StreamChannel.of(context).channel;
                           Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => GalleryPickerScreen(
                                   effectiveController: _effectiveController,
+                                  channel: channel,
                                 ),
                               ));
                         },
@@ -1041,6 +1043,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
                             );
                           });
                           if (pickedImage != null) {
+                            final channel = StreamChannel.of(context).channel;
+
                             await attachmentController
                                 .addAttachment(pickedImage);
                             Navigator.push(
@@ -1049,6 +1053,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                                 builder: (context) => AttachmentPreviewScreen(
                                   attachmentController: attachmentController,
                                   effectiveController: _effectiveController,
+                                  channel: channel,
                                 ),
                               ),
                             );

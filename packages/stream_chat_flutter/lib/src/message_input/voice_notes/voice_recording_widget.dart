@@ -85,7 +85,6 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
       child: Row(
         children: [
           const SizedBox(width: 16),
@@ -114,7 +113,10 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
                   ] else ...[
                     Padding(
                       padding: const EdgeInsets.all(2.0),
-                      child: Image.asset(UnikonColorTheme.recordingIcon),
+                      child: Image.asset(
+                        UnikonColorTheme.recordingIcon,
+                        width: 40,
+                      ),
                     ),
                     Expanded(
                       child: AudioWaveforms(
@@ -170,13 +172,17 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
                     },
                     icon: Image.asset(
                       UnikonColorTheme.deleteIcon,
+                      width: 24,
                     ),
                   ),
                 ]),
               ),
             ),
           ),
-          _buildStopAndSendButton(),
+          const SizedBox(
+            width: 8,
+          ),
+          SizedBox(width: 50, child: _buildStopAndSendButton()),
         ],
       ),
     );

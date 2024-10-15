@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:stream_chat_flutter/src/message_input/voice_notes/audio_loading_message.dart';
-import 'package:stream_chat_flutter/src/message_input/voice_notes/audio_wave_bars.dart';
+import 'audio_wave_bars.dart';
+import 'audio_loading_message.dart';
 
 class AudioPlayerMessage extends StatefulWidget {
   const AudioPlayerMessage({
@@ -31,6 +29,8 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
   late StreamSubscription<PlayerState> _playerStateChangedSubscription;
 
   late Future<Duration?> futureDuration;
+  double _progress = 0.0;
+  Duration? _totalDuration;
 
   @override
   void initState() {
@@ -40,10 +40,39 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
         _audioPlayer.playerStateStream.listen(playerStateListener);
 
     futureDuration = _audioPlayer.setAudioSource(widget.source);
+
+    // Listen to the duration stream to get the total duration
+    _audioPlayer.durationStream.listen((duration) {
+      if (duration != null) {
+        setState(() {
+          _totalDuration = duration;
+        });
+      }
+    });
+
+    // Update progress based on current position and total duration
+    _audioPlayer.positionStream.listen((position) {
+      final totalDuration = _totalDuration;
+      if (totalDuration != null && totalDuration.inMilliseconds > 0) {
+        setState(() {
+          final progress = position.inMilliseconds.toDouble() /
+              totalDuration.inMilliseconds.toDouble();
+          _progress = progress.clamp(0.0, 1.0);
+        });
+      } else {
+        // Duration is not yet available
+        setState(() {
+          _progress = 0.0;
+        });
+      }
+    });
   }
 
   void playerStateListener(PlayerState state) async {
     if (state.processingState == ProcessingState.completed) {
+      setState(() {
+        _progress = 1.0;
+      });
       await reset();
     }
   }
@@ -70,24 +99,17 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
               _controlButtons(snapshot.data),
               if (widget.fileWaveFormData != null) ...[
                 Expanded(
-                    child: StreamBuilder<Duration?>(
-                  stream: _audioPlayer.positionStream,
-                  builder: (context, snapshot) {
-                    return AudioWaveBars(
-                        amplitudes: widget.fileWaveFormData!,
-                        height: 35,
-                        barColor:
-                            widget.isMyMessage ? Colors.white : Colors.teal,
-                        barSpacing: 2,
-                        barColorActive: Colors.black45,
-                        progress: _audioPlayer.duration != null
-                            ? _audioPlayer.position.inMicroseconds /
-                                _audioPlayer.duration!.inMicroseconds
-                            : 0,
-                        barBorderRadius: 10,
-                        barWidth: 2);
-                  },
-                )),
+                  child: AudioWaveBars(
+                    amplitudes: widget.fileWaveFormData!,
+                    height: 35,
+                    barColor: widget.isMyMessage ? Colors.white : Colors.teal,
+                    barSpacing: 2,
+                    barColorActive: Colors.white,
+                    progress: _progress,
+                    barBorderRadius: 10,
+                    barWidth: 2,
+                  ),
+                ),
               ],
               const SizedBox(
                 width: 16,
@@ -107,7 +129,8 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
         const color = Colors.white;
         final icon =
             _audioPlayer.playerState.playing ? Icons.pause : Icons.play_arrow;
-        String audioDuration = duration.toString().split('.').first;
+        String audioDuration =
+            _totalDuration?.toString().split('.').first ?? '0:00';
         audioDuration = audioDuration.split(':').sublist(1).join(':');
         return Padding(
           padding: const EdgeInsets.all(4.0),
@@ -135,36 +158,19 @@ class AudioPlayerMessageState extends State<AudioPlayerMessage> {
     );
   }
 
-  Widget _slider(Duration? duration) {
-    return StreamBuilder<Duration>(
-      stream: _audioPlayer.positionStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData && duration != null) {
-          return Slider(
-            thumbColor: Colors.white,
-            activeColor: Colors.white,
-            value: snapshot.data!.inMicroseconds / duration.inMicroseconds,
-            onChanged: (val) {
-              _audioPlayer.seek(duration * val);
-            },
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
-      },
-    );
+  Future<void> play() async {
+    await _audioPlayer.play();
   }
 
-  Future<void> play() {
-    return _audioPlayer.play();
-  }
-
-  Future<void> pause() {
-    return _audioPlayer.pause();
+  Future<void> pause() async {
+    await _audioPlayer.pause();
   }
 
   Future<void> reset() async {
     await _audioPlayer.stop();
-    return _audioPlayer.seek(const Duration(milliseconds: 0));
+    await _audioPlayer.seek(Duration.zero);
+    setState(() {
+      _progress = 0.0;
+    });
   }
 }

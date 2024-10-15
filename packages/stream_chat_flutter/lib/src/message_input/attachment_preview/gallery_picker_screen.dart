@@ -11,8 +11,10 @@ class GalleryPickerScreen extends StatefulWidget {
   const GalleryPickerScreen({
     super.key,
     required this.effectiveController,
+    required this.channel,
   });
   final StreamMessageInputController effectiveController;
+  final Channel channel;
 
   @override
   State<GalleryPickerScreen> createState() => _GalleryPickerScreenState();
@@ -76,6 +78,7 @@ class _GalleryPickerScreenState extends State<GalleryPickerScreen> {
                     padding: const EdgeInsets.all(16),
                     child: BuildMediaAttachment(
                       effectiveController: widget.effectiveController,
+                      channel: widget.channel,
                     ),
                   ),
                   Padding(
@@ -122,6 +125,7 @@ class _GalleryPickerScreenState extends State<GalleryPickerScreen> {
                           builder: (context) => AttachmentPreviewScreen(
                             attachmentController: attachmentController,
                             effectiveController: widget.effectiveController,
+                            channel: widget.channel,
                           ),
                         ),
                       );
@@ -153,8 +157,10 @@ class BuildMediaAttachment extends StatelessWidget {
   const BuildMediaAttachment({
     super.key,
     required this.effectiveController,
+    required this.channel,
   });
   final StreamMessageInputController effectiveController;
+  final Channel channel;
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +181,7 @@ class BuildMediaAttachment extends StatelessWidget {
               builder: (context) => AttachmentPreviewScreen(
                 attachmentController: attachmentController,
                 effectiveController: effectiveController,
+                channel: channel,
               ),
             ),
           );

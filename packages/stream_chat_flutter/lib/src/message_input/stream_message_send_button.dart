@@ -74,18 +74,19 @@ class StreamMessageSendButton extends StatelessWidget {
           ),
         ),
         child: IconButton(
-            onPressed: () {},
-            padding: EdgeInsets.zero,
-            splashRadius: 24,
-            constraints: const BoxConstraints.tightFor(
-              height: 24,
-              width: 24,
-            ),
-            icon: const Icon(
-              Icons.send,
-              size: 20,
-              color: UnikonColorTheme.messageSentIndicatorColor,
-            )),
+          onPressed: () {},
+          padding: EdgeInsets.zero,
+          splashRadius: 24,
+          constraints: const BoxConstraints.tightFor(
+            height: 24,
+            width: 24,
+          ),
+          icon: const Icon(
+            Icons.send,
+            size: 20,
+            color: UnikonColorTheme.messageSentIndicatorColor,
+          ),
+        ),
       ),
     );
   }
