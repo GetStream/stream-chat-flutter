@@ -30,7 +30,8 @@ class UnikonColorTheme {
   static const Color sendMessageInactiveStateColor =
       const Color.fromRGBO(80, 80, 80, 1);
 
-  static const Color stopAudioRecordingMessage = Color.fromRGBO(226, 44, 44, 1);
+  static const Color stopAudioRecordingMessageColor =
+      Color.fromRGBO(226, 44, 44, 1);
 
   static const Color backButtonLinearGradientColor1 =
       Color.fromRGBO(68, 68, 68, 0.16);
