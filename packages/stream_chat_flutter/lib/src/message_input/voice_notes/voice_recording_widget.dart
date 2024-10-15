@@ -1,11 +1,10 @@
+import 'dart:developer' as dev;
 import 'dart:math';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/custom_theme/unikon_theme.dart';
-import 'dart:developer' as dev;
-
 import 'package:stream_chat_flutter/src/message_input/voice_notes/offline_audio_wave_widget.dart';
 
 /// This will handle the recording and the preview of the
@@ -188,7 +187,7 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: _isRecording
-            ? UnikonColorTheme.stopAudioRecordingMessage
+            ? UnikonColorTheme.stopAudioRecordingMessageColor
             : UnikonColorTheme.primaryColor,
         shape: BoxShape.circle,
       ),
@@ -218,7 +217,7 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget> {
                     child: Icon(
                       Icons.stop,
                       size: 20,
-                      color: UnikonColorTheme.stopAudioRecordingMessage,
+                      color: UnikonColorTheme.stopAudioRecordingMessageColor,
                     ),
                   ),
                 )
