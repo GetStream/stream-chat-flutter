@@ -32,7 +32,7 @@ class UserBlock extends Equatable {
   /// Reason for the ban.
   final String? blockedUserId;
 
-  /// Timestamp when the [user] was banned.
+  /// Timestamp when the [user] was blocked.
   final DateTime? createdAt;
 
   /// Serialize to json
