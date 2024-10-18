@@ -29,7 +29,7 @@ class UserBlock extends Equatable {
   /// Reason for the block.
   final String? userId;
 
-  /// Reason for the ban.
+  /// ID of the [blockedUser].
   final String? blockedUserId;
 
   /// Timestamp when the [user] was blocked.
