@@ -23,7 +23,7 @@ class UserBlock extends Equatable {
   /// User that blocked the [blockedUser].
   final User user;
 
-  /// User that banned the [user].
+  /// User that was blocked by the [user].
   final User? blockedUser;
 
   /// Reason for the ban.
