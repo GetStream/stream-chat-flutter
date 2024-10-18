@@ -167,4 +167,19 @@ void main() {
         })).called(1);
     verifyNoMoreInteractions(client);
   });
+
+  test('queryBlockedUsers', () async {
+    const path = '/users/block';
+
+    when(() => client.get(path)).thenAnswer(
+      (_) async => successResponse(path, data: <String, dynamic>{}),
+    );
+
+    final res = await userApi.queryBlockedUsers();
+
+    expect(res, isNotNull);
+
+    verify(() => client.get(path)).called(1);
+    verifyNoMoreInteractions(client);
+  });
 }
