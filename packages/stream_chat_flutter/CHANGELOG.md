@@ -21,6 +21,7 @@
 
 - Fixed null errors in web from markdown.
 - Fixed bug causing background events to be sent in foreground.
+- Added `onThreadTap` parameter to `MessageWidgetContent` to enable thread tap action.
 
 ## 7.3.0 
 
