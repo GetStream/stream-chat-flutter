@@ -20,7 +20,7 @@ class UserBlock extends Equatable {
   factory UserBlock.fromJson(Map<String, dynamic> json) =>
       _$UserBlockFromJson(json);
 
-  /// Banned user.
+  /// User that blocked the [blockedUser].
   final User user;
 
   /// User that banned the [user].
