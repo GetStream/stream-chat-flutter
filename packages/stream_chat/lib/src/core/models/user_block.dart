@@ -4,7 +4,7 @@ import 'package:stream_chat/src/core/models/user.dart';
 
 part 'user_block.g.dart';
 
-/// Contains information about a [User] that was blocked from a [Channel] or App.
+/// Contains information about a [User] blocked from a [Channel] or App.
 @JsonSerializable()
 class UserBlock extends Equatable {
   /// Creates a new instance of [UserBlock]
