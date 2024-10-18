@@ -26,7 +26,7 @@ class UserBlock extends Equatable {
   /// User that was blocked by the [user].
   final User? blockedUser;
 
-  /// Reason for the ban.
+  /// Reason for the block.
   final String? userId;
 
   /// Reason for the ban.
