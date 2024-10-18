@@ -59,4 +59,32 @@ class UserApi {
     );
     return UpdateUsersResponse.fromJson(response.data);
   }
+
+  /// Blocks a user
+  Future<UserBlockResponse> blockUser(String userId) async {
+    final response = await _client.post(
+      '/users/block',
+      data: {'blocked_user_id': userId},
+    );
+
+    return UserBlockResponse.fromJson(response.data);
+  }
+
+  /// Unblocks a user
+  Future<EmptyResponse> unblockUser(String userId) async {
+    final response = await _client.post(
+      '/users/unblock',
+      data: {'blocked_user_id': userId},
+    );
+    return EmptyResponse.fromJson(response.data);
+  }
+
+  /// Requests blocked users.
+  Future<BlockedUsersResponse> queryBlockedUsers() async {
+    final response = await _client.get(
+      '/users/block',
+    );
+
+    return BlockedUsersResponse.fromJson(response.data);
+  }
 }

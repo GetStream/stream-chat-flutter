@@ -1,6 +1,7 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
+import 'package:stream_chat/src/core/models/user_block.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -1880,6 +1881,65 @@ void main() {
         () => api.moderation.unbanUser(userId, options: any(named: 'options')),
       ).called(1);
       verifyNoMoreInteractions(api.moderation);
+    });
+
+    test('`.blockUser`', () async {
+      const userId = 'test-user-id';
+
+      when(() => api.user.blockUser(userId)).thenAnswer(
+        (_) async => UserBlockResponse.fromJson({
+          'blocked_by_user_id': 'deven',
+          'blocked_user_id': 'jaap',
+          'created_at': '2024-10-01 12:45:23.456',
+        }),
+      );
+
+      final res = await client.blockUser(userId);
+
+      expect(res, isNotNull);
+
+      verify(
+        () => api.user.blockUser(userId),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.unblockUser`', () async {
+      const userId = 'test-user-id';
+
+      when(() => api.user.unblockUser(userId))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.unblockUser(userId);
+
+      expect(res, isNotNull);
+
+      verify(
+        () => api.user.unblockUser(userId),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.queryBlockedUsers`', () async {
+      final users = List.generate(
+        3,
+        (index) => User(id: 'test-user-id-$index'),
+      );
+
+      when(() => api.user.queryBlockedUsers()).thenAnswer(
+        (_) async => BlockedUsersResponse()
+          ..blocks = [
+            UserBlock(user: users[0], blockedUser: users[1]),
+            UserBlock(user: users[0], blockedUser: users[2]),
+          ],
+      );
+
+      final res = await client.queryBlockedUsers();
+      expect(res, isNotNull);
+      expect(res.blocks.length, 2);
+
+      verify(() => api.user.queryBlockedUsers()).called(1);
+      verifyNoMoreInteractions(api.user);
     });
 
     test('`.shadowBan`', () async {
