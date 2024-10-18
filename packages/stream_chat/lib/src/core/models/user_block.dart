@@ -7,7 +7,7 @@ part 'user_block.g.dart';
 /// Contains information about a [User] that was blocked from a [Channel] or App.
 @JsonSerializable()
 class UserBlock extends Equatable {
-  /// Creates a new instance of [BannedUser]
+  /// Creates a new instance of [UserBlock]
   const UserBlock({
     required this.user,
     this.blockedUser,
