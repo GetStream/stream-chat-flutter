@@ -55,6 +55,7 @@ void main() {
       state: jsonEncode(MessageState.sent),
       localUpdatedAt: DateTime.now(),
       remoteUpdatedAt: DateTime.now().add(const Duration(seconds: 1)),
+      messageTextUpdatedAt: DateTime.now().add(const Duration(minutes: 5)),
       extraData: {'extra_test_data': 'extraData'},
       userId: user.id,
       localDeletedAt: DateTime.now(),
@@ -99,6 +100,10 @@ void main() {
     expect(message.state, MessageState.fromJson(jsonDecode(entity.state)));
     expect(message.localUpdatedAt, isSameDateAs(entity.localUpdatedAt));
     expect(message.remoteUpdatedAt, isSameDateAs(entity.remoteUpdatedAt));
+    expect(
+      message.messageTextUpdatedAt,
+      isSameDateAs(entity.messageTextUpdatedAt),
+    );
     expect(message.extraData, entity.extraData);
     expect(message.user!.id, entity.userId);
     expect(message.localDeletedAt, isSameDateAs(entity.localDeletedAt));
@@ -166,6 +171,7 @@ void main() {
       ),
       localUpdatedAt: DateTime.now(),
       updatedAt: DateTime.now().add(const Duration(seconds: 1)),
+      messageTextUpdatedAt: DateTime.now().add(const Duration(minutes: 5)),
       extraData: const {'extra_test_data': 'extraData'},
       user: user,
       localDeletedAt: DateTime.now(),
@@ -200,6 +206,10 @@ void main() {
     expect(entity.state, jsonEncode(message.state));
     expect(entity.localUpdatedAt, isSameDateAs(message.localUpdatedAt));
     expect(entity.remoteUpdatedAt, isSameDateAs(message.remoteUpdatedAt));
+    expect(
+      entity.messageTextUpdatedAt,
+      isSameDateAs(message.messageTextUpdatedAt),
+    );
     expect(entity.extraData, message.extraData);
     expect(entity.userId, message.user!.id);
     expect(entity.localDeletedAt, isSameDateAs(message.localDeletedAt));
