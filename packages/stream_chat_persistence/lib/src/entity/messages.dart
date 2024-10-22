@@ -124,7 +124,7 @@ class Messages extends Table {
       text().nullable().map(NullableMapConverter<String>())();
 
   /// Message custom extraData
-  TextColumn get extraData => text().nullable().map(MapConverter<Object?>())();
+  TextColumn get extraData => text().nullable().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {id};
