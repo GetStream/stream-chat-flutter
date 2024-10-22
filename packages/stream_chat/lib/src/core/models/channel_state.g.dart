@@ -19,7 +19,7 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) => ChannelState(
       pinnedMessages: (json['pinned_messages'] as List<dynamic>?)
           ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
           .toList(),
-      watcherCount: json['watcher_count'] as int?,
+      watcherCount: (json['watcher_count'] as num?)?.toInt(),
       watchers: (json['watchers'] as List<dynamic>?)
           ?.map((e) => User.fromJson(e as Map<String, dynamic>))
           .toList(),

@@ -22,8 +22,8 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       message: json['message'] == null
           ? null
           : Message.fromJson(json['message'] as Map<String, dynamic>),
-      totalUnreadCount: json['total_unread_count'] as int?,
-      unreadChannels: json['unread_channels'] as int?,
+      totalUnreadCount: (json['total_unread_count'] as num?)?.toInt(),
+      unreadChannels: (json['unread_channels'] as num?)?.toInt(),
       reaction: json['reaction'] == null
           ? null
           : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
@@ -97,8 +97,8 @@ EventChannel _$EventChannelFromJson(Map<String, dynamic> json) => EventChannel(
       deletedAt: json['deleted_at'] == null
           ? null
           : DateTime.parse(json['deleted_at'] as String),
-      memberCount: json['member_count'] as int? ?? 0,
+      memberCount: (json['member_count'] as num?)?.toInt() ?? 0,
       extraData: json['extra_data'] as Map<String, dynamic>?,
-      cooldown: json['cooldown'] as int? ?? 0,
+      cooldown: (json['cooldown'] as num?)?.toInt() ?? 0,
       team: json['team'] as String?,
     );

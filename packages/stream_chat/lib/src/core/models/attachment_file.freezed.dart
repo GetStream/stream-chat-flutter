@@ -12,7 +12,7 @@ part of 'attachment_file.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType']) {
@@ -83,6 +83,8 @@ mixin _$UploadState {
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
+
+  /// Serializes this UploadState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 }
 
@@ -102,33 +104,39 @@ class _$UploadStateCopyWithImpl<$Res, $Val extends UploadState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
-abstract class _$$PreparingCopyWith<$Res> {
-  factory _$$PreparingCopyWith(
-          _$Preparing value, $Res Function(_$Preparing) then) =
-      __$$PreparingCopyWithImpl<$Res>;
+abstract class _$$PreparingImplCopyWith<$Res> {
+  factory _$$PreparingImplCopyWith(
+          _$PreparingImpl value, $Res Function(_$PreparingImpl) then) =
+      __$$PreparingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$PreparingCopyWithImpl<$Res>
-    extends _$UploadStateCopyWithImpl<$Res, _$Preparing>
-    implements _$$PreparingCopyWith<$Res> {
-  __$$PreparingCopyWithImpl(
-      _$Preparing _value, $Res Function(_$Preparing) _then)
+class __$$PreparingImplCopyWithImpl<$Res>
+    extends _$UploadStateCopyWithImpl<$Res, _$PreparingImpl>
+    implements _$$PreparingImplCopyWith<$Res> {
+  __$$PreparingImplCopyWithImpl(
+      _$PreparingImpl _value, $Res Function(_$PreparingImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$Preparing extends Preparing {
-  const _$Preparing({final String? $type})
+class _$PreparingImpl extends Preparing {
+  const _$PreparingImpl({final String? $type})
       : $type = $type ?? 'preparing',
         super._();
 
-  factory _$Preparing.fromJson(Map<String, dynamic> json) =>
-      _$$PreparingFromJson(json);
+  factory _$PreparingImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PreparingImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -139,12 +147,12 @@ class _$Preparing extends Preparing {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Preparing);
+        (other.runtimeType == runtimeType && other is _$PreparingImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -224,43 +232,46 @@ class _$Preparing extends Preparing {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PreparingToJson(
+    return _$$PreparingImplToJson(
       this,
     );
   }
 }
 
 abstract class Preparing extends UploadState {
-  const factory Preparing() = _$Preparing;
+  const factory Preparing() = _$PreparingImpl;
   const Preparing._() : super._();
 
-  factory Preparing.fromJson(Map<String, dynamic> json) = _$Preparing.fromJson;
+  factory Preparing.fromJson(Map<String, dynamic> json) =
+      _$PreparingImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$InProgressCopyWith<$Res> {
-  factory _$$InProgressCopyWith(
-          _$InProgress value, $Res Function(_$InProgress) then) =
-      __$$InProgressCopyWithImpl<$Res>;
+abstract class _$$InProgressImplCopyWith<$Res> {
+  factory _$$InProgressImplCopyWith(
+          _$InProgressImpl value, $Res Function(_$InProgressImpl) then) =
+      __$$InProgressImplCopyWithImpl<$Res>;
   @useResult
   $Res call({int uploaded, int total});
 }
 
 /// @nodoc
-class __$$InProgressCopyWithImpl<$Res>
-    extends _$UploadStateCopyWithImpl<$Res, _$InProgress>
-    implements _$$InProgressCopyWith<$Res> {
-  __$$InProgressCopyWithImpl(
-      _$InProgress _value, $Res Function(_$InProgress) _then)
+class __$$InProgressImplCopyWithImpl<$Res>
+    extends _$UploadStateCopyWithImpl<$Res, _$InProgressImpl>
+    implements _$$InProgressImplCopyWith<$Res> {
+  __$$InProgressImplCopyWithImpl(
+      _$InProgressImpl _value, $Res Function(_$InProgressImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? uploaded = null,
     Object? total = null,
   }) {
-    return _then(_$InProgress(
+    return _then(_$InProgressImpl(
       uploaded: null == uploaded
           ? _value.uploaded
           : uploaded // ignore: cast_nullable_to_non_nullable
@@ -275,14 +286,14 @@ class __$$InProgressCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$InProgress extends InProgress {
-  const _$InProgress(
+class _$InProgressImpl extends InProgress {
+  const _$InProgressImpl(
       {required this.uploaded, required this.total, final String? $type})
       : $type = $type ?? 'inProgress',
         super._();
 
-  factory _$InProgress.fromJson(Map<String, dynamic> json) =>
-      _$$InProgressFromJson(json);
+  factory _$InProgressImpl.fromJson(Map<String, dynamic> json) =>
+      _$$InProgressImplFromJson(json);
 
   @override
   final int uploaded;
@@ -298,24 +309,26 @@ class _$InProgress extends InProgress {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$InProgress &&
+            other is _$InProgressImpl &&
             (identical(other.uploaded, uploaded) ||
                 other.uploaded == uploaded) &&
             (identical(other.total, total) || other.total == total));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, uploaded, total);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$InProgressCopyWith<_$InProgress> get copyWith =>
-      __$$InProgressCopyWithImpl<_$InProgress>(this, _$identity);
+  _$$InProgressImplCopyWith<_$InProgressImpl> get copyWith =>
+      __$$InProgressImplCopyWithImpl<_$InProgressImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -393,7 +406,7 @@ class _$InProgress extends InProgress {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$InProgressToJson(
+    return _$$InProgressImplToJson(
       this,
     );
   }
@@ -401,42 +414,51 @@ class _$InProgress extends InProgress {
 
 abstract class InProgress extends UploadState {
   const factory InProgress(
-      {required final int uploaded, required final int total}) = _$InProgress;
+      {required final int uploaded,
+      required final int total}) = _$InProgressImpl;
   const InProgress._() : super._();
 
   factory InProgress.fromJson(Map<String, dynamic> json) =
-      _$InProgress.fromJson;
+      _$InProgressImpl.fromJson;
 
   int get uploaded;
   int get total;
-  @JsonKey(ignore: true)
-  _$$InProgressCopyWith<_$InProgress> get copyWith =>
+
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$InProgressImplCopyWith<_$InProgressImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$SuccessCopyWith<$Res> {
-  factory _$$SuccessCopyWith(_$Success value, $Res Function(_$Success) then) =
-      __$$SuccessCopyWithImpl<$Res>;
+abstract class _$$SuccessImplCopyWith<$Res> {
+  factory _$$SuccessImplCopyWith(
+          _$SuccessImpl value, $Res Function(_$SuccessImpl) then) =
+      __$$SuccessImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
-class __$$SuccessCopyWithImpl<$Res>
-    extends _$UploadStateCopyWithImpl<$Res, _$Success>
-    implements _$$SuccessCopyWith<$Res> {
-  __$$SuccessCopyWithImpl(_$Success _value, $Res Function(_$Success) _then)
+class __$$SuccessImplCopyWithImpl<$Res>
+    extends _$UploadStateCopyWithImpl<$Res, _$SuccessImpl>
+    implements _$$SuccessImplCopyWith<$Res> {
+  __$$SuccessImplCopyWithImpl(
+      _$SuccessImpl _value, $Res Function(_$SuccessImpl) _then)
       : super(_value, _then);
+
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$Success extends Success {
-  const _$Success({final String? $type})
+class _$SuccessImpl extends Success {
+  const _$SuccessImpl({final String? $type})
       : $type = $type ?? 'success',
         super._();
 
-  factory _$Success.fromJson(Map<String, dynamic> json) =>
-      _$$SuccessFromJson(json);
+  factory _$SuccessImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SuccessImplFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -447,12 +469,12 @@ class _$Success extends Success {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Success);
+        (other.runtimeType == runtimeType && other is _$SuccessImpl);
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -532,40 +554,44 @@ class _$Success extends Success {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SuccessToJson(
+    return _$$SuccessImplToJson(
       this,
     );
   }
 }
 
 abstract class Success extends UploadState {
-  const factory Success() = _$Success;
+  const factory Success() = _$SuccessImpl;
   const Success._() : super._();
 
-  factory Success.fromJson(Map<String, dynamic> json) = _$Success.fromJson;
+  factory Success.fromJson(Map<String, dynamic> json) = _$SuccessImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$FailedCopyWith<$Res> {
-  factory _$$FailedCopyWith(_$Failed value, $Res Function(_$Failed) then) =
-      __$$FailedCopyWithImpl<$Res>;
+abstract class _$$FailedImplCopyWith<$Res> {
+  factory _$$FailedImplCopyWith(
+          _$FailedImpl value, $Res Function(_$FailedImpl) then) =
+      __$$FailedImplCopyWithImpl<$Res>;
   @useResult
   $Res call({String error});
 }
 
 /// @nodoc
-class __$$FailedCopyWithImpl<$Res>
-    extends _$UploadStateCopyWithImpl<$Res, _$Failed>
-    implements _$$FailedCopyWith<$Res> {
-  __$$FailedCopyWithImpl(_$Failed _value, $Res Function(_$Failed) _then)
+class __$$FailedImplCopyWithImpl<$Res>
+    extends _$UploadStateCopyWithImpl<$Res, _$FailedImpl>
+    implements _$$FailedImplCopyWith<$Res> {
+  __$$FailedImplCopyWithImpl(
+      _$FailedImpl _value, $Res Function(_$FailedImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? error = null,
   }) {
-    return _then(_$Failed(
+    return _then(_$FailedImpl(
       error: null == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -576,13 +602,13 @@ class __$$FailedCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$Failed extends Failed {
-  const _$Failed({required this.error, final String? $type})
+class _$FailedImpl extends Failed {
+  const _$FailedImpl({required this.error, final String? $type})
       : $type = $type ?? 'failed',
         super._();
 
-  factory _$Failed.fromJson(Map<String, dynamic> json) =>
-      _$$FailedFromJson(json);
+  factory _$FailedImpl.fromJson(Map<String, dynamic> json) =>
+      _$$FailedImplFromJson(json);
 
   @override
   final String error;
@@ -596,22 +622,24 @@ class _$Failed extends Failed {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$Failed &&
+            other is _$FailedImpl &&
             (identical(other.error, error) || other.error == error));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, error);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$FailedCopyWith<_$Failed> get copyWith =>
-      __$$FailedCopyWithImpl<_$Failed>(this, _$identity);
+  _$$FailedImplCopyWith<_$FailedImpl> get copyWith =>
+      __$$FailedImplCopyWithImpl<_$FailedImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -689,20 +717,23 @@ class _$Failed extends Failed {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$FailedToJson(
+    return _$$FailedImplToJson(
       this,
     );
   }
 }
 
 abstract class Failed extends UploadState {
-  const factory Failed({required final String error}) = _$Failed;
+  const factory Failed({required final String error}) = _$FailedImpl;
   const Failed._() : super._();
 
-  factory Failed.fromJson(Map<String, dynamic> json) = _$Failed.fromJson;
+  factory Failed.fromJson(Map<String, dynamic> json) = _$FailedImpl.fromJson;
 
   String get error;
-  @JsonKey(ignore: true)
-  _$$FailedCopyWith<_$Failed> get copyWith =>
+
+  /// Create a copy of UploadState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$FailedImplCopyWith<_$FailedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

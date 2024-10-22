@@ -9,7 +9,7 @@ part of 'requests.dart';
 SortOption<T> _$SortOptionFromJson<T>(Map<String, dynamic> json) =>
     SortOption<T>(
       json['field'] as String,
-      direction: json['direction'] as int? ?? SortOption.DESC,
+      direction: (json['direction'] as num?)?.toInt() ?? SortOption.DESC,
     );
 
 Map<String, dynamic> _$SortOptionToJson<T>(SortOption<T> instance) =>
@@ -20,8 +20,8 @@ Map<String, dynamic> _$SortOptionToJson<T>(SortOption<T> instance) =>
 
 PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) =>
     PaginationParams(
-      limit: json['limit'] as int? ?? 10,
-      offset: json['offset'] as int?,
+      limit: (json['limit'] as num?)?.toInt() ?? 10,
+      offset: (json['offset'] as num?)?.toInt(),
       next: json['next'] as String?,
       idAround: json['id_around'] as String?,
       greaterThan: json['id_gt'] as String?,
