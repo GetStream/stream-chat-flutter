@@ -726,6 +726,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       attachmentShape: widget.attachmentShape,
                       onAttachmentTap: widget.onAttachmentTap,
                       onReplyTap: widget.onReplyTap,
+                      onThreadTap: widget.onThreadTap,
                       onShowMessage: widget.onShowMessage,
                       attachmentActionsModalBuilder:
                           widget.attachmentActionsModalBuilder,
