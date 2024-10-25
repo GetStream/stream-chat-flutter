@@ -1800,8 +1800,6 @@ class ChannelClientState {
 
     _listenReactionDeleted();
 
-    _listenPollUpdated();
-
     _listenReadEvents();
 
     _listenUnreadEvents();
@@ -2052,31 +2050,6 @@ class ChannelClientState {
     final failedMessages = [...messages, ...threads.values.expand((v) => v)]
         .where((it) => it.state.isFailed);
     _retryQueue.add(failedMessages);
-  }
-
-  void _listenPollUpdated() {
-    _subscriptions.add(_channel
-        .on(
-      EventType.pollUpdated,
-      EventType.pollVoteCasted,
-      EventType.pollVoteChanged,
-      EventType.pollClosed,
-    )
-        .listen((event) {
-      final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
-              threads[event.message?.parentId]
-                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
-
-      if (oldMessage == null) return;
-
-      final message = oldMessage.copyWith(
-        poll: event.poll,
-        pollId: event.poll?.id,
-      );
-
-      updateMessage(message);
-    }));
   }
 
   void _listenReactionDeleted() {
