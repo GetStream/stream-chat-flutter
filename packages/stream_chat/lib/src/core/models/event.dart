@@ -1,6 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/poll.dart';
-import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
 
