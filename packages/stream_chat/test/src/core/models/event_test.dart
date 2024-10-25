@@ -45,6 +45,8 @@ void main() {
           'user': {'id': 'id'},
           'reaction': null,
           'message': null,
+          'poll': null,
+          'poll_vote': null,
           'channel': null,
           'total_unread_count': 1,
           'unread_channels': 1,
