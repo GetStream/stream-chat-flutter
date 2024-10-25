@@ -8,6 +8,7 @@ import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
+import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
@@ -58,6 +59,10 @@ class FakeChatApi extends Fake implements StreamChatApi {
   @override
   MessageApi get message => _message ??= MockMessageApi();
 
+  PollsApi get polls => _polls ??= MockPollsApi();
+
+  PollsApi? _polls;
+
   ChannelApi? _channel;
 
   @override
@@ -105,6 +110,8 @@ class FakeAttachmentFile extends Fake implements AttachmentFile {}
 class FakeEvent extends Fake implements Event {}
 
 class FakeUser extends Fake implements User {}
+
+class FakePollVote extends Fake implements PollVote {}
 
 class FakeWebSocket extends Fake implements WebSocket {
   BehaviorSubject<ConnectionStatus>? _connectionStatusController;

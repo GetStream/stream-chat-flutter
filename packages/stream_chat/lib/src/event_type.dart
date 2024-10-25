@@ -112,4 +112,19 @@ class EventType {
 
   /// Event sent when the user's mutes list is updated
   static const String notificationMutesUpdated = 'notification.mutes_updated';
+
+  /// Event sent when a poll is updated.
+  static const String pollUpdated = 'poll.updated';
+
+  /// Event sent when a vote is casted on a poll.
+  static const String pollVoteCasted = 'poll.vote_casted';
+
+  /// Event sent when a vote is changed on a poll.
+  static const String pollVoteChanged = 'poll.vote_changed';
+
+  /// Event sent when a vote is removed on a poll.
+  static const String pollVoteRemoved = 'poll.vote_removed';
+
+  /// Event sent when a poll is closed.
+  static const String pollClosed = 'poll.closed';
 }
