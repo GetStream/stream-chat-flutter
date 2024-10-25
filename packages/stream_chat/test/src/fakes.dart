@@ -59,6 +59,7 @@ class FakeChatApi extends Fake implements StreamChatApi {
   @override
   MessageApi get message => _message ??= MockMessageApi();
 
+  @override
   PollsApi get polls => _polls ??= MockPollsApi();
 
   PollsApi? _polls;
