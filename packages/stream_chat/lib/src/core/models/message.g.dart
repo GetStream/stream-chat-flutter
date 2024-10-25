@@ -68,6 +68,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       pinnedBy: json['pinned_by'] == null
           ? null
           : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
+      poll: json['poll'] == null
+          ? null
+          : Poll.fromJson(json['poll'] as Map<String, dynamic>),
+      pollId: json['poll_id'] as String?,
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
@@ -95,6 +99,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['silent'] = instance.silent;
   val['pinned'] = instance.pinned;
   val['pin_expires'] = instance.pinExpires?.toIso8601String();
+  val['poll_id'] = instance.pollId;
   val['extra_data'] = instance.extraData;
   return val;
 }
