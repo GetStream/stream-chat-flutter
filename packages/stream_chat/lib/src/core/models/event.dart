@@ -1,4 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/poll.dart';
+import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -16,6 +18,8 @@ class Event {
     this.me,
     this.user,
     this.message,
+    this.poll,
+    this.pollVote,
     this.totalUnreadCount,
     this.unreadChannels,
     this.reaction,
@@ -67,6 +71,12 @@ class Event {
 
   /// The message sent with the event
   final Message? message;
+
+  /// The poll sent with the event
+  final Poll? poll;
+
+  /// The poll vote sent with the event
+  final PollVote? pollVote;
 
   /// The channel sent with the event
   final EventChannel? channel;
@@ -138,6 +148,8 @@ class Event {
     'me',
     'user',
     'message',
+    'poll',
+    'poll_vote',
     'total_unread_count',
     'unread_channels',
     'reaction',

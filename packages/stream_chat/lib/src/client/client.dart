@@ -23,6 +23,9 @@ import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
+import 'package:stream_chat/src/core/models/poll.dart';
+import 'package:stream_chat/src/core/models/poll_option.dart';
+import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
@@ -1198,6 +1201,124 @@ class StreamChatClient {
         channelId,
         channelType,
         messageId,
+      );
+
+  /// Creates a new Poll
+  Future<CreatePollResponse> createPoll(Poll poll) =>
+      _chatApi.polls.createPoll(poll);
+
+  /// Retrieves a Poll by [pollId]
+  Future<GetPollResponse> getPoll(String pollId) =>
+      _chatApi.polls.getPoll(pollId);
+
+  /// Updates a Poll
+  Future<UpdatePollResponse> updatePoll(Poll poll) =>
+      _chatApi.polls.updatePoll(poll);
+
+  /// Partially updates a Poll by [pollId].
+  ///
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  Future<UpdatePollResponse> partialUpdatePoll(
+    String pollId, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) =>
+      _chatApi.polls.partialUpdatePoll(
+        pollId,
+        set: set,
+        unset: unset,
+      );
+
+  /// Deletes the Poll by [pollId].
+  Future<EmptyResponse> deletePoll(String pollId) =>
+      _chatApi.polls.deletePoll(pollId);
+
+  /// Marks the Poll [pollId] as closed.
+  Future<UpdatePollResponse> closePoll(String pollId) =>
+      partialUpdatePoll(pollId, set: {
+        'is_closed': true,
+      });
+
+  /// Creates a new Poll Option for the Poll [pollId].
+  Future<CreatePollOptionResponse> createPollOption(
+    String pollId,
+    PollOption option,
+  ) =>
+      _chatApi.polls.createPollOption(pollId, option);
+
+  /// Retrieves a Poll Option by [optionId] for the Poll [pollId].
+  Future<GetPollOptionResponse> getPollOption(
+    String pollId,
+    String optionId,
+  ) =>
+      _chatApi.polls.getPollOption(pollId, optionId);
+
+  /// Updates a Poll Option for the Poll [pollId].
+  Future<UpdatePollOptionResponse> updatePollOption(
+    String pollId,
+    PollOption option,
+  ) =>
+      _chatApi.polls.updatePollOption(pollId, option);
+
+  /// Deletes a Poll Option by [optionId] for the Poll [pollId].
+  Future<EmptyResponse> deletePollOption(
+    String pollId,
+    String optionId,
+  ) =>
+      _chatApi.polls.deletePollOption(pollId, optionId);
+
+  /// Cast a [vote] for the Poll [pollId].
+  Future<CastPollVoteResponse> castPollVote(
+    String messageId,
+    String pollId,
+    PollVote vote,
+  ) =>
+      _chatApi.polls.castPollVote(messageId, pollId, vote);
+
+  /// Adds a answer with [answerText] for the Poll [pollId].
+  Future<CastPollVoteResponse> addPollAnswer(
+    String messageId,
+    String pollId, {
+    required String answerText,
+  }) {
+    final vote = PollVote(answerText: answerText);
+    return castPollVote(messageId, pollId, vote);
+  }
+
+  /// Removes a vote by [voteId] for the Poll [pollId].
+  Future<RemovePollVoteResponse> removePollVote(
+    String messageId,
+    String pollId,
+    String voteId,
+  ) =>
+      _chatApi.polls.removePollVote(messageId, pollId, voteId);
+
+  /// Queries Polls with the given [filter] and [sort] options.
+  Future<QueryPollsResponse> queryPolls({
+    Filter? filter,
+    List<SortOption>? sort,
+    PaginationParams pagination = const PaginationParams(),
+  }) =>
+      _chatApi.polls.queryPolls(
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
+      );
+
+  /// Queries Poll Votes for the Poll [pollId] with the given [filter]
+  /// and [sort] options.
+  Future<QueryPollVotesResponse> queryPollVotes(
+    String pollId, {
+    Filter? filter,
+    List<SortOption>? sort,
+    PaginationParams pagination = const PaginationParams(),
+  }) =>
+      _chatApi.polls.queryPollVotes(
+        pollId,
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
       );
 
   /// Update or Create the given user object.
