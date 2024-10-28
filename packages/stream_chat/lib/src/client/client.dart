@@ -1271,10 +1271,12 @@ class StreamChatClient {
   /// Cast a [vote] for the Poll [pollId].
   Future<CastPollVoteResponse> castPollVote(
     String messageId,
-    String pollId,
-    PollVote vote,
-  ) =>
-      _chatApi.polls.castPollVote(messageId, pollId, vote);
+    String pollId, {
+    required String optionId,
+  }) {
+    final vote = PollVote(optionId: optionId);
+    return _chatApi.polls.castPollVote(messageId, pollId, vote);
+  }
 
   /// Adds a answer with [answerText] for the Poll [pollId].
   Future<CastPollVoteResponse> addPollAnswer(
@@ -1283,7 +1285,7 @@ class StreamChatClient {
     required String answerText,
   }) {
     final vote = PollVote(answerText: answerText);
-    return castPollVote(messageId, pollId, vote);
+    return _chatApi.polls.castPollVote(messageId, pollId, vote);
   }
 
   /// Removes a vote by [voteId] for the Poll [pollId].
