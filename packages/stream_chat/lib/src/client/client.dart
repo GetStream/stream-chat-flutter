@@ -200,7 +200,17 @@ class StreamChatClient {
 
   /// Stream of [Event] coming from [_ws] connection
   /// Listen to this or use the [on] method to filter specific event types
-  Stream<Event> get eventStream => _eventController.stream;
+  Stream<Event> get eventStream => _eventController.stream.map(
+        // If the poll vote is an answer, we should emit a different event
+        // to make it easier to handle in the state.
+        (event) => switch ((event.type, event.pollVote?.isAnswer == true)) {
+          (EventType.pollVoteCasted || EventType.pollVoteChanged, true) =>
+            event.copyWith(type: EventType.pollAnswerCasted),
+          (EventType.pollVoteRemoved, true) =>
+            event.copyWith(type: EventType.pollAnswerRemoved),
+          _ => event,
+        },
+      );
 
   final _wsConnectionStatusController =
       BehaviorSubject.seeded(ConnectionStatus.disconnected);

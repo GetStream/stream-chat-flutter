@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
@@ -34,19 +35,18 @@ class Poll extends Equatable {
     this.enforceUniqueVote = false,
     this.maxVotesAllowed,
     this.allowAnswers = false,
-    this.latestAnswers = const [],
+    this.answers = const [],
     this.answersCount = 0,
     this.allowUserSuggestedOptions = false,
     this.isClosed = false,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.voteCountsByOption = const {},
-    this.votes = const [],
     this.voteCount = 0,
-    this.latestVotesByOption = const {},
+    this.votesByOption = const {},
     this.createdById,
     this.createdBy,
-    this.ownVotes = const [],
+    this.ownVotesAndAnswers = const [],
     this.extraData = const {},
   })  : id = id ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now(),
@@ -94,33 +94,39 @@ class Poll extends Equatable {
   /// Indicates if the poll is closed.
   final bool isClosed;
 
-  /// Map of vote counts by option.
-  @JsonKey(includeToJson: false)
-  final Map<String, int> voteCountsByOption;
-
-  /// List of votes received by the poll.
-  @JsonKey(includeToJson: false)
-  final List<PollVote> votes;
-
-  /// List of votes casted by the current user.
-  @JsonKey(includeToJson: false)
-  final List<PollVote> ownVotes;
-
-  /// The total number of votes received by the poll.
-  @JsonKey(includeToJson: false)
-  final int voteCount;
-
   /// The total number of answers received by the poll.
   @JsonKey(includeToJson: false)
   final int answersCount;
 
-  /// Map of latest votes by option.
+  /// Map of vote counts by option.
   @JsonKey(includeToJson: false)
-  final Map<String, List<PollVote>> latestVotesByOption;
+  final Map<String, int> voteCountsByOption;
+
+  /// Map of latest votes by option.
+  @JsonKey(name: 'latest_votes_by_option', includeToJson: false)
+  final Map<String, List<PollVote>> votesByOption;
+
+  /// List of votes received by the poll.
+  ///
+  /// Note: This does not include the answers provided by the users,
+  /// see [answers] for that.
+  List<PollVote> get votes => [
+        ...votesByOption.values.flattened.where((it) => !it.isAnswer),
+      ];
 
   /// List of latest answers received by the poll.
+  @JsonKey(name: 'latest_answers', includeToJson: false)
+  final List<PollVote> answers;
+
+  /// List of votes casted by the current user.
+  ///
+  /// Contains both votes and answers.
+  @JsonKey(name: 'own_votes', includeToJson: false)
+  final List<PollVote> ownVotesAndAnswers;
+
+  /// The total number of votes received by the poll.
   @JsonKey(includeToJson: false)
-  final List<PollVote> latestAnswers;
+  final int voteCount;
 
   /// The id of the user who created the poll.
   @JsonKey(includeToJson: false)
@@ -144,6 +150,55 @@ class Poll extends Equatable {
   /// Serialize to json
   Map<String, dynamic> toJson() =>
       Serializer.moveFromExtraDataToRoot(_$PollToJson(this));
+
+  /// Creates a copy of [Poll] with specified attributes overridden.
+  Poll copyWith({
+    String? id,
+    String? name,
+    String? description,
+    List<PollOption>? options,
+    VotingVisibility? votingVisibility,
+    bool? enforceUniqueVote,
+    int? maxVotesAllowed,
+    bool? allowUserSuggestedOptions,
+    bool? allowAnswers,
+    bool? isClosed,
+    Map<String, int>? voteCountsByOption,
+    List<PollVote>? ownVotesAndAnswers,
+    int? voteCount,
+    int? answersCount,
+    Map<String, List<PollVote>>? votesByOption,
+    List<PollVote>? answers,
+    String? createdById,
+    User? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Map<String, Object?>? extraData,
+  }) =>
+      Poll(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        options: options ?? this.options,
+        votingVisibility: votingVisibility ?? this.votingVisibility,
+        enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
+        maxVotesAllowed: maxVotesAllowed ?? this.maxVotesAllowed,
+        allowUserSuggestedOptions:
+            allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
+        allowAnswers: allowAnswers ?? this.allowAnswers,
+        isClosed: isClosed ?? this.isClosed,
+        voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
+        ownVotesAndAnswers: ownVotesAndAnswers ?? this.ownVotesAndAnswers,
+        voteCount: voteCount ?? this.voteCount,
+        answersCount: answersCount ?? this.answersCount,
+        votesByOption: votesByOption ?? this.votesByOption,
+        answers: answers ?? this.answers,
+        createdById: createdById ?? this.createdById,
+        createdBy: createdBy ?? this.createdBy,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        extraData: extraData ?? this.extraData,
+      );
 
   /// Known top level fields.
   ///
@@ -185,15 +240,74 @@ class Poll extends Equatable {
         allowAnswers,
         isClosed,
         voteCountsByOption,
-        votes,
-        ownVotes,
+        ownVotesAndAnswers,
         voteCount,
         answersCount,
-        latestVotesByOption,
-        latestAnswers,
+        votesByOption,
+        answers,
         createdById,
         createdBy,
         createdAt,
         updatedAt,
       ];
+}
+
+/// Helper extension for [Poll] model.
+extension PollX on Poll {
+  /// The value of the option with the most votes.
+  int get currentMaximumVoteCount => voteCountsByOption.values.maxOrNull ?? 0;
+
+  /// Whether the poll is already closed and the provided option is the one,
+  /// and **the only one** with the most votes.
+  bool isOptionWinner(PollOption option) =>
+      isClosed && isOptionWithMostVotes(option);
+
+  /// Whether the poll is already closed and the provided option is one of that
+  /// has the most votes.
+  bool isOptionOneOfTheWinners(PollOption option) =>
+      isClosed && isOptionWithMaximumVotes(option);
+
+  /// Whether the provided option is the one, and **the only one** with the most
+  /// votes.
+  bool isOptionWithMostVotes(PollOption option) {
+    final optionsWithMostVotes = {
+      for (final entry in voteCountsByOption.entries)
+        if (entry.value == currentMaximumVoteCount) entry.key: entry.value
+    };
+
+    return optionsWithMostVotes.length == 1 &&
+        optionsWithMostVotes[option.id] != null;
+  }
+
+  /// Whether the provided option is one of that has the most votes.
+  bool isOptionWithMaximumVotes(PollOption option) {
+    final optionsWithMostVotes = {
+      for (final entry in voteCountsByOption.entries)
+        if (entry.value == currentMaximumVoteCount) entry.key: entry.value
+    };
+
+    return optionsWithMostVotes[option.id] != null;
+  }
+
+  /// The vote count for the given option.
+  int voteCountFor(PollOption option) => voteCountsByOption[option.id] ?? 0;
+
+  /// The ratio of the votes for the given option in comparison with the number
+  /// of total votes.
+  double voteRatioFor(PollOption option) {
+    if (currentMaximumVoteCount == 0) return 0;
+
+    final optionVoteCount = voteCountFor(option);
+    return optionVoteCount / currentMaximumVoteCount;
+  }
+
+  /// Returns the vote of the current user for the given option in case the user
+  /// has voted.
+  PollVote? currentUserVoteFor(PollOption option) =>
+      ownVotesAndAnswers.firstWhereOrNull((it) => it.optionId == option.id);
+
+  /// Returns a Boolean value indicating whether the current user has voted the
+  /// given option.
+  bool hasCurrentUserVotedFor(PollOption option) =>
+      ownVotesAndAnswers.any((it) => it.optionId == option.id);
 }
