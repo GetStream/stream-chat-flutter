@@ -19,7 +19,7 @@ Poll _$PollFromJson(Map<String, dynamic> json) => Poll(
       enforceUniqueVote: json['enforce_unique_vote'] as bool? ?? false,
       maxVotesAllowed: (json['max_votes_allowed'] as num?)?.toInt(),
       allowAnswers: json['allow_answers'] as bool? ?? false,
-      latestAnswers: (json['latest_answers'] as List<dynamic>?)
+      answers: (json['latest_answers'] as List<dynamic>?)
               ?.map((e) => PollVote.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
@@ -38,26 +38,21 @@ Poll _$PollFromJson(Map<String, dynamic> json) => Poll(
                 (k, e) => MapEntry(k, (e as num).toInt()),
               ) ??
               const {},
-      votes: (json['votes'] as List<dynamic>?)
-              ?.map((e) => PollVote.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
       voteCount: (json['vote_count'] as num?)?.toInt() ?? 0,
-      latestVotesByOption:
-          (json['latest_votes_by_option'] as Map<String, dynamic>?)?.map(
-                (k, e) => MapEntry(
-                    k,
-                    (e as List<dynamic>)
-                        .map(
-                            (e) => PollVote.fromJson(e as Map<String, dynamic>))
-                        .toList()),
-              ) ??
-              const {},
+      votesByOption: (json['latest_votes_by_option'] as Map<String, dynamic>?)
+              ?.map(
+            (k, e) => MapEntry(
+                k,
+                (e as List<dynamic>)
+                    .map((e) => PollVote.fromJson(e as Map<String, dynamic>))
+                    .toList()),
+          ) ??
+          const {},
       createdById: json['created_by_id'] as String?,
       createdBy: json['created_by'] == null
           ? null
           : User.fromJson(json['created_by'] as Map<String, dynamic>),
-      ownVotes: (json['own_votes'] as List<dynamic>?)
+      ownVotesAndAnswers: (json['own_votes'] as List<dynamic>?)
               ?.map((e) => PollVote.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],

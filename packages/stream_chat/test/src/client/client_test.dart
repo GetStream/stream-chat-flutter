@@ -1999,16 +1999,26 @@ void main() {
     test('`.castPollVote`', () async {
       const messageId = 'test-message-id';
       const pollId = 'test-poll-id';
-      final vote = PollVote(optionId: 'test-option-id');
+      const optionId = 'test-option-id';
+      final vote = PollVote(optionId: optionId);
 
-      when(() => api.polls.castPollVote(messageId, pollId, vote))
+      // Custom matcher to check if the Vote object has the specified id
+      Matcher matchesVoteOption(String expected) => predicate<PollVote>(
+            (vote) => vote.optionId == expected,
+            'Vote with option $expected',
+          );
+
+      when(() => api.polls.castPollVote(
+              messageId, pollId, any(that: matchesVoteOption(optionId))))
           .thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
 
-      final res = await client.castPollVote(messageId, pollId, vote);
+      final res =
+          await client.castPollVote(messageId, pollId, optionId: optionId);
       expect(res, isNotNull);
       expect(res.vote, vote);
 
-      verify(() => api.polls.castPollVote(messageId, pollId, vote)).called(1);
+      verify(() => api.polls.castPollVote(
+          messageId, pollId, any(that: matchesVoteOption(optionId)))).called(1);
       verifyNoMoreInteractions(api.polls);
     });
 
