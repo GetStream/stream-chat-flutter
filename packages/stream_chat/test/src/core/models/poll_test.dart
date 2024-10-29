@@ -29,10 +29,10 @@ void main() {
       expect(option.id, 'option1');
       expect(option.text, 'option1 text');
 
-      expect(poll.latestVotesByOption, isEmpty);
+      expect(poll.votesByOption, isEmpty);
 
-      expect(poll.ownVotes.length, 1);
-      final vote = poll.ownVotes[0];
+      expect(poll.ownVotesAndAnswers.length, 1);
+      final vote = poll.ownVotesAndAnswers[0];
       expect(vote.id, 'luke_skywalker');
       expect(vote.optionId, 'option1');
       expect(vote.pollId, '7fd88eb3-fc05-4e89-89af-36c6d8995dda');
