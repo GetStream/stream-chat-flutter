@@ -3,6 +3,10 @@
 ✅ Added
 - Added user blocking to the client.
 
+🐞 Fixed
+
+- Fixed locale conversion in jiffy.
+
 ## 8.1.0
 
 ✅ Added
