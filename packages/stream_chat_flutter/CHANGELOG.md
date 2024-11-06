@@ -4,6 +4,10 @@
 
 - Messages by default now show an "Edited" label if text is edited. Use `showEditedLabel` to disable this functionality. 
 
+🐞 Fixed
+
+- Reactions now scroll if count is too high.
+
 ## 8.1.0
 
 🐞 Fixed
