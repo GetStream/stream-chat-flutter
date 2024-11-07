@@ -46,7 +46,10 @@ dependencies:
   thumblr: ^0.0.4
   url_launcher: ^6.3.0
   video_player: ^2.8.7
-  video_thumbnail: ^0.5.3
+  video_thumbnail:
+    git:
+      url: https://github.com/AreenAI/video_thumbnail.git
+
 
 flutter:
   plugin:
