@@ -50,8 +50,8 @@ dependencies:
   synchronized: ^3.1.0+1
   thumblr: ^0.0.4
   url_launcher: ^6.3.0
-  video_player: ^2.8.7
-  video_thumbnail: ^0.5.3
+  video_player: ^2.9.2
+  get_thumbnail_video: ^0.7.2
 
 flutter:
   plugin:

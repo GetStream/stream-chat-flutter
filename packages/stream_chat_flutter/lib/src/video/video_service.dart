@@ -3,9 +3,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:get_thumbnail_video/index.dart';
+import 'package:get_thumbnail_video/video_thumbnail.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:thumblr/thumblr.dart' as thumblr;
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 ///
 // ignore: prefer-match-file-name
