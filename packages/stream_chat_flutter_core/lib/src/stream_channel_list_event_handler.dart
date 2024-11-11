@@ -54,17 +54,7 @@ mixin class StreamChannelListEventHandler {
     Event event,
     StreamChannelListController controller, {
     Filter? filter,
-  }) {
-    if (filter != null) {
-      if (event.channel?.type == 'team') return;
-      final passedFilter = filterChannelStatus(channel: event.channel, filter);
-      if (passedFilter == false) {
-        onChannelDeleted(event, controller);
-      } else {
-        onChannelVisible(event, controller, filter: filter);
-      }
-    }
-  }
+  }) => onChannelVisible(event, controller, filter: filter);
 
   /// Function which gets called for the event
   /// [EventType.channelVisible].
@@ -87,19 +77,41 @@ mixin class StreamChannelListEventHandler {
       type: channelType,
     );
 
-    if (filter != null) {
-      final passedFilter = filterChannelType(channel, filter);
-      if (passedFilter == false) return;
-    }
-
-    final currentChannels = [...controller.currentItems];
+    final currentItems = [...controller.currentItems];
 
     final updatedChannels = [
-      channel,
-      ...currentChannels..removeWhere((it) => it.cid == channel.cid),
+      ...currentItems..removeWhere((it) => it.cid == channel.cid),
     ];
 
+    if (filter != null) {
+      final filterType = filterChannelType(channel, filter);
+      final filterStatus = filterChannelStatus(filter, channel: event.channel);
+      final filterIsMember = filterMember(channel, filter);
+      if (filterType != true ||
+          filterStatus != true ||
+          filterIsMember != true) {
+        controller.channels = updatedChannels;
+        return;
+      }
+    }
+
+    updatedChannels.insert(0, channel);
     controller.channels = updatedChannels;
+  }
+
+  /// Function which gets called to check if member in filter is in the channel
+  bool? filterMember(
+    Channel channel,
+    Filter filter,
+  ) {
+    final filterList = filter.value as List;
+    final filterMembers = filterList
+        .firstWhereOrNull((filter) => filter.key == 'members') as Filter?;
+    if (filterMembers == null) return true;
+    final channelMembers = channel.state?.members;
+    final isMember = channelMembers?.firstWhereOrNull((member) =>
+        (filterMembers.value as List?)?.contains(member.userId) == true);
+    return isMember != null;
   }
 
   /// Function which gets called to check if the channel type is in the filter
@@ -107,7 +119,8 @@ mixin class StreamChannelListEventHandler {
     var passedFilter = false;
     final filterList = filter.value as List;
     final filterType =
-        filterList.firstWhereOrNull((filter) => filter.key == 'type') as Filter;
+        filterList.firstWhereOrNull((filter) => filter.key == 'type') as Filter?;
+    if (filterType == null) return true;
     if (filterType.value == channel.type) {
       passedFilter = true;
     }
@@ -119,10 +132,11 @@ mixin class StreamChannelListEventHandler {
   bool? filterChannelStatus(Filter filter, {EventChannel? channel}) {
     final filterList = filter.value as List;
     final filterType = filterList
-        .firstWhereOrNull((filter) => filter.key == 'status') as Filter;
-
+        .firstWhereOrNull((filter) => filter.key == 'status') as Filter?;
+    if (channel == null) return false;
+    if (filterType == null) return true;
     final passedFilter =
-        (filterType.value as List).contains(channel?.extraData['status']) ==
+        (filterType.value as List).contains(channel.extraData['status']) ==
             true;
     return passedFilter;
   }
@@ -204,16 +218,10 @@ mixin class StreamChannelListEventHandler {
   /// By default, this removes the event channel from the list.
   void onNotificationRemovedFromChannel(
     Event event,
-    StreamChannelListController controller,
-  ) {
-    final channels = [...controller.currentItems];
-    final updatedChannels =
-        channels.where((it) => it.cid != event.channel?.cid);
-    final listChanged = channels.length != updatedChannels.length;
-
-    if (!listChanged) return;
-
-    controller.channels = [...updatedChannels];
+    StreamChannelListController controller, {
+    Filter? filter,
+  }) {
+    onChannelVisible(event, controller, filter: filter);
   }
 
   /// Function which gets called for the event
