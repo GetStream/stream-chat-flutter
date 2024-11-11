@@ -56,6 +56,7 @@ class StreamChatThemeData {
     StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamVoiceRecordingThemeData? voiceRecordingTheme,
+    StreamPollCreatorThemeData? pollCreatorTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -83,6 +84,7 @@ class StreamChatThemeData {
       galleryFooterTheme: imageFooterTheme,
       messageListViewTheme: messageListViewTheme,
       voiceRecordingTheme: voiceRecordingTheme,
+      pollCreatorTheme: pollCreatorTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -111,6 +113,7 @@ class StreamChatThemeData {
     required this.galleryFooterTheme,
     required this.messageListViewTheme,
     required this.voiceRecordingTheme,
+    required this.pollCreatorTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -283,6 +286,43 @@ class StreamChatThemeData {
       voiceRecordingTheme: colorTheme.brightness == Brightness.dark
           ? StreamVoiceRecordingThemeData.dark()
           : StreamVoiceRecordingThemeData.light(),
+      pollCreatorTheme: StreamPollCreatorThemeData(
+        backgroundColor: colorTheme.appBg,
+        appBarBackgroundColor: colorTheme.barsBg,
+        appBarTitleStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        questionTextFieldFillColor: colorTheme.inputBg,
+        questionHeaderStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        questionTextFieldStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        questionTextFieldErrorStyle: textTheme.footnote.copyWith(
+          color: colorTheme.accentError,
+        ),
+        questionTextFieldBorderRadius: BorderRadius.circular(12),
+        optionsTextFieldFillColor: colorTheme.inputBg,
+        optionsHeaderStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        optionsTextFieldStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        optionsTextFieldErrorStyle: textTheme.footnote.copyWith(
+          color: colorTheme.accentError,
+        ),
+        optionsTextFieldBorderRadius: BorderRadius.circular(12),
+        switchListTileFillColor: colorTheme.inputBg,
+        switchListTileTitleStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        switchListTileErrorStyle: textTheme.footnote.copyWith(
+          color: colorTheme.accentError,
+        ),
+        switchListTileBorderRadius: BorderRadius.circular(12),
+      ),
     );
   }
 
@@ -327,6 +367,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamVoiceRecordingListPLayer] widget.
   final StreamVoiceRecordingThemeData voiceRecordingTheme;
 
+  /// Theme configuration for the [StreamPollCreatorWidget] widget.
+  final StreamPollCreatorThemeData pollCreatorTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -347,6 +390,7 @@ class StreamChatThemeData {
     StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamVoiceRecordingThemeData? voiceRecordingTheme,
+    StreamPollCreatorThemeData? pollCreatorTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -364,6 +408,7 @@ class StreamChatThemeData {
         galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
         voiceRecordingTheme: voiceRecordingTheme ?? this.voiceRecordingTheme,
+        pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
       );
 
   /// Merge themes
@@ -385,6 +430,7 @@ class StreamChatThemeData {
       messageListViewTheme:
           messageListViewTheme.merge(other.messageListViewTheme),
       voiceRecordingTheme: voiceRecordingTheme.merge(other.voiceRecordingTheme),
+      pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
     );
   }
 }

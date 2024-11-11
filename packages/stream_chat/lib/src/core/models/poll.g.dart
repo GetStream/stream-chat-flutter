@@ -16,7 +16,7 @@ Poll _$PollFromJson(Map<String, dynamic> json) => Poll(
       votingVisibility: $enumDecodeNullable(
               _$VotingVisibilityEnumMap, json['voting_visibility']) ??
           VotingVisibility.public,
-      enforceUniqueVote: json['enforce_unique_vote'] as bool? ?? false,
+      enforceUniqueVote: json['enforce_unique_vote'] as bool? ?? true,
       maxVotesAllowed: (json['max_votes_allowed'] as num?)?.toInt(),
       allowAnswers: json['allow_answers'] as bool? ?? false,
       answers: (json['latest_answers'] as List<dynamic>?)

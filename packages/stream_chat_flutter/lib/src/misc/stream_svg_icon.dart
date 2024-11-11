@@ -197,6 +197,32 @@ class StreamSvgIcon extends StatelessWidget {
   }
 
   /// [StreamSvgIcon] type
+  factory StreamSvgIcon.polls({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'polls.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.send({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'send.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  /// [StreamSvgIcon] type
   factory StreamSvgIcon.pictures({
     double? size,
     Color? color,
