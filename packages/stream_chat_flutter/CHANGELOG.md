@@ -1,8 +1,17 @@
-## Upcoming
+## 8.2.0
 
 ✅ Added
 
+- Added `onThreadTap` parameter to `MessageWidgetContent` to enable thread tap action.
 - Messages by default now show an "Edited" label if text is edited. Use `showEditedLabel` to disable this functionality. 
+
+🐞 Fixed
+
+- Fixed locale conversion in jiffy.
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency to [`8.2.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 8.1.0
 
@@ -21,7 +30,6 @@
 
 - Fixed null errors in web from markdown.
 - Fixed bug causing background events to be sent in foreground.
-- Added `onThreadTap` parameter to `MessageWidgetContent` to enable thread tap action.
 
 ## 7.3.0 
 
