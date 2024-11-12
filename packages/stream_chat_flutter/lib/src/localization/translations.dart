@@ -2,7 +2,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
-    show User;
+    show Range, User;
 
 /// Translation strings for the stream chat widgets
 abstract class Translations {
@@ -370,6 +370,63 @@ abstract class Translations {
 
   /// The text for "MUTE"/"UNMUTE" based on the value of [isMuted].
   String toggleMuteUnmuteAction({required bool isMuted});
+
+  /// The label for "Create poll".
+  ///
+  /// If [isNew] is true, it returns "Create a new poll".
+  String createPollLabel({bool isNew = false});
+
+  /// The label for "Questions".
+  String get questionsLabel;
+
+  /// The label for "Ask a question".
+  String get askAQuestionLabel;
+
+  /// The error shown when the poll question [length] is not within the [range].
+  ///
+  /// Returns 'Question must be a least ${range.min} characters long' if the
+  /// question is too short and 'Question must be at most ${range.max}
+  /// characters long' if the question is too long.
+  String? pollQuestionValidationError(int length, Range<int> range);
+
+  /// The label for "Option".
+  ///
+  /// If [isPlural] is true, it returns "Options".
+  String optionLabel({bool isPlural = false});
+
+  /// The error shown when the poll option text is empty.
+  String get pollOptionEmptyError;
+
+  /// The error shown when the poll option is a duplicate.
+  String get pollOptionDuplicateError;
+
+  /// The label for "Add an option".
+  String get addAnOptionLabel;
+
+  /// The label for "Multiple answers".
+  String get multipleAnswersLabel;
+
+  /// The label for "Maximum votes per person".
+  String get maximumVotesPerPersonLabel;
+
+  /// The error shown when the max [votes] is not within the [range].
+  ///
+  /// Returns 'Vote count must be at least ${range.min}' if the vote count is
+  /// too short and 'Vote count must be at most ${range.max}' if the vote count
+  /// is too long.
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range);
+
+  /// The label for "Anonymous poll".
+  String get anonymousPollLabel;
+
+  /// The label for "Suggest an option".
+  String get suggestAnOptionLabel;
+
+  /// The label for "Add a comment".
+  String get addACommentLabel;
+
+  /// The label for "Create".
+  String get createLabel;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -835,4 +892,81 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get markUnreadError =>
       'Error marking message unread. Cannot mark unread messages older than the'
       ' newest 100 channel messages.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Create a new poll';
+    return 'Create Poll';
+  }
+
+  @override
+  String get questionsLabel => 'Questions';
+
+  @override
+  String get askAQuestionLabel => 'Ask a question';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'Question must be at least $min characters long';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'Question must be at most $max characters long';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Options';
+    return 'Option';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'Option cannot be empty';
+
+  @override
+  String get pollOptionDuplicateError => 'This is already an option';
+
+  @override
+  String get addAnOptionLabel => 'Add an option';
+
+  @override
+  String get multipleAnswersLabel => 'Multiple answers';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Maximum votes per person';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'Vote count must be at least $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'Vote count must be at most $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Anonymous poll';
+
+  @override
+  String get suggestAnOptionLabel => 'Suggest an option';
+
+  @override
+  String get addACommentLabel => 'Add a comment';
+
+  @override
+  String get createLabel => 'Create';
 }

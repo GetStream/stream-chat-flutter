@@ -443,4 +443,81 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   @override
   String get markUnreadError =>
       'メッセージを未読にする際にエラーが発生しました。最新の100件のチャンネルメッセージより古い未読メッセージはマークできません。';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return '新しい投票を作成する';
+    return '投票の作成';
+  }
+
+  @override
+  String get questionsLabel => '問';
+
+  @override
+  String get askAQuestionLabel => '質問する';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return '質問は $min 文字以上である必要があります';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return '質問の長さは最大$max文字にする必要があります';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'オプション';
+    return 'オプション';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'オプションを空にすることはできません';
+
+  @override
+  String get pollOptionDuplicateError => 'これはすでにオプションです';
+
+  @override
+  String get addAnOptionLabel => 'オプションを追加する';
+
+  @override
+  String get multipleAnswersLabel => '複数の回答';
+
+  @override
+  String get maximumVotesPerPersonLabel => '一人当たりの最大投票数';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return '投票数は$min以上である必要があります';
+    }
+
+    if (max != null && votes > max) {
+      return '投票数は最大$max票でなければなりません';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => '匿名投票';
+
+  @override
+  String get suggestAnOptionLabel => 'オプションを提案する';
+
+  @override
+  String get addACommentLabel => 'コメントを追加';
+
+  @override
+  String get createLabel => '創造する';
 }

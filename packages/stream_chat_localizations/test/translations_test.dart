@@ -205,6 +205,51 @@ void main() {
       expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.markUnreadError, isNotNull);
       expect(localizations.markAsUnreadLabel, isNotNull);
+      // Create poll
+      expect(localizations.createPollLabel(), isNotNull);
+      // Create a new poll
+      expect(localizations.createPollLabel(isNew: true), isNotNull);
+      expect(localizations.questionsLabel, isNotNull);
+      expect(localizations.askAQuestionLabel, isNotNull);
+      // Question must be at least 5 characters long
+      expect(
+        localizations.pollQuestionValidationError(3, const (min: 5, max: 10)),
+        isNotNull,
+      );
+      // Question must be at most 10 characters long
+      expect(
+        localizations.pollQuestionValidationError(11, const (min: 5, max: 10)),
+        isNotNull,
+      );
+      // Option
+      expect(localizations.optionLabel(), isNotNull);
+      // Options
+      expect(localizations.optionLabel(isPlural: true), isNotNull);
+      expect(localizations.pollOptionEmptyError, isNotNull);
+      expect(localizations.pollOptionDuplicateError, isNotNull);
+      expect(localizations.addAnOptionLabel, isNotNull);
+      expect(localizations.multipleAnswersLabel, isNotNull);
+      expect(localizations.maximumVotesPerPersonLabel, isNotNull);
+      // Vote count must be at least 1
+      expect(
+        localizations.maxVotesPerPersonValidationError(
+          0,
+          const (min: 1, max: 10),
+        ),
+        isNotNull,
+      );
+      // Vote count must be at most 10
+      expect(
+        localizations.maxVotesPerPersonValidationError(
+          11,
+          const (min: 1, max: 10),
+        ),
+        isNotNull,
+      );
+      expect(localizations.anonymousPollLabel, isNotNull);
+      expect(localizations.suggestAnOptionLabel, isNotNull);
+      expect(localizations.addACommentLabel, isNotNull);
+      expect(localizations.createLabel, isNotNull);
     });
   }
 

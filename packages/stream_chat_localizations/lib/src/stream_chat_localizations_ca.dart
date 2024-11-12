@@ -465,4 +465,81 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       'Error en marcar el missatge com a no llegit. No es poden marcar'
       ' missatges no llegits més antics que els 100 missatges més recents del'
       ' canal.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Crear una enquesta nova';
+    return 'Crea enquesta';
+  }
+
+  @override
+  String get questionsLabel => 'Preguntes';
+
+  @override
+  String get askAQuestionLabel => 'Fes una pregunta';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'La pregunta ha de tenir com a mínim $min caràcters';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'La pregunta ha de tenir com a màxim $max caràcters';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Opcions';
+    return 'Opció';
+  }
+
+  @override
+  String get pollOptionEmptyError => "L'opció no pot estar buida";
+
+  @override
+  String get pollOptionDuplicateError => 'Això ja és una opció';
+
+  @override
+  String get addAnOptionLabel => 'Afegeix una opció';
+
+  @override
+  String get multipleAnswersLabel => 'Respostes múltiples';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Màxim de vots per persona';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'El recompte de vots ha de ser com a mínim de $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'El recompte de vots ha de ser com a màxim de $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Enquesta anònima';
+
+  @override
+  String get suggestAnOptionLabel => 'Suggerir una opció';
+
+  @override
+  String get addACommentLabel => 'Afegeix un comentari';
+
+  @override
+  String get createLabel => 'Crear';
 }

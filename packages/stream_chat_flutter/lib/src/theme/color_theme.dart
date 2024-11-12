@@ -10,7 +10,7 @@ class StreamColorTheme {
     this.textLowEmphasis = const Color(0xff7a7a7a),
     this.disabled = const Color(0xffdbdbdb),
     this.borders = const Color(0xffecebeb),
-    this.inputBg = const Color(0xfff2f2f2),
+    this.inputBg = const Color(0xffe9eaed),
     this.appBg = const Color(0xfff7f7f8),
     this.barsBg = const Color(0xffffffff),
     this.linkBg = const Color(0xffe9f2ff),

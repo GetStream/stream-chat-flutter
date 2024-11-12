@@ -16,6 +16,7 @@ class StreamUnreadIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamChatTheme.of(context);
     final client = StreamChat.of(context).client;
     return IgnorePointer(
       child: BetterStreamBuilder<int>(
@@ -25,31 +26,18 @@ class StreamUnreadIndicator extends StatelessWidget {
         initialData: cid != null
             ? client.state.channels[cid]?.state?.unreadCount
             : client.state.totalUnreadCount,
-        builder: (context, data) {
-          if (data == 0) {
-            return const Offstage();
-          }
-          return Material(
-            borderRadius: BorderRadius.circular(8),
-            color: StreamChatTheme.of(context)
-                .channelPreviewTheme
-                .unreadCounterColor,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 5,
-                right: 5,
-                top: 2,
-                bottom: 1,
-              ),
-              child: Center(
-                child: Text(
-                  '${data > 99 ? '99+' : data}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+        builder: (context, unreadCount) {
+          if (unreadCount == 0) return const SizedBox.shrink();
+
+          return Badge(
+            textColor: Colors.white,
+            textStyle: theme.textTheme.footnoteBold,
+            backgroundColor: theme.channelPreviewTheme.unreadCounterColor,
+            label: Text(
+              switch (unreadCount) {
+                > 99 => '99+',
+                _ => '$unreadCount',
+              },
             ),
           );
         },

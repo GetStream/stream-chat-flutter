@@ -4,6 +4,12 @@ import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'poll_option.g.dart';
 
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
+
 /// {@template streamPollOption}
 /// A model class representing a poll option.
 /// {@endtemplate}
@@ -23,7 +29,7 @@ class PollOption extends Equatable {
       );
 
   /// The unique identifier of the poll option.
-  @JsonKey(includeToJson: false)
+  @JsonKey(includeIfNull: false)
   final String? id;
 
   /// The text describing the poll option.
@@ -35,6 +41,18 @@ class PollOption extends Equatable {
   /// Serialize to json
   Map<String, dynamic> toJson() =>
       Serializer.moveFromExtraDataToRoot(_$PollOptionToJson(this));
+
+  /// Creates a copy of [PollOption] with specified attributes overridden.
+  PollOption copyWith({
+    Object? id = _nullConst,
+    String? text,
+    Map<String, Object?>? extraData,
+  }) =>
+      PollOption(
+        id: id == _nullConst ? this.id : id as String?,
+        text: text ?? this.text,
+        extraData: extraData ?? this.extraData,
+      );
 
   /// Known top level fields.
   ///
