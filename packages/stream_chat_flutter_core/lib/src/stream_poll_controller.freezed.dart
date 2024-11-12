@@ -17,8 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$PollValidationError {
   @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(String message) $default, {
+  TResult when<TResult extends Object?>({
     required TResult Function(List<PollOption> options) duplicateOptions,
     required TResult Function(String name, ({int? max, int? min}) range)
         nameRange,
@@ -30,8 +29,7 @@ mixin _$PollValidationError {
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String message)? $default, {
+  TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(List<PollOption> options)? duplicateOptions,
     TResult? Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult? Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -41,8 +39,7 @@ mixin _$PollValidationError {
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String message)? $default, {
+  TResult maybeWhen<TResult extends Object?>({
     TResult Function(List<PollOption> options)? duplicateOptions,
     TResult Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -53,8 +50,7 @@ mixin _$PollValidationError {
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_PollValidationError value) $default, {
+  TResult map<TResult extends Object?>({
     required TResult Function(_PollValidationErrorDuplicateOptions value)
         duplicateOptions,
     required TResult Function(_PollValidationErrorNameRange value) nameRange,
@@ -65,8 +61,7 @@ mixin _$PollValidationError {
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_PollValidationError value)? $default, {
+  TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult? Function(_PollValidationErrorNameRange value)? nameRange,
@@ -76,8 +71,7 @@ mixin _$PollValidationError {
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_PollValidationError value)? $default, {
+  TResult maybeMap<TResult extends Object?>({
     TResult Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult Function(_PollValidationErrorNameRange value)? nameRange,
@@ -108,181 +102,6 @@ class _$PollValidationErrorCopyWithImpl<$Res, $Val extends PollValidationError>
 
   /// Create a copy of PollValidationError
   /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-abstract class _$$PollValidationErrorImplCopyWith<$Res> {
-  factory _$$PollValidationErrorImplCopyWith(_$PollValidationErrorImpl value,
-          $Res Function(_$PollValidationErrorImpl) then) =
-      __$$PollValidationErrorImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({String message});
-}
-
-/// @nodoc
-class __$$PollValidationErrorImplCopyWithImpl<$Res>
-    extends _$PollValidationErrorCopyWithImpl<$Res, _$PollValidationErrorImpl>
-    implements _$$PollValidationErrorImplCopyWith<$Res> {
-  __$$PollValidationErrorImplCopyWithImpl(_$PollValidationErrorImpl _value,
-      $Res Function(_$PollValidationErrorImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of PollValidationError
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$PollValidationErrorImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
-}
-
-/// @nodoc
-
-class _$PollValidationErrorImpl implements _PollValidationError {
-  const _$PollValidationErrorImpl(this.message);
-
-  @override
-  final String message;
-
-  @override
-  String toString() {
-    return 'PollValidationError(message: $message)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$PollValidationErrorImpl &&
-            (identical(other.message, message) || other.message == message));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, message);
-
-  /// Create a copy of PollValidationError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$PollValidationErrorImplCopyWith<_$PollValidationErrorImpl> get copyWith =>
-      __$$PollValidationErrorImplCopyWithImpl<_$PollValidationErrorImpl>(
-          this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(String message) $default, {
-    required TResult Function(List<PollOption> options) duplicateOptions,
-    required TResult Function(String name, ({int? max, int? min}) range)
-        nameRange,
-    required TResult Function(
-            List<PollOption> options, ({int? max, int? min}) range)
-        optionsRange,
-    required TResult Function(int maxVotesAllowed, ({int? max, int? min}) range)
-        maxVotesAllowed,
-  }) {
-    return $default(message);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String message)? $default, {
-    TResult? Function(List<PollOption> options)? duplicateOptions,
-    TResult? Function(String name, ({int? max, int? min}) range)? nameRange,
-    TResult? Function(List<PollOption> options, ({int? max, int? min}) range)?
-        optionsRange,
-    TResult? Function(int maxVotesAllowed, ({int? max, int? min}) range)?
-        maxVotesAllowed,
-  }) {
-    return $default?.call(message);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String message)? $default, {
-    TResult Function(List<PollOption> options)? duplicateOptions,
-    TResult Function(String name, ({int? max, int? min}) range)? nameRange,
-    TResult Function(List<PollOption> options, ({int? max, int? min}) range)?
-        optionsRange,
-    TResult Function(int maxVotesAllowed, ({int? max, int? min}) range)?
-        maxVotesAllowed,
-    required TResult orElse(),
-  }) {
-    if ($default != null) {
-      return $default(message);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_PollValidationError value) $default, {
-    required TResult Function(_PollValidationErrorDuplicateOptions value)
-        duplicateOptions,
-    required TResult Function(_PollValidationErrorNameRange value) nameRange,
-    required TResult Function(_PollValidationErrorOptionsRange value)
-        optionsRange,
-    required TResult Function(_PollValidationErrorMaxVotesAllowed value)
-        maxVotesAllowed,
-  }) {
-    return $default(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_PollValidationError value)? $default, {
-    TResult? Function(_PollValidationErrorDuplicateOptions value)?
-        duplicateOptions,
-    TResult? Function(_PollValidationErrorNameRange value)? nameRange,
-    TResult? Function(_PollValidationErrorOptionsRange value)? optionsRange,
-    TResult? Function(_PollValidationErrorMaxVotesAllowed value)?
-        maxVotesAllowed,
-  }) {
-    return $default?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_PollValidationError value)? $default, {
-    TResult Function(_PollValidationErrorDuplicateOptions value)?
-        duplicateOptions,
-    TResult Function(_PollValidationErrorNameRange value)? nameRange,
-    TResult Function(_PollValidationErrorOptionsRange value)? optionsRange,
-    TResult Function(_PollValidationErrorMaxVotesAllowed value)?
-        maxVotesAllowed,
-    required TResult orElse(),
-  }) {
-    if ($default != null) {
-      return $default(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _PollValidationError implements PollValidationError {
-  const factory _PollValidationError(final String message) =
-      _$PollValidationErrorImpl;
-
-  String get message;
-
-  /// Create a copy of PollValidationError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$PollValidationErrorImplCopyWith<_$PollValidationErrorImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -366,8 +185,7 @@ class _$PollValidationErrorDuplicateOptionsImpl
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(String message) $default, {
+  TResult when<TResult extends Object?>({
     required TResult Function(List<PollOption> options) duplicateOptions,
     required TResult Function(String name, ({int? max, int? min}) range)
         nameRange,
@@ -382,8 +200,7 @@ class _$PollValidationErrorDuplicateOptionsImpl
 
   @override
   @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String message)? $default, {
+  TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(List<PollOption> options)? duplicateOptions,
     TResult? Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult? Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -396,8 +213,7 @@ class _$PollValidationErrorDuplicateOptionsImpl
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String message)? $default, {
+  TResult maybeWhen<TResult extends Object?>({
     TResult Function(List<PollOption> options)? duplicateOptions,
     TResult Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -414,8 +230,7 @@ class _$PollValidationErrorDuplicateOptionsImpl
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_PollValidationError value) $default, {
+  TResult map<TResult extends Object?>({
     required TResult Function(_PollValidationErrorDuplicateOptions value)
         duplicateOptions,
     required TResult Function(_PollValidationErrorNameRange value) nameRange,
@@ -429,8 +244,7 @@ class _$PollValidationErrorDuplicateOptionsImpl
 
   @override
   @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_PollValidationError value)? $default, {
+  TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult? Function(_PollValidationErrorNameRange value)? nameRange,
@@ -443,8 +257,7 @@ class _$PollValidationErrorDuplicateOptionsImpl
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_PollValidationError value)? $default, {
+  TResult maybeMap<TResult extends Object?>({
     TResult Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult Function(_PollValidationErrorNameRange value)? nameRange,
@@ -557,8 +370,7 @@ class _$PollValidationErrorNameRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(String message) $default, {
+  TResult when<TResult extends Object?>({
     required TResult Function(List<PollOption> options) duplicateOptions,
     required TResult Function(String name, ({int? max, int? min}) range)
         nameRange,
@@ -573,8 +385,7 @@ class _$PollValidationErrorNameRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String message)? $default, {
+  TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(List<PollOption> options)? duplicateOptions,
     TResult? Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult? Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -587,8 +398,7 @@ class _$PollValidationErrorNameRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String message)? $default, {
+  TResult maybeWhen<TResult extends Object?>({
     TResult Function(List<PollOption> options)? duplicateOptions,
     TResult Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -605,8 +415,7 @@ class _$PollValidationErrorNameRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_PollValidationError value) $default, {
+  TResult map<TResult extends Object?>({
     required TResult Function(_PollValidationErrorDuplicateOptions value)
         duplicateOptions,
     required TResult Function(_PollValidationErrorNameRange value) nameRange,
@@ -620,8 +429,7 @@ class _$PollValidationErrorNameRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_PollValidationError value)? $default, {
+  TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult? Function(_PollValidationErrorNameRange value)? nameRange,
@@ -634,8 +442,7 @@ class _$PollValidationErrorNameRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_PollValidationError value)? $default, {
+  TResult maybeMap<TResult extends Object?>({
     TResult Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult Function(_PollValidationErrorNameRange value)? nameRange,
@@ -757,8 +564,7 @@ class _$PollValidationErrorOptionsRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(String message) $default, {
+  TResult when<TResult extends Object?>({
     required TResult Function(List<PollOption> options) duplicateOptions,
     required TResult Function(String name, ({int? max, int? min}) range)
         nameRange,
@@ -773,8 +579,7 @@ class _$PollValidationErrorOptionsRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String message)? $default, {
+  TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(List<PollOption> options)? duplicateOptions,
     TResult? Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult? Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -787,8 +592,7 @@ class _$PollValidationErrorOptionsRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String message)? $default, {
+  TResult maybeWhen<TResult extends Object?>({
     TResult Function(List<PollOption> options)? duplicateOptions,
     TResult Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -805,8 +609,7 @@ class _$PollValidationErrorOptionsRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_PollValidationError value) $default, {
+  TResult map<TResult extends Object?>({
     required TResult Function(_PollValidationErrorDuplicateOptions value)
         duplicateOptions,
     required TResult Function(_PollValidationErrorNameRange value) nameRange,
@@ -820,8 +623,7 @@ class _$PollValidationErrorOptionsRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_PollValidationError value)? $default, {
+  TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult? Function(_PollValidationErrorNameRange value)? nameRange,
@@ -834,8 +636,7 @@ class _$PollValidationErrorOptionsRangeImpl
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_PollValidationError value)? $default, {
+  TResult maybeMap<TResult extends Object?>({
     TResult Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult Function(_PollValidationErrorNameRange value)? nameRange,
@@ -950,8 +751,7 @@ class _$PollValidationErrorMaxVotesAllowedImpl
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object?>(
-    TResult Function(String message) $default, {
+  TResult when<TResult extends Object?>({
     required TResult Function(List<PollOption> options) duplicateOptions,
     required TResult Function(String name, ({int? max, int? min}) range)
         nameRange,
@@ -966,8 +766,7 @@ class _$PollValidationErrorMaxVotesAllowedImpl
 
   @override
   @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String message)? $default, {
+  TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(List<PollOption> options)? duplicateOptions,
     TResult? Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult? Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -980,8 +779,7 @@ class _$PollValidationErrorMaxVotesAllowedImpl
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String message)? $default, {
+  TResult maybeWhen<TResult extends Object?>({
     TResult Function(List<PollOption> options)? duplicateOptions,
     TResult Function(String name, ({int? max, int? min}) range)? nameRange,
     TResult Function(List<PollOption> options, ({int? max, int? min}) range)?
@@ -998,8 +796,7 @@ class _$PollValidationErrorMaxVotesAllowedImpl
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object?>(
-    TResult Function(_PollValidationError value) $default, {
+  TResult map<TResult extends Object?>({
     required TResult Function(_PollValidationErrorDuplicateOptions value)
         duplicateOptions,
     required TResult Function(_PollValidationErrorNameRange value) nameRange,
@@ -1013,8 +810,7 @@ class _$PollValidationErrorMaxVotesAllowedImpl
 
   @override
   @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_PollValidationError value)? $default, {
+  TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult? Function(_PollValidationErrorNameRange value)? nameRange,
@@ -1027,8 +823,7 @@ class _$PollValidationErrorMaxVotesAllowedImpl
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>(
-    TResult Function(_PollValidationError value)? $default, {
+  TResult maybeMap<TResult extends Object?>({
     TResult Function(_PollValidationErrorDuplicateOptions value)?
         duplicateOptions,
     TResult Function(_PollValidationErrorNameRange value)? nameRange,

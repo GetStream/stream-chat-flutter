@@ -259,9 +259,6 @@ class StreamPollController extends ValueNotifier<Poll> {
 /// {@endtemplate}
 @freezed
 class PollValidationError with _$PollValidationError {
-  /// {@macro pollValidationError}
-  const factory PollValidationError(String message) = _PollValidationError;
-
   /// Occurs when the poll contains duplicate options.
   const factory PollValidationError.duplicateOptions(
     List<PollOption> options,
