@@ -161,6 +161,7 @@ class _StreamPollCreatorDialogState extends State<StreamPollCreatorDialog> {
       actions: actions,
       contentPadding: EdgeInsets.zero,
       actionsPadding: const EdgeInsets.all(8),
+      backgroundColor: pollCreatorTheme.backgroundColor,
       content: SizedBox(
         width: 640, // Similar to BottomSheet default width on M3
         child: StreamPollCreatorWidget(
