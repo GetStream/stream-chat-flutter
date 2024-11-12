@@ -289,6 +289,7 @@ class StreamChatThemeData {
       pollCreatorTheme: StreamPollCreatorThemeData(
         backgroundColor: colorTheme.appBg,
         appBarBackgroundColor: colorTheme.barsBg,
+        appBarElevation: 1,
         appBarTitleStyle: textTheme.headlineBold.copyWith(
           color: colorTheme.textHighEmphasis,
         ),

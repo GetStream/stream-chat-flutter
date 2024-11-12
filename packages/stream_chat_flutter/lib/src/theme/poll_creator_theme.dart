@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
@@ -58,6 +60,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
   const StreamPollCreatorThemeData({
     this.backgroundColor,
     this.appBarTitleStyle,
+    this.appBarElevation,
     this.appBarBackgroundColor,
     this.questionTextFieldFillColor,
     this.questionHeaderStyle,
@@ -80,6 +83,9 @@ class StreamPollCreatorThemeData with Diagnosticable {
 
   /// The text style of the appBar title.
   final TextStyle? appBarTitleStyle;
+
+  /// The elevation of the appBar.
+  final double? appBarElevation;
 
   /// The background color of the appBar.
   final Color? appBarBackgroundColor;
@@ -131,6 +137,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
   StreamPollCreatorThemeData copyWith({
     Color? backgroundColor,
     TextStyle? appBarTitleStyle,
+    double? appBarElevation,
     Color? appBarBackgroundColor,
     Color? questionTextFieldFillColor,
     TextStyle? questionHeaderStyle,
@@ -150,6 +157,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
     return StreamPollCreatorThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       appBarTitleStyle: appBarTitleStyle ?? this.appBarTitleStyle,
+      appBarElevation: appBarElevation ?? this.appBarElevation,
       appBarBackgroundColor:
           appBarBackgroundColor ?? this.appBarBackgroundColor,
       questionTextFieldFillColor:
@@ -187,6 +195,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
     return copyWith(
       backgroundColor: other.backgroundColor ?? backgroundColor,
       appBarTitleStyle: other.appBarTitleStyle ?? appBarTitleStyle,
+      appBarElevation: other.appBarElevation ?? appBarElevation,
       appBarBackgroundColor:
           other.appBarBackgroundColor ?? appBarBackgroundColor,
       questionTextFieldFillColor:
@@ -228,6 +237,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       appBarTitleStyle:
           TextStyle.lerp(a.appBarTitleStyle, b.appBarTitleStyle, t),
+      appBarElevation: lerpDouble(a.appBarElevation, b.appBarElevation, t),
       appBarBackgroundColor:
           Color.lerp(a.appBarBackgroundColor, b.appBarBackgroundColor, t),
       questionTextFieldFillColor: Color.lerp(
@@ -267,6 +277,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
       other is StreamPollCreatorThemeData &&
           other.backgroundColor == backgroundColor &&
           other.appBarTitleStyle == appBarTitleStyle &&
+          other.appBarElevation == appBarElevation &&
           other.appBarBackgroundColor == appBarBackgroundColor &&
           other.questionTextFieldFillColor == questionTextFieldFillColor &&
           other.questionHeaderStyle == questionHeaderStyle &&
@@ -288,6 +299,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
   int get hashCode =>
       backgroundColor.hashCode ^
       appBarTitleStyle.hashCode ^
+      appBarElevation.hashCode ^
       appBarBackgroundColor.hashCode ^
       questionTextFieldFillColor.hashCode ^
       questionHeaderStyle.hashCode ^

@@ -222,9 +222,11 @@ class _StreamPollCreatorFullScreenDialogState
   @override
   Widget build(BuildContext context) {
     final theme = StreamPollCreatorTheme.of(context);
+
     return Scaffold(
       backgroundColor: theme.backgroundColor,
       appBar: AppBar(
+        elevation: theme.appBarElevation,
         backgroundColor: theme.appBarBackgroundColor,
         title: Text(
           context.translations.createPollLabel(),
