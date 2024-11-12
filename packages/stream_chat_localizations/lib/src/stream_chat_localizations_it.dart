@@ -469,4 +469,81 @@ Attenzione: il limite massimo di $limit file è stato superato.
       'Errore durante la marcatura del messaggio come non letto. Impossibile'
       ' marcare messaggi non letti più vecchi dei più recenti 100 messaggi'
       ' del canale.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Crea un nuovo sondaggio';
+    return 'Crea sondaggio';
+  }
+
+  @override
+  String get questionsLabel => 'Domande';
+
+  @override
+  String get askAQuestionLabel => 'Fai una domanda';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'La domanda deve essere composta da almeno $min caratteri';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'La domanda deve essere lunga al massimo $max caratteri';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Opzioni';
+    return 'Opzione';
+  }
+
+  @override
+  String get pollOptionEmptyError => "L'opzione non può essere vuota";
+
+  @override
+  String get pollOptionDuplicateError => "Questa è già un'opzione";
+
+  @override
+  String get addAnOptionLabel => "Aggiungi un'opzione";
+
+  @override
+  String get multipleAnswersLabel => 'Risposte multiple';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Numero massimo di voti per persona';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'Il conteggio dei voti deve essere almeno $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'Il conteggio dei voti deve essere al massimo $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Sondaggio anonimo';
+
+  @override
+  String get suggestAnOptionLabel => "Suggerisci un'opzione";
+
+  @override
+  String get addACommentLabel => 'Aggiungi un commento';
+
+  @override
+  String get createLabel => 'Creare';
 }
