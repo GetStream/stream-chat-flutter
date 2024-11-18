@@ -22,6 +22,7 @@
   "quoted_message_id": null,
   "pinned": false,
   "pin_expires": null,
+  "poll_id": null,
   "show_in_channel": true,
   "hey": "test"
 }

@@ -20,6 +20,7 @@ class ChannelConfig {
     this.readEvents = false,
     this.replies = false,
     this.search = false,
+    this.polls = false,
     this.typingEvents = false,
     this.uploads = false,
     this.urlEnrichment = false,
@@ -65,6 +66,9 @@ class ChannelConfig {
 
   /// True if it's possible to perform a search in this channel
   final bool search;
+
+  /// True if polls are active for this channel
+  final bool polls;
 
   /// True if typing events should be sent for this channel
   final bool typingEvents;

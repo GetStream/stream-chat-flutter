@@ -16,6 +16,8 @@ class Event {
     this.me,
     this.user,
     this.message,
+    this.poll,
+    this.pollVote,
     this.totalUnreadCount,
     this.unreadChannels,
     this.reaction,
@@ -64,6 +66,12 @@ class Event {
 
   /// The message sent with the event
   final Message? message;
+
+  /// The poll sent with the event
+  final Poll? poll;
+
+  /// The poll vote sent with the event
+  final PollVote? pollVote;
 
   /// The channel sent with the event
   final EventChannel? channel;
@@ -125,6 +133,8 @@ class Event {
     'me',
     'user',
     'message',
+    'poll',
+    'poll_vote',
     'total_unread_count',
     'unread_channels',
     'reaction',
@@ -154,6 +164,8 @@ class Event {
     OwnUser? me,
     User? user,
     Message? message,
+    Poll? poll,
+    PollVote? pollVote,
     EventChannel? channel,
     Member? member,
     Reaction? reaction,
@@ -172,6 +184,8 @@ class Event {
         me: me ?? this.me,
         user: user ?? this.user,
         message: message ?? this.message,
+        poll: poll ?? this.poll,
+        pollVote: pollVote ?? this.pollVote,
         totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
         unreadChannels: unreadChannels ?? this.unreadChannels,
         reaction: reaction ?? this.reaction,

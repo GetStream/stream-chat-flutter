@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -56,6 +58,8 @@ void main() {
         pinnedMessages: [],
         watchers: [],
       );
+
+      print(jsonEncode(channelState.messages?.first));
 
       expect(
         channelState.toJson(),

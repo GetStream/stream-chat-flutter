@@ -22,6 +22,12 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       message: json['message'] == null
           ? null
           : Message.fromJson(json['message'] as Map<String, dynamic>),
+      poll: json['poll'] == null
+          ? null
+          : Poll.fromJson(json['poll'] as Map<String, dynamic>),
+      pollVote: json['poll_vote'] == null
+          ? null
+          : PollVote.fromJson(json['poll_vote'] as Map<String, dynamic>),
       totalUnreadCount: (json['total_unread_count'] as num?)?.toInt(),
       unreadChannels: (json['unread_channels'] as num?)?.toInt(),
       reaction: json['reaction'] == null
@@ -53,6 +59,8 @@ Map<String, dynamic> _$EventToJson(Event instance) {
     'me': instance.me?.toJson(),
     'user': instance.user?.toJson(),
     'message': instance.message?.toJson(),
+    'poll': instance.poll?.toJson(),
+    'poll_vote': instance.pollVote?.toJson(),
     'channel': instance.channel?.toJson(),
     'member': instance.member?.toJson(),
     'reaction': instance.reaction?.toJson(),
