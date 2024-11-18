@@ -25,6 +25,7 @@ dependencies:
   flutter_markdown: ^0.7.2+1
   flutter_portal: ^1.1.4
   flutter_svg: ^2.0.10+1
+  get_thumbnail_video: ^0.7.3
   http_parser: ^4.0.2
   image_gallery_saver_plus: ^3.0.5
   image_picker: ^1.1.2
@@ -46,7 +47,6 @@ dependencies:
   thumblr: ^0.0.4
   url_launcher: ^6.3.0
   video_player: ^2.8.7
-  video_thumbnail: ^0.5.3
 
 flutter:
   plugin:
