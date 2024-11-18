@@ -2,8 +2,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_thumbnail_video/index.dart';
 import 'package:stream_chat_flutter/src/video/video_service.dart';
-import 'package:video_thumbnail/video_thumbnail.dart' show ImageFormat;
 
 /// {@template video_thumbnail_image}
 /// A custom [ImageProvider] class for loading video thumbnails as images in
