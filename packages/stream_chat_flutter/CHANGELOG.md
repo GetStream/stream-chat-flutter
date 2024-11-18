@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#2030]](https://github.com/GetStream/stream-chat-flutter/issues/2030) Fixed `video_thumbnail`
+  Namespace not specified.
+
 ## 8.2.0
 
 ✅ Added
