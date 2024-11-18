@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Reactions now scroll if count is too high.
+
 ## 8.2.0
 
 ✅ Added
