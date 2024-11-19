@@ -1059,10 +1059,88 @@ class Channel {
     return _client.updatePoll(poll);
   }
 
-  /// Deletes the poll with the given [pollId] from this channel.
-  Future<EmptyResponse> deletePoll(String pollId) {
+  /// Deletes the given [poll] from this channel.
+  Future<EmptyResponse> deletePoll(Poll poll) {
     _checkInitialized();
-    return _client.deletePoll(pollId);
+    return _client.deletePoll(poll.id);
+  }
+
+  /// Cast a vote on the given [poll] with the given [option].
+  Future<CastPollVoteResponse> castPollVote(
+    Message message,
+    Poll poll,
+    PollOption option,
+  ) async {
+    _checkInitialized();
+
+    final optionId = option.id;
+    if (optionId == null) {
+      throw ArgumentError('Option id cannot be null');
+    }
+
+    return _client.castPollVote(message.id, poll.id, optionId: optionId);
+  }
+
+  /// Remove a vote on the given [poll] with the given [vote].
+  Future<RemovePollVoteResponse> removePollVote(
+    Message message,
+    Poll poll,
+    PollVote vote,
+  ) {
+    _checkInitialized();
+
+    final voteId = vote.id;
+    if (voteId == null) {
+      throw ArgumentError('Vote id cannot be null');
+    }
+
+    return _client.removePollVote(message.id, poll.id, voteId);
+  }
+
+  /// Close the given [poll].
+  Future<UpdatePollResponse> closePoll(Poll poll) {
+    _checkInitialized();
+    return _client.closePoll(poll.id);
+  }
+
+  /// Create a new poll option for the given [poll].
+  Future<CreatePollOptionResponse> createPollOption(
+    Poll poll,
+    PollOption option,
+  ) {
+    _checkInitialized();
+    return _client.createPollOption(poll.id, option);
+  }
+
+  /// Add a new answer to the given [poll].
+  Future<CastPollVoteResponse> addPollAnswer(
+    Message message,
+    Poll poll, {
+    required String answerText,
+  }) {
+    _checkInitialized();
+    return _client.addPollAnswer(
+      message.id,
+      poll.id,
+      answerText: answerText,
+    );
+  }
+
+  /// Query the poll votes for the given [pollId] with the given [filter] and
+  /// [sort] options.
+  Future<QueryPollVotesResponse> queryPollVotes(
+    String pollId, {
+    Filter? filter,
+    List<SortOption>? sort,
+    PaginationParams pagination = const PaginationParams(),
+  }) {
+    _checkInitialized();
+    return _client.queryPollVotes(
+      pollId,
+      filter: filter,
+      sort: sort,
+      pagination: pagination,
+    );
   }
 
   /// Send a reaction to this channel.
@@ -2110,12 +2188,12 @@ class ChannelClientState {
 
       final oldPoll = pollMessage.poll;
 
-      final answers = oldPoll?.answers ?? eventPoll.answers;
+      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
       final ownVotesAndAnswers =
           oldPoll?.ownVotesAndAnswers ?? eventPoll.ownVotesAndAnswers;
 
       final poll = eventPoll.copyWith(
-        answers: answers,
+        latestAnswers: latestAnswers,
         ownVotesAndAnswers: ownVotesAndAnswers,
       );
 
@@ -2150,8 +2228,8 @@ class ChannelClientState {
 
       final oldPoll = pollMessage.poll;
 
-      final answers = <String, PollVote>{
-        for (final ans in oldPoll?.answers ?? []) ans.id: ans,
+      final latestAnswers = <String, PollVote>{
+        for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
         eventPollVote.id!: eventPollVote,
       };
 
@@ -2163,7 +2241,7 @@ class ChannelClientState {
       };
 
       final poll = eventPoll.copyWith(
-        answers: [...answers.values],
+        latestAnswers: [...latestAnswers.values],
         ownVotesAndAnswers: [...ownVotesAndAnswers.values],
       );
 
@@ -2182,7 +2260,7 @@ class ChannelClientState {
 
       final oldPoll = pollMessage.poll;
 
-      final answers = oldPoll?.answers ?? eventPoll.answers;
+      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
       final currentUserId = _channel.client.state.currentUser?.id;
       final ownVotesAndAnswers = <String, PollVote>{
         for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
@@ -2191,7 +2269,7 @@ class ChannelClientState {
       };
 
       final poll = eventPoll.copyWith(
-        answers: answers,
+        latestAnswers: latestAnswers,
         ownVotesAndAnswers: [...ownVotesAndAnswers.values],
       );
 
@@ -2210,8 +2288,8 @@ class ChannelClientState {
 
       final oldPoll = pollMessage.poll;
 
-      final answers = <String, PollVote>{
-        for (final ans in oldPoll?.answers ?? []) ans.id: ans,
+      final latestAnswers = <String, PollVote>{
+        for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
       }..remove(eventPollVote.id);
 
       final ownVotesAndAnswers = <String, PollVote>{
@@ -2219,7 +2297,7 @@ class ChannelClientState {
       }..remove(eventPollVote.id);
 
       final poll = eventPoll.copyWith(
-        answers: [...answers.values],
+        latestAnswers: [...latestAnswers.values],
         ownVotesAndAnswers: [...ownVotesAndAnswers.values],
       );
 
@@ -2238,13 +2316,13 @@ class ChannelClientState {
 
       final oldPoll = pollMessage.poll;
 
-      final answers = oldPoll?.answers ?? eventPoll.answers;
+      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
       final ownVotesAndAnswers = <String, PollVote>{
         for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
       }..remove(eventPollVote.id);
 
       final poll = eventPoll.copyWith(
-        answers: answers,
+        latestAnswers: latestAnswers,
         ownVotesAndAnswers: [...ownVotesAndAnswers.values],
       );
 
@@ -2263,7 +2341,7 @@ class ChannelClientState {
 
       final oldPoll = pollMessage.poll;
 
-      final answers = oldPoll?.answers ?? eventPoll.answers;
+      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
       final currentUserId = _channel.client.state.currentUser?.id;
       final ownVotesAndAnswers = <String, PollVote>{
         for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
@@ -2272,7 +2350,7 @@ class ChannelClientState {
       };
 
       final poll = eventPoll.copyWith(
-        answers: answers,
+        latestAnswers: latestAnswers,
         ownVotesAndAnswers: [...ownVotesAndAnswers.values],
       );
 
@@ -2328,6 +2406,8 @@ class ChannelClientState {
               threads[event.message?.parentId]
                   ?.firstWhereOrNull((e) => e.id == event.message?.id);
       final message = event.message!.copyWith(
+        poll: oldMessage?.poll,
+        pollId: oldMessage?.pollId,
         ownReactions: oldMessage?.ownReactions,
       );
       updateMessage(message);
