@@ -11,6 +11,134 @@ import '../mocks.dart';
 import '../utils.dart';
 
 void main() {
+  // test('description', () async {
+  //   final client = StreamChatClient(
+  //     'hd8szvscpxvd',
+  //     logLevel: Level.OFF,
+  //   );
+  //
+  //   await client.connectUser(
+  //     User(id: 'test-sahil'),
+  //     '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC1zYWhpbCJ9.4YOR1CKQHxMjknmgt6wwb1vSmRBs8rJqqBlRiD1pDZM''',
+  //   );
+  //
+  //   /// Creates a channel using the type `messaging` and `godevs`.
+  //   /// Channels are containers for holding messages between different members. To
+  //   /// learn more about channels and some of our predefined types, checkout our
+  //   /// our channel docs: https://getstream.io/chat/docs/initialize_channel/?language=dart
+  //   final channel = client.channel('messaging', id: 'test-poll-channel');
+  //
+  //   /// `.watch()` is used to create and listen to the channel for updates. If the
+  //   /// channel already exists, it will simply listen for new events.
+  //   await channel.watch();
+  //
+  //   // channel.state?.messagesStream.listen((messages) {
+  //   //   print(messages);
+  //   // });
+  //
+  //   // final poll = await client.createPoll(
+  //   //   Poll(
+  //   //     name: 'Where should we go for lunch?',
+  //   //     options: [
+  //   //       PollOption(
+  //   //         text: '🍕 Pizza',
+  //   //         extraData: const {
+  //   //           'chefs': ['Gordon Ramsay']
+  //   //         },
+  //   //       ),
+  //   //       PollOption(
+  //   //         text: '🍣 Sushi',
+  //   //         extraData: const {
+  //   //           'chefs': ['Nobu Matsuhisa']
+  //   //         },
+  //   //       ),
+  //   //       PollOption(
+  //   //         text: '🍔 Burger',
+  //   //         extraData: const {
+  //   //           'chefs': ['Gordon Ramsay']
+  //   //         },
+  //   //       ),
+  //   //     ],
+  //   //     extraData: const {
+  //   //       'location': 'San Francisco',
+  //   //     },
+  //   //   ),
+  //   // );
+  //   // //
+  //   // print(poll);
+  //
+  //   // final message = await channel.sendMessage(Message(
+  //   //   pollId: poll.poll.id,
+  //   // ));
+  //   //
+  //   // final a =
+  //   //     await channel.getMessagesById(['80d166e1-cf59-4596-81fc-5474f23bf2c2']);
+  //   //
+  //   // print(a);
+  //
+  //   // final poll = await client.getPoll('9d44a472-a06f-4344-9619-0492a3e58226');
+  //
+  //   // print(poll);
+  //
+  //   // final closed = await client.closePoll('ef22cfaa-1e48-4f49-982e-8bf8061cd893');
+  //
+  //   final deleted = await client.deletePoll('c432c76e-0762-4a04-a4f1-8c0f03e00a32');
+  //
+  //   print(deleted);
+  //
+  //   // final option = await client.createPollOption(
+  //   //   '9d44a472-a06f-4344-9619-0492a3e58226',
+  //   //   const PollOption(
+  //   //     text: '🍜 Ramen',
+  //   //     extraData: {
+  //   //       'chefs': ['Ivan Orkin']
+  //   //     },
+  //   //   ),
+  //   // );
+  //   //
+  //   // print(option);
+  //
+  //   // final update = await client.partialUpdatePoll(
+  //   //   '9d44a472-a06f-4344-9619-0492a3e58226',
+  //   //   set: {
+  //   //     'allow_answers': true,
+  //   //   },
+  //   // );
+  //   //
+  //   // //
+  //   // final removed = await client.removePollVote(
+  //   //   '80d166e1-cf59-4596-81fc-5474f23bf2c2',
+  //   //   '9d44a472-a06f-4344-9619-0492a3e58226',
+  //   //   '4b718e51-3a3c-4797-ad8b-84baf59ca4ed',
+  //   // );
+  //
+  //   // final removed2 = await client.removePollVote(
+  //   //   '80d166e1-cf59-4596-81fc-5474f23bf2c2',
+  //   //   '9d44a472-a06f-4344-9619-0492a3e58226',
+  //   //   '07ed4d1f-581a-4be5-a290-e7a4f540e94f',
+  //   // );
+  //
+  //   // print(removed);
+  //   //
+  //   // final vote = await client.addPollAnswer(
+  //   //   '80d166e1-cf59-4596-81fc-5474f23bf2c2',
+  //   //   '9d44a472-a06f-4344-9619-0492a3e58226',
+  //   //   answerText: 'Why is this behaviour?',
+  //   // );
+  //   //
+  //   // final vote2 = await client.castPollVote(
+  //   //   '80d166e1-cf59-4596-81fc-5474f23bf2c2',
+  //   //   '9d44a472-a06f-4344-9619-0492a3e58226',
+  //   //   optionId: '744d931d-1743-424e-aa8d-928bbe339938',
+  //   // );
+  //   //
+  //   // print(vote);
+  //
+  //   await Future.delayed(const Duration(seconds: 6));
+  //
+  //   //0ce09496-0f5a-4742-ae5f-c46207ee2464
+  // }, timeout: const Timeout(Duration(minutes: 5)));
+
   group('Fake web-socket connection functions', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();

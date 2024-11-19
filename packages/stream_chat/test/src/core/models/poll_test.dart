@@ -29,7 +29,7 @@ void main() {
       expect(option.id, 'option1');
       expect(option.text, 'option1 text');
 
-      expect(poll.votesByOption, isEmpty);
+      expect(poll.latestVotesByOption, isEmpty);
 
       expect(poll.ownVotesAndAnswers.length, 1);
       final vote = poll.ownVotesAndAnswers[0];
@@ -50,7 +50,6 @@ void main() {
         name: 'test',
         options: const [
           PollOption(
-            id: 'option1',
             text: 'option1 text',
           ),
         ],
@@ -65,7 +64,7 @@ void main() {
         {'text': 'option1 text'}
       ]);
       expect(json['voting_visibility'], 'public');
-      expect(json['enforce_unique_vote'], false);
+      expect(json['enforce_unique_vote'], true);
       expect(json['max_votes_allowed'], isNull);
       expect(json['allow_user_suggested_options'], false);
       expect(json['allow_answers'], false);
