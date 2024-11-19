@@ -47,6 +47,7 @@ class StreamMessagePreviewText extends StatelessWidget {
             ? (it.title ?? 'File')
             : '${it.title ?? 'File'} , ';
       }),
+      if (message.poll?.name case final pollName?) '📊 $pollName',
       if (messageText != null)
         if (messageMentionedUsers.isNotEmpty)
           ...mentionedUsersRegex.allMatchesWithSep(messageText)
