@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/poll_text_field.dart';
+import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class _NullConst {
@@ -216,7 +216,7 @@ class _PollSwitchTextFieldState extends State<PollSwitchTextField> {
       child: Row(
         children: [
           Expanded(
-            child: PollTextField(
+            child: StreamPollTextField(
               hintText: widget.hintText,
               enabled: _item.value,
               fillColor: fillColor,

@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/separated_reorderable_list_view.dart';
-import 'package:stream_chat_flutter/src/poll/poll_text_field.dart';
+import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class _NullConst {
@@ -83,7 +83,7 @@ class PollOptionListItem extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: PollTextField(
+            child: StreamPollTextField(
               initialValue: option.text,
               hintText: hintText,
               style: theme.optionsTextFieldStyle,
@@ -298,6 +298,7 @@ class _PollOptionReorderableListViewState
                 horizontal: 16,
               ),
               backgroundColor: theme.optionsTextFieldFillColor,
+              foregroundColor: theme.optionsTextFieldStyle?.color,
             ),
             child: Text(context.translations.addAnOptionLabel),
           ),

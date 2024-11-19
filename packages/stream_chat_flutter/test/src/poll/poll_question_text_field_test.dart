@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
-import 'package:stream_chat_flutter/src/poll/poll_question_text_field.dart';
+import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 void main() {
