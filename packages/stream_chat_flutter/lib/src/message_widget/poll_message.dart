@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/src/poll/stream_poll_results_dialog.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-const _maxVisibleOptionCount = 2;
+const _maxVisibleOptionCount = 10;
 
 /// {@template pollMessage}
 /// A widget that displays a poll message.
