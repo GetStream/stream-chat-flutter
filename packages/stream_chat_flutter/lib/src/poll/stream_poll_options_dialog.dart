@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_options_list_view.dart';
-import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
 import 'package:stream_chat_flutter/src/theme/poll_options_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 

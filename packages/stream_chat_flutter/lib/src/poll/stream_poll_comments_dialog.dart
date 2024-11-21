@@ -1,11 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/attachment_upload_state_builder.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_add_comment_dialog.dart';
 import 'package:stream_chat_flutter/src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
 import 'package:stream_chat_flutter/src/theme/poll_comments_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 

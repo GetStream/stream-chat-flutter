@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class _NullConst {

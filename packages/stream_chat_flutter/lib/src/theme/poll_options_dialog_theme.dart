@@ -9,7 +9,8 @@ import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 ///
 /// See also:
 ///
-///  * [StreamPollResultsDialogThemeData], which is used to configure this theme.
+///  * [StreamPollResultsDialogThemeData], which is used to configure this
+///  theme.
 /// {@endtemplate}
 class StreamPollOptionsDialogTheme extends InheritedTheme {
   /// Creates a [StreamPollOptionsDialogTheme].

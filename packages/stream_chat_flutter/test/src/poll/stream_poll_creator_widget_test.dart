@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_switch_list_tile.dart';
-import 'package:stream_chat_flutter/src/poll/creator/stream_poll_creator_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
