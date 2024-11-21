@@ -51,7 +51,7 @@ class StreamPollCreatorTheme extends InheritedTheme {
 }
 
 /// {@template streamPollCreatorThemeData}
-/// A style that overrides the default appearance of [MessageInput] widgets
+/// A style that overrides the default appearance of [StreamPollCreator] widget
 /// when used with [StreamPollCreatorTheme] or with the overall
 /// [StreamChatTheme]'s [StreamChatThemeData.pollCreatorTheme].
 /// {@endtemplate}

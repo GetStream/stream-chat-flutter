@@ -869,7 +869,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final streamChannel = StreamChannel.of(context);
     final channel = streamChannel.channel;
 
-    return channel.deletePoll(poll.id);
+    return channel.deletePoll(poll);
   }
 
   Future<void> _createOrUpdatePoll(Poll? old, Poll? current) async {
