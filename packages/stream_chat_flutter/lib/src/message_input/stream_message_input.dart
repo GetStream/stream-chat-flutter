@@ -896,10 +896,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final initialAttachments = _effectiveController.attachments;
 
     // Remove AttachmentPickerType.poll if the user doesn't have the permission
-    // to send a poll.
+    // to send a poll or if this is a thread message.
     final allowedTypes = [...widget.allowedAttachmentPickerTypes]
       ..removeWhere((it) {
         if (it != AttachmentPickerType.poll) return false;
+        if (_effectiveController.message.parentId != null) return true;
         final channel = StreamChannel.of(context).channel;
         if (channel.ownCapabilities.contains(PermissionType.sendPoll)) {
           return false;

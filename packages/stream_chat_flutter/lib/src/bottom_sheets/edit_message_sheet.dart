@@ -79,6 +79,10 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
               else
                 StreamMessageInput(
                   messageInputController: controller,
+                  // Disallow editing poll for now as it's not supported.
+                  allowedAttachmentPickerTypes: [
+                    ...AttachmentPickerType.values,
+                  ]..remove(AttachmentPickerType.poll),
                   preMessageSending: (m) {
                     FocusScope.of(context).unfocus();
                     Navigator.of(context).pop();
