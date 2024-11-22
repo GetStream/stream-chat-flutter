@@ -4,14 +4,30 @@ import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
-/// {@template pollAddOrUpdateAnswerDialog}
+/// {@template showPollAddCommentDialog}
+/// Shows a dialog that allows the user to add a poll comment.
+///
+/// Optionally, you can provide an [initialValue] to pre-fill the text field.
+/// {@endtemplate}
+Future<String?> showPollAddCommentDialog({
+  required BuildContext context,
+  String initialValue = '',
+}) =>
+    showDialog<String?>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PollAddCommentDialog(
+        initialValue: initialValue,
+      ),
+    );
+
+/// {@template pollAddCommentDialog}
 /// A dialog that allows the user to add or update a poll comment.
 ///
-/// If the [initialValue] is provided, the dialog will behave as an update
-/// dialog.
+/// Optionally, you can provide an [initialValue] to pre-fill the text field.
 /// {@endtemplate}
 class PollAddCommentDialog extends StatefulWidget {
-  /// {@macro pollAddOrUpdateAnswerDialog}
+  /// {@macro pollAddCommentDialog}
   const PollAddCommentDialog({
     super.key,
     this.initialValue = '',
@@ -23,12 +39,10 @@ class PollAddCommentDialog extends StatefulWidget {
   final String initialValue;
 
   @override
-  State<PollAddCommentDialog> createState() =>
-      _PollAddCommentDialogState();
+  State<PollAddCommentDialog> createState() => _PollAddCommentDialogState();
 }
 
-class _PollAddCommentDialogState
-    extends State<PollAddCommentDialog> {
+class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
   late String _comment = widget.initialValue;
 
   @override

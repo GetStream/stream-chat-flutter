@@ -96,6 +96,7 @@ class StreamPollInteractor extends StatelessWidget {
         horizontal: 10,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           PollHeader(poll: poll),

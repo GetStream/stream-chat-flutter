@@ -30,14 +30,11 @@ Future<T?> showStreamPollCommentsDialog<T extends Object?>({
           final channel = StreamChannel.of(context).channel;
 
           Future<void> onUpdateComment() async {
-            final commentText = await showDialog<String?>(
+            final commentText = await showPollAddCommentDialog(
               context: context,
-              barrierDismissible: false,
-              builder: (_) => PollAddCommentDialog(
-                // We use the first answer as the initial value because the
-                // user can only add one comment per poll.
-                initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
-              ),
+              // We use the first answer as the initial value because the
+              // user can only add one comment per poll.
+              initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
             );
 
             if (commentText == null) return;

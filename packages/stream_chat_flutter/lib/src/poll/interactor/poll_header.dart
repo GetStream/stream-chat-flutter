@@ -23,6 +23,7 @@ class PollHeader extends StatelessWidget {
     final theme = StreamPollInteractorTheme.of(context);
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(

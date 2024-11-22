@@ -4,8 +4,27 @@ import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
+/// {@template showPollSuggestOptionDialog}
+/// Shows a dialog that allows the user to suggest an option for a poll.
+///
+/// Optionally, you can provide an [initialOption] to pre-fill the text field.
+/// {@endtemplate}
+Future<String?> showPollSuggestOptionDialog({
+  required BuildContext context,
+  String initialOption = '',
+}) =>
+    showDialog<String?>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PollSuggestOptionDialog(
+        initialOption: initialOption,
+      ),
+    );
+
 /// {@template pollSuggestOptionDialog}
 /// A dialog that allows the user to suggest an option for a poll.
+///
+/// Optionally, you can provide an [initialOption] to pre-fill the text field.
 /// {@endtemplate}
 class PollSuggestOptionDialog extends StatefulWidget {
   /// {@macro pollSuggestOptionDialog}

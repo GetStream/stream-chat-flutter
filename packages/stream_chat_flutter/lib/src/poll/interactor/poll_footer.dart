@@ -108,6 +108,7 @@ class PollFooter extends StatelessWidget {
     final translations = context.translations;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         if (visibleOptionCount case final count?

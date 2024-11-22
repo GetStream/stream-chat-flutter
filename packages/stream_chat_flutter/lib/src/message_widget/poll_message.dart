@@ -63,14 +63,11 @@ class _PollMessageState extends State<PollMessage> {
         final channel = StreamChannel.of(context).channel;
 
         Future<void> onAddComment() async {
-          final commentText = await showDialog<String?>(
+          final commentText = await showPollAddCommentDialog(
             context: context,
-            barrierDismissible: false,
-            builder: (_) => PollAddCommentDialog(
-              // We use the first answer as the initial value because the user
-              // can only add one comment per poll.
-              initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
-            ),
+            // We use the first answer as the initial value because the user
+            // can only add one comment per poll.
+            initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
           );
 
           if (commentText == null) return;
@@ -78,10 +75,8 @@ class _PollMessageState extends State<PollMessage> {
         }
 
         Future<void> onSuggestOption() async {
-          final optionText = await showDialog<String?>(
+          final optionText = await showPollSuggestOptionDialog(
             context: context,
-            barrierDismissible: false,
-            builder: (_) => const PollSuggestOptionDialog(),
           );
 
           if (optionText == null) return;
