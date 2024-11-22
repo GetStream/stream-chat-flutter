@@ -10,6 +10,11 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 const _maxVisibleOptionCount = 10;
 
+const _kDefaultPollMessageConstraints = BoxConstraints(
+  minWidth: 170,
+  maxWidth: 256,
+);
+
 /// {@template pollMessage}
 /// A widget that displays a poll message.
 ///
@@ -83,28 +88,31 @@ class _PollMessageState extends State<PollMessage> {
           channel.createPollOption(poll, PollOption(text: optionText));
         }
 
-        return StreamPollInteractor(
-          poll: poll,
-          currentUser: currentUser,
-          visibleOptionCount: _maxVisibleOptionCount,
-          onEndVote: () => channel.closePoll(poll),
-          onCastVote: (option) => channel.castPollVote(message, poll, option),
-          onRemoveVote: (vote) => channel.removePollVote(message, poll, vote),
-          onAddComment: onAddComment,
-          onSuggestOption: onSuggestOption,
-          // We need to pass the notifier here instead of the poll because the
-          // options dialog will have no way to update the poll itself.
-          onViewComments: () => showStreamPollCommentsDialog(
-            context: context,
-            messageNotifier: _messageNotifier,
-          ),
-          onSeeMoreOptions: () => showStreamPollOptionsDialog(
-            context: context,
-            messageNotifier: _messageNotifier,
-          ),
-          onViewResults: () => showStreamPollResultsDialog(
-            context: context,
-            messageNotifier: _messageNotifier,
+        return ConstrainedBox(
+          constraints: _kDefaultPollMessageConstraints,
+          child: StreamPollInteractor(
+            poll: poll,
+            currentUser: currentUser,
+            visibleOptionCount: _maxVisibleOptionCount,
+            onEndVote: () => channel.closePoll(poll),
+            onCastVote: (option) => channel.castPollVote(message, poll, option),
+            onRemoveVote: (vote) => channel.removePollVote(message, poll, vote),
+            onAddComment: onAddComment,
+            onSuggestOption: onSuggestOption,
+            // We need to pass the notifier here instead of the poll because the
+            // options dialog will have no way to update the poll itself.
+            onViewComments: () => showStreamPollCommentsDialog(
+              context: context,
+              messageNotifier: _messageNotifier,
+            ),
+            onSeeMoreOptions: () => showStreamPollOptionsDialog(
+              context: context,
+              messageNotifier: _messageNotifier,
+            ),
+            onViewResults: () => showStreamPollResultsDialog(
+              context: context,
+              messageNotifier: _messageNotifier,
+            ),
           ),
         );
       },

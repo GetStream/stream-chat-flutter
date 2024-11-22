@@ -123,17 +123,20 @@ class _StreamPollCommentsDialogState extends State<StreamPollCommentsDialog> {
           style: theme.appBarTitleTextStyle,
         ),
       ),
-      body: StreamPollVoteListView(
-        controller: _controller,
-        padding: const EdgeInsets.all(16),
-        itemBuilder: (context, _, __, defaultWidget) {
-          return defaultWidget.copyWith(
-            showAnswerText: true,
-            contentPadding: const EdgeInsets.all(16),
-            borderRadius: theme.pollCommentItemBorderRadius,
-            tileColor: theme.pollCommentItemBackgroundColor,
-          );
-        },
+      body: RefreshIndicator.adaptive(
+        onRefresh: _controller.refresh,
+        child: StreamPollVoteListView(
+          controller: _controller,
+          padding: const EdgeInsets.all(16),
+          itemBuilder: (context, _, __, defaultWidget) {
+            return defaultWidget.copyWith(
+              showAnswerText: true,
+              contentPadding: const EdgeInsets.all(16),
+              borderRadius: theme.pollCommentItemBorderRadius,
+              tileColor: theme.pollCommentItemBackgroundColor,
+            );
+          },
+        ),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
@@ -141,7 +144,10 @@ class _StreamPollCommentsDialogState extends State<StreamPollCommentsDialog> {
           child: FilledButton.tonal(
             onPressed: widget.onUpdateComment,
             style: theme.updateYourCommentButtonStyle,
-            child: Text(context.translations.updateYourCommentLabel),
+            child: Text(switch (widget.poll.ownAnswers.isEmpty) {
+              true => context.translations.addACommentLabel,
+              false => context.translations.updateYourCommentLabel,
+            }),
           ),
         ),
       ),

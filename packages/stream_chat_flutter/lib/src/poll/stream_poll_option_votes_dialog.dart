@@ -145,15 +145,18 @@ class _StreamPollOptionVotesDialogState
                 context: context,
                 removeTop: true,
                 removeBottom: true,
-                child: StreamPollVoteListView(
-                  controller: _controller,
-                  itemBuilder: (context, _, __, defaultWidget) {
-                    return defaultWidget.copyWith(
-                      contentPadding: const EdgeInsets.all(16),
-                      borderRadius: theme.pollOptionVoteItemBorderRadius,
-                      tileColor: theme.pollOptionVoteItemBackgroundColor,
-                    );
-                  },
+                child: RefreshIndicator.adaptive(
+                  onRefresh: _controller.refresh,
+                  child: StreamPollVoteListView(
+                    controller: _controller,
+                    itemBuilder: (context, _, __, defaultWidget) {
+                      return defaultWidget.copyWith(
+                        contentPadding: const EdgeInsets.all(16),
+                        borderRadius: theme.pollOptionVoteItemBorderRadius,
+                        tileColor: theme.pollOptionVoteItemBackgroundColor,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

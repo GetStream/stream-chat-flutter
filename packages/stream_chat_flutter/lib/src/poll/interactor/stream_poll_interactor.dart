@@ -26,8 +26,12 @@ class StreamPollInteractor extends StatelessWidget {
   const StreamPollInteractor({
     super.key,
     required this.poll,
-    this.visibleOptionCount,
     required this.currentUser,
+    this.padding = const EdgeInsets.symmetric(
+      vertical: 12,
+      horizontal: 10,
+    ),
+    this.visibleOptionCount,
     this.onCastVote,
     this.onRemoveVote,
     this.onEndVote,
@@ -43,6 +47,9 @@ class StreamPollInteractor extends StatelessWidget {
 
   /// The current user interacting with the poll.
   final User currentUser;
+
+  /// The padding to apply to the interactor.
+  final EdgeInsetsGeometry padding;
 
   /// The number of visible options in the poll.
   ///
@@ -91,10 +98,7 @@ class StreamPollInteractor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 12,
-        horizontal: 10,
-      ),
+      padding: padding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

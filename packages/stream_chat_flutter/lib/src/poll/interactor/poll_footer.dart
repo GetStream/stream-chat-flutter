@@ -74,7 +74,6 @@ class PollFooter extends StatelessWidget {
 
   bool get _shouldShowAddCommentButton {
     if (poll.isClosed || !poll.allowAnswers) return false;
-    if (poll.votingVisibility == VotingVisibility.anonymous) return true;
 
     // If the user has already commented, don't show the button.
     if (poll.ownAnswers.isNotEmpty) return false;
