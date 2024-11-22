@@ -82,8 +82,6 @@ class PollFooter extends StatelessWidget {
   }
 
   bool get _shouldShowViewCommentsButton {
-    if (poll.isClosed) return false;
-
     // If the poll has no answers, don't show the button.
     return poll.answersCount > 0;
   }

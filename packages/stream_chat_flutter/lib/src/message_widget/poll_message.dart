@@ -11,8 +11,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 const _maxVisibleOptionCount = 10;
 
 const _kDefaultPollMessageConstraints = BoxConstraints(
-  minWidth: 170,
-  maxWidth: 256,
+  maxWidth: 270,
 );
 
 /// {@template pollMessage}

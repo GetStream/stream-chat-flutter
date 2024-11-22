@@ -138,19 +138,21 @@ class _StreamPollCommentsDialogState extends State<StreamPollCommentsDialog> {
           },
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: FilledButton.tonal(
-            onPressed: widget.onUpdateComment,
-            style: theme.updateYourCommentButtonStyle,
-            child: Text(switch (widget.poll.ownAnswers.isEmpty) {
-              true => context.translations.addACommentLabel,
-              false => context.translations.updateYourCommentLabel,
-            }),
-          ),
-        ),
-      ),
+      bottomNavigationBar: widget.poll.isClosed
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: FilledButton.tonal(
+                  onPressed: widget.onUpdateComment,
+                  style: theme.updateYourCommentButtonStyle,
+                  child: Text(switch (widget.poll.ownAnswers.isEmpty) {
+                    true => context.translations.addACommentLabel,
+                    false => context.translations.updateYourCommentLabel,
+                  }),
+                ),
+              ),
+            ),
     );
   }
 }
