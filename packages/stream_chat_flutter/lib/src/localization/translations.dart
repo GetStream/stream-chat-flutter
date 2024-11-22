@@ -475,6 +475,12 @@ abstract class Translations {
   ///
   /// If [count] is provided, it returns "Show all $count votes".
   String showAllVotesLabel({int? count});
+
+  /// The label for "There are no poll votes currently".
+  String get noPollVotesLabel;
+
+  /// The label for "Error loading poll votes".
+  String get loadingPollVotesError;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1073,4 +1079,10 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
         1 => '1 vote',
         _ => '$count votes',
       };
+
+  @override
+  String get noPollVotesLabel => 'There are no poll votes currently';
+
+  @override
+  String get loadingPollVotesError => 'Error loading poll votes';
 }

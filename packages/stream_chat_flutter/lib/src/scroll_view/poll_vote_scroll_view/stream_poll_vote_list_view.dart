@@ -328,12 +328,12 @@ class StreamPollVoteListView extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: StreamScrollViewEmptyWidget(
-                    emptyIcon: StreamSvgIcon.user(
+                    emptyIcon: StreamSvgIcon.polls(
                       size: 148,
                       color: chatThemeData.colorTheme.disabled,
                     ),
                     emptyTitle: Text(
-                      context.translations.noUsersLabel,
+                      context.translations.noPollVotesLabel,
                       style: chatThemeData.textTheme.headline,
                     ),
                   ),
@@ -343,7 +343,7 @@ class StreamPollVoteListView extends StatelessWidget {
         loadMoreErrorBuilder: (context, error) =>
             StreamScrollViewLoadMoreError.list(
           onTap: controller.retry,
-          error: Text(context.translations.loadingUsersError),
+          error: Text(context.translations.loadingPollVotesError),
         ),
         loadMoreIndicatorBuilder: (context) => const Center(
           child: Padding(
@@ -360,7 +360,7 @@ class StreamPollVoteListView extends StatelessWidget {
             errorBuilder?.call(context, error) ??
             Center(
               child: StreamScrollViewErrorWidget(
-                errorTitle: Text(context.translations.loadingUsersError),
+                errorTitle: Text(context.translations.loadingPollVotesError),
                 onRetryPressed: controller.refresh,
               ),
             ),
