@@ -1035,6 +1035,8 @@ class Channel {
     return _client.sendEvent(id!, type, event);
   }
 
+  final _pollLock = Lock();
+
   /// Send a message with a poll to this channel.
   ///
   /// Optionally provide a [messageText] to send a message along with the poll.
@@ -1043,7 +1045,7 @@ class Channel {
     String messageText = '',
   }) async {
     _checkInitialized();
-    final res = await _client.createPoll(poll);
+    final res = await _pollLock.synchronized(() => _client.createPoll(poll));
     return sendMessage(
       Message(
         text: messageText,
@@ -1056,14 +1058,33 @@ class Channel {
   /// Updates the [poll] in this channel.
   Future<UpdatePollResponse> updatePoll(Poll poll) {
     _checkInitialized();
-    return _client.updatePoll(poll);
+    return _pollLock.synchronized(() => _client.updatePoll(poll));
   }
 
   /// Deletes the given [poll] from this channel.
   Future<EmptyResponse> deletePoll(Poll poll) {
     _checkInitialized();
-    return _client.deletePoll(poll.id);
+    return _pollLock.synchronized(() => _client.deletePoll(poll.id));
   }
+
+  /// Close the given [poll].
+  Future<UpdatePollResponse> closePoll(Poll poll) {
+    _checkInitialized();
+    return _pollLock.synchronized(() => _client.closePoll(poll.id));
+  }
+
+  /// Create a new poll option for the given [poll].
+  Future<CreatePollOptionResponse> createPollOption(
+    Poll poll,
+    PollOption option,
+  ) {
+    _checkInitialized();
+    return _pollLock.synchronized(
+      () => _client.createPollOption(poll.id, option),
+    );
+  }
+
+  final _pollVoteLock = Lock();
 
   /// Cast a vote on the given [poll] with the given [option].
   Future<CastPollVoteResponse> castPollVote(
@@ -1078,7 +1099,29 @@ class Channel {
       throw ArgumentError('Option id cannot be null');
     }
 
-    return _client.castPollVote(message.id, poll.id, optionId: optionId);
+    return _pollVoteLock.synchronized(
+      () => _client.castPollVote(
+        message.id,
+        poll.id,
+        optionId: optionId,
+      ),
+    );
+  }
+
+  /// Add a new answer to the given [poll].
+  Future<CastPollVoteResponse> addPollAnswer(
+    Message message,
+    Poll poll, {
+    required String answerText,
+  }) {
+    _checkInitialized();
+    return _pollVoteLock.synchronized(
+      () => _client.addPollAnswer(
+        message.id,
+        poll.id,
+        answerText: answerText,
+      ),
+    );
   }
 
   /// Remove a vote on the given [poll] with the given [vote].
@@ -1094,35 +1137,12 @@ class Channel {
       throw ArgumentError('Vote id cannot be null');
     }
 
-    return _client.removePollVote(message.id, poll.id, voteId);
-  }
-
-  /// Close the given [poll].
-  Future<UpdatePollResponse> closePoll(Poll poll) {
-    _checkInitialized();
-    return _client.closePoll(poll.id);
-  }
-
-  /// Create a new poll option for the given [poll].
-  Future<CreatePollOptionResponse> createPollOption(
-    Poll poll,
-    PollOption option,
-  ) {
-    _checkInitialized();
-    return _client.createPollOption(poll.id, option);
-  }
-
-  /// Add a new answer to the given [poll].
-  Future<CastPollVoteResponse> addPollAnswer(
-    Message message,
-    Poll poll, {
-    required String answerText,
-  }) {
-    _checkInitialized();
-    return _client.addPollAnswer(
-      message.id,
-      poll.id,
-      answerText: answerText,
+    return _pollVoteLock.synchronized(
+      () => _client.removePollVote(
+        message.id,
+        poll.id,
+        voteId,
+      ),
     );
   }
 
