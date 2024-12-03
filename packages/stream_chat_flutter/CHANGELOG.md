@@ -2,6 +2,8 @@
 
 🐞 Fixed
 
+- [[#2055]](https://github.com/GetStream/stream-chat-flutter/issues/2055) Fixed default plugin warnings.
+
 - [[#2030]](https://github.com/GetStream/stream-chat-flutter/issues/2030) Fixed `video_thumbnail`
   Namespace not specified.
 
