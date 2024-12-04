@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/ai_assistant/stream_typewriter_builder.dart';
 import 'package:stream_chat_flutter/src/ai_assistant/streaming_message_view.dart';
-import 'package:stream_chat_flutter/src/misc/markdown_message.dart';
 
 void main() {
   group('StreamingMessageView Tests', () {
