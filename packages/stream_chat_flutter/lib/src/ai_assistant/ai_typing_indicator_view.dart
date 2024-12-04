@@ -118,6 +118,7 @@ class AnimatedDots extends StatelessWidget {
         ...List.generate(
           count,
           (index) => _AnimatedDot(
+            key: ValueKey(index),
             index: index,
             size: size,
             color: color,

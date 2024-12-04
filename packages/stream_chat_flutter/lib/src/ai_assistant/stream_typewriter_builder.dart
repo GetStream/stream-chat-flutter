@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:characters/characters.dart';
 
 import 'package:flutter/widgets.dart';
 
