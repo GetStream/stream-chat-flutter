@@ -112,4 +112,13 @@ class EventType {
 
   /// Event sent when the user's mutes list is updated
   static const String notificationMutesUpdated = 'notification.mutes_updated';
+
+  /// Event sent when the AI indicator is updated
+  static const String aiIndicatorUpdate = 'ai_indicator.update';
+
+  /// Event sent when the AI indicator is stopped
+  static const String aiIndicatorStop = 'ai_indicator.stop';
+
+  /// Event sent when the AI indicator is cleared
+  static const String aiIndicatorClear = 'ai_indicator.clear';
 }
