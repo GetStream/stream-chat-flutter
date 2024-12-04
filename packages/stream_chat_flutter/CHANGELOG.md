@@ -1,4 +1,10 @@
-## Upcoming
+## 8.3.0
+
+✅ Added
+
+- Added several new widgets to enhance the AI assistant features.
+  - `StreamingMessageView` to show AI assistant messages with streaming animation.
+  - `AITypingIndicatorView` to show AI typing indicator.
 
 ✅ Added
 
