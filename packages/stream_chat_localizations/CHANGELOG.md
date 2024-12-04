@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#2055]](https://github.com/GetStream/stream-chat-flutter/issues/2055) Fixed default plugin warnings.
+
 ## 8.2.0
 
 - Updated `stream_chat_flutter` dependency to [`8.2.0`](https://pub.dev/packages/stream_chat/changelog).
