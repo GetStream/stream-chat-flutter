@@ -164,7 +164,7 @@ void main() {
       expect(fetchedReactions1, isEmpty);
       expect(fetchedReactions2, isNotEmpty);
     });
-    test('should delete all the messages of both message', () async {
+    test('should delete all the reactions of both message', () async {
       // Preparing test data
       final insertedReactions1 = await _prepareReactionData(messageId1);
       final insertedReactions2 = await _prepareReactionData(messageId2);

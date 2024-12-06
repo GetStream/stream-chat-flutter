@@ -5,6 +5,8 @@ export 'member_dao.dart';
 export 'message_dao.dart';
 export 'pinned_message_dao.dart';
 export 'pinned_message_reaction_dao.dart';
+export 'poll_dao.dart';
+export 'poll_vote_dao.dart';
 export 'reaction_dao.dart';
 export 'read_dao.dart';
 export 'user_dao.dart';

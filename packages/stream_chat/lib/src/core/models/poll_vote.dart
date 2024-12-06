@@ -70,6 +70,28 @@ class PollVote extends Equatable {
   /// Serialize to json
   Map<String, dynamic> toJson() => _$PollVoteToJson(this);
 
+  /// Creates a copy of [PollVote] with specified attributes overridden.
+  PollVote copyWith({
+    String? id,
+    String? pollId,
+    String? optionId,
+    String? answerText,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? userId,
+    User? user,
+  }) =>
+      PollVote(
+        id: id ?? this.id,
+        pollId: pollId ?? this.pollId,
+        optionId: optionId ?? this.optionId,
+        answerText: answerText ?? this.answerText,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        userId: userId ?? this.userId,
+        user: user ?? this.user,
+      );
+
   @override
   List<Object?> get props => [
         id,
