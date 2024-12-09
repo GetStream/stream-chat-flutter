@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/poll_text_field.dart';
+import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
 import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -132,7 +132,7 @@ class _PollQuestionTextFieldState extends State<PollQuestionTextField> {
             color: fillColor,
             borderRadius: borderRadius,
           ),
-          child: PollTextField(
+          child: StreamPollTextField(
             initialValue: _question.text,
             hintText: widget.hintText,
             fillColor: fillColor,

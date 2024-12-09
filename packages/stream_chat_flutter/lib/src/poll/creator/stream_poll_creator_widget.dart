@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/poll_option_reorderable_list_view.dart';
-import 'package:stream_chat_flutter/src/poll/poll_question_text_field.dart';
-import 'package:stream_chat_flutter/src/poll/poll_switch_list_tile.dart';
+import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
+import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.dart';
+import 'package:stream_chat_flutter/src/poll/creator/poll_switch_list_tile.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 

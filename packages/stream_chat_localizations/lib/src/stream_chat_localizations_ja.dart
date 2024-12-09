@@ -513,11 +513,73 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get anonymousPollLabel => '匿名投票';
 
   @override
-  String get suggestAnOptionLabel => 'オプションを提案する';
+  String get pollOptionsLabel => '投票オプション';
+
+  @override
+  String get suggestAnOptionLabel => 'オプションを提案';
+
+  @override
+  String get enterANewOptionLabel => '新しいオプションを入力';
 
   @override
   String get addACommentLabel => 'コメントを追加';
 
   @override
-  String get createLabel => '創造する';
+  String get pollCommentsLabel => '投票コメント';
+
+  @override
+  String get updateYourCommentLabel => 'コメントを更新';
+
+  @override
+  String get enterYourCommentLabel => 'コメントを入力';
+
+  @override
+  String get createLabel => '作成';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => '投票終了',
+      unique: () => '1つを選択',
+      limited: (count) => '最大 $count 選択',
+      all: () => '1つ以上を選択',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'すべてのオプションを表示';
+    return 'すべての $count オプションを表示';
+  }
+
+  @override
+  String get viewCommentsLabel => 'コメントを表示';
+
+  @override
+  String get viewResultsLabel => '結果を表示';
+
+  @override
+  String get endVoteLabel => '投票を終了';
+
+  @override
+  String get pollResultsLabel => '投票結果';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'すべての投票を表示';
+    return 'すべての $count 投票を表示';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 票',
+        1 => '1 票',
+        _ => '$count 票',
+      };
+
+  @override
+  String get noPollVotesLabel => '現在投票はありません';
+
+  @override
+  String get loadingPollVotesError => '投票の読み込みエラー';
 }

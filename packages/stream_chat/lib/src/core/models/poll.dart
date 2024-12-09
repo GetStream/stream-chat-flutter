@@ -41,7 +41,7 @@ class Poll extends Equatable {
     this.enforceUniqueVote = true,
     this.maxVotesAllowed,
     this.allowAnswers = false,
-    this.answers = const [],
+    this.latestAnswers = const [],
     this.answersCount = 0,
     this.allowUserSuggestedOptions = false,
     this.isClosed = false,
@@ -49,7 +49,7 @@ class Poll extends Equatable {
     DateTime? updatedAt,
     this.voteCountsByOption = const {},
     this.voteCount = 0,
-    this.votesByOption = const {},
+    this.latestVotesByOption = const {},
     this.createdById,
     this.createdBy,
     this.ownVotesAndAnswers = const [],
@@ -109,20 +109,20 @@ class Poll extends Equatable {
   final Map<String, int> voteCountsByOption;
 
   /// Map of latest votes by option.
-  @JsonKey(name: 'latest_votes_by_option', includeToJson: false)
-  final Map<String, List<PollVote>> votesByOption;
+  @JsonKey(includeToJson: false)
+  final Map<String, List<PollVote>> latestVotesByOption;
 
   /// List of votes received by the poll.
   ///
   /// Note: This does not include the answers provided by the users,
-  /// see [answers] for that.
-  List<PollVote> get votes => [
-        ...votesByOption.values.flattened.where((it) => !it.isAnswer),
+  /// see [latestAnswers] for that.
+  List<PollVote> get latestVotes => [
+        ...latestVotesByOption.values.flattened.where((it) => !it.isAnswer),
       ];
 
   /// List of latest answers received by the poll.
-  @JsonKey(name: 'latest_answers', includeToJson: false)
-  final List<PollVote> answers;
+  @JsonKey(includeToJson: false)
+  final List<PollVote> latestAnswers;
 
   /// List of votes casted by the current user.
   ///
@@ -133,6 +133,22 @@ class Poll extends Equatable {
   /// The total number of votes received by the poll.
   @JsonKey(includeToJson: false)
   final int voteCount;
+
+  /// List of votes casted by the current user.
+  ///
+  /// Note: This does not include the answers provided by the user,
+  /// see [ownAnswers] for that.
+  List<PollVote> get ownVotes => [
+        ...ownVotesAndAnswers.where((it) => !it.isAnswer),
+      ];
+
+  /// List of answers provided by the current user.
+  ///
+  /// Note: This does not include the votes casted by the user,
+  /// see [ownVotes] for that.
+  List<PollVote> get ownAnswers => [
+        ...ownVotesAndAnswers.where((it) => it.isAnswer),
+      ];
 
   /// The id of the user who created the poll.
   @JsonKey(includeToJson: false)
@@ -173,8 +189,8 @@ class Poll extends Equatable {
     List<PollVote>? ownVotesAndAnswers,
     int? voteCount,
     int? answersCount,
-    Map<String, List<PollVote>>? votesByOption,
-    List<PollVote>? answers,
+    Map<String, List<PollVote>>? latestVotesByOption,
+    List<PollVote>? latestAnswers,
     String? createdById,
     User? createdBy,
     DateTime? createdAt,
@@ -199,8 +215,8 @@ class Poll extends Equatable {
         ownVotesAndAnswers: ownVotesAndAnswers ?? this.ownVotesAndAnswers,
         voteCount: voteCount ?? this.voteCount,
         answersCount: answersCount ?? this.answersCount,
-        votesByOption: votesByOption ?? this.votesByOption,
-        answers: answers ?? this.answers,
+        latestVotesByOption: latestVotesByOption ?? this.latestVotesByOption,
+        latestAnswers: latestAnswers ?? this.latestAnswers,
         createdById: createdById ?? this.createdById,
         createdBy: createdBy ?? this.createdBy,
         createdAt: createdAt ?? this.createdAt,
@@ -251,8 +267,8 @@ class Poll extends Equatable {
         ownVotesAndAnswers,
         voteCount,
         answersCount,
-        votesByOption,
-        answers,
+        latestVotesByOption,
+        latestAnswers,
         createdById,
         createdBy,
         createdAt,
