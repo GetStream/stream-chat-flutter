@@ -93,4 +93,7 @@ class PermissionType {
   /// Capability required to update/edit channel members
   /// Channel is not distinct and user has UpdateChannelMembers permission
   static const String updateChannelMembers = 'update-channel-members';
+
+  /// Capability required to send a poll in a channel.
+  static const String sendPoll = 'send-poll';
 }

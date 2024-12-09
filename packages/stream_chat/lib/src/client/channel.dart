@@ -1035,6 +1035,36 @@ class Channel {
     return _client.sendEvent(id!, type, event);
   }
 
+  /// Send a message with a poll to this channel.
+  ///
+  /// Optionally provide a [messageText] to send a message along with the poll.
+  Future<SendMessageResponse> sendPoll(
+    Poll poll, {
+    String messageText = '',
+  }) async {
+    _checkInitialized();
+    final res = await _client.createPoll(poll);
+    return sendMessage(
+      Message(
+        text: messageText,
+        poll: res.poll,
+        pollId: res.poll.id,
+      ),
+    );
+  }
+
+  /// Updates the [poll] in this channel.
+  Future<UpdatePollResponse> updatePoll(Poll poll) {
+    _checkInitialized();
+    return _client.updatePoll(poll);
+  }
+
+  /// Deletes the poll with the given [pollId] from this channel.
+  Future<EmptyResponse> deletePoll(String pollId) {
+    _checkInitialized();
+    return _client.deletePoll(pollId);
+  }
+
   /// Send a reaction to this channel.
   ///
   /// Set [enforceUnique] to true to remove the existing user reaction.

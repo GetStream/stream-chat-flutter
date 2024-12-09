@@ -466,4 +466,81 @@ No es posible añadir más de $limit archivos adjuntos
   String get markUnreadError =>
       'Error al marcar el mensaje como no leído. No se pueden marcar mensajes'
       ' no leídos más antiguos que los últimos 100 mensajes del canal.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Crear un nuevo sondeo';
+    return 'Crear sondeo';
+  }
+
+  @override
+  String get questionsLabel => 'Preguntas';
+
+  @override
+  String get askAQuestionLabel => 'Hacer una pregunta';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'La pregunta debe tener al menos $min caracteres';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'La pregunta no puede tener más de $max caracteres';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Opciones';
+    return 'Opción';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'Esta opción no puede estar vacía';
+
+  @override
+  String get pollOptionDuplicateError => 'Las opciones no pueden ser iguales';
+
+  @override
+  String get addAnOptionLabel => 'Añadir una opción';
+
+  @override
+  String get multipleAnswersLabel => 'Respuestas múltiples';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Máximo de votos por persona';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'El recuento de votos debe ser al menos $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'El recuento de votos no puede ser superior a $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Sondeo anónimo';
+
+  @override
+  String get suggestAnOptionLabel => 'Sugerir una opción';
+
+  @override
+  String get addACommentLabel => 'Añadir un comentario';
+
+  @override
+  String get createLabel => 'Crear';
 }

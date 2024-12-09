@@ -223,6 +223,14 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     _ogAttachment = null;
   }
 
+  /// Returns the poll in the message.
+  Poll? get poll => message.poll;
+
+  /// Sets the poll in the message.
+  set poll(Poll? poll) {
+    message = message.copyWith(pollId: poll?.id, poll: poll);
+  }
+
   /// Returns the list of mentioned users in the message.
   List<User> get mentionedUsers => message.mentionedUsers;
 

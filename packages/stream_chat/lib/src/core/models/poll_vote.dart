@@ -32,7 +32,7 @@ class PollVote extends Equatable {
       _$PollVoteFromJson(json);
 
   /// The unique identifier of the poll vote.
-  @JsonKey(includeToJson: false)
+  @JsonKey(includeIfNull: false)
   final String? id;
 
   /// The unique identifier of the option selected in the poll.
