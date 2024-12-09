@@ -38,6 +38,9 @@ class Messages extends Table {
   /// The ID of the quoted message, if the message is a quoted reply.
   TextColumn get quotedMessageId => text().nullable()();
 
+  /// The ID of the poll, if the message is a poll.
+  TextColumn get pollId => text().nullable()();
+
   /// Number of replies for this message.
   IntColumn get replyCount => integer().nullable()();
 

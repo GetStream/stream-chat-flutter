@@ -20,9 +20,11 @@ const _nullConst = _NullConst();
 /// {@endtemplate}
 enum VotingVisibility {
   /// The voting process is anonymous.
+  @JsonValue('anonymous')
   anonymous,
 
   /// The voting process is public.
+  @JsonValue('public')
   public,
 }
 
