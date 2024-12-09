@@ -30,6 +30,7 @@ class AuthInterceptor extends QueuedInterceptor {
       final dioError = StreamChatDioError(
         error: error,
         requestOptions: options,
+        stackTrace: StackTrace.current,
       );
       return handler.reject(dioError, true);
     }

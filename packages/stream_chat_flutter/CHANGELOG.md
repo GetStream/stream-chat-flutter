@@ -1,8 +1,35 @@
-## Upcoming
+## 8.3.0
 
 ✅ Added
 
+- Added several new widgets to enhance the AI assistant features.
+  - `StreamingMessageView` to show AI assistant messages with streaming animation.
+  - `AITypingIndicatorView` to show AI typing indicator.
+
+✅ Added
+
+- Added several new widgets to enhance the AI assistant features.
+  - `StreamingMessageView` to show AI assistant messages with streaming animation.
+  - `AITypingIndicatorView` to show AI typing indicator.
+
+🐞 Fixed
+
+- [[#2030]](https://github.com/GetStream/stream-chat-flutter/issues/2030) Fixed `video_thumbnail` Namespace not specified.
+
+## 8.2.0
+
+✅ Added
+
+- Added `onThreadTap` parameter to `MessageWidgetContent` to enable thread tap action.
 - Messages by default now show an "Edited" label if text is edited. Use `showEditedLabel` to disable this functionality. 
+
+🐞 Fixed
+
+- Fixed locale conversion in jiffy.
+
+🔄 Changed
+
+- Updated `stream_chat_flutter_core` dependency to [`8.2.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 8.1.0
 

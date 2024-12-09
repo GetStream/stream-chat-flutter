@@ -63,6 +63,7 @@ class MessageWidgetContent extends StatelessWidget {
     required this.showUsername,
     required this.showEditedLabel,
     required this.messageWidget,
+    required this.onThreadTap,
     this.onUserAvatarTap,
     this.borderRadiusGeometry,
     this.borderSide,
@@ -159,6 +160,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro onReplyTap}
   final void Function(Message)? onReplyTap;
+
+  /// {@macro onThreadTap}
+  final void Function(Message)? onThreadTap;
 
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
@@ -429,6 +433,7 @@ class MessageWidgetContent extends StatelessWidget {
 
   Widget _buildBottomRow(BuildContext context) {
     final defaultWidget = BottomRow(
+      onThreadTap: onThreadTap,
       message: message,
       reverse: reverse,
       messageTheme: messageTheme,
