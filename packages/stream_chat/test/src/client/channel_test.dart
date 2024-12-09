@@ -1154,6 +1154,26 @@ void main() {
           cancelToken: any(named: 'cancelToken'))).called(1);
     });
 
+    test('`.stopAIResponse`', () async {
+      final stopAIEvent = Event(type: EventType.aiIndicatorStop);
+
+      when(() => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(stopAIEvent)),
+          )).thenAnswer((_) async => EmptyResponse());
+
+      final res = await channel.stopAIResponse();
+
+      expect(res, isNotNull);
+
+      verify(() => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(stopAIEvent)),
+          )).called(1);
+    });
+
     test('`.sendEvent`', () async {
       final event = Event(type: 'event.local');
 

@@ -9,8 +9,11 @@ class StreamChatDioError extends DioException {
     required super.requestOptions,
     super.response,
     super.type,
+    StackTrace? stackTrace,
+    super.message,
   }) : super(
           error: error,
+          stackTrace: stackTrace ?? StackTrace.current,
         );
 
   @override

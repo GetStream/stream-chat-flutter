@@ -532,14 +532,76 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get anonymousPollLabel => 'Enquesta anònima';
+  String get anonymousPollLabel => 'Votació anònima';
+
+  @override
+  String get pollOptionsLabel => 'Opcions de votació';
 
   @override
   String get suggestAnOptionLabel => 'Suggerir una opció';
 
   @override
-  String get addACommentLabel => 'Afegeix un comentari';
+  String get enterANewOptionLabel => 'Introduïu una nova opció';
+
+  @override
+  String get addACommentLabel => 'Afegir un comentari';
+
+  @override
+  String get pollCommentsLabel => 'Comentaris de la votació';
+
+  @override
+  String get updateYourCommentLabel => 'Actualitzar el vostre comentari';
+
+  @override
+  String get enterYourCommentLabel => 'Introduïu el vostre comentari';
 
   @override
   String get createLabel => 'Crear';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Votació finalitzada',
+      unique: () => 'Seleccionar un',
+      limited: (count) => 'Seleccionar fins a $count',
+      all: () => 'Seleccionar un o més',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Veure totes les opcions';
+    return 'Veure totes les $count opcions';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Veure comentaris';
+
+  @override
+  String get viewResultsLabel => 'Veure resultats';
+
+  @override
+  String get endVoteLabel => 'Finalitzar votació';
+
+  @override
+  String get pollResultsLabel => 'Resultats de la votació';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Mostrar tots els vots';
+    return 'Mostrar tots els $count vots';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 vots',
+        1 => '1 vot',
+        _ => '$count vots',
+      };
+
+  @override
+  String get noPollVotesLabel => 'No hi ha vots en aquest moment';
+
+  @override
+  String get loadingPollVotesError => 'Error en carregar els vots';
 }

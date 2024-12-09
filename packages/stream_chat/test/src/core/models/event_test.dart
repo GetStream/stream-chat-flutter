@@ -14,6 +14,8 @@ void main() {
       expect(event.me, isA<OwnUser>());
       expect(event.user, isA<User>());
       expect(event.isLocal, false);
+      expect(event.aiState, AITypingState.thinking);
+      expect(event.aiMessage, 'Some message');
     });
 
     test('should serialize to json correctly', () {
@@ -27,6 +29,9 @@ void main() {
         totalUnreadCount: 1,
         unreadChannels: 1,
         online: true,
+        aiState: AITypingState.thinking,
+        aiMessage: 'Some message',
+        messageId: 'messageId',
       );
 
       expect(
@@ -51,6 +56,9 @@ void main() {
           'channel_type': null,
           'parent_id': null,
           'is_local': true,
+          'ai_state': 'AI_STATE_THINKING',
+          'ai_message': 'Some message',
+          'message_id': 'messageId',
         },
       );
     });

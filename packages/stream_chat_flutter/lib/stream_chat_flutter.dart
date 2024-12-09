@@ -3,6 +3,9 @@ export 'package:photo_manager/photo_manager.dart'
     show ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+export 'src/ai_assistant/ai_typing_indicator_view.dart';
+export 'src/ai_assistant/stream_typewriter_builder.dart';
+export 'src/ai_assistant/streaming_message_view.dart';
 export 'src/attachment/attachment.dart';
 export 'src/attachment/builder/attachment_widget_builder.dart';
 export 'src/attachment/builder/voice_recording_attachment_builder/stream_voice_recording_list_player.dart';
@@ -70,6 +73,7 @@ export 'src/misc/back_button.dart';
 export 'src/misc/connection_status_builder.dart';
 export 'src/misc/date_divider.dart';
 export 'src/misc/info_tile.dart';
+export 'src/misc/markdown_message.dart';
 export 'src/misc/option_list_tile.dart';
 export 'src/misc/reaction_icon.dart';
 export 'src/misc/stream_neumorphic_button.dart';

@@ -28,6 +28,9 @@ class Event {
     this.channelType,
     this.parentId,
     this.hardDelete,
+    this.aiState,
+    this.aiMessage,
+    this.messageId,
     this.extraData = const {},
     this.isLocal = true,
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
@@ -102,6 +105,16 @@ class Event {
   @JsonKey(includeIfNull: false)
   final bool? hardDelete;
 
+  /// The current state of the AI assistant.
+  @JsonKey(unknownEnumValue: AITypingState.idle)
+  final AITypingState? aiState;
+
+  /// Additional message from the AI assistant.
+  final String? aiMessage;
+
+  /// The message id to which the event belongs.
+  final String? messageId;
+
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
 
@@ -146,6 +159,9 @@ class Event {
     'parent_id',
     'hard_delete',
     'is_local',
+    'ai_state',
+    'ai_message',
+    'message_id',
   ];
 
   /// Serialize to json
@@ -174,6 +190,9 @@ class Event {
     bool? online,
     String? parentId,
     bool? hardDelete,
+    AITypingState? aiState,
+    String? aiMessage,
+    String? messageId,
     Map<String, Object?>? extraData,
   }) =>
       Event(
@@ -197,14 +216,15 @@ class Event {
         parentId: parentId ?? this.parentId,
         hardDelete: hardDelete ?? this.hardDelete,
         extraData: extraData ?? this.extraData,
+        aiState: aiState ?? this.aiState,
+        aiMessage: aiMessage ?? this.aiMessage,
+        messageId: messageId ?? this.messageId,
         isLocal: isLocal,
       );
 }
 
 /// The channel embedded in the event object
-@JsonSerializable(
-  createToJson: false,
-)
+@JsonSerializable(createToJson: false)
 class EventChannel extends ChannelModel {
   /// Constructor used for json serialization
   EventChannel({
@@ -221,12 +241,12 @@ class EventChannel extends ChannelModel {
     required DateTime super.updatedAt,
     super.deletedAt,
     super.memberCount,
-    Map<String, Object?>? extraData,
     super.cooldown,
     super.team,
     super.disabled,
     super.hidden,
     super.truncatedAt,
+    Map<String, Object?>? extraData,
   }) : super(extraData: extraData ?? {});
 
   /// Create a new instance from a json
@@ -245,4 +265,32 @@ class EventChannel extends ChannelModel {
     'members',
     ...ChannelModel.topLevelFields,
   ];
+}
+
+/// {@template aiState}
+/// The current typing state of the AI assistant.
+///
+/// This is used to determine the state of the AI assistant when it's generating
+/// a response for the provided query.
+/// {@endtemplate}
+enum AITypingState {
+  /// The AI assistant is idle.
+  @JsonValue('AI_STATE_IDLE')
+  idle,
+
+  /// The AI assistant is in an error state.
+  @JsonValue('AI_STATE_ERROR')
+  error,
+
+  /// The AI assistant is checking external sources.
+  @JsonValue('AI_STATE_CHECKING_SOURCES')
+  checkingSources,
+
+  /// The AI assistant is thinking.
+  @JsonValue('AI_STATE_THINKING')
+  thinking,
+
+  /// The AI assistant is generating a response.
+  @JsonValue('AI_STATE_GENERATING')
+  generating,
 }

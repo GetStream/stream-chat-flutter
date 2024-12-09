@@ -76,9 +76,11 @@ class StreamChatNetworkError extends StreamChatError {
     ChatErrorCode errorCode, {
     int? statusCode,
     this.data,
+    StackTrace? stacktrace,
     this.isRequestCancelledError = false,
   })  : code = errorCode.code,
         statusCode = statusCode ?? data?.statusCode,
+        stackTrace = stacktrace ?? StackTrace.current,
         super(errorCode.message);
 
   ///
@@ -87,8 +89,10 @@ class StreamChatNetworkError extends StreamChatError {
     required String message,
     this.statusCode,
     this.data,
+    StackTrace? stacktrace,
     this.isRequestCancelledError = false,
-  }) : super(message);
+  })  : stackTrace = stacktrace ?? StackTrace.current,
+        super(message);
 
   ///
   factory StreamChatNetworkError.fromDioException(DioException exception) {
@@ -108,8 +112,9 @@ class StreamChatNetworkError extends StreamChatError {
           '',
       statusCode: errorResponse?.statusCode ?? response?.statusCode,
       data: errorResponse,
+      stacktrace: exception.stackTrace,
       isRequestCancelledError: exception.type == DioExceptionType.cancel,
-    )..stackTrace = exception.stackTrace;
+    );
   }
 
   /// Error code
@@ -124,10 +129,8 @@ class StreamChatNetworkError extends StreamChatError {
   /// True, in case the error is due to a cancelled network request.
   final bool isRequestCancelledError;
 
-  StackTrace? _stackTrace;
-
-  ///
-  set stackTrace(StackTrace? stack) => _stackTrace = stack;
+  /// The optional stack trace attached to the error.
+  final StackTrace? stackTrace;
 
   ///
   ChatErrorCode? get errorCode => chatErrorCodeFromCode(code);
@@ -145,8 +148,8 @@ class StreamChatNetworkError extends StreamChatError {
     if (data != null) params += ', data: $data';
     var msg = 'StreamChatNetworkError($params)';
 
-    if (printStackTrace && _stackTrace != null) {
-      msg += '\n$_stackTrace';
+    if (printStackTrace && stackTrace != null) {
+      msg += '\n$stackTrace';
     }
     return msg;
   }

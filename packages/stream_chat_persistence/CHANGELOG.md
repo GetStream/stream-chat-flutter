@@ -2,6 +2,14 @@
 
 - Added support for `Poll` and `PollVote` entities in the database.
 
+## 8.3.0
+
+- Updated `stream_chat` dependency to [`8.3.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 8.2.0
+
+- Updated `stream_chat` dependency to [`8.2.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 8.1.0
 
 - Updated `stream_chat` dependency to [`8.1.0`](https://pub.dev/packages/stream_chat/changelog).

@@ -1285,6 +1285,16 @@ class Channel {
     }
   }
 
+  /// Sends an event to stop AI response generation, leaving the message in
+  /// its current state.
+  Future<EmptyResponse> stopAIResponse() async {
+    return sendEvent(
+      Event(
+        type: EventType.aiIndicatorStop,
+      ),
+    );
+  }
+
   /// Update the channel's [name].
   ///
   /// This is the same as calling [updatePartial] and providing a map with a
@@ -2106,8 +2116,8 @@ class ChannelClientState {
           final existingWatchers = channelState.watchers;
           updateChannelState(channelState.copyWith(
             watchers: [
-              ...?existingWatchers,
               watcher,
+              ...?existingWatchers?.where((user) => user.id != watcher.id),
             ],
           ));
         }
@@ -2122,9 +2132,9 @@ class ChannelClientState {
         if (watcher != null) {
           final existingWatchers = channelState.watchers;
           updateChannelState(channelState.copyWith(
-            watchers: existingWatchers
-                ?.where((user) => user.id != watcher.id)
-                .toList(growable: false),
+            watchers: [
+              ...?existingWatchers?.where((user) => user.id != watcher.id)
+            ],
           ));
         }
       }),
@@ -2706,7 +2716,7 @@ class ChannelClientState {
         channelStateStream.map((cs) => cs.members),
         _channel.client.state.usersStream,
         (members, users) =>
-            members!.map((e) => e!.copyWith(user: users[e.user!.id])).toList(),
+            [...?members?.map((e) => e!.copyWith(user: users[e.user!.id]))],
       ).distinct(const ListEquality().equals);
 
   /// Channel watcher count.
@@ -2726,7 +2736,7 @@ class ChannelClientState {
           List<User>?, Map<String?, User?>, List<User>>(
         channelStateStream.map((cs) => cs.watchers),
         _channel.client.state.usersStream,
-        (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
+        (watchers, users) => [...?watchers?.map((e) => users[e.id] ?? e)],
       ).distinct(const ListEquality().equals);
 
   /// Channel member for the current user.

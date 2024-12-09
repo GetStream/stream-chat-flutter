@@ -25,5 +25,7 @@
     "online": false,
     "image": "https://getstream.io/random_svg/?name=Dry+meadow",
     "name": "Dry meadow"
-  }
+  },
+  "ai_state": "AI_STATE_THINKING",
+  "ai_message": "Some message"
 }
