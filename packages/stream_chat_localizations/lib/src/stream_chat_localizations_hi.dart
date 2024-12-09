@@ -533,4 +533,71 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get createLabel => 'क्रिएट करें';
+
+  @override
+  String get endVoteLabel => 'वोट समाप्त करें';
+
+  @override
+  String get enterANewOptionLabel => 'एक नया विकल्प दर्ज करें';
+
+  @override
+  String get enterYourCommentLabel => 'अपनी टिप्पणी दर्ज करें';
+
+  @override
+  String get loadingPollVotesError => 'पोल वोट लोड करने में त्रुटि';
+
+  @override
+  String get noPollVotesLabel => 'कोई पोल वोट नहीं';
+
+  @override
+  String get pollCommentsLabel => 'पोल टिप्पणियाँ';
+
+  @override
+  String get pollOptionsLabel => 'पोल विकल्प';
+
+  @override
+  String get pollResultsLabel => 'पोल परिणाम';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'मतदान समाप्त',
+      unique: () => 'एक चुनें',
+      limited: (count) => '$count तक चुनें',
+      all: () => 'एक या अधिक चुनें',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count != null) {
+      return 'सभी $count विकल्प देखें';
+    }
+    return 'सभी विकल्प देखें';
+  }
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count != null) {
+      return 'सभी $count वोट दिखाएं';
+    }
+    return 'सभी वोट दिखाएं';
+  }
+
+  @override
+  String get updateYourCommentLabel => 'अपनी टिप्पणी अपडेट करें';
+
+  @override
+  String get viewCommentsLabel => 'टिप्पणियाँ देखें';
+
+  @override
+  String get viewResultsLabel => 'परिणाम देखें';
+
+  @override
+  String voteCountLabel({int? count}) {
+    if (count != null) {
+      return '$count वोट';
+    }
+    return 'वोट';
+  }
 }

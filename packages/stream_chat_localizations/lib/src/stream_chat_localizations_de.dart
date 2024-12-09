@@ -529,11 +529,73 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get anonymousPollLabel => 'Anonyme Umfrage';
 
   @override
+  String get pollOptionsLabel => 'Umfrage-Optionen';
+
+  @override
   String get suggestAnOptionLabel => 'Option vorschlagen';
+
+  @override
+  String get enterANewOptionLabel => 'Neue Option eingeben';
 
   @override
   String get addACommentLabel => 'Kommentar hinzufügen';
 
   @override
-  String get createLabel => 'Schaffen';
+  String get pollCommentsLabel => 'Umfrage-Kommentare';
+
+  @override
+  String get updateYourCommentLabel => 'Kommentar aktualisieren';
+
+  @override
+  String get enterYourCommentLabel => 'Kommentar eingeben';
+
+  @override
+  String get createLabel => 'Erstellen';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Abstimmung beendet',
+      unique: () => 'Eine auswählen',
+      limited: (count) => 'Bis zu $count auswählen',
+      all: () => 'Eine oder mehrere auswählen',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Alle Optionen anzeigen';
+    return 'Alle $count Optionen anzeigen';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Kommentare anzeigen';
+
+  @override
+  String get viewResultsLabel => 'Ergebnisse anzeigen';
+
+  @override
+  String get endVoteLabel => 'Abstimmung beenden';
+
+  @override
+  String get pollResultsLabel => 'Umfrage-Ergebnisse';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Alle Stimmen anzeigen';
+    return 'Alle $count Stimmen anzeigen';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 Stimmen',
+        1 => '1 Stimme',
+        _ => '$count Stimmen',
+      };
+
+  @override
+  String get noPollVotesLabel => 'Derzeit keine Umfrage-Stimmen';
+
+  @override
+  String get loadingPollVotesError => 'Fehler beim Laden der Umfrage-Stimmen';
 }
