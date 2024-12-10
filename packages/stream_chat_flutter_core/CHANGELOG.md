@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamPollController` to create and manage a poll based on the passed configs.
+
 ## 8.3.0
 
 - Updated `stream_chat` dependency to [`8.3.0`](https://pub.dev/packages/stream_chat/changelog).
