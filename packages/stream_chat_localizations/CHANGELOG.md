@@ -1,3 +1,7 @@
+## Upcoming
+
+- Added multiple new localization strings related to poll creation and validation.
+
 ## 8.3.0
 
 - Updated `stream_chat_flutter` dependency to [`8.3.0`](https://pub.dev/packages/stream_chat/changelog).

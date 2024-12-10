@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added a new `StreamPollCreator` widget to facilitate poll creation within the chat interface.
+
 ## 8.3.0
 
 ✅ Added
