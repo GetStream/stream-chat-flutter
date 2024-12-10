@@ -1,0 +1,3 @@
+# Skip generated files from showing up in diffs.
+**/*.g.dart linguist-generated=true
+**/*.freezed.dart linguist-generated=true

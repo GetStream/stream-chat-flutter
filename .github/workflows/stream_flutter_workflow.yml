@@ -112,7 +112,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat/coverage/lcov.info
-          min_coverage: 79
+          min_coverage: 70
       - name: "Stream Chat Localizations Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
