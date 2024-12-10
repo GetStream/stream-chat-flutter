@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:test/test.dart';
