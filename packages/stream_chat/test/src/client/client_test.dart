@@ -827,6 +827,7 @@ void main() {
       // fallback values
       registerFallbackValue(FakeEvent());
       registerFallbackValue(FakeMessage());
+      registerFallbackValue(FakePollVote());
       registerFallbackValue(const PaginationParams());
     });
 
@@ -1790,6 +1791,357 @@ void main() {
 
       verify(() => api.channel.markRead(channelId, channelType)).called(1);
       verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.markChannelUnread`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      const messageId = 'test-message-id';
+
+      when(() => api.channel.markUnread(channelId, channelType, messageId))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.markChannelUnread(
+        channelId,
+        channelType,
+        messageId,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.markUnread(channelId, channelType, messageId))
+          .called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.createPoll`', () async {
+      final poll = Poll(
+        name: 'What is your favorite color?',
+        options: const [
+          PollOption(text: 'Red'),
+          PollOption(text: 'Blue'),
+        ],
+      );
+
+      when(() => api.polls.createPoll(poll)).thenAnswer(
+        (_) async => CreatePollResponse()..poll = poll,
+      );
+
+      final res = await client.createPoll(poll);
+      expect(res, isNotNull);
+      expect(res.poll, poll);
+
+      verify(() => api.polls.createPoll(poll)).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.getPoll`', () async {
+      const pollId = 'test-poll-id';
+      final poll = Poll(
+        id: pollId,
+        name: 'What is your favorite color?',
+        options: const [
+          PollOption(text: 'Red'),
+          PollOption(text: 'Blue'),
+        ],
+      );
+
+      when(() => api.polls.getPoll(pollId)).thenAnswer(
+        (_) async => GetPollResponse()..poll = poll,
+      );
+
+      final res = await client.getPoll(pollId);
+      expect(res, isNotNull);
+      expect(res.poll, poll);
+
+      verify(() => api.polls.getPoll(pollId)).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.updatePoll`', () async {
+      final poll = Poll(
+        id: 'test-poll-id',
+        name: 'What is your favorite color?',
+        options: const [
+          PollOption(text: 'Red'),
+          PollOption(text: 'Blue'),
+        ],
+      );
+
+      when(() => api.polls.updatePoll(poll)).thenAnswer(
+        (_) async => UpdatePollResponse()..poll = poll,
+      );
+
+      final res = await client.updatePoll(poll);
+      expect(res, isNotNull);
+      expect(res.poll, poll);
+
+      verify(() => api.polls.updatePoll(poll)).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.partialUpdatePoll`', () async {
+      const pollId = 'test-poll-id';
+      final set = {'name': 'What is your favorite color?'};
+      final unset = <String>[];
+
+      final poll = Poll(
+        id: pollId,
+        name: set['name']!,
+        options: const [
+          PollOption(text: 'Red'),
+          PollOption(text: 'Blue'),
+        ],
+      );
+
+      when(() => api.polls.partialUpdatePoll(pollId, set: set, unset: unset))
+          .thenAnswer((_) async => UpdatePollResponse()..poll = poll);
+
+      final res =
+          await client.partialUpdatePoll(pollId, set: set, unset: unset);
+      expect(res, isNotNull);
+      expect(res.poll.id, pollId);
+      expect(res.poll.name, set['name']);
+
+      verify(() => api.polls.partialUpdatePoll(pollId, set: set, unset: unset))
+          .called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.deletePoll`', () async {
+      const pollId = 'test-poll-id';
+
+      when(() => api.polls.deletePoll(pollId))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.deletePoll(pollId);
+      expect(res, isNotNull);
+
+      verify(() => api.polls.deletePoll(pollId)).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.closePoll`', () async {
+      const pollId = 'test-poll-id';
+
+      when(() => api.polls.partialUpdatePoll(pollId, set: {'is_closed': true}))
+          .thenAnswer((_) async => UpdatePollResponse());
+
+      final res = await client.closePoll(pollId);
+      expect(res, isNotNull);
+
+      verify(() =>
+              api.polls.partialUpdatePoll(pollId, set: {'is_closed': true}))
+          .called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.createPollOption`', () async {
+      const pollId = 'test-poll-id';
+      const option = PollOption(text: 'Red');
+
+      when(() => api.polls.createPollOption(pollId, option)).thenAnswer(
+          (_) async => CreatePollOptionResponse()..pollOption = option);
+
+      final res = await client.createPollOption(pollId, option);
+      expect(res, isNotNull);
+      expect(res.pollOption, option);
+
+      verify(() => api.polls.createPollOption(pollId, option)).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.getPollOption`', () async {
+      const pollId = 'test-poll-id';
+      const optionId = 'test-option-id';
+      const option = PollOption(id: optionId, text: 'Red');
+
+      when(() => api.polls.getPollOption(pollId, optionId)).thenAnswer(
+          (_) async => GetPollOptionResponse()..pollOption = option);
+
+      final res = await client.getPollOption(pollId, optionId);
+      expect(res, isNotNull);
+      expect(res.pollOption, option);
+
+      verify(() => api.polls.getPollOption(pollId, optionId)).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.updatePollOption`', () async {
+      const pollId = 'test-poll-id';
+      const option = PollOption(id: 'test-option-id', text: 'Red');
+
+      when(() => api.polls.updatePollOption(pollId, option)).thenAnswer(
+          (_) async => UpdatePollOptionResponse()..pollOption = option);
+
+      final res = await client.updatePollOption(pollId, option);
+      expect(res, isNotNull);
+      expect(res.pollOption, option);
+
+      verify(() => api.polls.updatePollOption(pollId, option)).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.deletePollOption`', () async {
+      const pollId = 'test-poll-id';
+      const optionId = 'test-option-id';
+
+      when(() => api.polls.deletePollOption(pollId, optionId))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.deletePollOption(pollId, optionId);
+      expect(res, isNotNull);
+
+      verify(() => api.polls.deletePollOption(pollId, optionId)).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.castPollVote`', () async {
+      const messageId = 'test-message-id';
+      const pollId = 'test-poll-id';
+      const optionId = 'test-option-id';
+      final vote = PollVote(optionId: optionId);
+
+      // Custom matcher to check if the Vote object has the specified id
+      Matcher matchesVoteOption(String expected) => predicate<PollVote>(
+            (vote) => vote.optionId == expected,
+            'Vote with option $expected',
+          );
+
+      when(() => api.polls.castPollVote(
+              messageId, pollId, any(that: matchesVoteOption(optionId))))
+          .thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
+
+      final res =
+          await client.castPollVote(messageId, pollId, optionId: optionId);
+      expect(res, isNotNull);
+      expect(res.vote, vote);
+
+      verify(() => api.polls.castPollVote(
+          messageId, pollId, any(that: matchesVoteOption(optionId)))).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.addPollAnswer`', () async {
+      const messageId = 'test-message-id';
+      const pollId = 'test-poll-id';
+      const answerText = 'Red';
+      final vote = PollVote(answerText: answerText);
+
+      // Custom matcher to check if the Vote object has the specified id
+      Matcher matchesVoteAnswer(String expected) => predicate<PollVote>(
+            (vote) => vote.answerText == expected,
+            'Vote with answer $expected',
+          );
+
+      when(() => api.polls.castPollVote(
+              messageId, pollId, any(that: matchesVoteAnswer(answerText))))
+          .thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
+
+      final res =
+          await client.addPollAnswer(messageId, pollId, answerText: answerText);
+      expect(res, isNotNull);
+      expect(res.vote, vote);
+
+      verify(() => api.polls.castPollVote(
+              messageId, pollId, any(that: matchesVoteAnswer(answerText))))
+          .called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.removePollVote`', () async {
+      const messageId = 'test-message-id';
+      const pollId = 'test-poll-id';
+      const voteId = 'test-vote-id';
+
+      when(() => api.polls.removePollVote(messageId, pollId, voteId))
+          .thenAnswer((_) async => RemovePollVoteResponse());
+
+      final res = await client.removePollVote(messageId, pollId, voteId);
+      expect(res, isNotNull);
+
+      verify(() => api.polls.removePollVote(messageId, pollId, voteId))
+          .called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.queryPolls`', () async {
+      final filter = Filter.in_('id', const ['test-poll-id']);
+      final sort = [const SortOption('created_at')];
+      const pagination = PaginationParams(limit: 20);
+
+      final polls = List.generate(
+        pagination.limit,
+        (index) => Poll(
+          id: 'test-poll-id-$index',
+          name: 'What is your favorite color?',
+          options: const [
+            PollOption(text: 'Red'),
+            PollOption(text: 'Blue'),
+          ],
+        ),
+      );
+
+      when(() => api.polls.queryPolls(
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          )).thenAnswer(
+        (_) async => QueryPollsResponse()..polls = polls,
+      );
+
+      final res = await client.queryPolls(
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
+      );
+      expect(res, isNotNull);
+      expect(res.polls.length, polls.length);
+
+      verify(() => api.polls.queryPolls(
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          )).called(1);
+      verifyNoMoreInteractions(api.polls);
+    });
+
+    test('`.queryPollVotes`', () async {
+      const pollId = 'test-poll-id';
+      final filter = Filter.in_('id', const ['test-vote-id']);
+      final sort = [const SortOption('created_at')];
+      const pagination = PaginationParams(limit: 20);
+
+      final votes = List.generate(
+        pagination.limit,
+        (index) => PollVote(id: 'test-vote-id-$index', answerText: 'Red'),
+      );
+
+      when(() => api.polls.queryPollVotes(
+            pollId,
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          )).thenAnswer(
+        (_) async => QueryPollVotesResponse()..votes = votes,
+      );
+
+      final res = await client.queryPollVotes(
+        pollId,
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
+      );
+      expect(res, isNotNull);
+      expect(res.votes.length, votes.length);
+
+      verify(() => api.polls.queryPollVotes(
+            pollId,
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          )).called(1);
+      verifyNoMoreInteractions(api.polls);
     });
 
     test('`.updateUser`', () async {
