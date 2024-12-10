@@ -207,3 +207,37 @@ class PartialUpdateUserRequest extends Equatable {
   @override
   List<Object?> get props => [id, set, unset];
 }
+
+/// {@template threadOptions}
+/// Options for querying threads.
+/// {@endtemplate}
+@JsonSerializable(createFactory: false)
+class ThreadOptions extends Equatable {
+  /// {@macro threadOptions}
+  const ThreadOptions({
+    this.replyLimit = 2,
+    this.participantLimit = 100,
+    this.memberLimit = 100,
+  });
+
+  /// The number of most recent replies to return per thread.
+  ///
+  /// Defaults to 2.
+  final int replyLimit;
+
+  /// The number of thread participants to return per thread.
+  ///
+  /// Defaults to 100.
+  final int participantLimit;
+
+  /// The number of members to return per thread.
+  ///
+  /// Defaults to 100.
+  final int memberLimit;
+
+  /// Serialize model to json
+  Map<String, dynamic> toJson() => _$ThreadOptionsToJson(this);
+
+  @override
+  List<Object?> get props => [replyLimit, participantLimit, memberLimit];
+}

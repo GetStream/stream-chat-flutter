@@ -85,3 +85,13 @@ Map<String, dynamic> _$PartialUpdateUserRequestToJson(
       'unset': instance.unset,
       'props': instance.props,
     };
+
+Map<String, dynamic> _$ThreadOptionsToJson(ThreadOptions instance) =>
+    <String, dynamic>{
+      'stringify': instance.stringify,
+      'hash_code': instance.hashCode,
+      'reply_limit': instance.replyLimit,
+      'participant_limit': instance.participantLimit,
+      'member_limit': instance.memberLimit,
+      'props': instance.props,
+    };

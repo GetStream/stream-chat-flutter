@@ -1659,6 +1659,43 @@ class StreamChatClient {
   Future<OGAttachmentResponse> enrichUrl(String url) =>
       _chatApi.general.enrichUrl(url);
 
+  /// Queries threads with the given [options] and [pagination] params.
+  Future<QueryThreadsResponse> queryThreads({
+    ThreadOptions options = const ThreadOptions(),
+    PaginationParams pagination = const PaginationParams(),
+  }) =>
+      _chatApi.threads.queryThreads(
+        options: options,
+        pagination: pagination,
+      );
+
+  /// Retrieves a thread with the given [messageId].
+  ///
+  /// Optionally pass [options] to limit the response.
+  Future<GetThreadResponse> getThread(
+    String messageId, {
+    ThreadOptions options = const ThreadOptions(),
+  }) =>
+      _chatApi.threads.getThread(
+        messageId,
+        options: options,
+      );
+
+  /// Partially updates the thread with the given [messageId].
+  ///
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  Future<UpdateThreadResponse> partialUpdateThread(
+    String messageId, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) =>
+      _chatApi.threads.partialUpdateThread(
+        messageId,
+        set: set,
+        unset: unset,
+      );
+
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline
   /// user's data.
