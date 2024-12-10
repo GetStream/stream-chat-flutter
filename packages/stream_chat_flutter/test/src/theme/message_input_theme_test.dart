@@ -77,7 +77,7 @@ final _messageInputThemeControlMidLerp = StreamMessageInputThemeData(
   inputTextStyle: const TextStyle(
     color: Color(0xff7f7f7f),
     fontSize: 14,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
   ),
   idleBorderGradient: const LinearGradient(
     stops: [0.0, 1.0],

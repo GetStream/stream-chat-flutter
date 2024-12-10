@@ -78,11 +78,12 @@ final _channelPreviewThemeControlMidLerp = StreamChannelPreviewThemeData(
   titleStyle: const TextStyle(
     color: Color(0xff7f7f7f),
     fontSize: 14,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   ),
   subtitleStyle: const TextStyle(
     color: Color(0xff7a7a7a),
     fontSize: 12,
+    fontWeight: FontWeight.w400,
   ),
   lastMessageAtStyle: StreamTextTheme.light().footnote.copyWith(
         color: const Color(0x807f7f7f).withOpacity(0.5),
