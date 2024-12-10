@@ -500,7 +500,8 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get multipleAnswersLabel => 'Flere svar';
 
   @override
-  String get maximumVotesPerPersonLabel => 'Maksimalt antall stemmer per person';
+  String get maximumVotesPerPersonLabel =>
+      'Maksimalt antall stemmer per person';
 
   @override
   String? maxVotesPerPersonValidationError(int votes, Range<int> range) {

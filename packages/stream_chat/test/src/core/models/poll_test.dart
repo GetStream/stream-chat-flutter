@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:test/test.dart';
@@ -62,10 +64,13 @@ void main() {
       expect(json['name'], 'test');
       expect(json['description'], isNull);
       expect(json['options'], [
-        {'text': 'option1 text'}
+        {
+          'id': 'option1',
+          'text': 'option1 text',
+        }
       ]);
       expect(json['voting_visibility'], 'public');
-      expect(json['enforce_unique_vote'], false);
+      expect(json['enforce_unique_vote'], true);
       expect(json['max_votes_allowed'], isNull);
       expect(json['allow_user_suggested_options'], false);
       expect(json['allow_answers'], false);
