@@ -451,4 +451,82 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get markUnreadError =>
       'Feil ved merking av melding som ulest. Kan ikke merke meldinger som'
       ' uleste som er eldre enn de 100 nyeste kanalmeldingene.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Opprett en ny avstemning';
+    return 'Opprett avstemning';
+  }
+
+  @override
+  String get questionsLabel => 'Spørsmål';
+
+  @override
+  String get askAQuestionLabel => 'Still et spørsmål';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'Spørsmålet må være minst $min tegn langt';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'Spørsmålet må være maksimalt $max tegn langt';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Alternativer';
+    return 'Opsjon';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'Alternativet kan ikke være tomt';
+
+  @override
+  String get pollOptionDuplicateError => 'Dette er allerede et alternativ';
+
+  @override
+  String get addAnOptionLabel => 'Legg til et alternativ';
+
+  @override
+  String get multipleAnswersLabel => 'Flere svar';
+
+  @override
+  String get maximumVotesPerPersonLabel =>
+      'Maksimalt antall stemmer per person';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'Stemmetellingen må være minst $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'Stemmeopptellingen må være på maksimalt $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Anonym avstemning';
+
+  @override
+  String get suggestAnOptionLabel => 'Foreslå et alternativ';
+
+  @override
+  String get addACommentLabel => 'Legg til en kommentar';
+
+  @override
+  String get createLabel => 'Skape';
 }

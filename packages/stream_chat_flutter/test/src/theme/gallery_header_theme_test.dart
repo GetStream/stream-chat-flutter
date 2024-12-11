@@ -130,12 +130,13 @@ final _galleryHeaderThemeDataControl = StreamGalleryHeaderThemeData(
   iconMenuPointColor: const Color(0xff000000),
   titleTextStyle: const TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
     color: Colors.black,
   ),
   subtitleTextStyle: const TextStyle(
     fontSize: 12,
     color: Colors.black,
+    fontWeight: FontWeight.w400,
   ).copyWith(
     color: const Color(0xff7A7A7A),
   ),
@@ -149,12 +150,13 @@ final _galleryHeaderThemeDataHalfLerpControl = StreamGalleryHeaderThemeData(
   iconMenuPointColor: const Color(0xff7f7f7f),
   titleTextStyle: const TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
     color: Color(0xff7f7f7f),
   ),
   subtitleTextStyle: const TextStyle(
     fontSize: 12,
     color: Color(0xff7a7a7a),
+    fontWeight: FontWeight.w400,
   ).copyWith(
     color: const Color(0xff7A7A7A),
   ),
@@ -168,12 +170,13 @@ final _galleryHeaderThemeDataDarkControl = StreamGalleryHeaderThemeData(
   iconMenuPointColor: const Color(0xffffffff),
   titleTextStyle: const TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
     color: Colors.white,
   ),
   subtitleTextStyle: const TextStyle(
     fontSize: 12,
     color: Colors.white,
+    fontWeight: FontWeight.w400,
   ).copyWith(
     color: const Color(0xff7A7A7A),
   ),

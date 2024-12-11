@@ -77,7 +77,7 @@ final _channelListHeaderThemeControlMidLerp = StreamChannelListHeaderThemeData(
   titleStyle: const TextStyle(
     color: Color(0xff7f7f7f),
     fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   ),
 );
 

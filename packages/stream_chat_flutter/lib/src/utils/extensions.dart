@@ -497,6 +497,8 @@ extension AttachmentPickerTypeX on AttachmentPickerType {
         return FileType.any;
       case AttachmentPickerType.audios:
         return FileType.audio;
+      case AttachmentPickerType.poll:
+        throw Exception('Polls do not have a file type');
     }
   }
 }

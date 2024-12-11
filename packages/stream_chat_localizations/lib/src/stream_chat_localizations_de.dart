@@ -459,4 +459,81 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Fehler beim Markieren der Nachricht als ungelesen. Kann keine älteren'
       ' ungelesenen Nachrichten markieren als die neuesten 100'
       ' Kanalnachrichten.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Erstellen einer neuen Umfrage';
+    return 'Umfrage erstellen';
+  }
+
+  @override
+  String get questionsLabel => 'Fragen';
+
+  @override
+  String get askAQuestionLabel => 'Stellen Sie eine Frage';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'Die Frage muss mindestens $min Zeichen lang sein';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'Die Frage darf höchstens $max Zeichen lang sein';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Optionen';
+    return 'Option';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'Option darf nicht leer sein';
+
+  @override
+  String get pollOptionDuplicateError => 'Dies ist bereits eine Option';
+
+  @override
+  String get addAnOptionLabel => 'Option hinzufügen';
+
+  @override
+  String get multipleAnswersLabel => 'Mehrere Antworten';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Maximale Stimmen pro Person';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'Die Stimmenauszählung muss mindestens $min betragen';
+    }
+
+    if (max != null && votes > max) {
+      return 'Die Stimmenauszählung darf höchstens $max betragen';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Anonyme Umfrage';
+
+  @override
+  String get suggestAnOptionLabel => 'Option vorschlagen';
+
+  @override
+  String get addACommentLabel => 'Kommentar hinzufügen';
+
+  @override
+  String get createLabel => 'Schaffen';
 }

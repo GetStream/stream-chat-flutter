@@ -484,6 +484,83 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get markUnreadError =>
       'Error marking message unread. Cannot mark unread messages older than'
       ' the newest 100 channel messages.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Create a new poll';
+    return 'Create Poll';
+  }
+
+  @override
+  String get questionsLabel => 'Questions';
+
+  @override
+  String get askAQuestionLabel => 'Ask a question';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'Question must be at least $min characters long';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'Question must be at most $max characters long';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Options';
+    return 'Option';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'Option cannot be empty';
+
+  @override
+  String get pollOptionDuplicateError => 'This is already an option';
+
+  @override
+  String get addAnOptionLabel => 'Add an option';
+
+  @override
+  String get multipleAnswersLabel => 'Multiple answers';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Maximum votes per person';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'Vote count must be at least $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'Vote count must be at most $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Anonymous poll';
+
+  @override
+  String get suggestAnOptionLabel => 'Suggest an option';
+
+  @override
+  String get addACommentLabel => 'Add a comment';
+
+  @override
+  String get createLabel => 'Create';
 }
 
 void main() async {

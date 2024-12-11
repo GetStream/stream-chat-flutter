@@ -32,6 +32,7 @@ Map<String, dynamic> _$PollVoteToJson(PollVote instance) {
     }
   }
 
+  writeNotNull('id', instance.id);
   writeNotNull('option_id', instance.optionId);
   writeNotNull('answer_text', instance.answerText);
   return val;

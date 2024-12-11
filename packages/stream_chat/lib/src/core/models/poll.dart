@@ -9,6 +9,12 @@ import 'package:uuid/uuid.dart';
 
 part 'poll.g.dart';
 
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
+
 /// {@template streamVotingVisibility}
 /// Represents the visibility of the voting process.
 /// {@endtemplate}
@@ -32,7 +38,7 @@ class Poll extends Equatable {
     this.description,
     required this.options,
     this.votingVisibility = VotingVisibility.public,
-    this.enforceUniqueVote = false,
+    this.enforceUniqueVote = true,
     this.maxVotesAllowed,
     this.allowAnswers = false,
     this.answers = const [],
@@ -159,7 +165,7 @@ class Poll extends Equatable {
     List<PollOption>? options,
     VotingVisibility? votingVisibility,
     bool? enforceUniqueVote,
-    int? maxVotesAllowed,
+    Object? maxVotesAllowed = _nullConst,
     bool? allowUserSuggestedOptions,
     bool? allowAnswers,
     bool? isClosed,
@@ -182,7 +188,9 @@ class Poll extends Equatable {
         options: options ?? this.options,
         votingVisibility: votingVisibility ?? this.votingVisibility,
         enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
-        maxVotesAllowed: maxVotesAllowed ?? this.maxVotesAllowed,
+        maxVotesAllowed: maxVotesAllowed == _nullConst
+            ? this.maxVotesAllowed
+            : maxVotesAllowed as int?,
         allowUserSuggestedOptions:
             allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
         allowAnswers: allowAnswers ?? this.allowAnswers,
