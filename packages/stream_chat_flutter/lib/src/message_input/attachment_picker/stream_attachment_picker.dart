@@ -926,7 +926,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
           key: 'poll-creator',
           type: AttachmentPickerType.poll,
           icon: StreamSvgIcon.polls().toIconThemeSvgIcon(),
-          title: 'Create a poll',
+          title: context.translations.createPollLabel(),
         ),
       }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
     },
