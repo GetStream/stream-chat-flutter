@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/material.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
