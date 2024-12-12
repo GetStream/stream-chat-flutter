@@ -533,14 +533,77 @@ No es posible añadir más de $limit archivos adjuntos
   }
 
   @override
-  String get anonymousPollLabel => 'Sondeo anónimo';
+  String get anonymousPollLabel => 'Encuesta anónima';
+
+  @override
+  String get pollOptionsLabel => 'Opciones de la encuesta';
 
   @override
   String get suggestAnOptionLabel => 'Sugerir una opción';
 
   @override
-  String get addACommentLabel => 'Añadir un comentario';
+  String get enterANewOptionLabel => 'Ingresar una nueva opción';
+
+  @override
+  String get addACommentLabel => 'Agregar un comentario';
+
+  @override
+  String get pollCommentsLabel => 'Comentarios de la encuesta';
+
+  @override
+  String get updateYourCommentLabel => 'Actualizar tu comentario';
+
+  @override
+  String get enterYourCommentLabel => 'Ingresar tu comentario';
 
   @override
   String get createLabel => 'Crear';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Votación finalizada',
+      unique: () => 'Seleccionar uno',
+      limited: (count) => 'Seleccionar hasta $count',
+      all: () => 'Seleccionar uno o más',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Ver todas las opciones';
+    return 'Ver todas las $count opciones';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Ver comentarios';
+
+  @override
+  String get viewResultsLabel => 'Ver resultados';
+
+  @override
+  String get endVoteLabel => 'Finalizar votación';
+
+  @override
+  String get pollResultsLabel => 'Resultados de la encuesta';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Mostrar todos los votos';
+    return 'Mostrar todos los $count votos';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 votos',
+        1 => '1 voto',
+        _ => '$count votos',
+      };
+
+  @override
+  String get noPollVotesLabel => 'No hay votos en la encuesta actualmente';
+
+  @override
+  String get loadingPollVotesError =>
+      'Error al cargar los votos de la encuesta';
 }

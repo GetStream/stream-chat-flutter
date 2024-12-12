@@ -514,11 +514,73 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get anonymousPollLabel => '익명 투표';
 
   @override
-  String get suggestAnOptionLabel => '옵션 제안하기';
+  String get pollOptionsLabel => '투표 옵션';
+
+  @override
+  String get suggestAnOptionLabel => '옵션 제안';
+
+  @override
+  String get enterANewOptionLabel => '새 옵션 입력';
 
   @override
   String get addACommentLabel => '댓글 추가';
 
   @override
-  String get createLabel => '창조하다';
+  String get pollCommentsLabel => '투표 댓글';
+
+  @override
+  String get updateYourCommentLabel => '댓글 업데이트';
+
+  @override
+  String get enterYourCommentLabel => '댓글 입력';
+
+  @override
+  String get createLabel => '생성';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => '투표 종료',
+      unique: () => '하나 선택',
+      limited: (count) => '최대 $count 선택',
+      all: () => '하나 이상 선택',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return '모든 옵션 보기';
+    return '모든 $count 옵션 보기';
+  }
+
+  @override
+  String get viewCommentsLabel => '댓글 보기';
+
+  @override
+  String get viewResultsLabel => '결과 보기';
+
+  @override
+  String get endVoteLabel => '투표 종료';
+
+  @override
+  String get pollResultsLabel => '투표 결과';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return '모든 투표 보기';
+    return '모든 $count 투표 보기';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 표',
+        1 => '1 표',
+        _ => '$count 표',
+      };
+
+  @override
+  String get noPollVotesLabel => '현재 투표가 없습니다';
+
+  @override
+  String get loadingPollVotesError => '투표 로딩 오류';
 }

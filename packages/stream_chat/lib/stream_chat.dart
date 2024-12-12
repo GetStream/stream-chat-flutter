@@ -45,6 +45,7 @@ export 'src/core/models/own_user.dart';
 export 'src/core/models/poll.dart';
 export 'src/core/models/poll_option.dart';
 export 'src/core/models/poll_vote.dart';
+export 'src/core/models/poll_voting_mode.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/read.dart';
 export 'src/core/models/user.dart';
