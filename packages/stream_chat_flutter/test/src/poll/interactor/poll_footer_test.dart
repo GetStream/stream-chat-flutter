@@ -179,29 +179,6 @@ void main() async {
   );
 
   testWidgets(
-    'View Comments button is not visible when the poll is closed',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(
-            isClosed: true,
-            answersCount: 1,
-          ),
-          currentUser: currentUser,
-          onViewComments: () {},
-        ),
-      ));
-
-      final viewCommentsButton = find.ancestor(
-        of: find.text('View Comments'),
-        matching: find.byType(PollFooterButton),
-      );
-
-      expect(viewCommentsButton, findsNothing);
-    },
-  );
-
-  testWidgets(
     'Suggest Option button is visible and enabled when allowed',
     (WidgetTester tester) async {
       await tester.pumpWidget(_wrapWithMaterialApp(

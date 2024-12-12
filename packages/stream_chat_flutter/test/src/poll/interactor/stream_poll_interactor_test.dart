@@ -105,7 +105,7 @@ void main() {
             ),
             currentUser: currentUser,
           ),
-          surfaceSize: const Size(412, 300),
+          surfaceSize: const Size(412, 400),
           wrapper: (child) => _wrapWithMaterialApp(
             child,
             brightness: brightness,
