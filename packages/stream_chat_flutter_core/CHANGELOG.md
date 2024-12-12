@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added `StreamPollController` to create and manage a poll based on the passed configs.
+- Added `StreamPollVoteListController` to manage the list of votes for a poll.
 
 ## 8.3.0
 
