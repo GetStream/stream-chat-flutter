@@ -157,7 +157,7 @@ const _galleryFooterThemeDataControlMidLerp = StreamGalleryFooterThemeData(
   titleTextStyle: TextStyle(
     color: Color(0xff7f7f7f),
     fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   ),
   gridIconButtonColor: Color(0xff7f7f7f),
   bottomSheetBarrierColor: Color(0x4c000000),
@@ -165,7 +165,7 @@ const _galleryFooterThemeDataControlMidLerp = StreamGalleryFooterThemeData(
   bottomSheetPhotosTextStyle: TextStyle(
     color: Color(0xff7f7f7f),
     fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   ),
   bottomSheetCloseIconColor: Color(0xff7f7f7f),
 );

@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for Polls feature, which allows users to create and vote on polls in chat messages.
+
 ## 8.3.0
 
 ✅ Added
