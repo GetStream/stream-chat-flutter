@@ -9,7 +9,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 void main() {
   final currentUser = User(id: 'curr-user', name: 'Current User');
-
+  final createdAt = DateTime.parse('2021-07-20T16:00:00.000Z');
   final latestVotesByOption = {
     'option-1': [
       for (var i = 0; i < 5; i++)
@@ -17,7 +17,7 @@ void main() {
           userId: 'user-$i',
           user: User(id: 'user-$i', name: 'User $i'),
           optionId: 'option-1',
-          createdAt: DateTime.now(),
+          createdAt: createdAt,
         ),
     ],
     'option-2': [
@@ -26,7 +26,7 @@ void main() {
           userId: 'user-$i',
           user: User(id: 'user-$i', name: 'User $i'),
           optionId: 'option-2',
-          createdAt: DateTime.now(),
+          createdAt: createdAt,
         ),
     ],
     'option-3': [
@@ -34,7 +34,7 @@ void main() {
         user: currentUser,
         userId: currentUser.id,
         optionId: 'option-3',
-        createdAt: DateTime.now(),
+        createdAt: createdAt,
       ),
     ],
   };
@@ -48,7 +48,7 @@ void main() {
       user: currentUser,
       userId: currentUser.id,
       answerText: 'I also like yellow',
-      createdAt: DateTime.now(),
+      createdAt: createdAt,
     ),
   ];
 
