@@ -18,6 +18,7 @@ void main() {
           user: User(id: 'user-$i', name: 'User $i'),
           optionId: 'option-1',
           createdAt: createdAt,
+          updatedAt: createdAt,
         ),
     ],
     'option-2': [
@@ -27,6 +28,7 @@ void main() {
           user: User(id: 'user-$i', name: 'User $i'),
           optionId: 'option-2',
           createdAt: createdAt,
+          updatedAt: createdAt,
         ),
     ],
     'option-3': [
@@ -35,6 +37,7 @@ void main() {
         userId: currentUser.id,
         optionId: 'option-3',
         createdAt: createdAt,
+        updatedAt: createdAt,
       ),
     ],
   };
@@ -49,6 +52,7 @@ void main() {
       userId: currentUser.id,
       answerText: 'I also like yellow',
       createdAt: createdAt,
+      updatedAt: createdAt,
     ),
   ];
 
