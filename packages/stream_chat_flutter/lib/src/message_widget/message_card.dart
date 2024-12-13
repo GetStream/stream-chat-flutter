@@ -17,6 +17,7 @@ class MessageCard extends StatefulWidget {
     required this.hasQuotedMessage,
     required this.hasUrlAttachments,
     required this.hasNonUrlAttachments,
+    required this.hasPoll,
     required this.isOnlyEmoji,
     required this.isGiphy,
     required this.attachmentBuilders,
@@ -64,6 +65,9 @@ class MessageCard extends StatefulWidget {
 
   /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
+
+  /// {@macro hasPoll}
+  final bool hasPoll;
 
   /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
@@ -209,6 +213,10 @@ class _MessageCardState extends State<MessageCard> {
               onReplyTap: widget.onReplyTap,
               attachmentActionsModalBuilder:
                   widget.attachmentActionsModalBuilder,
+            ),
+          if (widget.hasPoll)
+            PollMessage(
+              message: widget.message,
             ),
           TextBubble(
             messageTheme: widget.messageTheme,

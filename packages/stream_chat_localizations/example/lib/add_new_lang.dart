@@ -554,13 +554,75 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get anonymousPollLabel => 'Anonymous poll';
 
   @override
+  String get pollOptionsLabel => 'Poll Options';
+
+  @override
   String get suggestAnOptionLabel => 'Suggest an option';
+
+  @override
+  String get enterANewOptionLabel => 'Enter a new option';
 
   @override
   String get addACommentLabel => 'Add a comment';
 
   @override
+  String get pollCommentsLabel => 'Poll Comments';
+
+  @override
+  String get updateYourCommentLabel => 'Update your comment';
+
+  @override
+  String get enterYourCommentLabel => 'Enter your comment';
+
+  @override
   String get createLabel => 'Create';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Vote ended',
+      unique: () => 'Select one',
+      limited: (count) => 'Select up to $count',
+      all: () => 'Select one or more',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'See all options';
+    return 'See all $count options';
+  }
+
+  @override
+  String get viewCommentsLabel => 'View Comments';
+
+  @override
+  String get viewResultsLabel => 'View Results';
+
+  @override
+  String get endVoteLabel => 'End Vote';
+
+  @override
+  String get pollResultsLabel => 'Poll Results';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Show all votes';
+    return 'Show all $count votes';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 votes',
+        1 => '1 vote',
+        _ => '$count votes',
+      };
+
+  @override
+  String get noPollVotesLabel => 'There are no poll votes currently';
+
+  @override
+  String get loadingPollVotesError => 'Error loading poll votes';
 }
 
 void main() async {

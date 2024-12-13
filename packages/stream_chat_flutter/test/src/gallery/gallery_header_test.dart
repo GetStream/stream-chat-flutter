@@ -99,7 +99,7 @@ void main() {
               child: Scaffold(
                 appBar: StreamGalleryHeader(
                   userName: 'User',
-                  sentAt: DateTime.now().toIso8601String(),
+                  sentAt: '12/12/2024',
                   message: Message(),
                   attachment: MockAttachment(),
                 ),

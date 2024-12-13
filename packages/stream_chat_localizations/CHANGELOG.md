@@ -1,6 +1,7 @@
 ## Upcoming
 
 - Added multiple new localization strings related to poll creation and validation.
+- Added multiple new localization strings related to poll message interactions.
 
 ## 8.3.0
 

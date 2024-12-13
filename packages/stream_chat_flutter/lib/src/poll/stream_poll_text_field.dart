@@ -3,12 +3,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kTransitionDuration = Duration(milliseconds: 167);
 
-/// {@template pollInputTextField}
+/// {@template streamPollTextField}
 /// A widget that represents a text field for poll input.
 /// {@endtemplate}
-class PollTextField extends StatefulWidget {
-  /// {@macro pollInputTextField}
-  const PollTextField({
+class StreamPollTextField extends StatefulWidget {
+  /// {@macro streamPollTextField}
+  const StreamPollTextField({
     super.key,
     this.initialValue,
     this.style,
@@ -24,6 +24,7 @@ class PollTextField extends StatefulWidget {
     this.borderRadius,
     this.focusNode,
     this.keyboardType,
+    this.autoFocus = false,
     this.onChanged,
   });
 
@@ -61,6 +62,9 @@ class PollTextField extends StatefulWidget {
   /// The keyboard type of the text field.
   final TextInputType? keyboardType;
 
+  /// Whether the text field should autofocus.
+  final bool autoFocus;
+
   /// The focus node of the text field.
   final FocusNode? focusNode;
 
@@ -68,14 +72,14 @@ class PollTextField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
 
   @override
-  State<PollTextField> createState() => _PollTextFieldState();
+  State<StreamPollTextField> createState() => _StreamPollTextFieldState();
 }
 
-class _PollTextFieldState extends State<PollTextField> {
+class _StreamPollTextFieldState extends State<StreamPollTextField> {
   late final _controller = TextEditingController(text: widget.initialValue);
 
   @override
-  void didUpdateWidget(covariant PollTextField oldWidget) {
+  void didUpdateWidget(covariant StreamPollTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Update the controller value if the updated initial value is different
     // from the current value.
@@ -135,6 +139,7 @@ class _PollTextFieldState extends State<PollTextField> {
           onChanged: widget.onChanged,
           style: widget.style ?? theme.textTheme.headline,
           keyboardType: widget.keyboardType,
+          autofocus: widget.autoFocus,
           decoration: InputDecoration(
             filled: true,
             isCollapsed: true,
@@ -160,7 +165,7 @@ class _PollTextFieldState extends State<PollTextField> {
 /// A widget that displays an error text around a text field with a fade
 /// transition.
 ///
-/// Usually used with [PollTextField].
+/// Usually used with [StreamPollTextField].
 /// {@endtemplate}
 class PollTextFieldError extends StatefulWidget {
   /// {@macro pollTextFieldError}

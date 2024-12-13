@@ -19,7 +19,7 @@ Poll _$PollFromJson(Map<String, dynamic> json) => Poll(
       enforceUniqueVote: json['enforce_unique_vote'] as bool? ?? true,
       maxVotesAllowed: (json['max_votes_allowed'] as num?)?.toInt(),
       allowAnswers: json['allow_answers'] as bool? ?? false,
-      answers: (json['latest_answers'] as List<dynamic>?)
+      latestAnswers: (json['latest_answers'] as List<dynamic>?)
               ?.map((e) => PollVote.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
@@ -39,15 +39,16 @@ Poll _$PollFromJson(Map<String, dynamic> json) => Poll(
               ) ??
               const {},
       voteCount: (json['vote_count'] as num?)?.toInt() ?? 0,
-      votesByOption: (json['latest_votes_by_option'] as Map<String, dynamic>?)
-              ?.map(
-            (k, e) => MapEntry(
-                k,
-                (e as List<dynamic>)
-                    .map((e) => PollVote.fromJson(e as Map<String, dynamic>))
-                    .toList()),
-          ) ??
-          const {},
+      latestVotesByOption:
+          (json['latest_votes_by_option'] as Map<String, dynamic>?)?.map(
+                (k, e) => MapEntry(
+                    k,
+                    (e as List<dynamic>)
+                        .map(
+                            (e) => PollVote.fromJson(e as Map<String, dynamic>))
+                        .toList()),
+              ) ??
+              const {},
       createdById: json['created_by_id'] as String?,
       createdBy: json['created_by'] == null
           ? null
