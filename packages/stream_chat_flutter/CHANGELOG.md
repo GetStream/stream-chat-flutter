@@ -4,6 +4,10 @@
 
 - Added a new `StreamPollCreator` widget to facilitate poll creation within the chat interface.
 
+🐞 Fixed
+
+- flutter 3.27 plugin errors
+
 ## 8.3.0
 
 ✅ Added
