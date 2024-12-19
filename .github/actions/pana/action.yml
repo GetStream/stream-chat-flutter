@@ -1,21 +1,23 @@
 name: Pana Workflow
 
-inputs:
-  min_score:
-    required: false
-    type: number
-    default: 120
-  pana_version:
-    required: false
-    type: string
-  runs_on:
-    required: false
-    type: string
-    default: "ubuntu-latest"
-  working_directory:
-    required: false
-    type: string
-    default: "."
+on:
+  workflow_call:
+    inputs:
+      min_score:
+        required: false
+        type: number
+        default: 120
+      pana_version:
+        required: false
+        type: string
+      runs_on:
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      working_directory:
+        required: false
+        type: string
+        default: "."
 
 jobs:
   build:
