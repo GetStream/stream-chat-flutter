@@ -45,7 +45,6 @@ runs:
         done
     
     - name: Install Flutter
-      shell: bash
       uses: subosito/flutter-action@v2
       with:
         channel: stable
