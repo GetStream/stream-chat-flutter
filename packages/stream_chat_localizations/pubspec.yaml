@@ -5,33 +5,29 @@ homepage: https://github.com/GetStream/stream-chat-flutter
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
+# Note: The environment configuration and dependency versions are managed by Melos.
+#
+# Do not edit them manually.
+#
+# Steps to update dependencies:
+#   1. Modify the version in the melos.yaml file.
+#   2. Run `melos bootstrap` to apply changes.
+#
+# Steps to add a new dependency:
+#   1. Add the dependency to this list.
+#   2. Add it to the melos.yaml file for future updates.
+
 environment:
-  sdk: ">=3.4.0 <4.0.0"
-  flutter: ">=3.22.0"
+  sdk: ^3.5.4
+  flutter: ">=3.24.5"
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  stream_chat_flutter: ^8.2.0
+  stream_chat_flutter: ^8.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-flutter:
-  plugin:
-    platforms:
-      android:
-        default_package: stream_chat_localizations
-      ios:
-        default_package: stream_chat_localizations
-      windows:
-        default_package: stream_chat_localizations
-      linux:
-        default_package: stream_chat_localizations
-      macos:
-        default_package: stream_chat_localizations
-      web:
-        default_package: stream_chat_localizations

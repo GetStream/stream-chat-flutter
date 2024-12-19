@@ -321,14 +321,6 @@ UserBlockResponse _$UserBlockResponseFromJson(Map<String, dynamic> json) =>
       ..blockedUserId = json['blocked_user_id'] as String? ?? ''
       ..createdAt = DateTime.parse(json['created_at'] as String);
 
-Map<String, dynamic> _$UserBlockResponseToJson(UserBlockResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'blocked_by_user_id': instance.blockedByUserId,
-      'blocked_user_id': instance.blockedUserId,
-      'created_at': instance.createdAt.toIso8601String(),
-    };
-
 BlockedUsersResponse _$BlockedUsersResponseFromJson(
         Map<String, dynamic> json) =>
     BlockedUsersResponse()
