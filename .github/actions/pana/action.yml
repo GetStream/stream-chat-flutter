@@ -37,7 +37,7 @@ runs:
         for DEP in "${!DEPENDENCY_PATHS[@]}"; do
           if grep -q "^$DEP:" pubspec.yaml; then
             echo "Overriding dependency: $DEP with path ${DEPENDENCY_PATHS[$DEP]}"
-            sed -i.bak "s|^$DEP:.*|$DEP:\n    path: ${DEPENDENCY_PATHS[$DEP]}|g" pubspec.yaml
+            sed -i.bak "s|$DEP:.*|$DEP:\n    path: ${DEPENDENCY_PATHS[$DEP]}|g" pubspec.yaml
           else
             echo "Dependency $DEP not found in pubspec.yaml, skipping override."
           fi
