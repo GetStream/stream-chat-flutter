@@ -45,7 +45,6 @@ runs:
         done
     
     - name: Install Flutter
-      working-directory: ${{ inputs.working_directory }}
       shell: bash
       uses: subosito/flutter-action@v2
       with:
