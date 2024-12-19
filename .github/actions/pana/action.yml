@@ -1,0 +1,62 @@
+name: Pana Workflow
+
+inputs:
+  min_score:
+    required: false
+    type: number
+    default: 120
+  pana_version:
+    required: false
+    type: string
+  runs_on:
+    required: false
+    type: string
+    default: "ubuntu-latest"
+  working_directory:
+    required: false
+    type: string
+    default: "."
+
+runs:
+  using: "composite"
+  steps:
+    - name: Apply Dependency Overrides
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+      run: |
+        # Define dependencies and their paths
+        declare -A DEPENDENCY_PATHS=(
+          ["stream_chat"]="../stream_chat"
+          ["stream_chat_persistence"]="../stream_chat_persistence"
+          ["stream_chat_flutter_core"]="../stream_chat_flutter_core"
+          ["stream_chat_flutter"]="../stream_chat_flutter"
+          ["stream_chat_localizations"]="../stream_chat_localizations"
+        )
+
+        # Iterate through each dependency and apply override if it exists
+        for DEP in "${!DEPENDENCY_PATHS[@]}"; do
+          if grep -q "$DEP:" pubspec.yaml; then
+            echo "Overriding dependency: $DEP with path ${DEPENDENCY_PATHS[$DEP]}"
+            sed -i.bak "s|$DEP:.*|$DEP:\n    path: ${DEPENDENCY_PATHS[$DEP]}|g" pubspec.yaml
+          fi
+        done
+    
+    - name: Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+        cache: true
+
+    - name: Install Pana
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+      run: flutter pub global activate pana ${{inputs.pana_version}}
+
+    - name: Verify Pana Score
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+      run: |
+        PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
+        echo "Score: $PANA_SCORE"
+        IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0];
+        if (( $SCORE < ${{inputs.min_score}} )); then echo "The minimum score of ${{inputs.min_score}} was not met!"; exit 1; fi
