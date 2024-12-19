@@ -22,6 +22,7 @@ runs:
   steps:
     - name: Apply Dependency Overrides
       working-directory: ${{ inputs.working_directory }}
+      shell: bash
       run: |
         # Define dependencies and their paths
         declare -A DEPENDENCY_PATHS=(
@@ -44,10 +45,12 @@ runs:
 
     - name: Install Pana
       working-directory: ${{ inputs.working_directory }}
+      shell: bash
       run: flutter pub global activate pana ${{inputs.pana_version}}
 
     - name: Verify Pana Score
       working-directory: ${{ inputs.working_directory }}
+      shell: bash
       run: |
         PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
         echo "Score: $PANA_SCORE"
