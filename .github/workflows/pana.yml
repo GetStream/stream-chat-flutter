@@ -18,31 +18,31 @@ concurrency:
 
 jobs:
   stream_chat:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    uses: ./.github/actions/pana.yml
     with:
       working_directory: packages/stream_chat
       min_score: 120
 
   stream_chat_persistence:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    uses: ./.github/actions/pana.yml
     with:
       working_directory: packages/stream_chat_persistence
       min_score: 120
 
   stream_chat_flutter_core:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    uses: ./.github/actions/pana.yml
     with:
       working_directory: packages/stream_chat_flutter_core
       min_score: 120
 
   stream_chat_flutter:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    uses: ./.github/actions/pana.yml
     with:
       working_directory: packages/stream_chat_flutter
       min_score: 120
 
   stream_chat_localizations:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    uses: ./.github/actions/pana.yml
     with:
       working_directory: packages/stream_chat_localizations
       min_score: 120

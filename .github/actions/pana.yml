@@ -1,0 +1,63 @@
+name: Pana Workflow
+
+on:
+  workflow_call:
+    inputs:
+      min_score:
+        required: false
+        type: number
+        default: 120
+      pana_version:
+        required: false
+        type: string
+      runs_on:
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      working_directory:
+        required: false
+        type: string
+        default: "."
+
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+
+    runs-on: ${{ inputs.runs_on }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Apply Dependency Overrides
+        run: |
+          # Define dependencies and their paths
+          declare -A DEPENDENCY_PATHS=(
+            ["stream_chat"]="/github/workspace/packages/stream_chat"
+            ["stream_chat_persistence"]="/github/workspace/packages/stream_chat_persistence"
+            ["stream_chat_flutter_core"]="/github/workspace/packages/stream_chat_flutter_core"
+            ["stream_chat_flutter"]="/github/workspace/packages/stream_chat_flutter"
+            ["stream_chat_localizations"]="/github/workspace/packages/stream_chat_localizations"
+          )
+
+          # Iterate through each dependency and apply override if it exists
+          for DEP in "${!DEPENDENCY_PATHS[@]}"; do
+            if grep -q "^$DEP:" pubspec.yaml; then
+              echo "Overriding dependency: $DEP with path ${DEPENDENCY_PATHS[$DEP]}"
+              sed -i.bak "s|^$DEP:.*|$DEP:\n    path: ${DEPENDENCY_PATHS[$DEP]}|g" pubspec.yaml
+            else
+              echo "Dependency $DEP not found in pubspec.yaml, skipping override."
+            fi
+          done
+
+      - name: Install Pana
+        run: flutter pub global activate pana ${{inputs.pana_version}}
+
+      - name: Verify Pana Score
+        run: |
+          PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
+          echo "Score: $PANA_SCORE"
+          IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0];
+          if (( $SCORE < ${{inputs.min_score}} )); then echo "The minimum score of ${{inputs.min_score}} was not met!"; exit 1; fi
