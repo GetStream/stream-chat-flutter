@@ -19,18 +19,9 @@ inputs:
 
 runs:
   using: "composite"
-
-  defaults:
-    run:
-      working-directory: ${{ inputs.working_directory }}
-
-  runs-on: ${{ inputs.runs_on }}
-
   steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-
     - name: Apply Dependency Overrides
+      working-directory: ${{ inputs.working_directory }}
       run: |
         # Define dependencies and their paths
         declare -A DEPENDENCY_PATHS=(
@@ -52,9 +43,11 @@ runs:
         done
 
     - name: Install Pana
+      working-directory: ${{ inputs.working_directory }}
       run: flutter pub global activate pana ${{inputs.pana_version}}
 
     - name: Verify Pana Score
+      working-directory: ${{ inputs.working_directory }}
       run: |
         PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
         echo "Score: $PANA_SCORE"
