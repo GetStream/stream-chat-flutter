@@ -27,10 +27,10 @@ runs:
         # Define dependencies and their paths
         declare -A DEPENDENCY_PATHS=(
           ["stream_chat"]="../stream_chat"
-          ["stream_chat_persistence"]="/github/workspace/packages/stream_chat_persistence"
-          ["stream_chat_flutter_core"]="/github/workspace/packages/stream_chat_flutter_core"
-          ["stream_chat_flutter"]="/github/workspace/packages/stream_chat_flutter"
-          ["stream_chat_localizations"]="/github/workspace/packages/stream_chat_localizations"
+          ["stream_chat_persistence"]="../stream_chat_persistence"
+          ["stream_chat_flutter_core"]="../stream_chat_flutter_core"
+          ["stream_chat_flutter"]="../stream_chat_flutter"
+          ["stream_chat_localizations"]="../stream_chat_localizations"
         )
 
         # Iterate through each dependency and apply override if it exists
@@ -41,7 +41,6 @@ runs:
           else
             echo "Dependency $DEP not found in pubspec.yaml, skipping override."
           fi
-          echo "pubspec.yaml: $(cat pubspec.yaml)"
         done
     
     - name: Install Flutter
