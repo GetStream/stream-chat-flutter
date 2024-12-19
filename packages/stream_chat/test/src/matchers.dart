@@ -120,7 +120,9 @@ class _IsSameMessageAs extends Matcher {
           if (!isSameAttachmentAs(
             attachments[i],
             matchUploadState: matchAttachmentsUploadState,
-          ).matches(targetAttachments[i], matchState)) return false;
+          ).matches(targetAttachments[i], matchState)) {
+            return false;
+          }
         }
         return true;
       }

@@ -536,7 +536,7 @@ class CreateCallPayload extends _BaseResponse {
 }
 
 /// Contains information about a [User] that was banned from a [Channel] or App.
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class UserBlockResponse extends _BaseResponse {
   /// User that banned the [user].
   @JsonKey(defaultValue: '')

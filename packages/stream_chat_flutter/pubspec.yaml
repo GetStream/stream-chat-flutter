@@ -26,7 +26,7 @@ dependencies:
   chewie: ^1.8.1
   collection: ^1.17.2
   contextmenu: ^3.0.0
-  desktop_drop: ^0.4.4
+  desktop_drop: ^0.5.0
   diacritic: ^0.1.5
   dio: ^5.4.3+1
   ezanimation: ^0.6.0
@@ -60,6 +60,14 @@ dependencies:
   url_launcher: ^6.3.0
   video_player: ^2.8.7
 
+dev_dependencies:
+  faker_dart: ^0.2.1
+  flutter_test:
+    sdk: flutter
+  golden_toolkit: ^0.15.0
+  mocktail: ^1.0.0
+  path: ^1.8.3
+
 flutter:
   assets:
     - images/
@@ -68,10 +76,11 @@ flutter:
     - animations/
   uses-material-design: true
 
-dev_dependencies:
-  faker_dart: ^0.2.1
-  flutter_test:
-    sdk: flutter
-  golden_toolkit: ^0.15.0
-  mocktail: ^1.0.0
-  path: ^1.8.3
+# This package supports all platforms listed below.
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:

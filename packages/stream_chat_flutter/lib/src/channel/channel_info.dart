@@ -53,8 +53,6 @@ class StreamChannelInfo extends StatelessWidget {
                 client: client,
                 textStyle: textStyle,
               );
-            default:
-              return const Offstage();
           }
         },
       ),
