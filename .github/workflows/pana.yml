@@ -1,10 +1,5 @@
 name: pana
 
-env:
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_channel: "stable"
-  flutter_version: "3.13.9"
-
 on:
   pull_request:
     branches:
@@ -23,108 +18,31 @@ concurrency:
 
 jobs:
   stream_chat:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: flutterings/dart-package-analyzer@v1
-        id: analysis
-        with:
-          flutter_version: ${{ env.flutter_version }}
-          flutter_channel: ${{ env.flutter_channel }}
-          relativePath: packages/stream_chat
-      - name: Check scores
-        env:
-          # NB: "analysis" is the id set above. Replace it with the one you used if different.
-          TOTAL: ${{ steps.analysis.outputs.total }}
-          TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
-        run: |
-          if (( $TOTAL < 120 ))
-          then
-            echo Score too low!
-            exit 1
-          fi
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    with:
+      working_directory: packages/stream_chat
+      min_score: 120
+
   stream_chat_persistence:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: flutterings/dart-package-analyzer@v1
-        id: analysis
-        with:
-          flutter_version: ${{ env.flutter_version }}
-          flutter_channel: ${{ env.flutter_channel }}
-          relativePath: packages/stream_chat_persistence
-      - name: Check scores
-        env:
-          # NB: "analysis" is the id set above. Replace it with the one you used if different.
-          TOTAL: ${{ steps.analysis.outputs.total }}
-          TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
-        run: |
-          PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
-          if (( $TOTAL < 120 ))
-          then
-            echo Score too low!
-            exit 1
-          fi
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    with:
+      working_directory: packages/stream_chat_persistence
+      min_score: 120
+
   stream_chat_flutter_core:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: flutterings/dart-package-analyzer@v1
-        id: analysis
-        with:
-          flutter_version: ${{ env.flutter_version }}
-          flutter_channel: ${{ env.flutter_channel }}
-          relativePath: packages/stream_chat_flutter_core
-      - name: Check scores
-        env:
-          # NB: "analysis" is the id set above. Replace it with the one you used if different.
-          TOTAL: ${{ steps.analysis.outputs.total }}
-          TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
-        run: |
-          if (( $TOTAL < 120 ))
-          then
-            echo Score too low!
-            exit 1
-          fi
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    with:
+      working_directory: packages/stream_chat_flutter_core
+      min_score: 120
+
   stream_chat_flutter:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: flutterings/dart-package-analyzer@v1
-        id: analysis
-        with:
-          flutter_version: ${{ env.flutter_version }}
-          flutter_channel: ${{ env.flutter_channel }}
-          relativePath: packages/stream_chat_flutter
-      - name: Check scores
-        env:
-          # NB: "analysis" is the id set above. Replace it with the one you used if different.
-          TOTAL: ${{ steps.analysis.outputs.total }}
-          TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
-        run: |
-          if (( $TOTAL < 100 ))
-          then
-            echo Score too low!
-            exit 1
-          fi
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    with:
+      working_directory: packages/stream_chat_flutter
+      min_score: 120
+
   stream_chat_localizations:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: flutterings/dart-package-analyzer@v1
-        id: analysis
-        with:
-          flutter_version: ${{ env.flutter_version }}
-          flutter_channel: ${{ env.flutter_channel }}
-          relativePath: packages/stream_chat_localizations
-      - name: Check scores
-        env:
-          # NB: "analysis" is the id set above. Replace it with the one you used if different.
-          TOTAL: ${{ steps.analysis.outputs.total }}
-          TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
-        run: |
-          if (( $TOTAL < 120 ))
-          then
-            echo Score too low!
-            exit 1
-          fi
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    with:
+      working_directory: packages/stream_chat_localizations
+      min_score: 120
