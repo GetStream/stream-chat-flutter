@@ -26,7 +26,7 @@ runs:
       run: |
         # Define dependencies and their paths
         declare -A DEPENDENCY_PATHS=(
-          ["stream_chat"]="/github/workspace/packages/stream_chat"
+          ["stream_chat"]="../stream_chat"
           ["stream_chat_persistence"]="/github/workspace/packages/stream_chat_persistence"
           ["stream_chat_flutter_core"]="/github/workspace/packages/stream_chat_flutter_core"
           ["stream_chat_flutter"]="/github/workspace/packages/stream_chat_flutter"
