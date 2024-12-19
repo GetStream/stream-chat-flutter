@@ -41,9 +41,11 @@ runs:
           else
             echo "Dependency $DEP not found in pubspec.yaml, skipping override."
           fi
+          echo "pubspec.yaml: $(cat pubspec.yaml)"
         done
     
     - name: Install Flutter
+      working-directory: ${{ inputs.working_directory }}
       uses: subosito/flutter-action@v2
       with:
         channel: stable
