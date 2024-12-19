@@ -19,6 +19,8 @@ inputs:
 
 jobs:
   build:
+    using: "composite"
+
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
