@@ -25,6 +25,7 @@ jobs:
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           working_directory: packages/stream_chat
           min_score: 120
 
@@ -36,6 +37,7 @@ jobs:
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           working_directory: packages/stream_chat_persistence
           min_score: 120
 
@@ -47,6 +49,7 @@ jobs:
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           working_directory: packages/stream_chat_flutter_core
           min_score: 120
 
@@ -58,6 +61,7 @@ jobs:
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           working_directory: packages/stream_chat_flutter
           min_score: 120
 
@@ -69,5 +73,6 @@ jobs:
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           working_directory: packages/stream_chat_localizations
           min_score: 120

@@ -16,6 +16,9 @@ inputs:
     required: false
     type: string
     default: "."
+  githubToken:
+    required: true
+    type: string
 
 runs:
   using: "composite"
@@ -48,10 +51,9 @@ runs:
         cache: true
 
     - uses: axel-op/dart-package-analyzer@56afb7e6737bd2b7cee05382ae7f0e8111138080 # pin@v3
-      shell: bash
       id: analysis
       with:
-        githubToken: ${{ secrets.GITHUB_TOKEN }}
+        githubToken: ${{ inputs.githubToken }}
         relativePath: ${{ inputs.working_directory }}
     - name: Check scores
       env:
