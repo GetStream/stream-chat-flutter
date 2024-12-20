@@ -36,7 +36,7 @@ runs:
         # Iterate through each dependency and apply override if it exists
         for DEP in "${!DEPENDENCY_PATHS[@]}"; do
           if grep -q "$DEP:" pubspec.yaml; then
-            echo "Overriding dependency: $DEP with path ${DEPENDENCY_PATHS[$DEP]}"
+            echo "Temporarily overriding dependency: $DEP with path ${DEPENDENCY_PATHS[$DEP]}"
             sed -i.bak "s|$DEP:.*|$DEP:\n    path: ${DEPENDENCY_PATHS[$DEP]}|g" pubspec.yaml
           fi
         done
@@ -47,16 +47,33 @@ runs:
         channel: stable
         cache: true
 
-    - name: Install Pana
-      working-directory: ${{ inputs.working_directory }}
-      shell: bash
-      run: flutter pub global activate pana ${{inputs.pana_version}}
-
-    - name: Verify Pana Score
-      working-directory: ${{ inputs.working_directory }}
-      shell: bash
+    - uses: axel-op/dart-package-analyzer@56afb7e6737bd2b7cee05382ae7f0e8111138080 # pin@v3
+      id: analysis
+      with:
+        githubToken: ${{ secrets.GITHUB_TOKEN }}
+        relativePath: ${{ inputs.working_directory }}
+    - name: Check scores
+      env:
+        TOTAL: ${{ steps.analysis.outputs.total }}
+        TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
       run: |
-        PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
-        echo "Score: $PANA_SCORE"
-        IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0];
-        if (( $SCORE < ${{inputs.min_score}} )); then echo "The minimum score of ${{inputs.min_score}} was not met!"; exit 1; fi
+        PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
+        if (( $PERCENTAGE < ${{ inputs.panaThreshold }} ))
+        then
+          echo "Score too low ($PERCENTAGE % is less than the expected ${{ inputs.panaThreshold }} %)!"
+          exit 1
+        fi
+
+    # - name: Install Pana
+    #   working-directory: ${{ inputs.working_directory }}
+    #   shell: bash
+    #   run: flutter pub global activate pana ${{inputs.pana_version}}
+
+    # - name: Verify Pana Score
+    #   working-directory: ${{ inputs.working_directory }}
+    #   shell: bash
+    #   run: |
+    #     PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
+    #     echo "Score: $PANA_SCORE"
+    #     IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0];
+    #     if (( $SCORE < ${{inputs.min_score}} )); then echo "The minimum score of ${{inputs.min_score}} was not met!"; exit 1; fi
