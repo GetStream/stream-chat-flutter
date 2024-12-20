@@ -23,22 +23,7 @@ runs:
     - name: Apply Dependency Overrides
       shell: bash
       run: |
-        # Define dependencies and their paths
-        declare -A DEPENDENCY_PATHS=(
-          ["stream_chat"]="../stream_chat"
-          ["stream_chat_persistence"]="../stream_chat_persistence"
-          ["stream_chat_flutter_core"]="../stream_chat_flutter_core"
-          ["stream_chat_flutter"]="../stream_chat_flutter"
-          ["stream_chat_localizations"]="../stream_chat_localizations"
-        )
-
-        # Iterate through each dependency and apply override if it exists
-        for DEP in "${!DEPENDENCY_PATHS[@]}"; do
-          if grep -q "$DEP:" pubspec.yaml; then
-            echo "Temporarily overriding dependency: $DEP with path ${DEPENDENCY_PATHS[$DEP]}"
-            sed -i.bak "s|$DEP:.*|$DEP:\n    path: ${DEPENDENCY_PATHS[$DEP]}|g" pubspec.yaml
-          fi
-        done
+        git apply .github/actions/pana/chore__temporarily_override_dep_to_local.patch
     
     - name: Install Flutter
       uses: subosito/flutter-action@v2
