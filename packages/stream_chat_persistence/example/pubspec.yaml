@@ -16,7 +16,7 @@ version: 1.0.0+1
 #   2. Add it to the melos.yaml file for future updates.
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.5.3
   flutter: ">=3.24.5"
 
 dependencies:

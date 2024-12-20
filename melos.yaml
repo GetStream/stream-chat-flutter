@@ -8,7 +8,7 @@ command:
   bootstrap:
     # Dart and Flutter environment used in the project.
     environment:
-      sdk: ^3.5.4
+      sdk: ^3.5.3
       # We are not using carat '^' syntax here because flutter don't follow semantic versioning.
       flutter: ">=3.24.5"
 
