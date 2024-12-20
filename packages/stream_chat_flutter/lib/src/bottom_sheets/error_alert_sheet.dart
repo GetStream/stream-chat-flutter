@@ -50,6 +50,7 @@ class ErrorAlertSheet extends StatelessWidget {
           height: 36,
         ),
         Container(
+          // ignore: deprecated_member_use
           color: _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.08),
           height: 1,
         ),

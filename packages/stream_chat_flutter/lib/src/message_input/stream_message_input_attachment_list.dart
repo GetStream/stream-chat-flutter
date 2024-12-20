@@ -357,6 +357,7 @@ class RemoveAttachmentButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
+        // ignore: deprecated_member_use
         fillColor: colorTheme.textHighEmphasis.withOpacity(0.5),
         child: StreamSvgIcon.close(
           size: 24,

@@ -61,6 +61,7 @@ final _channelPreviewThemeControl = StreamChannelPreviewThemeData(
         color: const Color(0xff7A7A7A),
       ),
   lastMessageAtStyle: StreamTextTheme.light().footnote.copyWith(
+        // ignore: deprecated_member_use
         color: StreamColorTheme.light().textHighEmphasis.withOpacity(0.5),
       ),
   indicatorIconSize: 16,
@@ -86,6 +87,7 @@ final _channelPreviewThemeControlMidLerp = StreamChannelPreviewThemeData(
     fontWeight: FontWeight.w400,
   ),
   lastMessageAtStyle: StreamTextTheme.light().footnote.copyWith(
+        // ignore: deprecated_member_use
         color: const Color(0x807f7f7f).withOpacity(0.5),
       ),
   indicatorIconSize: 16,
@@ -105,6 +107,7 @@ final _channelPreviewThemeControlDark = StreamChannelPreviewThemeData(
         color: const Color(0xff7A7A7A),
       ),
   lastMessageAtStyle: StreamTextTheme.dark().footnote.copyWith(
+        // ignore: deprecated_member_use
         color: StreamColorTheme.dark().textHighEmphasis.withOpacity(0.5),
       ),
   indicatorIconSize: 16,
