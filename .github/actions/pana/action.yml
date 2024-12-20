@@ -62,9 +62,9 @@ runs:
       shell: bash
       run: |
         PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
-        if (( $PERCENTAGE < ${{ inputs.panaThreshold }} ))
+        if (( $PERCENTAGE < ${{ inputs.min_score }} ))
         then
-          echo "Score too low ($PERCENTAGE % is less than the expected ${{ inputs.panaThreshold }} %)!"
+          echo "Score too low ($PERCENTAGE % is less than the expected ${{ inputs.min_score }} %)!"
           exit 1
         fi
 
