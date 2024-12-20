@@ -16,9 +16,6 @@ inputs:
     required: false
     type: string
     default: "."
-  githubToken:
-    required: true
-    type: string
 
 runs:
   using: "composite"
@@ -47,37 +44,21 @@ runs:
     - name: Install Flutter
       uses: subosito/flutter-action@v2
       with:
-        channel: stable
+        # Forcing to 3.24.0 for right now as pana has an issue with Dart 3.6 https://github.com/dart-lang/dartdoc/issues/3947
+        flutter-version: "3.24.0"
         cache: true
+        cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
-    - uses: axel-op/dart-package-analyzer@56afb7e6737bd2b7cee05382ae7f0e8111138080 # pin@v3
-      id: analysis
-      with:
-        githubToken: ${{ inputs.githubToken }}
-        relativePath: ${{ inputs.working_directory }}
-    - name: Check scores
-      env:
-        TOTAL: ${{ steps.analysis.outputs.total }}
-        TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
+    - name: Install Pana
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+      run: flutter pub global activate pana ${{inputs.pana_version}}
+
+    - name: Verify Pana Score
+      working-directory: ${{ inputs.working_directory }}
       shell: bash
       run: |
-        PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
-        if (( $PERCENTAGE < ${{ inputs.min_score }} ))
-        then
-          echo "Score too low ($PERCENTAGE % is less than the expected ${{ inputs.min_score }} %)!"
-          exit 1
-        fi
-
-    # - name: Install Pana
-    #   working-directory: ${{ inputs.working_directory }}
-    #   shell: bash
-    #   run: flutter pub global activate pana ${{inputs.pana_version}}
-
-    # - name: Verify Pana Score
-    #   working-directory: ${{ inputs.working_directory }}
-    #   shell: bash
-    #   run: |
-    #     PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
-    #     echo "Score: $PANA_SCORE"
-    #     IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0];
-    #     if (( $SCORE < ${{inputs.min_score}} )); then echo "The minimum score of ${{inputs.min_score}} was not met!"; exit 1; fi
+        PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
+        echo "Score: $PANA_SCORE"
+        IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0];
+        if (( $SCORE < ${{inputs.min_score}} )); then echo "The minimum score of ${{inputs.min_score}} was not met!"; exit 1; fi
