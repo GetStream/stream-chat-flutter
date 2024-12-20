@@ -99,6 +99,7 @@ Future<bool?> showConfirmationBottomSheet(
               ),
             const SizedBox(height: 36),
             Container(
+              // ignore: deprecated_member_use
               color: effect.color!.withOpacity(effect.alpha ?? 1),
               height: 1,
             ),
@@ -116,6 +117,7 @@ Future<bool?> showConfirmationBottomSheet(
                           cancelText,
                           style: chatThemeData.textTheme.bodyBold.copyWith(
                             color: chatThemeData.colorTheme.textHighEmphasis
+                                // ignore: deprecated_member_use
                                 .withOpacity(0.5),
                           ),
                         ),
@@ -189,7 +191,9 @@ Future<bool?> showInfoBottomSheet(
             height: 36,
           ),
           Container(
+            // ignore: deprecated_member_use
             color: theme?.colorTheme.textHighEmphasis.withOpacity(0.08) ??
+                // ignore: deprecated_member_use
                 chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.08),
             height: 1,
           ),
@@ -201,6 +205,7 @@ Future<bool?> showInfoBottomSheet(
               child: Text(
                 okText,
                 style: TextStyle(
+                  // ignore: deprecated_member_use
                   color: theme?.colorTheme.textHighEmphasis.withOpacity(0.5) ??
                       chatThemeData.colorTheme.accentPrimary,
                   fontWeight: FontWeight.w400,

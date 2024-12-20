@@ -22,10 +22,7 @@ class VoiceRecordingAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   List<double> _resolveWaveform(Attachment attachment) {
     final waveform =
         attachment.extraData['waveform_data'] as List<dynamic>? ?? <dynamic>[];
-    return waveform
-        .map((e) => double.tryParse(e.toString()))
-        .whereNotNull()
-        .toList();
+    return waveform.map((e) => double.tryParse(e.toString())).nonNulls.toList();
   }
 
   @override

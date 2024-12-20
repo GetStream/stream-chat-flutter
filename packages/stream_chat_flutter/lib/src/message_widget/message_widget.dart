@@ -682,6 +682,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           duration: const Duration(seconds: 1),
           color: widget.message.pinned && widget.showPinHighlight
               ? _streamChatTheme.colorTheme.highlight
+              // ignore: deprecated_member_use
               : _streamChatTheme.colorTheme.barsBg.withOpacity(0),
           child: Portal(
             child: PlatformWidgetBuilder(

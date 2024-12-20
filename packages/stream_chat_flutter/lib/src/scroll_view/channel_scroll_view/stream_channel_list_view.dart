@@ -376,6 +376,7 @@ class StreamChannelListSeparator extends StatelessWidget {
     final effect = StreamChatTheme.of(context).colorTheme.borderBottom;
     return Container(
       height: 1,
+      // ignore: deprecated_member_use
       color: effect.color!.withOpacity(effect.alpha ?? 1.0),
     );
   }

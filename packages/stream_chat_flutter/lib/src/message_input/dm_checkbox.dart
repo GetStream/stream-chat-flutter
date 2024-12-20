@@ -64,6 +64,7 @@ class DmCheckbox extends StatelessWidget {
             context.translations.alsoSendAsDirectMessageLabel,
             style: _streamChatTheme.textTheme.footnote.copyWith(
               color:
+                  // ignore: deprecated_member_use
                   _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),

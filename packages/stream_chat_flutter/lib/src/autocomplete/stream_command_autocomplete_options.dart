@@ -50,6 +50,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
           title: Text(
             context.translations.instantCommandsLabel,
             style: TextStyle(
+              // ignore: deprecated_member_use
               color: colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),

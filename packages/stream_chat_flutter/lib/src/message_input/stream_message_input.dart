@@ -655,6 +655,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                               : Border.all(
                                   color: _streamChatTheme
                                       .colorTheme.textHighEmphasis
+                                      // ignore: deprecated_member_use
                                       .withOpacity(0.5),
                                   width: 2,
                                 ),

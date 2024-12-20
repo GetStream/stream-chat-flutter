@@ -103,6 +103,7 @@ class StreamPhotoGalleryTile extends StatelessWidget {
               opacity: selected ? 1.0 : 0.0,
               child: Container(
                 color:
+                    // ignore: deprecated_member_use
                     chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.5),
                 alignment: Alignment.topRight,
                 padding: const EdgeInsets.only(

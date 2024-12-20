@@ -494,6 +494,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       context.translations.emptyChatMessagesText,
                       style: _streamTheme.textTheme.footnote.copyWith(
                         color: _streamTheme.colorTheme.textHighEmphasis
+                            // ignore: deprecated_member_use
                             .withOpacity(0.5),
                       ),
                     ),
@@ -508,6 +509,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       context.translations.genericErrorText,
                       style: _streamTheme.textTheme.footnote.copyWith(
                         color: _streamTheme.colorTheme.textHighEmphasis
+                            // ignore: deprecated_member_use
                             .withOpacity(0.5),
                       ),
                     ),
@@ -1447,6 +1449,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       child = TweenAnimationBuilder<Color?>(
         tween: ColorTween(
           begin: highlightColor,
+          // ignore: deprecated_member_use
           end: colorTheme.barsBg.withOpacity(0),
         ),
         duration: const Duration(seconds: 3),

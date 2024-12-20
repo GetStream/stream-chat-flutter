@@ -77,6 +77,7 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
     );
 
     final backgroundColor = this.backgroundColor ??
+        // ignore: deprecated_member_use
         theme.colorTheme.textLowEmphasis.withOpacity(0.9);
 
     final children = [errorText, errorIcon];
