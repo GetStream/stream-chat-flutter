@@ -21,7 +21,6 @@ runs:
   using: "composite"
   steps:
     - name: Apply Dependency Overrides
-      working-directory: ${{ inputs.working_directory }}
       shell: bash
       run: |
         # Define dependencies and their paths
