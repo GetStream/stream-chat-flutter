@@ -48,6 +48,7 @@ runs:
         cache: true
 
     - uses: axel-op/dart-package-analyzer@56afb7e6737bd2b7cee05382ae7f0e8111138080 # pin@v3
+      shell: bash
       id: analysis
       with:
         githubToken: ${{ secrets.GITHUB_TOKEN }}
@@ -56,6 +57,7 @@ runs:
       env:
         TOTAL: ${{ steps.analysis.outputs.total }}
         TOTAL_MAX: ${{ steps.analysis.outputs.total_max }}
+      shell: bash
       run: |
         PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
         if (( $PERCENTAGE < ${{ inputs.panaThreshold }} ))
