@@ -4,13 +4,9 @@ on:
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - 'docs/**'
   push:
     branches:
       - master
-    paths-ignore:
-      - 'docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -59,13 +55,15 @@ jobs:
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_chat_flutter
-          min_score: 100
+          min_score: 120
 
   stream_chat_localizations:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/pana
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+      - name: 📊 Verify Pana Score
+        uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_chat_localizations
           min_score: 120

@@ -20,7 +20,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Apply Dependency Overrides
+    - name: Temporary Override Local Dependencies
       shell: bash
       run: |
         git apply .github/actions/pana/chore__temporarily_override_dep_to_local.patch
