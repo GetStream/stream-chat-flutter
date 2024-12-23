@@ -206,8 +206,6 @@ class StreamChannelListHeader extends StatelessWidget
                         return _ConnectingTitleState();
                       case ConnectionStatus.disconnected:
                         return _DisconnectedTitleState(client: _client);
-                      default:
-                        return const Offstage();
                     }
                   },
                 ),

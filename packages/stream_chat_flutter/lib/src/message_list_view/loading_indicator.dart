@@ -41,6 +41,7 @@ class LoadingIndicator extends StatelessWidget {
       stream: stream,
       initialData: false,
       errorBuilder: (context, error) => ColoredBox(
+        // ignore: deprecated_member_use
         color: streamTheme.colorTheme.accentError.withOpacity(0.2),
         child: Center(
           child: Text(context.translations.loadingMessagesError),

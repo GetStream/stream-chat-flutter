@@ -42,13 +42,13 @@ class ItemPosition {
   final double itemTrailingEdge;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
-    final ItemPosition otherPosition = other;
-    return otherPosition.index == index &&
-        otherPosition.itemLeadingEdge == itemLeadingEdge &&
-        otherPosition.itemTrailingEdge == itemTrailingEdge;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ItemPosition &&
+          runtimeType == other.runtimeType &&
+          index == other.index &&
+          itemLeadingEdge == other.itemLeadingEdge &&
+          itemTrailingEdge == other.itemTrailingEdge;
 
   @override
   int get hashCode =>

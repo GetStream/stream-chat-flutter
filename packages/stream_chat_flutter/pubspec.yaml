@@ -5,16 +5,28 @@ version: 8.3.0
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
+# Note: The environment configuration and dependency versions are managed by Melos.
+#
+# Do not edit them manually.
+#
+# Steps to update dependencies:
+#   1. Modify the version in the melos.yaml file.
+#   2. Run `melos bootstrap` to apply changes.
+#
+# Steps to add a new dependency:
+#   1. Add the dependency to this list.
+#   2. Add it to the melos.yaml file for future updates.
+
 environment:
-  sdk: ">=3.4.0 <4.0.0"
-  flutter: ">=3.22.0"
+  sdk: ^3.5.4
+  flutter: ">=3.24.5"
 
 dependencies:
   cached_network_image: ^3.3.1
   chewie: ^1.8.1
   collection: ^1.17.2
   contextmenu: ^3.0.0
-  desktop_drop: ^0.4.4
+  desktop_drop: ^0.5.0
   diacritic: ^0.1.5
   dio: ^5.4.3+1
   ezanimation: ^0.6.0
@@ -48,29 +60,6 @@ dependencies:
   url_launcher: ^6.3.0
   video_player: ^2.8.7
 
-flutter:
-  plugin:
-    platforms:
-      android:
-        default_package: stream_chat_flutter
-      ios:
-        default_package: stream_chat_flutter
-      windows:
-        default_package: stream_chat_flutter
-      linux:
-        default_package: stream_chat_flutter
-      macos:
-        default_package: stream_chat_flutter
-      web:
-        default_package: stream_chat_flutter
-
-  assets:
-    - images/
-    - svgs/
-    - lib/svgs/
-    - animations/
-  uses-material-design: true
-
 dev_dependencies:
   faker_dart: ^0.2.1
   flutter_test:
@@ -78,3 +67,20 @@ dev_dependencies:
   golden_toolkit: ^0.15.0
   mocktail: ^1.0.0
   path: ^1.8.3
+
+flutter:
+  assets:
+    - images/
+    - svgs/
+    - lib/svgs/
+    - animations/
+  uses-material-design: true
+
+# This package supports all platforms listed below.
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:

@@ -4,6 +4,10 @@
 
 - Added `StreamPollController` to create and manage a poll based on the passed configs.
 
+🔄 Changed
+
+- Updated minimum Flutter version to 3.24.5 for the SDK.
+
 ## 8.3.0
 
 - Updated `stream_chat` dependency to [`8.3.0`](https://pub.dev/packages/stream_chat/changelog).
