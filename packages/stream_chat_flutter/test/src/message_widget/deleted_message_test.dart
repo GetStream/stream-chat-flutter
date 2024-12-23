@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../material_app_wrapper.dart';
 import '../mocks.dart';
-import '../widget_tester_extension.dart';
 
 void main() {
   testWidgets('control test', (tester) async {

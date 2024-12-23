@@ -1,7 +1,7 @@
+import 'package:alchemist/alchemist.dart'; // Changed from golden_toolkit
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:alchemist/alchemist.dart'; // Changed from golden_toolkit
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

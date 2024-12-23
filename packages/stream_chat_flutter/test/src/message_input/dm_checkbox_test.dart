@@ -61,6 +61,7 @@ void main() {
                   color: StreamChatThemeData.light()
                       .colorTheme
                       .textHighEmphasis
+                      // ignore: deprecated_member_use
                       .withOpacity(0.5),
                   width: 2,
                 ),
@@ -114,6 +115,7 @@ void main() {
                   color: StreamChatThemeData.light()
                       .colorTheme
                       .textHighEmphasis
+                      // ignore: deprecated_member_use
                       .withOpacity(0.5),
                   width: 2,
                 ),
