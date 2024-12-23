@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:alchemist/alchemist.dart';
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  const isRunningInCi = bool.fromEnvironment('CI');
+  final env = Platform.environment..forEach((k, v) => print('Key=$k Value=$v'));
+
+  const isRunningInCi = bool.fromEnvironment('GITHUB_ACTIONS');
 
   print('Running in CI: $isRunningInCi');
 
