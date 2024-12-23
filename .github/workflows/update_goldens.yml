@@ -1,39 +1,11 @@
 name: update_goldens
 
-on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to generate goldens from'
-        required: true
-      flutter_version:
-        description: 'Flutter version to use'
-        required: true
-        default: '3.x'
+on: workflow_dispatch
 
 jobs:
-  generate-and-pr:
+  update_goldens:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Validate branch input
-        run: |
-          BRANCH_PATTERN="^[a-zA-Z0-9/_.-]+$"
-
-          # Input string (branch name) to be validated
-          BRANCH_NAME=${{ inputs.branch}}
-
-          echo "Checking branch name: $BRANCH_NAME"
-
-          # Validate branch name against the regex pattern
-          if [[ $BRANCH_NAME =~ $BRANCH_PATTERN ]]; then
-              echo "Branch name is valid."
-              exit 0
-          else
-              echo "Branch name is invalid."
-              exit 1
-          fi
-        
       - name: Ensure branch is not master
         if: ${{ github.event.inputs.branch == 'master' || github.event.inputs.branch == 'origin/master'}}
         run: exit 1
