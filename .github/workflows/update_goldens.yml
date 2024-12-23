@@ -1,6 +1,7 @@
 name: Generate Goldens
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       branch:
