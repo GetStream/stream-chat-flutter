@@ -1,7 +1,6 @@
 name: update_goldens
 
 on:
-  push:
   workflow_dispatch:
     inputs:
       branch:
@@ -63,12 +62,12 @@ jobs:
         working-directory: packages/stream_chat_flutter
         continue-on-error: true
         run: |
-          flutter test --update-goldens
+          flutter test --tags golden --update-goldens
 
       - name: Commit Changes
         id: commit_changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: Updating Goldens"
+          commit_message: "chore: Update Goldens"
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
