@@ -61,10 +61,11 @@ dependencies:
   video_player: ^2.8.7
 
 dev_dependencies:
+  alchemist: ^0.11.0
   faker_dart: ^0.2.1
   flutter_test:
     sdk: flutter
-  golden_toolkit: ^0.15.0
+#  golden_toolkit: ^0.15.0
   mocktail: ^1.0.0
   path: ^1.8.3
 

@@ -30,6 +30,7 @@ class DmCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     final _streamChatTheme = StreamChatTheme.of(context);
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           height: 16,

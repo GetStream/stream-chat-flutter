@@ -1,66 +1,50 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/poll/poll_question_text_field.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 void main() {
-  testGoldens(
+  goldenTest(
     '[Light] -> PollQuestionTextField should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        PollQuestionTextField(
-          title: 'Question',
-          hintText: 'Ask a question',
-          initialQuestion: PollQuestion(),
-        ),
-        surfaceSize: const Size(600, 150),
-        wrapper: (child) => _wrapWithMaterialApp(
-          child,
-          brightness: Brightness.light,
-        ),
-      );
-
-      await screenMatchesGolden(tester, 'poll_question_text_field_light');
-    },
+    fileName: 'poll_question_text_field_light',
+    constraints: const BoxConstraints.tightFor(width: 600, height: 150),
+    builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.light,
+      PollQuestionTextField(
+        title: 'Question',
+        hintText: 'Ask a question',
+        initialQuestion: PollQuestion(),
+      ),
+    ),
   );
 
-  testGoldens(
-    '[Dark] -> PollQuestionTextField should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        PollQuestionTextField(
-          title: 'Question',
-          initialQuestion: PollQuestion(
-            text: 'A very long question that should not be allowed',
-            error: 'Question should be at most 10 characters long',
-          ),
-        ),
-        surfaceSize: const Size(600, 150),
-        wrapper: _wrapWithMaterialApp,
-      );
-
-      await screenMatchesGolden(tester, 'poll_question_text_field_error');
-    },
-  );
-
-  testGoldens(
+  goldenTest(
     '[Error] -> PollQuestionTextField should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        PollQuestionTextField(
-          title: 'Question',
-          hintText: 'Ask a question',
-          initialQuestion: PollQuestion(),
+    fileName: 'poll_question_text_field_error',
+    constraints: const BoxConstraints.tightFor(width: 600, height: 150),
+    builder: () => _wrapWithMaterialApp(
+      PollQuestionTextField(
+        title: 'Question',
+        initialQuestion: PollQuestion(
+          text: 'A very long question that should not be allowed',
+          error: 'Question should be at most 10 characters long',
         ),
-        surfaceSize: const Size(600, 150),
-        wrapper: (child) => _wrapWithMaterialApp(
-          child,
-          brightness: Brightness.dark,
-        ),
-      );
+      ),
+    ),
+  );
 
-      await screenMatchesGolden(tester, 'poll_question_text_field_dark');
-    },
+  goldenTest(
+    '[Dark] -> PollQuestionTextField should look fine',
+    fileName: 'poll_question_text_field_dark',
+    constraints: const BoxConstraints.tightFor(width: 600, height: 150),
+    builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.dark,
+      PollQuestionTextField(
+        title: 'Question',
+        hintText: 'Ask a question',
+        initialQuestion: PollQuestion(),
+      ),
+    ),
   );
 }
 
