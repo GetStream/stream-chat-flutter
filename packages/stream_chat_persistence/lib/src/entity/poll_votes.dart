@@ -1,3 +1,4 @@
+// coverage:ignore-file
 import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/entity/entity.dart';
 
