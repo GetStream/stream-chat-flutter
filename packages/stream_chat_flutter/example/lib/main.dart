@@ -31,15 +31,8 @@ Future<void> main() async {
     '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
   );
 
-  final channel = client.channel('messaging', id: 'godevs');
-
-  await channel.watch();
-
   runApp(
-    MyApp(
-      client: client,
-      channel: channel,
-    ),
+    MyApp(client: client),
   );
 }
 
@@ -57,7 +50,6 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
     required this.client,
-    required this.channel,
   });
 
   /// Instance of Stream Client.
@@ -66,9 +58,6 @@ class MyApp extends StatelessWidget {
   /// set the default user for the application. Performing these actions
   /// trigger a websocket connection allowing for real-time updates.
   final StreamChatClient client;
-
-  /// Instance of the Channel
-  final Channel channel;
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +78,7 @@ class MyApp extends StatelessWidget {
         client: client,
         child: widget,
       ),
-      home: StreamChannel(
-        channel: channel,
-        child: const ResponsiveChat(),
-      ),
+      home: const ResponsiveChat(),
     );
   }
 }
@@ -106,38 +92,26 @@ class ResponsiveChat extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
       builder: (context, sizingInformation) {
-        if (sizingInformation.isMobile) {
-          return ChannelListPage(
-            onTap: (c) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return StreamChannel(
-                      channel: c,
-                      child: ChannelPage(
-                        onBackPressed: (context) {
-                          Navigator.of(
-                            context,
-                            rootNavigator: true,
-                          ).pop();
-                        },
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
+        if (sizingInformation.isDesktop || sizingInformation.isTablet) {
+          return const SplitView();
         }
 
-        return const SplitView();
+        return ChannelListPage(
+          onTap: (c) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StreamChannel(
+                channel: c,
+                child: ChannelPage(
+                  onBackPressed: (context) {
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
       },
-      breakpoints: const ScreenBreakpoints(
-        desktop: 550,
-        tablet: 550,
-        watch: 300,
-      ),
     );
   }
 }
@@ -278,87 +252,93 @@ class _ChannelPageState extends State<ChannelPage> {
             body: Column(
               children: <Widget>[
                 Expanded(
-                  child: StreamMessageListView(
-                    threadBuilder: (context, parent) {
-                      return ThreadPage(
-                        parent: parent!,
-                      );
-                    },
-                    messageBuilder: (
-                      context,
-                      messageDetails,
-                      messages,
-                      defaultWidget,
-                    ) {
-                      // The threshold after which the message is considered
-                      // swiped.
-                      const threshold = 0.2;
+                  child: StreamMessageListViewTheme(
+                    data: StreamMessageListViewThemeData(
+                      backgroundColor: Colors.transparent,
+                    ),
+                    child: StreamMessageListView(
+                      threadBuilder: (context, parent) {
+                        return ThreadPage(
+                          parent: parent!,
+                        );
+                      },
+                      messageBuilder: (
+                        context,
+                        messageDetails,
+                        messages,
+                        defaultWidget,
+                      ) {
+                        // The threshold after which the message is considered
+                        // swiped.
+                        const threshold = 0.2;
 
-                      final isMyMessage = messageDetails.isMyMessage;
+                        final isMyMessage = messageDetails.isMyMessage;
 
-                      // The direction in which the message can be swiped.
-                      final swipeDirection = isMyMessage
-                          ? SwipeDirection.endToStart //
-                          : SwipeDirection.startToEnd;
+                        // The direction in which the message can be swiped.
+                        final swipeDirection = isMyMessage
+                            ? SwipeDirection.endToStart //
+                            : SwipeDirection.startToEnd;
 
-                      return Swipeable(
-                        key: ValueKey(messageDetails.message.id),
-                        direction: swipeDirection,
-                        swipeThreshold: threshold,
-                        onSwiped: (details) => reply(messageDetails.message),
-                        backgroundBuilder: (context, details) {
-                          // The alignment of the swipe action.
-                          final alignment = isMyMessage
-                              ? Alignment.centerRight //
-                              : Alignment.centerLeft;
+                        return Swipeable(
+                          key: ValueKey(messageDetails.message.id),
+                          direction: swipeDirection,
+                          swipeThreshold: threshold,
+                          onSwiped: (details) => reply(messageDetails.message),
+                          backgroundBuilder: (context, details) {
+                            // The alignment of the swipe action.
+                            final alignment = isMyMessage
+                                ? Alignment.centerRight //
+                                : Alignment.centerLeft;
 
-                          // The progress of the swipe action.
-                          final progress =
-                              math.min(details.progress, threshold) / threshold;
+                            // The progress of the swipe action.
+                            final progress =
+                                math.min(details.progress, threshold) /
+                                    threshold;
 
-                          // The offset for the reply icon.
-                          var offset = Offset.lerp(
-                            const Offset(-24, 0),
-                            const Offset(12, 0),
-                            progress,
-                          )!;
+                            // The offset for the reply icon.
+                            var offset = Offset.lerp(
+                              const Offset(-24, 0),
+                              const Offset(12, 0),
+                              progress,
+                            )!;
 
-                          // If the message is mine, we need to flip the offset.
-                          if (isMyMessage) {
-                            offset = Offset(-offset.dx, -offset.dy);
-                          }
+                            // If the message is mine, we need to flip the offset.
+                            if (isMyMessage) {
+                              offset = Offset(-offset.dx, -offset.dy);
+                            }
 
-                          final _streamTheme = StreamChatTheme.of(context);
+                            final _streamTheme = StreamChatTheme.of(context);
 
-                          return Align(
-                            alignment: alignment,
-                            child: Transform.translate(
-                              offset: offset,
-                              child: Opacity(
-                                opacity: progress,
-                                child: SizedBox.square(
-                                  dimension: 30,
-                                  child: CustomPaint(
-                                    painter: AnimatedCircleBorderPainter(
-                                      progress: progress,
-                                      color: _streamTheme.colorTheme.borders,
-                                    ),
-                                    child: Center(
-                                      child: StreamSvgIcon.reply(
-                                        size: lerpDouble(0, 18, progress),
-                                        color: _streamTheme
-                                            .colorTheme.accentPrimary,
+                            return Align(
+                              alignment: alignment,
+                              child: Transform.translate(
+                                offset: offset,
+                                child: Opacity(
+                                  opacity: progress,
+                                  child: SizedBox.square(
+                                    dimension: 30,
+                                    child: CustomPaint(
+                                      painter: AnimatedCircleBorderPainter(
+                                        progress: progress,
+                                        color: _streamTheme.colorTheme.borders,
+                                      ),
+                                      child: Center(
+                                        child: StreamSvgIcon.reply(
+                                          size: lerpDouble(0, 18, progress),
+                                          color: _streamTheme
+                                              .colorTheme.accentPrimary,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                        child: defaultWidget.copyWith(onReplyTap: reply),
-                      );
-                    },
+                            );
+                          },
+                          child: defaultWidget.copyWith(onReplyTap: reply),
+                        );
+                      },
+                    ),
                   ),
                 ),
                 StreamMessageInput(
