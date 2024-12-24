@@ -489,6 +489,48 @@ void main() {
       verify(() => mockDatabase.channelDao.updateChannels(channels)).called(1);
     });
 
+    test('updatePolls', () async {
+      const name = 'testPollName';
+      final options = List.generate(3, (index) => PollOption(text: '$index'));
+      final polls =
+          List.generate(3, (index) => Poll(name: name, options: options));
+      when(() => mockDatabase.pollDao.updatePolls(polls))
+          .thenAnswer((_) => Future.value());
+
+      await client.updatePolls(polls);
+      verify(() => mockDatabase.pollDao.updatePolls(polls)).called(1);
+    });
+
+    test('deletePollsByIds', () async {
+      final pollIds = <String>['testPollId'];
+      when(() => mockDatabase.pollDao.deletePollsByIds(pollIds))
+          .thenAnswer((_) => Future.value());
+
+      await client.deletePollsByIds(pollIds);
+      verify(() => mockDatabase.pollDao.deletePollsByIds(pollIds)).called(1);
+    });
+
+    test('updatePollVotes', () async {
+      final pollVotes = List.generate(
+          3, (index) => PollVote(id: '$index', optionId: 'testOptionId$index'));
+      when(() => mockDatabase.pollVoteDao.updatePollVotes(pollVotes))
+          .thenAnswer((_) => Future.value());
+
+      await client.updatePollVotes(pollVotes);
+      verify(() => mockDatabase.pollVoteDao.updatePollVotes(pollVotes))
+          .called(1);
+    });
+
+    test('deletePollVotesByPollIds', () async {
+      final pollIds = <String>['testPollId'];
+      when(() => mockDatabase.pollVoteDao.deletePollVotesByPollIds(pollIds))
+          .thenAnswer((_) => Future.value());
+
+      await client.deletePollVotesByPollIds(pollIds);
+      verify(() => mockDatabase.pollVoteDao.deletePollVotesByPollIds(pollIds))
+          .called(1);
+    });
+
     test('updateMembers', () async {
       const cid = 'testCid';
       final members = List.generate(3, (index) => Member());
