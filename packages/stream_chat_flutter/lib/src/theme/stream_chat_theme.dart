@@ -183,6 +183,7 @@ class StreamChatThemeData {
         color: const Color(0xff7A7A7A),
       ),
       lastMessageAtStyle: textTheme.footnote.copyWith(
+        // ignore: deprecated_member_use
         color: colorTheme.textHighEmphasis.withOpacity(0.5),
       ),
       indicatorIconSize: 16,

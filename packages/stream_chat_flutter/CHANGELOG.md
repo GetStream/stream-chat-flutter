@@ -5,6 +5,10 @@
 - Added a new `StreamPollCreator` widget to facilitate poll creation within the chat interface.
 - Added a new `PollMessage` widget to display poll messages within the chat interface.
 
+🔄 Changed
+
+- Updated minimum Flutter version to 3.24.5 for the SDK.
+
 ## 8.3.0
 
 ✅ Added

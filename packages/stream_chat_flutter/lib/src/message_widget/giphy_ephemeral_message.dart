@@ -222,6 +222,7 @@ class GiphyHeader extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
+                // ignore: deprecated_member_use
                 color: colorTheme.textHighEmphasis.withOpacity(0.5),
               ),
             ),

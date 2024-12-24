@@ -1,7 +1,7 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../material_app_wrapper.dart';
@@ -11,6 +11,7 @@ void main() {
   group('ErrorAlertSheet tests', () {
     const methodChannel =
         MethodChannel('dev.fluttercommunity.plus/connectivity_status');
+
     setUp(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(methodChannel,
@@ -74,27 +75,21 @@ void main() {
       expect(find.text('Something went wrong'), findsOneWidget);
     });
 
-    testGoldens(
+    goldenTest(
       'golden test for ErrorAlertSheet',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialAppWrapper(
-            builder: (context, child) => StreamChat(
-              client: MockClient(),
-              child: child,
-            ),
-            home: const Scaffold(
-              body: Center(
-                child: ErrorAlertSheet(
-                  errorDescription: 'Something went wrong.',
-                ),
-              ),
-            ),
+      fileName: 'error_alert_sheet_0',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+      builder: () => MaterialAppWrapper(
+        builder: (context, child) => StreamChat(
+          client: MockClient(),
+          child: child,
+        ),
+        home: const Scaffold(
+          bottomSheet: ErrorAlertSheet(
+            errorDescription: 'Something went wrong.',
           ),
-        );
-
-        await screenMatchesGolden(tester, 'error_alert_sheet_0');
-      },
+        ),
+      ),
     );
 
     tearDown(() {

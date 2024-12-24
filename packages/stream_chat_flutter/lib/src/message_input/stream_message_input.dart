@@ -618,6 +618,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_hasQuotedMessage && !_isEditing)
                     // Ensure this doesn't show on web & desktop
@@ -655,6 +656,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                               : Border.all(
                                   color: _streamChatTheme
                                       .colorTheme.textHighEmphasis
+                                      // ignore: deprecated_member_use
                                       .withOpacity(0.5),
                                   width: 2,
                                 ),

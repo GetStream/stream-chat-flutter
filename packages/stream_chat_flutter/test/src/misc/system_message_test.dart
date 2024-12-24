@@ -1,6 +1,6 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -61,9 +61,11 @@ void main() {
     },
   );
 
-  testGoldens(
+  goldenTest(
     'control golden light',
-    (WidgetTester tester) async {
+    fileName: 'system_message_light',
+    constraints: const BoxConstraints.tightFor(width: 200, height: 200),
+    builder: () {
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel();
@@ -88,8 +90,9 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(10));
 
-      await tester.pumpWidgetBuilder(
-        StreamChat(
+      return MaterialAppWrapper(
+        theme: ThemeData.light(),
+        home: StreamChat(
           client: client,
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChannel(
@@ -106,19 +109,15 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: const Size.square(200),
-        wrapper: (child) => MaterialAppWrapper(
-          home: child,
-        ),
       );
-
-      await screenMatchesGolden(tester, 'system_message_light');
     },
   );
 
-  testGoldens(
+  goldenTest(
     'control golden dark',
-    (WidgetTester tester) async {
+    fileName: 'system_message_dark',
+    constraints: const BoxConstraints.tightFor(width: 200, height: 200),
+    builder: () {
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel();
@@ -143,8 +142,9 @@ void main() {
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(10));
 
-      await tester.pumpWidgetBuilder(
-        StreamChat(
+      return MaterialAppWrapper(
+        theme: ThemeData.dark(),
+        home: StreamChat(
           client: client,
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChannel(
@@ -161,16 +161,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: const Size.square(200),
-        wrapper: (child) => MaterialAppWrapper(
-          theme: ThemeData.dark(
-            useMaterial3: false,
-          ),
-          home: child,
-        ),
       );
-
-      await screenMatchesGolden(tester, 'system_message_dark');
     },
   );
 }

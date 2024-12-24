@@ -1,6 +1,6 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../material_app_wrapper.dart';
@@ -98,72 +98,63 @@ void main() {
     expect(const Color(0x99000000), backgroundColor);
   });
 
-  testGoldens(
-      'golden test for StreamUploadProgressIndicator at 0% with background',
-      (tester) async {
-    await tester.pumpWidget(
-      MaterialAppWrapper(
-        home: StreamChatTheme(
-          data: StreamChatThemeData.light(),
-          child: const Scaffold(
-            body: Center(
-              child: StreamUploadProgressIndicator(
-                total: 100,
-                uploaded: 0,
-              ),
+  goldenTest(
+    'golden test for StreamUploadProgressIndicator at 0% with background',
+    fileName: 'upload_progress_indicator_0',
+    constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+    pumpBeforeTest: pumpOnce,
+    builder: () => MaterialAppWrapper(
+      home: StreamChatTheme(
+        data: StreamChatThemeData.light(),
+        child: const Scaffold(
+          body: Center(
+            child: StreamUploadProgressIndicator(
+              total: 100,
+              uploaded: 0,
             ),
           ),
         ),
       ),
-    );
+    ),
+  );
 
-    await screenMatchesGolden(tester, 'upload_progress_indicator_0',
-        customPump: (widget) => widget.pump(const Duration(seconds: 3)));
-  });
-
-  testGoldens(
-      'golden test for StreamUploadProgressIndicator at 50% with background',
-      (tester) async {
-    await tester.pumpWidget(
-      MaterialAppWrapper(
-        home: StreamChatTheme(
-          data: StreamChatThemeData.light(),
-          child: const Scaffold(
-            body: Center(
-              child: StreamUploadProgressIndicator(
-                total: 100,
-                uploaded: 50,
-              ),
+  goldenTest(
+    'golden test for StreamUploadProgressIndicator at 50% with background',
+    fileName: 'upload_progress_indicator_1',
+    constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+    pumpBeforeTest: pumpOnce,
+    builder: () => MaterialAppWrapper(
+      home: StreamChatTheme(
+        data: StreamChatThemeData.light(),
+        child: const Scaffold(
+          body: Center(
+            child: StreamUploadProgressIndicator(
+              total: 100,
+              uploaded: 50,
             ),
           ),
         ),
       ),
-    );
+    ),
+  );
 
-    await screenMatchesGolden(tester, 'upload_progress_indicator_1',
-        customPump: (widget) => widget.pump(const Duration(seconds: 3)));
-  });
-
-  testGoldens(
-      'golden test for StreamUploadProgressIndicator at 100% with background',
-      (tester) async {
-    await tester.pumpWidget(
-      MaterialAppWrapper(
-        home: StreamChatTheme(
-          data: StreamChatThemeData.light(),
-          child: const Scaffold(
-            body: Center(
-              child: StreamUploadProgressIndicator(
-                total: 100,
-                uploaded: 100,
-              ),
+  goldenTest(
+    'golden test for StreamUploadProgressIndicator at 100% with background',
+    fileName: 'upload_progress_indicator_2',
+    constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+    pumpBeforeTest: pumpOnce,
+    builder: () => MaterialAppWrapper(
+      home: StreamChatTheme(
+        data: StreamChatThemeData.light(),
+        child: const Scaffold(
+          body: Center(
+            child: StreamUploadProgressIndicator(
+              total: 100,
+              uploaded: 100,
             ),
           ),
         ),
       ),
-    );
-
-    await screenMatchesGolden(tester, 'upload_progress_indicator_2',
-        customPump: (widget) => widget.pump(const Duration(seconds: 3)));
-  });
+    ),
+  );
 }
