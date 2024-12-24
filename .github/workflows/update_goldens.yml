@@ -8,8 +8,6 @@ jobs:
     steps:
       - name: 📚 Checkout branch
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
