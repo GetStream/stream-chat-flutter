@@ -1,88 +1,63 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/poll/poll_option_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 void main() {
-  testGoldens(
+  goldenTest(
     '[Light] -> PollOptionReorderableListView should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        PollOptionReorderableListView(
-          title: 'Options',
-          itemHintText: 'Add an option',
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-            PollOptionItem(text: 'Option 2'),
-            PollOptionItem(text: 'Option 3'),
-            PollOptionItem(text: 'Option 4'),
-          ],
-        ),
-        surfaceSize: const Size(600, 500),
-        wrapper: (child) => _wrapWithMaterialApp(
-          child,
-          brightness: Brightness.light,
-        ),
-      );
-
-      await screenMatchesGolden(
-        tester,
-        'poll_option_reorderable_list_view_light',
-      );
-    },
+    fileName: 'poll_option_reorderable_list_view_light',
+    constraints: const BoxConstraints.tightFor(width: 600, height: 500),
+    builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.light,
+      PollOptionReorderableListView(
+        title: 'Options',
+        itemHintText: 'Add an option',
+        initialOptions: [
+          PollOptionItem(text: 'Option 1'),
+          PollOptionItem(text: 'Option 2'),
+          PollOptionItem(text: 'Option 3'),
+          PollOptionItem(text: 'Option 4'),
+        ],
+      ),
+    ),
   );
 
-  testGoldens(
+  goldenTest(
     '[Dark] -> PollOptionReorderableListView should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        PollOptionReorderableListView(
-          title: 'Options',
-          itemHintText: 'Add an option',
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-            PollOptionItem(text: 'Option 2'),
-            PollOptionItem(text: 'Option 3'),
-            PollOptionItem(text: 'Option 4'),
-          ],
-        ),
-        surfaceSize: const Size(600, 500),
-        wrapper: (child) => _wrapWithMaterialApp(
-          child,
-          brightness: Brightness.dark,
-        ),
-      );
-
-      await screenMatchesGolden(
-        tester,
-        'poll_option_reorderable_list_view_dark',
-      );
-    },
+    fileName: 'poll_option_reorderable_list_view_dark',
+    constraints: const BoxConstraints.tightFor(width: 600, height: 500),
+    builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.dark,
+      PollOptionReorderableListView(
+        title: 'Options',
+        itemHintText: 'Add an option',
+        initialOptions: [
+          PollOptionItem(text: 'Option 1'),
+          PollOptionItem(text: 'Option 2'),
+          PollOptionItem(text: 'Option 3'),
+          PollOptionItem(text: 'Option 4'),
+        ],
+      ),
+    ),
   );
 
-  testGoldens(
+  goldenTest(
     '[Error] -> PollOptionReorderableListView should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        PollOptionReorderableListView(
-          title: 'Options',
-          itemHintText: 'Add an option',
-          initialOptions: [
-            PollOptionItem(text: 'Option 1', error: 'Option already exists'),
-            PollOptionItem(text: 'Option 1', error: 'Option already exists'),
-            PollOptionItem(text: 'Option 3'),
-            PollOptionItem(text: 'Option 4'),
-          ],
-        ),
-        surfaceSize: const Size(600, 500),
-        wrapper: _wrapWithMaterialApp,
-      );
-
-      await screenMatchesGolden(
-        tester,
-        'poll_option_reorderable_list_view_error',
-      );
-    },
+    fileName: 'poll_option_reorderable_list_view_error',
+    constraints: const BoxConstraints.tightFor(width: 600, height: 500),
+    builder: () => _wrapWithMaterialApp(
+      PollOptionReorderableListView(
+        title: 'Options',
+        itemHintText: 'Add an option',
+        initialOptions: [
+          PollOptionItem(text: 'Option 1', error: 'Option already exists'),
+          PollOptionItem(text: 'Option 1', error: 'Option already exists'),
+          PollOptionItem(text: 'Option 3'),
+          PollOptionItem(text: 'Option 4'),
+        ],
+      ),
+    ),
   );
 }
 

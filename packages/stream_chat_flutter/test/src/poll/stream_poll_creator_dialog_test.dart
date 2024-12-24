@@ -1,77 +1,47 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_creator_dialog.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 void main() {
-  testGoldens(
+  goldenTest(
     '[Light] -> StreamPollCreatorDialog should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        const StreamPollCreatorDialog(),
-        surfaceSize: const Size(1280, 800),
-        wrapper: (child) => _wrapWithMaterialApp(
-          child,
-          brightness: Brightness.light,
-        ),
-      );
-
-      await screenMatchesGolden(tester, 'stream_poll_creator_dialog_light');
-    },
+    fileName: 'stream_poll_creator_dialog_light',
+    constraints: const BoxConstraints.tightFor(width: 1280, height: 800),
+    builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.light,
+      const StreamPollCreatorDialog(),
+    ),
   );
 
-  testGoldens(
+  goldenTest(
     '[Dark] -> StreamPollCreatorDialog should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        const StreamPollCreatorDialog(),
-        surfaceSize: const Size(1280, 800),
-        wrapper: (child) => _wrapWithMaterialApp(
-          child,
-          brightness: Brightness.dark,
-        ),
-      );
-
-      await screenMatchesGolden(tester, 'stream_poll_creator_dialog_dark');
-    },
+    fileName: 'stream_poll_creator_dialog_dark',
+    constraints: const BoxConstraints.tightFor(width: 1280, height: 800),
+    builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.dark,
+      const StreamPollCreatorDialog(),
+    ),
   );
 
-  testGoldens(
+  goldenTest(
     '[Light] -> StreamPollCreatorFullScreenDialog should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        const StreamPollCreatorFullScreenDialog(),
-        surfaceSize: const Size(412, 916),
-        wrapper: (child) => _wrapWithMaterialApp(
-          child,
-          brightness: Brightness.light,
-        ),
-      );
-
-      await screenMatchesGolden(
-        tester,
-        'stream_poll_creator_full_screen_dialog_light',
-      );
-    },
+    fileName: 'stream_poll_creator_full_screen_dialog_light',
+    constraints: const BoxConstraints.tightFor(width: 412, height: 916),
+    builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.light,
+      const StreamPollCreatorFullScreenDialog(),
+    ),
   );
 
-  testGoldens(
+  goldenTest(
     '[Dark] -> StreamPollCreatorFullScreenDialog should look fine',
-    (tester) async {
-      await tester.pumpWidgetBuilder(
-        const StreamPollCreatorFullScreenDialog(),
-        surfaceSize: const Size(412, 916),
-        wrapper: (child) => _wrapWithMaterialApp(
-          child,
-          brightness: Brightness.dark,
-        ),
-      );
-
-      await screenMatchesGolden(
-        tester,
-        'stream_poll_creator_full_screen_dialog_dark',
-      );
-    },
+    fileName: 'stream_poll_creator_full_screen_dialog_dark',
+    constraints: const BoxConstraints.tightFor(width: 412, height: 916),
+    builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.dark,
+      const StreamPollCreatorFullScreenDialog(),
+    ),
   );
 }
 

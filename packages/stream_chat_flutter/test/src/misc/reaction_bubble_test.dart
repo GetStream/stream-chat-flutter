@@ -1,6 +1,5 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -8,9 +7,11 @@ import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
-  testGoldens(
+  goldenTest(
     'it should show a like - light theme',
-    (WidgetTester tester) async {
+    fileName: 'reaction_bubble_like_light',
+    constraints: const BoxConstraints.tightFor(width: 100, height: 100),
+    builder: () {
       final client = MockClient();
       final clientState = MockClientState();
       final themeData = ThemeData.light(
@@ -21,8 +22,9 @@ void main() {
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
       final theme = StreamChatThemeData.fromTheme(themeData);
-      await tester.pumpWidgetBuilder(
-        StreamChat(
+      return MaterialAppWrapper(
+        theme: themeData,
+        home: StreamChat(
           client: client,
           streamChatThemeData: theme,
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
@@ -43,19 +45,15 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: const Size(100, 100),
-        wrapper: (child) => MaterialAppWrapper(
-          theme: themeData,
-          home: child,
-        ),
       );
-      await screenMatchesGolden(tester, 'reaction_bubble_like_light');
     },
   );
 
-  testGoldens(
+  goldenTest(
     'it should show a like - dark theme',
-    (WidgetTester tester) async {
+    fileName: 'reaction_bubble_like_dark',
+    constraints: const BoxConstraints.tightFor(width: 100, height: 100),
+    builder: () {
       final client = MockClient();
       final clientState = MockClientState();
       final themeData = ThemeData.dark();
@@ -64,35 +62,38 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
-      await tester.pumpWidgetBuilder(
-        StreamChat(
+      return MaterialAppWrapper(
+        theme: themeData,
+        home: StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: ColoredBox(
-            color: Colors.black,
-            child: StreamReactionBubble(
-              reactions: [
-                Reaction(
-                  type: 'like',
-                  user: User(id: 'test'),
-                ),
-              ],
-              borderColor: theme.ownMessageTheme.reactionsBorderColor!,
-              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
-              maskColor: theme.ownMessageTheme.reactionsMaskColor!,
+          child: Scaffold(
+            body: Center(
+              child: StreamReactionBubble(
+                reactions: [
+                  Reaction(
+                    type: 'like',
+                    user: User(id: 'test'),
+                  ),
+                ],
+                borderColor: theme.ownMessageTheme.reactionsBorderColor!,
+                backgroundColor:
+                    theme.ownMessageTheme.reactionsBackgroundColor!,
+                maskColor: theme.ownMessageTheme.reactionsMaskColor!,
+              ),
             ),
           ),
         ),
-        surfaceSize: const Size(100, 100),
       );
-      await screenMatchesGolden(tester, 'reaction_bubble_like_dark');
     },
   );
 
-  testGoldens(
+  goldenTest(
     'it should show three reactions - light theme',
-    (WidgetTester tester) async {
+    fileName: 'reaction_bubble_3_light',
+    constraints: const BoxConstraints.tightFor(width: 140, height: 140),
+    builder: () {
       final client = MockClient();
       final clientState = MockClientState();
       final themeData = ThemeData.light();
@@ -101,43 +102,46 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
-      await tester.pumpWidgetBuilder(
-        StreamChat(
+      return MaterialAppWrapper(
+        theme: themeData,
+        home: StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: ColoredBox(
-            color: Colors.black,
-            child: StreamReactionBubble(
-              reactions: [
-                Reaction(
-                  type: 'like',
-                  user: User(id: 'test'),
-                ),
-                Reaction(
-                  type: 'like',
-                  user: User(id: 'user-id'),
-                ),
-                Reaction(
-                  type: 'like',
-                  user: User(id: 'test'),
-                ),
-              ],
-              borderColor: theme.ownMessageTheme.reactionsBorderColor!,
-              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
-              maskColor: theme.ownMessageTheme.reactionsMaskColor!,
+          child: Scaffold(
+            body: Center(
+              child: StreamReactionBubble(
+                reactions: [
+                  Reaction(
+                    type: 'like',
+                    user: User(id: 'test'),
+                  ),
+                  Reaction(
+                    type: 'like',
+                    user: User(id: 'user-id'),
+                  ),
+                  Reaction(
+                    type: 'like',
+                    user: User(id: 'test'),
+                  ),
+                ],
+                borderColor: theme.ownMessageTheme.reactionsBorderColor!,
+                backgroundColor:
+                    theme.ownMessageTheme.reactionsBackgroundColor!,
+                maskColor: theme.ownMessageTheme.reactionsMaskColor!,
+              ),
             ),
           ),
         ),
-        surfaceSize: const Size(140, 140),
       );
-      await screenMatchesGolden(tester, 'reaction_bubble_3_light');
     },
   );
 
-  testGoldens(
+  goldenTest(
     'it should show three reactions - dark theme',
-    (WidgetTester tester) async {
+    fileName: 'reaction_bubble_3_dark',
+    constraints: const BoxConstraints.tightFor(width: 140, height: 140),
+    builder: () {
       final client = MockClient();
       final clientState = MockClientState();
       final themeData = ThemeData.dark();
@@ -146,43 +150,46 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
-      await tester.pumpWidgetBuilder(
-        StreamChat(
+      return MaterialAppWrapper(
+        theme: themeData,
+        home: StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: ColoredBox(
-            color: Colors.black,
-            child: StreamReactionBubble(
-              reactions: [
-                Reaction(
-                  type: 'like',
-                  user: User(id: 'test'),
-                ),
-                Reaction(
-                  type: 'like',
-                  user: User(id: 'user-id'),
-                ),
-                Reaction(
-                  type: 'like',
-                  user: User(id: 'test'),
-                ),
-              ],
-              borderColor: theme.ownMessageTheme.reactionsBorderColor!,
-              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
-              maskColor: theme.ownMessageTheme.reactionsMaskColor!,
+          child: Scaffold(
+            body: Center(
+              child: StreamReactionBubble(
+                reactions: [
+                  Reaction(
+                    type: 'like',
+                    user: User(id: 'test'),
+                  ),
+                  Reaction(
+                    type: 'like',
+                    user: User(id: 'user-id'),
+                  ),
+                  Reaction(
+                    type: 'like',
+                    user: User(id: 'test'),
+                  ),
+                ],
+                borderColor: theme.ownMessageTheme.reactionsBorderColor!,
+                backgroundColor:
+                    theme.ownMessageTheme.reactionsBackgroundColor!,
+                maskColor: theme.ownMessageTheme.reactionsMaskColor!,
+              ),
             ),
           ),
         ),
-        surfaceSize: const Size(140, 140),
       );
-      await screenMatchesGolden(tester, 'reaction_bubble_3_dark');
     },
   );
 
-  testGoldens(
+  goldenTest(
     'it should show two reactions with customized ui',
-    (WidgetTester tester) async {
+    fileName: 'reaction_bubble_2',
+    constraints: const BoxConstraints.tightFor(width: 200, height: 200),
+    builder: () {
       final client = MockClient();
       final clientState = MockClientState();
       final themeData = ThemeData(
@@ -192,8 +199,9 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
-      await tester.pumpWidgetBuilder(
-        StreamChat(
+      return MaterialAppWrapper(
+        theme: themeData,
+        home: StreamChat(
           client: client,
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
@@ -224,14 +232,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: const Size(200, 200),
-        wrapper: (child) => MaterialAppWrapper(
-          theme: themeData,
-          home: child,
-        ),
       );
-
-      await screenMatchesGolden(tester, 'reaction_bubble_2');
     },
   );
 }

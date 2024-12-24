@@ -1,6 +1,6 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 
 import '../material_app_wrapper.dart';
@@ -72,20 +72,19 @@ void main() {
     );
   });
 
-  testGoldens('golden test for CommandButton', (tester) async {
-    await tester.pumpWidget(
-      MaterialAppWrapper(
-        home: Scaffold(
-          body: Center(
-            child: CommandButton(
-              color: Colors.red,
-              onPressed: () {},
-            ),
+  goldenTest(
+    'golden test for CommandButton',
+    fileName: 'command_button_0',
+    constraints: const BoxConstraints.tightFor(width: 50, height: 50),
+    builder: () => MaterialAppWrapper(
+      home: Scaffold(
+        body: Center(
+          child: CommandButton(
+            color: Colors.blueAccent,
+            onPressed: () {},
           ),
         ),
       ),
-    );
-
-    await screenMatchesGolden(tester, 'command_button_0');
-  });
+    ),
+  );
 }

@@ -1,7 +1,7 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -87,9 +87,12 @@ void main() {
     },
   );
 
-  testGoldens('golden test for GalleryHeader', (tester) async {
-    await tester.pumpWidget(
-      MaterialAppWrapper(
+  goldenTest(
+    'golden test for GalleryHeader',
+    fileName: 'gallery_header_0',
+    constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+    builder: () {
+      return MaterialAppWrapper(
         home: StreamChat(
           client: client,
           child: StreamChannel(
@@ -99,7 +102,7 @@ void main() {
               child: Scaffold(
                 appBar: StreamGalleryHeader(
                   userName: 'User',
-                  sentAt: DateTime.now().toIso8601String(),
+                  sentAt: '12:02 AM',
                   message: Message(),
                   attachment: MockAttachment(),
                 ),
@@ -107,11 +110,9 @@ void main() {
             ),
           ),
         ),
-      ),
-    );
-
-    await screenMatchesGolden(tester, 'gallery_header_0');
-  });
+      );
+    },
+  );
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

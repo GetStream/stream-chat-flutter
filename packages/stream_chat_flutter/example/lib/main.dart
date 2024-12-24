@@ -31,15 +31,8 @@ Future<void> main() async {
     '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
   );
 
-  final channel = client.channel('messaging', id: 'godevs');
-
-  await channel.watch();
-
   runApp(
-    MyApp(
-      client: client,
-      channel: channel,
-    ),
+    MyApp(client: client),
   );
 }
 
@@ -57,7 +50,6 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
     required this.client,
-    required this.channel,
   });
 
   /// Instance of Stream Client.
@@ -66,9 +58,6 @@ class MyApp extends StatelessWidget {
   /// set the default user for the application. Performing these actions
   /// trigger a websocket connection allowing for real-time updates.
   final StreamChatClient client;
-
-  /// Instance of the Channel
-  final Channel channel;
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +78,7 @@ class MyApp extends StatelessWidget {
         client: client,
         child: widget,
       ),
-      home: StreamChannel(
-        channel: channel,
-        child: const ResponsiveChat(),
-      ),
+      home: const ResponsiveChat(),
     );
   }
 }
@@ -106,38 +92,26 @@ class ResponsiveChat extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
       builder: (context, sizingInformation) {
-        if (sizingInformation.isMobile) {
-          return ChannelListPage(
-            onTap: (c) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return StreamChannel(
-                      channel: c,
-                      child: ChannelPage(
-                        onBackPressed: (context) {
-                          Navigator.of(
-                            context,
-                            rootNavigator: true,
-                          ).pop();
-                        },
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
+        if (sizingInformation.isDesktop || sizingInformation.isTablet) {
+          return const SplitView();
         }
 
-        return const SplitView();
+        return ChannelListPage(
+          onTap: (c) => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StreamChannel(
+                channel: c,
+                child: ChannelPage(
+                  onBackPressed: (context) {
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
       },
-      breakpoints: const ScreenBreakpoints(
-        desktop: 550,
-        tablet: 550,
-        watch: 300,
-      ),
     );
   }
 }
@@ -279,11 +253,7 @@ class _ChannelPageState extends State<ChannelPage> {
               children: <Widget>[
                 Expanded(
                   child: StreamMessageListView(
-                    threadBuilder: (context, parent) {
-                      return ThreadPage(
-                        parent: parent!,
-                      );
-                    },
+                    threadBuilder: (_, parent) => ThreadPage(parent: parent!),
                     messageBuilder: (
                       context,
                       messageDetails,

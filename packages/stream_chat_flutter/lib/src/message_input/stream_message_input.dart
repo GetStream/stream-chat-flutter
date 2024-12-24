@@ -618,6 +618,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_hasQuotedMessage && !_isEditing)
                     // Ensure this doesn't show on web & desktop
