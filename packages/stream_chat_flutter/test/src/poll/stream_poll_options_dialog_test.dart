@@ -1,5 +1,5 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_options_dialog.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
@@ -73,23 +73,14 @@ void main() {
   );
 
   for (final brightness in Brightness.values) {
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> StreamPollOptionsDialog looks fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          StreamPollOptionsDialog(poll: poll),
-          surfaceSize: const Size(412, 916),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(
-          tester,
-          'stream_poll_options_dialog_${brightness.name}',
-        );
-      },
+      fileName: 'stream_poll_options_dialog_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 412, height: 916),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        StreamPollOptionsDialog(poll: poll),
+      ),
     );
   }
 }

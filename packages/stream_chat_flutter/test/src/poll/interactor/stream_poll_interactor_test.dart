@@ -1,7 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/stream_poll_interactor.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
@@ -75,50 +75,32 @@ void main() {
   );
 
   for (final brightness in Brightness.values) {
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> StreamPollInteractor should look fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          StreamPollInteractor(
-            poll: poll,
-            currentUser: currentUser,
-          ),
-          surfaceSize: const Size(412, 500),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(
-          tester,
-          'stream_poll_interactor_${brightness.name}',
-        );
-      },
+      fileName: 'stream_poll_interactor_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 412, height: 500),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        StreamPollInteractor(
+          poll: poll,
+          currentUser: currentUser,
+        ),
+      ),
     );
 
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> StreamPollInteractor with closed poll should look fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          StreamPollInteractor(
-            poll: poll.copyWith(
-              isClosed: true,
-            ),
-            currentUser: currentUser,
+      fileName: 'stream_poll_interactor_closed_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 412, height: 500),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        StreamPollInteractor(
+          poll: poll.copyWith(
+            isClosed: true,
           ),
-          surfaceSize: const Size(412, 400),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(
-          tester,
-          'stream_poll_interactor_poll_closed_${brightness.name}',
-        );
-      },
+          currentUser: currentUser,
+        ),
+      ),
     );
   }
 }
