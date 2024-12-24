@@ -6,16 +6,8 @@ jobs:
   update_goldens:
     runs-on: ubuntu-latest
     steps:
-      - name: 🚫 Ensure branch is not master
-        if: ${{ github.event.inputs.branch == 'master' || github.event.inputs.branch == 'origin/master'}}
-        run: |
-          echo "Updating goldens on 'master' branch is prohibited."
-          exit 1
-
       - name: 📚 Checkout branch
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch }}
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
@@ -32,10 +24,8 @@ jobs:
         run: melos bootstrap --verbose
 
       - name: 🖼️ Update Goldens
-        working-directory: packages/stream_chat_flutter
         continue-on-error: true
-        run: |
-          flutter test --tags golden --update-goldens
+        run: melos run update:goldens
 
       - name: 📤 Commit Changes
         id: commit_changes

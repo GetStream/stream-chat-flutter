@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added a new `StreamPollCreator` widget to facilitate poll creation within the chat interface.
+- Added a new `PollMessage` widget to display poll messages within the chat interface.
 
 🔄 Changed
 

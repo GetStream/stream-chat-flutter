@@ -120,6 +120,8 @@ class _QuotedMessage extends StatelessWidget {
 
   bool get _isDeleted => message.isDeleted || message.deletedAt != null;
 
+  bool get _isPoll => message.poll != null;
+
   @override
   Widget build(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
@@ -139,6 +141,18 @@ class _QuotedMessage extends StatelessWidget {
           style: messageTheme.messageTextStyle?.copyWith(
             fontStyle: FontStyle.italic,
             color: messageTheme.createdAtStyle?.color,
+          ),
+        ),
+      ];
+    } else if (_isPoll) {
+      // Show poll message
+      children = [
+        Flexible(
+          child: Text(
+            '📊 ${message.poll?.name}',
+            style: messageTheme.messageTextStyle?.copyWith(
+              fontSize: 12,
+            ),
           ),
         ),
       ];

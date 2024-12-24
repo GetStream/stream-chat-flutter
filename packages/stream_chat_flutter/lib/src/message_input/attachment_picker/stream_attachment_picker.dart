@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_creator_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The default maximum size for media attachments.
@@ -926,7 +925,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
           key: 'poll-creator',
           type: AttachmentPickerType.poll,
           icon: StreamSvgIcon.polls().toIconThemeSvgIcon(),
-          title: context.translations.createPollLabel(),
+          title: context.translations.createPollLabel(isNew: true),
         ),
       }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
     },

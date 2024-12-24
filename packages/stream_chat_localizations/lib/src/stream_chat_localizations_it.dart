@@ -539,11 +539,74 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get anonymousPollLabel => 'Sondaggio anonimo';
 
   @override
+  String get pollOptionsLabel => 'Opzioni del sondaggio';
+
+  @override
   String get suggestAnOptionLabel => "Suggerisci un'opzione";
+
+  @override
+  String get enterANewOptionLabel => 'Inserisci una nuova opzione';
 
   @override
   String get addACommentLabel => 'Aggiungi un commento';
 
   @override
-  String get createLabel => 'Creare';
+  String get pollCommentsLabel => 'Commenti del sondaggio';
+
+  @override
+  String get updateYourCommentLabel => 'Aggiorna il tuo commento';
+
+  @override
+  String get enterYourCommentLabel => 'Inserisci il tuo commento';
+
+  @override
+  String get createLabel => 'Crea';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Votazione terminata',
+      unique: () => 'Seleziona uno',
+      limited: (count) => 'Seleziona fino a $count',
+      all: () => 'Seleziona uno o più',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Vedi tutte le opzioni';
+    return 'Vedi tutte le $count opzioni';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Visualizza commenti';
+
+  @override
+  String get viewResultsLabel => 'Visualizza risultati';
+
+  @override
+  String get endVoteLabel => 'Termina votazione';
+
+  @override
+  String get pollResultsLabel => 'Risultati del sondaggio';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Mostra tutti i voti';
+    return 'Mostra tutti i $count voti';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 voti',
+        1 => '1 voto',
+        _ => '$count voti',
+      };
+
+  @override
+  String get noPollVotesLabel => 'Attualmente non ci sono voti nel sondaggio';
+
+  @override
+  String get loadingPollVotesError =>
+      'Errore durante il caricamento dei voti del sondaggio';
 }

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart' hide TextTheme;
+import 'package:stream_chat_flutter/src/theme/poll_comments_dialog_theme.dart';
+import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
+import 'package:stream_chat_flutter/src/theme/poll_option_votes_dialog_theme.dart';
+import 'package:stream_chat_flutter/src/theme/poll_options_dialog_theme.dart';
+import 'package:stream_chat_flutter/src/theme/poll_results_dialog_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatTheme}
@@ -57,6 +62,11 @@ class StreamChatThemeData {
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
+    StreamPollInteractorThemeData? pollInteractorTheme,
+    StreamPollOptionsDialogThemeData? pollOptionsDialogTheme,
+    StreamPollResultsDialogThemeData? pollResultsDialogTheme,
+    StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
+    StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -85,6 +95,11 @@ class StreamChatThemeData {
       messageListViewTheme: messageListViewTheme,
       voiceRecordingTheme: voiceRecordingTheme,
       pollCreatorTheme: pollCreatorTheme,
+      pollInteractorTheme: pollInteractorTheme,
+      pollOptionsDialogTheme: pollOptionsDialogTheme,
+      pollResultsDialogTheme: pollResultsDialogTheme,
+      pollCommentsDialogTheme: pollCommentsDialogTheme,
+      pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -114,6 +129,11 @@ class StreamChatThemeData {
     required this.messageListViewTheme,
     required this.voiceRecordingTheme,
     required this.pollCreatorTheme,
+    required this.pollInteractorTheme,
+    required this.pollResultsDialogTheme,
+    required this.pollOptionsDialogTheme,
+    required this.pollCommentsDialogTheme,
+    required this.pollOptionVotesDialogTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -325,6 +345,140 @@ class StreamChatThemeData {
         ),
         switchListTileBorderRadius: BorderRadius.circular(12),
       ),
+      pollInteractorTheme: StreamPollInteractorThemeData(
+        pollTitleStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollSubtitleStyle: textTheme.footnote.copyWith(
+          color: colorTheme.textLowEmphasis,
+        ),
+        pollOptionTextStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollOptionVoteCountTextStyle: textTheme.footnote.copyWith(
+          color: colorTheme.textLowEmphasis,
+        ),
+        pollOptionCheckboxShape: const CircleBorder(),
+        pollOptionCheckboxCheckColor: Colors.white,
+        pollOptionCheckboxActiveColor: colorTheme.accentPrimary,
+        pollOptionCheckboxBorderSide: BorderSide(
+          width: 2,
+          color: colorTheme.disabled,
+        ),
+        pollOptionVotesProgressBarMinHeight: 4,
+        pollOptionVotesProgressBarTrackColor: colorTheme.disabled,
+        pollOptionVotesProgressBarValueColor: colorTheme.accentPrimary,
+        pollOptionVotesProgressBarWinnerColor: colorTheme.accentInfo,
+        pollOptionVotesProgressBarBorderRadius: BorderRadius.circular(4),
+        pollActionButtonStyle: TextButton.styleFrom(
+          textStyle: textTheme.headline,
+          foregroundColor: colorTheme.accentPrimary,
+        ),
+        pollActionDialogTitleStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollActionDialogTextFieldStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollActionDialogTextFieldBorderRadius: BorderRadius.circular(12),
+        pollActionDialogTextFieldFillColor: colorTheme.inputBg,
+      ),
+      pollResultsDialogTheme: StreamPollResultsDialogThemeData(
+        backgroundColor: colorTheme.appBg,
+        appBarElevation: 1,
+        appBarBackgroundColor: colorTheme.barsBg,
+        appBarTitleTextStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollTitleTextStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollTitleDecoration: BoxDecoration(
+          color: colorTheme.inputBg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        pollOptionsDecoration: BoxDecoration(
+          color: colorTheme.inputBg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        pollOptionsWinnerDecoration: BoxDecoration(
+          color: colorTheme.inputBg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        pollOptionsTextStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollOptionsWinnerTextStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollOptionsVoteCountTextStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollOptionsWinnerVoteCountTextStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollOptionsShowAllVotesButtonStyle: TextButton.styleFrom(
+          textStyle: textTheme.headline,
+          foregroundColor: colorTheme.accentPrimary,
+        ),
+      ),
+      pollOptionsDialogTheme: StreamPollOptionsDialogThemeData(
+        backgroundColor: colorTheme.appBg,
+        appBarElevation: 1,
+        appBarBackgroundColor: colorTheme.barsBg,
+        appBarTitleTextStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollTitleTextStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollTitleDecoration: BoxDecoration(
+          color: colorTheme.inputBg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        pollOptionsListViewDecoration: BoxDecoration(
+          color: colorTheme.inputBg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      pollCommentsDialogTheme: StreamPollCommentsDialogThemeData(
+        backgroundColor: colorTheme.appBg,
+        appBarElevation: 1,
+        appBarBackgroundColor: colorTheme.barsBg,
+        appBarTitleTextStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollCommentItemBackgroundColor: colorTheme.inputBg,
+        pollCommentItemBorderRadius: BorderRadius.circular(12),
+        updateYourCommentButtonStyle: TextButton.styleFrom(
+          textStyle: textTheme.headlineBold,
+          foregroundColor: colorTheme.accentPrimary,
+          backgroundColor: colorTheme.inputBg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 16,
+          ),
+        ),
+      ),
+      pollOptionVotesDialogTheme: StreamPollOptionVotesDialogThemeData(
+        backgroundColor: colorTheme.appBg,
+        appBarElevation: 1,
+        appBarBackgroundColor: colorTheme.barsBg,
+        appBarTitleTextStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollOptionVoteCountTextStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollOptionWinnerVoteCountTextStyle: textTheme.headline.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        pollOptionVoteItemBackgroundColor: colorTheme.inputBg,
+        pollOptionVoteItemBorderRadius: BorderRadius.circular(12),
+      ),
     );
   }
 
@@ -372,6 +526,21 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamPollCreatorWidget] widget.
   final StreamPollCreatorThemeData pollCreatorTheme;
 
+  /// Theme configuration for the [StreamPollInteractor] widget.
+  final StreamPollInteractorThemeData pollInteractorTheme;
+
+  /// Theme configuration for the [StreamPollResultsDialog] widget.
+  final StreamPollResultsDialogThemeData pollResultsDialogTheme;
+
+  /// Theme configuration for the [StreamPollOptionsDialog] widget.
+  final StreamPollOptionsDialogThemeData pollOptionsDialogTheme;
+
+  /// Theme configuration for the [StreamPollCommentsDialog] widget.
+  final StreamPollCommentsDialogThemeData pollCommentsDialogTheme;
+
+  /// Theme configuration for the [StreamPollOptionVotesDialog] widget.
+  final StreamPollOptionVotesDialogThemeData pollOptionVotesDialogTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -393,6 +562,11 @@ class StreamChatThemeData {
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
+    StreamPollInteractorThemeData? pollInteractorTheme,
+    StreamPollResultsDialogThemeData? pollResultsDialogTheme,
+    StreamPollOptionsDialogThemeData? pollOptionsDialogTheme,
+    StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
+    StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -411,6 +585,15 @@ class StreamChatThemeData {
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
         voiceRecordingTheme: voiceRecordingTheme ?? this.voiceRecordingTheme,
         pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
+        pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
+        pollResultsDialogTheme:
+            pollResultsDialogTheme ?? this.pollResultsDialogTheme,
+        pollOptionsDialogTheme:
+            pollOptionsDialogTheme ?? this.pollOptionsDialogTheme,
+        pollCommentsDialogTheme:
+            pollCommentsDialogTheme ?? this.pollCommentsDialogTheme,
+        pollOptionVotesDialogTheme:
+            pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
       );
 
   /// Merge themes
@@ -433,6 +616,15 @@ class StreamChatThemeData {
           messageListViewTheme.merge(other.messageListViewTheme),
       voiceRecordingTheme: voiceRecordingTheme.merge(other.voiceRecordingTheme),
       pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
+      pollInteractorTheme: pollInteractorTheme.merge(other.pollInteractorTheme),
+      pollResultsDialogTheme:
+          pollResultsDialogTheme.merge(other.pollResultsDialogTheme),
+      pollOptionsDialogTheme:
+          pollOptionsDialogTheme.merge(other.pollOptionsDialogTheme),
+      pollCommentsDialogTheme:
+          pollCommentsDialogTheme.merge(other.pollCommentsDialogTheme),
+      pollOptionVotesDialogTheme:
+          pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
     );
   }
 }

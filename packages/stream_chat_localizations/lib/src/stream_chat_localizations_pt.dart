@@ -531,14 +531,76 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   }
 
   @override
-  String get anonymousPollLabel => 'Sondagem anónima';
+  String get anonymousPollLabel => 'Votação anônima';
 
   @override
-  String get suggestAnOptionLabel => 'Sugira uma opção';
+  String get pollOptionsLabel => 'Opções de votação';
+
+  @override
+  String get suggestAnOptionLabel => 'Sugerir uma opção';
+
+  @override
+  String get enterANewOptionLabel => 'Inserir uma nova opção';
 
   @override
   String get addACommentLabel => 'Adicionar um comentário';
 
   @override
+  String get pollCommentsLabel => 'Comentários da votação';
+
+  @override
+  String get updateYourCommentLabel => 'Atualizar seu comentário';
+
+  @override
+  String get enterYourCommentLabel => 'Inserir seu comentário';
+
+  @override
   String get createLabel => 'Criar';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Votação encerrada',
+      unique: () => 'Selecionar um',
+      limited: (count) => 'Selecionar até $count',
+      all: () => 'Selecionar um ou mais',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Ver todas as opções';
+    return 'Ver todas as $count opções';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Ver comentários';
+
+  @override
+  String get viewResultsLabel => 'Ver resultados';
+
+  @override
+  String get endVoteLabel => 'Encerrar votação';
+
+  @override
+  String get pollResultsLabel => 'Resultados da votação';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Mostrar todos os votos';
+    return 'Mostrar todos os $count votos';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 votos',
+        1 => '1 voto',
+        _ => '$count votos',
+      };
+
+  @override
+  String get noPollVotesLabel => 'Não há votos no momento';
+
+  @override
+  String get loadingPollVotesError => 'Erro ao carregar os votos';
 }

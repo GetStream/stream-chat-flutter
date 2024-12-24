@@ -2,7 +2,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart'
-    show Range, User;
+    show PollVotingMode, Range, User;
 
 /// Translation strings for the stream chat widgets
 abstract class Translations {
@@ -419,14 +419,68 @@ abstract class Translations {
   /// The label for "Anonymous poll".
   String get anonymousPollLabel;
 
+  /// The label for "Poll Options".
+  String get pollOptionsLabel;
+
   /// The label for "Suggest an option".
   String get suggestAnOptionLabel;
+
+  /// The label for "Enter a new option".
+  String get enterANewOptionLabel;
 
   /// The label for "Add a comment".
   String get addACommentLabel;
 
+  /// The label for "Poll comments".
+  String get pollCommentsLabel;
+
+  /// The label for "Update your comment".
+  String get updateYourCommentLabel;
+
+  /// The label for "Enter your comment".
+  String get enterYourCommentLabel;
+
   /// The label for "Create".
   String get createLabel;
+
+  /// The label for Poll voting mode.
+  ///
+  /// Returns different labels based on the [votingMode].
+  ///
+  /// eg: 'Vote ended', 'Select one', 'Select up to $count',
+  /// 'Select one or more'.
+  String pollVotingModeLabel(PollVotingMode votingMode);
+
+  /// The label for "See all options".
+  ///
+  /// If [totalOptions] is provided, it returns "See all $count options".
+  String seeAllOptionsLabel({int? count});
+
+  /// The label for "View Comments".
+  String get viewCommentsLabel;
+
+  /// The label for "View Results".
+  String get viewResultsLabel;
+
+  /// The label for "End Vote".
+  String get endVoteLabel;
+
+  /// The label for "Poll Results".
+  String get pollResultsLabel;
+
+  /// The label for "$count votes".
+  String voteCountLabel({int? count});
+
+  /// The label for "Show all votes".
+  ///
+  /// If [count] is provided, it returns "Show all $count votes".
+  String showAllVotesLabel({int? count});
+
+  /// The label for "There are no poll votes currently".
+  String get noPollVotesLabel;
+
+  /// The label for "Error loading poll votes".
+  String get loadingPollVotesError;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -962,11 +1016,73 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get anonymousPollLabel => 'Anonymous poll';
 
   @override
+  String get pollOptionsLabel => 'Poll Options';
+
+  @override
   String get suggestAnOptionLabel => 'Suggest an option';
+
+  @override
+  String get enterANewOptionLabel => 'Enter a new option';
 
   @override
   String get addACommentLabel => 'Add a comment';
 
   @override
+  String get pollCommentsLabel => 'Poll Comments';
+
+  @override
+  String get updateYourCommentLabel => 'Update your comment';
+
+  @override
+  String get enterYourCommentLabel => 'Enter your comment';
+
+  @override
   String get createLabel => 'Create';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Vote ended',
+      unique: () => 'Select one',
+      limited: (count) => 'Select up to $count',
+      all: () => 'Select one or more',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'See all options';
+    return 'See all $count options';
+  }
+
+  @override
+  String get viewCommentsLabel => 'View Comments';
+
+  @override
+  String get viewResultsLabel => 'View Results';
+
+  @override
+  String get endVoteLabel => 'End Vote';
+
+  @override
+  String get pollResultsLabel => 'Poll Results';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Show all votes';
+    return 'Show all $count votes';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 votes',
+        1 => '1 vote',
+        _ => '$count votes',
+      };
+
+  @override
+  String get noPollVotesLabel => 'There are no poll votes currently';
+
+  @override
+  String get loadingPollVotesError => 'Error loading poll votes';
 }

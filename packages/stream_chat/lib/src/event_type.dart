@@ -142,4 +142,7 @@ class EventType {
 
   /// Event sent when a poll is closed.
   static const String pollClosed = 'poll.closed';
+
+  /// Event sent when a poll is deleted.
+  static const String pollDeleted = 'poll.deleted';
 }

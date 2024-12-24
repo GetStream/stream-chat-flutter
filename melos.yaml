@@ -159,6 +159,10 @@ scripts:
       flutter: true
       dirExists: test
 
+  update:goldens:
+    run: melos exec -c 1 --depends-on="alchemist" -- "flutter test --tags golden --update-goldens"
+    description: Update golden files for all packages in this project.
+
   clean:flutter:
     run: melos exec -c 4 --fail-fast -- "flutter clean"
     description: Run Flutter clean for a specific package in this project.

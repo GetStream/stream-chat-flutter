@@ -522,11 +522,73 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get anonymousPollLabel => 'Anonym avstemning';
 
   @override
+  String get pollOptionsLabel => 'Avstemningsalternativer';
+
+  @override
   String get suggestAnOptionLabel => 'Foreslå et alternativ';
+
+  @override
+  String get enterANewOptionLabel => 'Skriv inn et nytt alternativ';
 
   @override
   String get addACommentLabel => 'Legg til en kommentar';
 
   @override
-  String get createLabel => 'Skape';
+  String get pollCommentsLabel => 'Kommentarer til avstemningen';
+
+  @override
+  String get updateYourCommentLabel => 'Oppdater kommentaren din';
+
+  @override
+  String get enterYourCommentLabel => 'Skriv inn kommentaren din';
+
+  @override
+  String get createLabel => 'Opprett';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Avstemning avsluttet',
+      unique: () => 'Velg én',
+      limited: (count) => 'Velg opptil $count',
+      all: () => 'Velg én eller flere',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Se alle alternativer';
+    return 'Se alle $count alternativer';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Vis kommentarer';
+
+  @override
+  String get viewResultsLabel => 'Vis resultater';
+
+  @override
+  String get endVoteLabel => 'Avslutt avstemning';
+
+  @override
+  String get pollResultsLabel => 'Resultater for avstemningen';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Vis alle stemmer';
+    return 'Vis alle $count stemmer';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 stemmer',
+        1 => '1 stemme',
+        _ => '$count stemmer',
+      };
+
+  @override
+  String get noPollVotesLabel => 'Det er ingen stemmer for øyeblikket';
+
+  @override
+  String get loadingPollVotesError => 'Feil ved lasting av stemmer';
 }

@@ -158,6 +158,8 @@ class StreamUserListTile extends StatelessWidget {
       title: title,
       subtitle: subtitle,
       tileColor: tileColor,
+      visualDensity: visualDensity,
+      contentPadding: contentPadding,
     );
   }
 }

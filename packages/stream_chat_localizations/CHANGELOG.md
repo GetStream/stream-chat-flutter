@@ -1,6 +1,7 @@
 ## Upcoming
 
 - Added multiple new localization strings related to poll creation and validation.
+- Added multiple new localization strings related to poll message interactions.
 - Updated minimum Flutter version to 3.24.5 for the SDK.
 
 ## 8.3.0

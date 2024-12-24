@@ -538,11 +538,75 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get anonymousPollLabel => 'Sondage anonyme';
 
   @override
+  String get pollOptionsLabel => 'Options du sondage';
+
+  @override
   String get suggestAnOptionLabel => 'Suggérer une option';
+
+  @override
+  String get enterANewOptionLabel => 'Saisir une nouvelle option';
 
   @override
   String get addACommentLabel => 'Ajouter un commentaire';
 
   @override
+  String get pollCommentsLabel => 'Commentaires du sondage';
+
+  @override
+  String get updateYourCommentLabel => 'Mettre à jour votre commentaire';
+
+  @override
+  String get enterYourCommentLabel => 'Saisir votre commentaire';
+
+  @override
   String get createLabel => 'Créer';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Vote terminé',
+      unique: () => 'Sélectionner un',
+      limited: (count) => "Sélectionner jusqu'à $count",
+      all: () => 'Sélectionner un ou plusieurs',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Voir toutes les options';
+    return 'Voir toutes les $count options';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Voir les commentaires';
+
+  @override
+  String get viewResultsLabel => 'Voir les résultats';
+
+  @override
+  String get endVoteLabel => 'Terminer le vote';
+
+  @override
+  String get pollResultsLabel => 'Résultats du sondage';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Afficher tous les votes';
+    return 'Afficher tous les $count votes';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 vote',
+        1 => '1 vote',
+        _ => '$count votes',
+      };
+
+  @override
+  String get noPollVotesLabel =>
+      "Il n'y a pas de votes de sondage actuellement";
+
+  @override
+  String get loadingPollVotesError =>
+      'Erreur de chargement des votes du sondage';
 }
