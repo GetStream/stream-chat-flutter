@@ -1,6 +1,6 @@
 name: update_goldens
 
-on: workflow_dispatch
+on: push
 
 jobs:
   update_goldens:
