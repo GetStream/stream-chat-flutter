@@ -1,6 +1,6 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../material_app_wrapper.dart';
@@ -115,27 +115,23 @@ void main() {
       expect(called, 1);
     });
 
-    testGoldens(
+    goldenTest(
       'golden test for AttachmentModalSheet',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialAppWrapper(
-            home: Scaffold(
-              body: Builder(builder: (context) {
-                return Center(
-                  child: AttachmentModalSheet(
-                    onPhotoTap: () {},
-                    onVideoTap: () {},
-                    onFileTap: () {},
-                  ),
-                );
-              }),
-            ),
-          ),
-        );
-
-        await screenMatchesGolden(tester, 'attachment_modal_sheet_0');
-      },
+      fileName: 'attachment_modal_sheet_0',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+      builder: () => MaterialAppWrapper(
+        home: Scaffold(
+          body: Builder(builder: (context) {
+            return Center(
+              child: AttachmentModalSheet(
+                onPhotoTap: () {},
+                onVideoTap: () {},
+                onFileTap: () {},
+              ),
+            );
+          }),
+        ),
+      ),
     );
   });
 }

@@ -71,6 +71,7 @@ class StreamUploadProgressIndicator extends StatelessWidget {
       child = DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
+          // ignore: deprecated_member_use
           color: theme.colorTheme.overlayDark.withOpacity(0.6),
         ),
         child: child,

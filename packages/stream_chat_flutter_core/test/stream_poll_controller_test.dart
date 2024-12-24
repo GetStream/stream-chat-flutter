@@ -104,7 +104,7 @@ void main() {
 
       final containsNameRangeError = errors
           .map((e) => e.mapOrNull(nameRange: (e) => e))
-          .whereNotNull()
+          .nonNulls
           .isNotEmpty;
 
       expect(containsNameRangeError, isTrue);
@@ -120,7 +120,7 @@ void main() {
 
       final containsDuplicateOptions = errors
           .map((e) => e.mapOrNull(duplicateOptions: (e) => e))
-          .whereNotNull()
+          .nonNulls
           .isNotEmpty;
 
       expect(containsDuplicateOptions, isTrue);
@@ -133,7 +133,7 @@ void main() {
 
       final containsOptionsRangeError = errors
           .map((e) => e.mapOrNull(optionsRange: (e) => e))
-          .whereNotNull()
+          .nonNulls
           .isNotEmpty;
 
       expect(containsOptionsRangeError, isTrue);
@@ -149,7 +149,7 @@ void main() {
 
       final containsMaxVotesAllowedError = errors
           .map((e) => e.mapOrNull(maxVotesAllowed: (e) => e))
-          .whereNotNull()
+          .nonNulls
           .isNotEmpty;
 
       expect(containsMaxVotesAllowedError, isTrue);
@@ -241,7 +241,7 @@ void main() {
       final errors = pollController.validateGranularly();
       final containsNameRangeError = errors
           .map((e) => e.mapOrNull(nameRange: (e) => e))
-          .whereNotNull()
+          .nonNulls
           .isNotEmpty;
 
       expect(containsNameRangeError, isFalse);
@@ -259,7 +259,7 @@ void main() {
       final errors = pollController.validateGranularly();
       final containsOptionsRangeError = errors
           .map((e) => e.mapOrNull(optionsRange: (e) => e))
-          .whereNotNull()
+          .nonNulls
           .isNotEmpty;
 
       expect(containsOptionsRangeError, isFalse);
@@ -273,7 +273,7 @@ void main() {
       final errors = pollController.validateGranularly();
       final containsMaxVotesAllowedError = errors
           .map((e) => e.mapOrNull(maxVotesAllowed: (e) => e))
-          .whereNotNull()
+          .nonNulls
           .isNotEmpty;
 
       expect(containsMaxVotesAllowedError, isFalse);

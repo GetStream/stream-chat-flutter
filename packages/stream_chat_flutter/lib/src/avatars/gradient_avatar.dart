@@ -135,6 +135,7 @@ class PolygonGradientPainter extends CustomPainter {
           fontFamily: fontFamily,
           fontSize: fontSize,
           fontWeight: FontWeight.w500,
+          // ignore: deprecated_member_use
           color: Colors.white.withOpacity(0.7),
         ),
       ),

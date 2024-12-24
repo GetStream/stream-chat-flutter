@@ -1,7 +1,7 @@
+import 'package:alchemist/alchemist.dart'; // Changed from golden_toolkit
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -86,28 +86,27 @@ void main() {
     },
   );
 
-  testGoldens('golden test for GalleryFooter', (tester) async {
-    await tester.pumpWidget(
-      MaterialAppWrapper(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: PopScope(
-              onPopInvokedWithResult: (bool didPop, res) async => false,
-              child: const Scaffold(
-                body: StreamGalleryFooter(
-                  mediaAttachmentPackages: [],
-                ),
+  goldenTest(
+    'golden test for GalleryFooter',
+    fileName: 'gallery_footer_0',
+    constraints: const BoxConstraints.tightFor(width: 400, height: 300),
+    builder: () => MaterialAppWrapper(
+      home: StreamChat(
+        client: client,
+        child: StreamChannel(
+          channel: channel,
+          child: PopScope(
+            onPopInvokedWithResult: (bool didPop, res) async => false,
+            child: const Scaffold(
+              bottomNavigationBar: StreamGalleryFooter(
+                mediaAttachmentPackages: [],
               ),
             ),
           ),
         ),
       ),
-    );
-
-    await screenMatchesGolden(tester, 'gallery_footer_0');
-  });
+    ),
+  );
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

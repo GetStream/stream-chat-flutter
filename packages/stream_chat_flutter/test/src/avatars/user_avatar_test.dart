@@ -1,6 +1,6 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -45,69 +45,65 @@ void main() {
     },
   );
 
-  testGoldens(
+  goldenTest(
     'golden test for online user "user123"',
-    (WidgetTester tester) async {
+    fileName: 'user_avatar_0',
+    constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+    builder: () {
       when(() => user.online).thenReturn(true);
-      await tester.pumpWidget(
-        MaterialAppWrapper(
-          builder: (context, child) {
-            return StreamChatConfiguration(
-              data: StreamChatConfigurationData(),
-              child: child!,
-            );
-          },
-          home: StreamChatTheme(
-            data: StreamChatThemeData.light(),
-            child: Builder(
-              builder: (context) {
-                return Scaffold(
-                  body: Center(
-                    child: StreamUserAvatar(
-                      user: user,
-                    ),
+      return MaterialAppWrapper(
+        builder: (context, child) {
+          return StreamChatConfiguration(
+            data: StreamChatConfigurationData(),
+            child: child!,
+          );
+        },
+        home: StreamChatTheme(
+          data: StreamChatThemeData.light(),
+          child: Builder(
+            builder: (context) {
+              return Scaffold(
+                body: Center(
+                  child: StreamUserAvatar(
+                    user: user,
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       );
-
-      await screenMatchesGolden(tester, 'user_avatar_0');
     },
   );
 
-  testGoldens(
+  goldenTest(
     'golden test for offline user "user123"',
-    (WidgetTester tester) async {
+    fileName: 'user_avatar_1',
+    constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+    builder: () {
       when(() => user.online).thenReturn(false);
-      await tester.pumpWidget(
-        MaterialAppWrapper(
-          builder: (context, child) {
-            return StreamChatConfiguration(
-              data: StreamChatConfigurationData(),
-              child: child!,
-            );
-          },
-          home: StreamChatTheme(
-            data: StreamChatThemeData.light(),
-            child: Builder(
-              builder: (context) {
-                return Scaffold(
-                  body: Center(
-                    child: StreamUserAvatar(
-                      user: user,
-                    ),
+      return MaterialAppWrapper(
+        builder: (context, child) {
+          return StreamChatConfiguration(
+            data: StreamChatConfigurationData(),
+            child: child!,
+          );
+        },
+        home: StreamChatTheme(
+          data: StreamChatThemeData.light(),
+          child: Builder(
+            builder: (context) {
+              return Scaffold(
+                body: Center(
+                  child: StreamUserAvatar(
+                    user: user,
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       );
-
-      await screenMatchesGolden(tester, 'user_avatar_1');
     },
   );
 }

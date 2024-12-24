@@ -194,7 +194,9 @@ class _PollOptionReorderableListViewState
         if (it.id == option.id) return false;
 
         return it.text == option.text;
-      })) return translations.pollOptionDuplicateError;
+      })) {
+        return translations.pollOptionDuplicateError;
+      }
     }
 
     return null;

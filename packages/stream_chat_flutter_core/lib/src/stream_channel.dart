@@ -160,7 +160,9 @@ class StreamChannelState extends State<StreamChannel> {
     if (_bottomPaginationEnded ||
         _queryBottomMessagesController.value ||
         channel.state == null ||
-        channel.state!.isUpToDate) return;
+        channel.state!.isUpToDate) {
+      return;
+    }
     _queryBottomMessagesController.safeAdd(true);
 
     if (channel.state!.messages.isEmpty) {
@@ -205,7 +207,9 @@ class StreamChannelState extends State<StreamChannel> {
   }) async {
     if (_topPaginationEnded ||
         _queryTopMessagesController.value ||
-        channel.state == null) return;
+        channel.state == null) {
+      return;
+    }
     _queryTopMessagesController.safeAdd(true);
 
     Message? message;

@@ -8136,8 +8136,7 @@ final class $$MessagesTableReferences
       db.channels.createAlias(
           $_aliasNameGenerator(db.messages.channelCid, db.channels.cid));
 
-  $$ChannelsTableProcessedTableManager? get channelCid {
-    if ($_item.channelCid == null) return null;
+  $$ChannelsTableProcessedTableManager get channelCid {
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
         .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
@@ -10283,8 +10282,7 @@ final class $$PinnedMessageReactionsTableReferences extends BaseReferences<
       db.pinnedMessages.createAlias($_aliasNameGenerator(
           db.pinnedMessageReactions.messageId, db.pinnedMessages.id));
 
-  $$PinnedMessagesTableProcessedTableManager? get messageId {
-    if ($_item.messageId == null) return null;
+  $$PinnedMessagesTableProcessedTableManager get messageId {
     final manager = $$PinnedMessagesTableTableManager($_db, $_db.pinnedMessages)
         .filter((f) => f.id($_item.messageId!));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
@@ -10580,8 +10578,7 @@ final class $$ReactionsTableReferences extends BaseReferences<
       db.messages.createAlias(
           $_aliasNameGenerator(db.reactions.messageId, db.messages.id));
 
-  $$MessagesTableProcessedTableManager? get messageId {
-    if ($_item.messageId == null) return null;
+  $$MessagesTableProcessedTableManager get messageId {
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
         .filter((f) => f.id($_item.messageId!));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
@@ -11110,8 +11107,7 @@ final class $$MembersTableReferences
       db.channels.createAlias(
           $_aliasNameGenerator(db.members.channelCid, db.channels.cid));
 
-  $$ChannelsTableProcessedTableManager? get channelCid {
-    if ($_item.channelCid == null) return null;
+  $$ChannelsTableProcessedTableManager get channelCid {
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
         .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
@@ -11462,8 +11458,7 @@ final class $$ReadsTableReferences
   static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels
       .createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
 
-  $$ChannelsTableProcessedTableManager? get channelCid {
-    if ($_item.channelCid == null) return null;
+  $$ChannelsTableProcessedTableManager get channelCid {
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
         .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));

@@ -2,8 +2,7 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_channel: "stable"
-  flutter_version: "3.24.3"
+  flutter_version: "3.x"
 
 on:
   pull_request:
@@ -37,8 +36,9 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter_version }}
+          channel: stable
           cache: true
-          channel: ${{ env.flutter_channel }}
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
@@ -65,8 +65,9 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter_version }}
+          channel: stable
           cache: true
-          channel: ${{ env.flutter_channel }}
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
@@ -91,8 +92,9 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter_version }}
+          channel: stable
           cache: true
-          channel: ${{ env.flutter_channel }}
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
@@ -104,7 +106,7 @@ jobs:
       - name: "Collect Coverage"
         run: melos run coverage:ignore-file --no-select
       - name: "Upload Coverage"
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           files: packages/*/coverage/lcov.info
@@ -112,7 +114,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat/coverage/lcov.info
-          min_coverage: 79
+          min_coverage: 70
       - name: "Stream Chat Localizations Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:

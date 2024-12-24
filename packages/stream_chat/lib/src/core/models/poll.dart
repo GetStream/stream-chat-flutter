@@ -118,9 +118,7 @@ class Poll extends Equatable {
   ///
   /// Note: This does not include the answers provided by the users,
   /// see [latestAnswers] for that.
-  List<PollVote> get latestVotes => [
-        ...latestVotesByOption.values.flattened.where((it) => !it.isAnswer),
-      ];
+  late final latestVotes = [...latestVotesByOption.values.flattened];
 
   /// List of latest answers received by the poll.
   @JsonKey(includeToJson: false)
@@ -140,17 +138,13 @@ class Poll extends Equatable {
   ///
   /// Note: This does not include the answers provided by the user,
   /// see [ownAnswers] for that.
-  List<PollVote> get ownVotes => [
-        ...ownVotesAndAnswers.where((it) => !it.isAnswer),
-      ];
+  late final ownVotes = [...ownVotesAndAnswers.where((it) => !it.isAnswer)];
 
   /// List of answers provided by the current user.
   ///
   /// Note: This does not include the votes casted by the user,
   /// see [ownVotes] for that.
-  List<PollVote> get ownAnswers => [
-        ...ownVotesAndAnswers.where((it) => it.isAnswer),
-      ];
+  late final ownAnswers = [...ownVotesAndAnswers.where((it) => it.isAnswer)];
 
   /// The id of the user who created the poll.
   @JsonKey(includeToJson: false)

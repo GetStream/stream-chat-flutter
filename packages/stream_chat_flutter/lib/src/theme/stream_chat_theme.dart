@@ -63,6 +63,7 @@ class StreamChatThemeData {
     StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
+    StreamPollOptionsDialogThemeData? pollOptionsDialogTheme,
     StreamPollResultsDialogThemeData? pollResultsDialogTheme,
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
@@ -95,6 +96,7 @@ class StreamChatThemeData {
       voiceRecordingTheme: voiceRecordingTheme,
       pollCreatorTheme: pollCreatorTheme,
       pollInteractorTheme: pollInteractorTheme,
+      pollOptionsDialogTheme: pollOptionsDialogTheme,
       pollResultsDialogTheme: pollResultsDialogTheme,
       pollCommentsDialogTheme: pollCommentsDialogTheme,
       pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
@@ -181,6 +183,7 @@ class StreamChatThemeData {
         color: const Color(0xff7A7A7A),
       ),
       lastMessageAtStyle: textTheme.footnote.copyWith(
+        // ignore: deprecated_member_use
         color: colorTheme.textHighEmphasis.withOpacity(0.5),
       ),
       indicatorIconSize: 16,

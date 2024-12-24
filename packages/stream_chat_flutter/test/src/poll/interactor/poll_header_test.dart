@@ -1,5 +1,7 @@
+// ignore_for_file: lines_longer_than_80_chars
+
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_header.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -16,147 +18,78 @@ void main() {
   );
 
   for (final brightness in Brightness.values) {
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> PollHeader looks fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          PollHeader(poll: poll),
-          surfaceSize: const Size(300, 100),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(tester, 'poll_header_${brightness.name}');
-      },
+      fileName: 'poll_header_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        PollHeader(poll: poll),
+      ),
     );
 
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> PollHeader with long question looks fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          PollHeader(
-            poll: poll.copyWith(
-              name: 'A very long question that does not fit in one line',
-            ),
+      fileName: 'poll_header_long_question_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        PollHeader(
+          poll: poll.copyWith(
+            name: 'A very long question that does not fit in one line',
           ),
-          surfaceSize: const Size(300, 100),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(
-            tester, 'poll_header_long_question_${brightness.name}');
-      },
+        ),
+      ),
     );
 
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> PollHeader subtitle with voting mode disabled looks fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          PollHeader(
-            poll: poll.copyWith(
-              isClosed: true,
-            ),
-          ),
-          surfaceSize: const Size(300, 100),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(
-          tester,
-          'poll_header_subtitle_voting_mode_disabled_${brightness.name}',
-        );
-      },
+      fileName: 'poll_header_subtitle_voting_mode_disabled_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        PollHeader(
+          poll: poll.copyWith(isClosed: true),
+        ),
+      ),
     );
 
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> PollHeader subtitle with voting mode unique looks fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          PollHeader(
-            poll: poll.copyWith(
-              enforceUniqueVote: true,
-            ),
-          ),
-          surfaceSize: const Size(300, 100),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(
-          tester,
-          'poll_header_subtitle_voting_mode_unique_${brightness.name}',
-        );
-      },
+      fileName: 'poll_header_subtitle_voting_mode_unique_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        PollHeader(
+          poll: poll.copyWith(enforceUniqueVote: true),
+        ),
+      ),
     );
 
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> PollHeader subtitle with voting mode limited looks fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          PollHeader(
-            poll: poll.copyWith(
-              maxVotesAllowed: 2,
-              enforceUniqueVote: false,
-            ),
-          ),
-          surfaceSize: const Size(300, 100),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(
-          tester,
-          'poll_header_subtitle_voting_mode_limited_${brightness.name}',
-        );
-      },
+      fileName: 'poll_header_subtitle_voting_mode_limited_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        PollHeader(
+          poll: poll.copyWith(maxVotesAllowed: 2, enforceUniqueVote: false),
+        ),
+      ),
     );
 
-    testGoldens(
+    goldenTest(
       '[${brightness.name}] -> PollHeader subtitle with voting mode all looks fine',
-      (tester) async {
-        await tester.pumpWidgetBuilder(
-          PollHeader(
-            poll: poll.copyWith(
-              maxVotesAllowed: 3,
-              enforceUniqueVote: false,
-            ),
-          ),
-          surfaceSize: const Size(300, 100),
-          wrapper: (child) => _wrapWithMaterialApp(
-            child,
-            brightness: brightness,
-          ),
-        );
-
-        await screenMatchesGolden(
-          tester,
-          'poll_header_subtitle_voting_mode_all_${brightness.name}',
-        );
-      },
+      fileName: 'poll_header_subtitle_voting_mode_all_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      builder: () => _wrapWithMaterialApp(
+        brightness: brightness,
+        PollHeader(
+          poll: poll.copyWith(maxVotesAllowed: 3, enforceUniqueVote: false),
+        ),
+      ),
     );
   }
-
-  //  @override
-  //   String pollVotingModeLabel(PollVotingMode votingMode) {
-  //     return votingMode.when(
-  //       disabled: () => 'Vote ended',
-  //       unique: () => 'Select one',
-  //       limited: (count) => 'Select up to $count',
-  //       all: () => 'Select one or more',
-  //     );
-  //   }
 }
 
 Widget _wrapWithMaterialApp(

@@ -1,3 +1,13 @@
+## Upcoming
+
+✅ Added
+
+- Added support for Polls feature, which allows users to create and vote on polls in chat messages.
+
+🔄 Changed
+
+- Updated minimum Dart version to 3.5.4 for the SDK.
+
 ## 8.3.0
 
 ✅ Added

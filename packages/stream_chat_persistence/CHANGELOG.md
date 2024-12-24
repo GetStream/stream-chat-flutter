@@ -1,6 +1,7 @@
 ## Upcoming
 
 - Added support for `Poll` and `PollVote` entities in the database.
+- Updated minimum Flutter version to 3.24.5 for the SDK.
 
 ## 8.3.0
 

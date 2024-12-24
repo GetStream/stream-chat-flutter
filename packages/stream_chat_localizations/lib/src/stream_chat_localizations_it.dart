@@ -542,7 +542,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get pollOptionsLabel => 'Opzioni del sondaggio';
 
   @override
-  String get suggestAnOptionLabel => 'Suggerisci un\'opzione';
+  String get suggestAnOptionLabel => "Suggerisci un'opzione";
 
   @override
   String get enterANewOptionLabel => 'Inserisci una nuova opzione';
