@@ -1,21 +1,14 @@
 name: update_goldens
 
-on: push
+on: workflow_dispatch
 
 jobs:
   update_goldens:
     runs-on: ubuntu-latest
     steps:
-      - name: 🚫 Ensure branch is not master
-        if: ${{ github.ref == 'refs/heads/master'}}
-        run: |
-          echo "Updating goldens on 'master' branch is prohibited."
-          exit 1
-
       - name: 📚 Checkout branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
           fetch-depth: 0
 
       - name: 🐦 Install Flutter
