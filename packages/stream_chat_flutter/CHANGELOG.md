@@ -1,4 +1,11 @@
-## Upcoming
+## 9.0.0
+
+🛑️ Breaking
+
+- The `StreamAttachmentPickerController` has been restructured to improve flexibility and support additional use cases like poll management.
+  - Previously managed a `List<Attachment>` but now manages an `AttachmentPickerValue` object, which includes:
+    - `attachments`: A list of attachments.
+    - `poll`: A new field for managing polls.
 
 ✅ Added
 
