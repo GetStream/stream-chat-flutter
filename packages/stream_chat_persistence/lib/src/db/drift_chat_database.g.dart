@@ -738,6 +738,11 @@ class $MessagesTable extends Messages
   late final GeneratedColumn<String> quotedMessageId = GeneratedColumn<String>(
       'quoted_message_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _pollIdMeta = const VerificationMeta('pollId');
+  @override
+  late final GeneratedColumn<String> pollId = GeneratedColumn<String>(
+      'poll_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _replyCountMeta =
       const VerificationMeta('replyCount');
   @override
@@ -878,6 +883,7 @@ class $MessagesTable extends Messages
         reactionScores,
         parentId,
         quotedMessageId,
+        pollId,
         replyCount,
         showInChannel,
         shadowed,
@@ -942,6 +948,10 @@ class $MessagesTable extends Messages
           _quotedMessageIdMeta,
           quotedMessageId.isAcceptableOrUnknown(
               data['quoted_message_id']!, _quotedMessageIdMeta));
+    }
+    if (data.containsKey('poll_id')) {
+      context.handle(_pollIdMeta,
+          pollId.isAcceptableOrUnknown(data['poll_id']!, _pollIdMeta));
     }
     if (data.containsKey('reply_count')) {
       context.handle(
@@ -1072,6 +1082,8 @@ class $MessagesTable extends Messages
           .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
       quotedMessageId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}quoted_message_id']),
+      pollId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}poll_id']),
       replyCount: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}reply_count']),
       showInChannel: attachedDatabase.typeMapping
@@ -1172,6 +1184,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   /// The ID of the quoted message, if the message is a quoted reply.
   final String? quotedMessageId;
 
+  /// The ID of the poll, if the message is a poll.
+  final String? pollId;
+
   /// Number of replies for this message.
   final int? replyCount;
 
@@ -1239,6 +1254,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       this.reactionScores,
       this.parentId,
       this.quotedMessageId,
+      this.pollId,
       this.replyCount,
       this.showInChannel,
       required this.shadowed,
@@ -1288,6 +1304,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     }
     if (!nullToAbsent || quotedMessageId != null) {
       map['quoted_message_id'] = Variable<String>(quotedMessageId);
+    }
+    if (!nullToAbsent || pollId != null) {
+      map['poll_id'] = Variable<String>(pollId);
     }
     if (!nullToAbsent || replyCount != null) {
       map['reply_count'] = Variable<int>(replyCount);
@@ -1360,6 +1379,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           serializer.fromJson<Map<String, int>?>(json['reactionScores']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       quotedMessageId: serializer.fromJson<String?>(json['quotedMessageId']),
+      pollId: serializer.fromJson<String?>(json['pollId']),
       replyCount: serializer.fromJson<int?>(json['replyCount']),
       showInChannel: serializer.fromJson<bool?>(json['showInChannel']),
       shadowed: serializer.fromJson<bool>(json['shadowed']),
@@ -1396,6 +1416,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'reactionScores': serializer.toJson<Map<String, int>?>(reactionScores),
       'parentId': serializer.toJson<String?>(parentId),
       'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
+      'pollId': serializer.toJson<String?>(pollId),
       'replyCount': serializer.toJson<int?>(replyCount),
       'showInChannel': serializer.toJson<bool?>(showInChannel),
       'shadowed': serializer.toJson<bool>(shadowed),
@@ -1430,6 +1451,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           Value<Map<String, int>?> reactionScores = const Value.absent(),
           Value<String?> parentId = const Value.absent(),
           Value<String?> quotedMessageId = const Value.absent(),
+          Value<String?> pollId = const Value.absent(),
           Value<int?> replyCount = const Value.absent(),
           Value<bool?> showInChannel = const Value.absent(),
           bool? shadowed,
@@ -1464,6 +1486,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         quotedMessageId: quotedMessageId.present
             ? quotedMessageId.value
             : this.quotedMessageId,
+        pollId: pollId.present ? pollId.value : this.pollId,
         replyCount: replyCount.present ? replyCount.value : this.replyCount,
         showInChannel:
             showInChannel.present ? showInChannel.value : this.showInChannel,
@@ -1519,6 +1542,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       quotedMessageId: data.quotedMessageId.present
           ? data.quotedMessageId.value
           : this.quotedMessageId,
+      pollId: data.pollId.present ? data.pollId.value : this.pollId,
       replyCount:
           data.replyCount.present ? data.replyCount.value : this.replyCount,
       showInChannel: data.showInChannel.present
@@ -1575,6 +1599,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('reactionScores: $reactionScores, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
+          ..write('pollId: $pollId, ')
           ..write('replyCount: $replyCount, ')
           ..write('showInChannel: $showInChannel, ')
           ..write('shadowed: $shadowed, ')
@@ -1610,6 +1635,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         reactionScores,
         parentId,
         quotedMessageId,
+        pollId,
         replyCount,
         showInChannel,
         shadowed,
@@ -1644,6 +1670,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.reactionScores == this.reactionScores &&
           other.parentId == this.parentId &&
           other.quotedMessageId == this.quotedMessageId &&
+          other.pollId == this.pollId &&
           other.replyCount == this.replyCount &&
           other.showInChannel == this.showInChannel &&
           other.shadowed == this.shadowed &&
@@ -1676,6 +1703,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<Map<String, int>?> reactionScores;
   final Value<String?> parentId;
   final Value<String?> quotedMessageId;
+  final Value<String?> pollId;
   final Value<int?> replyCount;
   final Value<bool?> showInChannel;
   final Value<bool> shadowed;
@@ -1707,6 +1735,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.reactionScores = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
+    this.pollId = const Value.absent(),
     this.replyCount = const Value.absent(),
     this.showInChannel = const Value.absent(),
     this.shadowed = const Value.absent(),
@@ -1739,6 +1768,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.reactionScores = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
+    this.pollId = const Value.absent(),
     this.replyCount = const Value.absent(),
     this.showInChannel = const Value.absent(),
     this.shadowed = const Value.absent(),
@@ -1775,6 +1805,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<String>? reactionScores,
     Expression<String>? parentId,
     Expression<String>? quotedMessageId,
+    Expression<String>? pollId,
     Expression<int>? replyCount,
     Expression<bool>? showInChannel,
     Expression<bool>? shadowed,
@@ -1807,6 +1838,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (reactionScores != null) 'reaction_scores': reactionScores,
       if (parentId != null) 'parent_id': parentId,
       if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
+      if (pollId != null) 'poll_id': pollId,
       if (replyCount != null) 'reply_count': replyCount,
       if (showInChannel != null) 'show_in_channel': showInChannel,
       if (shadowed != null) 'shadowed': shadowed,
@@ -1842,6 +1874,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<Map<String, int>?>? reactionScores,
       Value<String?>? parentId,
       Value<String?>? quotedMessageId,
+      Value<String?>? pollId,
       Value<int?>? replyCount,
       Value<bool?>? showInChannel,
       Value<bool>? shadowed,
@@ -1873,6 +1906,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       reactionScores: reactionScores ?? this.reactionScores,
       parentId: parentId ?? this.parentId,
       quotedMessageId: quotedMessageId ?? this.quotedMessageId,
+      pollId: pollId ?? this.pollId,
       replyCount: replyCount ?? this.replyCount,
       showInChannel: showInChannel ?? this.showInChannel,
       shadowed: shadowed ?? this.shadowed,
@@ -1932,6 +1966,9 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     }
     if (quotedMessageId.present) {
       map['quoted_message_id'] = Variable<String>(quotedMessageId.value);
+    }
+    if (pollId.present) {
+      map['poll_id'] = Variable<String>(pollId.value);
     }
     if (replyCount.present) {
       map['reply_count'] = Variable<int>(replyCount.value);
@@ -2012,6 +2049,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('reactionScores: $reactionScores, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
+          ..write('pollId: $pollId, ')
           ..write('replyCount: $replyCount, ')
           ..write('showInChannel: $showInChannel, ')
           ..write('shadowed: $shadowed, ')
@@ -2112,6 +2150,11 @@ class $PinnedMessagesTable extends PinnedMessages
   @override
   late final GeneratedColumn<String> quotedMessageId = GeneratedColumn<String>(
       'quoted_message_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _pollIdMeta = const VerificationMeta('pollId');
+  @override
+  late final GeneratedColumn<String> pollId = GeneratedColumn<String>(
+      'poll_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _replyCountMeta =
       const VerificationMeta('replyCount');
@@ -2251,6 +2294,7 @@ class $PinnedMessagesTable extends PinnedMessages
         reactionScores,
         parentId,
         quotedMessageId,
+        pollId,
         replyCount,
         showInChannel,
         shadowed,
@@ -2316,6 +2360,10 @@ class $PinnedMessagesTable extends PinnedMessages
           _quotedMessageIdMeta,
           quotedMessageId.isAcceptableOrUnknown(
               data['quoted_message_id']!, _quotedMessageIdMeta));
+    }
+    if (data.containsKey('poll_id')) {
+      context.handle(_pollIdMeta,
+          pollId.isAcceptableOrUnknown(data['poll_id']!, _pollIdMeta));
     }
     if (data.containsKey('reply_count')) {
       context.handle(
@@ -2446,6 +2494,8 @@ class $PinnedMessagesTable extends PinnedMessages
           .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
       quotedMessageId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}quoted_message_id']),
+      pollId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}poll_id']),
       replyCount: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}reply_count']),
       showInChannel: attachedDatabase.typeMapping
@@ -2548,6 +2598,9 @@ class PinnedMessageEntity extends DataClass
   /// The ID of the quoted message, if the message is a quoted reply.
   final String? quotedMessageId;
 
+  /// The ID of the poll, if the message is a poll.
+  final String? pollId;
+
   /// Number of replies for this message.
   final int? replyCount;
 
@@ -2615,6 +2668,7 @@ class PinnedMessageEntity extends DataClass
       this.reactionScores,
       this.parentId,
       this.quotedMessageId,
+      this.pollId,
       this.replyCount,
       this.showInChannel,
       required this.shadowed,
@@ -2664,6 +2718,9 @@ class PinnedMessageEntity extends DataClass
     }
     if (!nullToAbsent || quotedMessageId != null) {
       map['quoted_message_id'] = Variable<String>(quotedMessageId);
+    }
+    if (!nullToAbsent || pollId != null) {
+      map['poll_id'] = Variable<String>(pollId);
     }
     if (!nullToAbsent || replyCount != null) {
       map['reply_count'] = Variable<int>(replyCount);
@@ -2737,6 +2794,7 @@ class PinnedMessageEntity extends DataClass
           serializer.fromJson<Map<String, int>?>(json['reactionScores']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       quotedMessageId: serializer.fromJson<String?>(json['quotedMessageId']),
+      pollId: serializer.fromJson<String?>(json['pollId']),
       replyCount: serializer.fromJson<int?>(json['replyCount']),
       showInChannel: serializer.fromJson<bool?>(json['showInChannel']),
       shadowed: serializer.fromJson<bool>(json['shadowed']),
@@ -2773,6 +2831,7 @@ class PinnedMessageEntity extends DataClass
       'reactionScores': serializer.toJson<Map<String, int>?>(reactionScores),
       'parentId': serializer.toJson<String?>(parentId),
       'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
+      'pollId': serializer.toJson<String?>(pollId),
       'replyCount': serializer.toJson<int?>(replyCount),
       'showInChannel': serializer.toJson<bool?>(showInChannel),
       'shadowed': serializer.toJson<bool>(shadowed),
@@ -2807,6 +2866,7 @@ class PinnedMessageEntity extends DataClass
           Value<Map<String, int>?> reactionScores = const Value.absent(),
           Value<String?> parentId = const Value.absent(),
           Value<String?> quotedMessageId = const Value.absent(),
+          Value<String?> pollId = const Value.absent(),
           Value<int?> replyCount = const Value.absent(),
           Value<bool?> showInChannel = const Value.absent(),
           bool? shadowed,
@@ -2841,6 +2901,7 @@ class PinnedMessageEntity extends DataClass
         quotedMessageId: quotedMessageId.present
             ? quotedMessageId.value
             : this.quotedMessageId,
+        pollId: pollId.present ? pollId.value : this.pollId,
         replyCount: replyCount.present ? replyCount.value : this.replyCount,
         showInChannel:
             showInChannel.present ? showInChannel.value : this.showInChannel,
@@ -2896,6 +2957,7 @@ class PinnedMessageEntity extends DataClass
       quotedMessageId: data.quotedMessageId.present
           ? data.quotedMessageId.value
           : this.quotedMessageId,
+      pollId: data.pollId.present ? data.pollId.value : this.pollId,
       replyCount:
           data.replyCount.present ? data.replyCount.value : this.replyCount,
       showInChannel: data.showInChannel.present
@@ -2952,6 +3014,7 @@ class PinnedMessageEntity extends DataClass
           ..write('reactionScores: $reactionScores, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
+          ..write('pollId: $pollId, ')
           ..write('replyCount: $replyCount, ')
           ..write('showInChannel: $showInChannel, ')
           ..write('shadowed: $shadowed, ')
@@ -2987,6 +3050,7 @@ class PinnedMessageEntity extends DataClass
         reactionScores,
         parentId,
         quotedMessageId,
+        pollId,
         replyCount,
         showInChannel,
         shadowed,
@@ -3021,6 +3085,7 @@ class PinnedMessageEntity extends DataClass
           other.reactionScores == this.reactionScores &&
           other.parentId == this.parentId &&
           other.quotedMessageId == this.quotedMessageId &&
+          other.pollId == this.pollId &&
           other.replyCount == this.replyCount &&
           other.showInChannel == this.showInChannel &&
           other.shadowed == this.shadowed &&
@@ -3053,6 +3118,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<Map<String, int>?> reactionScores;
   final Value<String?> parentId;
   final Value<String?> quotedMessageId;
+  final Value<String?> pollId;
   final Value<int?> replyCount;
   final Value<bool?> showInChannel;
   final Value<bool> shadowed;
@@ -3084,6 +3150,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.reactionScores = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
+    this.pollId = const Value.absent(),
     this.replyCount = const Value.absent(),
     this.showInChannel = const Value.absent(),
     this.shadowed = const Value.absent(),
@@ -3116,6 +3183,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.reactionScores = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
+    this.pollId = const Value.absent(),
     this.replyCount = const Value.absent(),
     this.showInChannel = const Value.absent(),
     this.shadowed = const Value.absent(),
@@ -3152,6 +3220,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Expression<String>? reactionScores,
     Expression<String>? parentId,
     Expression<String>? quotedMessageId,
+    Expression<String>? pollId,
     Expression<int>? replyCount,
     Expression<bool>? showInChannel,
     Expression<bool>? shadowed,
@@ -3184,6 +3253,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (reactionScores != null) 'reaction_scores': reactionScores,
       if (parentId != null) 'parent_id': parentId,
       if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
+      if (pollId != null) 'poll_id': pollId,
       if (replyCount != null) 'reply_count': replyCount,
       if (showInChannel != null) 'show_in_channel': showInChannel,
       if (shadowed != null) 'shadowed': shadowed,
@@ -3219,6 +3289,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       Value<Map<String, int>?>? reactionScores,
       Value<String?>? parentId,
       Value<String?>? quotedMessageId,
+      Value<String?>? pollId,
       Value<int?>? replyCount,
       Value<bool?>? showInChannel,
       Value<bool>? shadowed,
@@ -3250,6 +3321,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       reactionScores: reactionScores ?? this.reactionScores,
       parentId: parentId ?? this.parentId,
       quotedMessageId: quotedMessageId ?? this.quotedMessageId,
+      pollId: pollId ?? this.pollId,
       replyCount: replyCount ?? this.replyCount,
       showInChannel: showInChannel ?? this.showInChannel,
       shadowed: shadowed ?? this.shadowed,
@@ -3312,6 +3384,9 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     }
     if (quotedMessageId.present) {
       map['quoted_message_id'] = Variable<String>(quotedMessageId.value);
+    }
+    if (pollId.present) {
+      map['poll_id'] = Variable<String>(pollId.value);
     }
     if (replyCount.present) {
       map['reply_count'] = Variable<int>(replyCount.value);
@@ -3392,6 +3467,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('reactionScores: $reactionScores, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
+          ..write('pollId: $pollId, ')
           ..write('replyCount: $replyCount, ')
           ..write('showInChannel: $showInChannel, ')
           ..write('shadowed: $shadowed, ')
@@ -3411,6 +3487,1262 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('channelCid: $channelCid, ')
           ..write('i18n: $i18n, ')
           ..write('extraData: $extraData, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PollsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _optionsMeta =
+      const VerificationMeta('options');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> options =
+      GeneratedColumn<String>('options', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>($PollsTable.$converteroptions);
+  static const VerificationMeta _votingVisibilityMeta =
+      const VerificationMeta('votingVisibility');
+  @override
+  late final GeneratedColumnWithTypeConverter<VotingVisibility, String>
+      votingVisibility = GeneratedColumn<String>(
+              'voting_visibility', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('public'))
+          .withConverter<VotingVisibility>(
+              $PollsTable.$convertervotingVisibility);
+  static const VerificationMeta _enforceUniqueVoteMeta =
+      const VerificationMeta('enforceUniqueVote');
+  @override
+  late final GeneratedColumn<bool> enforceUniqueVote = GeneratedColumn<bool>(
+      'enforce_unique_vote', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("enforce_unique_vote" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _maxVotesAllowedMeta =
+      const VerificationMeta('maxVotesAllowed');
+  @override
+  late final GeneratedColumn<int> maxVotesAllowed = GeneratedColumn<int>(
+      'max_votes_allowed', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _allowUserSuggestedOptionsMeta =
+      const VerificationMeta('allowUserSuggestedOptions');
+  @override
+  late final GeneratedColumn<bool> allowUserSuggestedOptions =
+      GeneratedColumn<bool>('allow_user_suggested_options', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: false,
+          defaultConstraints: GeneratedColumn.constraintIsAlways(
+              'CHECK ("allow_user_suggested_options" IN (0, 1))'),
+          defaultValue: const Constant(false));
+  static const VerificationMeta _allowAnswersMeta =
+      const VerificationMeta('allowAnswers');
+  @override
+  late final GeneratedColumn<bool> allowAnswers = GeneratedColumn<bool>(
+      'allow_answers', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("allow_answers" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _isClosedMeta =
+      const VerificationMeta('isClosed');
+  @override
+  late final GeneratedColumn<bool> isClosed = GeneratedColumn<bool>(
+      'is_closed', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_closed" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _answersCountMeta =
+      const VerificationMeta('answersCount');
+  @override
+  late final GeneratedColumn<int> answersCount = GeneratedColumn<int>(
+      'answers_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _voteCountsByOptionMeta =
+      const VerificationMeta('voteCountsByOption');
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, int>, String>
+      voteCountsByOption = GeneratedColumn<String>(
+              'vote_counts_by_option', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<Map<String, int>>(
+              $PollsTable.$convertervoteCountsByOption);
+  static const VerificationMeta _voteCountMeta =
+      const VerificationMeta('voteCount');
+  @override
+  late final GeneratedColumn<int> voteCount = GeneratedColumn<int>(
+      'vote_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdByIdMeta =
+      const VerificationMeta('createdById');
+  @override
+  late final GeneratedColumn<String> createdById = GeneratedColumn<String>(
+      'created_by_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, dynamic>?>(
+              $PollsTable.$converterextraDatan);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        description,
+        options,
+        votingVisibility,
+        enforceUniqueVote,
+        maxVotesAllowed,
+        allowUserSuggestedOptions,
+        allowAnswers,
+        isClosed,
+        answersCount,
+        voteCountsByOption,
+        voteCount,
+        createdById,
+        createdAt,
+        updatedAt,
+        extraData
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'polls';
+  @override
+  VerificationContext validateIntegrity(Insertable<PollEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    context.handle(_optionsMeta, const VerificationResult.success());
+    context.handle(_votingVisibilityMeta, const VerificationResult.success());
+    if (data.containsKey('enforce_unique_vote')) {
+      context.handle(
+          _enforceUniqueVoteMeta,
+          enforceUniqueVote.isAcceptableOrUnknown(
+              data['enforce_unique_vote']!, _enforceUniqueVoteMeta));
+    }
+    if (data.containsKey('max_votes_allowed')) {
+      context.handle(
+          _maxVotesAllowedMeta,
+          maxVotesAllowed.isAcceptableOrUnknown(
+              data['max_votes_allowed']!, _maxVotesAllowedMeta));
+    }
+    if (data.containsKey('allow_user_suggested_options')) {
+      context.handle(
+          _allowUserSuggestedOptionsMeta,
+          allowUserSuggestedOptions.isAcceptableOrUnknown(
+              data['allow_user_suggested_options']!,
+              _allowUserSuggestedOptionsMeta));
+    }
+    if (data.containsKey('allow_answers')) {
+      context.handle(
+          _allowAnswersMeta,
+          allowAnswers.isAcceptableOrUnknown(
+              data['allow_answers']!, _allowAnswersMeta));
+    }
+    if (data.containsKey('is_closed')) {
+      context.handle(_isClosedMeta,
+          isClosed.isAcceptableOrUnknown(data['is_closed']!, _isClosedMeta));
+    }
+    if (data.containsKey('answers_count')) {
+      context.handle(
+          _answersCountMeta,
+          answersCount.isAcceptableOrUnknown(
+              data['answers_count']!, _answersCountMeta));
+    }
+    context.handle(_voteCountsByOptionMeta, const VerificationResult.success());
+    if (data.containsKey('vote_count')) {
+      context.handle(_voteCountMeta,
+          voteCount.isAcceptableOrUnknown(data['vote_count']!, _voteCountMeta));
+    }
+    if (data.containsKey('created_by_id')) {
+      context.handle(
+          _createdByIdMeta,
+          createdById.isAcceptableOrUnknown(
+              data['created_by_id']!, _createdByIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    context.handle(_extraDataMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PollEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PollEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      options: $PollsTable.$converteroptions.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}options'])!),
+      votingVisibility: $PollsTable.$convertervotingVisibility.fromSql(
+          attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}voting_visibility'])!),
+      enforceUniqueVote: attachedDatabase.typeMapping.read(
+          DriftSqlType.bool, data['${effectivePrefix}enforce_unique_vote'])!,
+      maxVotesAllowed: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}max_votes_allowed']),
+      allowUserSuggestedOptions: attachedDatabase.typeMapping.read(
+          DriftSqlType.bool,
+          data['${effectivePrefix}allow_user_suggested_options'])!,
+      allowAnswers: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}allow_answers'])!,
+      isClosed: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_closed'])!,
+      answersCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}answers_count'])!,
+      voteCountsByOption: $PollsTable.$convertervoteCountsByOption.fromSql(
+          attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}vote_counts_by_option'])!),
+      voteCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}vote_count'])!,
+      createdById: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}created_by_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      extraData: $PollsTable.$converterextraDatan.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
+    );
+  }
+
+  @override
+  $PollsTable createAlias(String alias) {
+    return $PollsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $converteroptions =
+      ListConverter<String>();
+  static TypeConverter<VotingVisibility, String> $convertervotingVisibility =
+      const VotingVisibilityConverter();
+  static TypeConverter<Map<String, int>, String> $convertervoteCountsByOption =
+      MapConverter<int>();
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
+      MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
+      NullAwareTypeConverter.wrap($converterextraData);
+}
+
+class PollEntity extends DataClass implements Insertable<PollEntity> {
+  /// The unique identifier of the poll.
+  final String id;
+
+  /// The name of the poll.
+  final String name;
+
+  /// The description of the poll.
+  final String? description;
+
+  /// The list of options available for the poll.
+  final List<String> options;
+
+  /// Represents the visibility of the voting process.
+  ///
+  /// Defaults to 'public'.
+  final VotingVisibility votingVisibility;
+
+  /// If true, only unique votes are allowed.
+  ///
+  /// Defaults to false.
+  final bool enforceUniqueVote;
+
+  /// The maximum number of votes allowed per user.
+  final int? maxVotesAllowed;
+
+  /// If true, users can suggest their own options.
+  ///
+  /// Defaults to false.
+  final bool allowUserSuggestedOptions;
+
+  /// If true, users can provide their own answers/comments.
+  ///
+  /// Defaults to false.
+  final bool allowAnswers;
+
+  /// Indicates if the poll is closed.
+  final bool isClosed;
+
+  /// The total number of answers received by the poll.
+  final int answersCount;
+
+  /// Map of vote counts by option.
+  final Map<String, int> voteCountsByOption;
+
+  /// The total number of votes received by the poll.
+  final int voteCount;
+
+  /// The id of the user who created the poll.
+  final String? createdById;
+
+  /// The date when the poll was created.
+  final DateTime createdAt;
+
+  /// The date when the poll was last updated.
+  final DateTime updatedAt;
+
+  /// Map of custom poll extraData
+  final Map<String, dynamic>? extraData;
+  const PollEntity(
+      {required this.id,
+      required this.name,
+      this.description,
+      required this.options,
+      required this.votingVisibility,
+      required this.enforceUniqueVote,
+      this.maxVotesAllowed,
+      required this.allowUserSuggestedOptions,
+      required this.allowAnswers,
+      required this.isClosed,
+      required this.answersCount,
+      required this.voteCountsByOption,
+      required this.voteCount,
+      this.createdById,
+      required this.createdAt,
+      required this.updatedAt,
+      this.extraData});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    {
+      map['options'] =
+          Variable<String>($PollsTable.$converteroptions.toSql(options));
+    }
+    {
+      map['voting_visibility'] = Variable<String>(
+          $PollsTable.$convertervotingVisibility.toSql(votingVisibility));
+    }
+    map['enforce_unique_vote'] = Variable<bool>(enforceUniqueVote);
+    if (!nullToAbsent || maxVotesAllowed != null) {
+      map['max_votes_allowed'] = Variable<int>(maxVotesAllowed);
+    }
+    map['allow_user_suggested_options'] =
+        Variable<bool>(allowUserSuggestedOptions);
+    map['allow_answers'] = Variable<bool>(allowAnswers);
+    map['is_closed'] = Variable<bool>(isClosed);
+    map['answers_count'] = Variable<int>(answersCount);
+    {
+      map['vote_counts_by_option'] = Variable<String>(
+          $PollsTable.$convertervoteCountsByOption.toSql(voteCountsByOption));
+    }
+    map['vote_count'] = Variable<int>(voteCount);
+    if (!nullToAbsent || createdById != null) {
+      map['created_by_id'] = Variable<String>(createdById);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || extraData != null) {
+      map['extra_data'] =
+          Variable<String>($PollsTable.$converterextraDatan.toSql(extraData));
+    }
+    return map;
+  }
+
+  factory PollEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PollEntity(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      options: serializer.fromJson<List<String>>(json['options']),
+      votingVisibility:
+          serializer.fromJson<VotingVisibility>(json['votingVisibility']),
+      enforceUniqueVote: serializer.fromJson<bool>(json['enforceUniqueVote']),
+      maxVotesAllowed: serializer.fromJson<int?>(json['maxVotesAllowed']),
+      allowUserSuggestedOptions:
+          serializer.fromJson<bool>(json['allowUserSuggestedOptions']),
+      allowAnswers: serializer.fromJson<bool>(json['allowAnswers']),
+      isClosed: serializer.fromJson<bool>(json['isClosed']),
+      answersCount: serializer.fromJson<int>(json['answersCount']),
+      voteCountsByOption:
+          serializer.fromJson<Map<String, int>>(json['voteCountsByOption']),
+      voteCount: serializer.fromJson<int>(json['voteCount']),
+      createdById: serializer.fromJson<String?>(json['createdById']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'options': serializer.toJson<List<String>>(options),
+      'votingVisibility': serializer.toJson<VotingVisibility>(votingVisibility),
+      'enforceUniqueVote': serializer.toJson<bool>(enforceUniqueVote),
+      'maxVotesAllowed': serializer.toJson<int?>(maxVotesAllowed),
+      'allowUserSuggestedOptions':
+          serializer.toJson<bool>(allowUserSuggestedOptions),
+      'allowAnswers': serializer.toJson<bool>(allowAnswers),
+      'isClosed': serializer.toJson<bool>(isClosed),
+      'answersCount': serializer.toJson<int>(answersCount),
+      'voteCountsByOption':
+          serializer.toJson<Map<String, int>>(voteCountsByOption),
+      'voteCount': serializer.toJson<int>(voteCount),
+      'createdById': serializer.toJson<String?>(createdById),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
+    };
+  }
+
+  PollEntity copyWith(
+          {String? id,
+          String? name,
+          Value<String?> description = const Value.absent(),
+          List<String>? options,
+          VotingVisibility? votingVisibility,
+          bool? enforceUniqueVote,
+          Value<int?> maxVotesAllowed = const Value.absent(),
+          bool? allowUserSuggestedOptions,
+          bool? allowAnswers,
+          bool? isClosed,
+          int? answersCount,
+          Map<String, int>? voteCountsByOption,
+          int? voteCount,
+          Value<String?> createdById = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
+      PollEntity(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description.present ? description.value : this.description,
+        options: options ?? this.options,
+        votingVisibility: votingVisibility ?? this.votingVisibility,
+        enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
+        maxVotesAllowed: maxVotesAllowed.present
+            ? maxVotesAllowed.value
+            : this.maxVotesAllowed,
+        allowUserSuggestedOptions:
+            allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
+        allowAnswers: allowAnswers ?? this.allowAnswers,
+        isClosed: isClosed ?? this.isClosed,
+        answersCount: answersCount ?? this.answersCount,
+        voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
+        voteCount: voteCount ?? this.voteCount,
+        createdById: createdById.present ? createdById.value : this.createdById,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        extraData: extraData.present ? extraData.value : this.extraData,
+      );
+  PollEntity copyWithCompanion(PollsCompanion data) {
+    return PollEntity(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description:
+          data.description.present ? data.description.value : this.description,
+      options: data.options.present ? data.options.value : this.options,
+      votingVisibility: data.votingVisibility.present
+          ? data.votingVisibility.value
+          : this.votingVisibility,
+      enforceUniqueVote: data.enforceUniqueVote.present
+          ? data.enforceUniqueVote.value
+          : this.enforceUniqueVote,
+      maxVotesAllowed: data.maxVotesAllowed.present
+          ? data.maxVotesAllowed.value
+          : this.maxVotesAllowed,
+      allowUserSuggestedOptions: data.allowUserSuggestedOptions.present
+          ? data.allowUserSuggestedOptions.value
+          : this.allowUserSuggestedOptions,
+      allowAnswers: data.allowAnswers.present
+          ? data.allowAnswers.value
+          : this.allowAnswers,
+      isClosed: data.isClosed.present ? data.isClosed.value : this.isClosed,
+      answersCount: data.answersCount.present
+          ? data.answersCount.value
+          : this.answersCount,
+      voteCountsByOption: data.voteCountsByOption.present
+          ? data.voteCountsByOption.value
+          : this.voteCountsByOption,
+      voteCount: data.voteCount.present ? data.voteCount.value : this.voteCount,
+      createdById:
+          data.createdById.present ? data.createdById.value : this.createdById,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      extraData: data.extraData.present ? data.extraData.value : this.extraData,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PollEntity(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('options: $options, ')
+          ..write('votingVisibility: $votingVisibility, ')
+          ..write('enforceUniqueVote: $enforceUniqueVote, ')
+          ..write('maxVotesAllowed: $maxVotesAllowed, ')
+          ..write('allowUserSuggestedOptions: $allowUserSuggestedOptions, ')
+          ..write('allowAnswers: $allowAnswers, ')
+          ..write('isClosed: $isClosed, ')
+          ..write('answersCount: $answersCount, ')
+          ..write('voteCountsByOption: $voteCountsByOption, ')
+          ..write('voteCount: $voteCount, ')
+          ..write('createdById: $createdById, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      name,
+      description,
+      options,
+      votingVisibility,
+      enforceUniqueVote,
+      maxVotesAllowed,
+      allowUserSuggestedOptions,
+      allowAnswers,
+      isClosed,
+      answersCount,
+      voteCountsByOption,
+      voteCount,
+      createdById,
+      createdAt,
+      updatedAt,
+      extraData);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PollEntity &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.options == this.options &&
+          other.votingVisibility == this.votingVisibility &&
+          other.enforceUniqueVote == this.enforceUniqueVote &&
+          other.maxVotesAllowed == this.maxVotesAllowed &&
+          other.allowUserSuggestedOptions == this.allowUserSuggestedOptions &&
+          other.allowAnswers == this.allowAnswers &&
+          other.isClosed == this.isClosed &&
+          other.answersCount == this.answersCount &&
+          other.voteCountsByOption == this.voteCountsByOption &&
+          other.voteCount == this.voteCount &&
+          other.createdById == this.createdById &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.extraData == this.extraData);
+}
+
+class PollsCompanion extends UpdateCompanion<PollEntity> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<List<String>> options;
+  final Value<VotingVisibility> votingVisibility;
+  final Value<bool> enforceUniqueVote;
+  final Value<int?> maxVotesAllowed;
+  final Value<bool> allowUserSuggestedOptions;
+  final Value<bool> allowAnswers;
+  final Value<bool> isClosed;
+  final Value<int> answersCount;
+  final Value<Map<String, int>> voteCountsByOption;
+  final Value<int> voteCount;
+  final Value<String?> createdById;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<Map<String, dynamic>?> extraData;
+  final Value<int> rowid;
+  const PollsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.options = const Value.absent(),
+    this.votingVisibility = const Value.absent(),
+    this.enforceUniqueVote = const Value.absent(),
+    this.maxVotesAllowed = const Value.absent(),
+    this.allowUserSuggestedOptions = const Value.absent(),
+    this.allowAnswers = const Value.absent(),
+    this.isClosed = const Value.absent(),
+    this.answersCount = const Value.absent(),
+    this.voteCountsByOption = const Value.absent(),
+    this.voteCount = const Value.absent(),
+    this.createdById = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.extraData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PollsCompanion.insert({
+    required String id,
+    required String name,
+    this.description = const Value.absent(),
+    required List<String> options,
+    this.votingVisibility = const Value.absent(),
+    this.enforceUniqueVote = const Value.absent(),
+    this.maxVotesAllowed = const Value.absent(),
+    this.allowUserSuggestedOptions = const Value.absent(),
+    this.allowAnswers = const Value.absent(),
+    this.isClosed = const Value.absent(),
+    this.answersCount = const Value.absent(),
+    required Map<String, int> voteCountsByOption,
+    this.voteCount = const Value.absent(),
+    this.createdById = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.extraData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        options = Value(options),
+        voteCountsByOption = Value(voteCountsByOption);
+  static Insertable<PollEntity> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? options,
+    Expression<String>? votingVisibility,
+    Expression<bool>? enforceUniqueVote,
+    Expression<int>? maxVotesAllowed,
+    Expression<bool>? allowUserSuggestedOptions,
+    Expression<bool>? allowAnswers,
+    Expression<bool>? isClosed,
+    Expression<int>? answersCount,
+    Expression<String>? voteCountsByOption,
+    Expression<int>? voteCount,
+    Expression<String>? createdById,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? extraData,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (options != null) 'options': options,
+      if (votingVisibility != null) 'voting_visibility': votingVisibility,
+      if (enforceUniqueVote != null) 'enforce_unique_vote': enforceUniqueVote,
+      if (maxVotesAllowed != null) 'max_votes_allowed': maxVotesAllowed,
+      if (allowUserSuggestedOptions != null)
+        'allow_user_suggested_options': allowUserSuggestedOptions,
+      if (allowAnswers != null) 'allow_answers': allowAnswers,
+      if (isClosed != null) 'is_closed': isClosed,
+      if (answersCount != null) 'answers_count': answersCount,
+      if (voteCountsByOption != null)
+        'vote_counts_by_option': voteCountsByOption,
+      if (voteCount != null) 'vote_count': voteCount,
+      if (createdById != null) 'created_by_id': createdById,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (extraData != null) 'extra_data': extraData,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PollsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String?>? description,
+      Value<List<String>>? options,
+      Value<VotingVisibility>? votingVisibility,
+      Value<bool>? enforceUniqueVote,
+      Value<int?>? maxVotesAllowed,
+      Value<bool>? allowUserSuggestedOptions,
+      Value<bool>? allowAnswers,
+      Value<bool>? isClosed,
+      Value<int>? answersCount,
+      Value<Map<String, int>>? voteCountsByOption,
+      Value<int>? voteCount,
+      Value<String?>? createdById,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<Map<String, dynamic>?>? extraData,
+      Value<int>? rowid}) {
+    return PollsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      options: options ?? this.options,
+      votingVisibility: votingVisibility ?? this.votingVisibility,
+      enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
+      maxVotesAllowed: maxVotesAllowed ?? this.maxVotesAllowed,
+      allowUserSuggestedOptions:
+          allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
+      allowAnswers: allowAnswers ?? this.allowAnswers,
+      isClosed: isClosed ?? this.isClosed,
+      answersCount: answersCount ?? this.answersCount,
+      voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
+      voteCount: voteCount ?? this.voteCount,
+      createdById: createdById ?? this.createdById,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      extraData: extraData ?? this.extraData,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (options.present) {
+      map['options'] =
+          Variable<String>($PollsTable.$converteroptions.toSql(options.value));
+    }
+    if (votingVisibility.present) {
+      map['voting_visibility'] = Variable<String>(
+          $PollsTable.$convertervotingVisibility.toSql(votingVisibility.value));
+    }
+    if (enforceUniqueVote.present) {
+      map['enforce_unique_vote'] = Variable<bool>(enforceUniqueVote.value);
+    }
+    if (maxVotesAllowed.present) {
+      map['max_votes_allowed'] = Variable<int>(maxVotesAllowed.value);
+    }
+    if (allowUserSuggestedOptions.present) {
+      map['allow_user_suggested_options'] =
+          Variable<bool>(allowUserSuggestedOptions.value);
+    }
+    if (allowAnswers.present) {
+      map['allow_answers'] = Variable<bool>(allowAnswers.value);
+    }
+    if (isClosed.present) {
+      map['is_closed'] = Variable<bool>(isClosed.value);
+    }
+    if (answersCount.present) {
+      map['answers_count'] = Variable<int>(answersCount.value);
+    }
+    if (voteCountsByOption.present) {
+      map['vote_counts_by_option'] = Variable<String>($PollsTable
+          .$convertervoteCountsByOption
+          .toSql(voteCountsByOption.value));
+    }
+    if (voteCount.present) {
+      map['vote_count'] = Variable<int>(voteCount.value);
+    }
+    if (createdById.present) {
+      map['created_by_id'] = Variable<String>(createdById.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (extraData.present) {
+      map['extra_data'] = Variable<String>(
+          $PollsTable.$converterextraDatan.toSql(extraData.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PollsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('options: $options, ')
+          ..write('votingVisibility: $votingVisibility, ')
+          ..write('enforceUniqueVote: $enforceUniqueVote, ')
+          ..write('maxVotesAllowed: $maxVotesAllowed, ')
+          ..write('allowUserSuggestedOptions: $allowUserSuggestedOptions, ')
+          ..write('allowAnswers: $allowAnswers, ')
+          ..write('isClosed: $isClosed, ')
+          ..write('answersCount: $answersCount, ')
+          ..write('voteCountsByOption: $voteCountsByOption, ')
+          ..write('voteCount: $voteCount, ')
+          ..write('createdById: $createdById, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('extraData: $extraData, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PollVotesTable extends PollVotes
+    with TableInfo<$PollVotesTable, PollVoteEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PollVotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _pollIdMeta = const VerificationMeta('pollId');
+  @override
+  late final GeneratedColumn<String> pollId = GeneratedColumn<String>(
+      'poll_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES polls (id) ON DELETE CASCADE'));
+  static const VerificationMeta _optionIdMeta =
+      const VerificationMeta('optionId');
+  @override
+  late final GeneratedColumn<String> optionId = GeneratedColumn<String>(
+      'option_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _answerTextMeta =
+      const VerificationMeta('answerText');
+  @override
+  late final GeneratedColumn<String> answerText = GeneratedColumn<String>(
+      'answer_text', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, pollId, optionId, answerText, createdAt, updatedAt, userId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'poll_votes';
+  @override
+  VerificationContext validateIntegrity(Insertable<PollVoteEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('poll_id')) {
+      context.handle(_pollIdMeta,
+          pollId.isAcceptableOrUnknown(data['poll_id']!, _pollIdMeta));
+    }
+    if (data.containsKey('option_id')) {
+      context.handle(_optionIdMeta,
+          optionId.isAcceptableOrUnknown(data['option_id']!, _optionIdMeta));
+    }
+    if (data.containsKey('answer_text')) {
+      context.handle(
+          _answerTextMeta,
+          answerText.isAcceptableOrUnknown(
+              data['answer_text']!, _answerTextMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id, pollId};
+  @override
+  PollVoteEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PollVoteEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id']),
+      pollId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}poll_id']),
+      optionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}option_id']),
+      answerText: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}answer_text']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+    );
+  }
+
+  @override
+  $PollVotesTable createAlias(String alias) {
+    return $PollVotesTable(attachedDatabase, alias);
+  }
+}
+
+class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
+  /// The unique identifier of the poll vote.
+  final String? id;
+
+  /// The unique identifier of the poll the vote belongs to.
+  final String? pollId;
+
+  /// The unique identifier of the option selected in the poll.
+  ///
+  /// Nullable if the user provided an answer.
+  final String? optionId;
+
+  /// The text of the answer provided in the poll.
+  ///
+  /// Nullable if the user selected an option.
+  final String? answerText;
+
+  /// The date when the poll vote was created.
+  final DateTime createdAt;
+
+  /// The date when the poll vote was last updated.
+  final DateTime updatedAt;
+
+  /// The unique identifier of the user who voted.
+  ///
+  /// Nullable if the poll is anonymous.
+  final String? userId;
+  const PollVoteEntity(
+      {this.id,
+      this.pollId,
+      this.optionId,
+      this.answerText,
+      required this.createdAt,
+      required this.updatedAt,
+      this.userId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || pollId != null) {
+      map['poll_id'] = Variable<String>(pollId);
+    }
+    if (!nullToAbsent || optionId != null) {
+      map['option_id'] = Variable<String>(optionId);
+    }
+    if (!nullToAbsent || answerText != null) {
+      map['answer_text'] = Variable<String>(answerText);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    return map;
+  }
+
+  factory PollVoteEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PollVoteEntity(
+      id: serializer.fromJson<String?>(json['id']),
+      pollId: serializer.fromJson<String?>(json['pollId']),
+      optionId: serializer.fromJson<String?>(json['optionId']),
+      answerText: serializer.fromJson<String?>(json['answerText']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      userId: serializer.fromJson<String?>(json['userId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String?>(id),
+      'pollId': serializer.toJson<String?>(pollId),
+      'optionId': serializer.toJson<String?>(optionId),
+      'answerText': serializer.toJson<String?>(answerText),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'userId': serializer.toJson<String?>(userId),
+    };
+  }
+
+  PollVoteEntity copyWith(
+          {Value<String?> id = const Value.absent(),
+          Value<String?> pollId = const Value.absent(),
+          Value<String?> optionId = const Value.absent(),
+          Value<String?> answerText = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<String?> userId = const Value.absent()}) =>
+      PollVoteEntity(
+        id: id.present ? id.value : this.id,
+        pollId: pollId.present ? pollId.value : this.pollId,
+        optionId: optionId.present ? optionId.value : this.optionId,
+        answerText: answerText.present ? answerText.value : this.answerText,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        userId: userId.present ? userId.value : this.userId,
+      );
+  PollVoteEntity copyWithCompanion(PollVotesCompanion data) {
+    return PollVoteEntity(
+      id: data.id.present ? data.id.value : this.id,
+      pollId: data.pollId.present ? data.pollId.value : this.pollId,
+      optionId: data.optionId.present ? data.optionId.value : this.optionId,
+      answerText:
+          data.answerText.present ? data.answerText.value : this.answerText,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      userId: data.userId.present ? data.userId.value : this.userId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PollVoteEntity(')
+          ..write('id: $id, ')
+          ..write('pollId: $pollId, ')
+          ..write('optionId: $optionId, ')
+          ..write('answerText: $answerText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('userId: $userId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, pollId, optionId, answerText, createdAt, updatedAt, userId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PollVoteEntity &&
+          other.id == this.id &&
+          other.pollId == this.pollId &&
+          other.optionId == this.optionId &&
+          other.answerText == this.answerText &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.userId == this.userId);
+}
+
+class PollVotesCompanion extends UpdateCompanion<PollVoteEntity> {
+  final Value<String?> id;
+  final Value<String?> pollId;
+  final Value<String?> optionId;
+  final Value<String?> answerText;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<String?> userId;
+  final Value<int> rowid;
+  const PollVotesCompanion({
+    this.id = const Value.absent(),
+    this.pollId = const Value.absent(),
+    this.optionId = const Value.absent(),
+    this.answerText = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PollVotesCompanion.insert({
+    this.id = const Value.absent(),
+    this.pollId = const Value.absent(),
+    this.optionId = const Value.absent(),
+    this.answerText = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  static Insertable<PollVoteEntity> custom({
+    Expression<String>? id,
+    Expression<String>? pollId,
+    Expression<String>? optionId,
+    Expression<String>? answerText,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? userId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pollId != null) 'poll_id': pollId,
+      if (optionId != null) 'option_id': optionId,
+      if (answerText != null) 'answer_text': answerText,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (userId != null) 'user_id': userId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PollVotesCompanion copyWith(
+      {Value<String?>? id,
+      Value<String?>? pollId,
+      Value<String?>? optionId,
+      Value<String?>? answerText,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<String?>? userId,
+      Value<int>? rowid}) {
+    return PollVotesCompanion(
+      id: id ?? this.id,
+      pollId: pollId ?? this.pollId,
+      optionId: optionId ?? this.optionId,
+      answerText: answerText ?? this.answerText,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      userId: userId ?? this.userId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (pollId.present) {
+      map['poll_id'] = Variable<String>(pollId.value);
+    }
+    if (optionId.present) {
+      map['option_id'] = Variable<String>(optionId.value);
+    }
+    if (answerText.present) {
+      map['answer_text'] = Variable<String>(answerText.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PollVotesCompanion(')
+          ..write('id: $id, ')
+          ..write('pollId: $pollId, ')
+          ..write('optionId: $optionId, ')
+          ..write('answerText: $answerText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('userId: $userId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6109,6 +7441,8 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final $ChannelsTable channels = $ChannelsTable(this);
   late final $MessagesTable messages = $MessagesTable(this);
   late final $PinnedMessagesTable pinnedMessages = $PinnedMessagesTable(this);
+  late final $PollsTable polls = $PollsTable(this);
+  late final $PollVotesTable pollVotes = $PollVotesTable(this);
   late final $PinnedMessageReactionsTable pinnedMessageReactions =
       $PinnedMessageReactionsTable(this);
   late final $ReactionsTable reactions = $ReactionsTable(this);
@@ -6126,6 +7460,8 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final PinnedMessageReactionDao pinnedMessageReactionDao =
       PinnedMessageReactionDao(this as DriftChatDatabase);
   late final MemberDao memberDao = MemberDao(this as DriftChatDatabase);
+  late final PollDao pollDao = PollDao(this as DriftChatDatabase);
+  late final PollVoteDao pollVoteDao = PollVoteDao(this as DriftChatDatabase);
   late final ReactionDao reactionDao = ReactionDao(this as DriftChatDatabase);
   late final ReadDao readDao = ReadDao(this as DriftChatDatabase);
   late final ChannelQueryDao channelQueryDao =
@@ -6140,6 +7476,8 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
         channels,
         messages,
         pinnedMessages,
+        polls,
+        pollVotes,
         pinnedMessageReactions,
         reactions,
         users,
@@ -6156,6 +7494,13 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('messages', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('polls',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('poll_votes', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
@@ -6727,6 +8072,7 @@ typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   Value<Map<String, int>?> reactionScores,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
+  Value<String?> pollId,
   Value<int?> replyCount,
   Value<bool?> showInChannel,
   Value<bool> shadowed,
@@ -6759,6 +8105,7 @@ typedef $$MessagesTableUpdateCompanionBuilder = MessagesCompanion Function({
   Value<Map<String, int>?> reactionScores,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
+  Value<String?> pollId,
   Value<int?> replyCount,
   Value<bool?> showInChannel,
   Value<bool> shadowed,
@@ -6861,6 +8208,9 @@ class $$MessagesTableFilterComposer
   ColumnFilters<String> get quotedMessageId => $composableBuilder(
       column: $table.quotedMessageId,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pollId => $composableBuilder(
+      column: $table.pollId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get replyCount => $composableBuilder(
       column: $table.replyCount, builder: (column) => ColumnFilters(column));
@@ -7015,6 +8365,9 @@ class $$MessagesTableOrderingComposer
       column: $table.quotedMessageId,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get pollId => $composableBuilder(
+      column: $table.pollId, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get replyCount => $composableBuilder(
       column: $table.replyCount, builder: (column) => ColumnOrderings(column));
 
@@ -7141,6 +8494,9 @@ class $$MessagesTableAnnotationComposer
 
   GeneratedColumn<String> get quotedMessageId => $composableBuilder(
       column: $table.quotedMessageId, builder: (column) => column);
+
+  GeneratedColumn<String> get pollId =>
+      $composableBuilder(column: $table.pollId, builder: (column) => column);
 
   GeneratedColumn<int> get replyCount => $composableBuilder(
       column: $table.replyCount, builder: (column) => column);
@@ -7272,6 +8628,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<Map<String, int>?> reactionScores = const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
+            Value<String?> pollId = const Value.absent(),
             Value<int?> replyCount = const Value.absent(),
             Value<bool?> showInChannel = const Value.absent(),
             Value<bool> shadowed = const Value.absent(),
@@ -7304,6 +8661,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             reactionScores: reactionScores,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
+            pollId: pollId,
             replyCount: replyCount,
             showInChannel: showInChannel,
             shadowed: shadowed,
@@ -7336,6 +8694,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<Map<String, int>?> reactionScores = const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
+            Value<String?> pollId = const Value.absent(),
             Value<int?> replyCount = const Value.absent(),
             Value<bool?> showInChannel = const Value.absent(),
             Value<bool> shadowed = const Value.absent(),
@@ -7368,6 +8727,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             reactionScores: reactionScores,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
+            pollId: pollId,
             replyCount: replyCount,
             showInChannel: showInChannel,
             shadowed: shadowed,
@@ -7468,6 +8828,7 @@ typedef $$PinnedMessagesTableCreateCompanionBuilder = PinnedMessagesCompanion
   Value<Map<String, int>?> reactionScores,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
+  Value<String?> pollId,
   Value<int?> replyCount,
   Value<bool?> showInChannel,
   Value<bool> shadowed,
@@ -7501,6 +8862,7 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder = PinnedMessagesCompanion
   Value<Map<String, int>?> reactionScores,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
+  Value<String?> pollId,
   Value<int?> replyCount,
   Value<bool?> showInChannel,
   Value<bool> shadowed,
@@ -7595,6 +8957,9 @@ class $$PinnedMessagesTableFilterComposer
   ColumnFilters<String> get quotedMessageId => $composableBuilder(
       column: $table.quotedMessageId,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pollId => $composableBuilder(
+      column: $table.pollId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get replyCount => $composableBuilder(
       column: $table.replyCount, builder: (column) => ColumnFilters(column));
@@ -7734,6 +9099,9 @@ class $$PinnedMessagesTableOrderingComposer
       column: $table.quotedMessageId,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get pollId => $composableBuilder(
+      column: $table.pollId, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get replyCount => $composableBuilder(
       column: $table.replyCount, builder: (column) => ColumnOrderings(column));
 
@@ -7843,6 +9211,9 @@ class $$PinnedMessagesTableAnnotationComposer
 
   GeneratedColumn<String> get quotedMessageId => $composableBuilder(
       column: $table.quotedMessageId, builder: (column) => column);
+
+  GeneratedColumn<String> get pollId =>
+      $composableBuilder(column: $table.pollId, builder: (column) => column);
 
   GeneratedColumn<int> get replyCount => $composableBuilder(
       column: $table.replyCount, builder: (column) => column);
@@ -7960,6 +9331,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<Map<String, int>?> reactionScores = const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
+            Value<String?> pollId = const Value.absent(),
             Value<int?> replyCount = const Value.absent(),
             Value<bool?> showInChannel = const Value.absent(),
             Value<bool> shadowed = const Value.absent(),
@@ -7992,6 +9364,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             reactionScores: reactionScores,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
+            pollId: pollId,
             replyCount: replyCount,
             showInChannel: showInChannel,
             shadowed: shadowed,
@@ -8024,6 +9397,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<Map<String, int>?> reactionScores = const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
+            Value<String?> pollId = const Value.absent(),
             Value<int?> replyCount = const Value.absent(),
             Value<bool?> showInChannel = const Value.absent(),
             Value<bool> shadowed = const Value.absent(),
@@ -8056,6 +9430,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             reactionScores: reactionScores,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
+            pollId: pollId,
             replyCount: replyCount,
             showInChannel: showInChannel,
             shadowed: shadowed,
@@ -8123,6 +9498,758 @@ typedef $$PinnedMessagesTableProcessedTableManager = ProcessedTableManager<
     (PinnedMessageEntity, $$PinnedMessagesTableReferences),
     PinnedMessageEntity,
     PrefetchHooks Function({bool pinnedMessageReactionsRefs})>;
+typedef $$PollsTableCreateCompanionBuilder = PollsCompanion Function({
+  required String id,
+  required String name,
+  Value<String?> description,
+  required List<String> options,
+  Value<VotingVisibility> votingVisibility,
+  Value<bool> enforceUniqueVote,
+  Value<int?> maxVotesAllowed,
+  Value<bool> allowUserSuggestedOptions,
+  Value<bool> allowAnswers,
+  Value<bool> isClosed,
+  Value<int> answersCount,
+  required Map<String, int> voteCountsByOption,
+  Value<int> voteCount,
+  Value<String?> createdById,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<Map<String, dynamic>?> extraData,
+  Value<int> rowid,
+});
+typedef $$PollsTableUpdateCompanionBuilder = PollsCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String?> description,
+  Value<List<String>> options,
+  Value<VotingVisibility> votingVisibility,
+  Value<bool> enforceUniqueVote,
+  Value<int?> maxVotesAllowed,
+  Value<bool> allowUserSuggestedOptions,
+  Value<bool> allowAnswers,
+  Value<bool> isClosed,
+  Value<int> answersCount,
+  Value<Map<String, int>> voteCountsByOption,
+  Value<int> voteCount,
+  Value<String?> createdById,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<Map<String, dynamic>?> extraData,
+  Value<int> rowid,
+});
+
+final class $$PollsTableReferences
+    extends BaseReferences<_$DriftChatDatabase, $PollsTable, PollEntity> {
+  $$PollsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PollVotesTable, List<PollVoteEntity>>
+      _pollVotesRefsTable(_$DriftChatDatabase db) =>
+          MultiTypedResultKey.fromTable(db.pollVotes,
+              aliasName:
+                  $_aliasNameGenerator(db.polls.id, db.pollVotes.pollId));
+
+  $$PollVotesTableProcessedTableManager get pollVotesRefs {
+    final manager = $$PollVotesTableTableManager($_db, $_db.pollVotes)
+        .filter((f) => f.pollId.id($_item.id));
+
+    final cache = $_typedResult.readTableOrNull(_pollVotesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$PollsTableFilterComposer
+    extends Composer<_$DriftChatDatabase, $PollsTable> {
+  $$PollsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get options => $composableBuilder(
+          column: $table.options,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<VotingVisibility, VotingVisibility, String>
+      get votingVisibility => $composableBuilder(
+          column: $table.votingVisibility,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<bool> get enforceUniqueVote => $composableBuilder(
+      column: $table.enforceUniqueVote,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get maxVotesAllowed => $composableBuilder(
+      column: $table.maxVotesAllowed,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get allowUserSuggestedOptions => $composableBuilder(
+      column: $table.allowUserSuggestedOptions,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get allowAnswers => $composableBuilder(
+      column: $table.allowAnswers, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isClosed => $composableBuilder(
+      column: $table.isClosed, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get answersCount => $composableBuilder(
+      column: $table.answersCount, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, int>, Map<String, int>, String>
+      get voteCountsByOption => $composableBuilder(
+          column: $table.voteCountsByOption,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get voteCount => $composableBuilder(
+      column: $table.voteCount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdById => $composableBuilder(
+      column: $table.createdById, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
+          String>
+      get extraData => $composableBuilder(
+          column: $table.extraData,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  Expression<bool> pollVotesRefs(
+      Expression<bool> Function($$PollVotesTableFilterComposer f) f) {
+    final $$PollVotesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.pollVotes,
+        getReferencedColumn: (t) => t.pollId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PollVotesTableFilterComposer(
+              $db: $db,
+              $table: $db.pollVotes,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$PollsTableOrderingComposer
+    extends Composer<_$DriftChatDatabase, $PollsTable> {
+  $$PollsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get options => $composableBuilder(
+      column: $table.options, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get votingVisibility => $composableBuilder(
+      column: $table.votingVisibility,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get enforceUniqueVote => $composableBuilder(
+      column: $table.enforceUniqueVote,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get maxVotesAllowed => $composableBuilder(
+      column: $table.maxVotesAllowed,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get allowUserSuggestedOptions => $composableBuilder(
+      column: $table.allowUserSuggestedOptions,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get allowAnswers => $composableBuilder(
+      column: $table.allowAnswers,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isClosed => $composableBuilder(
+      column: $table.isClosed, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get answersCount => $composableBuilder(
+      column: $table.answersCount,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get voteCountsByOption => $composableBuilder(
+      column: $table.voteCountsByOption,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get voteCount => $composableBuilder(
+      column: $table.voteCount, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdById => $composableBuilder(
+      column: $table.createdById, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get extraData => $composableBuilder(
+      column: $table.extraData, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PollsTableAnnotationComposer
+    extends Composer<_$DriftChatDatabase, $PollsTable> {
+  $$PollsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get options =>
+      $composableBuilder(column: $table.options, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<VotingVisibility, String>
+      get votingVisibility => $composableBuilder(
+          column: $table.votingVisibility, builder: (column) => column);
+
+  GeneratedColumn<bool> get enforceUniqueVote => $composableBuilder(
+      column: $table.enforceUniqueVote, builder: (column) => column);
+
+  GeneratedColumn<int> get maxVotesAllowed => $composableBuilder(
+      column: $table.maxVotesAllowed, builder: (column) => column);
+
+  GeneratedColumn<bool> get allowUserSuggestedOptions => $composableBuilder(
+      column: $table.allowUserSuggestedOptions, builder: (column) => column);
+
+  GeneratedColumn<bool> get allowAnswers => $composableBuilder(
+      column: $table.allowAnswers, builder: (column) => column);
+
+  GeneratedColumn<bool> get isClosed =>
+      $composableBuilder(column: $table.isClosed, builder: (column) => column);
+
+  GeneratedColumn<int> get answersCount => $composableBuilder(
+      column: $table.answersCount, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Map<String, int>, String>
+      get voteCountsByOption => $composableBuilder(
+          column: $table.voteCountsByOption, builder: (column) => column);
+
+  GeneratedColumn<int> get voteCount =>
+      $composableBuilder(column: $table.voteCount, builder: (column) => column);
+
+  GeneratedColumn<String> get createdById => $composableBuilder(
+      column: $table.createdById, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      get extraData => $composableBuilder(
+          column: $table.extraData, builder: (column) => column);
+
+  Expression<T> pollVotesRefs<T extends Object>(
+      Expression<T> Function($$PollVotesTableAnnotationComposer a) f) {
+    final $$PollVotesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.pollVotes,
+        getReferencedColumn: (t) => t.pollId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PollVotesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.pollVotes,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$PollsTableTableManager extends RootTableManager<
+    _$DriftChatDatabase,
+    $PollsTable,
+    PollEntity,
+    $$PollsTableFilterComposer,
+    $$PollsTableOrderingComposer,
+    $$PollsTableAnnotationComposer,
+    $$PollsTableCreateCompanionBuilder,
+    $$PollsTableUpdateCompanionBuilder,
+    (PollEntity, $$PollsTableReferences),
+    PollEntity,
+    PrefetchHooks Function({bool pollVotesRefs})> {
+  $$PollsTableTableManager(_$DriftChatDatabase db, $PollsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PollsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PollsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PollsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String?> description = const Value.absent(),
+            Value<List<String>> options = const Value.absent(),
+            Value<VotingVisibility> votingVisibility = const Value.absent(),
+            Value<bool> enforceUniqueVote = const Value.absent(),
+            Value<int?> maxVotesAllowed = const Value.absent(),
+            Value<bool> allowUserSuggestedOptions = const Value.absent(),
+            Value<bool> allowAnswers = const Value.absent(),
+            Value<bool> isClosed = const Value.absent(),
+            Value<int> answersCount = const Value.absent(),
+            Value<Map<String, int>> voteCountsByOption = const Value.absent(),
+            Value<int> voteCount = const Value.absent(),
+            Value<String?> createdById = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<Map<String, dynamic>?> extraData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PollsCompanion(
+            id: id,
+            name: name,
+            description: description,
+            options: options,
+            votingVisibility: votingVisibility,
+            enforceUniqueVote: enforceUniqueVote,
+            maxVotesAllowed: maxVotesAllowed,
+            allowUserSuggestedOptions: allowUserSuggestedOptions,
+            allowAnswers: allowAnswers,
+            isClosed: isClosed,
+            answersCount: answersCount,
+            voteCountsByOption: voteCountsByOption,
+            voteCount: voteCount,
+            createdById: createdById,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            extraData: extraData,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            Value<String?> description = const Value.absent(),
+            required List<String> options,
+            Value<VotingVisibility> votingVisibility = const Value.absent(),
+            Value<bool> enforceUniqueVote = const Value.absent(),
+            Value<int?> maxVotesAllowed = const Value.absent(),
+            Value<bool> allowUserSuggestedOptions = const Value.absent(),
+            Value<bool> allowAnswers = const Value.absent(),
+            Value<bool> isClosed = const Value.absent(),
+            Value<int> answersCount = const Value.absent(),
+            required Map<String, int> voteCountsByOption,
+            Value<int> voteCount = const Value.absent(),
+            Value<String?> createdById = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<Map<String, dynamic>?> extraData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PollsCompanion.insert(
+            id: id,
+            name: name,
+            description: description,
+            options: options,
+            votingVisibility: votingVisibility,
+            enforceUniqueVote: enforceUniqueVote,
+            maxVotesAllowed: maxVotesAllowed,
+            allowUserSuggestedOptions: allowUserSuggestedOptions,
+            allowAnswers: allowAnswers,
+            isClosed: isClosed,
+            answersCount: answersCount,
+            voteCountsByOption: voteCountsByOption,
+            voteCount: voteCount,
+            createdById: createdById,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            extraData: extraData,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) =>
+                  (e.readTable(table), $$PollsTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: ({pollVotesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (pollVotesRefs) db.pollVotes],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (pollVotesRefs)
+                    await $_getPrefetchedData(
+                        currentTable: table,
+                        referencedTable:
+                            $$PollsTableReferences._pollVotesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$PollsTableReferences(db, table, p0).pollVotesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.pollId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$PollsTableProcessedTableManager = ProcessedTableManager<
+    _$DriftChatDatabase,
+    $PollsTable,
+    PollEntity,
+    $$PollsTableFilterComposer,
+    $$PollsTableOrderingComposer,
+    $$PollsTableAnnotationComposer,
+    $$PollsTableCreateCompanionBuilder,
+    $$PollsTableUpdateCompanionBuilder,
+    (PollEntity, $$PollsTableReferences),
+    PollEntity,
+    PrefetchHooks Function({bool pollVotesRefs})>;
+typedef $$PollVotesTableCreateCompanionBuilder = PollVotesCompanion Function({
+  Value<String?> id,
+  Value<String?> pollId,
+  Value<String?> optionId,
+  Value<String?> answerText,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<String?> userId,
+  Value<int> rowid,
+});
+typedef $$PollVotesTableUpdateCompanionBuilder = PollVotesCompanion Function({
+  Value<String?> id,
+  Value<String?> pollId,
+  Value<String?> optionId,
+  Value<String?> answerText,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<String?> userId,
+  Value<int> rowid,
+});
+
+final class $$PollVotesTableReferences extends BaseReferences<
+    _$DriftChatDatabase, $PollVotesTable, PollVoteEntity> {
+  $$PollVotesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PollsTable _pollIdTable(_$DriftChatDatabase db) => db.polls
+      .createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
+
+  $$PollsTableProcessedTableManager? get pollId {
+    if ($_item.pollId == null) return null;
+    final manager = $$PollsTableTableManager($_db, $_db.polls)
+        .filter((f) => f.id($_item.pollId!));
+    final item = $_typedResult.readTableOrNull(_pollIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$PollVotesTableFilterComposer
+    extends Composer<_$DriftChatDatabase, $PollVotesTable> {
+  $$PollVotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get optionId => $composableBuilder(
+      column: $table.optionId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get answerText => $composableBuilder(
+      column: $table.answerText, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  $$PollsTableFilterComposer get pollId {
+    final $$PollsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.pollId,
+        referencedTable: $db.polls,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PollsTableFilterComposer(
+              $db: $db,
+              $table: $db.polls,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$PollVotesTableOrderingComposer
+    extends Composer<_$DriftChatDatabase, $PollVotesTable> {
+  $$PollVotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get optionId => $composableBuilder(
+      column: $table.optionId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get answerText => $composableBuilder(
+      column: $table.answerText, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  $$PollsTableOrderingComposer get pollId {
+    final $$PollsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.pollId,
+        referencedTable: $db.polls,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PollsTableOrderingComposer(
+              $db: $db,
+              $table: $db.polls,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$PollVotesTableAnnotationComposer
+    extends Composer<_$DriftChatDatabase, $PollVotesTable> {
+  $$PollVotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get optionId =>
+      $composableBuilder(column: $table.optionId, builder: (column) => column);
+
+  GeneratedColumn<String> get answerText => $composableBuilder(
+      column: $table.answerText, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  $$PollsTableAnnotationComposer get pollId {
+    final $$PollsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.pollId,
+        referencedTable: $db.polls,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PollsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.polls,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$PollVotesTableTableManager extends RootTableManager<
+    _$DriftChatDatabase,
+    $PollVotesTable,
+    PollVoteEntity,
+    $$PollVotesTableFilterComposer,
+    $$PollVotesTableOrderingComposer,
+    $$PollVotesTableAnnotationComposer,
+    $$PollVotesTableCreateCompanionBuilder,
+    $$PollVotesTableUpdateCompanionBuilder,
+    (PollVoteEntity, $$PollVotesTableReferences),
+    PollVoteEntity,
+    PrefetchHooks Function({bool pollId})> {
+  $$PollVotesTableTableManager(_$DriftChatDatabase db, $PollVotesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PollVotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PollVotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PollVotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String?> id = const Value.absent(),
+            Value<String?> pollId = const Value.absent(),
+            Value<String?> optionId = const Value.absent(),
+            Value<String?> answerText = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PollVotesCompanion(
+            id: id,
+            pollId: pollId,
+            optionId: optionId,
+            answerText: answerText,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            userId: userId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String?> id = const Value.absent(),
+            Value<String?> pollId = const Value.absent(),
+            Value<String?> optionId = const Value.absent(),
+            Value<String?> answerText = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PollVotesCompanion.insert(
+            id: id,
+            pollId: pollId,
+            optionId: optionId,
+            answerText: answerText,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            userId: userId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$PollVotesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({pollId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (pollId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.pollId,
+                    referencedTable:
+                        $$PollVotesTableReferences._pollIdTable(db),
+                    referencedColumn:
+                        $$PollVotesTableReferences._pollIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$PollVotesTableProcessedTableManager = ProcessedTableManager<
+    _$DriftChatDatabase,
+    $PollVotesTable,
+    PollVoteEntity,
+    $$PollVotesTableFilterComposer,
+    $$PollVotesTableOrderingComposer,
+    $$PollVotesTableAnnotationComposer,
+    $$PollVotesTableCreateCompanionBuilder,
+    $$PollVotesTableUpdateCompanionBuilder,
+    (PollVoteEntity, $$PollVotesTableReferences),
+    PollVoteEntity,
+    PrefetchHooks Function({bool pollId})>;
 typedef $$PinnedMessageReactionsTableCreateCompanionBuilder
     = PinnedMessageReactionsCompanion Function({
   required String userId,
@@ -9927,6 +12054,10 @@ class $DriftChatDatabaseManager {
       $$MessagesTableTableManager(_db, _db.messages);
   $$PinnedMessagesTableTableManager get pinnedMessages =>
       $$PinnedMessagesTableTableManager(_db, _db.pinnedMessages);
+  $$PollsTableTableManager get polls =>
+      $$PollsTableTableManager(_db, _db.polls);
+  $$PollVotesTableTableManager get pollVotes =>
+      $$PollVotesTableTableManager(_db, _db.pollVotes);
   $$PinnedMessageReactionsTableTableManager get pinnedMessageReactions =>
       $$PinnedMessageReactionsTableTableManager(
           _db, _db.pinnedMessageReactions);

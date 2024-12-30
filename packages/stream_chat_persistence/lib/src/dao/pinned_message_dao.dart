@@ -51,12 +51,18 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
     if (quotedMessageId != null) {
       quotedMessage = await getMessageById(quotedMessageId);
     }
+    Poll? poll;
+    final pollId = msgEntity.pollId;
+    if (pollId != null) {
+      poll = await _db.pollDao.getPollById(pollId);
+    }
     return msgEntity.toMessage(
       user: userEntity?.toUser(),
       pinnedBy: pinnedByEntity?.toUser(),
       latestReactions: latestReactions,
       ownReactions: ownReactions,
       quotedMessage: quotedMessage,
+      poll: poll,
     );
   }
 
