@@ -1,4 +1,4 @@
-## Upcoming
+## 9.0.0
 
 - Added multiple new localization strings related to poll creation and validation.
 - Added multiple new localization strings related to poll message interactions.
