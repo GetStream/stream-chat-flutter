@@ -25,6 +25,16 @@ class MockChannel extends Mock implements Channel {
   Future<bool> get initialized async => true;
 
   @override
+  Future<ChannelState> watch({
+    bool presence = false,
+    PaginationParams? messagesPagination,
+    PaginationParams? membersPagination,
+    PaginationParams? watchersPagination,
+  }) {
+    return Future.value(ChannelState());
+  }
+
+  @override
   // ignore: prefer_expression_function_bodies
   Future<void> keyStroke([String? parentId]) async {
     return;
