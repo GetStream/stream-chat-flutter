@@ -17,6 +17,7 @@ part 'thread.g.dart';
 class Thread extends Equatable {
   /// {@macro streamThread}
   Thread({
+    this.activeParticipantCount,
     this.channel,
     required this.channelCid,
     required this.parentMessageId,
@@ -40,6 +41,9 @@ class Thread extends Equatable {
   /// Create a new instance from a json
   factory Thread.fromJson(Map<String, dynamic> json) => _$ThreadFromJson(
       Serializer.moveToExtraDataFromRoot(json, topLevelFields));
+
+  /// The active participant count in the thread.
+  final int? activeParticipantCount;
 
   /// The channel cid this thread belongs to.
   final String channelCid;
@@ -77,7 +81,7 @@ class Thread extends Equatable {
   /// The number of users participating in the thread.
   final int participantCount;
 
-  /// The list of users participating in the thread.
+  /// The list of participants in the thread.
   final List<ThreadParticipant> threadParticipants;
 
   /// The date of the last message in the thread.
@@ -98,6 +102,7 @@ class Thread extends Equatable {
 
   /// Creates a copy of [Thread] with specified attributes overridden.
   Thread copyWith({
+    int? activeParticipantCount,
     ChannelModel? channel,
     String? channelCid,
     DateTime? createdAt,
@@ -117,6 +122,8 @@ class Thread extends Equatable {
     Map<String, Object?>? extraData,
   }) =>
       Thread(
+        activeParticipantCount:
+            activeParticipantCount ?? this.activeParticipantCount,
         channel: channel ?? this.channel,
         channelCid: channelCid ?? this.channelCid,
         createdAt: createdAt ?? this.createdAt,
@@ -136,10 +143,36 @@ class Thread extends Equatable {
         extraData: extraData ?? this.extraData,
       );
 
+  /// Merge this thread with the [other] thread.
+  Thread merge(Thread? other) {
+    if (other == null) return this;
+    return copyWith(
+      activeParticipantCount: other.activeParticipantCount,
+      channel: other.channel,
+      channelCid: other.channelCid,
+      createdAt: other.createdAt,
+      updatedAt: other.updatedAt,
+      deletedAt: other.deletedAt,
+      createdByUserId: other.createdByUserId,
+      createdBy: other.createdBy,
+      title: other.title,
+      parentMessageId: other.parentMessageId,
+      parentMessage: other.parentMessage,
+      replyCount: other.replyCount,
+      participantCount: other.participantCount,
+      threadParticipants: other.threadParticipants,
+      lastMessageAt: other.lastMessageAt,
+      latestReplies: other.latestReplies,
+      read: other.read,
+      extraData: other.extraData,
+    );
+  }
+
   /// Known top level fields.
   ///
   /// Useful for [Serializer] methods.
   static const topLevelFields = [
+    'active_participant_count',
     'channel_cid',
     'channel',
     'created_at',
@@ -160,6 +193,7 @@ class Thread extends Equatable {
 
   @override
   List<Object?> get props => [
+        activeParticipantCount,
         channelCid,
         channel,
         createdAt,

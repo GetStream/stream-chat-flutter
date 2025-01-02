@@ -287,6 +287,8 @@ void main() {
       // Vote count
       expect(localizations.voteCountLabel(), isNotNull);
       expect(localizations.voteCountLabel(count: 3), isNotNull);
+      expect(localizations.repliedToLabel, isNotNull);
+      expect(localizations.newThreadsLabel(count: 3), isNotNull);
     });
   }
 

@@ -609,4 +609,13 @@ Attenzione: il limite massimo di $limit file è stato superato.
   @override
   String get loadingPollVotesError =>
       'Errore durante il caricamento dei voti del sondaggio';
+
+  @override
+  String get repliedToLabel => 'risposto a:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 nuovo thread';
+    return '$count nuovi thread';
+  }
 }

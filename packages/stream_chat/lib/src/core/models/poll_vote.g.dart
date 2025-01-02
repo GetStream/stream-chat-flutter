@@ -23,17 +23,8 @@ PollVote _$PollVoteFromJson(Map<String, dynamic> json) => PollVote(
           : User.fromJson(json['user'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$PollVoteToJson(PollVote instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('id', instance.id);
-  writeNotNull('option_id', instance.optionId);
-  writeNotNull('answer_text', instance.answerText);
-  return val;
-}
+Map<String, dynamic> _$PollVoteToJson(PollVote instance) => <String, dynamic>{
+      if (instance.id case final value?) 'id': value,
+      if (instance.optionId case final value?) 'option_id': value,
+      if (instance.answerText case final value?) 'answer_text': value,
+    };

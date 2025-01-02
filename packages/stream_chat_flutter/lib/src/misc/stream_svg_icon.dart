@@ -1132,6 +1132,19 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.reload({
+    double? size,
+    Color? color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'reload.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
   /// Name of icon asset
   final String? assetName;
 

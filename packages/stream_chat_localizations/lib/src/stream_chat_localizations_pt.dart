@@ -603,4 +603,13 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get loadingPollVotesError => 'Erro ao carregar os votos';
+
+  @override
+  String get repliedToLabel => 'respondeu a:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 novo tópico';
+    return '$count novos tópicos';
+  }
 }

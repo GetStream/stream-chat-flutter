@@ -582,4 +582,12 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get loadingPollVotesError => '投票の読み込みエラー';
+
+  @override
+  String get repliedToLabel => '返信先:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    return '$count 件の新しいスレッド';
+  }
 }

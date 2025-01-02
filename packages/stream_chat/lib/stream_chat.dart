@@ -48,6 +48,8 @@ export 'src/core/models/poll_vote.dart';
 export 'src/core/models/poll_voting_mode.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/read.dart';
+export 'src/core/models/thread.dart';
+export 'src/core/models/thread_participant.dart';
 export 'src/core/models/user.dart';
 export 'src/core/platform_detector/platform_detector.dart';
 export 'src/core/util/extension.dart';

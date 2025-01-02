@@ -604,4 +604,13 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get loadingPollVotesError => 'Error en carregar els vots';
+
+  @override
+  String get repliedToLabel => 'resposta a:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 fil nou';
+    return '$count fils nous';
+  }
 }

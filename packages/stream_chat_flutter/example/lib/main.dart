@@ -16,7 +16,7 @@ Future<void> main() async {
   /// Create a new instance of [StreamChatClient] passing the apikey obtained
   /// from your project dashboard.
   final client = StreamChatClient(
-    's2dxdhpxd94g',
+    'zcgvnykxsfm8',
     logLevel: Level.OFF,
   );
 
@@ -26,10 +26,8 @@ Future<void> main() async {
   ///
   /// Please see the following for more information:
   /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
-  await client.connectUser(
-    User(id: 'super-band-9'),
-    '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
-  );
+  await client.connectUser(User(id: 'luke'),
+      '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibHVrZV9za3l3YWxrZXIifQ.b6EiC8dq2AHk0JPfI-6PN-AM9TVzt8JV-qB1N9kchlI''');
 
   runApp(
     MyApp(client: client),
@@ -65,7 +63,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      // themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       supportedLocales: const [
         Locale('en'),
         Locale('hi'),
@@ -78,7 +76,70 @@ class MyApp extends StatelessWidget {
         client: client,
         child: widget,
       ),
-      home: const ResponsiveChat(),
+      home: const ThreadListPage(),
+    );
+  }
+}
+
+class ThreadListPage extends StatefulWidget {
+  const ThreadListPage({super.key});
+
+  @override
+  State<ThreadListPage> createState() => _ThreadListPageState();
+}
+
+class _ThreadListPageState extends State<ThreadListPage> {
+  late final controller = StreamThreadListController(
+    client: StreamChat.of(context).client,
+  );
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Threads')),
+      body: Column(
+        children: [
+          ValueListenableBuilder(
+            valueListenable: controller.unseenThreadIds,
+            builder: (_, unreadThreads, __) => UnreadThreadsBanner(
+              unreadThreads: unreadThreads,
+              onTap: () => controller
+                  .refresh(resetValue: false)
+                  .then((_) => controller.clearUnseenThreadIds()),
+            ),
+          ),
+          Expanded(
+            child: StreamThreadListView(
+              controller: controller,
+              onThreadTap: (thread) async {
+                final channelCid = thread.channelCid;
+
+                final channel = StreamChat.of(context).client.channel(
+                      channelCid.split(':')[0],
+                      id: channelCid.split(':')[1],
+                    );
+
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return StreamChannel(
+                        channel: channel,
+                        child: ThreadPage(parent: thread.parentMessage!),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

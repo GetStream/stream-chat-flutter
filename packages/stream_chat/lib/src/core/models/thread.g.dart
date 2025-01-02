@@ -7,6 +7,8 @@ part of 'thread.dart';
 // **************************************************************************
 
 Thread _$ThreadFromJson(Map<String, dynamic> json) => Thread(
+      activeParticipantCount:
+          (json['active_participant_count'] as num?)?.toInt(),
       channel: json['channel'] == null
           ? null
           : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
@@ -51,6 +53,7 @@ Thread _$ThreadFromJson(Map<String, dynamic> json) => Thread(
     );
 
 Map<String, dynamic> _$ThreadToJson(Thread instance) => <String, dynamic>{
+      'active_participant_count': instance.activeParticipantCount,
       'channel_cid': instance.channelCid,
       'channel': instance.channel?.toJson(),
       'created_at': instance.createdAt.toIso8601String(),

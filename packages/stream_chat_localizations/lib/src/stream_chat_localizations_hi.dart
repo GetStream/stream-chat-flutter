@@ -600,4 +600,13 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
     }
     return 'वोट';
   }
+
+  @override
+  String get repliedToLabel => 'जवाब दिया:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 नया थ्रेड';
+    return '$count नए थ्रेड्स';
+  }
 }

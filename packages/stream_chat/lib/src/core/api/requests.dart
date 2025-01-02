@@ -215,10 +215,16 @@ class PartialUpdateUserRequest extends Equatable {
 class ThreadOptions extends Equatable {
   /// {@macro threadOptions}
   const ThreadOptions({
+    this.watch = true,
     this.replyLimit = 2,
     this.participantLimit = 100,
     this.memberLimit = 100,
   });
+
+  /// If true, the client will watch for changes in the thread.
+  ///
+  /// Defaults to true.
+  final bool watch;
 
   /// The number of most recent replies to return per thread.
   ///
@@ -239,5 +245,5 @@ class ThreadOptions extends Equatable {
   Map<String, dynamic> toJson() => _$ThreadOptionsToJson(this);
 
   @override
-  List<Object?> get props => [replyLimit, participantLimit, memberLimit];
+  List<Object?> get props => [watch, replyLimit, participantLimit, memberLimit];
 }

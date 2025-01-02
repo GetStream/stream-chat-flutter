@@ -196,7 +196,7 @@ class StreamChatClient {
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
 
-  final _eventController = BehaviorSubject<Event>();
+  final _eventController = PublishSubject<Event>();
 
   /// Stream of [Event] coming from [_ws] connection
   /// Listen to this or use the [on] method to filter specific event types
@@ -491,10 +491,12 @@ class StreamChatClient {
     final previousState = wsConnectionStatus;
     final currentState = _wsConnectionStatus = status;
 
-    handleEvent(Event(
-      type: EventType.connectionChanged,
-      online: status == ConnectionStatus.connected,
-    ));
+    if (previousState != currentState) {
+      handleEvent(Event(
+        type: EventType.connectionChanged,
+        online: status == ConnectionStatus.connected,
+      ));
+    }
 
     if (currentState == ConnectionStatus.connected &&
         previousState != ConnectionStatus.connected) {
@@ -1211,6 +1213,32 @@ class StreamChatClient {
         channelId,
         channelType,
         messageId,
+      );
+
+  /// Mark the thread with [threadId] in the channel with [channelId] of type
+  /// [channelType] as read.
+  Future<EmptyResponse> markThreadRead(
+    String channelId,
+    String channelType,
+    String threadId,
+  ) =>
+      _chatApi.channel.markThreadRead(
+        channelId,
+        channelType,
+        threadId,
+      );
+
+  /// Mark the thread with [threadId] in the channel with [channelId] of type
+  /// [channelType] as unread.
+  Future<EmptyResponse> markThreadUnread(
+    String channelId,
+    String channelType,
+    String threadId,
+  ) =>
+      _chatApi.channel.markThreadUnread(
+        channelId,
+        channelType,
+        threadId,
       );
 
   /// Creates a new Poll

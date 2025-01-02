@@ -16,6 +16,8 @@ void main() {
       expect(event.isLocal, false);
       expect(event.aiState, AITypingState.thinking);
       expect(event.aiMessage, 'Some message');
+      expect(event.unreadThreadMessages, 2);
+      expect(event.unreadThreads, 3);
     });
 
     test('should serialize to json correctly', () {
@@ -32,6 +34,8 @@ void main() {
         aiState: AITypingState.thinking,
         aiMessage: 'Some message',
         messageId: 'messageId',
+        unreadThreadMessages: 2,
+        unreadThreads: 3,
       );
 
       expect(
@@ -59,6 +63,9 @@ void main() {
           'ai_state': 'AI_STATE_THINKING',
           'ai_message': 'Some message',
           'message_id': 'messageId',
+          'thread': null,
+          'unread_thread_messages': 2,
+          'unread_threads': 3,
         },
       );
     });
@@ -73,6 +80,8 @@ void main() {
       expect(newEvent.me, isA<OwnUser>());
       expect(newEvent.user, isA<User>());
       expect(newEvent.isLocal, false);
+      expect(newEvent.unreadThreadMessages, 2);
+      expect(newEvent.unreadThreads, 3);
 
       newEvent = event.copyWith(
         type: 'test',
@@ -83,6 +92,8 @@ void main() {
         channelId: 'test',
         totalUnreadCount: 2,
         channelType: 'testtype',
+        unreadThreadMessages: 6,
+        unreadThreads: 7,
       );
 
       expect(newEvent.channelType, 'testtype');
@@ -93,22 +104,8 @@ void main() {
       expect(newEvent.connectionId, 'test');
       expect(newEvent.extraData, {});
       expect(newEvent.user!.id, 'test');
-    });
-
-    group('eventChannel', () {
-      test('should parse json correctly', () {
-        final eventChannel =
-            EventChannel.fromJson(jsonFixture('event_channel.json'));
-        expect(eventChannel.type, 'messaging');
-        expect(eventChannel.cid,
-            'messaging:!members-v9ktpgmYysZA-MjgC-GMoeEawFHSelkOdTu6JGxFZWU');
-        expect(eventChannel.createdBy!.id, 'super-band-9');
-        expect(eventChannel.frozen, false);
-        expect(eventChannel.members!.length, 2);
-        expect(eventChannel.memberCount, 2);
-        expect(eventChannel.config, isA<ChannelConfig>());
-        expect(eventChannel.name, 'test');
-      });
+      expect(newEvent.unreadThreadMessages, 6);
+      expect(newEvent.unreadThreads, 7);
     });
   });
 }

@@ -583,4 +583,12 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get loadingPollVotesError => '투표 로딩 오류';
+
+  @override
+  String get repliedToLabel => '회신:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    return '$count개의 새 스레드';
+  }
 }
