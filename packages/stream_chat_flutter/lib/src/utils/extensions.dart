@@ -592,3 +592,40 @@ extension MessageListX on Iterable<Message> {
     return null;
   }
 }
+
+/// Useful extensions on [ChannelModel].
+extension ChannelModelX on ChannelModel {
+  /// Returns the channel name if exists, or a formatted name based on the
+  /// members of the channel and the [maxMembers] allowed.
+  String? formatName({
+    User? currentUser,
+    int maxMembers = 2,
+  }) {
+    // If there's an assigned name and it's not empty, we use it.
+    if (name case final name? when name.isNotEmpty) return name;
+
+    // If there are no members, we return null.
+    final members = this.members;
+    if (members == null) return null;
+
+    final otherMembers = members.where((it) => it.userId != currentUser?.id);
+
+    // If there are no other members, we return the name of the current user.
+    if (otherMembers.isEmpty) return currentUser?.name;
+
+    // Otherwise, we return the names of the first `maxMembers` members sorted
+    // alphabetically, followed by the number of remaining members if there are
+    // more than `maxMembers` members.
+    final memberNames = otherMembers
+        .map((it) => it.user?.name)
+        .whereType<String>()
+        .take(maxMembers)
+        .sorted();
+
+    return switch (otherMembers.length <= maxMembers) {
+      true => memberNames.join(', '),
+      false =>
+        '${memberNames.join(', ')} + ${otherMembers.length - maxMembers}',
+    };
+  }
+}

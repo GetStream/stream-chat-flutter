@@ -36,7 +36,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       online: json['online'] as bool?,
       channel: json['channel'] == null
           ? null
-          : EventChannel.fromJson(json['channel'] as Map<String, dynamic>),
+          : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
       member: json['member'] == null
           ? null
           : Member.fromJson(json['member'] as Map<String, dynamic>),
@@ -48,46 +48,44 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
           unknownValue: AITypingState.idle),
       aiMessage: json['ai_message'] as String?,
       messageId: json['message_id'] as String?,
+      thread: json['thread'] == null
+          ? null
+          : Thread.fromJson(json['thread'] as Map<String, dynamic>),
+      unreadThreadMessages: (json['unread_thread_messages'] as num?)?.toInt(),
+      unreadThreads: (json['unread_threads'] as num?)?.toInt(),
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       isLocal: json['is_local'] as bool? ?? false,
     );
 
-Map<String, dynamic> _$EventToJson(Event instance) {
-  final val = <String, dynamic>{
-    'type': instance.type,
-    'cid': instance.cid,
-    'channel_id': instance.channelId,
-    'channel_type': instance.channelType,
-    'connection_id': instance.connectionId,
-    'created_at': instance.createdAt.toIso8601String(),
-    'me': instance.me?.toJson(),
-    'user': instance.user?.toJson(),
-    'message': instance.message?.toJson(),
-    'poll': instance.poll?.toJson(),
-    'poll_vote': instance.pollVote?.toJson(),
-    'channel': instance.channel?.toJson(),
-    'member': instance.member?.toJson(),
-    'reaction': instance.reaction?.toJson(),
-    'total_unread_count': instance.totalUnreadCount,
-    'unread_channels': instance.unreadChannels,
-    'online': instance.online,
-    'parent_id': instance.parentId,
-    'is_local': instance.isLocal,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('hard_delete', instance.hardDelete);
-  val['ai_state'] = _$AITypingStateEnumMap[instance.aiState];
-  val['ai_message'] = instance.aiMessage;
-  val['message_id'] = instance.messageId;
-  val['extra_data'] = instance.extraData;
-  return val;
-}
+Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
+      'type': instance.type,
+      'cid': instance.cid,
+      'channel_id': instance.channelId,
+      'channel_type': instance.channelType,
+      'connection_id': instance.connectionId,
+      'created_at': instance.createdAt.toIso8601String(),
+      'me': instance.me?.toJson(),
+      'user': instance.user?.toJson(),
+      'message': instance.message?.toJson(),
+      'poll': instance.poll?.toJson(),
+      'poll_vote': instance.pollVote?.toJson(),
+      'channel': instance.channel?.toJson(),
+      'member': instance.member?.toJson(),
+      'reaction': instance.reaction?.toJson(),
+      'total_unread_count': instance.totalUnreadCount,
+      'unread_channels': instance.unreadChannels,
+      'online': instance.online,
+      'parent_id': instance.parentId,
+      'is_local': instance.isLocal,
+      if (instance.hardDelete case final value?) 'hard_delete': value,
+      'ai_state': _$AITypingStateEnumMap[instance.aiState],
+      'ai_message': instance.aiMessage,
+      'message_id': instance.messageId,
+      'thread': instance.thread?.toJson(),
+      'unread_thread_messages': instance.unreadThreadMessages,
+      'unread_threads': instance.unreadThreads,
+      'extra_data': instance.extraData,
+    };
 
 const _$AITypingStateEnumMap = {
   AITypingState.idle: 'AI_STATE_IDLE',
@@ -96,32 +94,3 @@ const _$AITypingStateEnumMap = {
   AITypingState.thinking: 'AI_STATE_THINKING',
   AITypingState.generating: 'AI_STATE_GENERATING',
 };
-
-EventChannel _$EventChannelFromJson(Map<String, dynamic> json) => EventChannel(
-      members: (json['members'] as List<dynamic>?)
-          ?.map((e) => Member.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      id: json['id'] as String?,
-      type: json['type'] as String?,
-      cid: json['cid'] as String,
-      ownCapabilities: (json['own_capabilities'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      config: ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),
-      createdBy: json['created_by'] == null
-          ? null
-          : User.fromJson(json['created_by'] as Map<String, dynamic>),
-      frozen: json['frozen'] as bool? ?? false,
-      lastMessageAt: json['last_message_at'] == null
-          ? null
-          : DateTime.parse(json['last_message_at'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      deletedAt: json['deleted_at'] == null
-          ? null
-          : DateTime.parse(json['deleted_at'] as String),
-      memberCount: (json['member_count'] as num?)?.toInt() ?? 0,
-      cooldown: (json['cooldown'] as num?)?.toInt() ?? 0,
-      team: json['team'] as String?,
-      extraData: json['extra_data'] as Map<String, dynamic>?,
-    );

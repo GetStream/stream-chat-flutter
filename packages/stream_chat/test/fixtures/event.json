@@ -27,5 +27,7 @@
     "name": "Dry meadow"
   },
   "ai_state": "AI_STATE_THINKING",
-  "ai_message": "Some message"
+  "ai_message": "Some message",
+  "unread_thread_messages": 2,
+  "unread_threads": 3
 }

@@ -591,4 +591,13 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get loadingPollVotesError => 'Feil ved lasting av stemmer';
+
+  @override
+  String get repliedToLabel => 'svarte på:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 ny tråd';
+    return '$count nye tråder';
+  }
 }

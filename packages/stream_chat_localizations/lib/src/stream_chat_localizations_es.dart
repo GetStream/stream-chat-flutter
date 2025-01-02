@@ -606,4 +606,13 @@ No es posible añadir más de $limit archivos adjuntos
   @override
   String get loadingPollVotesError =>
       'Error al cargar los votos de la encuesta';
+
+  @override
+  String get repliedToLabel => 'respondido a:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 nuevo hilo';
+    return '$count nuevos hilos';
+  }
 }

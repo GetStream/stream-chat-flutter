@@ -15,6 +15,7 @@ import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
+import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/models/user_block.dart';
 
@@ -682,4 +683,41 @@ class QueryPollVotesResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryPollVotesResponse fromJson(Map<String, dynamic> json) =>
       _$QueryPollVotesResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getThread] api call
+@JsonSerializable(createToJson: false)
+class GetThreadResponse extends _BaseResponse {
+  /// The thread returned by the api call
+  late Thread thread;
+
+  /// Create a new instance from a json
+  static GetThreadResponse fromJson(Map<String, dynamic> json) =>
+      _$GetThreadResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updateThread] api call
+@JsonSerializable(createToJson: false)
+class UpdateThreadResponse extends _BaseResponse {
+  /// The thread returned by the api call
+  late Thread thread;
+
+  /// Create a new instance from a json
+  static UpdateThreadResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdateThreadResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryThreads] api call
+@JsonSerializable(createToJson: false)
+class QueryThreadsResponse extends _BaseResponse {
+  /// List of threads returned by the query
+  @JsonKey(defaultValue: [])
+  late List<Thread> threads;
+
+  /// The next page token
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryThreadsResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryThreadsResponseFromJson(json);
 }

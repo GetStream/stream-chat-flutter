@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamThreadListController` to load and paginate list of threads.
+
 ## 9.0.0
 
 ✅ Added

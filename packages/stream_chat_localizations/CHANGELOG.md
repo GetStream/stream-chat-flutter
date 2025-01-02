@@ -1,3 +1,8 @@
+## Upcoming
+
+- Added translations for new `repliedToLabel` label.
+- Added translations for new `newThreadsLabel` label.
+
 ## 9.0.0
 
 - Added multiple new localization strings related to poll creation and validation.

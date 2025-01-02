@@ -623,6 +623,15 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get loadingPollVotesError => 'Error loading poll votes';
+
+  @override
+  String get repliedToLabel => 'replied to:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 new thread';
+    return '$count new threads';
+  }
 }
 
 void main() async {

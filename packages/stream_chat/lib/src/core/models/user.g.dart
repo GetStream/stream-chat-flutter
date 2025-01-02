@@ -30,18 +30,8 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       language: json['language'] as String?,
     );
 
-Map<String, dynamic> _$UserToJson(User instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('language', instance.language);
-  val['extra_data'] = instance.extraData;
-  return val;
-}
+Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
+      'id': instance.id,
+      if (instance.language case final value?) 'language': value,
+      'extra_data': instance.extraData,
+    };

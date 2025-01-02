@@ -609,4 +609,13 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   @override
   String get loadingPollVotesError =>
       'Erreur de chargement des votes du sondage';
+
+  @override
+  String get repliedToLabel => 'répondu à:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 Nouveau fil';
+    return '$count Nouveaux fils';
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
+import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
@@ -22,6 +23,7 @@ class ChannelModel {
     DateTime? updatedAt,
     this.deletedAt,
     this.memberCount = 0,
+    this.members,
     Map<String, Object?> extraData = const {},
     this.team,
     this.cooldown = 0,
@@ -101,6 +103,10 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final int memberCount;
 
+  /// The list of this channel members
+  @JsonKey(includeToJson: false)
+  final List<Member>? members;
+
   /// The number of seconds in a cooldown
   @JsonKey(includeIfNull: false)
   final int cooldown;
@@ -143,13 +149,13 @@ class ChannelModel {
     'updated_at',
     'deleted_at',
     'member_count',
+    'members',
     'team',
     'cooldown',
   ];
 
   /// Shortcut for channel name
-  String get name =>
-      extraData.containsKey('name') ? extraData['name']! as String : cid;
+  String? get name => extraData['name'] as String?;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
@@ -170,6 +176,7 @@ class ChannelModel {
     DateTime? updatedAt,
     DateTime? deletedAt,
     int? memberCount,
+    List<Member>? members,
     Map<String, Object?>? extraData,
     String? team,
     int? cooldown,
@@ -190,6 +197,7 @@ class ChannelModel {
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt ?? this.deletedAt,
         memberCount: memberCount ?? this.memberCount,
+        members: members ?? this.members,
         extraData: extraData ?? this.extraData,
         team: team ?? this.team,
         cooldown: cooldown ?? this.cooldown,
@@ -220,6 +228,7 @@ class ChannelModel {
       updatedAt: other.updatedAt,
       deletedAt: other.deletedAt,
       memberCount: other.memberCount,
+      members: other.members,
       extraData: other.extraData,
       team: other.team,
       cooldown: other.cooldown,

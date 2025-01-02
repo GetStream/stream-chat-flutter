@@ -337,6 +337,32 @@ class ChannelApi {
     return EmptyResponse.fromJson(response.data);
   }
 
+  /// Mark the provided [threadId] of the channel as read.
+  Future<EmptyResponse> markThreadRead(
+    String channelId,
+    String channelType,
+    String threadId,
+  ) async {
+    final response = await _client.post(
+      '${_getChannelUrl(channelId, channelType)}/read',
+      data: {'thread_id': threadId},
+    );
+    return EmptyResponse.fromJson(response.data);
+  }
+
+  /// Mark the provided [threadId] of the channel as unread.
+  Future<EmptyResponse> markThreadUnread(
+    String channelId,
+    String channelType,
+    String threadId,
+  ) async {
+    final response = await _client.post(
+      '${_getChannelUrl(channelId, channelType)}/unread',
+      data: {'thread_id': threadId},
+    );
+    return EmptyResponse.fromJson(response.data);
+  }
+
   /// Stop watching the channel
   Future<EmptyResponse> stopWatching(
     String channelId,

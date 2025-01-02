@@ -9,6 +9,7 @@ import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
+import 'package:stream_chat/src/core/api/threads_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
@@ -45,54 +46,48 @@ class StreamChatApi {
   final StreamHttpClient _client;
   final AttachmentFileUploaderProvider _fileUploaderProvider;
 
-  UserApi? _user;
-
   /// Api dedicated to users operations
   UserApi get user => _user ??= UserApi(_client);
-
-  GuestApi? _guest;
+  UserApi? _user;
 
   /// Api dedicated to guest operations
   GuestApi get guest => _guest ??= GuestApi(_client);
-
-  MessageApi? _message;
+  GuestApi? _guest;
 
   /// Api dedicated to message operations
   MessageApi get message => _message ??= MessageApi(_client);
-
-  PollsApi? _polls;
+  MessageApi? _message;
 
   /// Api dedicated to polls operations
   PollsApi get polls => _polls ??= PollsApi(_client);
+  PollsApi? _polls;
 
-  CallApi? _call;
+  /// Api dedicated to threads operations
+  ThreadsApi get threads => _threads ??= ThreadsApi(_client);
+  ThreadsApi? _threads;
 
   /// Api dedicated to call operations
   CallApi get call => _call ??= CallApi(_client);
-
-  ChannelApi? _channel;
+  CallApi? _call;
 
   /// Api dedicated to channel operations
   ChannelApi get channel => _channel ??= ChannelApi(_client);
-
-  DeviceApi? _device;
+  ChannelApi? _channel;
 
   /// Api dedicated to device operations
   DeviceApi get device => _device ??= DeviceApi(_client);
-
-  ModerationApi? _moderation;
+  DeviceApi? _device;
 
   /// Api dedicated to moderation operations
   ModerationApi get moderation => _moderation ??= ModerationApi(_client);
-
-  GeneralApi? _general;
+  ModerationApi? _moderation;
 
   /// Api dedicated to general operations
   GeneralApi get general => _general ??= GeneralApi(_client);
-
-  AttachmentFileUploader? _fileUploader;
+  GeneralApi? _general;
 
   /// Class responsible for uploading images and files to a given channel
   AttachmentFileUploader get fileUploader =>
       _fileUploader ??= _fileUploaderProvider.call(_client);
+  AttachmentFileUploader? _fileUploader;
 }

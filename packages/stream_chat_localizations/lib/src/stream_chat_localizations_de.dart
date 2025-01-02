@@ -598,4 +598,13 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get loadingPollVotesError => 'Fehler beim Laden der Umfrage-Stimmen';
+
+  @override
+  String get repliedToLabel => 'antwortete:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 neuer Thread';
+    return '$count neue Threads';
+  }
 }

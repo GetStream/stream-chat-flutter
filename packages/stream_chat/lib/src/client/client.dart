@@ -196,7 +196,7 @@ class StreamChatClient {
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
 
-  final _eventController = BehaviorSubject<Event>();
+  final _eventController = PublishSubject<Event>();
 
   /// Stream of [Event] coming from [_ws] connection
   /// Listen to this or use the [on] method to filter specific event types
@@ -491,10 +491,12 @@ class StreamChatClient {
     final previousState = wsConnectionStatus;
     final currentState = _wsConnectionStatus = status;
 
-    handleEvent(Event(
-      type: EventType.connectionChanged,
-      online: status == ConnectionStatus.connected,
-    ));
+    if (previousState != currentState) {
+      handleEvent(Event(
+        type: EventType.connectionChanged,
+        online: status == ConnectionStatus.connected,
+      ));
+    }
 
     if (currentState == ConnectionStatus.connected &&
         previousState != ConnectionStatus.connected) {
@@ -1213,6 +1215,32 @@ class StreamChatClient {
         messageId,
       );
 
+  /// Mark the thread with [threadId] in the channel with [channelId] of type
+  /// [channelType] as read.
+  Future<EmptyResponse> markThreadRead(
+    String channelId,
+    String channelType,
+    String threadId,
+  ) =>
+      _chatApi.channel.markThreadRead(
+        channelId,
+        channelType,
+        threadId,
+      );
+
+  /// Mark the thread with [threadId] in the channel with [channelId] of type
+  /// [channelType] as unread.
+  Future<EmptyResponse> markThreadUnread(
+    String channelId,
+    String channelType,
+    String threadId,
+  ) =>
+      _chatApi.channel.markThreadUnread(
+        channelId,
+        channelType,
+        threadId,
+      );
+
   /// Creates a new Poll
   Future<CreatePollResponse> createPoll(Poll poll) =>
       _chatApi.polls.createPoll(poll);
@@ -1658,6 +1686,43 @@ class StreamChatClient {
   /// Get OpenGraph data of the given [url].
   Future<OGAttachmentResponse> enrichUrl(String url) =>
       _chatApi.general.enrichUrl(url);
+
+  /// Queries threads with the given [options] and [pagination] params.
+  Future<QueryThreadsResponse> queryThreads({
+    ThreadOptions options = const ThreadOptions(),
+    PaginationParams pagination = const PaginationParams(),
+  }) =>
+      _chatApi.threads.queryThreads(
+        options: options,
+        pagination: pagination,
+      );
+
+  /// Retrieves a thread with the given [messageId].
+  ///
+  /// Optionally pass [options] to limit the response.
+  Future<GetThreadResponse> getThread(
+    String messageId, {
+    ThreadOptions options = const ThreadOptions(),
+  }) =>
+      _chatApi.threads.getThread(
+        messageId,
+        options: options,
+      );
+
+  /// Partially updates the thread with the given [messageId].
+  ///
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  Future<UpdateThreadResponse> partialUpdateThread(
+    String messageId, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) =>
+      _chatApi.threads.partialUpdateThread(
+        messageId,
+        set: set,
+        unset: unset,
+      );
 
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline
