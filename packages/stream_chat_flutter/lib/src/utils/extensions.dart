@@ -548,7 +548,7 @@ extension OriginalSizeX on Attachment {
       if (input == null) return null;
 
       try {
-        final size = ImageSizeGetter.getSize(input);
+        final size = ImageSizeGetter.getSizeResult(input).size;
         if (size.needRotate) {
           return Size(size.height.toDouble(), size.width.toDouble());
         }
