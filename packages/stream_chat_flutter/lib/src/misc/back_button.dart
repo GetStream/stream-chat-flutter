@@ -39,7 +39,10 @@ class StreamBackButton extends StatelessWidget {
           PositionedDirectional(
             top: -4,
             start: 12,
-            child: StreamUnreadIndicator.channels(cid: channelId),
+            child: switch (channelId) {
+              final cid? => StreamUnreadIndicator.channels(cid: cid),
+              _ => StreamUnreadIndicator(),
+            },
           ),
         ],
       );

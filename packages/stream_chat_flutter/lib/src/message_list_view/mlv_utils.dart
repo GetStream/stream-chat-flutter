@@ -49,11 +49,11 @@ int getInitialIndex(
 
 /// Gets the index of the top element in the viewport.
 int? getTopElementIndex(Iterable<ItemPosition> values) {
-  final inView = values.where((position) => position.itemLeadingEdge > 0);
+  final inView = values.where((position) => position.itemTrailingEdge > 0);
   if (inView.isEmpty) return null;
 
   return inView.reduce((min, position) {
-    return position.itemLeadingEdge < min.itemLeadingEdge ? position : min;
+    return position.itemTrailingEdge < min.itemTrailingEdge ? position : min;
   }).index;
 }
 
