@@ -364,7 +364,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   double initialAlignment = 0;
 
   List<Message> messages = <Message>[];
-
   Map<String, int> messagesIndex = {};
 
   bool initialMessageHighlightComplete = false;
@@ -405,10 +404,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
 
-      _userRead = streamChannel?.channel.state!.read.firstWhereOrNull(
-        (it) =>
-            it.user.id == streamChannel?.channel.client.state.currentUser?.id,
-      );
+      _userRead = streamChannel?.channel.state!.currentUserRead;
 
       _messageNewListener?.cancel();
       _userReadListener?.cancel();
@@ -469,6 +465,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (!_upToDate) {
       streamChannel!.reloadChannel();
     }
+    debouncedMarkRead?.cancel();
+    debouncedMarkThreadRead?.cancel();
     _messageNewListener?.cancel();
     _userReadListener?.cancel();
     _itemPositionListener.itemPositions
@@ -965,8 +963,30 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
   }
 
+  late final debouncedMarkRead = switch (streamChannel) {
+    final streamChannel? => debounce(
+        streamChannel.channel.markRead,
+        const Duration(seconds: 1),
+      ),
+    _ => null,
+  };
+
+  late final debouncedMarkThreadRead = switch (streamChannel) {
+    final streamChannel? => debounce(
+        streamChannel.channel.markThreadRead,
+        const Duration(seconds: 1),
+      ),
+    _ => null,
+  };
+
   Future<void> dismissIndicatorDefaultTapAction() async {
-    await streamChannel!.channel.markRead();
+    // Mark regular messages as read.
+    debouncedMarkRead?.call();
+
+    // Mark thread messages as read.
+    if (widget.parentMessage case final parent?) {
+      debouncedMarkThreadRead?.call([parent.id]);
+    }
   }
 
   Widget _buildDateDivider(Message message) {
@@ -1468,33 +1488,53 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     return child;
   }
 
+  Message? _lastFullyVisibleMessage;
   void _handleItemPositionsChanged() {
-    final _itemPositions = _itemPositionListener.itemPositions.value.toList();
-    final _firstItemIndex =
-        _itemPositions.indexWhere((element) => element.index == 1);
-    var _isFirstItemVisible = false;
-    if (_firstItemIndex != -1) {
-      final _firstItem = _itemPositions[_firstItemIndex];
-      _isFirstItemVisible =
-          _firstItem.itemLeadingEdge > 0 && _firstItem.itemTrailingEdge < 1;
-    }
-    if (_isFirstItemVisible) {
-      // most recent message is visible
-      final channel = streamChannel?.channel;
-      if (channel != null) {
-        if (_upToDate &&
-            channel.config?.readEvents == true &&
-            channel.state!.unreadCount > 0 &&
-            widget.markReadWhenAtTheBottom) {
-          streamChannel!.channel.markRead();
+    final itemPositions = _itemPositionListener.itemPositions.value.toList();
+    if (itemPositions.isEmpty) return;
+
+    final isLastItemFullyVisible = isElementAtIndexVisible(
+      itemPositions,
+      fullyVisible: true,
+      // Index of the last item in the list view when reversed is 2 as 1 is the
+      // progress indicator and 0 is the footer. Similarly, when not reversed,
+      // the index of the last item is messages.length - 1.
+      index: widget.reverse ? 2 : messages.length - 1,
+    );
+
+    if (isLastItemFullyVisible) {
+      // We are using the first message as the last fully visible message
+      // because the messages are reversed in the list view.
+      final newLastFullyVisibleMessage = messages.first;
+      final lastFullyVisibleMessageChanged = switch (_lastFullyVisibleMessage) {
+        final message? => message.id != newLastFullyVisibleMessage.id,
+        null => true, // Allows setting the initial value.
+      };
+
+      // If the last fully visible message has changed, update the value and
+      // mark the messages as read.
+      if (lastFullyVisibleMessageChanged) {
+        _lastFullyVisibleMessage = newLastFullyVisibleMessage;
+
+        if (streamChannel?.channel case final channel?) {
+          final allowMarkRead = channel.config?.readEvents == true;
+          final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
+
+          // Only mark read if it is allowed and channel is upToDate.
+          if (_upToDate && allowMarkRead && canMarkReadAtBottom) {
+            // Mark regular message as read.
+            debouncedMarkRead?.call();
+
+            // Mark thread message as read.
+            if (widget.parentMessage case final parent?) {
+              debouncedMarkThreadRead?.call([parent.id]);
+            }
+          }
         }
       }
     }
-    if (mounted) {
-      if (_showScrollToBottom.value == _isFirstItemVisible) {
-        _showScrollToBottom.value = !_isFirstItemVisible;
-      }
-    }
+
+    if (mounted) _showScrollToBottom.value = !isLastItemFullyVisible;
   }
 
   void _getOnThreadTap() {

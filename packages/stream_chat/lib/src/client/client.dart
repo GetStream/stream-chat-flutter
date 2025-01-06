@@ -1777,30 +1777,32 @@ class ClientState {
       cancelEventSubscription();
     }
 
-    _eventsSubscription = CompositeSubscription();
-    _eventsSubscription!
-      ..add(_client
-          .on()
-          .where((event) =>
-              event.me != null && event.type != EventType.healthCheck)
-          .map((e) => e.me!)
-          .listen((user) {
-        currentUser = currentUser?.merge(user) ?? user;
-      }))
-      ..add(_client
-          .on()
-          .map((event) => event.unreadChannels)
-          .whereType<int>()
-          .listen((count) {
-        currentUser = currentUser?.copyWith(unreadChannels: count);
-      }))
-      ..add(_client
-          .on()
-          .map((event) => event.totalUnreadCount)
-          .whereType<int>()
-          .listen((count) {
-        currentUser = currentUser?.copyWith(totalUnreadCount: count);
-      }));
+    _eventsSubscription = CompositeSubscription()
+      ..add(
+        _client.on().listen((event) {
+          // Update the current user only if the event is not a health check.
+          if (event.me case final user?) {
+            if (event.type != EventType.healthCheck) {
+              currentUser = currentUser?.merge(user) ?? user;
+            }
+          }
+
+          // Update the total unread count.
+          if (event.totalUnreadCount case final count?) {
+            currentUser = currentUser?.copyWith(totalUnreadCount: count);
+          }
+
+          // Update the unread channels count.
+          if (event.unreadChannels case final count?) {
+            currentUser = currentUser?.copyWith(unreadChannels: count);
+          }
+
+          // Update the unread threads count.
+          if (event.unreadThreads case final count?) {
+            currentUser = currentUser?.copyWith(unreadThreads: count);
+          }
+        }),
+      );
 
     _listenChannelLeft();
 
@@ -1938,6 +1940,12 @@ class ClientState {
   /// The current unread channels count as a stream
   Stream<int> get unreadChannelsStream => _unreadChannelsController.stream;
 
+  /// The current unread thread count.
+  int get unreadThreads => _unreadThreadsController.value;
+
+  /// The current unread threads count as a stream.
+  Stream<int> get unreadThreadsStream => _unreadThreadsController.stream;
+
   /// The current total unread messages count
   int get totalUnreadCount => _totalUnreadCountController.value;
 
@@ -1974,14 +1982,16 @@ class ClientState {
   }
 
   void _computeUnreadCounts(OwnUser? user) {
-    final totalUnreadCount = user?.totalUnreadCount;
-    if (totalUnreadCount != null) {
-      _totalUnreadCountController.add(totalUnreadCount);
+    if (user?.totalUnreadCount case final count?) {
+      _totalUnreadCountController.add(count);
     }
 
-    final unreadChannels = user?.unreadChannels;
-    if (unreadChannels != null) {
-      _unreadChannelsController.add(unreadChannels);
+    if (user?.unreadChannels case final count?) {
+      _unreadChannelsController.add(count);
+    }
+
+    if (user?.unreadThreads case final count?) {
+      _unreadThreadsController.add(count);
     }
   }
 
@@ -1989,6 +1999,7 @@ class ClientState {
   final _currentUserController = BehaviorSubject<OwnUser?>();
   final _usersController = BehaviorSubject<Map<String, User>>.seeded({});
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
+  final _unreadThreadsController = BehaviorSubject<int>.seeded(0);
   final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
 
   /// Call this method to dispose this object
@@ -1996,6 +2007,7 @@ class ClientState {
     cancelEventSubscription();
     _currentUserController.close();
     _unreadChannelsController.close();
+    _unreadThreadsController.close();
     _totalUnreadCountController.close();
 
     final channels = [...this.channels.keys];

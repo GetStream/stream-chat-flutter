@@ -41,7 +41,7 @@ mixin class StreamThreadListEventHandler {
     final message = event.message;
     if (message == null) return;
 
-    return _updateParentOrReply(message, controller);
+    _updateParentOrReply(message, controller);
   }
 
   /// Function which gets called for the event [EventType.reactionUpdated].
@@ -56,7 +56,7 @@ mixin class StreamThreadListEventHandler {
     final message = event.message;
     if (message == null) return;
 
-    return _updateParentOrReply(message, controller);
+    _updateParentOrReply(message, controller);
   }
 
   /// Function which gets called for the event [EventType.reactionDeleted].
@@ -71,7 +71,7 @@ mixin class StreamThreadListEventHandler {
     final message = event.message;
     if (message == null) return;
 
-    return _updateParentOrReply(message, controller);
+    _updateParentOrReply(message, controller);
   }
 
   /// Function which gets called for the event
@@ -110,7 +110,7 @@ mixin class StreamThreadListEventHandler {
     final message = event.message;
     if (message == null) return;
 
-    return _updateParentOrReply(message, controller);
+    _updateParentOrReply(message, controller);
   }
 
   /// Function which gets called for the event [EventType.messageUpdated].
@@ -125,7 +125,7 @@ mixin class StreamThreadListEventHandler {
     final message = event.message;
     if (message == null) return;
 
-    return _updateParentOrReply(message, controller);
+    _updateParentOrReply(message, controller);
   }
 
   /// Function which gets called for the event [EventType.messageDeleted].
@@ -141,7 +141,7 @@ mixin class StreamThreadListEventHandler {
     final message = event.message;
     if (message == null) return;
 
-    return _deleteParentOrReply(
+    _deleteParentOrReply(
       message,
       controller,
       isHardDelete: event.hardDelete ?? false,
@@ -231,7 +231,7 @@ mixin class StreamThreadListEventHandler {
 
     final updatedThread = thread.markAsReadByUser(user, createdAt);
 
-    return controller.updateThread(updatedThread);
+    controller.updateThread(updatedThread);
   }
 
   void _markThreadAsUnread(
@@ -246,30 +246,22 @@ mixin class StreamThreadListEventHandler {
 
     final updatedThread = thread.markAsUnreadByUser(user, createdAt);
 
-    return controller.updateThread(updatedThread);
+    controller.updateThread(updatedThread);
   }
 
-  void _updateParentOrReply(
+  bool _updateParentOrReply(
     Message message,
     StreamThreadListController controller,
   ) {
-    // If the message is a parent message, update the thread.
-    final thread = controller.getThread(parentMessageId: message.id);
-    if (thread != null) {
-      final updatedThread = thread.updateParent(message);
-      return controller.updateThread(updatedThread);
-    }
+    // Try to update it as a parent message first.
+    final updated = controller.updateParent(message);
+    if (updated) return true;
 
-    // Otherwise, if the message is a reply, upsert it in the thread.
-    final parentMessageId = message.parentId;
-    final parentThread = controller.getThread(parentMessageId: parentMessageId);
-    if (parentThread != null) {
-      final updatedThread = parentThread.upsertReply(message);
-      return controller.updateThread(updatedThread);
-    }
+    // Otherwise, try to update it as a reply.
+    return controller.upsertReply(message);
   }
 
-  void _deleteParentOrReply(
+  bool _deleteParentOrReply(
     Message message,
     StreamThreadListController controller, {
     bool isHardDelete = false,
@@ -297,9 +289,9 @@ extension StreamThreadListEventHandlerExtension on StreamThreadListController {
   ///
   /// Returns `true` if matching parent message was found and was updated,
   /// `false` otherwise.
-  void updateParent(Message parent) {
+  bool updateParent(Message parent) {
     final thread = getThread(parentMessageId: parent.id);
-    if (thread == null) return; // No thread found for the message.
+    if (thread == null) return false; // No thread found for the message.
 
     final updatedThread = thread.updateParent(parent);
 
@@ -307,9 +299,9 @@ extension StreamThreadListEventHandlerExtension on StreamThreadListController {
   }
 
   /// Deletes the given [reply] from the appropriate thread.
-  void deleteReply(Message reply) {
+  bool deleteReply(Message reply) {
     final thread = getThread(parentMessageId: reply.parentId);
-    if (thread == null) return; // No thread found for the message.
+    if (thread == null) return false; // No thread found for the message.
 
     final updatedThread = thread.deleteReply(reply);
 
@@ -317,9 +309,9 @@ extension StreamThreadListEventHandlerExtension on StreamThreadListController {
   }
 
   /// Inserts/updates the given [reply] into the appropriate thread.
-  void upsertReply(Message reply) {
+  bool upsertReply(Message reply) {
     final thread = getThread(parentMessageId: reply.parentId);
-    if (thread == null) return; // No thread found for the message.
+    if (thread == null) return false; // No thread found for the message.
 
     final updatedThread = thread.upsertReply(reply);
 

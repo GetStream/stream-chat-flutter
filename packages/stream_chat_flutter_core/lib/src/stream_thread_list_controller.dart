@@ -165,32 +165,45 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
     return thread;
   }
 
-  /// Updates the given [thread] in the list.
-  void updateThread(Thread thread) {
+  /// Updates the given [thread] in the list and moves it to the top if
+  /// [moveThreadToTop] is `true`.
+  ///
+  /// Returns `true` if the thread is updated successfully. Otherwise, `false`.
+  bool updateThread(
+    Thread thread, {
+    bool moveThreadToTop = false,
+  }) {
     final currentThreads = [...currentItems];
     final updateIndex = currentThreads.indexWhere(
       (it) => it.parentMessageId == thread.parentMessageId,
     );
 
-    if (updateIndex < 0) return;
+    if (updateIndex < 0) return false;
     currentThreads[updateIndex] = thread;
 
+    if (moveThreadToTop) {
+      final updatedThread = currentThreads.removeAt(updateIndex);
+      currentThreads.insert(0, updatedThread);
+    }
+
     threads = currentThreads;
+    return true;
   }
 
   /// Deletes the thread with the given [parentMessageId] from the list.
   ///
   /// Returns `true` if the thread is deleted successfully. Otherwise, `false`.
-  void deleteThread({required String? parentMessageId}) {
+  bool deleteThread({required String? parentMessageId}) {
     final currentThreads = [...currentItems];
     final removeIndex = currentThreads.indexWhere(
       (it) => it.parentMessageId == parentMessageId,
     );
 
-    if (removeIndex < 0) return;
+    if (removeIndex < 0) return false;
     currentThreads.removeAt(removeIndex);
 
     threads = currentThreads;
+    return true;
   }
 
   /// Removes all the threads with the given [channelCid] from the list.

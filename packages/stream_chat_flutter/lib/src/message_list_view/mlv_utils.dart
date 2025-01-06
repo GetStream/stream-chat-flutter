@@ -49,22 +49,42 @@ int getInitialIndex(
 
 /// Gets the index of the top element in the viewport.
 int? getTopElementIndex(Iterable<ItemPosition> values) {
-  final inView = values.where((position) => position.itemLeadingEdge < 1);
+  final inView = values.where((position) => position.itemLeadingEdge > 0);
   if (inView.isEmpty) return null;
-  return inView
-      .reduce((max, position) =>
-          position.itemLeadingEdge > max.itemLeadingEdge ? position : max)
-      .index;
+
+  return inView.reduce((min, position) {
+    return position.itemLeadingEdge < min.itemLeadingEdge ? position : min;
+  }).index;
 }
 
 /// Gets the index of the bottom element in the viewport.
 int? getBottomElementIndex(Iterable<ItemPosition> values) {
   final inView = values.where((position) => position.itemLeadingEdge < 1);
   if (inView.isEmpty) return null;
-  return inView
-      .reduce((min, position) =>
-          position.itemLeadingEdge < min.itemLeadingEdge ? position : min)
-      .index;
+
+  return inView.reduce((max, position) {
+    return position.itemLeadingEdge > max.itemLeadingEdge ? position : max;
+  }).index;
+}
+
+/// Returns true if the element at [index] is at least partially visible in the
+/// viewport.
+///
+/// Optionally, pass [fullyVisible] as true to check if the element is fully
+/// visible in the viewport.
+bool isElementAtIndexVisible(
+  Iterable<ItemPosition> values, {
+  required int index,
+  bool fullyVisible = false,
+}) {
+  final element = values.firstWhereOrNull((it) => it.index == index);
+  if (element == null) return false;
+
+  if (fullyVisible) {
+    return element.itemLeadingEdge >= 0 && element.itemTrailingEdge <= 1;
+  }
+
+  return element.itemLeadingEdge > 0 || element.itemTrailingEdge < 1;
 }
 
 /// Returns true if the message is the initial message.
