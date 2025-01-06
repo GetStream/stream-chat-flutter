@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
+import 'package:stream_chat_flutter/src/theme/thread_list_tile_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamThreadListTile}
@@ -35,6 +36,8 @@ class StreamThreadListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamThreadListTileTheme.of(context);
+
     final language = currentUser?.language;
     final unreadMessageCount = thread.read
         ?.firstWhereOrNull((read) => read.user.id == currentUser?.id)
@@ -43,11 +46,8 @@ class StreamThreadListTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       onLongPress: onLongPress,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: 8,
-        ),
+      child: Container(
+        padding: theme.padding,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,14 +97,15 @@ class ThreadTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final theme = StreamThreadListTileTheme.of(context);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           Icons.message_outlined,
           size: 16,
-          color: theme.colorTheme.textHighEmphasis,
+          color: theme.threadChannelNameStyle?.color,
         ),
         const SizedBox(width: 4),
         Flexible(
@@ -112,7 +113,7 @@ class ThreadTitle extends StatelessWidget {
             channelName ?? context.translations.noTitleText,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyBold,
+            style: theme.threadChannelNameStyle,
           ),
         ),
       ],
@@ -145,25 +146,21 @@ class ThreadReplyToContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final theme = StreamThreadListTileTheme.of(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           prefix,
-          style: theme.textTheme.footnote.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
-          ),
+          style: theme.threadReplyToMessageStyle,
         ),
         const SizedBox(width: 4),
         Flexible(
           child: StreamMessagePreviewText(
             language: language,
             message: parentMessage,
-            textStyle: theme.textTheme.footnote.copyWith(
-              color: theme.colorTheme.textLowEmphasis,
-            ),
+            textStyle: theme.threadReplyToMessageStyle,
           ),
         ),
       ],
@@ -186,12 +183,12 @@ class ThreadUnreadCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final theme = StreamThreadListTileTheme.of(context);
 
     return Badge(
-      textColor: Colors.white,
-      textStyle: theme.textTheme.footnoteBold,
-      backgroundColor: theme.channelPreviewTheme.unreadCounterColor,
+      textStyle: theme.threadUnreadMessageCountStyle,
+      textColor: theme.threadUnreadMessageCountStyle?.color,
+      backgroundColor: theme.threadUnreadMessageCountBackgroundColor,
       label: Text('$unreadCount'),
     );
   }
@@ -216,7 +213,7 @@ class ThreadLatestReply extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final theme = StreamThreadListTileTheme.of(context);
 
     return Row(
       children: <Widget>[
@@ -228,7 +225,7 @@ class ThreadLatestReply extends StatelessWidget {
             children: [
               Text(
                 latestReply.user!.name,
-                style: theme.textTheme.bodyBold,
+                style: theme.threadLatestReplyUsernameStyle,
               ),
               Row(
                 children: [
@@ -236,16 +233,12 @@ class ThreadLatestReply extends StatelessWidget {
                     child: StreamMessagePreviewText(
                       language: language,
                       message: latestReply,
-                      textStyle: theme.textTheme.body.copyWith(
-                        color: theme.colorTheme.textLowEmphasis,
-                      ),
+                      textStyle: theme.threadLatestReplyMessageStyle,
                     ),
                   ),
                   StreamTimestamp(
                     date: latestReply.createdAt.toLocal(),
-                    style: theme.textTheme.body.copyWith(
-                      color: theme.colorTheme.textLowEmphasis,
-                    ),
+                    style: theme.threadLatestReplyTimestampStyle,
                   ),
                 ],
               ),
