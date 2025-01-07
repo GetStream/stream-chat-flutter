@@ -9,9 +9,9 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 /// This widget can be used to show a banner with the number of unread threads
 /// on the top of the [ThreadListView].
 /// {@endtemplate}
-class UnreadThreadsBanner extends StatelessWidget {
+class StreamUnreadThreadsBanner extends StatelessWidget {
   /// {@macro unreadThreadsBanner}
-  const UnreadThreadsBanner({
+  const StreamUnreadThreadsBanner({
     super.key,
     required this.unreadThreads,
     this.onTap,

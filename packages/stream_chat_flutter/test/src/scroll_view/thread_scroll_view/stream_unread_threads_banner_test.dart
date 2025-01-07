@@ -5,12 +5,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 void main() {
   for (final brightness in Brightness.values) {
     goldenTest(
-      '[${brightness.name}] -> UnreadThreadsBanner looks fine',
-      fileName: 'unread_threads_banner_${brightness.name}',
+      '[${brightness.name}] -> StreamUnreadThreadsBanner looks fine',
+      fileName: 'stream_unread_threads_banner_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 400, height: 100),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
-        const UnreadThreadsBanner(unreadThreads: {'id1', 'id2', 'id3'}),
+        const StreamUnreadThreadsBanner(unreadThreads: {'id1', 'id2', 'id3'}),
       ),
     );
   }

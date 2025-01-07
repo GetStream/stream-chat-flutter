@@ -108,7 +108,7 @@ export 'src/scroll_view/stream_scroll_view_empty_widget.dart';
 export 'src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_tile.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_view.dart';
-export 'src/scroll_view/thread_scroll_view/unread_threads_banner.dart';
+export 'src/scroll_view/thread_scroll_view/stream_unread_threads_banner.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_grid_tile.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_grid_view.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_list_tile.dart';
