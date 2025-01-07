@@ -84,7 +84,7 @@ bool isElementAtIndexVisible(
     return element.itemLeadingEdge >= 0 && element.itemTrailingEdge <= 1;
   }
 
-  return element.itemLeadingEdge > 0 || element.itemTrailingEdge < 1;
+  return element.itemTrailingEdge > 0 && element.itemLeadingEdge < 1;
 }
 
 /// Returns true if the message is the initial message.
