@@ -16,10 +16,12 @@
 
 🛑️ Breaking
 
-- The `StreamAttachmentPickerController` has been restructured to improve flexibility and support additional use cases like poll management.
-  - Previously managed a `List<Attachment>` but now manages an `AttachmentPickerValue` object, which includes:
-    - `attachments`: A list of attachments.
-    - `poll`: A new field for managing polls.
+- The `StreamAttachmentPickerController` has been restructured to improve flexibility and support
+  additional use cases like poll management.
+    - Previously managed a `List<Attachment>` but now manages an `AttachmentPickerValue` object,
+      which includes:
+        - `attachments`: A list of attachments.
+        - `poll`: A new field for managing polls.
 
 ✅ Added
 
@@ -35,25 +37,27 @@
 ✅ Added
 
 - Added several new widgets to enhance the AI assistant features.
-  - `StreamingMessageView` to show AI assistant messages with streaming animation.
-  - `AITypingIndicatorView` to show AI typing indicator.
+    - `StreamingMessageView` to show AI assistant messages with streaming animation.
+    - `AITypingIndicatorView` to show AI typing indicator.
 
 ✅ Added
 
 - Added several new widgets to enhance the AI assistant features.
-  - `StreamingMessageView` to show AI assistant messages with streaming animation.
-  - `AITypingIndicatorView` to show AI typing indicator.
+    - `StreamingMessageView` to show AI assistant messages with streaming animation.
+    - `AITypingIndicatorView` to show AI typing indicator.
 
 🐞 Fixed
 
-- [[#2030]](https://github.com/GetStream/stream-chat-flutter/issues/2030) Fixed `video_thumbnail` Namespace not specified.
+- [[#2030]](https://github.com/GetStream/stream-chat-flutter/issues/2030) Fixed `video_thumbnail`
+  Namespace not specified.
 
 ## 8.2.0
 
 ✅ Added
 
 - Added `onThreadTap` parameter to `MessageWidgetContent` to enable thread tap action.
-- Messages by default now show an "Edited" label if text is edited. Use `showEditedLabel` to disable this functionality. 
+- Messages by default now show an "Edited" label if text is edited. Use `showEditedLabel` to disable
+  this functionality.
 
 🐞 Fixed
 
@@ -61,7 +65,8 @@
 
 🔄 Changed
 
-- Updated `stream_chat_flutter_core` dependency to [`8.2.0`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat_flutter_core` dependency to [
+  `8.2.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 8.1.0
 
@@ -81,16 +86,17 @@
 - Fixed null errors in web from markdown.
 - Fixed bug causing background events to be sent in foreground.
 
-## 7.3.0 
+## 7.3.0
 
 🐞 Fixed
 
-- Fixed copy message function. 
+- Fixed copy message function.
 
 🔄 Changed
 
 - Changed minimum Flutter version to 3.19 for the SDK.
-- Updated `stream_chat_flutter_core` dependency to [`7.3.0`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat_flutter_core` dependency to [
+  `7.3.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.2.2
 
@@ -102,7 +108,8 @@
 
 🐞 Fixed
 
-- Added export for `message_widget_content_components.dart` to allow for easier customization of message content components.
+- Added export for `message_widget_content_components.dart` to allow for easier customization of
+  message content components.
 - Fixed error when channel image is not set.
 - Fixes reaction picker tail showing up unexpectedly.
 - Copying a message now replaces the User IDs with user names.
@@ -111,42 +118,57 @@
 
 🔄 Changed
 
-- Updated `stream_chat_flutter_core` dependency to [`7.2.2`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat_flutter_core` dependency to [
+  `7.2.2`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.2.1
 
 ✅ Added
+
 - Added `VoiceRecordingAttachmentBuilder`, for displaying voice recording attachments in the chat.
 
 🐞 Fixed
+
 - Fixed wrong calculation of the last unread message indicator.
 
 ## 7.2.0-hotfix.1
 
-  🔄 Changed
-  - Updated `stream_chat_flutter_core` dependency to [`7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
+🔄 Changed
 
+- Updated `stream_chat_flutter_core` dependency to [
+  `7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.2.0
 
 ✅ Added
-`StreamMessageListView` will now by default show unread indicator floating on top of the message list that will scroll to last read message when tapped and mark channel as unread when dismissed.
+`StreamMessageListView` will now by default show unread indicator floating on top of the message
+list that will scroll to last read message when tapped and mark channel as unread when dismissed.
 
-- Added `showUnreadIndicator` parameter to `StreamMessageListView` that controls visibility of new channel unread indicator
-- Added `unreadIndicatorBuilder` parameter to `StreamMessageListView` that allows to provide custom unread indicator builder
-- Added `markReadWhenAtTheBottom` parameter to `StreamMessageListView` that will toggle, previously default, behaviour of marking channel as read when message list is scrolled to the bottom (now default is `false`)
-- Added `showUnreadCountOnScrollToBottom` parameter to `StreamMessageListView` that will toggle, previously shown by default, unread messages counter on the scroll to bottom button (no default is `false`)
+- Added `showUnreadIndicator` parameter to `StreamMessageListView` that controls visibility of new
+  channel unread indicator
+- Added `unreadIndicatorBuilder` parameter to `StreamMessageListView` that allows to provide custom
+  unread indicator builder
+- Added `markReadWhenAtTheBottom` parameter to `StreamMessageListView` that will toggle, previously
+  default, behaviour of marking channel as read when message list is scrolled to the bottom (now
+  default is `false`)
+- Added `showUnreadCountOnScrollToBottom` parameter to `StreamMessageListView` that will toggle,
+  previously shown by default, unread messages counter on the scroll to bottom button (no default is
+  `false`)
 
-Added Mark as Unread option to `StreamMessageWidget` context menu that will show for non-thread messages of other users and mark channel as unread from selected message onwards.
+Added Mark as Unread option to `StreamMessageWidget` context menu that will show for non-thread
+messages of other users and mark channel as unread from selected message onwards.
 
-- Added `showMarkUnreadMessage` to  `StreamMessageWidget` that controls visibility of Mark as Unread option.
+- Added `showMarkUnreadMessage` to  `StreamMessageWidget` that controls visibility of Mark as Unread
+  option.
 
 ## 7.1.0
 
 🐞 Fixed
-- Fixed quoted message having 0 bottom padding. All sides now have 8 padding 
+
+- Fixed quoted message having 0 bottom padding. All sides now have 8 padding
 
 🔄 Changed
+
 - Updated `photo_manager` dependency to `^3.0.0`
 - Updated `lottie` to `>=2.6.0 <4.0.0`
 
@@ -154,10 +176,12 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 
 ✅ Added
 
-- Added `ActionsBuilder` signature for function which will return default actions and allows past custom actions.
+- Added `ActionsBuilder` signature for function which will return default actions and allows past
+  custom actions.
 - Added `spaceBetweenActions` parameter for `StreamMessageInput` to control distance between actions
 
 🐞 Fixed
+
 - Removed double focus on `StreamMessageInput` when `focusNode` is provided for web and desktop.
 - Optionally call `onThreadTap` in `BottomRow` to avoid `Null check operator used on a null value`
 
@@ -165,7 +189,7 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 
 🐞 Fixed
 
-- [[#1804]](https://github.com/GetStream/stream-chat-flutter/issues/1804) Fixed 
+- [[#1804]](https://github.com/GetStream/stream-chat-flutter/issues/1804) Fixed
   `StreamAttachmentWidgetBuilder`` is not accessible in 7.0.0.
 - Updated `stream_chat_flutter_core` dependency
   to [`7.0.1`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
@@ -175,22 +199,28 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 🛑️ Breaking
 
 - Removed deprecated `ChannelPreview` widget. Use `StreamChannelListTile` instead.
-- Removed deprecated `ChannelPreviewBuilder`, Use `StreamChannelListViewIndexedWidgetBuilder` instead.
+- Removed deprecated `ChannelPreviewBuilder`, Use `StreamChannelListViewIndexedWidgetBuilder`
+  instead.
 - Removed deprecated `StreamUserItem` widget. Use `StreamUserListTile` instead.
 - Removed deprecated `ReturnActionType` enum, No longer used.
 - Removed deprecated `StreamMessageInput.attachmentThumbnailBuilders` parameter. Use
   `StreamMessageInput.mediaAttachmentBuilder` instead.
-- Removed deprecated `MessageListView.onMessageSwiped` parameter. Try wrapping the `MessageWidget` with
+- Removed deprecated `MessageListView.onMessageSwiped` parameter. Try wrapping the `MessageWidget`
+  with
   a `Swipeable`, `Dismissible` or a custom widget to achieve the swipe to reply behaviour.
-- Removed deprecated `MessageWidget.showReactionPickerIndicator` parameter. Use `MessageWidget.showReactionPicker`
+- Removed deprecated `MessageWidget.showReactionPickerIndicator` parameter. Use
+  `MessageWidget.showReactionPicker`
   instead.
-- Removed deprecated `MessageWidget.bottomRowBuilder` parameter. Use `MessageWidget.bottomRowBuilderWithDefaultWidget`
+- Removed deprecated `MessageWidget.bottomRowBuilder` parameter. Use
+  `MessageWidget.bottomRowBuilderWithDefaultWidget`
   instead.
 - Removed deprecated `MessageWidget.deletedBottomRowBuilder` parameter.
   Use `MessageWidget.deletedBottomRowBuilderWithDefaultWidget` instead.
-- Removed deprecated `MessageWidget.usernameBuilder` parameter. Use `MessageWidget.usernameBuilderWithDefaultWidget`
+- Removed deprecated `MessageWidget.usernameBuilder` parameter. Use
+  `MessageWidget.usernameBuilderWithDefaultWidget`
   instead.
-- Removed deprecated `MessageTheme.linkBackgroundColor` parameter. Use `MessageTheme.urlAttachmentBackgroundColor`
+- Removed deprecated `MessageTheme.linkBackgroundColor` parameter. Use
+  `MessageTheme.urlAttachmentBackgroundColor`
   instead.
 - Removed deprecated `showConfirmationDialog` method. Use `showConfirmationBottomSheet` instead.
 - Removed deprecated `showInfoDialog` method. Use `showInfoBottomSheet` instead.
@@ -199,7 +229,8 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 
 ✅ Added
 
-- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content insertion configuration.
+- Added support for `StreamMessageInput.contentInsertionConfiguration` to specify the content
+  insertion configuration.
   [#1613](https://github.com/GetStream/stream-chat-flutter/issues/1613)
 
   ```dart
@@ -225,7 +256,7 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 
 🐞 Fixed
 
-- Fix render overflow issue with `StreamTypingIndicator`. It now uses `Flexible` 
+- Fix render overflow issue with `StreamTypingIndicator`. It now uses `Flexible`
   inside `Row`.
 
 - [[#1759]](https://github.com/GetStream/stream-chat-flutter/issues/1759) Fixed
@@ -250,7 +281,7 @@ Added Mark as Unread option to `StreamMessageWidget` context menu that will show
 - Added support for overriding the `MessageWidget.onReactionsHover` callback.
   > **Note**
   > Used only in desktop devices (web and desktop).
-  
+
 ## 6.9.0
 
 🐞 Fixed

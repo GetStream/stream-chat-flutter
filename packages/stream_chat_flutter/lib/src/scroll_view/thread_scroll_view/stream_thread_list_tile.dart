@@ -48,6 +48,7 @@ class StreamThreadListTile extends StatelessWidget {
       onLongPress: onLongPress,
       child: Container(
         padding: theme.padding,
+        color: theme.backgroundColor,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
