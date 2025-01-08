@@ -219,6 +219,39 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
     threads = newThreads;
   }
 
+  /// Updates the parent message of a thread.
+  ///
+  /// Returns `true` if matching parent message was found and was updated,
+  /// `false` otherwise.
+  bool updateParent(Message parent) {
+    final thread = getThread(parentMessageId: parent.id);
+    if (thread == null) return false; // No thread found for the message.
+
+    final updatedThread = thread.updateParent(parent);
+
+    return updateThread(updatedThread);
+  }
+
+  /// Deletes the given [reply] from the appropriate thread.
+  bool deleteReply(Message reply) {
+    final thread = getThread(parentMessageId: reply.parentId);
+    if (thread == null) return false; // No thread found for the message.
+
+    final updatedThread = thread.deleteReply(reply);
+
+    return updateThread(updatedThread);
+  }
+
+  /// Inserts/updates the given [reply] into the appropriate thread.
+  bool upsertReply(Message reply) {
+    final thread = getThread(parentMessageId: reply.parentId);
+    if (thread == null) return false; // No thread found for the message.
+
+    final updatedThread = thread.upsertReply(reply);
+
+    return updateThread(updatedThread);
+  }
+
   /// Event listener, which can be set in order to listen
   /// [client] web-socket events.
   ///
@@ -286,5 +319,125 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   void dispose() {
     _unsubscribeFromThreadListEvents();
     super.dispose();
+  }
+}
+
+/// Helper extension on [Thread] to update the parent message and replies.
+extension ThreadExtension on Thread {
+  /// Updates the parent message of a Thread.
+  Thread updateParent(Message parent) {
+    // Skip update if [parent] is not related to this Thread.
+    if (parentMessageId != parent.id) return this;
+
+    return copyWith(
+      parentMessage: parent,
+      deletedAt: parent.deletedAt,
+      updatedAt: parent.updatedAt,
+    );
+  }
+
+  /// Inserts a new [reply] (or updates and existing one) into the Thread.
+  Thread upsertReply(Message reply) {
+    // Skip update if [reply] is not related to this Thread.
+    if (parentMessageId != reply.parentId) return this;
+
+    final updatedReplies = _upsertMessageInList(reply, latestReplies);
+    final isInsert = updatedReplies.length > latestReplies.length;
+    final sortedUpdatedReplies = updatedReplies.sortedBy(
+      (it) => it.localCreatedAt ?? it.createdAt,
+    );
+
+    final lastMessage = sortedUpdatedReplies.lastOrNull;
+    final lastMessageAt = lastMessage?.localCreatedAt ?? lastMessage?.createdAt;
+
+    // Update read counts (+1 for each non-sender of the message).
+    final updatedRead = isInsert ? _updateReadCounts(read, reply) : read;
+
+    return copyWith(
+      updatedAt: lastMessageAt,
+      lastMessageAt: lastMessageAt,
+      latestReplies: sortedUpdatedReplies,
+      read: updatedRead,
+    );
+  }
+
+  /// Deletes the given [reply] from the Thread.
+  Thread deleteReply(Message reply) {
+    // Skip update if [reply] is not related to this Thread.
+    if (parentMessageId != reply.parentId) return this;
+
+    final updatedReplies = latestReplies.where((it) => it.id != reply.id);
+    final sortedUpdatedReplies = updatedReplies.sortedBy(
+      (it) => it.localCreatedAt ?? it.createdAt,
+    );
+
+    final lastMessage = sortedUpdatedReplies.lastOrNull;
+    final lastMessageAt = lastMessage?.localCreatedAt ?? lastMessage?.createdAt;
+
+    return copyWith(
+      updatedAt: lastMessageAt,
+      lastMessageAt: lastMessageAt,
+      latestReplies: sortedUpdatedReplies,
+    );
+  }
+
+  /// Marks the given thread as read by the given [user].
+  Thread markAsReadByUser(User user, DateTime createdAt) {
+    final updatedRead = read?.map((read) {
+      if (read.user.id == user.id) {
+        return read.copyWith(
+          user: user,
+          unreadMessages: 0,
+          lastRead: createdAt,
+        );
+      }
+      return read;
+    }).toList();
+
+    return copyWith(read: updatedRead);
+  }
+
+  /// Marks the given thread as unread by the given [user].
+  Thread markAsUnreadByUser(User user, DateTime createdAt) {
+    final updatedRead = read?.map((read) {
+      if (read.user.id == user.id) {
+        return read.copyWith(
+          user: user,
+          // Update this value to what the backend returns (when implemented)
+          unreadMessages: read.unreadMessages + 1,
+          lastRead: createdAt,
+        );
+      }
+      return read;
+    }).toList();
+
+    return copyWith(read: updatedRead);
+  }
+
+  List<Message> _upsertMessageInList(
+    Message newMessage,
+    List<Message> messages,
+  ) {
+    // Insert if message is not present in the list.
+    if (messages.none((it) => it.id == newMessage.id)) {
+      return [...messages, newMessage];
+    }
+
+    // Otherwise, update the message.
+    return [
+      ...messages.map((message) {
+        if (message.id == newMessage.id) return newMessage;
+        return message;
+      }),
+    ];
+  }
+
+  List<Read>? _updateReadCounts(List<Read>? read, Message reply) {
+    return read?.map((userRead) {
+      // Skip the sender of the message.
+      if (userRead.user.id == reply.user?.id) return userRead;
+      // Increment the unread count for the non-sender.
+      return userRead.copyWith(unreadMessages: userRead.unreadMessages + 1);
+    }).toList();
   }
 }
