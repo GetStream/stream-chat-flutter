@@ -145,4 +145,11 @@ class EventType {
 
   /// Event sent when a poll is deleted.
   static const String pollDeleted = 'poll.deleted';
+
+  /// Event sent when a thread is updated.
+  static const String threadUpdated = 'thread.updated';
+
+  /// Event sent when a new message is added to a thread.
+  static const String notificationThreadMessageNew =
+      'notification.thread_message_new';
 }

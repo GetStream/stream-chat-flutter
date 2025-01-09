@@ -196,7 +196,7 @@ class StreamChatClient {
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
 
-  final _eventController = BehaviorSubject<Event>();
+  final _eventController = PublishSubject<Event>();
 
   /// Stream of [Event] coming from [_ws] connection
   /// Listen to this or use the [on] method to filter specific event types
@@ -491,10 +491,12 @@ class StreamChatClient {
     final previousState = wsConnectionStatus;
     final currentState = _wsConnectionStatus = status;
 
-    handleEvent(Event(
-      type: EventType.connectionChanged,
-      online: status == ConnectionStatus.connected,
-    ));
+    if (previousState != currentState) {
+      handleEvent(Event(
+        type: EventType.connectionChanged,
+        online: status == ConnectionStatus.connected,
+      ));
+    }
 
     if (currentState == ConnectionStatus.connected &&
         previousState != ConnectionStatus.connected) {
@@ -1213,6 +1215,32 @@ class StreamChatClient {
         messageId,
       );
 
+  /// Mark the thread with [threadId] in the channel with [channelId] of type
+  /// [channelType] as read.
+  Future<EmptyResponse> markThreadRead(
+    String channelId,
+    String channelType,
+    String threadId,
+  ) =>
+      _chatApi.channel.markThreadRead(
+        channelId,
+        channelType,
+        threadId,
+      );
+
+  /// Mark the thread with [threadId] in the channel with [channelId] of type
+  /// [channelType] as unread.
+  Future<EmptyResponse> markThreadUnread(
+    String channelId,
+    String channelType,
+    String threadId,
+  ) =>
+      _chatApi.channel.markThreadUnread(
+        channelId,
+        channelType,
+        threadId,
+      );
+
   /// Creates a new Poll
   Future<CreatePollResponse> createPoll(Poll poll) =>
       _chatApi.polls.createPoll(poll);
@@ -1659,6 +1687,43 @@ class StreamChatClient {
   Future<OGAttachmentResponse> enrichUrl(String url) =>
       _chatApi.general.enrichUrl(url);
 
+  /// Queries threads with the given [options] and [pagination] params.
+  Future<QueryThreadsResponse> queryThreads({
+    ThreadOptions options = const ThreadOptions(),
+    PaginationParams pagination = const PaginationParams(),
+  }) =>
+      _chatApi.threads.queryThreads(
+        options: options,
+        pagination: pagination,
+      );
+
+  /// Retrieves a thread with the given [messageId].
+  ///
+  /// Optionally pass [options] to limit the response.
+  Future<GetThreadResponse> getThread(
+    String messageId, {
+    ThreadOptions options = const ThreadOptions(),
+  }) =>
+      _chatApi.threads.getThread(
+        messageId,
+        options: options,
+      );
+
+  /// Partially updates the thread with the given [messageId].
+  ///
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  Future<UpdateThreadResponse> partialUpdateThread(
+    String messageId, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) =>
+      _chatApi.threads.partialUpdateThread(
+        messageId,
+        set: set,
+        unset: unset,
+      );
+
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline
   /// user's data.
@@ -1712,30 +1777,32 @@ class ClientState {
       cancelEventSubscription();
     }
 
-    _eventsSubscription = CompositeSubscription();
-    _eventsSubscription!
-      ..add(_client
-          .on()
-          .where((event) =>
-              event.me != null && event.type != EventType.healthCheck)
-          .map((e) => e.me!)
-          .listen((user) {
-        currentUser = currentUser?.merge(user) ?? user;
-      }))
-      ..add(_client
-          .on()
-          .map((event) => event.unreadChannels)
-          .whereType<int>()
-          .listen((count) {
-        currentUser = currentUser?.copyWith(unreadChannels: count);
-      }))
-      ..add(_client
-          .on()
-          .map((event) => event.totalUnreadCount)
-          .whereType<int>()
-          .listen((count) {
-        currentUser = currentUser?.copyWith(totalUnreadCount: count);
-      }));
+    _eventsSubscription = CompositeSubscription()
+      ..add(
+        _client.on().listen((event) {
+          // Update the current user only if the event is not a health check.
+          if (event.me case final user?) {
+            if (event.type != EventType.healthCheck) {
+              currentUser = currentUser?.merge(user) ?? user;
+            }
+          }
+
+          // Update the total unread count.
+          if (event.totalUnreadCount case final count?) {
+            currentUser = currentUser?.copyWith(totalUnreadCount: count);
+          }
+
+          // Update the unread channels count.
+          if (event.unreadChannels case final count?) {
+            currentUser = currentUser?.copyWith(unreadChannels: count);
+          }
+
+          // Update the unread threads count.
+          if (event.unreadThreads case final count?) {
+            currentUser = currentUser?.copyWith(unreadThreads: count);
+          }
+        }),
+      );
 
     _listenChannelLeft();
 
@@ -1873,6 +1940,12 @@ class ClientState {
   /// The current unread channels count as a stream
   Stream<int> get unreadChannelsStream => _unreadChannelsController.stream;
 
+  /// The current unread thread count.
+  int get unreadThreads => _unreadThreadsController.value;
+
+  /// The current unread threads count as a stream.
+  Stream<int> get unreadThreadsStream => _unreadThreadsController.stream;
+
   /// The current total unread messages count
   int get totalUnreadCount => _totalUnreadCountController.value;
 
@@ -1909,14 +1982,16 @@ class ClientState {
   }
 
   void _computeUnreadCounts(OwnUser? user) {
-    final totalUnreadCount = user?.totalUnreadCount;
-    if (totalUnreadCount != null) {
-      _totalUnreadCountController.add(totalUnreadCount);
+    if (user?.totalUnreadCount case final count?) {
+      _totalUnreadCountController.add(count);
     }
 
-    final unreadChannels = user?.unreadChannels;
-    if (unreadChannels != null) {
-      _unreadChannelsController.add(unreadChannels);
+    if (user?.unreadChannels case final count?) {
+      _unreadChannelsController.add(count);
+    }
+
+    if (user?.unreadThreads case final count?) {
+      _unreadThreadsController.add(count);
     }
   }
 
@@ -1924,6 +1999,7 @@ class ClientState {
   final _currentUserController = BehaviorSubject<OwnUser?>();
   final _usersController = BehaviorSubject<Map<String, User>>.seeded({});
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
+  final _unreadThreadsController = BehaviorSubject<int>.seeded(0);
   final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
 
   /// Call this method to dispose this object
@@ -1931,6 +2007,7 @@ class ClientState {
     cancelEventSubscription();
     _currentUserController.close();
     _unreadChannelsController.close();
+    _unreadThreadsController.close();
     _totalUnreadCountController.close();
 
     final channels = [...this.channels.keys];

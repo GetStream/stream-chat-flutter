@@ -21,6 +21,7 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
               ?.map((e) => ChannelMute.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      unreadThreads: (json['unread_threads'] as num?)?.toInt() ?? 0,
       id: json['id'] as String,
       role: json['role'] as String?,
       createdAt: json['created_at'] == null

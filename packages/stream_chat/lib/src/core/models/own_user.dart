@@ -16,6 +16,7 @@ class OwnUser extends User {
     this.totalUnreadCount = 0,
     this.unreadChannels = 0,
     this.channelMutes = const [],
+    this.unreadThreads = 0,
     required super.id,
     super.role,
     super.name,
@@ -73,6 +74,7 @@ class OwnUser extends User {
     List<Mute>? mutes,
     int? totalUnreadCount,
     int? unreadChannels,
+    int? unreadThreads,
     String? language,
   }) =>
       OwnUser(
@@ -96,6 +98,7 @@ class OwnUser extends User {
         mutes: mutes ?? this.mutes,
         totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
         unreadChannels: unreadChannels ?? this.unreadChannels,
+        unreadThreads: unreadThreads ?? this.unreadThreads,
         language: language ?? this.language,
       );
 
@@ -120,6 +123,7 @@ class OwnUser extends User {
       teams: other.teams,
       totalUnreadCount: other.totalUnreadCount,
       unreadChannels: other.unreadChannels,
+      unreadThreads: other.unreadThreads,
       updatedAt: other.updatedAt,
       language: other.language,
     );
@@ -145,6 +149,10 @@ class OwnUser extends User {
   @JsonKey(includeIfNull: false)
   final int unreadChannels;
 
+  /// Total unread threads by the user.
+  @JsonKey(includeIfNull: false)
+  final int unreadThreads;
+
   /// Known top level fields.
   ///
   /// Useful for [Serializer] methods.
@@ -154,6 +162,7 @@ class OwnUser extends User {
     'total_unread_count',
     'unread_channels',
     'channel_mutes',
+    'unread_threads',
     ...User.topLevelFields,
   ];
 }

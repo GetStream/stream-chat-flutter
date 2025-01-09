@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
 import 'package:stream_chat_flutter/src/theme/poll_option_votes_dialog_theme.dart';
 import 'package:stream_chat_flutter/src/theme/poll_options_dialog_theme.dart';
 import 'package:stream_chat_flutter/src/theme/poll_results_dialog_theme.dart';
+import 'package:stream_chat_flutter/src/theme/thread_list_tile_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatTheme}
@@ -67,6 +68,7 @@ class StreamChatThemeData {
     StreamPollResultsDialogThemeData? pollResultsDialogTheme,
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
+    StreamThreadListTileThemeData? threadListTileTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -100,6 +102,7 @@ class StreamChatThemeData {
       pollResultsDialogTheme: pollResultsDialogTheme,
       pollCommentsDialogTheme: pollCommentsDialogTheme,
       pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
+      threadListTileTheme: threadListTileTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -134,6 +137,7 @@ class StreamChatThemeData {
     required this.pollOptionsDialogTheme,
     required this.pollCommentsDialogTheme,
     required this.pollOptionVotesDialogTheme,
+    required this.threadListTileTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -479,6 +483,30 @@ class StreamChatThemeData {
         pollOptionVoteItemBackgroundColor: colorTheme.inputBg,
         pollOptionVoteItemBorderRadius: BorderRadius.circular(12),
       ),
+      threadListTileTheme: StreamThreadListTileThemeData(
+        backgroundColor: colorTheme.barsBg,
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        threadUnreadMessageCountStyle: textTheme.footnoteBold.copyWith(
+          color: Colors.white,
+        ),
+        threadUnreadMessageCountBackgroundColor:
+            channelPreviewTheme.unreadCounterColor,
+        threadChannelNameStyle: textTheme.bodyBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        threadReplyToMessageStyle: textTheme.footnote.copyWith(
+          color: colorTheme.textLowEmphasis,
+        ),
+        threadLatestReplyTimestampStyle: textTheme.footnote.copyWith(
+          color: colorTheme.textLowEmphasis,
+        ),
+        threadLatestReplyUsernameStyle: textTheme.bodyBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        threadLatestReplyMessageStyle: textTheme.body.copyWith(
+          color: colorTheme.textLowEmphasis,
+        ),
+      ),
     );
   }
 
@@ -541,6 +569,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamPollOptionVotesDialog] widget.
   final StreamPollOptionVotesDialogThemeData pollOptionVotesDialogTheme;
 
+  /// Theme configuration for the [StreamThreadListTile] widget.
+  final StreamThreadListTileThemeData threadListTileTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -567,6 +598,7 @@ class StreamChatThemeData {
     StreamPollOptionsDialogThemeData? pollOptionsDialogTheme,
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
+    StreamThreadListTileThemeData? threadListTileTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -594,6 +626,7 @@ class StreamChatThemeData {
             pollCommentsDialogTheme ?? this.pollCommentsDialogTheme,
         pollOptionVotesDialogTheme:
             pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
+        threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
       );
 
   /// Merge themes
@@ -625,6 +658,7 @@ class StreamChatThemeData {
           pollCommentsDialogTheme.merge(other.pollCommentsDialogTheme),
       pollOptionVotesDialogTheme:
           pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
+      threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
     );
   }
 }

@@ -45,35 +45,27 @@ PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['created_at_around'] as String),
     );
 
-Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
-  final val = <String, dynamic>{
-    'limit': instance.limit,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('offset', instance.offset);
-  writeNotNull('next', instance.next);
-  writeNotNull('id_around', instance.idAround);
-  writeNotNull('id_gt', instance.greaterThan);
-  writeNotNull('id_gte', instance.greaterThanOrEqual);
-  writeNotNull('id_lt', instance.lessThan);
-  writeNotNull('id_lte', instance.lessThanOrEqual);
-  writeNotNull('created_at_after_or_equal',
-      instance.createdAtAfterOrEqual?.toIso8601String());
-  writeNotNull('created_at_after', instance.createdAtAfter?.toIso8601String());
-  writeNotNull('created_at_before_or_equal',
-      instance.createdAtBeforeOrEqual?.toIso8601String());
-  writeNotNull(
-      'created_at_before', instance.createdAtBefore?.toIso8601String());
-  writeNotNull(
-      'created_at_around', instance.createdAtAround?.toIso8601String());
-  return val;
-}
+Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) =>
+    <String, dynamic>{
+      'limit': instance.limit,
+      if (instance.offset case final value?) 'offset': value,
+      if (instance.next case final value?) 'next': value,
+      if (instance.idAround case final value?) 'id_around': value,
+      if (instance.greaterThan case final value?) 'id_gt': value,
+      if (instance.greaterThanOrEqual case final value?) 'id_gte': value,
+      if (instance.lessThan case final value?) 'id_lt': value,
+      if (instance.lessThanOrEqual case final value?) 'id_lte': value,
+      if (instance.createdAtAfterOrEqual?.toIso8601String() case final value?)
+        'created_at_after_or_equal': value,
+      if (instance.createdAtAfter?.toIso8601String() case final value?)
+        'created_at_after': value,
+      if (instance.createdAtBeforeOrEqual?.toIso8601String() case final value?)
+        'created_at_before_or_equal': value,
+      if (instance.createdAtBefore?.toIso8601String() case final value?)
+        'created_at_before': value,
+      if (instance.createdAtAround?.toIso8601String() case final value?)
+        'created_at_around': value,
+    };
 
 Map<String, dynamic> _$PartialUpdateUserRequestToJson(
         PartialUpdateUserRequest instance) =>
@@ -83,5 +75,16 @@ Map<String, dynamic> _$PartialUpdateUserRequestToJson(
       'id': instance.id,
       'set': instance.set,
       'unset': instance.unset,
+      'props': instance.props,
+    };
+
+Map<String, dynamic> _$ThreadOptionsToJson(ThreadOptions instance) =>
+    <String, dynamic>{
+      'stringify': instance.stringify,
+      'hash_code': instance.hashCode,
+      'watch': instance.watch,
+      'reply_limit': instance.replyLimit,
+      'participant_limit': instance.participantLimit,
+      'member_limit': instance.memberLimit,
       'props': instance.props,
     };

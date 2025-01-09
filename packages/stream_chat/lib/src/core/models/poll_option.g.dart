@@ -12,17 +12,9 @@ PollOption _$PollOptionFromJson(Map<String, dynamic> json) => PollOption(
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
     );
 
-Map<String, dynamic> _$PollOptionToJson(PollOption instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('id', instance.id);
-  val['text'] = instance.text;
-  val['extra_data'] = instance.extraData;
-  return val;
-}
+Map<String, dynamic> _$PollOptionToJson(PollOption instance) =>
+    <String, dynamic>{
+      if (instance.id case final value?) 'id': value,
+      'text': instance.text,
+      'extra_data': instance.extraData,
+    };

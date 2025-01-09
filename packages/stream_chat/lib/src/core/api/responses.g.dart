@@ -396,3 +396,24 @@ QueryPollVotesResponse _$QueryPollVotesResponseFromJson(
               .toList() ??
           []
       ..next = json['next'] as String?;
+
+GetThreadResponse _$GetThreadResponseFromJson(Map<String, dynamic> json) =>
+    GetThreadResponse()
+      ..duration = json['duration'] as String?
+      ..thread = Thread.fromJson(json['thread'] as Map<String, dynamic>);
+
+UpdateThreadResponse _$UpdateThreadResponseFromJson(
+        Map<String, dynamic> json) =>
+    UpdateThreadResponse()
+      ..duration = json['duration'] as String?
+      ..thread = Thread.fromJson(json['thread'] as Map<String, dynamic>);
+
+QueryThreadsResponse _$QueryThreadsResponseFromJson(
+        Map<String, dynamic> json) =>
+    QueryThreadsResponse()
+      ..duration = json['duration'] as String?
+      ..threads = (json['threads'] as List<dynamic>?)
+              ?.map((e) => Thread.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          []
+      ..next = json['next'] as String?;

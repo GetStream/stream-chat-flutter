@@ -1519,6 +1519,18 @@ class Channel {
     return response;
   }
 
+  /// Mark the thread with [threadId] in the channel as read.
+  Future<EmptyResponse> markThreadRead(String threadId) {
+    _checkInitialized();
+    return client.markThreadRead(id!, type, threadId);
+  }
+
+  /// Mark the thread with [threadId] in the channel as unread.
+  Future<EmptyResponse> markThreadUnread(String threadId) {
+    _checkInitialized();
+    return client.markThreadUnread(id!, type, threadId);
+  }
+
   void _initState(ChannelState channelState) {
     state = ChannelClientState(this, channelState);
 
