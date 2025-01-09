@@ -1,9 +1,9 @@
-## Upcoming
+## 9.1.0
 
 ✅ Added
 
 - Added a new `StreamThreadListView` widget to load and display list of threads.
-- Added a new `UnreadThreadsBanner` widget to display count of unread threads.
+- Added a new `StreamUnreadThreadsBanner` widget to display count of unread threads.
 - Added new `StreamUnreadIndicator.channels` and `StreamUnreadIndicator.threads` constructors to
   display unread channels and threads respectively.
 

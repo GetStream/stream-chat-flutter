@@ -1,4 +1,4 @@
-## Upcoming
+## 9.1.0
 
 - Added translations for new `repliedToLabel` label.
 - Added translations for new `newThreadsLabel` label.
