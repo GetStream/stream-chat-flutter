@@ -22,7 +22,8 @@ environment:
   flutter: ">=3.24.5"
 
 dependencies:
-  cached_network_image: ^3.3.1
+  cached_network_image: ^3.4.1
+  cached_network_image_platform_interface: ^4.1.1
   chewie: ^1.8.1
   collection: ^1.17.2
   contextmenu: ^3.0.0
