@@ -131,6 +131,7 @@ class StreamChannelAvatar extends StatelessWidget {
               child: channelImage.isEmpty
                   ? fallbackWidget
                   : CachedNetworkImage(
+                      imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
                       imageUrl: channelImage,
                       errorWidget: (_, __, ___) => fallbackWidget,
                       fit: BoxFit.cover,

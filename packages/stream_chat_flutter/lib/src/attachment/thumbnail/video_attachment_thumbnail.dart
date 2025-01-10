@@ -57,6 +57,7 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
     final thumbUrl = video.thumbUrl;
     if (thumbUrl != null) {
       return CachedNetworkImage(
+        imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
         imageUrl: thumbUrl,
         width: width,
         height: height,

@@ -71,6 +71,7 @@ class StreamGiphyAttachmentThumbnail extends StatelessWidget {
     }
 
     return CachedNetworkImage(
+      imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
       imageUrl: info.url,
       width: width,
       height: height,

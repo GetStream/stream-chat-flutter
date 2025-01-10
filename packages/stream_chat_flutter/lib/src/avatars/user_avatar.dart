@@ -98,6 +98,7 @@ class StreamUserAvatar extends StatelessWidget {
             streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
         child: hasImage
             ? CachedNetworkImage(
+                imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.high,
                 imageUrl: user.image!,

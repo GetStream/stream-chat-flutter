@@ -179,6 +179,7 @@ class _RemoteImageAttachment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CachedNetworkImage(
+      imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
       imageUrl: url,
       width: width,
       height: height,

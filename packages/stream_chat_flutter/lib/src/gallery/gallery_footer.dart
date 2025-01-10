@@ -240,6 +240,7 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: CachedNetworkImage(
+                              imageRenderMethodForWeb: ImageRenderMethodForWeb.HttpGet,
                               imageUrl: attachment.imageUrl ??
                                   attachment.assetUrl ??
                                   attachment.thumbUrl!,

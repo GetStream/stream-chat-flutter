@@ -1,3 +1,9 @@
+## 9.1.1
+
+🐞 Fixed
+
+- [[#2067]](https://github.com/GetStream/stream-chat-flutter/issues/2067) Fixed Cached Network Image not working in Flutter 3.27 web. Temporary workaround.
+
 ## 9.1.0
 
 ✅ Added
