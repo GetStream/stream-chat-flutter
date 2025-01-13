@@ -24,3 +24,7 @@ dependency_overrides:
       url: https://github.com/GetStream/stream-chat-flutter.git
       ref: master
       path: packages/stream_chat_localizations
+
+  # The last chewie version that supports flutter 3.24.5
+  # Issue: https://github.com/fluttercommunity/chewie/issues/888
+  chewie: 1.8.5
