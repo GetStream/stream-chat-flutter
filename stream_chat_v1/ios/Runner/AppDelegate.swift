@@ -1,7 +1,7 @@
 import UIKit
 import Flutter
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
     let sharedDefaults = UserDefaults(suiteName: "group.io.getstream.flutter")
     
