@@ -56,6 +56,7 @@ class _ThreadPageState extends State<ThreadPage> {
               parentMessage: widget.parent,
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
+              markReadWhenAtTheBottom: true,
               //onMessageSwiped: _reply,
               messageFilter: defaultFilter,
               showScrollToBottom: false,

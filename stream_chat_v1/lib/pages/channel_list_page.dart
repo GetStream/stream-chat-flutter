@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:example/app.dart';
+import 'package:example/pages/thread_list_page.dart';
 import 'package:example/pages/user_mentions_page.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/state/init_data.dart';
@@ -41,9 +42,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
                   ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
             ),
-            const Positioned(
-              top: -3,
-              right: -16,
+            PositionedDirectional(
+              top: -4,
+              start: 12,
               child: StreamUnreadIndicator(),
             ),
           ],
@@ -51,17 +52,30 @@ class _ChannelListPageState extends State<ChannelListPage> {
         label: AppLocalizations.of(context).chats,
       ),
       BottomNavigationBarItem(
+        icon: StreamSvgIcon.mentions(
+          color: _isSelected(1)
+              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
+              : Colors.grey,
+        ),
+        label: AppLocalizations.of(context).mentions,
+      ),
+      BottomNavigationBarItem(
         icon: Stack(
           clipBehavior: Clip.none,
           children: [
-            StreamSvgIcon.mentions(
-              color: _isSelected(1)
+            Icon(Icons.message_outlined,
+              color: _isSelected(2)
                   ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
             ),
+            PositionedDirectional(
+              top: -4,
+              start: 12,
+              child: StreamUnreadIndicator.threads(),
+            ),
           ],
         ),
-        label: AppLocalizations.of(context).mentions,
+        label: 'Threads',
       ),
     ];
   }
@@ -105,6 +119,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
         children: const [
           ChannelList(),
           UserMentionsPage(),
+          ThreadListPage(),
         ],
       ),
     );
