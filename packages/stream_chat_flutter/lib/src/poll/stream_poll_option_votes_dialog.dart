@@ -20,19 +20,22 @@ Future<T?> showStreamPollOptionVotesDialog<T extends Object?>({
   return navigator.push(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (_) => ValueListenableBuilder(
-        valueListenable: messageNotifier,
-        builder: (context, message, child) {
-          final poll = message.poll;
-          if (poll == null) return const SizedBox.shrink();
-          if (option.id == null) return const SizedBox.shrink();
+      builder: (_) => StreamChannel(
+        channel: StreamChannel.of(context).channel,
+        child: ValueListenableBuilder(
+          valueListenable: messageNotifier,
+          builder: (context, message, child) {
+            final poll = message.poll;
+            if (poll == null) return const SizedBox.shrink();
+            if (option.id == null) return const SizedBox.shrink();
 
-          return StreamPollOptionVotesDialog(
-            poll: poll,
-            option: option,
-            pollVotesCount: poll.voteCountsByOption[option.id],
-          );
-        },
+            return StreamPollOptionVotesDialog(
+              poll: poll,
+              option: option,
+              pollVotesCount: poll.voteCountsByOption[option.id],
+            );
+          },
+        ),
       ),
     ),
   );
