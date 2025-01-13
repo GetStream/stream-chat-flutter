@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamChannel` not available in the widget tree for various Poll options.
+
 ## 9.1.0
 
 ✅ Added
