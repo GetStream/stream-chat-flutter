@@ -2,7 +2,7 @@
 
 🐞 Fixed
 
-- Fixed `StreamChannel` not available in the widget tree for various Poll options.
+- Fixed `StreamChannel` not available in the widget tree for various poll-related dialogs.
 
 ## 9.1.0
 
