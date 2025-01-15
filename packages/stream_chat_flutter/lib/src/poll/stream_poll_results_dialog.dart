@@ -29,26 +29,29 @@ Future<T?> showStreamPollResultsDialog<T extends Object?>({
   return navigator.push(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (_) => ValueListenableBuilder(
-        valueListenable: messageNotifier,
-        builder: (context, message, child) {
-          final poll = message.poll;
-          if (poll == null) return const SizedBox.shrink();
+      builder: (_) => StreamChannel(
+        channel: StreamChannel.of(context).channel,
+        child: ValueListenableBuilder(
+          valueListenable: messageNotifier,
+          builder: (context, message, child) {
+            final poll = message.poll;
+            if (poll == null) return const SizedBox.shrink();
 
-          void onShowAllVotesPressed(PollOption option) {
-            showStreamPollOptionVotesDialog(
-              context: context,
-              messageNotifier: messageNotifier,
-              option: option,
+            void onShowAllVotesPressed(PollOption option) {
+              showStreamPollOptionVotesDialog(
+                context: context,
+                messageNotifier: messageNotifier,
+                option: option,
+              );
+            }
+
+            return StreamPollResultsDialog(
+              poll: poll,
+              visibleVotesCount: 5,
+              onShowAllVotesPressed: onShowAllVotesPressed,
             );
-          }
-
-          return StreamPollResultsDialog(
-            poll: poll,
-            visibleVotesCount: 5,
-            onShowAllVotesPressed: onShowAllVotesPressed,
-          );
-        },
+          },
+        ),
       ),
     ),
   );

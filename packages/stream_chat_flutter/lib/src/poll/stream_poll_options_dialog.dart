@@ -18,8 +18,9 @@ Future<T?> showStreamPollOptionsDialog<T extends Object?>({
   return navigator.push(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (context) {
-        return ValueListenableBuilder(
+      builder: (_) => StreamChannel(
+        channel: StreamChannel.of(context).channel,
+        child: ValueListenableBuilder(
           valueListenable: messageNotifier,
           builder: (context, message, child) {
             final poll = message.poll;
@@ -41,8 +42,8 @@ Future<T?> showStreamPollOptionsDialog<T extends Object?>({
               onRemoveVote: onRemoveVote,
             );
           },
-        );
-      },
+        ),
+      ),
     ),
   );
 }

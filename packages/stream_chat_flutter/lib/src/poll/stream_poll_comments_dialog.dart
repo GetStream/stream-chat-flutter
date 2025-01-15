@@ -21,31 +21,34 @@ Future<T?> showStreamPollCommentsDialog<T extends Object?>({
   return navigator.push(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (_) => ValueListenableBuilder(
-        valueListenable: messageNotifier,
-        builder: (context, message, child) {
-          final poll = message.poll;
-          if (poll == null) return const SizedBox.shrink();
+      builder: (_) => StreamChannel(
+        channel: StreamChannel.of(context).channel,
+        child: ValueListenableBuilder(
+          valueListenable: messageNotifier,
+          builder: (context, message, child) {
+            final poll = message.poll;
+            if (poll == null) return const SizedBox.shrink();
 
-          final channel = StreamChannel.of(context).channel;
+            final channel = StreamChannel.of(context).channel;
 
-          Future<void> onUpdateComment() async {
-            final commentText = await showPollAddCommentDialog(
-              context: context,
-              // We use the first answer as the initial value because the
-              // user can only add one comment per poll.
-              initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
+            Future<void> onUpdateComment() async {
+              final commentText = await showPollAddCommentDialog(
+                context: context,
+                // We use the first answer as the initial value because the
+                // user can only add one comment per poll.
+                initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
+              );
+
+              if (commentText == null) return;
+              channel.addPollAnswer(message, poll, answerText: commentText);
+            }
+
+            return StreamPollCommentsDialog(
+              poll: poll,
+              onUpdateComment: onUpdateComment,
             );
-
-            if (commentText == null) return;
-            channel.addPollAnswer(message, poll, answerText: commentText);
-          }
-
-          return StreamPollCommentsDialog(
-            poll: poll,
-            onUpdateComment: onUpdateComment,
-          );
-        },
+          },
+        ),
       ),
     ),
   );
