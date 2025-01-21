@@ -59,9 +59,9 @@ command:
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
       stream_chat: ^9.2.0
-      stream_chat_flutter: ^9.2.0
+      stream_chat_flutter: ^9.2.0+1
       stream_chat_flutter_core: ^9.2.0
-      stream_chat_localizations: ^9.2.0
+      stream_chat_localizations: ^9.2.0+1
       stream_chat_persistence: ^9.2.0
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4

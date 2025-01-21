@@ -1,3 +1,7 @@
+## 9.2.0+1
+
+- Remove untracked files from the package.
+
 ## 9.2.0
 
 🐞 Fixed
