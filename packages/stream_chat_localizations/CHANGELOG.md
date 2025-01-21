@@ -1,3 +1,7 @@
+## 9.2.0
+
+- Updated `stream_chat_flutter` dependency to [`9.2.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.1.0
 
 - Added translations for new `repliedToLabel` label.
