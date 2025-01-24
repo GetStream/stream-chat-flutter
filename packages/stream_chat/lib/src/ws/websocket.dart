@@ -166,10 +166,15 @@ class WebSocket with TimerHelper {
       ...queryParameters,
     };
     final scheme = baseUrl.startsWith('https') ? 'wss' : 'ws';
-    final host = baseUrl.replaceAll(RegExp(r'(^\w+:|^)\/\/'), '');
+    final address = baseUrl.replaceAll(RegExp(r'(^\w+:|^)\/\/'), '');
+    final addressParts = address.split(':');
+    final host = addressParts[0];
+    final port = addressParts.length > 1 ? int.tryParse(addressParts[1]) : null;
+    _logger?.info('[buildUri] #ws; scheme: $scheme, host: $host, port: $port');
     return Uri(
       scheme: scheme,
       host: host,
+      port: port,
       pathSegments: ['connect'],
       queryParameters: qs,
     );
@@ -199,6 +204,7 @@ class WebSocket with TimerHelper {
       final uri = await _buildUri(
         includeUserDetails: includeUserDetails,
       );
+      _logger?.info('[connect] #ws; uri: $uri');
       _initWebSocketChannel(uri);
     } catch (e, stk) {
       _onConnectionError(e, stk);
@@ -230,6 +236,7 @@ class WebSocket with TimerHelper {
           refreshToken: refreshToken,
           includeUserDetails: false,
         );
+        _logger?.info('[reconnect] #ws; uri: $uri');
         try {
           _initWebSocketChannel(uri);
         } catch (e, stk) {
@@ -350,7 +357,7 @@ class WebSocket with TimerHelper {
   }
 
   void _onConnectionError(error, [stacktrace]) {
-    _logger?.warning('Error occurred', error, stacktrace);
+    _logger?.warning('[onConnectionError] #ws; error occurred', error, stacktrace);
 
     StreamWebSocketError wsError;
     if (error is WebSocketChannelException) {

@@ -25,6 +25,7 @@ export 'src/core/api/responses.dart';
 export 'src/core/api/stream_chat_api.dart';
 export 'src/core/error/error.dart';
 export 'src/core/http/interceptor/logging_interceptor.dart';
+export 'src/core/http/stream_http_client.dart';
 export 'src/core/models/action.dart';
 export 'src/core/models/attachment.dart';
 export 'src/core/models/attachment_file.dart';

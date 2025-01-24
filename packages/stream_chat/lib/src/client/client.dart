@@ -69,6 +69,7 @@ class StreamChatClient {
     this.logHandlerFunction = StreamChatClient.defaultLogHandler,
     RetryPolicy? retryPolicy,
     String? baseURL,
+    String? baseWsUrl,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     StreamChatApi? chatApi,
@@ -102,7 +103,7 @@ class StreamChatClient {
     _ws = ws ??
         WebSocket(
           apiKey: apiKey,
-          baseUrl: options.baseUrl,
+          baseUrl: baseWsUrl ?? options.baseUrl,
           tokenManager: _tokenManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
