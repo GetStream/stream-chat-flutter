@@ -110,6 +110,8 @@ StreamChatClient buildStreamChatClient(String apiKey) {
     apiKey,
     logLevel: logLevel,
     logHandlerFunction: _sampleAppLogHandler,
+    //baseURL: 'http://<local-ip>:3030',
+    //baseWsUrl: 'ws://<local-ip>:8800',
   )..chatPersistenceClient = chatPersistentClient;
 }
 
@@ -173,9 +175,14 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
             .listen(_onFirebaseTokenRefresh(client)));
 
         final token = await FirebaseMessaging.instance.getToken();
+        debugPrint('[onTokenInit] #firebase; token: $token');
         if (token != null) {
+          // replace with your push provider name, e.g., 'chat-flutter-firebase'
+          const pushProviderName = null;
+
           // add Token to Stream
-          await client.addDevice(token, PushProvider.firebase);
+          await client.addDevice(token, PushProvider.firebase,
+              pushProviderName: pushProviderName);
         }
       }
       // User logged out
