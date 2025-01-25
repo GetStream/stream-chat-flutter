@@ -1,3 +1,17 @@
+## Upcoming
+
+✅ Added
+
+- Added support for overriding the `baseUrl` of the websocket.
+
+  ```dart
+  final client = StreamChatClient(
+    apiKey,
+    logLevel: Level.INFO,
+    baseWsUrl: 'http://localhost:8080',
+  );
+  ```
+
 ## 9.2.0
 
 - Bug fixes and improvements

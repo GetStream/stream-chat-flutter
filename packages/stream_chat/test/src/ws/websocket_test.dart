@@ -29,7 +29,7 @@ void main() {
 
     webSocket = WebSocket(
       apiKey: 'api-key',
-      baseUrl: 'base-url',
+      baseUrl: 'ws://<local-ip>:8800',
       tokenManager: tokenManager,
       webSocketChannelProvider: channelProvider,
     );
