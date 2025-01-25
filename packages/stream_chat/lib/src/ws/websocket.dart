@@ -166,7 +166,12 @@ class WebSocket with TimerHelper {
       ...queryParameters,
     };
 
-    final scheme = baseUrl.startsWith('https') ? 'wss' : 'ws';
+    final scheme = switch (baseUrl) {
+      final url when url.startsWith(RegExp('^(ws?|http?)://')) => 'ws',
+      final url when url.startsWith(RegExp('^(wss?|https?)://')) => 'wss',
+      _ => throw const FormatException('Invalid url format'),
+    };
+
     final address = baseUrl.replaceAll(RegExp(r'(^\w+:|^)\/\/'), '');
     final (:host, :port) = switch (address.split(':')) {
       [final host] => (host: host, port: null),
