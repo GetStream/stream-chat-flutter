@@ -165,12 +165,17 @@ class WebSocket with TimerHelper {
       'stream-auth-type': token.authType.name,
       ...queryParameters,
     };
+
     final scheme = baseUrl.startsWith('https') ? 'wss' : 'ws';
     final address = baseUrl.replaceAll(RegExp(r'(^\w+:|^)\/\/'), '');
-    final addressParts = address.split(':');
-    final host = addressParts[0];
-    final port = addressParts.length > 1 ? int.tryParse(addressParts[1]) : null;
+    final (:host, :port) = switch (address.split(':')) {
+      [final host] => (host: host, port: null),
+      [final host, final port] => (host: host, port: int.tryParse(port)),
+      _ => throw const FormatException('Invalid address format'),
+    };
+
     _logger?.info('[buildUri] #ws; scheme: $scheme, host: $host, port: $port');
+
     return Uri(
       scheme: scheme,
       host: host,
@@ -357,7 +362,8 @@ class WebSocket with TimerHelper {
   }
 
   void _onConnectionError(error, [stacktrace]) {
-    _logger?.warning('[onConnectionError] #ws; error occurred', error, stacktrace);
+    _logger?.warning(
+        '[onConnectionError] #ws; error occurred', error, stacktrace);
 
     StreamWebSocketError wsError;
     if (error is WebSocketChannelException) {
