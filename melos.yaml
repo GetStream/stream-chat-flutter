@@ -63,6 +63,7 @@ command:
       stream_chat_flutter_core: ^9.2.0
       stream_chat_localizations: ^9.2.0
       stream_chat_persistence: ^9.2.0
+      svg_icon_widget: ^0.0.1
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
       url_launcher: ^6.3.0

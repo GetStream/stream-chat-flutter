@@ -25,7 +25,8 @@ class ErrorAlertSheet extends StatelessWidget {
         const SizedBox(
           height: 26,
         ),
-        StreamSvgIcon.error(
+        StreamSvgIcon(
+          icon: StreamSvgIcons.error,
           color: _streamChatTheme.colorTheme.accentError,
           size: 24,
         ),

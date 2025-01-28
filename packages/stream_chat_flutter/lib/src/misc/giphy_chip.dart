@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
@@ -21,8 +21,9 @@ class GiphyChip extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
       child: Row(
         children: [
-          StreamSvgIcon.lightning(
+          StreamSvgIcon(
             size: 16,
+            icon: StreamSvgIcons.lightning,
             color: colorTheme.barsBg,
           ),
           Text(

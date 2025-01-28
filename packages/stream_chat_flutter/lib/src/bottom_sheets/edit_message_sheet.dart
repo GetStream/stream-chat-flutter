@@ -58,7 +58,8 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8),
-                      child: StreamSvgIcon.edit(
+                      child: StreamSvgIcon(
+                        icon: StreamSvgIcons.edit,
                         color: streamChatThemeData.colorTheme.disabled,
                       ),
                     ),
@@ -68,7 +69,10 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                     ),
                     IconButton(
                       visualDensity: VisualDensity.compact,
-                      icon: StreamSvgIcon.closeSmall(),
+                      icon: StreamSvgIcon(
+                        icon: StreamSvgIcons.closeSmall,
+                        color: streamChatThemeData.colorTheme.textLowEmphasis,
+                      ),
                       onPressed: Navigator.of(context).pop,
                     ),
                   ],

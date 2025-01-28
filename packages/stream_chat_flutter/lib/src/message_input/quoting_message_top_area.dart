@@ -34,7 +34,8 @@ class QuotingMessageTopArea extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(8),
-              child: StreamSvgIcon.reply(
+              child: StreamSvgIcon(
+                icon: StreamSvgIcons.reply,
                 color: _streamChatTheme.colorTheme.disabled,
               ),
             ),
@@ -44,7 +45,10 @@ class QuotingMessageTopArea extends StatelessWidget {
             ),
             IconButton(
               visualDensity: VisualDensity.compact,
-              icon: StreamSvgIcon.closeSmall(),
+              icon: StreamSvgIcon(
+                icon: StreamSvgIcons.closeSmall,
+                color: _streamChatTheme.colorTheme.textLowEmphasis,
+              ),
               onPressed: onQuotedMessageCleared?.call,
             ),
           ],

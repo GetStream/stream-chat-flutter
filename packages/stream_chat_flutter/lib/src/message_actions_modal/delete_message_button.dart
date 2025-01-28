@@ -28,8 +28,9 @@ class DeleteMessageButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
-            StreamSvgIcon.delete(
+            const StreamSvgIcon(
               color: Colors.red,
+              icon: StreamSvgIcons.delete,
             ),
             const SizedBox(width: 16),
             Text(

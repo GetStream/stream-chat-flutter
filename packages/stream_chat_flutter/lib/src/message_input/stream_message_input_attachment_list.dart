@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/file_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -311,10 +311,10 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             if (attachment.type == AttachmentType.video)
-              Positioned(
+              const Positioned(
                 left: 8,
                 bottom: 8,
-                child: StreamSvgIcon.videoCall(),
+                child: StreamSvgIcon(icon: StreamSvgIcons.videoCall),
               ),
             Positioned(
               top: 8,
@@ -359,8 +359,9 @@ class RemoveAttachmentButton extends StatelessWidget {
         ),
         // ignore: deprecated_member_use
         fillColor: colorTheme.textHighEmphasis.withOpacity(0.5),
-        child: StreamSvgIcon.close(
+        child: StreamSvgIcon(
           size: 24,
+          icon: StreamSvgIcons.close,
           color: colorTheme.barsBg,
         ),
       ),

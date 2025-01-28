@@ -25,8 +25,9 @@ class CopyMessageButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
-            StreamSvgIcon.copy(
+            StreamSvgIcon(
               size: 24,
+              icon: StreamSvgIcons.copy,
               color: streamChatThemeData.primaryIconTheme.color,
             ),
             const SizedBox(width: 16),

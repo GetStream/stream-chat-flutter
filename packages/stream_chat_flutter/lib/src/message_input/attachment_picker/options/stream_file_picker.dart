@@ -2,8 +2,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -60,8 +60,9 @@ class StreamFilePicker extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: StreamSvgIcon.files(
+        child: StreamSvgIcon(
           size: 240,
+          icon: StreamSvgIcons.files,
           color: theme.colorTheme.disabled,
         ),
         onEndOfFrame: (_) async {
@@ -85,8 +86,9 @@ class StreamFilePicker extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StreamSvgIcon.files(
+              StreamSvgIcon(
                 size: 240,
+                icon: StreamSvgIcons.files,
                 color: theme.colorTheme.disabled,
               ),
               Text(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/misc/visible_footnote.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
@@ -208,7 +208,7 @@ class GiphyHeader extends StatelessWidget {
     final colorTheme = StreamChatTheme.of(context).colorTheme;
     return Row(
       children: [
-        StreamSvgIcon.giphyIcon(),
+        const StreamSvgIcon(icon: StreamSvgIcons.giphy),
         const SizedBox(width: 8),
         Text(
           context.translations.giphyLabel,

@@ -503,14 +503,6 @@ extension AttachmentPickerTypeX on AttachmentPickerType {
   }
 }
 
-/// Useful extensions on [StreamSvgIcon].
-extension StreamSvgIconX on StreamSvgIcon {
-  /// Converts the [StreamSvgIcon] to a [StreamIconThemeSvgIcon].
-  StreamIconThemeSvgIcon toIconThemeSvgIcon() {
-    return StreamIconThemeSvgIcon.fromStreamSvgIcon(this);
-  }
-}
-
 /// Useful extensions on [BoxConstraints].
 extension ConstraintsX on BoxConstraints {
   /// Returns new box constraints that tightens the max width and max height

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 
 const double _kDefaultCommandButtonSize = 24;
 
@@ -56,8 +56,9 @@ class CommandButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: icon ??
-          StreamSvgIcon.lightning(
+          StreamSvgIcon(
             color: color,
+            icon: StreamSvgIcons.lightning,
           ),
       padding: EdgeInsets.zero,
       constraints: BoxConstraints.tightFor(

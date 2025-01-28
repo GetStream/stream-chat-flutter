@@ -25,7 +25,8 @@ class ReplyButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
-            StreamSvgIcon.reply(
+            StreamSvgIcon(
+              icon: StreamSvgIcons.reply,
               color: streamChatThemeData.primaryIconTheme.color,
             ),
             const SizedBox(width: 16),

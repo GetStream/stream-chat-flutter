@@ -26,8 +26,9 @@ class StreamBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
-    Widget icon = StreamSvgIcon.left(
+    Widget icon = StreamSvgIcon(
       size: 24,
+      icon: StreamSvgIcons.left,
       color: theme.colorTheme.textHighEmphasis,
     );
 

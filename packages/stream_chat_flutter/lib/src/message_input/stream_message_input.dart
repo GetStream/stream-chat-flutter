@@ -796,7 +796,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     widget.actionsLocation == ActionsLocation.rightInside)
                 ? pi
                 : 0,
-            child: StreamSvgIcon.emptyCircleLeft(
+            child: StreamSvgIcon(
+              icon: StreamSvgIcons.emptyCircleRight,
               color: _messageInputTheme.expandButtonColor,
             ),
           ),
@@ -1100,9 +1101,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        StreamSvgIcon.lightning(
+                        const StreamSvgIcon(
                           color: Colors.white,
                           size: 16,
+                          icon: StreamSvgIcons.lightning,
                         ),
                         Text(
                           _effectiveController.message.command!.toUpperCase(),
@@ -1132,7 +1134,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: IconButton(
-                icon: StreamSvgIcon.closeSmall(),
+                icon: const StreamSvgIcon(icon: StreamSvgIcons.closeSmall),
                 splashRadius: 24,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
@@ -1419,7 +1421,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
             element.group(0)?.split('.').last.isValidTLD() == true)) {
       showInfoBottomSheet(
         context,
-        icon: StreamSvgIcon.error(
+        icon: StreamSvgIcon(
+          icon: StreamSvgIcons.error,
           color: StreamChatTheme.of(context).colorTheme.accentError,
           size: 24,
         ),
@@ -1595,7 +1598,7 @@ class OGAttachmentPreview extends StatelessWidget {
         ),
         IconButton(
           visualDensity: VisualDensity.compact,
-          icon: StreamSvgIcon.closeSmall(),
+          icon: const StreamSvgIcon(icon: StreamSvgIcons.closeSmall),
           onPressed: onDismissPreviewPressed,
         ),
       ],

@@ -46,8 +46,9 @@ class DmCheckbox extends StatelessWidget {
                   duration: const Duration(milliseconds: 300),
                   reverseDuration: const Duration(milliseconds: 300),
                   crossFadeState: crossFadeState,
-                  firstChild: StreamSvgIcon.check(
+                  firstChild: StreamSvgIcon(
                     size: 16,
+                    icon: StreamSvgIcons.check,
                     color: _streamChatTheme.colorTheme.barsBg,
                   ),
                   secondChild: const SizedBox(

@@ -342,7 +342,7 @@ class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
       color: Color(0xFF080707),
     ),
     this.fileTypeIcon = const StreamSvgIcon(
-      assetName: 'filetype_AAC.svg',
+      icon: StreamSvgIcons.filetypeAudioAac,
     ),
     this.fileSizeTextStyle = const TextStyle(fontSize: 10),
     this.timerTextStyle,
