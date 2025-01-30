@@ -27,30 +27,6 @@ void main() {
     },
   );
 
-  testWidgets(
-    'StreamSendingIndicator shows an Icon if message state is sending',
-    (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChatTheme(
-            data: StreamChatThemeData.light(),
-            child: Scaffold(
-              body: Center(
-                child: StreamSendingIndicator(
-                  message: Message(
-                    state: MessageState.sending,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(Icon), findsOneWidget);
-    },
-  );
-
   goldenTest(
     'golden test for StreamSendingIndicator with StreamSvgIcon.checkAll',
     fileName: 'sending_indicator_0',
@@ -91,7 +67,7 @@ void main() {
   );
 
   goldenTest(
-    'golden test for StreamSendingIndicator with Icon(Icons.access_time)',
+    'golden test for StreamSendingIndicator with StreamSvgIcons.time',
     fileName: 'sending_indicator_2',
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
     builder: () => MaterialAppWrapper(
