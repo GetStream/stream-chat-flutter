@@ -66,7 +66,7 @@ Future<void> main() async {
   final outputFile = File('lib/src/icons/stream_svg_icon.g.dart');
 
   final clazz = Class(
-        (it) => it
+    (it) => it
       ..docs.add(_streamSvgIconsClassDocs)
       ..abstract = true
       ..modifier = ClassModifier.final$
@@ -75,7 +75,7 @@ Future<void> main() async {
         [
           // The package that contains the Stream SVG icons.
           Field(
-                (it) => it
+            (it) => it
               ..docs.add('/// The package that contains the Stream SVG icons.')
               ..static = true
               ..modifier = FieldModifier.constant
@@ -85,12 +85,12 @@ Future<void> main() async {
           ),
           // Icon data for each SVG file
           ...svgIconFiles.map(
-                (file) {
+            (file) {
               final iconFullName = path.basenameWithoutExtension(file.path);
               final iconName = iconFullName.replaceFirst('icon_', '');
               final camelCasedIconName = ReCase(iconName).camelCase;
               return Field(
-                    (it) => it
+                (it) => it
                   ..docs.add("/// Stream SVG icon named '$camelCasedIconName'.")
                   ..static = true
                   ..modifier = FieldModifier.constant
@@ -108,12 +108,12 @@ Future<void> main() async {
           ),
           // Icon data for each colored SVG file
           ...coloredSvgIconFiles.map(
-                (file) {
+            (file) {
               final iconFullName = path.basenameWithoutExtension(file.path);
               final iconName = iconFullName.replaceFirst('icon_', '');
               final camelCasedIconName = ReCase(iconName).camelCase;
               return Field(
-                    (it) => it
+                (it) => it
                   ..docs.add("/// Stream SVG icon named '$camelCasedIconName'.")
                   ..static = true
                   ..modifier = FieldModifier.constant
@@ -124,7 +124,7 @@ Future<void> main() async {
                     StreamSvgIconData(
                       '${file.path}',
                       package: package,
-                      preserveColors: true
+                      preserveColors: true,
                     )''',
                   ),
               );
@@ -138,7 +138,7 @@ Future<void> main() async {
   final clazzSink = library.accept(DartEmitter.scoped());
 
   final formatter = DartFormatter(
-    languageVersion: DartFormatter.latestLanguageVersion,
+    languageVersion: DartFormatter.latestShortStyleLanguageVersion,
   );
 
   try {
@@ -182,7 +182,7 @@ Future<List<File>> _getSvgIconFiles(String iconsPath) async {
 
   final files = iconsDirectory.listSync().whereType<File>();
   final svgIconFiles = files.where(
-        (file) {
+    (file) {
       final split = file.path.split(Platform.pathSeparator);
       return split.last.contains(RegExp(_svgIconFileNamePattern));
     },

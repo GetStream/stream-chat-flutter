@@ -469,18 +469,18 @@ abstract final class StreamSvgIcons {
   /// Stream SVG icon named 'filetypePresentationStandard'.
   static const StreamSvgIconData filetypePresentationStandard =
       StreamSvgIconData(
-        'lib/assets/icons/colored/icon_filetype_presentation_standard.svg',
-        package: package,
-        preserveColors: true,
-      );
+    'lib/assets/icons/colored/icon_filetype_presentation_standard.svg',
+    package: package,
+    preserveColors: true,
+  );
 
   /// Stream SVG icon named 'filetypePresentationSpecial'.
   static const StreamSvgIconData filetypePresentationSpecial =
       StreamSvgIconData(
-        'lib/assets/icons/colored/icon_filetype_presentation_special.svg',
-        package: package,
-        preserveColors: true,
-      );
+    'lib/assets/icons/colored/icon_filetype_presentation_special.svg',
+    package: package,
+    preserveColors: true,
+  );
 
   /// Stream SVG icon named 'filetypeSpreadsheetSpecial'.
   static const StreamSvgIconData filetypeSpreadsheetSpecial = StreamSvgIconData(
@@ -618,10 +618,10 @@ abstract final class StreamSvgIcons {
   /// Stream SVG icon named 'filetypeSpreadsheetStandard'.
   static const StreamSvgIconData filetypeSpreadsheetStandard =
       StreamSvgIconData(
-        'lib/assets/icons/colored/icon_filetype_spreadsheet_standard.svg',
-        package: package,
-        preserveColors: true,
-      );
+    'lib/assets/icons/colored/icon_filetype_spreadsheet_standard.svg',
+    package: package,
+    preserveColors: true,
+  );
 
   /// Stream SVG icon named 'filetypeAudioAac'.
   static const StreamSvgIconData filetypeAudioAac = StreamSvgIconData(
@@ -794,10 +794,10 @@ abstract final class StreamSvgIcons {
   /// Stream SVG icon named 'filetypeCompressionStandard'.
   static const StreamSvgIconData filetypeCompressionStandard =
       StreamSvgIconData(
-        'lib/assets/icons/colored/icon_filetype_compression_standard.svg',
-        package: package,
-        preserveColors: true,
-      );
+    'lib/assets/icons/colored/icon_filetype_compression_standard.svg',
+    package: package,
+    preserveColors: true,
+  );
 
   /// Stream SVG icon named 'filetypeTextDoc'.
   static const StreamSvgIconData filetypeTextDoc = StreamSvgIconData(
