@@ -110,8 +110,9 @@ class AttachmentActionsModal extends StatelessWidget {
                     _buildButton(
                       context,
                       context.translations.replyLabel,
-                      StreamSvgIcon.iconCurveLineLeftUp(
+                      StreamSvgIcon(
                         size: 24,
+                        icon: StreamSvgIcons.reply,
                         color: theme.colorTheme.textLowEmphasis,
                       ),
                       onReply,
@@ -120,8 +121,9 @@ class AttachmentActionsModal extends StatelessWidget {
                     _buildButton(
                       context,
                       context.translations.showInChatLabel,
-                      StreamSvgIcon.eye(
+                      StreamSvgIcon(
                         size: 24,
+                        icon: StreamSvgIcons.eye,
                         color: theme.colorTheme.textHighEmphasis,
                       ),
                       onShowMessage,
@@ -132,8 +134,9 @@ class AttachmentActionsModal extends StatelessWidget {
                       attachment.type == AttachmentType.video
                           ? context.translations.saveVideoLabel
                           : context.translations.saveImageLabel,
-                      StreamSvgIcon.iconSave(
+                      StreamSvgIcon(
                         size: 24,
+                        icon: StreamSvgIcons.save,
                         color: theme.colorTheme.textLowEmphasis,
                       ),
                       () {
@@ -193,8 +196,9 @@ class AttachmentActionsModal extends StatelessWidget {
                     _buildButton(
                       context,
                       context.translations.deleteLabel.capitalize(),
-                      StreamSvgIcon.delete(
+                      StreamSvgIcon(
                         size: 24,
+                        icon: StreamSvgIcons.delete,
                         color: theme.colorTheme.accentError,
                       ),
                       () {
@@ -326,7 +330,8 @@ class AttachmentActionsModal extends StatelessWidget {
                         ? SizedBox(
                             height: 100,
                             width: 100,
-                            child: StreamSvgIcon.error(
+                            child: StreamSvgIcon(
+                              icon: StreamSvgIcons.error,
                               color: theme.colorTheme.disabled,
                             ),
                           )
@@ -335,7 +340,8 @@ class AttachmentActionsModal extends StatelessWidget {
                                 key: const Key('completedIcon'),
                                 height: 160,
                                 width: 160,
-                                child: StreamSvgIcon.check(
+                                child: StreamSvgIcon(
+                                  icon: StreamSvgIcons.check,
                                   color: theme.colorTheme.disabled,
                                 ),
                               )

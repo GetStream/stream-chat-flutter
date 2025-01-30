@@ -68,7 +68,7 @@ class StreamMessageSendButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: StreamSvgIcon(
-        assetName: _getIdleSendIcon(),
+        icon: _getIdleSendIcon(),
         color: _messageInputTheme.sendButtonIdleColor,
       ),
     );
@@ -88,28 +88,21 @@ class StreamMessageSendButton extends StatelessWidget {
           width: 24,
         ),
         icon: StreamSvgIcon(
-          assetName: _getSendIcon(),
+          icon: _getSendIcon(),
           color: _messageInputTheme.sendButtonColor,
         ),
       ),
     );
   }
 
-  String _getIdleSendIcon() {
-    if (isCommandEnabled) {
-      return 'Icon_search.svg';
-    } else {
-      return 'Icon_circle_right.svg';
-    }
+  StreamSvgIconData _getIdleSendIcon() {
+    if (isCommandEnabled) return StreamSvgIcons.search;
+    return StreamSvgIcons.emptyCircleRight;
   }
 
-  String _getSendIcon() {
-    if (isEditEnabled) {
-      return 'Icon_circle_up.svg';
-    } else if (isCommandEnabled) {
-      return 'Icon_search.svg';
-    } else {
-      return 'Icon_circle_up.svg';
-    }
+  StreamSvgIconData _getSendIcon() {
+    if (isEditEnabled) return StreamSvgIcons.circleUp;
+    if (isCommandEnabled) return StreamSvgIcons.search;
+    return StreamSvgIcons.circleUp;
   }
 }

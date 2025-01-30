@@ -318,8 +318,9 @@ class StreamThreadListView extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon.thread(
+                  emptyIcon: StreamSvgIcon(
                     size: 148,
+                    icon: StreamSvgIcons.threadReply,
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(

@@ -33,7 +33,8 @@ class ResendMessageButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
-            StreamSvgIcon.circleUp(
+            StreamSvgIcon(
+              icon: StreamSvgIcons.circleUp,
               color: streamChatThemeData.colorTheme.accentPrimary,
             ),
             const SizedBox(width: 16),

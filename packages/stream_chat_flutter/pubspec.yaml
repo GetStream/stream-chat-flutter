@@ -56,6 +56,7 @@ dependencies:
   share_plus: ^10.0.2
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^9.2.0
+  svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
   thumblr: ^0.0.4
   url_launcher: ^6.3.0
@@ -71,10 +72,10 @@ dev_dependencies:
 
 flutter:
   assets:
-    - images/
-    - svgs/
-    - lib/svgs/
-    - animations/
+    - lib/assets/animations/
+    - lib/assets/icons/
+    - lib/assets/icons/colored/
+    - lib/assets/images/
   uses-material-design: true
 
 # This package supports all platforms listed below.

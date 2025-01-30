@@ -56,7 +56,8 @@ class AttachmentButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: icon ??
-          StreamSvgIcon.attach(
+          StreamSvgIcon(
+            icon: StreamSvgIcons.attach,
             color: color,
           ),
       padding: EdgeInsets.zero,

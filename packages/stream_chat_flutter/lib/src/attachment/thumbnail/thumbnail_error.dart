@@ -44,7 +44,7 @@ class ThumbnailError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      'images/placeholder.png',
+      'lib/assets/images/placeholder.png',
       width: width,
       height: height,
       fit: fit,

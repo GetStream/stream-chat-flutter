@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
@@ -73,7 +73,8 @@ class StreamUnreadThreadsBanner extends StatelessWidget {
                 ),
               ),
             ),
-            StreamSvgIcon.reload(
+            StreamSvgIcon(
+              icon: StreamSvgIcons.reload,
               color: theme.colorTheme.barsBg,
             ),
           ],

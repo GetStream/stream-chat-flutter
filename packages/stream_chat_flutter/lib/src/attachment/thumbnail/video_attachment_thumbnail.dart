@@ -63,7 +63,7 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
         fit: fit,
         placeholder: (context, __) {
           final image = Image.asset(
-            'images/placeholder.png',
+            'lib/assets/images/placeholder.png',
             width: width,
             height: height,
             fit: BoxFit.cover,
@@ -101,7 +101,7 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
           }
 
           final image = Image.asset(
-            'images/placeholder.png',
+            'lib/assets/images/placeholder.png',
             width: width,
             height: height,
             fit: BoxFit.cover,

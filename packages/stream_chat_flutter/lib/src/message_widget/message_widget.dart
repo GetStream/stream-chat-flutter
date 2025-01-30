@@ -790,7 +790,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowReplyAction) ...[
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.reply(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
           title: Text(context.translations.replyLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
@@ -800,7 +800,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       ],
       if (widget.showMarkUnreadMessage)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.messageUnread(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.messageUnread),
           title: Text(context.translations.markAsUnreadLabel),
           onClick: () async {
             try {
@@ -820,7 +820,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowThreadReplyAction)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.thread(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
           title: Text(context.translations.threadReplyLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
@@ -829,7 +829,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowCopyAction)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.copy(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
           title: Text(context.translations.copyMessageLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
@@ -853,7 +853,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowEditAction) ...[
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.edit(color: Colors.grey),
+          leading: const StreamSvgIcon(
+            color: Colors.grey,
+            icon: StreamSvgIcons.edit,
+          ),
           title: Text(context.translations.editMessageLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
@@ -881,9 +884,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       ],
       if (widget.showPinButton)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.pin(
-            color: Colors.grey,
+          leading: const StreamSvgIcon(
             size: 24,
+            color: Colors.grey,
+            icon: StreamSvgIcons.pin,
           ),
           title: Text(
             context.translations.togglePinUnpinText(
@@ -905,7 +909,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowResendAction)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.iconSendMessage(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
           title: Text(
             context.translations.toggleResendOrResendEditedMessage(
               isUpdateFailed: widget.message.state.isUpdatingFailed,
@@ -924,7 +928,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowDeleteAction)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.delete(color: Colors.red),
+          leading: const StreamSvgIcon(
+            color: Colors.red,
+            icon: StreamSvgIcons.delete,
+          ),
           title: Text(
             context.translations.deleteMessageLabel,
             style: const TextStyle(color: Colors.red),

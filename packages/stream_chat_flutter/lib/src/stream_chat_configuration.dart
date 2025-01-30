@@ -171,7 +171,8 @@ class StreamChatConfigurationData {
       type: 'love',
       builder: (context, highlighted, size) {
         final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon.loveReaction(
+        return StreamSvgIcon(
+          icon: StreamSvgIcons.loveReaction,
           color: highlighted
               ? theme.colorTheme.accentPrimary
               : theme.primaryIconTheme.color,
@@ -183,7 +184,8 @@ class StreamChatConfigurationData {
       type: 'like',
       builder: (context, highlighted, size) {
         final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon.thumbsUpReaction(
+        return StreamSvgIcon(
+          icon: StreamSvgIcons.thumbsUpReaction,
           color: highlighted
               ? theme.colorTheme.accentPrimary
               : theme.primaryIconTheme.color,
@@ -195,7 +197,8 @@ class StreamChatConfigurationData {
       type: 'sad',
       builder: (context, highlighted, size) {
         final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon.thumbsDownReaction(
+        return StreamSvgIcon(
+          icon: StreamSvgIcons.thumbsDownReaction,
           color: highlighted
               ? theme.colorTheme.accentPrimary
               : theme.primaryIconTheme.color,
@@ -207,7 +210,8 @@ class StreamChatConfigurationData {
       type: 'haha',
       builder: (context, highlighted, size) {
         final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon.lolReaction(
+        return StreamSvgIcon(
+          icon: StreamSvgIcons.lolReaction,
           color: highlighted
               ? theme.colorTheme.accentPrimary
               : theme.primaryIconTheme.color,
@@ -219,7 +223,8 @@ class StreamChatConfigurationData {
       type: 'wow',
       builder: (context, highlighted, size) {
         final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon.wutReaction(
+        return StreamSvgIcon(
+          icon: StreamSvgIcons.wutReaction,
           color: highlighted
               ? theme.colorTheme.accentPrimary
               : theme.primaryIconTheme.color,

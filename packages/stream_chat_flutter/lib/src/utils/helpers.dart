@@ -335,44 +335,28 @@ String fileSize(dynamic size, [int round = 2]) {
 ///
 StreamSvgIcon getFileTypeImage([String? mimeType]) {
   final subtype = mimeType?.split('/').last;
-  switch (subtype) {
-    case '7z':
-      return StreamSvgIcon.filetype7z();
-    case 'csv':
-      return StreamSvgIcon.filetypeCsv();
-    case 'doc':
-      return StreamSvgIcon.filetypeDoc();
-    case 'docx':
-      return StreamSvgIcon.filetypeDocx();
-    case 'html':
-      return StreamSvgIcon.filetypeHtml();
-    case 'md':
-      return StreamSvgIcon.filetypeMd();
-    case 'odt':
-      return StreamSvgIcon.filetypeOdt();
-    case 'pdf':
-      return StreamSvgIcon.filetypePdf();
-    case 'ppt':
-      return StreamSvgIcon.filetypePpt();
-    case 'pptx':
-      return StreamSvgIcon.filetypePptx();
-    case 'rar':
-      return StreamSvgIcon.filetypeRar();
-    case 'rtf':
-      return StreamSvgIcon.filetypeRtf();
-    case 'tar':
-      return StreamSvgIcon.filetypeTar();
-    case 'txt':
-      return StreamSvgIcon.filetypeTxt();
-    case 'xls':
-      return StreamSvgIcon.filetypeXls();
-    case 'xlsx':
-      return StreamSvgIcon.filetypeXlsx();
-    case 'zip':
-      return StreamSvgIcon.filetypeZip();
-    default:
-      return StreamSvgIcon.filetypeGeneric();
-  }
+  return StreamSvgIcon(
+    icon: switch (subtype) {
+      '7z' => StreamSvgIcons.filetypeCompression7z,
+      'csv' => StreamSvgIcons.filetypeCodeCsv,
+      'doc' => StreamSvgIcons.filetypeTextDoc,
+      'docx' => StreamSvgIcons.filetypeTextDocx,
+      'html' => StreamSvgIcons.filetypeCodeHtml,
+      'md' => StreamSvgIcons.filetypeCodeMd,
+      'odt' => StreamSvgIcons.filetypeTextOdt,
+      'pdf' => StreamSvgIcons.filetypeOtherPdf,
+      'ppt' => StreamSvgIcons.filetypePresentationPpt,
+      'pptx' => StreamSvgIcons.filetypePresentationPptx,
+      'rar' => StreamSvgIcons.filetypeCompressionRar,
+      'rtf' => StreamSvgIcons.filetypeTextRtf,
+      'tar' => StreamSvgIcons.filetypeCodeTar,
+      'txt' => StreamSvgIcons.filetypeTextTxt,
+      'xls' => StreamSvgIcons.filetypeSpreadsheetXls,
+      'xlsx' => StreamSvgIcons.filetypeSpreadsheetXlsx,
+      'zip' => StreamSvgIcons.filetypeCompressionZip,
+      _ => StreamSvgIcons.filetypeOtherStandard,
+    },
+  );
 }
 
 /// Wraps attachment widget with custom shape

@@ -36,8 +36,9 @@ class StreamPollCreator extends StatelessWidget {
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: StreamSvgIcon.polls(
+        child: StreamSvgIcon(
           size: 180,
+          icon: StreamSvgIcons.polls,
           color: theme.colorTheme.disabled,
         ),
         onEndOfFrame: (_) => _openCreatePollFlow(),
@@ -45,8 +46,9 @@ class StreamPollCreator extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StreamSvgIcon.polls(
+              StreamSvgIcon(
                 size: 240,
+                icon: StreamSvgIcons.polls,
                 color: theme.colorTheme.disabled,
               ),
               const SizedBox(height: 8),

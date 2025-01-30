@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_tile.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_empty_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
@@ -328,8 +328,9 @@ class StreamPollVoteListView extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: StreamScrollViewEmptyWidget(
-                    emptyIcon: StreamSvgIcon.polls(
+                    emptyIcon: StreamSvgIcon(
                       size: 148,
+                      icon: StreamSvgIcons.polls,
                       color: chatThemeData.colorTheme.disabled,
                     ),
                     emptyTitle: Text(

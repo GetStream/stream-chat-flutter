@@ -330,7 +330,7 @@ class ChannelListTileSubtitle extends StatelessWidget {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          StreamSvgIcon.mute(size: 16),
+          const StreamSvgIcon(size: 16, icon: StreamSvgIcons.mute),
           Expanded(
             child: Text(
               '  ${context.translations.channelIsMutedText}',

@@ -21,7 +21,7 @@ class DownloadMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamChatContextMenuItem(
-      leading: StreamSvgIcon.download(),
+      leading: const StreamSvgIcon(icon: StreamSvgIcons.download),
       title: Text(context.translations.downloadLabel),
       onClick: () async {
         Navigator.of(context).pop();

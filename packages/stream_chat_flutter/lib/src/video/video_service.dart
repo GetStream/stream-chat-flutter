@@ -79,7 +79,7 @@ class _IVideoService {
   /// Generates a placeholder thumbnail by loading placeholder.png from assets.
   Future<Uint8List> generatePlaceholderThumbnail() async {
     final placeholder = await rootBundle.load(
-      'packages/stream_chat_flutter/images/placeholder.png',
+      'packages/stream_chat_flutter/lib/assets/images/placeholder.png',
     );
 
     return placeholder.buffer.asUint8List();
