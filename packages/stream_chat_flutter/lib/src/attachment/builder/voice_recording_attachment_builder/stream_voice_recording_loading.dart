@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// message is still not available. One use situation in when the audio is
 /// still being uploaded.
 /// {@endtemplate}
+@Deprecated('Will be removed in the next major version')
 class StreamVoiceRecordingLoading extends StatelessWidget {
   /// {@macro StreamVoiceRecordingLoading}
   const StreamVoiceRecordingLoading({super.key});

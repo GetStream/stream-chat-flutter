@@ -1290,6 +1290,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       hasTimeDiff = !createdAt.isSame(nextCreatedAt, unit: Unit.minute);
     }
 
+    final hasVoiceRecordingAttachment = message.attachments
+        .any((it) => it.type == AttachmentType.voiceRecording);
+
     final hasFileAttachment =
         message.attachments.any((it) => it.type == AttachmentType.file);
 
@@ -1390,7 +1393,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               ? Radius.circular(attachmentBorderRadius)
               : Radius.circular(
                   (hasTimeDiff || !isNextUserSame) &&
-                          !(hasReplies || isThreadMessage || hasFileAttachment)
+                          !(hasReplies ||
+                              isThreadMessage ||
+                              hasFileAttachment ||
+                              hasVoiceRecordingAttachment)
                       ? 0
                       : attachmentBorderRadius,
                 ),
@@ -1398,7 +1404,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           bottomRight: isMyMessage
               ? Radius.circular(
                   (hasTimeDiff || !isNextUserSame) &&
-                          !(hasReplies || isThreadMessage || hasFileAttachment)
+                          !(hasReplies ||
+                              isThreadMessage ||
+                              hasFileAttachment ||
+                              hasVoiceRecordingAttachment)
                       ? 0
                       : attachmentBorderRadius,
                 )
@@ -1408,7 +1417,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       attachmentPadding: EdgeInsets.all(
         hasUrlAttachment
             ? 8
-            : hasFileAttachment
+            : hasFileAttachment || hasVoiceRecordingAttachment
                 ? 4
                 : 2,
       ),
@@ -1507,9 +1516,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (isLastItemFullyVisible) {
       // We are using the first message as the last fully visible message
       // because the messages are reversed in the list view.
-      final newLastFullyVisibleMessage = messages.first;
+      final newLastFullyVisibleMessage = messages.firstOrNull;
       final lastFullyVisibleMessageChanged = switch (_lastFullyVisibleMessage) {
-        final message? => message.id != newLastFullyVisibleMessage.id,
+        final message? => message.id != newLastFullyVisibleMessage?.id,
         null => true, // Allows setting the initial value.
       };
 

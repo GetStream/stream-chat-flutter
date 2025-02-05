@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
-import 'package:stream_chat_flutter/src/theme/thread_list_tile_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamThreadListTile}

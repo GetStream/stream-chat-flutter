@@ -37,6 +37,11 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
         _urlAttachmentBuilder = UrlAttachmentBuilder(
           padding: EdgeInsets.zero,
           onAttachmentTap: onAttachmentTap,
+        ),
+        _voiceRecordingAttachmentPlaylistBuilder =
+            VoiceRecordingAttachmentPlaylistBuilder(
+          padding: EdgeInsets.zero,
+          onAttachmentTap: onAttachmentTap,
         );
 
   /// The padding to apply to the mixed attachment widget.
@@ -48,26 +53,33 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   late final StreamAttachmentWidgetBuilder _galleryAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _fileAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _urlAttachmentBuilder;
+  late final StreamAttachmentWidgetBuilder
+      _voiceRecordingAttachmentPlaylistBuilder;
 
   @override
   bool canHandle(
     Message message,
     Map<String, List<Attachment>> attachments,
   ) {
-    final types = attachments.keys;
+    final types = {...attachments.keys};
 
-    final containsImage = types.contains(AttachmentType.image);
-    final containsVideo = types.contains(AttachmentType.video);
-    final containsGiphy = types.contains(AttachmentType.giphy);
-    final containsFile = types.contains(AttachmentType.file);
-    final containsUrlPreview = types.contains(AttachmentType.urlPreview);
+    final mediaTypes = {
+      AttachmentType.image,
+      AttachmentType.video,
+      AttachmentType.giphy,
+    };
 
-    final containsMedia = containsImage || containsVideo || containsGiphy;
+    final otherTypes = {
+      AttachmentType.file,
+      AttachmentType.urlPreview,
+      AttachmentType.voiceRecording,
+    };
 
-    return containsMedia && containsFile ||
-        containsMedia && containsUrlPreview ||
-        containsFile && containsUrlPreview ||
-        containsMedia && containsFile && containsUrlPreview;
+    // Check if there's at least one media type and one other type
+    final hasMedia = types.intersection(mediaTypes).isNotEmpty;
+    final hasOther = types.intersection(otherTypes).isNotEmpty;
+
+    return hasMedia && hasOther || types.intersection(otherTypes).length > 1;
   }
 
   @override
@@ -80,6 +92,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
 
     final urls = attachments[AttachmentType.urlPreview];
     final files = attachments[AttachmentType.file];
+    final voiceRecordings = attachments[AttachmentType.voiceRecording];
     final images = attachments[AttachmentType.image];
     final videos = attachments[AttachmentType.video];
     final giphys = attachments[AttachmentType.giphy];
@@ -98,6 +111,10 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
           if (files != null)
             _fileAttachmentBuilder.build(context, message, {
               AttachmentType.file: files,
+            }),
+          if (voiceRecordings != null)
+            _voiceRecordingAttachmentPlaylistBuilder.build(context, message, {
+              AttachmentType.voiceRecording: voiceRecordings,
             }),
           if (shouldBuildGallery)
             _galleryAttachmentBuilder.build(context, message, {

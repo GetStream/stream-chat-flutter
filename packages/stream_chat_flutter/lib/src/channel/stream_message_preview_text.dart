@@ -44,23 +44,26 @@ class StreamMessagePreviewText extends StatelessWidget {
               AttachmentType.image => '📷',
               AttachmentType.video => '🎬',
               AttachmentType.giphy => '[GIF]',
+              AttachmentType.audio => '🎧',
+              AttachmentType.voiceRecording => '🎤',
               _ => it == message.attachments.last
                   ? (it.title ?? 'File')
-                  : '${it.title ?? 'File'} , ',
+                  : '${it.title ?? 'File'},',
             },
           ),
           if (message.poll?.name case final pollName?) '📊 $pollName',
-          if (messageText != null)
+          if (messageText != null && messageText.isNotEmpty)
             if (messageMentionedUsers.isNotEmpty)
               ...mentionedUsersRegex.allMatchesWithSep(messageText)
             else
-              messageText,
+              messageText.trim(),
         ]
     };
 
-    final fontStyle = (message.isSystem || message.isDeleted)
-        ? FontStyle.italic
-        : FontStyle.normal;
+    final fontStyle = switch (message.isSystem || message.isDeleted) {
+      true => FontStyle.italic,
+      false => FontStyle.normal,
+    };
 
     final regularTextStyle = textStyle?.copyWith(fontStyle: fontStyle);
 
@@ -92,7 +95,7 @@ class StreamMessagePreviewText extends StatelessWidget {
           style: regularTextStyle,
         );
       })
-    ];
+    ].insertBetween(const TextSpan(text: ' '));
 
     return Text.rich(
       TextSpan(children: spans),

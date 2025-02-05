@@ -536,7 +536,6 @@ class _AttachmentPickerOptions extends StatelessWidget {
                 }
 
                 return IconButton(
-                  iconSize: 22,
                   color: colorTheme.accentPrimary,
                   disabledColor: colorTheme.disabled,
                   icon: const StreamSvgIcon(

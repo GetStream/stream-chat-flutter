@@ -22,12 +22,8 @@ extension MapX<K, V> on Map<K?, V?> {
 extension StringX on String {
   /// returns the media type from the passed file name.
   MediaType? get mediaType {
-    if (toLowerCase().endsWith('heic')) {
-      return MediaType.parse('image/heic');
-    } else {
-      final mimeType = lookupMimeType(this);
-      if (mimeType == null) return null;
-      return MediaType.parse(mimeType);
-    }
+    final mimeType = lookupMimeType(this);
+    if (mimeType == null) return null;
+    return MediaType.parse(mimeType);
   }
 }

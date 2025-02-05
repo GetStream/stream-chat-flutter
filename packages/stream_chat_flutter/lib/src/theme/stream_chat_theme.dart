@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart' hide TextTheme;
-import 'package:stream_chat_flutter/src/theme/poll_comments_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_option_votes_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_options_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_results_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/thread_list_tile_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatTheme}

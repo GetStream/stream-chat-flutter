@@ -2,6 +2,47 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template streamThreadListTileTheme}
+/// Overrides the default style of [StreamThreadListTile] descendants.
+///
+/// See also:
+///
+///  * [StreamPollOptionVotesDialogThemeData], which is used to configure this
+///    theme.
+/// {@endtemplate}
+class StreamVoiceRecordingTheme extends InheritedTheme {
+  /// Creates a [StreamVoiceRecordingTheme].
+  ///
+  /// The [data] parameter must not be null.
+  const StreamVoiceRecordingTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
+
+  /// The configuration of this theme.
+  final StreamVoiceRecordingThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [StreamVoiceRecordingThemeData] widget, then
+  /// [StreamChatThemeData.pollOptionVotesDialogTheme] is used.
+  static StreamVoiceRecordingThemeData of(BuildContext context) {
+    final voiceRecordingTheme =
+        context.dependOnInheritedWidgetOfExactType<StreamVoiceRecordingTheme>();
+    return voiceRecordingTheme?.data ??
+        StreamChatTheme.of(context).voiceRecordingTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) =>
+      StreamVoiceRecordingTheme(data: data, child: child);
+
+  @override
+  bool updateShouldNotify(StreamVoiceRecordingTheme oldWidget) =>
+      data != oldWidget.data;
+}
+
 /// {@template StreamVoiceRecordingThemeData}
 /// The theme data for the voice recording attachment builder.
 /// {@endtemplate}
@@ -323,20 +364,23 @@ class StreamVoiceRecordingListPlayerThemeData with Diagnosticable {
 class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
   /// {@macro StreamVoiceRecordingPlayerTheme}
   const StreamVoiceRecordingPlayerThemeData({
+    this.backgroundColor,
     this.playIcon = Icons.play_arrow,
     this.pauseIcon = Icons.pause,
     this.iconColor,
     this.buttonBackgroundColor,
     this.buttonPadding = const EdgeInsets.symmetric(horizontal: 6),
     this.buttonShape = const CircleBorder(),
+    this.buttonSize = const Size(36, 36),
     this.buttonElevation = 2,
-    this.speedButtonSize = const Size(44, 36),
+    this.speedButtonSize = const Size(40, 28),
     this.speedButtonElevation = 2,
     this.speedButtonPadding = const EdgeInsets.symmetric(horizontal: 8),
     this.speedButtonBackgroundColor = const Color(0xFFFFFFFF),
     this.speedButtonShape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(50)),
     ),
+    this.titleTextStyle,
     this.speedButtonTextStyle = const TextStyle(
       fontSize: 12,
       color: Color(0xFF080707),
@@ -351,18 +395,43 @@ class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
   /// {@macro ThemeDataLight}
   factory StreamVoiceRecordingPlayerThemeData.light() {
     return const StreamVoiceRecordingPlayerThemeData(
+      backgroundColor: Color(0xFFFFFFFF),
       iconColor: Color(0xFF080707),
       buttonBackgroundColor: Color(0xFFFFFFFF),
+      titleTextStyle: TextStyle(
+        fontSize: 16,
+        color: Color(0xFF080707),
+        fontWeight: FontWeight.w600,
+      ),
+      timerTextStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        color: Color(0xff7a7a7a),
+      ),
     );
   }
 
   /// {@macro ThemeDataDark}
   factory StreamVoiceRecordingPlayerThemeData.dark() {
     return const StreamVoiceRecordingPlayerThemeData(
+      backgroundColor: Color(0xFF17191C),
       iconColor: Color(0xFF080707),
       buttonBackgroundColor: Color(0xFFFFFFFF),
+      titleTextStyle: TextStyle(
+        fontSize: 16,
+        color: Color(0xFFFFFFFF),
+        fontWeight: FontWeight.w600,
+      ),
+      timerTextStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        color: Color(0xff7a7a7a),
+      ),
     );
   }
+
+  /// The background color of the player.
+  final Color? backgroundColor;
 
   /// The icon to display when the player is paused/stopped.
   final IconData playIcon;
@@ -382,6 +451,9 @@ class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
   /// The shape of the buttons.
   final OutlinedBorder? buttonShape;
 
+  /// The size of the buttons.
+  final Size? buttonSize;
+
   /// The elevation of the buttons.
   final double? buttonElevation;
 
@@ -400,6 +472,9 @@ class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
   /// The shape of the speed button.
   final OutlinedBorder? speedButtonShape;
 
+  /// The text style of the title.
+  final TextStyle? titleTextStyle;
+
   /// The text style of the speed button.
   final TextStyle? speedButtonTextStyle;
 
@@ -417,18 +492,21 @@ class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
       StreamVoiceRecordingPlayerThemeData? other) {
     if (other == null) return this;
     return StreamVoiceRecordingPlayerThemeData(
+      backgroundColor: other.backgroundColor,
       playIcon: other.playIcon,
       pauseIcon: other.pauseIcon,
       iconColor: other.iconColor,
       buttonBackgroundColor: other.buttonBackgroundColor,
       buttonPadding: other.buttonPadding,
       buttonShape: other.buttonShape,
+      buttonSize: other.buttonSize,
       buttonElevation: other.buttonElevation,
       speedButtonSize: other.speedButtonSize,
       speedButtonElevation: other.speedButtonElevation,
       speedButtonPadding: other.speedButtonPadding,
       speedButtonBackgroundColor: other.speedButtonBackgroundColor,
       speedButtonShape: other.speedButtonShape,
+      titleTextStyle: other.titleTextStyle,
       speedButtonTextStyle: other.speedButtonTextStyle,
       fileTypeIcon: other.fileTypeIcon,
       fileSizeTextStyle: other.fileSizeTextStyle,
@@ -440,12 +518,14 @@ class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
+      ..add(ColorProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('playIcon', playIcon))
       ..add(DiagnosticsProperty('pauseIcon', pauseIcon))
       ..add(ColorProperty('iconColor', iconColor))
       ..add(ColorProperty('buttonBackgroundColor', buttonBackgroundColor))
       ..add(DiagnosticsProperty('buttonPadding', buttonPadding))
       ..add(DiagnosticsProperty('buttonShape', buttonShape))
+      ..add(DiagnosticsProperty('buttonSize', buttonSize))
       ..add(DoubleProperty('buttonElevation', buttonElevation))
       ..add(DiagnosticsProperty('speedButtonSize', speedButtonSize))
       ..add(DoubleProperty('speedButtonElevation', speedButtonElevation))
@@ -453,6 +533,7 @@ class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
       ..add(ColorProperty(
           'speedButtonBackgroundColor', speedButtonBackgroundColor))
       ..add(DiagnosticsProperty('speedButtonShape', speedButtonShape))
+      ..add(DiagnosticsProperty('titleTextStyle', titleTextStyle))
       ..add(DiagnosticsProperty('speedButtonTextStyle', speedButtonTextStyle))
       ..add(DiagnosticsProperty('fileTypeIcon', fileTypeIcon))
       ..add(DiagnosticsProperty('fileSizeTextStyle', fileSizeTextStyle))

@@ -25,7 +25,7 @@ class StreamThreadListTileTheme extends InheritedTheme {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [StreamPollOptionVotesDialogTheme] widget, then
+  /// If there is no enclosing [StreamThreadListTileTheme] widget, then
   /// [StreamChatThemeData.pollOptionVotesDialogTheme] is used.
   static StreamThreadListTileThemeData of(BuildContext context) {
     final threadListTileTheme =

@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// This Widget is indeed to be used to control the position of an audio message
 /// and to get feedback of the position.
 /// {@endtemplate}
+@Deprecated("Use 'StreamAudioWaveformSlider' instead")
 class StreamVoiceRecordingSlider extends StatefulWidget {
   /// {@macro StreamVoiceRecordingSlider}
   const StreamVoiceRecordingSlider({
@@ -50,6 +51,7 @@ class StreamVoiceRecordingSlider extends StatefulWidget {
       _StreamVoiceRecordingSliderState();
 }
 
+@Deprecated("Use 'StreamAudioWaveformSlider' instead")
 class _StreamVoiceRecordingSliderState
     extends State<StreamVoiceRecordingSlider> {
   var _dragging = false;

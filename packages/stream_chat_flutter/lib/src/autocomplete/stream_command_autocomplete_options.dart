@@ -60,7 +60,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
       optionBuilder: (context, command) {
         return ListTile(
           dense: true,
-          horizontalTitleGap: 0,
+          horizontalTitleGap: 8,
           leading: _CommandIcon(command: command),
           title: Row(
             children: [

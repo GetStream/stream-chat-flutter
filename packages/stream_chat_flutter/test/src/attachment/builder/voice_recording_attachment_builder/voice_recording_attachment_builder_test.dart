@@ -8,7 +8,7 @@ void main() {
   group('VoiceRecordingAttachmentBuilder', () {
     test('should handle voiceRecording attachment type', () {
       final builder = VoiceRecordingAttachmentBuilder();
-      final message = MocMessage();
+      final message = MockMessage();
       final attachments = {
         'voiceRecording': [Attachment()],
       };
@@ -18,7 +18,7 @@ void main() {
 
     test('should not handle other than voiceRecording attachment type', () {
       final builder = VoiceRecordingAttachmentBuilder();
-      final message = MocMessage();
+      final message = MockMessage();
       final attachments = {
         'gify': [Attachment()],
       };
@@ -28,7 +28,7 @@ void main() {
 
     testWidgets('should build StreamVoiceRecordingListPlayer', (tester) async {
       final builder = VoiceRecordingAttachmentBuilder();
-      final message = MocMessage();
+      final message = MockMessage();
       final attachments = {
         'voiceRecording': [Attachment()],
       };

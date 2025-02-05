@@ -8,6 +8,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template StreamVoiceRecordingListPlayer}
 /// Display many audios and displays a list of AudioPlayerMessage.
 /// {@endtemplate}
+@Deprecated('Use StreamVoiceRecordingAttachmentPlaylist instead')
 class StreamVoiceRecordingListPlayer extends StatefulWidget {
   /// {@macro StreamVoiceRecordingListPlayer}
   const StreamVoiceRecordingListPlayer({
@@ -31,6 +32,7 @@ class StreamVoiceRecordingListPlayer extends StatefulWidget {
       _StreamVoiceRecordingListPlayerState();
 }
 
+@Deprecated("Use 'StreamVoiceRecordingAttachmentPlaylist' instead")
 class _StreamVoiceRecordingListPlayerState
     extends State<StreamVoiceRecordingListPlayer> {
   final _player = AudioPlayer();
