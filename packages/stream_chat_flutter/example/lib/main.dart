@@ -333,6 +333,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   ),
                 ),
                 StreamMessageInput(
+                  enableVoiceRecording: true,
                   onQuotedMessageCleared:
                       messageInputController.clearQuotedMessage,
                   focusNode: focusNode,
@@ -381,6 +382,7 @@ class ThreadPage extends StatelessWidget {
             ),
           ),
           StreamMessageInput(
+            enableVoiceRecording: true,
             messageInputController: StreamMessageInputController(
               message: Message(parentId: parent.id),
             ),

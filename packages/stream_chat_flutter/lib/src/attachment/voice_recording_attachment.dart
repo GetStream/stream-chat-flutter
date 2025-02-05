@@ -294,17 +294,8 @@ class AudioControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final streamTheme = StreamChatTheme.of(context);
     final theme = StreamVoiceRecordingTheme.of(context).playerTheme;
-
-    final child = switch (state) {
-      TrackState.loading => SizedBox.fromSize(
-          size: const Size(24, 24),
-          child: const Center(child: CircularProgressIndicator.adaptive()),
-        ),
-      TrackState.idle => Icon(theme.playIcon, color: theme.iconColor),
-      TrackState.playing => Icon(theme.pauseIcon, color: theme.iconColor),
-      TrackState.paused => Icon(theme.playIcon, color: theme.iconColor),
-    };
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -322,7 +313,21 @@ class AudioControlButton extends StatelessWidget {
         TrackState.playing => onPause,
         TrackState.paused => onPlay,
       },
-      child: child,
+      child: switch (state) {
+        TrackState.loading => SizedBox.fromSize(
+            size: const Size.square(24 - /* Padding */ 2),
+            child: Center(
+              child: CircularProgressIndicator.adaptive(
+                valueColor: AlwaysStoppedAnimation(
+                  streamTheme.colorTheme.accentPrimary,
+                ),
+              ),
+            ),
+          ),
+        TrackState.idle => Icon(theme.playIcon, color: theme.iconColor),
+        TrackState.playing => Icon(theme.pauseIcon, color: theme.iconColor),
+        TrackState.paused => Icon(theme.playIcon, color: theme.iconColor),
+      },
     );
   }
 }

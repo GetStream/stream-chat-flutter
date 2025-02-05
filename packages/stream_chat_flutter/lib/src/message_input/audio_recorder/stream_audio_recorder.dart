@@ -612,14 +612,23 @@ class PlaybackControlButton extends StatelessWidget {
 
     return StreamMessageInputIconButton(
       color: theme.colorTheme.accentPrimary,
-      onPressed: () => switch (state) {
+      onPressed: switch (state) {
         TrackState.loading => null,
-        TrackState.idle => onPlay?.call(),
-        TrackState.playing => onPause?.call(),
-        TrackState.paused => onPlay?.call(),
+        TrackState.idle => onPlay,
+        TrackState.playing => onPause,
+        TrackState.paused => onPlay,
       },
       icon: switch (state) {
-        TrackState.loading => const CircularProgressIndicator(),
+        TrackState.loading => SizedBox.fromSize(
+            size: const Size.square(24 - /* Padding */ 2),
+            child: Center(
+              child: CircularProgressIndicator.adaptive(
+                valueColor: AlwaysStoppedAnimation(
+                  theme.colorTheme.accentPrimary,
+                ),
+              ),
+            ),
+          ),
         TrackState.idle => const StreamSvgIcon(icon: StreamSvgIcons.play),
         TrackState.paused => const StreamSvgIcon(icon: StreamSvgIcons.play),
         TrackState.playing => const StreamSvgIcon(icon: StreamSvgIcons.pause),
