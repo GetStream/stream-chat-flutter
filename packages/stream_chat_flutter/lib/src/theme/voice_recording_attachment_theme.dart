@@ -1,542 +1,210 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/theme/audio_waveform_slider_theme.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
-/// {@template streamThreadListTileTheme}
-/// Overrides the default style of [StreamThreadListTile] descendants.
+/// {@template streamVoiceRecordingAttachmentTheme}
+/// Overrides the default style of [StreamVoiceRecordingAttachment] descendants.
 ///
 /// See also:
 ///
-///  * [StreamPollOptionVotesDialogThemeData], which is used to configure this
-///    theme.
+///  * [StreamVoiceRecordingAttachmentThemeData], which is used to configure
+///  this theme.
 /// {@endtemplate}
-class StreamVoiceRecordingTheme extends InheritedTheme {
-  /// Creates a [StreamVoiceRecordingTheme].
+class StreamVoiceRecordingAttachmentTheme extends InheritedTheme {
+  /// Creates a [StreamVoiceRecordingAttachmentTheme].
   ///
   /// The [data] parameter must not be null.
-  const StreamVoiceRecordingTheme({
+  const StreamVoiceRecordingAttachmentTheme({
     super.key,
     required this.data,
     required super.child,
   });
 
   /// The configuration of this theme.
-  final StreamVoiceRecordingThemeData data;
+  final StreamVoiceRecordingAttachmentThemeData data;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [StreamVoiceRecordingThemeData] widget, then
-  /// [StreamChatThemeData.pollOptionVotesDialogTheme] is used.
-  static StreamVoiceRecordingThemeData of(BuildContext context) {
-    final voiceRecordingTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamVoiceRecordingTheme>();
+  /// If there is no enclosing [StreamVoiceRecordingAttachmentTheme] widget,
+  /// then [StreamVoiceRecordingAttachmentTheme.voiceRecordingTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// StreamVoiceRecordingAttachmentTheme theme =
+  /// StreamVoiceRecordingAttachmentTheme.of(context);
+  /// ```
+  static StreamVoiceRecordingAttachmentThemeData of(BuildContext context) {
+    final voiceRecordingTheme = context.dependOnInheritedWidgetOfExactType<
+        StreamVoiceRecordingAttachmentTheme>();
     return voiceRecordingTheme?.data ??
-        StreamChatTheme.of(context).voiceRecordingTheme;
+        StreamChatTheme.of(context).voiceRecordingAttachmentTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) =>
-      StreamVoiceRecordingTheme(data: data, child: child);
+      StreamVoiceRecordingAttachmentTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamVoiceRecordingTheme oldWidget) =>
+  bool updateShouldNotify(StreamVoiceRecordingAttachmentTheme oldWidget) =>
       data != oldWidget.data;
 }
 
-/// {@template StreamVoiceRecordingThemeData}
-/// The theme data for the voice recording attachment builder.
+/// {@template streamVoiceRecordingAttachmentThemeData}
+/// A style that overrides the default appearance of
+/// [StreamVoiceRecordingAttachment] widgets when used with
+/// [StreamVoiceRecordingAttachmentTheme] or with the overall
+/// [StreamChatTheme]'s [StreamChatThemeData.voiceRecordingAttachmentTheme].
 /// {@endtemplate}
-class StreamVoiceRecordingThemeData with Diagnosticable {
-  /// {@macro StreamVoiceRecordingThemeData}
-  const StreamVoiceRecordingThemeData({
-    required this.loadingTheme,
-    required this.sliderTheme,
-    required this.listPlayerTheme,
-    required this.playerTheme,
-  });
-
-  /// {@template ThemeDataLight}
-  /// Creates a theme data with light values.
-  /// {@endtemplate}
-  factory StreamVoiceRecordingThemeData.light() {
-    return StreamVoiceRecordingThemeData(
-      loadingTheme: StreamVoiceRecordingLoadingThemeData.light(),
-      sliderTheme: StreamVoiceRecordingSliderTheme.light(),
-      listPlayerTheme: StreamVoiceRecordingListPlayerThemeData.light(),
-      playerTheme: StreamVoiceRecordingPlayerThemeData.light(),
-    );
-  }
-
-  /// {@template ThemeDataDark}
-  /// Creates a theme data with dark values.
-  /// {@endtemplate}
-  factory StreamVoiceRecordingThemeData.dark() {
-    return StreamVoiceRecordingThemeData(
-      loadingTheme: StreamVoiceRecordingLoadingThemeData.dark(),
-      sliderTheme: StreamVoiceRecordingSliderTheme.dark(),
-      listPlayerTheme: StreamVoiceRecordingListPlayerThemeData.dark(),
-      playerTheme: StreamVoiceRecordingPlayerThemeData.dark(),
-    );
-  }
-
-  /// The theme for the loading widget.
-  final StreamVoiceRecordingLoadingThemeData loadingTheme;
-
-  /// The theme for the slider widget.
-  final StreamVoiceRecordingSliderTheme sliderTheme;
-
-  /// The theme for the list player widget.
-  final StreamVoiceRecordingListPlayerThemeData listPlayerTheme;
-
-  /// The theme for the player widget.
-  final StreamVoiceRecordingPlayerThemeData playerTheme;
-
-  /// {@template ThemeDataMerge}
-  /// Used to merge the values of another theme data object into this.
-  /// {@endtemplate}
-  StreamVoiceRecordingThemeData merge(StreamVoiceRecordingThemeData? other) {
-    if (other == null) return this;
-    return StreamVoiceRecordingThemeData(
-      loadingTheme: loadingTheme.merge(other.loadingTheme),
-      sliderTheme: sliderTheme.merge(other.sliderTheme),
-      listPlayerTheme: listPlayerTheme.merge(other.listPlayerTheme),
-      playerTheme: playerTheme.merge(other.playerTheme),
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty('loadingTheme', loadingTheme))
-      ..add(DiagnosticsProperty('sliderTheme', sliderTheme))
-      ..add(DiagnosticsProperty('listPlayerTheme', listPlayerTheme))
-      ..add(DiagnosticsProperty('playerTheme', playerTheme));
-  }
-}
-
-/// {@template StreamAudioPlayerLoadingTheme}
-/// The theme data for the voice recording attachment builder
-/// loading widget [StreamVoiceRecordingLoading].
-/// {@endtemplate}
-class StreamVoiceRecordingLoadingThemeData with Diagnosticable {
-  /// {@macro StreamAudioPlayerLoadingTheme}
-  const StreamVoiceRecordingLoadingThemeData({
-    this.size,
-    this.strokeWidth,
-    this.color,
-    this.padding,
-  });
-
-  /// {@macro ThemeDataLight}
-  factory StreamVoiceRecordingLoadingThemeData.light() {
-    return const StreamVoiceRecordingLoadingThemeData(
-      size: Size(20, 20),
-      strokeWidth: 2,
-      color: Color(0xFF005FFF),
-      padding: EdgeInsets.all(8),
-    );
-  }
-
-  /// {@macro ThemeDataDark}
-  factory StreamVoiceRecordingLoadingThemeData.dark() {
-    return const StreamVoiceRecordingLoadingThemeData(
-      size: Size(20, 20),
-      strokeWidth: 2,
-      color: Color(0xFF005FFF),
-      padding: EdgeInsets.all(8),
-    );
-  }
-
-  /// The size of the loading indicator.
-  final Size? size;
-
-  /// The stroke width of the loading indicator.
-  final double? strokeWidth;
-
-  /// The color of the loading indicator.
-  final Color? color;
-
-  /// The padding around the loading indicator.
-  final EdgeInsets? padding;
-
-  /// {@macro ThemeDataMerge}
-  StreamVoiceRecordingLoadingThemeData merge(
-      StreamVoiceRecordingLoadingThemeData? other) {
-    if (other == null) return this;
-    return StreamVoiceRecordingLoadingThemeData(
-      size: other.size,
-      strokeWidth: other.strokeWidth,
-      color: other.color,
-      padding: other.padding,
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty('size', size))
-      ..add(DiagnosticsProperty('strokeWidth', strokeWidth))
-      ..add(ColorProperty('color', color))
-      ..add(DiagnosticsProperty('padding', padding));
-  }
-}
-
-/// {@template StreamAudioPlayerSliderTheme}
-/// The theme data for the voice recording attachment builder audio player
-/// slider [StreamVoiceRecordingSlider].
-/// {@endtemplate}
-class StreamVoiceRecordingSliderTheme with Diagnosticable {
-  /// {@macro StreamAudioPlayerSliderTheme}
-  const StreamVoiceRecordingSliderTheme({
-    this.horizontalPadding = 10,
-    this.spacingRatio = 0.007,
-    this.waveHeightRatio = 1,
-    this.buttonBorderRadius = const BorderRadius.all(Radius.circular(8)),
-    this.buttonColor,
-    this.buttonBorderColor,
-    this.buttonBorderWidth = 1,
-    this.waveColorPlayed,
-    this.waveColorUnplayed,
-    this.buttonShadow = const BoxShadow(
-      color: Color(0x33000000),
-      blurRadius: 4,
-      offset: Offset(0, 2),
-    ),
-  });
-
-  /// {@macro ThemeDataLight}
-  factory StreamVoiceRecordingSliderTheme.light() {
-    return const StreamVoiceRecordingSliderTheme(
-      buttonColor: Color(0xFFFFFFFF),
-      buttonBorderColor: Color(0x3308070733),
-      waveColorPlayed: Color(0xFF005DFF),
-      waveColorUnplayed: Color(0xFF7E828B),
-    );
-  }
-
-  /// {@macro ThemeDataDark}
-  factory StreamVoiceRecordingSliderTheme.dark() {
-    return const StreamVoiceRecordingSliderTheme(
-      buttonColor: Color(0xFF005FFF),
-      buttonBorderColor: Color(0x3308070766),
-      waveColorPlayed: Color(0xFF337EFF),
-      waveColorUnplayed: Color(0xFF7E828B),
-    );
-  }
-
-  /// The color of the slider button.
-  final Color? buttonColor;
-
-  /// The color of the border of the slider button.
-  final Color? buttonBorderColor;
-
-  /// The width of the border of the slider button.
-  final double? buttonBorderWidth;
-
-  /// The shadow of the slider button.
-  final BoxShadow? buttonShadow;
-
-  /// The border radius of the slider button.
-  final BorderRadius buttonBorderRadius;
-
-  /// The horizontal padding of the slider.
-  final double horizontalPadding;
-
-  /// Spacing ratios. This is the percentage that the space takes from the whole
-  /// available space. Typically this value should be between 0.003 to 0.02.
-  /// Default = 0.01
-  final double spacingRatio;
-
-  /// The percentage maximum value of waves. This can be used to reduce the
-  /// height of bars. Default = 1;
-  final double waveHeightRatio;
-
-  /// Color of the waves to the left side of the slider button.
-  final Color? waveColorPlayed;
-
-  /// Color of the waves to the right side of the slider button.
-  final Color? waveColorUnplayed;
-
-  /// {@macro ThemeDataMerge}
-  StreamVoiceRecordingSliderTheme merge(
-      StreamVoiceRecordingSliderTheme? other) {
-    if (other == null) return this;
-    return StreamVoiceRecordingSliderTheme(
-      buttonColor: other.buttonColor,
-      buttonBorderColor: other.buttonBorderColor,
-      buttonBorderRadius: other.buttonBorderRadius,
-      horizontalPadding: other.horizontalPadding,
-      spacingRatio: other.spacingRatio,
-      waveHeightRatio: other.waveHeightRatio,
-      waveColorPlayed: other.waveColorPlayed,
-      waveColorUnplayed: other.waveColorUnplayed,
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(ColorProperty('buttonColor', buttonColor))
-      ..add(ColorProperty('buttonBorderColor', buttonBorderColor))
-      ..add(DiagnosticsProperty('buttonBorderRadius', buttonBorderRadius))
-      ..add(DoubleProperty('horizontalPadding', horizontalPadding))
-      ..add(DoubleProperty('spacingRatio', spacingRatio))
-      ..add(DoubleProperty('waveHeightRatio', waveHeightRatio))
-      ..add(ColorProperty('waveColorPlayed', waveColorPlayed))
-      ..add(ColorProperty('waveColorUnplayed', waveColorUnplayed));
-  }
-}
-
-/// {@template StreamAudioListPlayerTheme}
-/// The theme data for the voice recording attachment builder audio player
-/// [StreamVoiceRecordingListPlayer].
-/// {@endtemplate}
-class StreamVoiceRecordingListPlayerThemeData with Diagnosticable {
-  /// {@macro StreamAudioListPlayerTheme}
-  const StreamVoiceRecordingListPlayerThemeData({
+class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
+  /// {@macro streamVoiceRecordingAttachmentThemeData}
+  const StreamVoiceRecordingAttachmentThemeData({
     this.backgroundColor,
-    this.borderColor,
-    this.borderRadius,
-    this.margin,
-  });
-
-  /// {@macro ThemeDataLight}
-  factory StreamVoiceRecordingListPlayerThemeData.light() {
-    return StreamVoiceRecordingListPlayerThemeData(
-      backgroundColor: const Color(0xFFFFFFFF),
-      borderColor: const Color(0xFFDBDDE1),
-      borderRadius: BorderRadius.circular(14),
-      margin: const EdgeInsets.all(4),
-    );
-  }
-
-  /// {@macro ThemeDataDark}
-  factory StreamVoiceRecordingListPlayerThemeData.dark() {
-    return StreamVoiceRecordingListPlayerThemeData(
-      backgroundColor: const Color(0xFF17191C),
-      borderColor: const Color(0xFF272A30),
-      borderRadius: BorderRadius.circular(14),
-      margin: const EdgeInsets.all(4),
-    );
-  }
-
-  /// The background color of the list.
-  final Color? backgroundColor;
-
-  /// The border color of the list.
-  final Color? borderColor;
-
-  /// The border radius of the list.
-  final BorderRadius? borderRadius;
-
-  /// The margin of the list.
-  final EdgeInsets? margin;
-
-  /// {@macro ThemeDataMerge}
-  StreamVoiceRecordingListPlayerThemeData merge(
-      StreamVoiceRecordingListPlayerThemeData? other) {
-    if (other == null) return this;
-    return StreamVoiceRecordingListPlayerThemeData(
-      backgroundColor: other.backgroundColor,
-      borderColor: other.borderColor,
-      borderRadius: other.borderRadius,
-      margin: other.margin,
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(ColorProperty('backgroundColor', backgroundColor))
-      ..add(ColorProperty('borderColor', borderColor))
-      ..add(DiagnosticsProperty('borderRadius', borderRadius))
-      ..add(DiagnosticsProperty('margin', margin));
-  }
-}
-
-/// {@template StreamVoiceRecordingPlayerTheme}
-/// The theme data for the voice recording attachment builder audio player
-/// {@endtemplate}
-class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
-  /// {@macro StreamVoiceRecordingPlayerTheme}
-  const StreamVoiceRecordingPlayerThemeData({
-    this.backgroundColor,
-    this.playIcon = Icons.play_arrow,
-    this.pauseIcon = Icons.pause,
-    this.iconColor,
-    this.buttonBackgroundColor,
-    this.buttonPadding = const EdgeInsets.symmetric(horizontal: 6),
-    this.buttonShape = const CircleBorder(),
-    this.buttonSize = const Size(36, 36),
-    this.buttonElevation = 2,
-    this.speedButtonSize = const Size(40, 28),
-    this.speedButtonElevation = 2,
-    this.speedButtonPadding = const EdgeInsets.symmetric(horizontal: 8),
-    this.speedButtonBackgroundColor = const Color(0xFFFFFFFF),
-    this.speedButtonShape = const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(50)),
-    ),
+    this.playIcon,
+    this.pauseIcon,
+    this.loadingIndicator,
+    this.audioControlButtonStyle,
     this.titleTextStyle,
-    this.speedButtonTextStyle = const TextStyle(
-      fontSize: 12,
-      color: Color(0xFF080707),
-    ),
-    this.fileTypeIcon = const StreamSvgIcon(
-      icon: StreamSvgIcons.filetypeAudioAac,
-    ),
-    this.fileSizeTextStyle = const TextStyle(fontSize: 10),
-    this.timerTextStyle,
+    this.durationTextStyle,
+    this.playbackSpeedTextStyle,
+    this.speedControlButtonStyle,
+    this.audioWaveformSliderTheme,
   });
 
-  /// {@macro ThemeDataLight}
-  factory StreamVoiceRecordingPlayerThemeData.light() {
-    return const StreamVoiceRecordingPlayerThemeData(
-      backgroundColor: Color(0xFFFFFFFF),
-      iconColor: Color(0xFF080707),
-      buttonBackgroundColor: Color(0xFFFFFFFF),
-      titleTextStyle: TextStyle(
-        fontSize: 16,
-        color: Color(0xFF080707),
-        fontWeight: FontWeight.w600,
-      ),
-      timerTextStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-        color: Color(0xff7a7a7a),
-      ),
-    );
-  }
-
-  /// {@macro ThemeDataDark}
-  factory StreamVoiceRecordingPlayerThemeData.dark() {
-    return const StreamVoiceRecordingPlayerThemeData(
-      backgroundColor: Color(0xFF17191C),
-      iconColor: Color(0xFF080707),
-      buttonBackgroundColor: Color(0xFFFFFFFF),
-      titleTextStyle: TextStyle(
-        fontSize: 16,
-        color: Color(0xFFFFFFFF),
-        fontWeight: FontWeight.w600,
-      ),
-      timerTextStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-        color: Color(0xff7a7a7a),
-      ),
-    );
-  }
-
-  /// The background color of the player.
+  /// The background color of the attachment.
   final Color? backgroundColor;
 
-  /// The icon to display when the player is paused/stopped.
-  final IconData playIcon;
+  /// The icon widget to show when the recording is playing.
+  final Widget? playIcon;
 
-  /// The icon to display when the player is playing.
-  final IconData pauseIcon;
+  /// The icon widget to show when the recording is paused.
+  final Widget? pauseIcon;
 
-  /// The color of the icons.
-  final Color? iconColor;
+  /// The widget to show when the recording is loading.
+  final Widget? loadingIndicator;
 
-  /// The background color of the buttons.
-  final Color? buttonBackgroundColor;
+  /// The style for the audio control button.
+  final ButtonStyle? audioControlButtonStyle;
 
-  /// The padding of the buttons.
-  final EdgeInsets? buttonPadding;
-
-  /// The shape of the buttons.
-  final OutlinedBorder? buttonShape;
-
-  /// The size of the buttons.
-  final Size? buttonSize;
-
-  /// The elevation of the buttons.
-  final double? buttonElevation;
-
-  /// The size of the speed button.
-  final Size? speedButtonSize;
-
-  /// The elevation of the speed button.
-  final double? speedButtonElevation;
-
-  /// The padding of the speed button.
-  final EdgeInsets? speedButtonPadding;
-
-  /// The background color of the speed button.
-  final Color? speedButtonBackgroundColor;
-
-  /// The shape of the speed button.
-  final OutlinedBorder? speedButtonShape;
-
-  /// The text style of the title.
+  /// The text style for the title.
   final TextStyle? titleTextStyle;
 
-  /// The text style of the speed button.
-  final TextStyle? speedButtonTextStyle;
+  /// The text style for the duration.
+  final TextStyle? durationTextStyle;
 
-  /// The icon to display for the file type.
-  final Widget? fileTypeIcon;
+  /// The text style for the playback speed.
+  final TextStyle? playbackSpeedTextStyle;
 
-  /// The text style of the file size.
-  final TextStyle? fileSizeTextStyle;
+  /// The style for the speed control button.
+  final ButtonStyle? speedControlButtonStyle;
 
-  /// The text style of the timer.
-  final TextStyle? timerTextStyle;
+  /// The theme for the audio waveform slider.
+  final StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme;
 
-  /// {@macro ThemeDataMerge}
-  StreamVoiceRecordingPlayerThemeData merge(
-      StreamVoiceRecordingPlayerThemeData? other) {
+  /// A copy of [StreamVoiceRecordingAttachmentThemeData] with specified
+  /// attributes overridden.
+  StreamVoiceRecordingAttachmentThemeData copyWith({
+    Color? backgroundColor,
+    Widget? playIcon,
+    Widget? pauseIcon,
+    Widget? loadingIndicator,
+    ButtonStyle? audioControlButtonStyle,
+    TextStyle? titleTextStyle,
+    TextStyle? durationTextStyle,
+    TextStyle? playbackSpeedTextStyle,
+    ButtonStyle? speedControlButtonStyle,
+    StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
+  }) =>
+      StreamVoiceRecordingAttachmentThemeData(
+        backgroundColor: backgroundColor ?? this.backgroundColor,
+        playIcon: playIcon ?? this.playIcon,
+        pauseIcon: pauseIcon ?? this.pauseIcon,
+        loadingIndicator: loadingIndicator ?? this.loadingIndicator,
+        audioControlButtonStyle:
+            audioControlButtonStyle ?? this.audioControlButtonStyle,
+        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+        durationTextStyle: durationTextStyle ?? this.durationTextStyle,
+        playbackSpeedTextStyle:
+            playbackSpeedTextStyle ?? this.playbackSpeedTextStyle,
+        speedControlButtonStyle:
+            speedControlButtonStyle ?? this.speedControlButtonStyle,
+        audioWaveformSliderTheme:
+            audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
+      );
+
+  /// Merges this [StreamVoiceRecordingAttachmentThemeData] with the [other].
+  StreamVoiceRecordingAttachmentThemeData merge(
+    StreamVoiceRecordingAttachmentThemeData? other,
+  ) {
     if (other == null) return this;
-    return StreamVoiceRecordingPlayerThemeData(
+    return copyWith(
       backgroundColor: other.backgroundColor,
       playIcon: other.playIcon,
       pauseIcon: other.pauseIcon,
-      iconColor: other.iconColor,
-      buttonBackgroundColor: other.buttonBackgroundColor,
-      buttonPadding: other.buttonPadding,
-      buttonShape: other.buttonShape,
-      buttonSize: other.buttonSize,
-      buttonElevation: other.buttonElevation,
-      speedButtonSize: other.speedButtonSize,
-      speedButtonElevation: other.speedButtonElevation,
-      speedButtonPadding: other.speedButtonPadding,
-      speedButtonBackgroundColor: other.speedButtonBackgroundColor,
-      speedButtonShape: other.speedButtonShape,
+      loadingIndicator: other.loadingIndicator,
+      audioControlButtonStyle: other.audioControlButtonStyle,
       titleTextStyle: other.titleTextStyle,
-      speedButtonTextStyle: other.speedButtonTextStyle,
-      fileTypeIcon: other.fileTypeIcon,
-      fileSizeTextStyle: other.fileSizeTextStyle,
-      timerTextStyle: other.timerTextStyle,
+      durationTextStyle: other.durationTextStyle,
+      playbackSpeedTextStyle: other.playbackSpeedTextStyle,
+      speedControlButtonStyle: other.speedControlButtonStyle,
+      audioWaveformSliderTheme: audioWaveformSliderTheme?.merge(
+        other.audioWaveformSliderTheme,
+      ),
+    );
+  }
+
+  /// Linearly interpolate between two [StreamVoiceRecordingAttachmentThemeData]
+  /// objects.
+  static StreamVoiceRecordingAttachmentThemeData lerp(
+    StreamVoiceRecordingAttachmentThemeData a,
+    StreamVoiceRecordingAttachmentThemeData b,
+    double t,
+  ) {
+    return StreamVoiceRecordingAttachmentThemeData(
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      playIcon: t < 0.5 ? a.playIcon : b.playIcon,
+      pauseIcon: t < 0.5 ? a.pauseIcon : b.pauseIcon,
+      loadingIndicator: t < 0.5 ? a.loadingIndicator : b.loadingIndicator,
+      audioControlButtonStyle: ButtonStyle.lerp(
+          a.audioControlButtonStyle, b.audioControlButtonStyle, t),
+      titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
+      durationTextStyle:
+          TextStyle.lerp(a.durationTextStyle, b.durationTextStyle, t),
+      playbackSpeedTextStyle:
+          TextStyle.lerp(a.playbackSpeedTextStyle, b.playbackSpeedTextStyle, t),
+      speedControlButtonStyle: ButtonStyle.lerp(
+          a.speedControlButtonStyle, b.speedControlButtonStyle, t),
+      audioWaveformSliderTheme: StreamAudioWaveformSliderThemeData.lerp(
+          a.audioWaveformSliderTheme!, b.audioWaveformSliderTheme!, t),
     );
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(ColorProperty('backgroundColor', backgroundColor))
-      ..add(DiagnosticsProperty('playIcon', playIcon))
-      ..add(DiagnosticsProperty('pauseIcon', pauseIcon))
-      ..add(ColorProperty('iconColor', iconColor))
-      ..add(ColorProperty('buttonBackgroundColor', buttonBackgroundColor))
-      ..add(DiagnosticsProperty('buttonPadding', buttonPadding))
-      ..add(DiagnosticsProperty('buttonShape', buttonShape))
-      ..add(DiagnosticsProperty('buttonSize', buttonSize))
-      ..add(DoubleProperty('buttonElevation', buttonElevation))
-      ..add(DiagnosticsProperty('speedButtonSize', speedButtonSize))
-      ..add(DoubleProperty('speedButtonElevation', speedButtonElevation))
-      ..add(DiagnosticsProperty('speedButtonPadding', speedButtonPadding))
-      ..add(ColorProperty(
-          'speedButtonBackgroundColor', speedButtonBackgroundColor))
-      ..add(DiagnosticsProperty('speedButtonShape', speedButtonShape))
-      ..add(DiagnosticsProperty('titleTextStyle', titleTextStyle))
-      ..add(DiagnosticsProperty('speedButtonTextStyle', speedButtonTextStyle))
-      ..add(DiagnosticsProperty('fileTypeIcon', fileTypeIcon))
-      ..add(DiagnosticsProperty('fileSizeTextStyle', fileSizeTextStyle))
-      ..add(DiagnosticsProperty('timerTextStyle', timerTextStyle));
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StreamVoiceRecordingAttachmentThemeData &&
+          other.backgroundColor == backgroundColor &&
+          other.playIcon == playIcon &&
+          other.pauseIcon == pauseIcon &&
+          other.loadingIndicator == loadingIndicator &&
+          other.audioControlButtonStyle == audioControlButtonStyle &&
+          other.titleTextStyle == titleTextStyle &&
+          other.durationTextStyle == durationTextStyle &&
+          other.playbackSpeedTextStyle == playbackSpeedTextStyle &&
+          other.speedControlButtonStyle == speedControlButtonStyle &&
+          other.audioWaveformSliderTheme == audioWaveformSliderTheme;
+
+  @override
+  int get hashCode =>
+      backgroundColor.hashCode ^
+      playIcon.hashCode ^
+      pauseIcon.hashCode ^
+      loadingIndicator.hashCode ^
+      audioControlButtonStyle.hashCode ^
+      titleTextStyle.hashCode ^
+      durationTextStyle.hashCode ^
+      playbackSpeedTextStyle.hashCode ^
+      speedControlButtonStyle.hashCode ^
+      audioWaveformSliderTheme.hashCode;
 }

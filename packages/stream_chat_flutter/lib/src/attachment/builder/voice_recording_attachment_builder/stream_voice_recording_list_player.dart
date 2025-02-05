@@ -117,6 +117,7 @@ class _StreamVoiceRecordingListPlayerState
 /// {@template PlayListItem}
 /// Represents an audio attachment meta data.
 /// {@endtemplate}
+@Deprecated("Use 'PlaylistTrack' instead")
 class PlayListItem {
   /// {@macro PlayListItem}
   const PlayListItem({

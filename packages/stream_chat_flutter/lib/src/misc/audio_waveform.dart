@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/theme/audio_waveform_slider_theme.dart';
 
 const _kAudioWaveformSliderThumbWidth = 4.0;
 const _kAudioWaveformSliderThumbHeight = 28.0;
@@ -20,13 +21,15 @@ class StreamAudioWaveformSlider extends StatefulWidget {
     required this.onChanged,
     this.onChangeEnd,
     this.limit = 100,
-    this.color = const Color(0xff7E828B),
+    this.color,
     this.progress = 0,
-    this.progressColor = const Color(0xff005FFF),
-    this.minBarHeight = 2,
-    this.spacingRatio = 0.3,
-    this.heightScale = 1,
+    this.progressColor,
+    this.minBarHeight,
+    this.spacingRatio,
+    this.heightScale,
     this.inverse = true,
+    this.thumbColor,
+    this.thumbBorderColor,
   });
 
   /// The waveform data to be drawn.
@@ -45,8 +48,8 @@ class StreamAudioWaveformSlider extends StatefulWidget {
 
   /// The color of the wave bars.
   ///
-  /// Defaults to [Colors.grey].
-  final Color color;
+  /// Defaults to [StreamAudioWaveformSliderThemeData.color].
+  final Color? color;
 
   /// The number of wave bars that will be draw in the screen. When the length
   /// of [waveform] is bigger than [limit] only the X last bars will be shown.
@@ -61,29 +64,39 @@ class StreamAudioWaveformSlider extends StatefulWidget {
 
   /// The color of the progressed wave bars.
   ///
-  /// Defaults to [Colors.blue].
-  final Color progressColor;
+  /// Defaults to [StreamAudioWaveformSliderThemeData.progressColor].
+  final Color? progressColor;
 
   /// The minimum height of the bars.
   ///
-  /// Defaults to 2.
-  final double minBarHeight;
+  /// Defaults to [StreamAudioWaveformSliderThemeData.minBarHeight].
+  final double? minBarHeight;
 
   /// The ratio of the spacing between the bars.
   ///
-  /// Defaults to 0.2.
-  final double spacingRatio;
+  /// Defaults to [StreamAudioWaveformSliderThemeData.spacingRatio].
+  final double? spacingRatio;
 
   /// The scale of the height of the bars.
   ///
-  /// Defaults to 1.
-  final double heightScale;
+  /// Defaults to [StreamAudioWaveformSliderThemeData.heightScale].
+  final double? heightScale;
 
   /// If true, the bars grow from right to left otherwise they grow from left
   /// to right.
   ///
   /// Defaults to true.
   final bool inverse;
+
+  /// The color of the slider thumb.
+  ///
+  /// Defaults to [StreamAudioWaveformSliderThemeData.thumbColor].
+  final Color? thumbColor;
+
+  /// The color of the slider thumb border.
+  ///
+  /// Defaults to [StreamAudioWaveformSliderThemeData.thumbBorderColor].
+  final Color? thumbBorderColor;
 
   @override
   State<StreamAudioWaveformSlider> createState() =>
@@ -93,6 +106,16 @@ class StreamAudioWaveformSlider extends StatefulWidget {
 class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
   @override
   Widget build(BuildContext context) {
+    final theme = StreamAudioWaveformSliderTheme.of(context);
+
+    final color = widget.color ?? theme.color!;
+    final progressColor = widget.progressColor ?? theme.progressColor!;
+    final minBarHeight = widget.minBarHeight ?? theme.minBarHeight!;
+    final spacingRatio = widget.spacingRatio ?? theme.spacingRatio!;
+    final heightScale = widget.heightScale ?? theme.heightScale!;
+    final thumbColor = widget.thumbColor ?? theme.thumbColor!;
+    final thumbBorderColor = widget.thumbBorderColor ?? theme.thumbBorderColor!;
+
     return HorizontalSlider(
       onChangeStart: widget.onChangeStart,
       onChanged: widget.onChanged,
@@ -106,12 +129,12 @@ class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
             StreamAudioWaveform(
               waveform: widget.waveform,
               limit: widget.limit,
-              color: widget.color,
+              color: color,
               progress: widget.progress,
-              progressColor: widget.progressColor,
-              minBarHeight: widget.minBarHeight,
-              spacingRatio: widget.spacingRatio,
-              heightScale: widget.heightScale,
+              progressColor: progressColor,
+              minBarHeight: minBarHeight,
+              spacingRatio: spacingRatio,
+              heightScale: heightScale,
               inverse: widget.inverse,
             ),
             Builder(
@@ -123,6 +146,8 @@ class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
                   duration: const Duration(milliseconds: 300),
                   left: progressWidth - _kAudioWaveformSliderThumbWidth / 2,
                   child: StreamAudioWaveformSliderThumb(
+                    color: thumbColor,
+                    borderColor: thumbBorderColor,
                     height: constraints.maxHeight,
                   ),
                 );

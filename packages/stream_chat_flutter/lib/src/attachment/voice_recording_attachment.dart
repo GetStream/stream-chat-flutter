@@ -112,7 +112,8 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVoiceRecordingTheme.of(context).playerTheme;
+    final theme = StreamVoiceRecordingAttachmentTheme.of(context);
+    final waveformSliderTheme = theme.audioWaveformSliderTheme;
 
     final shape = this.shape ??
         RoundedRectangleBorder(
@@ -157,6 +158,7 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
                     AudioDurationText(
                       duration: track.duration,
                       position: track.position,
+                      style: theme.durationTextStyle,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -172,6 +174,14 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
                           onChangeStart: onTrackSeekStart,
                           onChanged: onTrackSeekChanged,
                           onChangeEnd: onTrackSeekEnd,
+                          color: waveformSliderTheme?.color,
+                          progressColor: waveformSliderTheme?.progressColor,
+                          minBarHeight: waveformSliderTheme?.minBarHeight,
+                          spacingRatio: waveformSliderTheme?.spacingRatio,
+                          heightScale: waveformSliderTheme?.heightScale,
+                          thumbColor: waveformSliderTheme?.thumbColor,
+                          thumbBorderColor:
+                              waveformSliderTheme?.thumbBorderColor,
                         ),
                       ),
                     ),
@@ -229,6 +239,7 @@ class AudioDurationText extends StatelessWidget {
     super.key,
     required this.duration,
     required this.position,
+    this.style,
   });
 
   /// The total duration of the audio track.
@@ -237,14 +248,15 @@ class AudioDurationText extends StatelessWidget {
   /// The current position of the audio track.
   final Duration position;
 
+  /// The style to apply to the duration text.
+  final TextStyle? style;
+
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVoiceRecordingTheme.of(context).playerTheme;
-
     if (position.inMilliseconds > 0) {
       return Text(
         position.toMinutesAndSeconds(),
-        style: theme.timerTextStyle?.copyWith(
+        style: style?.copyWith(
           // Use mono space for each num character.
           fontFeatures: [const FontFeature.tabularFigures()],
         ),
@@ -253,7 +265,7 @@ class AudioDurationText extends StatelessWidget {
 
     return Text(
       duration.toMinutesAndSeconds(),
-      style: theme.timerTextStyle?.copyWith(
+      style: style?.copyWith(
         // Use mono space for each num character.
         fontFeatures: [const FontFeature.tabularFigures()],
       ),
@@ -294,19 +306,10 @@ class AudioControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streamTheme = StreamChatTheme.of(context);
-    final theme = StreamVoiceRecordingTheme.of(context).playerTheme;
+    final theme = StreamVoiceRecordingAttachmentTheme.of(context);
 
     return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        elevation: theme.buttonElevation,
-        padding: theme.buttonPadding,
-        backgroundColor: theme.buttonBackgroundColor,
-        disabledBackgroundColor: theme.buttonBackgroundColor,
-        shape: theme.buttonShape,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        minimumSize: theme.buttonSize,
-      ),
+      style: theme.audioControlButtonStyle,
       onPressed: switch (state) {
         TrackState.loading => null,
         TrackState.idle => onPlay,
@@ -314,19 +317,10 @@ class AudioControlButton extends StatelessWidget {
         TrackState.paused => onPlay,
       },
       child: switch (state) {
-        TrackState.loading => SizedBox.fromSize(
-            size: const Size.square(24 - /* Padding */ 2),
-            child: Center(
-              child: CircularProgressIndicator.adaptive(
-                valueColor: AlwaysStoppedAnimation(
-                  streamTheme.colorTheme.accentPrimary,
-                ),
-              ),
-            ),
-          ),
-        TrackState.idle => Icon(theme.playIcon, color: theme.iconColor),
-        TrackState.playing => Icon(theme.pauseIcon, color: theme.iconColor),
-        TrackState.paused => Icon(theme.playIcon, color: theme.iconColor),
+        TrackState.loading => theme.loadingIndicator,
+        TrackState.idle => theme.playIcon,
+        TrackState.playing => theme.pauseIcon,
+        TrackState.paused => theme.playIcon,
       },
     );
   }
@@ -353,24 +347,17 @@ class SpeedControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVoiceRecordingTheme.of(context).playerTheme;
+    final theme = StreamVoiceRecordingAttachmentTheme.of(context);
 
     return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        elevation: theme.speedButtonElevation,
-        backgroundColor: theme.speedButtonBackgroundColor,
-        padding: theme.speedButtonPadding,
-        shape: theme.speedButtonShape,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        minimumSize: theme.speedButtonSize,
-      ),
-      onPressed: () {
-        final nextSpeed = speed.next;
-        onChangeSpeed?.call(nextSpeed);
+      style: theme.speedControlButtonStyle,
+      onPressed: switch (onChangeSpeed) {
+        final it? => () => it(speed.next),
+        _ => null,
       },
       child: Text(
         'x${speed.speed}',
-        style: theme.speedButtonTextStyle,
+        style: theme.playbackSpeedTextStyle,
       ),
     );
   }

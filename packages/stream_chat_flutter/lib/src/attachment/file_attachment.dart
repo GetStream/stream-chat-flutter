@@ -38,7 +38,7 @@ class StreamFileAttachment extends StatelessWidget {
 
   /// The background color of the attachment.
   ///
-  /// Defaults to [StreamChatTheme.colorTheme.barsBg].
+  /// Defaults to [StreamChatTheme._colorTheme.barsBg].
   final Color? backgroundColor;
 
   /// The constraints to use when displaying the file.
