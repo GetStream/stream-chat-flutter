@@ -89,8 +89,6 @@ class StreamAudioRecorderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     final isRecording = recordState is! RecordStateIdle;
     final isLocked = isRecording && recordState is! RecordStateRecordingHold;
 
@@ -128,13 +126,9 @@ class StreamAudioRecorderButton extends StatelessWidget {
       },
       child: StreamAudioRecorderBuilder(
         state: recordState,
-        button: StreamSvgIcon(
-          icon: StreamSvgIcons.mic,
-          size: kDefaultMessageInputIconSize,
-          color: switch (isRecording) {
-            true => theme.colorTheme.accentPrimary,
-            false => theme.colorTheme.textLowEmphasis,
-          },
+        button: StreamMessageInputIconButton(
+          onPressed: () {}, // Allows showing ripple effect on tap.
+          icon: const StreamSvgIcon(icon: StreamSvgIcons.mic),
         ),
         builder: (context, state, recordButton) => switch (state) {
           // Show only the record button if the recording is not in progress.
@@ -188,8 +182,15 @@ class RecordStateIdleContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamChatTheme.of(context);
+
+    final child = IconTheme(
+      data: IconThemeData(color: theme.colorTheme.textLowEmphasis),
+      child: recordButton,
+    );
+
     final info = state.message;
-    if (info == null || info.isEmpty) return recordButton;
+    if (info == null || info.isEmpty) return child;
 
     return PortalTarget(
       anchor: const Aligned(
@@ -197,7 +198,7 @@ class RecordStateIdleContent extends StatelessWidget {
         follower: Alignment.bottomRight,
       ),
       portalFollower: HoldToRecordInfoTooltip(message: info),
-      child: recordButton,
+      child: child,
     );
   }
 }
@@ -246,7 +247,7 @@ class RecordStateHoldRecordingContent extends StatelessWidget {
       // Show the swipe to lock button once the recording starts.
       visible: recordingTime.inSeconds > 0,
       anchor: Aligned(
-        offset: Offset(0, dragOffset.dy - 16),
+        offset: Offset(4, dragOffset.dy - 16),
         target: Alignment.topRight,
         follower: Alignment.bottomRight,
       ),
@@ -257,19 +258,25 @@ class RecordStateHoldRecordingContent extends StatelessWidget {
       ),
       child: Row(
         children: [
-          PlaybackTimerIndicator(duration: recordingTime),
+          IgnorePointer(
+            child: PlaybackTimerIndicator(duration: recordingTime),
+          ),
           Expanded(
-            child: SlideToCancelIndicator(
-              progress: cancelProgress.toDouble(),
+            child: IgnorePointer(
+              child: SlideToCancelIndicator(
+                progress: cancelProgress.toDouble(),
+              ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
+          DecoratedBox(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: theme.colorTheme.inputBg,
             ),
-            child: recordButton,
+            child: IconTheme(
+              data: IconThemeData(color: theme.colorTheme.accentPrimary),
+              child: recordButton,
+            ),
           ),
         ].insertBetween(const SizedBox(width: 8)),
       ),
@@ -316,7 +323,7 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
 
     return PortalTarget(
       anchor: const Aligned(
-        offset: Offset(0, -16),
+        offset: Offset(4, -16),
         target: Alignment.topRight,
         follower: Alignment.bottomRight,
       ),
@@ -335,7 +342,7 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: SizedBox(
-                  height: 28,
+                  height: kDefaultMessageInputIconSize,
                   child: StreamAudioWaveform(
                     limit: 50,
                     waveform: state.waveform,
@@ -429,7 +436,7 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
 
     return PortalTarget(
       anchor: const Aligned(
-        offset: Offset(0, -16),
+        offset: Offset(4, -16),
         target: Alignment.topRight,
         follower: Alignment.bottomRight,
       ),
@@ -505,7 +512,7 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
                 );
               },
             ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -619,15 +626,21 @@ class PlaybackControlButton extends StatelessWidget {
         TrackState.paused => onPlay,
       },
       icon: switch (state) {
-        TrackState.loading => SizedBox.fromSize(
-            size: const Size.square(24 - /* Padding */ 2),
-            child: Center(
-              child: CircularProgressIndicator.adaptive(
-                valueColor: AlwaysStoppedAnimation(
-                  theme.colorTheme.accentPrimary,
+        TrackState.loading => Builder(
+            builder: (context) {
+              final iconTheme = IconTheme.of(context);
+              return SizedBox.fromSize(
+                size: Size.square(iconTheme.size!),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: CircularProgressIndicator.adaptive(
+                    valueColor: AlwaysStoppedAnimation(
+                      theme.colorTheme.accentPrimary,
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         TrackState.idle => const StreamSvgIcon(icon: StreamSvgIcons.play),
         TrackState.paused => const StreamSvgIcon(icon: StreamSvgIcons.play),
@@ -884,7 +897,10 @@ class HoldToRecordInfoTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
-    const arrowSize = Size(kDefaultMessageInputIconSize / 2, 6);
+    const recordButtonWidth = kDefaultMessageInputIconSize +
+        kDefaultMessageInputIconPadding * 2; // right, left padding.
+
+    const arrowSize = Size(recordButtonWidth / 2, 6);
 
     return Padding(
       padding: EdgeInsets.only(bottom: arrowSize.height),

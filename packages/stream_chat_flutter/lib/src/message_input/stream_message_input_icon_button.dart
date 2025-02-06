@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 /// The default size for the icon inside the message input icon button.
 const double kDefaultMessageInputIconSize = 32;
 
+/// The default padding around the icon inside the message input icon button.
+const double kDefaultMessageInputIconPadding = 4;
+
 /// {@template streamMessageInputIconButton}
 /// A customized [IconButton] for the message input.
 ///
@@ -18,8 +21,7 @@ class StreamMessageInputIconButton extends StatelessWidget {
     this.color,
     this.disabledColor,
     this.iconSize = kDefaultMessageInputIconSize,
-    this.padding = EdgeInsets.zero,
-    this.tapTargetSize = MaterialTapTargetSize.shrinkWrap,
+    this.padding = const EdgeInsets.all(kDefaultMessageInputIconPadding),
   });
 
   /// The icon to display inside the button.
@@ -51,12 +53,6 @@ class StreamMessageInputIconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback? onPressed;
 
-  /// Configures the minimum size of the area within which the button may be
-  /// pressed.
-  ///
-  /// Defaults to [MaterialTapTargetSize.shrinkWrap].
-  final MaterialTapTargetSize tapTargetSize;
-
   @override
   Widget build(BuildContext context) {
     return IconButton(
@@ -67,8 +63,8 @@ class StreamMessageInputIconButton extends StatelessWidget {
       onPressed: onPressed,
       padding: padding,
       style: ButtonStyle(
-        tapTargetSize: tapTargetSize,
-        minimumSize: WidgetStateProperty.all(Size(iconSize, iconSize)),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: WidgetStateProperty.all(Size.square(iconSize)),
       ),
     );
   }

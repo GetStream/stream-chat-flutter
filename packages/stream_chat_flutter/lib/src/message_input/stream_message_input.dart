@@ -113,7 +113,7 @@ class StreamMessageInput extends StatefulWidget {
     this.disableAttachments = false,
     this.messageInputController,
     this.actionsBuilder,
-    this.spaceBetweenActions = 8,
+    this.spaceBetweenActions = 0,
     this.actionsLocation = ActionsLocation.left,
     this.attachmentListBuilder,
     this.fileAttachmentListBuilder,
@@ -787,7 +787,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
               if (!_commandEnabled &&
                   widget.actionsLocation == ActionsLocation.left)
                 _buildExpandActionsButton(context),
+              const SizedBox(width: 4),
               Expanded(child: _buildTextInput(context)),
+              const SizedBox(width: 4),
               if (!_commandEnabled &&
                   widget.actionsLocation == ActionsLocation.right)
                 _buildExpandActionsButton(context),
@@ -835,7 +837,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   },
                 ),
               ),
-          ].insertBetween(const SizedBox(width: 8)),
+          ],
         );
       },
     );
