@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart' hide TextTheme;
 import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/src/theme/audio_waveform_slider_theme.dart';
@@ -536,7 +538,6 @@ class StreamChatThemeData {
           iconColor: Colors.black,
           padding: const EdgeInsets.symmetric(horizontal: 6),
           backgroundColor: Colors.white,
-          disabledBackgroundColor: Colors.white,
           shape: const CircleBorder(),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           minimumSize: const Size(36, 36),
@@ -555,7 +556,6 @@ class StreamChatThemeData {
           iconColor: Colors.black,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           backgroundColor: Colors.white,
-          disabledBackgroundColor: Colors.white,
           shape: const StadiumBorder(),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           minimumSize: const Size(40, 28),

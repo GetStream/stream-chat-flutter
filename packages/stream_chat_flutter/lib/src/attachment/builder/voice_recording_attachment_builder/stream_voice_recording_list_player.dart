@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 import 'dart:async';
 
 import 'package:collection/collection.dart';

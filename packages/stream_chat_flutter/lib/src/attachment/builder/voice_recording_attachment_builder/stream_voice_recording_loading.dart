@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

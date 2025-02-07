@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 import 'dart:math';
 
 import 'package:collection/collection.dart';

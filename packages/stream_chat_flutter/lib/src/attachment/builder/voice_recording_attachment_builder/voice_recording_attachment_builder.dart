@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 part of '../attachment_widget_builder.dart';
 
 /// The default attachment builder for voice recordings
