@@ -820,14 +820,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     // message input controller.
                     final audio = await _audioRecorderController.finishRecord();
                     if (audio != null) {
-                      _effectiveController.attachments = [
-                        ..._effectiveController.attachments,
-                        audio,
-                      ];
+                      _effectiveController.addAttachment(audio);
                     }
 
                     // Once the recording is finished, cancel the recorder.
-                    _audioRecorderController.cancelRecord();
+                    _audioRecorderController.cancelRecord(discardTrack: false);
 
                     // Send the message if the user has enabled the option to
                     // send the voice recording automatically.

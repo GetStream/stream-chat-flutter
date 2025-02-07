@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
@@ -128,11 +127,15 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
     return null;
   }
 
-  /// Cancels the current recording session.
-  Future<void> cancelRecord() async {
+  /// Cancels the current recording session and discards the recorded track.
+  ///
+  /// Pass [discardTrack] as `false` to keep the recorded track, This is useful
+  /// when you want to cancel the recording session without losing the recorded
+  /// track.
+  Future<void> cancelRecord({bool discardTrack = true}) async {
     // Only cancel the recorder if it is currently recording or stopped.
     if (value case RecordStateRecording() || RecordStateStopped()) {
-      await _recorder.cancel();
+      if (discardTrack) await _recorder.cancel();
 
       // Update the state to idle.
       value = const RecordStateIdle();
@@ -200,14 +203,10 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
     return '${tempDir.path}/audio_$currentTimestamp.${encoder.extension}';
   }
 
-  double _minValue = 0;
   StreamSubscription<Amplitude>? _recorderAmplitudeSubscription;
   void _onRecorderAmplitudeChanged(Amplitude amplitude) {
     // Only update the waveform if the recorder is currently recording.
     if (value case final RecordStateRecording state) {
-      // The amplitude is normalized between -160 and 0 dBFS.
-      // https://github.com/llfbandit/record/issues/51#issuecomment-1080351237
-      _minValue = math.min(_minValue, amplitude.current);
       final normalizedAmplitude = amplitude.current.normalize(-60, 0);
       final updatedWaveForm = [...state.waveform, normalizedAmplitude];
       value = state.copyWith(waveform: updatedWaveForm);
