@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for `voiceRecording` type attachments.
+
 ## 9.2.0+1
 
 - Remove untracked files from the package.
