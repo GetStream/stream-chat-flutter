@@ -126,7 +126,7 @@ class StreamAudioRecorderButton extends StatelessWidget {
       },
       child: StreamAudioRecorderBuilder(
         state: recordState,
-        button: StreamMessageInputIconButton(
+        button: RecordButton(
           onPressed: () {}, // Allows showing ripple effect on tap.
           icon: const StreamSvgIcon(icon: StreamSvgIcons.mic),
         ),
@@ -155,6 +155,35 @@ class StreamAudioRecorderButton extends StatelessWidget {
             ),
         },
       ),
+    );
+  }
+}
+
+/// {@template recordButton}
+/// A widget representing the record button for the audio recorder.
+/// {@endtemplate}
+class RecordButton extends StatelessWidget {
+  /// {@macro recordButton}
+  const RecordButton({
+    super.key,
+    required this.icon,
+    this.onPressed,
+  });
+
+  /// The icon to display inside the button.
+  final Widget icon;
+
+  /// The callback that is called when the button is tapped or otherwise
+  /// activated.
+  ///
+  /// If this is set to null, the button will be disabled.
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamMessageInputIconButton(
+      onPressed: onPressed,
+      icon: icon,
     );
   }
 }

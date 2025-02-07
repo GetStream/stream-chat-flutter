@@ -98,7 +98,7 @@ void main() {
           ),
         );
 
-        final center = tester.getCenter(find.byType(StreamAudioRecorderButton));
+        final center = tester.getCenter(find.byType(RecordButton));
         final gesture = await tester.startGesture(center);
         await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
         await gesture.up();
@@ -125,7 +125,7 @@ void main() {
           ),
         );
 
-        final center = tester.getCenter(find.byType(StreamAudioRecorderButton));
+        final center = tester.getCenter(find.byType(RecordButton));
         final gesture = await tester.startGesture(center);
         await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
         // Move beyond threshold
@@ -153,7 +153,7 @@ void main() {
           ),
         );
 
-        final center = tester.getCenter(find.byType(StreamAudioRecorderButton));
+        final center = tester.getCenter(find.byType(RecordButton));
         final gesture = await tester.startGesture(center);
         await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
         // Move beyond threshold
