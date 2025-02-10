@@ -1,4 +1,3 @@
-export 'audio_recorder_theme.dart';
 export 'audio_waveform_slider_theme.dart';
 export 'audio_waveform_theme.dart';
 export 'avatar_theme.dart';
