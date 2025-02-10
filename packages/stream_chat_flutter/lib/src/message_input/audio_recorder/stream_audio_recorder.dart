@@ -12,6 +12,19 @@ import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
+/// {@template audioRecorderBuilder}
+/// A builder function for constructing the audio recorder UI.
+///
+/// See also:
+///   - [StreamAudioRecorderButton], which uses this builder function.
+///   - [StreamAudioRecorderState], which provides the state of the recorder.
+/// {@endtemplate}
+typedef AudioRecorderBuilder = Widget Function(
+  BuildContext,
+  AudioRecorderState,
+  Widget,
+);
+
 /// {@template streamAudioRecorderButton}
 /// A configurable audio recording button with interactive states and gestures.
 ///
@@ -124,7 +137,7 @@ class StreamAudioRecorderButton extends StatelessWidget {
         // Update the drag offset.
         return onRecordDragUpdate?.call(dragOffset);
       },
-      child: StreamAudioRecorderBuilder(
+      child: StreamAudioRecorder(
         state: recordState,
         button: RecordButton(
           onPressed: () {}, // Allows showing ripple effect on tap.
@@ -809,16 +822,20 @@ class SlideToCancelIndicator extends StatelessWidget {
   }
 }
 
-/// {@template streamAudioRecorderBuilder}
+/// {@template streamAudioRecorder}
 /// Builder widget for constructing audio recorder UI based on state.
 ///
 /// Allows dynamic UI rendering depending on the current audio recorder state.
 ///
 /// Provides a flexible mechanism for rendering audio recorder UI dynamically.
+///
+/// see also:
+///  - [StreamAudioRecorderButton], which uses this builder function.
+///  - [StreamAudioRecorderState], which provides the state of the recorder.
 /// {@endtemplate}
-class StreamAudioRecorderBuilder extends StatelessWidget {
-  /// {@macro streamAudioRecorderBuilder}
-  const StreamAudioRecorderBuilder({
+class StreamAudioRecorder extends StatelessWidget {
+  /// {@macro streamAudioRecorder}
+  const StreamAudioRecorder({
     super.key,
     required this.state,
     required this.builder,
@@ -832,7 +849,7 @@ class StreamAudioRecorderBuilder extends StatelessWidget {
   final AudioRecorderState state;
 
   /// The builder function to construct the audio recorder UI.
-  final Widget Function(BuildContext, AudioRecorderState, Widget) builder;
+  final AudioRecorderBuilder builder;
 
   @override
   Widget build(BuildContext context) => builder(context, state, button);
