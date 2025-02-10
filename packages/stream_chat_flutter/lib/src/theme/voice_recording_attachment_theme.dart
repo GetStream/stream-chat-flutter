@@ -67,7 +67,6 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
     this.audioControlButtonStyle,
     this.titleTextStyle,
     this.durationTextStyle,
-    this.playbackSpeedTextStyle,
     this.speedControlButtonStyle,
     this.audioWaveformSliderTheme,
   });
@@ -93,9 +92,6 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
   /// The text style for the duration.
   final TextStyle? durationTextStyle;
 
-  /// The text style for the playback speed.
-  final TextStyle? playbackSpeedTextStyle;
-
   /// The style for the speed control button.
   final ButtonStyle? speedControlButtonStyle;
 
@@ -112,7 +108,6 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
     ButtonStyle? audioControlButtonStyle,
     TextStyle? titleTextStyle,
     TextStyle? durationTextStyle,
-    TextStyle? playbackSpeedTextStyle,
     ButtonStyle? speedControlButtonStyle,
     StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
   }) =>
@@ -125,8 +120,6 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
             audioControlButtonStyle ?? this.audioControlButtonStyle,
         titleTextStyle: titleTextStyle ?? this.titleTextStyle,
         durationTextStyle: durationTextStyle ?? this.durationTextStyle,
-        playbackSpeedTextStyle:
-            playbackSpeedTextStyle ?? this.playbackSpeedTextStyle,
         speedControlButtonStyle:
             speedControlButtonStyle ?? this.speedControlButtonStyle,
         audioWaveformSliderTheme:
@@ -146,7 +139,6 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
       audioControlButtonStyle: other.audioControlButtonStyle,
       titleTextStyle: other.titleTextStyle,
       durationTextStyle: other.durationTextStyle,
-      playbackSpeedTextStyle: other.playbackSpeedTextStyle,
       speedControlButtonStyle: other.speedControlButtonStyle,
       audioWaveformSliderTheme: audioWaveformSliderTheme?.merge(
         other.audioWaveformSliderTheme,
@@ -171,8 +163,6 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
       titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
       durationTextStyle:
           TextStyle.lerp(a.durationTextStyle, b.durationTextStyle, t),
-      playbackSpeedTextStyle:
-          TextStyle.lerp(a.playbackSpeedTextStyle, b.playbackSpeedTextStyle, t),
       speedControlButtonStyle: ButtonStyle.lerp(
           a.speedControlButtonStyle, b.speedControlButtonStyle, t),
       audioWaveformSliderTheme: StreamAudioWaveformSliderThemeData.lerp(
@@ -191,7 +181,6 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
           other.audioControlButtonStyle == audioControlButtonStyle &&
           other.titleTextStyle == titleTextStyle &&
           other.durationTextStyle == durationTextStyle &&
-          other.playbackSpeedTextStyle == playbackSpeedTextStyle &&
           other.speedControlButtonStyle == speedControlButtonStyle &&
           other.audioWaveformSliderTheme == audioWaveformSliderTheme;
 
@@ -204,7 +193,6 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
       audioControlButtonStyle.hashCode ^
       titleTextStyle.hashCode ^
       durationTextStyle.hashCode ^
-      playbackSpeedTextStyle.hashCode ^
       speedControlButtonStyle.hashCode ^
       audioWaveformSliderTheme.hashCode;
 }

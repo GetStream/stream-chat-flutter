@@ -555,12 +555,10 @@ class StreamChatThemeData {
         durationTextStyle: textTheme.footnote.copyWith(
           color: colorTheme.textLowEmphasis,
         ),
-        playbackSpeedTextStyle: textTheme.footnote.copyWith(
-          color: Colors.black,
-        ),
         speedControlButtonStyle: ElevatedButton.styleFrom(
           elevation: 2,
-          iconColor: Colors.black,
+          textStyle: textTheme.footnote,
+          foregroundColor: Colors.black,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           backgroundColor: Colors.white,
           shape: const StadiumBorder(),

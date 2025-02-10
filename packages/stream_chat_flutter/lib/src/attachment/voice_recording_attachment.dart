@@ -356,10 +356,7 @@ class SpeedControlButton extends StatelessWidget {
         final it? => () => it(speed.next),
         _ => null,
       },
-      child: Text(
-        'x${speed.speed}',
-        style: theme.playbackSpeedTextStyle,
-      ),
+      child: Text('x${speed.speed}'),
     );
   }
 }
