@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart' hide TextTheme;
 import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
-import 'package:stream_chat_flutter/src/theme/audio_waveform_slider_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatTheme}
@@ -69,6 +68,7 @@ class StreamChatThemeData {
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
+    StreamAudioWaveformThemeData? audioWaveformTheme,
     StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
   }) {
@@ -104,6 +104,7 @@ class StreamChatThemeData {
       pollCommentsDialogTheme: pollCommentsDialogTheme,
       pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
       threadListTileTheme: threadListTileTheme,
+      audioWaveformTheme: audioWaveformTheme,
       audioWaveformSliderTheme: audioWaveformSliderTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
     );
@@ -141,6 +142,7 @@ class StreamChatThemeData {
     required this.pollCommentsDialogTheme,
     required this.pollOptionVotesDialogTheme,
     required this.threadListTileTheme,
+    required this.audioWaveformTheme,
     required this.audioWaveformSliderTheme,
     required this.voiceRecordingAttachmentTheme,
   });
@@ -198,12 +200,16 @@ class StreamChatThemeData {
       indicatorIconSize: 16,
     );
 
-    final audioWaveformSliderTheme = StreamAudioWaveformSliderThemeData(
+    final audioWaveformTheme = StreamAudioWaveformThemeData(
       color: colorTheme.textLowEmphasis,
       progressColor: colorTheme.accentPrimary,
       minBarHeight: 2,
       spacingRatio: 0.3,
       heightScale: 1,
+    );
+
+    final audioWaveformSliderTheme = StreamAudioWaveformSliderThemeData(
+      audioWaveformTheme: audioWaveformTheme,
       thumbColor: Colors.white,
       thumbBorderColor: colorTheme.borders,
     );
@@ -520,6 +526,7 @@ class StreamChatThemeData {
           color: colorTheme.textLowEmphasis,
         ),
       ),
+      audioWaveformTheme: audioWaveformTheme,
       audioWaveformSliderTheme: audioWaveformSliderTheme,
       voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
         backgroundColor: colorTheme.barsBg,
@@ -631,6 +638,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamThreadListTile] widget.
   final StreamThreadListTileThemeData threadListTileTheme;
 
+  /// Theme configuration for the [StreamAudioWaveform] widget.
+  final StreamAudioWaveformThemeData audioWaveformTheme;
+
   /// Theme configuration for the [StreamAudioWaveformSlider] widget.
   final StreamAudioWaveformSliderThemeData audioWaveformSliderTheme;
 
@@ -665,6 +675,7 @@ class StreamChatThemeData {
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
+    StreamAudioWaveformThemeData? audioWaveformTheme,
     StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
   }) =>
@@ -695,6 +706,7 @@ class StreamChatThemeData {
         pollOptionVotesDialogTheme:
             pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
         threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
+        audioWaveformTheme: audioWaveformTheme ?? this.audioWaveformTheme,
         audioWaveformSliderTheme:
             audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
         voiceRecordingAttachmentTheme:
@@ -731,6 +743,7 @@ class StreamChatThemeData {
       pollOptionVotesDialogTheme:
           pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
+      audioWaveformTheme: audioWaveformTheme.merge(other.audioWaveformTheme),
       audioWaveformSliderTheme:
           audioWaveformSliderTheme.merge(other.audioWaveformSliderTheme),
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme

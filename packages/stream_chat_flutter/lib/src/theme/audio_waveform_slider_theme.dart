@@ -1,7 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:stream_chat_flutter/src/theme/audio_waveform_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// {@template streamAudioWaveformSliderTheme}
@@ -52,7 +51,7 @@ class StreamAudioWaveformSliderTheme extends InheritedTheme {
       data != oldWidget.data;
 }
 
-/// {@template streamVoiceRecordingAttachmentThemeData}
+/// {@template streamAudioWaveformSliderThemeData}
 /// A style that overrides the default appearance of
 /// [StreamAudioWaveformSlider] widgets when used with
 /// [StreamAudioWaveformSliderTheme] or with the overall
@@ -61,29 +60,13 @@ class StreamAudioWaveformSliderTheme extends InheritedTheme {
 class StreamAudioWaveformSliderThemeData with Diagnosticable {
   /// {@macro streamVoiceRecordingAttachmentThemeData}
   const StreamAudioWaveformSliderThemeData({
-    this.color,
-    this.progressColor,
-    this.minBarHeight,
-    this.spacingRatio,
-    this.heightScale,
+    this.audioWaveformTheme,
     this.thumbColor,
     this.thumbBorderColor,
   });
 
-  /// The color of the wave bars.
-  final Color? color;
-
-  /// The color of the progressed wave bars.
-  final Color? progressColor;
-
-  /// The minimum height of the bars.
-  final double? minBarHeight;
-
-  /// The ratio of the spacing between the bars.
-  final double? spacingRatio;
-
-  /// The scale of the height of the bars.
-  final double? heightScale;
+  /// The theme of the audio waveform.
+  final StreamAudioWaveformThemeData? audioWaveformTheme;
 
   /// The color of the thumb.
   final Color? thumbColor;
@@ -94,20 +77,12 @@ class StreamAudioWaveformSliderThemeData with Diagnosticable {
   /// A copy of [StreamAudioWaveformSliderThemeData] with specified attributes
   /// overridden.
   StreamAudioWaveformSliderThemeData copyWith({
-    Color? color,
-    Color? progressColor,
-    double? minBarHeight,
-    double? spacingRatio,
-    double? heightScale,
+    StreamAudioWaveformThemeData? audioWaveformTheme,
     Color? thumbColor,
     Color? thumbBorderColor,
   }) {
     return StreamAudioWaveformSliderThemeData(
-      color: color ?? this.color,
-      progressColor: progressColor ?? this.progressColor,
-      minBarHeight: minBarHeight ?? this.minBarHeight,
-      spacingRatio: spacingRatio ?? this.spacingRatio,
-      heightScale: heightScale ?? this.heightScale,
+      audioWaveformTheme: audioWaveformTheme ?? this.audioWaveformTheme,
       thumbColor: thumbColor ?? this.thumbColor,
       thumbBorderColor: thumbBorderColor ?? this.thumbBorderColor,
     );
@@ -119,11 +94,7 @@ class StreamAudioWaveformSliderThemeData with Diagnosticable {
   ) {
     if (other == null) return this;
     return copyWith(
-      color: other.color,
-      progressColor: other.progressColor,
-      minBarHeight: other.minBarHeight,
-      spacingRatio: other.spacingRatio,
-      heightScale: other.heightScale,
+      audioWaveformTheme: other.audioWaveformTheme,
       thumbColor: other.thumbColor,
       thumbBorderColor: other.thumbBorderColor,
     );
@@ -136,11 +107,8 @@ class StreamAudioWaveformSliderThemeData with Diagnosticable {
     double t,
   ) =>
       StreamAudioWaveformSliderThemeData(
-        color: Color.lerp(a.color, b.color, t),
-        progressColor: Color.lerp(a.progressColor, b.progressColor, t),
-        minBarHeight: lerpDouble(a.minBarHeight, b.minBarHeight, t),
-        spacingRatio: lerpDouble(a.spacingRatio, b.spacingRatio, t),
-        heightScale: lerpDouble(a.heightScale, b.heightScale, t),
+        audioWaveformTheme: StreamAudioWaveformThemeData.lerp(
+            a.audioWaveformTheme!, b.audioWaveformTheme!, t),
         thumbColor: Color.lerp(a.thumbColor, b.thumbColor, t),
         thumbBorderColor: Color.lerp(a.thumbBorderColor, b.thumbBorderColor, t),
       );
@@ -149,21 +117,13 @@ class StreamAudioWaveformSliderThemeData with Diagnosticable {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is StreamAudioWaveformSliderThemeData &&
-          other.color == color &&
-          other.progressColor == progressColor &&
-          other.minBarHeight == minBarHeight &&
-          other.spacingRatio == spacingRatio &&
-          other.heightScale == heightScale &&
+          other.audioWaveformTheme == audioWaveformTheme &&
           other.thumbColor == thumbColor &&
           other.thumbBorderColor == thumbBorderColor;
 
   @override
   int get hashCode =>
-      color.hashCode ^
-      progressColor.hashCode ^
-      minBarHeight.hashCode ^
-      spacingRatio.hashCode ^
-      heightScale.hashCode ^
+      audioWaveformTheme.hashCode ^
       thumbColor.hashCode ^
       thumbBorderColor.hashCode;
 
@@ -171,11 +131,8 @@ class StreamAudioWaveformSliderThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(ColorProperty('color', color))
-      ..add(ColorProperty('progressColor', progressColor))
-      ..add(DoubleProperty('minBarHeight', minBarHeight))
-      ..add(DoubleProperty('spacingRatio', spacingRatio))
-      ..add(DoubleProperty('heightScale', heightScale))
+      ..add(DiagnosticsProperty<StreamAudioWaveformThemeData>(
+          'audioWaveformTheme', audioWaveformTheme))
       ..add(ColorProperty('thumbColor', thumbColor))
       ..add(ColorProperty('thumbBorderColor', thumbBorderColor));
   }

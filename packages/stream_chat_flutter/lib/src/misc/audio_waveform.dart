@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/audio_waveform_slider_theme.dart';
+import 'package:stream_chat_flutter/src/theme/audio_waveform_theme.dart';
 
 const _kAudioWaveformSliderThumbWidth = 4.0;
 const _kAudioWaveformSliderThumbHeight = 28.0;
@@ -107,12 +108,13 @@ class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamAudioWaveformSliderTheme.of(context);
+    final waveformTheme = theme.audioWaveformTheme;
 
-    final color = widget.color ?? theme.color!;
-    final progressColor = widget.progressColor ?? theme.progressColor!;
-    final minBarHeight = widget.minBarHeight ?? theme.minBarHeight!;
-    final spacingRatio = widget.spacingRatio ?? theme.spacingRatio!;
-    final heightScale = widget.heightScale ?? theme.heightScale!;
+    final color = widget.color ?? waveformTheme!.color!;
+    final progressColor = widget.progressColor ?? waveformTheme!.progressColor!;
+    final minBarHeight = widget.minBarHeight ?? waveformTheme!.minBarHeight!;
+    final spacingRatio = widget.spacingRatio ?? waveformTheme!.spacingRatio!;
+    final heightScale = widget.heightScale ?? waveformTheme!.heightScale!;
     final thumbColor = widget.thumbColor ?? theme.thumbColor!;
     final thumbBorderColor = widget.thumbBorderColor ?? theme.thumbBorderColor!;
 
@@ -214,12 +216,12 @@ class StreamAudioWaveform extends StatelessWidget {
     super.key,
     required this.waveform,
     this.limit = 100,
-    this.color = const Color(0xff7E828B),
+    this.color,
     this.progress = 0,
-    this.progressColor = const Color(0xff005FFF),
-    this.minBarHeight = 2,
-    this.spacingRatio = 0.3,
-    this.heightScale = 1,
+    this.progressColor,
+    this.minBarHeight,
+    this.spacingRatio,
+    this.heightScale,
     this.inverse = true,
   });
 
@@ -230,8 +232,8 @@ class StreamAudioWaveform extends StatelessWidget {
 
   /// The color of the wave bars.
   ///
-  /// Defaults to [Colors.grey].
-  final Color color;
+  /// Defaults to [StreamAudioWaveformThemeData.color].
+  final Color? color;
 
   /// The number of wave bars that will be draw in the screen. When the length
   /// of [waveform] is bigger than [limit] only the X last bars will be shown.
@@ -246,23 +248,23 @@ class StreamAudioWaveform extends StatelessWidget {
 
   /// The color of the progressed wave bars.
   ///
-  /// Defaults to [Colors.blue].
-  final Color progressColor;
+  /// Defaults to [StreamAudioWaveformThemeData.progressColor].
+  final Color? progressColor;
 
   /// The minimum height of the bars.
   ///
-  /// Defaults to 2.
-  final double minBarHeight;
+  /// Defaults to [StreamAudioWaveformThemeData.minBarHeight].
+  final double? minBarHeight;
 
   /// The ratio of the spacing between the bars.
   ///
-  /// Defaults to 0.2.
-  final double spacingRatio;
+  /// Defaults to [StreamAudioWaveformThemeData.spacingRatio].
+  final double? spacingRatio;
 
   /// The scale of the height of the bars.
   ///
-  /// Defaults to 1.
-  final double heightScale;
+  /// Defaults to [StreamAudioWaveformThemeData.heightScale].
+  final double? heightScale;
 
   /// If true, the bars grow from right to left otherwise they grow from left
   /// to right.
@@ -272,6 +274,14 @@ class StreamAudioWaveform extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamAudioWaveformTheme.of(context);
+
+    final color = this.color ?? theme.color!;
+    final progressColor = this.progressColor ?? theme.progressColor!;
+    final minBarHeight = this.minBarHeight ?? theme.minBarHeight!;
+    final spacingRatio = this.spacingRatio ?? theme.spacingRatio!;
+    final heightScale = this.heightScale ?? theme.heightScale!;
+
     return CustomPaint(
       willChange: true,
       painter: _WaveformPainter(

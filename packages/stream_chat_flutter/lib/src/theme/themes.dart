@@ -1,3 +1,6 @@
+export 'audio_recorder_theme.dart';
+export 'audio_waveform_slider_theme.dart';
+export 'audio_waveform_theme.dart';
 export 'avatar_theme.dart';
 export 'channel_header_theme.dart';
 export 'channel_list_header_theme.dart';

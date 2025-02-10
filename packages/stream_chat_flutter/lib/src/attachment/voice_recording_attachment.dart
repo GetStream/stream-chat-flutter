@@ -114,6 +114,7 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamVoiceRecordingAttachmentTheme.of(context);
     final waveformSliderTheme = theme.audioWaveformSliderTheme;
+    final waveformTheme = waveformSliderTheme?.audioWaveformTheme;
 
     final shape = this.shape ??
         RoundedRectangleBorder(
@@ -174,11 +175,11 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
                           onChangeStart: onTrackSeekStart,
                           onChanged: onTrackSeekChanged,
                           onChangeEnd: onTrackSeekEnd,
-                          color: waveformSliderTheme?.color,
-                          progressColor: waveformSliderTheme?.progressColor,
-                          minBarHeight: waveformSliderTheme?.minBarHeight,
-                          spacingRatio: waveformSliderTheme?.spacingRatio,
-                          heightScale: waveformSliderTheme?.heightScale,
+                          color: waveformTheme?.color,
+                          progressColor: waveformTheme?.progressColor,
+                          minBarHeight: waveformTheme?.minBarHeight,
+                          spacingRatio: waveformTheme?.spacingRatio,
+                          heightScale: waveformTheme?.heightScale,
                           thumbColor: waveformSliderTheme?.thumbColor,
                           thumbBorderColor:
                               waveformSliderTheme?.thumbBorderColor,

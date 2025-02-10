@@ -388,7 +388,6 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
                   child: StreamAudioWaveform(
                     limit: 50,
                     waveform: state.waveform,
-                    color: theme.colorTheme.textLowEmphasis,
                   ),
                 ),
               ),
@@ -524,7 +523,6 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
                           limit: 50,
                           progress: track.progress,
                           waveform: resampleWaveformData(track.waveform, 50),
-                          color: theme.colorTheme.textLowEmphasis,
                           // Only allow seeking if the current track is the one
                           // being interacted with.
                           onChangeStart: (_) async {
