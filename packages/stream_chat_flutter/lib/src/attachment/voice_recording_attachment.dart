@@ -254,18 +254,11 @@ class AudioDurationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (position.inMilliseconds > 0) {
-      return Text(
-        position.toMinutesAndSeconds(),
-        style: style?.copyWith(
-          // Use mono space for each num character.
-          fontFeatures: [const FontFeature.tabularFigures()],
-        ),
-      );
-    }
-
     return Text(
-      duration.toMinutesAndSeconds(),
+      switch (position.inMilliseconds > 0) {
+        true => position.toMinutesAndSeconds(),
+        false => duration.toMinutesAndSeconds(),
+      },
       style: style?.copyWith(
         // Use mono space for each num character.
         fontFeatures: [const FontFeature.tabularFigures()],
