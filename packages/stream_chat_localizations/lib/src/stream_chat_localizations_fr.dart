@@ -618,4 +618,11 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     if (count == 1) return '1 Nouveau fil';
     return '$count Nouveaux fils';
   }
+
+  @override
+  String get slideToCancelLabel => 'Glissez pour annuler';
+
+  @override
+  String get holdToRecordLabel =>
+      'Maintenez pour enregistrer, relâchez pour envoyer';
 }

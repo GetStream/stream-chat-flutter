@@ -808,7 +808,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   onRecordStartCancel: () {
                     // Show a message to the user to hold to record.
                     _audioRecorderController.showInfo(
-                      'Hold to record, release to send.',
+                      context.translations.holdToRecordLabel,
                     );
                   },
                   onRecordFinish: () async {

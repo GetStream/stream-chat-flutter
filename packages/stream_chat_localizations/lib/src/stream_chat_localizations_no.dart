@@ -600,4 +600,10 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 ny tråd';
     return '$count nye tråder';
   }
+
+  @override
+  String get slideToCancelLabel => 'Gli for å avbryte';
+
+  @override
+  String get holdToRecordLabel => 'Hold for å ta opp, slipp for å sende';
 }

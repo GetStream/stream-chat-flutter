@@ -591,4 +591,10 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String newThreadsLabel({required int count}) {
     return '$count개의 새 스레드';
   }
+
+  @override
+  String get slideToCancelLabel => '슬라이드하여 취소';
+
+  @override
+  String get holdToRecordLabel => '길게 눌러서 녹음, 놓아서 전송';
 }

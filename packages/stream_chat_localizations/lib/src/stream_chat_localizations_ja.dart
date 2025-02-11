@@ -590,4 +590,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String newThreadsLabel({required int count}) {
     return '$count 件の新しいスレッド';
   }
+
+  @override
+  String get slideToCancelLabel => 'スライドでキャンセル';
+
+  @override
+  String get holdToRecordLabel => '長押しで録音、離すと送信';
 }

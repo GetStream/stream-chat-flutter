@@ -289,6 +289,8 @@ void main() {
       expect(localizations.voteCountLabel(count: 3), isNotNull);
       expect(localizations.repliedToLabel, isNotNull);
       expect(localizations.newThreadsLabel(count: 3), isNotNull);
+      expect(localizations.slideToCancelLabel, isNotNull);
+      expect(localizations.holdToRecordLabel, isNotNull);
     });
   }
 

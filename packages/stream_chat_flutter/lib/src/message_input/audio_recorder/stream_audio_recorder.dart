@@ -804,7 +804,7 @@ class SlideToCancelIndicator extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Slide to cancel',
+            context.translations.slideToCancelLabel,
             style: theme.textTheme.headline.copyWith(
               color: theme.colorTheme.textLowEmphasis,
             ),

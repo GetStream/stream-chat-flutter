@@ -612,4 +612,11 @@ Não é possível adicionar mais de $limit arquivos de uma vez
     if (count == 1) return '1 novo tópico';
     return '$count novos tópicos';
   }
+
+  @override
+  String get slideToCancelLabel => 'Deslize para cancelar';
+
+  @override
+  String get holdToRecordLabel =>
+      'Mantenha pressionado para gravar, solte para enviar';
 }
