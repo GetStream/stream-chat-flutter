@@ -1,0 +1,30 @@
+dependency_overrides:
+  stream_chat:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat
+  stream_chat_flutter_core:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat_flutter_core
+  stream_chat_flutter:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat_flutter
+  stream_chat_persistence:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat_persistence
+  stream_chat_localizations:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat_localizations
+
+  # The last chewie version that supports flutter 3.24.5
+  # Issue: https://github.com/fluttercommunity/chewie/issues/888
+  chewie: 1.8.5
