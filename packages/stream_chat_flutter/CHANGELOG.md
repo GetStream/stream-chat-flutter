@@ -1,8 +1,18 @@
-## Upcoming
+## 9.3.0
 
 ✅ Added
 
 - Added support for `voiceRecording` type attachments.
+
+🔄 Changed
+
+- Deprecated `PlayListItem` in favor of `PlaylistTrack`.
+- Deprecated `StreamVoiceRecordingListPlayer` in favor of `StreamVoiceRecordingAttachmentPlaylist`.
+- Deprecated `StreamVoiceRecordingLoading` as it is no longer used.
+- Deprecated `StreamVoiceRecordingPlayer` in favor of `StreamVoiceRecordingAttachment`.
+- Deprecated `StreamVoiceRecordingSlider` in favor of `StreamAudioWaveformSlider`.
+- Deprecated `VoiceRecordingAttachmentBuilder` in favor of `VoiceRecordingAttachmentPlaylistBuilder`.
+- Deprecated `StreamVoiceRecordingTheme` in favor of `StreamVoiceRecordingAttachmentTheme`.
 
 ## 9.2.0+1
 
