@@ -1,3 +1,8 @@
+## 9.3.0
+
+- Added translations for new `slideToCancelLabel` label.
+- Added translations for new `holdToRecordLabel` label.
+
 ## 9.2.0
 
 - Updated `stream_chat_flutter` dependency to [`9.2.0+1`](https://pub.dev/packages/stream_chat/changelog).

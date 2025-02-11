@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_size_getter/file_input.dart'; // For compatibility with flutter web.
 import 'package:image_size_getter/image_size_getter.dart' hide Size;
+import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -134,7 +135,8 @@ extension PlatformFileX on PlatformFile {
   /// Converts the [PlatformFile] into [AttachmentFile]
   AttachmentFile get toAttachmentFile {
     return AttachmentFile(
-      path: kIsWeb ? null : path,
+      // Path is not supported on web.
+      path: CurrentPlatform.isWeb ? null : path,
       name: name,
       bytes: bytes,
       size: size,
@@ -170,9 +172,10 @@ extension XFileX on XFile {
   Future<AttachmentFile> get toAttachmentFile async {
     final bytes = await readAsBytes();
     return AttachmentFile(
+      // Path is not supported on web.
+      path: CurrentPlatform.isWeb ? null : path,
       name: name,
       size: bytes.length,
-      path: path,
       bytes: bytes,
     );
   }
@@ -471,15 +474,15 @@ extension FileTypeX on FileType {
   String toAttachmentType() {
     switch (this) {
       case FileType.image:
-        return 'image';
+        return AttachmentType.image;
       case FileType.video:
-        return 'video';
+        return AttachmentType.video;
       case FileType.audio:
-        return 'audio';
+        return AttachmentType.audio;
       case FileType.any:
       case FileType.media:
       case FileType.custom:
-        return 'file';
+        return AttachmentType.file;
     }
   }
 }
@@ -619,5 +622,74 @@ extension ChannelModelX on ChannelModel {
       false =>
         '${memberNames.join(', ')} + ${otherMembers.length - maxMembers}',
     };
+  }
+}
+
+/// {@template voiceRecordingAttachmentExtension}
+/// Extension on [Attachment] to provide the voice recording attachment specific
+/// properties.
+/// {@endtemplate}
+extension VoiceRecordingAttachmentExtension on Attachment {
+  /// Returns the duration of the voice recording attachment if available else
+  /// returns [Duration.zero].
+  Duration get duration {
+    final duration = extraData['duration'] as num?;
+    if (duration == null) return Duration.zero;
+
+    return Duration(milliseconds: duration.round() * 1000);
+  }
+
+  /// Returns the waveform data of the voice recording attachment if available
+  /// else returns an empty list.
+  List<double> get waveform {
+    final waveform = extraData['waveform_data'] as List<dynamic>?;
+    if (waveform == null) return [];
+
+    return [...waveform.map((e) => double.tryParse(e.toString())).nonNulls];
+  }
+}
+
+/// {@template attachmentPlaylistExtension}
+/// Extension on [Iterable<Attachment>] to provide the playlist specific
+/// properties.
+/// {@endtemplate}
+extension AttachmentPlaylistExtension on Iterable<Attachment> {
+  /// Converts the list of attachments to a list of [PlaylistTrack].
+  List<PlaylistTrack> toPlaylist() {
+    return [
+      ...map((it) {
+        final uri = switch (it.uploadState) {
+          Preparing() || InProgress() || Failed() => () {
+              if (CurrentPlatform.isWeb) {
+                final bytes = it.file?.bytes;
+                final mimeType = it.file?.mediaType?.mimeType;
+                if (bytes == null || mimeType == null) return null;
+
+                return Uri.dataFromBytes(bytes, mimeType: mimeType);
+              }
+
+              final path = it.file?.path;
+              if (path == null) return null;
+
+              return Uri.file(path, windows: CurrentPlatform.isWindows);
+            }(),
+          Success() => () {
+              final url = it.assetUrl;
+              if (url == null) return null;
+
+              return Uri.tryParse(url);
+            }(),
+        };
+
+        if (uri == null) return null;
+
+        return PlaylistTrack(
+          uri: uri,
+          title: it.title,
+          waveform: it.waveform,
+          duration: it.duration,
+        );
+      }).nonNulls,
+    ];
   }
 }

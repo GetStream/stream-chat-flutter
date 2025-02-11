@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template StreamVoiceRecordingThemeData}
 /// The theme data for the voice recording attachment builder.
 /// {@endtemplate}
+@Deprecated("Use 'StreamVoiceRecordingAttachmentThemeData' instead.")
 class StreamVoiceRecordingThemeData with Diagnosticable {
   /// {@macro StreamVoiceRecordingThemeData}
   const StreamVoiceRecordingThemeData({
@@ -78,6 +79,7 @@ class StreamVoiceRecordingThemeData with Diagnosticable {
 /// The theme data for the voice recording attachment builder
 /// loading widget [StreamVoiceRecordingLoading].
 /// {@endtemplate}
+@Deprecated("Use 'StreamVoiceRecordingAttachmentThemeData' instead.")
 class StreamVoiceRecordingLoadingThemeData with Diagnosticable {
   /// {@macro StreamAudioPlayerLoadingTheme}
   const StreamVoiceRecordingLoadingThemeData({
@@ -146,6 +148,7 @@ class StreamVoiceRecordingLoadingThemeData with Diagnosticable {
 /// The theme data for the voice recording attachment builder audio player
 /// slider [StreamVoiceRecordingSlider].
 /// {@endtemplate}
+@Deprecated("Use 'StreamVoiceRecordingAttachmentThemeData' instead.")
 class StreamVoiceRecordingSliderTheme with Diagnosticable {
   /// {@macro StreamAudioPlayerSliderTheme}
   const StreamVoiceRecordingSliderTheme({
@@ -253,6 +256,7 @@ class StreamVoiceRecordingSliderTheme with Diagnosticable {
 /// The theme data for the voice recording attachment builder audio player
 /// [StreamVoiceRecordingListPlayer].
 /// {@endtemplate}
+@Deprecated("Use 'StreamVoiceRecordingAttachmentThemeData' instead.")
 class StreamVoiceRecordingListPlayerThemeData with Diagnosticable {
   /// {@macro StreamAudioListPlayerTheme}
   const StreamVoiceRecordingListPlayerThemeData({
@@ -320,6 +324,7 @@ class StreamVoiceRecordingListPlayerThemeData with Diagnosticable {
 /// {@template StreamVoiceRecordingPlayerTheme}
 /// The theme data for the voice recording attachment builder audio player
 /// {@endtemplate}
+@Deprecated("Use 'StreamVoiceRecordingAttachmentThemeData' instead.")
 class StreamVoiceRecordingPlayerThemeData with Diagnosticable {
   /// {@macro StreamVoiceRecordingPlayerTheme}
   const StreamVoiceRecordingPlayerThemeData({

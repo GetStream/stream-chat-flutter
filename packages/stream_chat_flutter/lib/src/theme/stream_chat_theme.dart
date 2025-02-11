@@ -1,10 +1,7 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart' hide TextTheme;
-import 'package:stream_chat_flutter/src/theme/poll_comments_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_option_votes_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_options_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/poll_results_dialog_theme.dart';
-import 'package:stream_chat_flutter/src/theme/thread_list_tile_theme.dart';
+import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatTheme}
@@ -61,6 +58,8 @@ class StreamChatThemeData {
     StreamGalleryHeaderThemeData? imageHeaderTheme,
     StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
+    @Deprecated(
+        "Use 'StreamChatThemeData.voiceRecordingAttachmentTheme' instead")
     StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
@@ -69,6 +68,9 @@ class StreamChatThemeData {
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
+    StreamAudioWaveformThemeData? audioWaveformTheme,
+    StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
+    StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
@@ -90,7 +92,6 @@ class StreamChatThemeData {
       defaultUserImage: defaultUserImage,
       placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
-      //ignore: deprecated_member_use_from_same_package
       reactionIcons: reactionIcons,
       galleryHeaderTheme: imageHeaderTheme,
       galleryFooterTheme: imageFooterTheme,
@@ -103,6 +104,9 @@ class StreamChatThemeData {
       pollCommentsDialogTheme: pollCommentsDialogTheme,
       pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
       threadListTileTheme: threadListTileTheme,
+      audioWaveformTheme: audioWaveformTheme,
+      audioWaveformSliderTheme: audioWaveformSliderTheme,
+      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -138,6 +142,9 @@ class StreamChatThemeData {
     required this.pollCommentsDialogTheme,
     required this.pollOptionVotesDialogTheme,
     required this.threadListTileTheme,
+    required this.audioWaveformTheme,
+    required this.audioWaveformSliderTheme,
+    required this.voiceRecordingAttachmentTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -192,6 +199,21 @@ class StreamChatThemeData {
       ),
       indicatorIconSize: 16,
     );
+
+    final audioWaveformTheme = StreamAudioWaveformThemeData(
+      color: colorTheme.textLowEmphasis,
+      progressColor: colorTheme.accentPrimary,
+      minBarHeight: 2,
+      spacingRatio: 0.3,
+      heightScale: 1,
+    );
+
+    final audioWaveformSliderTheme = StreamAudioWaveformSliderThemeData(
+      audioWaveformTheme: audioWaveformTheme,
+      thumbColor: Colors.white,
+      thumbBorderColor: colorTheme.borders,
+    );
+
     return StreamChatThemeData.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
@@ -308,9 +330,6 @@ class StreamChatThemeData {
       messageListViewTheme: StreamMessageListViewThemeData(
         backgroundColor: colorTheme.barsBg,
       ),
-      voiceRecordingTheme: colorTheme.brightness == Brightness.dark
-          ? StreamVoiceRecordingThemeData.dark()
-          : StreamVoiceRecordingThemeData.light(),
       pollCreatorTheme: StreamPollCreatorThemeData(
         backgroundColor: colorTheme.appBg,
         appBarBackgroundColor: colorTheme.barsBg,
@@ -507,6 +526,50 @@ class StreamChatThemeData {
           color: colorTheme.textLowEmphasis,
         ),
       ),
+      audioWaveformTheme: audioWaveformTheme,
+      audioWaveformSliderTheme: audioWaveformSliderTheme,
+      voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
+        backgroundColor: colorTheme.barsBg,
+        playIcon: const StreamSvgIcon(icon: StreamSvgIcons.play),
+        pauseIcon: const StreamSvgIcon(icon: StreamSvgIcons.pause),
+        loadingIndicator: SizedBox.fromSize(
+          size: const Size.square(24 - /* Padding */ 2),
+          child: Center(
+            child: CircularProgressIndicator.adaptive(
+              valueColor: AlwaysStoppedAnimation(colorTheme.accentPrimary),
+            ),
+          ),
+        ),
+        audioControlButtonStyle: ElevatedButton.styleFrom(
+          elevation: 2,
+          iconColor: Colors.black,
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          backgroundColor: Colors.white,
+          shape: const CircleBorder(),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          minimumSize: const Size(36, 36),
+        ),
+        titleTextStyle: textTheme.bodyBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        durationTextStyle: textTheme.footnote.copyWith(
+          color: colorTheme.textLowEmphasis,
+        ),
+        speedControlButtonStyle: ElevatedButton.styleFrom(
+          elevation: 2,
+          textStyle: textTheme.footnote,
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          backgroundColor: Colors.white,
+          shape: const StadiumBorder(),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          minimumSize: const Size(40, 28),
+        ),
+        audioWaveformSliderTheme: audioWaveformSliderTheme,
+      ),
+      voiceRecordingTheme: colorTheme.brightness == Brightness.dark
+          ? StreamVoiceRecordingThemeData.dark()
+          : StreamVoiceRecordingThemeData.light(),
     );
   }
 
@@ -549,6 +612,7 @@ class StreamChatThemeData {
   final StreamMessageListViewThemeData messageListViewTheme;
 
   /// Theme configuration for the [StreamVoiceRecordingListPLayer] widget.
+  @Deprecated("Use 'StreamChatThemeData.voiceRecordingAttachmentTheme' instead")
   final StreamVoiceRecordingThemeData voiceRecordingTheme;
 
   /// Theme configuration for the [StreamPollCreatorWidget] widget.
@@ -572,6 +636,15 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamThreadListTile] widget.
   final StreamThreadListTileThemeData threadListTileTheme;
 
+  /// Theme configuration for the [StreamAudioWaveform] widget.
+  final StreamAudioWaveformThemeData audioWaveformTheme;
+
+  /// Theme configuration for the [StreamAudioWaveformSlider] widget.
+  final StreamAudioWaveformSliderThemeData audioWaveformSliderTheme;
+
+  /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
+  final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -591,6 +664,7 @@ class StreamChatThemeData {
     StreamGalleryHeaderThemeData? galleryHeaderTheme,
     StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
+    @Deprecated("Use 'voiceRecordingAttachmentTheme' instead")
     StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
@@ -599,6 +673,9 @@ class StreamChatThemeData {
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
+    StreamAudioWaveformThemeData? audioWaveformTheme,
+    StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
+    StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
@@ -627,6 +704,11 @@ class StreamChatThemeData {
         pollOptionVotesDialogTheme:
             pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
         threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
+        audioWaveformTheme: audioWaveformTheme ?? this.audioWaveformTheme,
+        audioWaveformSliderTheme:
+            audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
+        voiceRecordingAttachmentTheme:
+            voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
       );
 
   /// Merge themes
@@ -659,6 +741,11 @@ class StreamChatThemeData {
       pollOptionVotesDialogTheme:
           pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
+      audioWaveformTheme: audioWaveformTheme.merge(other.audioWaveformTheme),
+      audioWaveformSliderTheme:
+          audioWaveformSliderTheme.merge(other.audioWaveformSliderTheme),
+      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme
+          .merge(other.voiceRecordingAttachmentTheme),
     );
   }
 }

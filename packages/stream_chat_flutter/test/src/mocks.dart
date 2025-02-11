@@ -56,8 +56,8 @@ class MockVoidCallback extends Mock {
   void call();
 }
 
-class MockVoidSingleParamCallback<T> extends Mock {
-  void call(T param);
+class MockValueChanged<T> extends Mock {
+  void call(T value);
 }
 
 class MockAttachmentHandler extends Mock implements StreamAttachmentHandler {}
@@ -78,4 +78,4 @@ class MockStreamMemberListController extends Mock
   PagedValue<int, Member> value = const PagedValue.loading();
 }
 
-class MocMessage extends Mock implements Message {}
+class MockMessage extends Mock implements Message {}

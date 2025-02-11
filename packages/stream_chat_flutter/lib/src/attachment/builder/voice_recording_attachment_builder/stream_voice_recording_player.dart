@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 import 'dart:async';
 import 'dart:math';
 
@@ -14,6 +16,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// When waveBars are not provided they are shown as 0 bars.
 /// {@endtemplate}
+@Deprecated("Use 'StreamVoiceRecordingAttachment' instead")
 class StreamVoiceRecordingPlayer extends StatefulWidget {
   /// {@macro StreamVoiceRecordingPlayer}
   const StreamVoiceRecordingPlayer({
@@ -51,6 +54,7 @@ class StreamVoiceRecordingPlayer extends StatefulWidget {
       _StreamVoiceRecordingPlayerState();
 }
 
+@Deprecated("Use 'StreamVoiceRecordingAttachment' instead")
 class _StreamVoiceRecordingPlayerState
     extends State<StreamVoiceRecordingPlayer> {
   var _seeking = false;

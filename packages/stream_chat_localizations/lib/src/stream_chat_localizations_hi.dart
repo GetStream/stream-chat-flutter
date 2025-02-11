@@ -609,4 +609,11 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 नया थ्रेड';
     return '$count नए थ्रेड्स';
   }
+
+  @override
+  String get slideToCancelLabel => 'रद्द करने के लिए स्लाइड करें';
+
+  @override
+  String get holdToRecordLabel =>
+      'रिकॉर्ड करने के लिए दबाए रखें, भेजने के लिए छोड़ें';
 }

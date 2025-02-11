@@ -632,6 +632,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 new thread';
     return '$count new threads';
   }
+
+  @override
+  String get slideToCancelLabel => 'Slide to cancel';
+
+  @override
+  String get holdToRecordLabel => 'Hold to record, release to send.';
 }
 
 void main() async {

@@ -607,4 +607,10 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 neuer Thread';
     return '$count neue Threads';
   }
+
+  @override
+  String get slideToCancelLabel => 'Zum Abbrechen schieben';
+
+  @override
+  String get holdToRecordLabel => 'Zum Aufnehmen halten, zum Senden loslassen';
 }

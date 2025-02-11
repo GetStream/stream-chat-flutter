@@ -73,6 +73,12 @@ abstract final class StreamSvgIcons {
     package: package,
   );
 
+  /// Stream SVG icon named 'pause'.
+  static const StreamSvgIconData pause = StreamSvgIconData(
+    'lib/assets/icons/icon_pause.svg',
+    package: package,
+  );
+
   /// Stream SVG icon named 'error'.
   static const StreamSvgIconData error = StreamSvgIconData(
     'lib/assets/icons/icon_error.svg',
@@ -163,6 +169,12 @@ abstract final class StreamSvgIcons {
     package: package,
   );
 
+  /// Stream SVG icon named 'mic'.
+  static const StreamSvgIconData mic = StreamSvgIconData(
+    'lib/assets/icons/icon_mic.svg',
+    package: package,
+  );
+
   /// Stream SVG icon named 'download'.
   static const StreamSvgIconData download = StreamSvgIconData(
     'lib/assets/icons/icon_download.svg',
@@ -184,6 +196,12 @@ abstract final class StreamSvgIcons {
   /// Stream SVG icon named 'search'.
   static const StreamSvgIconData search = StreamSvgIconData(
     'lib/assets/icons/icon_search.svg',
+    package: package,
+  );
+
+  /// Stream SVG icon named 'play'.
+  static const StreamSvgIconData play = StreamSvgIconData(
+    'lib/assets/icons/icon_play.svg',
     package: package,
   );
 
@@ -283,6 +301,12 @@ abstract final class StreamSvgIcons {
     package: package,
   );
 
+  /// Stream SVG icon named 'link'.
+  static const StreamSvgIconData link = StreamSvgIconData(
+    'lib/assets/icons/icon_link.svg',
+    package: package,
+  );
+
   /// Stream SVG icon named 'userDelete'.
   static const StreamSvgIconData userDelete = StreamSvgIconData(
     'lib/assets/icons/icon_user_delete.svg',
@@ -298,6 +322,12 @@ abstract final class StreamSvgIcons {
   /// Stream SVG icon named 'notification'.
   static const StreamSvgIconData notification = StreamSvgIconData(
     'lib/assets/icons/icon_notification.svg',
+    package: package,
+  );
+
+  /// Stream SVG icon named 'lock'.
+  static const StreamSvgIconData lock = StreamSvgIconData(
+    'lib/assets/icons/icon_lock.svg',
     package: package,
   );
 
@@ -340,6 +370,12 @@ abstract final class StreamSvgIcons {
   /// Stream SVG icon named 'check'.
   static const StreamSvgIconData check = StreamSvgIconData(
     'lib/assets/icons/icon_check.svg',
+    package: package,
+  );
+
+  /// Stream SVG icon named 'stop'.
+  static const StreamSvgIconData stop = StreamSvgIconData(
+    'lib/assets/icons/icon_stop.svg',
     package: package,
   );
 

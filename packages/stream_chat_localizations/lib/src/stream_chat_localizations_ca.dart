@@ -613,4 +613,11 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 fil nou';
     return '$count fils nous';
   }
+
+  @override
+  String get slideToCancelLabel => 'Llisca per cancel·lar';
+
+  @override
+  String get holdToRecordLabel =>
+      'Mantén premut per gravar, deixa anar per enviar';
 }

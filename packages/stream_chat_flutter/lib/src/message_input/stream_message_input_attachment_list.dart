@@ -1,6 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/file_attachment.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
+import 'package:stream_chat_flutter/src/attachment/voice_recording_attachment.dart';
+import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
@@ -41,7 +44,7 @@ typedef AttachmentItemBuilder = Widget Function(
 /// You can override the default action of removing an attachment by providing
 /// [onRemovePressed].
 /// {@endtemplate}
-class StreamMessageInputAttachmentList extends StatefulWidget {
+class StreamMessageInputAttachmentList extends StatelessWidget {
   /// {@macro stream_message_input_attachment_list}
   const StreamMessageInputAttachmentList({
     super.key,
@@ -49,8 +52,10 @@ class StreamMessageInputAttachmentList extends StatefulWidget {
     this.onRemovePressed,
     this.fileAttachmentBuilder,
     this.mediaAttachmentBuilder,
+    this.voiceRecordingAttachmentBuilder,
     this.fileAttachmentListBuilder,
     this.mediaAttachmentListBuilder,
+    this.voiceRecordingAttachmentListBuilder,
   });
 
   /// List of attachments to display thumbnails for.
@@ -64,59 +69,38 @@ class StreamMessageInputAttachmentList extends StatefulWidget {
   /// Builder used to build the media attachment item.
   final AttachmentItemBuilder? mediaAttachmentBuilder;
 
+  /// Builder used to build the voice recording attachment item.
+  final AttachmentItemBuilder? voiceRecordingAttachmentBuilder;
+
   /// Builder used to build the file attachment list.
   final AttachmentListBuilder? fileAttachmentListBuilder;
 
   /// Builder used to build the media attachment list.
   final AttachmentListBuilder? mediaAttachmentListBuilder;
 
+  /// Builder used to build the voice recording attachment list.
+  final AttachmentListBuilder? voiceRecordingAttachmentListBuilder;
+
   /// Callback called when the remove button is pressed.
   final ValueSetter<Attachment>? onRemovePressed;
 
   @override
-  State<StreamMessageInputAttachmentList> createState() =>
-      _StreamMessageInputAttachmentListState();
-}
-
-class _StreamMessageInputAttachmentListState
-    extends State<StreamMessageInputAttachmentList> {
-  List<Attachment> fileAttachments = [];
-  List<Attachment> mediaAttachments = [];
-
-  void _updateAttachments() {
-    // Clear the lists.
-    fileAttachments.clear();
-    mediaAttachments.clear();
-
-    // Split the attachments into file and media attachments.
-    for (final attachment in widget.attachments) {
-      if (attachment.type == AttachmentType.file) {
-        fileAttachments.add(attachment);
-      } else {
-        mediaAttachments.add(attachment);
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _updateAttachments();
-  }
-
-  @override
-  void didUpdateWidget(covariant StreamMessageInputAttachmentList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.attachments != widget.attachments) {
-      _updateAttachments();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // If there are no attachments, return an empty box.
-    if (fileAttachments.isEmpty && mediaAttachments.isEmpty) {
-      return const SizedBox();
+    final groupedAttachments = attachments.groupListsBy((it) => it.type);
+    final (:files, :media, :voices) = (
+      files: [...?groupedAttachments[AttachmentType.file]],
+      voices: [...?groupedAttachments[AttachmentType.voiceRecording]],
+      media: [
+        ...?groupedAttachments[AttachmentType.image],
+        ...?groupedAttachments[AttachmentType.video],
+        ...?groupedAttachments[AttachmentType.giphy],
+        ...?groupedAttachments[AttachmentType.audio],
+      ],
+    );
+
+    // If there are no attachments, return an empty widget.
+    if (files.isEmpty && media.isEmpty && voices.isEmpty) {
+      return const SizedBox.shrink();
     }
 
     return SingleChildScrollView(
@@ -124,31 +108,38 @@ class _StreamMessageInputAttachmentListState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          if (mediaAttachments.isNotEmpty)
+          if (media.isNotEmpty)
             Flexible(
-              child: widget.mediaAttachmentListBuilder?.call(
-                    context,
-                    mediaAttachments,
-                    widget.onRemovePressed,
-                  ) ??
-                  MessageInputMediaAttachments(
-                    attachments: mediaAttachments,
-                    attachmentBuilder: widget.mediaAttachmentBuilder,
-                    onRemovePressed: widget.onRemovePressed,
+              child: switch (mediaAttachmentListBuilder) {
+                final builder? => builder(context, media, onRemovePressed),
+                _ => MessageInputMediaAttachments(
+                    attachments: media,
+                    attachmentBuilder: mediaAttachmentBuilder,
+                    onRemovePressed: onRemovePressed,
                   ),
+              },
             ),
-          if (fileAttachments.isNotEmpty)
+          if (voices.isNotEmpty)
             Flexible(
-              child: widget.fileAttachmentListBuilder?.call(
-                    context,
-                    fileAttachments,
-                    widget.onRemovePressed,
-                  ) ??
-                  MessageInputFileAttachments(
-                    attachments: fileAttachments,
-                    attachmentBuilder: widget.fileAttachmentBuilder,
-                    onRemovePressed: widget.onRemovePressed,
+              child: switch (voiceRecordingAttachmentListBuilder) {
+                final builder? => builder(context, voices, onRemovePressed),
+                _ => MessageInputVoiceRecordingAttachments(
+                    attachments: voices,
+                    attachmentBuilder: voiceRecordingAttachmentBuilder,
+                    onRemovePressed: onRemovePressed,
                   ),
+              },
+            ),
+          if (files.isNotEmpty)
+            Flexible(
+              child: switch (fileAttachmentListBuilder) {
+                final builder? => builder(context, files, onRemovePressed),
+                _ => MessageInputFileAttachments(
+                    attachments: files,
+                    attachmentBuilder: fileAttachmentBuilder,
+                    onRemovePressed: onRemovePressed,
+                  ),
+              },
             ),
         ].insertBetween(
           Divider(
@@ -218,6 +209,131 @@ class MessageInputFileAttachments extends StatelessWidget {
           );
         },
       ).insertBetween(const SizedBox(height: 8)),
+    );
+  }
+}
+
+/// Widget used to display the list of voice recording type attachments added to
+/// the message input.
+class MessageInputVoiceRecordingAttachments extends StatefulWidget {
+  /// Creates a new MessageInputVoiceRecordingAttachments widget.
+  const MessageInputVoiceRecordingAttachments({
+    super.key,
+    required this.attachments,
+    this.attachmentBuilder,
+    this.onRemovePressed,
+  });
+
+  /// List of voice recording type attachments to display thumbnails for.
+  ///
+  /// Only attachments of type [AttachmentType.voiceRecording] are supported.
+  final List<Attachment> attachments;
+
+  /// Builder used to build the voice recording type attachment item.
+  final AttachmentItemBuilder? attachmentBuilder;
+
+  /// Callback called when the remove button is pressed.
+  final ValueSetter<Attachment>? onRemovePressed;
+
+  @override
+  State<MessageInputVoiceRecordingAttachments> createState() =>
+      _MessageInputVoiceRecordingAttachmentsState();
+}
+
+class _MessageInputVoiceRecordingAttachmentsState
+    extends State<MessageInputVoiceRecordingAttachments> {
+  late final _controller = StreamAudioPlaylistController(
+    widget.attachments.toPlaylist(),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.initialize();
+  }
+
+  @override
+  void didUpdateWidget(
+    covariant MessageInputVoiceRecordingAttachments oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
+    final equals = const ListEquality().equals;
+    if (!equals(widget.attachments, oldWidget.attachments)) {
+      // If the attachments have changed, update the playlist.
+      _controller.updatePlaylist(widget.attachments.toPlaylist());
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: _controller,
+      builder: (context, state, _) {
+        return MediaQuery.removePadding(
+          context: context,
+          // Workaround for the bottom padding issue.
+          // Link: https://github.com/flutter/flutter/issues/156149
+          removeTop: true,
+          removeBottom: true,
+          child: ListView.separated(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: state.tracks.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final track = state.tracks[index];
+
+              return StreamVoiceRecordingAttachment(
+                track: track,
+                speed: state.speed,
+                trailingBuilder: (_, __, ___, ____) {
+                  final attachment = widget.attachments[index];
+                  return RemoveAttachmentButton(
+                    onPressed: switch (widget.onRemovePressed) {
+                      final callback? => () => callback(attachment),
+                      _ => null,
+                    },
+                  );
+                },
+                onTrackPause: _controller.pause,
+                onChangeSpeed: _controller.setSpeed,
+                onTrackPlay: () async {
+                  // Play the track directly if it is already loaded.
+                  if (state.currentIndex == index) return _controller.play();
+                  // Otherwise, load the track first and then play it.
+                  return _controller.skipToItem(index);
+                },
+                // Only allow seeking if the current track is the one being
+                // interacted with.
+                onTrackSeekStart: (_) async {
+                  if (state.currentIndex != index) return;
+                  return _controller.pause();
+                },
+                onTrackSeekEnd: (_) async {
+                  if (state.currentIndex != index) return;
+                  return _controller.play();
+                },
+                onTrackSeekChanged: (progress) async {
+                  if (state.currentIndex != index) return;
+
+                  final duration = track.duration.inMicroseconds;
+                  final seekPosition = (duration * progress).toInt();
+                  final seekDuration = Duration(microseconds: seekPosition);
+
+                  return _controller.seek(seekDuration);
+                },
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -345,25 +461,16 @@ class RemoveAttachmentButton extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     final colorTheme = theme.colorTheme;
 
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: RawMaterialButton(
-        elevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        highlightElevation: 0,
-        onPressed: onPressed,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+    return IconButton.filled(
+      onPressed: onPressed,
+      color: colorTheme.barsBg,
+      padding: EdgeInsets.zero,
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.close),
+      style: IconButton.styleFrom(
+        minimumSize: const Size(24, 24),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         // ignore: deprecated_member_use
-        fillColor: colorTheme.textHighEmphasis.withOpacity(0.5),
-        child: StreamSvgIcon(
-          size: 24,
-          icon: StreamSvgIcons.close,
-          color: colorTheme.barsBg,
-        ),
+        backgroundColor: colorTheme.textHighEmphasis.withOpacity(0.6),
       ),
     );
   }

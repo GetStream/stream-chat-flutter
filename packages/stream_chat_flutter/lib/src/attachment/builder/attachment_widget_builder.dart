@@ -9,6 +9,7 @@ part 'image_attachment_builder.dart';
 part 'mixed_attachment_builder.dart';
 part 'url_attachment_builder.dart';
 part 'video_attachment_builder.dart';
+part 'voice_recording_attachment_playlist_builder.dart';
 part 'voice_recording_attachment_builder/voice_recording_attachment_builder.dart';
 
 /// {@template streamAttachmentWidgetTapCallback}
@@ -113,7 +114,12 @@ abstract class StreamAttachmentWidgetBuilder {
         onAttachmentTap: onAttachmentTap,
       ),
 
-      VoiceRecordingAttachmentBuilder(),
+      // Handles voice recording attachments.
+      VoiceRecordingAttachmentPlaylistBuilder(
+        shape: shape,
+        padding: padding,
+        onAttachmentTap: onAttachmentTap,
+      ),
 
       // We don't handle URL attachments if the message is a reply.
       if (message.quotedMessage == null)

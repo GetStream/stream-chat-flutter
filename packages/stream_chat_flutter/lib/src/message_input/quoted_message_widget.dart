@@ -263,7 +263,8 @@ class _ParseAttachments extends StatelessWidget {
 
     var clipBehavior = Clip.none;
     ShapeDecoration? decoration;
-    if (attachment.type != AttachmentType.file) {
+    if (attachment.type != AttachmentType.file &&
+        attachment.type != AttachmentType.voiceRecording) {
       clipBehavior = Clip.hardEdge;
       decoration = ShapeDecoration(
         shape: RoundedRectangleBorder(
@@ -341,6 +342,7 @@ class _ParseAttachments extends StatelessWidget {
       AttachmentType.video: _createMediaThumbnail,
       AttachmentType.urlPreview: _createUrlThumbnail,
       AttachmentType.file: _createFileThumbnail,
+      AttachmentType.voiceRecording: _createFileThumbnail,
     };
   }
 }

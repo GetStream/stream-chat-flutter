@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   file_selector_windows
   media_kit_video
+  record_windows
   screen_brightness_windows
   share_plus
   sqlite3_flutter_libs

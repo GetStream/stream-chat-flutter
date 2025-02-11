@@ -618,4 +618,11 @@ Attenzione: il limite massimo di $limit file è stato superato.
     if (count == 1) return '1 nuovo thread';
     return '$count nuovi thread';
   }
+
+  @override
+  String get slideToCancelLabel => 'Scorri per annullare';
+
+  @override
+  String get holdToRecordLabel =>
+      'Tieni premuto per registrare, rilascia per inviare';
 }
