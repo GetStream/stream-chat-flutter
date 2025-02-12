@@ -3,6 +3,18 @@ description: A new Flutter project.
 publish_to: "none"
 version: 2.2.0
 
+# Note: The environment configuration and dependency versions are managed by Melos.
+#
+# Do not edit them manually.
+#
+# Steps to update dependencies:
+#   1. Modify the version in the melos.yaml file.
+#   2. Run `melos bootstrap` to apply changes.
+#
+# Steps to add a new dependency:
+#   1. Add the dependency to this list.
+#   2. Add it to the melos.yaml file for future updates.
+
 environment:
   sdk: ^3.5.4
   flutter: ">=3.24.5"
