@@ -1,14 +1,12 @@
 name: stream_flutter_workflow
 
 env:
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+  # Note: The versions below should be manually updated after a new major
+  # version comes out.
   flutter_version: "3.x"
 
 on:
   pull_request:
-    paths:
-      - 'packages/**'
-      - '.github/workflows/stream_flutter_workflow.yml'
     types:
       - opened
       - reopened
@@ -23,127 +21,102 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  analyze:
-    timeout-minutes: 15
-    if: github.event.pull_request.draft == false
+  lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter_version }}
-          channel: stable
-          cache: true
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
-      - name: "Install Tools"
-        run: |
-          flutter pub global activate melos
-      - name: "Bootstrap Workspace"
-        run: melos bootstrap --verbose
-      - name: "Dart Analyze"
-        run: |
-          melos run analyze
-      - name: "Pub Check"
-        if: github.base_ref == 'master'
-        run: |
-          melos run lint:pub
 
-  format:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
-    timeout-minutes: 15
-    steps:
-      - name: "Git Checkout"
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: "Install Flutter"
+      - name: 🎯 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
-          channel: stable
           cache: true
+          channel: stable
+          flutter-version: ${{ env.flutter_version }}
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
-      - name: "Install Tools"
-        run: |
-          flutter pub global activate melos
-      - name: "Bootstrap Workspace"
+
+      - name: 📦 Install Tools
+        run: flutter pub global activate melos
+
+      - name: ⚙️ Bootstrap Workspace
         run: melos bootstrap
-      - name: "Melos Format"
-        run: melos run format
-      - name: "Validate Formatting"
-        run: |
-          ./.github/workflows/scripts/validate-formatting.sh
+
+      - name: ✨ Check Formatting
+        run: melos run format:changes
+
+      - name: 🕵️ Analyze
+        run: melos run analyze:changes
+
+      - if: github.base_ref == 'master'
+        name: 🚀 Pub Check
+        run: melos run publish:dry-run:changes
 
   test:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
     timeout-minutes: 30
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: "Install Flutter"
+
+      - name: 🎯 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
-          channel: stable
           cache: true
+          channel: stable
+          flutter-version: ${{ env.flutter_version }}
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
-      # This step is needed due to https://github.com/actions/runner-images/issues/11279
-      - name: Install SQLite3
-        run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
-      - name: "Install Tools"
+
+      - name: 📦 Install Tools
         run: |
           flutter pub global activate melos
           flutter pub global activate remove_from_coverage
-      - name: "Bootstrap Workspace"
+
+      - name: ⚙️ Bootstrap Workspace
         run: melos bootstrap
-      - name: "Flutter Test"
-        run: melos run test:all
-      - name: "Collect Coverage"
+
+      - name: 🧪 Run Tests
+        run: melos run test:packages:changed
+
+      - name: 📊 Collect Coverage
         run: melos run coverage:ignore-file --no-select
-      - name: "Upload Coverage"
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
-          files: packages/*/coverage/lcov.info
-      - name: "Stream Chat Coverage Check"
+
+      - name: ✅ Stream Chat Coverage Check
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat/coverage/lcov.info
           min_coverage: 70
-      - name: "Stream Chat Localizations Coverage Check"
+
+      - name: ✅ Stream Chat Localizations Coverage Check
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_localizations/coverage/lcov.info
           min_coverage: 100
-      - name: "Stream Chat Persistence Coverage Check"
+
+      - name: ✅ Stream Chat Persistence Coverage Check
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
           min_coverage: 95
-      - name: "Stream Chat Flutter Core Coverage Check"
+
+      - name: ✅ Stream Chat Flutter Core Coverage Check
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
           min_coverage: 30
-      - name: "Stream Chat Flutter Coverage Check"
+
+      - name: ✅ Stream Chat Flutter Coverage Check
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
           min_coverage: 44
 
-  draft-build:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == true
-    timeout-minutes: 1
-
-    steps:
-      - name: Run a one-line script
-        run: echo Draft PR, you are good.
+      - name: 📁 Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          files: packages/*/coverage/lcov.info
