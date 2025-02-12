@@ -6,7 +6,6 @@ import 'package:sample_app/utils/notifications_service.dart' as pn;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class LocalNotificationObserver extends NavigatorObserver {
-
   LocalNotificationObserver(
     StreamChatClient client,
     GlobalKey<NavigatorState> navigatorKey,

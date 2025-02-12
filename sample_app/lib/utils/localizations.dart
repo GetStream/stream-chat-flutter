@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppLocalizations {
-
   AppLocalizations(this.locale);
   static const _localizedValues = <String, Map<String, String>>{
     'en': {

@@ -8,7 +8,6 @@ import 'package:sample_app/routes/routes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChannelPage extends StatefulWidget {
-
   const ChannelPage({
     super.key,
     this.initialScrollIndex,
