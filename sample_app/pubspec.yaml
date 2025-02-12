@@ -1,0 +1,55 @@
+name: sample_app
+description: A new Flutter project.
+publish_to: "none"
+version: 2.2.0
+
+environment:
+  sdk: ^3.5.4
+  flutter: ">=3.24.5"
+
+dependencies:
+  flutter_app_badger: ^1.5.0
+  flutter:
+    sdk: flutter
+  stream_chat_flutter: ^9.3.0
+  stream_chat_persistence: ^9.3.0
+  stream_chat_localizations: ^9.3.0
+  flutter_local_notifications: ^18.0.1
+  flutter_svg: ^2.0.10+1
+  flutter_secure_storage: ^9.2.2
+  yaml: ^3.1.2
+  uuid: ^4.4.0
+  streaming_shared_preferences: ^2.0.0
+  lottie: ^3.1.2
+  collection: ^1.17.2
+  sentry_flutter: ^8.3.0
+  flutter_slidable: ^3.1.1
+  go_router: ^14.6.2
+  provider: ^6.0.5
+  video_player: ^2.8.7
+  firebase_core: ^3.0.0
+  firebase_messaging: ^15.0.0
+
+dev_dependencies:
+  flutter_launcher_icons: ^0.14.2
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - pubspec.lock
+
+flutter_icons:
+  image_path: "assets/ic_launcher.png"
+
+  android: true
+  adaptive_icon_background: "assets/ic_launcher_background.png"
+  adaptive_icon_foreground: "assets/ic_launcher_foreground.png"
+  ios: true
+  web:
+    generate: true
+  windows:
+    generate: true
+  macos:
+    generate: true
