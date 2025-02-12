@@ -1,6 +1,6 @@
 name: stream_chat_flutter_core_example
 description: Example app for testing stream_chat_flutter_core
-publish_to: 'none'
+publish_to: none
 version: 1.0.0+1
 
 # Note: The environment configuration and dependency versions are managed by Melos.

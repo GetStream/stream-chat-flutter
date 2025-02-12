@@ -9,15 +9,9 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'packages/**'
-      - '.github/workflows/legacy_version_analyze.yml'
   pull_request:
     branches:
       - master
-    paths:
-      - 'packages/**'
-      - '.github/workflows/legacy_version_analyze.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,38 +28,26 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: "Install Flutter"
+      - name: 🎯 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
-          channel: stable
           cache: true
+          channel: stable
+          flutter-version: ${{ env.flutter_version }}
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
-      - name: "Install Tools"
+      - name: 📦 Install Tools
         run: flutter pub global activate melos
 
-      - name: "Bootstrap Workspace"
-        run: melos bootstrap --verbose
+      - name: ⚙️ Bootstrap Workspace
+        run: melos bootstrap
 
-      # Only analyze lib/; non-client code doesn't need to work on
-      # all supported legacy version.
-      - name: "Stream Chat Analyze"
-        run: cd packages/stream_chat/lib && dart analyze --fatal-infos .
-
-      - name: "Stream Chat Flutter Core Analyze"
-        run: cd packages/stream_chat_flutter_core/lib && dart analyze --fatal-infos .
-
-      - name: "Stream Chat Flutter Analyze"
-        run: cd packages/stream_chat_flutter/lib && dart analyze --fatal-infos .
-
-      - name: "Stream Chat Persistence Analyze"
-        run: cd packages/stream_chat_persistence/lib && dart analyze --fatal-infos .
-
-      - name: "Stream Chat Localizations Analyze"
-        run: cd packages/stream_chat_localizations/lib && dart analyze --fatal-infos .
+      - name: 🕵️ Analyze
+        # Only analyze lib/; non-client code doesn't need to work on
+        # all supported legacy version.
+        run: melos exec -c 1 --diff=origin/master...HEAD --include-dependents -- "dart analyze lib --fatal-infos"
