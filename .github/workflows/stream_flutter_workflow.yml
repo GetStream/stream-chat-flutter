@@ -80,7 +80,7 @@ jobs:
         run: melos bootstrap
 
       - name: 🧪 Run Tests
-        run: melos run test:packages:changed
+        run: melos run test:changes
 
       - name: 📊 Collect Coverage
         run: melos run coverage:ignore-file --no-select
