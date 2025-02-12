@@ -1,7 +1,9 @@
-import 'package:sample_app/utils/localizations.dart';
-import 'package:sample_app/routes/routes.dart';
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class PinnedMessagesScreen extends StatefulWidget {
@@ -42,7 +44,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
           AppLocalizations.of(context).pinnedMessages,
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-            fontSize: 16.0,
+            fontSize: 16,
           ),
         ),
         leading: const StreamBackButton(),
@@ -55,28 +57,29 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                StreamSvgIcon.pin(
-                  size: 136.0,
+                StreamSvgIcon(
+                  icon: StreamSvgIcons.pin,
+                  size: 136,
                   color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 16),
                 Text(
                   AppLocalizations.of(context).noPinnedItems,
                   style: TextStyle(
-                    fontSize: 17.0,
+                    fontSize: 17,
                     color:
                         StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8.0),
+                const SizedBox(height: 8),
                 RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(children: [
                     TextSpan(
                       text: '${AppLocalizations.of(context).longPressMessage} ',
                       style: TextStyle(
-                        fontSize: 14.0,
+                        fontSize: 14,
                         color: StreamChatTheme.of(context)
                             .colorTheme
                             .textHighEmphasis
@@ -86,7 +89,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                     TextSpan(
                       text: AppLocalizations.of(context).pinToConversation,
                       style: TextStyle(
-                        fontSize: 14.0,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: StreamChatTheme.of(context)
                             .colorTheme

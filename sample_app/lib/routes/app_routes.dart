@@ -1,8 +1,11 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/advanced_options_page.dart';
 import 'package:sample_app/pages/channel_list_page.dart';
 import 'package:sample_app/pages/channel_page.dart';
 import 'package:sample_app/pages/chat_info_screen.dart';
+import 'package:sample_app/pages/choose_user_page.dart';
 import 'package:sample_app/pages/group_chat_details_screen.dart';
 import 'package:sample_app/pages/group_info_screen.dart';
 import 'package:sample_app/pages/new_chat_screen.dart';
@@ -10,11 +13,7 @@ import 'package:sample_app/pages/new_group_chat_screen.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/state/new_group_chat_state.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import '../pages/choose_user_page.dart';
 
 final appRoutes = [
   GoRoute(
@@ -110,7 +109,7 @@ final appRoutes = [
     name: Routes.NEW_GROUP_CHAT_DETAILS.name,
     path: Routes.NEW_GROUP_CHAT_DETAILS.path,
     builder: (BuildContext context, GoRouterState state) {
-      final groupChatState = state.extra as NewGroupChatState;
+      final groupChatState = state.extra! as NewGroupChatState;
       return GroupChatDetailsScreen(groupChatState: groupChatState);
     },
   ),

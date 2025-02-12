@@ -1,5 +1,13 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:sample_app/app.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/pages/user_mentions_page.dart';
@@ -8,19 +16,13 @@ import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/channel_list.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ChannelListPage> createState() => _ChannelListPageState();
@@ -37,7 +39,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
         icon: Stack(
           clipBehavior: Clip.none,
           children: [
-            StreamSvgIcon.message(
+            StreamSvgIcon(
+              icon: StreamSvgIcons.message,
               color: _isSelected(0)
                   ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
@@ -52,7 +55,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
         label: AppLocalizations.of(context).chats,
       ),
       BottomNavigationBarItem(
-        icon: StreamSvgIcon.mentions(
+        icon: StreamSvgIcon(
+          icon: StreamSvgIcons.mentions,
           color: _isSelected(1)
               ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
               : Colors.grey,
@@ -63,7 +67,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
         icon: Stack(
           clipBehavior: Clip.none,
           children: [
-            Icon(Icons.message_outlined,
+            Icon(
+              Icons.message_outlined,
               color: _isSelected(2)
                   ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
@@ -154,16 +159,16 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({
-    Key? key,
+    super.key,
     required this.user,
-  }) : super(key: key);
+  });
 
   final User user;
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Container(
+      child: ColoredBox(
         color: StreamChatTheme.of(context).colorTheme.barsBg,
         child: SafeArea(
           child: Padding(
@@ -174,7 +179,7 @@ class LeftDrawer extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(
-                    bottom: 20.0,
+                    bottom: 20,
                     left: 8,
                   ),
                   child: Row(
@@ -186,7 +191,7 @@ class LeftDrawer extends StatelessWidget {
                             BoxConstraints.tight(const Size.fromRadius(20)),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
+                        padding: const EdgeInsets.only(left: 16),
                         child: Text(
                           user.name,
                           style: const TextStyle(
@@ -199,7 +204,8 @@ class LeftDrawer extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  leading: StreamSvgIcon.penWrite(
+                  leading: StreamSvgIcon(
+                    icon: StreamSvgIcons.penWrite,
                     color: StreamChatTheme.of(context)
                         .colorTheme
                         .textHighEmphasis
@@ -217,11 +223,12 @@ class LeftDrawer extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  leading: StreamSvgIcon.contacts(
+                  leading: StreamSvgIcon(
                     color: StreamChatTheme.of(context)
                         .colorTheme
                         .textHighEmphasis
                         .withOpacity(.5),
+                    icon: StreamSvgIcons.contacts,
                   ),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -256,7 +263,8 @@ class LeftDrawer extends StatelessWidget {
 
                         router.goNamed(Routes.CHOOSE_USER.name);
                       },
-                      leading: StreamSvgIcon.user(
+                      leading: StreamSvgIcon(
+                        icon: StreamSvgIcons.user,
                         color: StreamChatTheme.of(context)
                             .colorTheme
                             .textHighEmphasis
@@ -269,9 +277,8 @@ class LeftDrawer extends StatelessWidget {
                         ),
                       ),
                       trailing: IconButton(
-                        icon: StreamSvgIcon.iconMoon(
-                          size: 24,
-                        ),
+                        iconSize: 24,
+                        icon: const StreamSvgIcon(icon: StreamSvgIcons.moon),
                         color: StreamChatTheme.of(context)
                             .colorTheme
                             .textLowEmphasis,

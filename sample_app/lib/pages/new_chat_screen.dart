@@ -1,12 +1,13 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
-import 'package:sample_app/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/widgets/chips_input_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import '../widgets/chips_input_text_field.dart';
-import '../routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
   const NewChatScreen({super.key});
@@ -157,8 +158,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
       ),
       body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
-          String statusString = '';
-          bool showStatus = true;
+          var statusString = '';
+          var showStatus = true;
 
           switch (status) {
             case ConnectionStatus.connected:
@@ -234,7 +235,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 ),
                               ),
                             ),
-                            StreamSvgIcon.close(),
+                            const StreamSvgIcon(icon: StreamSvgIcons.close),
                           ],
                         ),
                       );
@@ -259,11 +260,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           children: [
                             StreamNeumorphicButton(
                               child: Center(
-                                child: StreamSvgIcon.contacts(
+                                child: StreamSvgIcon(
                                   color: StreamChatTheme.of(context)
                                       .colorTheme
                                       .accentPrimary,
                                   size: 24,
+                                  icon: StreamSvgIcons.contacts,
                                 ),
                               ),
                             ),
@@ -346,10 +348,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                         child: Center(
                                           child: Column(
                                             children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(24),
-                                                child: StreamSvgIcon.search(
+                                              const Padding(
+                                                padding: EdgeInsets.all(24),
+                                                child: StreamSvgIcon(
+                                                  icon: StreamSvgIcons.search,
                                                   size: 96,
                                                   color: Colors.grey,
                                                 ),

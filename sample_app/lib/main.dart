@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:sample_app/app.dart';
-import 'package:sample_app/utils/app_config.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sample_app/app.dart';
+import 'package:sample_app/firebase_options.dart';
+import 'package:sample_app/utils/app_config.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-
-import 'firebase_options.dart';
 
 Future<void> main() async {
   /// Captures errors reported by the Flutter framework.

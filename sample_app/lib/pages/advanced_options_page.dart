@@ -1,15 +1,14 @@
-import 'package:sample_app/app.dart';
-import 'package:sample_app/state/init_data.dart';
-import 'package:sample_app/utils/localizations.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/widgets/stream_version.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
+import 'package:sample_app/app.dart';
 import 'package:sample_app/pages/choose_user_page.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/state/init_data.dart';
+import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/widgets/stream_version.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
   const AdvancedOptionsPage({super.key});
@@ -137,9 +136,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
         ),
         leading: IconButton(
-          icon: StreamSvgIcon.left(
-            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-          ),
+          icon: const StreamSvgIcon(icon: StreamSvgIcons.left),
+          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
           onPressed: () {
             Navigator.pop(context);
           },
@@ -327,16 +325,16 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                   const Spacer(),
                   ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
+                      backgroundColor: WidgetStateProperty.all<Color>(
                           Theme.of(context).brightness == Brightness.light
                               ? StreamChatTheme.of(context)
                                   .colorTheme
                                   .accentPrimary
                               : Colors.white),
-                      elevation: MaterialStateProperty.all<double>(0),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
+                      elevation: WidgetStateProperty.all<double>(0),
+                      padding: WidgetStateProperty.all<EdgeInsets>(
                           const EdgeInsets.symmetric(vertical: 16)),
-                      shape: MaterialStateProperty.all(
+                      shape: WidgetStateProperty.all(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(26),
                         ),

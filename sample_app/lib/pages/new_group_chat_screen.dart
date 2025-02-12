@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:sample_app/state/new_group_chat_state.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/state/new_group_chat_state.dart';
+import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import '../routes/routes.dart';
-import '../widgets/search_text_field.dart';
 
 class NewGroupChatScreen extends StatefulWidget {
   const NewGroupChatScreen({super.key});
@@ -92,9 +91,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             actions: [
               if (state.users.isNotEmpty)
                 IconButton(
-                  icon: StreamSvgIcon.arrowRight(
-                    color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                  ),
+                  color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+                  icon: const StreamSvgIcon(icon: StreamSvgIcons.arrowRight),
                   onPressed: () async {
                     GoRouter.of(context).pushNamed(
                       Routes.NEW_GROUP_CHAT_DETAILS.name,
@@ -106,8 +104,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
           ),
           body: StreamConnectionStatusBuilder(
             statusBuilder: (context, status) {
-              String statusString = '';
-              bool showStatus = true;
+              var statusString = '';
+              var showStatus = true;
 
               switch (status) {
                 case ConnectionStatus.connected:
@@ -157,7 +155,6 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                           onlineIndicatorAlignment:
                                               const Alignment(0.9, 0.9),
                                           user: user,
-                                          showOnlineStatus: true,
                                           borderRadius:
                                               BorderRadius.circular(32),
                                           constraints:
@@ -173,7 +170,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                             onTap: () {
                                               groupChatState.removeUser(user);
                                             },
-                                            child: Container(
+                                            child: DecoratedBox(
                                               decoration: BoxDecoration(
                                                 color:
                                                     StreamChatTheme.of(context)
@@ -187,12 +184,13 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                                       .appBg,
                                                 ),
                                               ),
-                                              child: StreamSvgIcon.close(
+                                              child: StreamSvgIcon(
                                                 color:
                                                     StreamChatTheme.of(context)
                                                         .colorTheme
                                                         .textHighEmphasis,
                                                 size: 24,
+                                                icon: StreamSvgIcons.close,
                                               ),
                                             ),
                                           ),
@@ -270,7 +268,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                     children: [
                                       Padding(
                                         padding: const EdgeInsets.all(24),
-                                        child: StreamSvgIcon.search(
+                                        child: StreamSvgIcon(
+                                          icon: StreamSvgIcons.search,
                                           size: 96,
                                           color: StreamChatTheme.of(context)
                                               .colorTheme
@@ -310,18 +309,17 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 }
 
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  final double height;
-
   const _HeaderDelegate({
     required this.child,
     required this.height,
   });
+  final Widget child;
+  final double height;
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
+    return ColoredBox(
       color: StreamChatTheme.of(context).colorTheme.barsBg,
       child: child,
     );

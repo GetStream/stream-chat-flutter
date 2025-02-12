@@ -1,13 +1,13 @@
-import 'package:sample_app/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:yaml/yaml.dart';
+import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:yaml/yaml.dart';
 
 class StreamVersion extends StatelessWidget {
   const StreamVersion({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

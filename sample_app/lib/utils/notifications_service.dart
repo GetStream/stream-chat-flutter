@@ -1,9 +1,9 @@
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void showLocalNotification(
@@ -18,7 +18,9 @@ void showLocalNotification(
   if (![
     EventType.messageNew,
     EventType.notificationMessageNew,
-  ].contains(event.type)) return;
+  ].contains(event.type)) {
+    return;
+  }
 
   // Return if the message is null.
   if (event.message == null) return;

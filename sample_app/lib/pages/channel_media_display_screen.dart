@@ -1,18 +1,18 @@
-import 'package:sample_app/utils/localizations.dart';
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
-import '../routes/routes.dart';
-
 class ChannelMediaDisplayScreen extends StatefulWidget {
-  final StreamMessageThemeData messageTheme;
-
   const ChannelMediaDisplayScreen({
-    Key? key,
+    super.key,
     required this.messageTheme,
-  }) : super(key: key);
+  });
+  final StreamMessageThemeData messageTheme;
 
   @override
   State<ChannelMediaDisplayScreen> createState() =>
@@ -52,7 +52,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
           AppLocalizations.of(context).photosAndVideos,
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-            fontSize: 16.0,
+            fontSize: 16,
           ),
         ),
         leading: const StreamBackButton(),
@@ -69,27 +69,28 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      StreamSvgIcon.pictures(
-                        size: 136.0,
+                      StreamSvgIcon(
+                        icon: StreamSvgIcons.pictures,
+                        size: 136,
                         color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),
-                      const SizedBox(height: 16.0),
+                      const SizedBox(height: 16),
                       Text(
                         AppLocalizations.of(context).noMedia,
                         style: TextStyle(
-                          fontSize: 14.0,
+                          fontSize: 14,
                           color: StreamChatTheme.of(context)
                               .colorTheme
                               .textHighEmphasis,
                         ),
                       ),
-                      const SizedBox(height: 8.0),
+                      const SizedBox(height: 8),
                       Text(
                         AppLocalizations.of(context)
                             .photosOrVideosWillAppearHere,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 14.0,
+                          fontSize: 14,
                           color: StreamChatTheme.of(context)
                               .colorTheme
                               .textHighEmphasis
@@ -113,7 +114,8 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                     final cachedController = controllerCache[e.assetUrl];
 
                     if (cachedController == null) {
-                      controller = VideoPlayerController.network(e.assetUrl!);
+                      final url = Uri.parse(e.assetUrl!);
+                      controller = VideoPlayerController.networkUrl(url);
                       controller.initialize();
                       controllerCache[e.assetUrl] = controller;
                     } else {
@@ -134,9 +136,9 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3),
                   itemBuilder: (context, position) {
-                    var channel = StreamChannel.of(context).channel;
+                    final channel = StreamChannel.of(context).channel;
                     return Padding(
-                      padding: const EdgeInsets.all(1.0),
+                      padding: const EdgeInsets.all(1),
                       child: InkWell(
                         onTap: () {
                           Navigator.push(
@@ -214,9 +216,8 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
 }
 
 class _AssetPackage {
+  _AssetPackage(this.attachment, this.message, this.videoPlayer);
   Attachment attachment;
   Message message;
   VideoPlayerController? videoPlayer;
-
-  _AssetPackage(this.attachment, this.message, this.videoPlayer);
 }

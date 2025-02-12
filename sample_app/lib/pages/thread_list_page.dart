@@ -1,5 +1,5 @@
-import 'package:sample_app/pages/thread_page.dart';
 import 'package:flutter/material.dart';
+import 'package:sample_app/pages/thread_page.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ThreadListPage extends StatefulWidget {

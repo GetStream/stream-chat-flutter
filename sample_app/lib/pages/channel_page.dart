@@ -1,21 +1,23 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:collection/collection.dart';
-import 'package:sample_app/pages/thread_page.dart';
-import 'package:sample_app/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/pages/thread_page.dart';
+import 'package:sample_app/routes/routes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChannelPage extends StatefulWidget {
-  final int? initialScrollIndex;
-  final double? initialAlignment;
-  final bool highlightInitialMessage;
 
   const ChannelPage({
-    Key? key,
+    super.key,
     this.initialScrollIndex,
     this.initialAlignment,
     this.highlightInitialMessage = false,
-  }) : super(key: key);
+  });
+  final int? initialScrollIndex;
+  final double? initialAlignment;
+  final bool highlightInitialMessage;
 
   @override
   State<ChannelPage> createState() => _ChannelPageState();
@@ -156,9 +158,7 @@ class _ChannelPageState extends State<ChannelPage> {
           StreamMessageInput(
             focusNode: _focusNode,
             messageInputController: _messageInputController,
-            onQuotedMessageCleared: () {
-              _messageInputController.clearQuotedMessage();
-            },
+            onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
           ),
         ],
       ),

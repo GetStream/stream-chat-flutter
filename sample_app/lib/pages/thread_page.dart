@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ThreadPage extends StatefulWidget {
-  final Message parent;
-  final int? initialScrollIndex;
-  final double? initialAlignment;
 
   const ThreadPage({
-    Key? key,
+    super.key,
     required this.parent,
     this.initialScrollIndex,
     this.initialAlignment,
-  }) : super(key: key);
+  });
+  final Message parent;
+  final int? initialScrollIndex;
+  final double? initialAlignment;
 
   @override
   State<ThreadPage> createState() => _ThreadPageState();

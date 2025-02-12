@@ -82,6 +82,17 @@ Podfile.lock
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 
+# macOS-related
+**/macos/**/Pods/
+**/macos/**/xcuserdata
+**/macos/**/Flutter/ephemeral
+
+# Windows-related
+**/windows/flutter/ephemeral/
+
+# Linux-related
+**/linux/flutter/ephemeral/
+
 # Generated files
 *.dart.js
 *.info.json

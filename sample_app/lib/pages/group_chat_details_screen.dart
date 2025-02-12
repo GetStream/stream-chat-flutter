@@ -1,18 +1,18 @@
-import 'package:sample_app/state/new_group_chat_state.dart';
-import 'package:sample_app/utils/localizations.dart';
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/state/new_group_chat_state.dart';
+import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../routes/routes.dart';
-
 class GroupChatDetailsScreen extends StatefulWidget {
-  final NewGroupChatState groupChatState;
-
   const GroupChatDetailsScreen({
-    Key? key,
+    super.key,
     required this.groupChatState,
-  }) : super(key: key);
+  });
+  final NewGroupChatState groupChatState;
 
   @override
   State<GroupChatDetailsScreen> createState() => _GroupChatDetailsScreenState();
@@ -90,7 +90,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         enabledBorder: InputBorder.none,
                         errorBorder: InputBorder.none,
                         disabledBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.all(0),
+                        contentPadding: EdgeInsets.zero,
                         hintText:
                             AppLocalizations.of(context).chooseAGroupChatName,
                         hintStyle: TextStyle(
@@ -109,13 +109,12 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           actions: [
             StreamNeumorphicButton(
               child: IconButton(
-                padding: const EdgeInsets.all(0),
-                icon: StreamSvgIcon.check(
-                  size: 24,
-                  color: _isGroupNameEmpty
-                      ? StreamChatTheme.of(context).colorTheme.textLowEmphasis
-                      : StreamChatTheme.of(context).colorTheme.accentPrimary,
-                ),
+                iconSize: 24,
+                padding: EdgeInsets.zero,
+                color: _isGroupNameEmpty
+                    ? StreamChatTheme.of(context).colorTheme.textLowEmphasis
+                    : StreamChatTheme.of(context).colorTheme.accentPrimary,
+                icon: const StreamSvgIcon(icon: StreamSvgIcons.check),
                 onPressed: _isGroupNameEmpty
                     ? null
                     : () async {
@@ -148,8 +147,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         ),
         body: StreamConnectionStatusBuilder(
           statusBuilder: (context, status) {
-            String statusString = '';
-            bool showStatus = true;
+            var statusString = '';
+            var showStatus = true;
 
             switch (status) {
               case ConnectionStatus.connected:
@@ -243,7 +242,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                                           .colorTheme
                                           .textHighEmphasis,
                                     ),
-                                    padding: const EdgeInsets.all(0),
+                                    padding: EdgeInsets.zero,
                                     splashRadius: 24,
                                     onPressed: () {
                                       widget.groupChatState.removeUser(user);
@@ -269,45 +268,45 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
   void _showErrorAlert() {
     showModalBottomSheet(
-      useRootNavigator: false,
       backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       context: context,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16.0),
-        topRight: Radius.circular(16.0),
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
       )),
       builder: (context) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(
-              height: 26.0,
+              height: 26,
             ),
-            StreamSvgIcon.error(
+            StreamSvgIcon(
+              icon: StreamSvgIcons.error,
               color: StreamChatTheme.of(context).colorTheme.accentError,
-              size: 24.0,
+              size: 24,
             ),
             const SizedBox(
-              height: 26.0,
+              height: 26,
             ),
             Text(
               AppLocalizations.of(context).somethingWentWrongErrorMessage,
               style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
             const SizedBox(
-              height: 7.0,
+              height: 7,
             ),
             Text(AppLocalizations.of(context).operationCouldNotBeCompleted),
             const SizedBox(
-              height: 36.0,
+              height: 36,
             ),
             Container(
               color: StreamChatTheme.of(context)
                   .colorTheme
                   .textHighEmphasis
                   .withOpacity(.08),
-              height: 1.0,
+              height: 1,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

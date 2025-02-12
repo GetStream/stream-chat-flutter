@@ -1,13 +1,5 @@
 import 'dart:async';
 
-import 'package:sample_app/pages/choose_user_page.dart';
-import 'package:sample_app/pages/splash_screen.dart';
-import 'package:sample_app/routes/app_routes.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/state/init_data.dart';
-import 'package:sample_app/utils/app_config.dart';
-import 'package:sample_app/utils/local_notification_observer.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -16,13 +8,20 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:sample_app/firebase_options.dart';
+import 'package:sample_app/pages/choose_user_page.dart';
+import 'package:sample_app/pages/splash_screen.dart';
+import 'package:sample_app/routes/app_routes.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/state/init_data.dart';
+import 'package:sample_app/utils/app_config.dart';
+import 'package:sample_app/utils/local_notification_observer.dart';
+import 'package:sample_app/utils/localizations.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
-
-import 'firebase_options.dart';
 
 /// Constructs callback for background notification handling.
 ///
@@ -84,7 +83,6 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
 
 final chatPersistentClient = StreamChatPersistenceClient(
   logLevel: Level.SEVERE,
-  connectionMode: ConnectionMode.regular,
 );
 
 void _sampleAppLogHandler(LogRecord record) async {
@@ -177,12 +175,11 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         final token = await FirebaseMessaging.instance.getToken();
         debugPrint('[onTokenInit] #firebase; token: $token');
         if (token != null) {
-          // replace with your push provider name, e.g., 'chat-flutter-firebase'
-          const pushProviderName = null;
+          // replace with your push provider, e.g., 'PushProvider.xiaomi'
+          const pushProvider = PushProvider.firebase;
 
           // add Token to Stream
-          await client.addDevice(token, PushProvider.firebase,
-              pushProviderName: pushProviderName);
+          await client.addDevice(token, pushProvider);
         }
       }
       // User logged out

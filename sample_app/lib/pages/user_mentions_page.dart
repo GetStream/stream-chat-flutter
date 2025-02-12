@@ -1,7 +1,7 @@
-import 'package:sample_app/utils/localizations.dart';
-import 'package:sample_app/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class UserMentionsPage extends StatefulWidget {
@@ -46,7 +46,8 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(24),
-                        child: StreamSvgIcon.mentions(
+                        child: StreamSvgIcon(
+                          icon: StreamSvgIcons.mentions,
                           size: 96,
                           color:
                               StreamChatTheme.of(context).colorTheme.disabled,

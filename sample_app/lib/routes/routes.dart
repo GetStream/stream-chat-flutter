@@ -25,10 +25,10 @@ abstract class Routes {
 }
 
 class RouteConfig {
-  final String name;
-  final String path;
 
   const RouteConfig({required this.name, required this.path});
+  final String name;
+  final String path;
 }
 
 class ChannelRouteConfig extends RouteConfig {

@@ -1,15 +1,16 @@
-import 'package:sample_app/utils/localizations.dart';
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 class ChannelFileDisplayScreen extends StatefulWidget {
-  final StreamMessageThemeData messageTheme;
-
   const ChannelFileDisplayScreen({
-    Key? key,
+    super.key,
     required this.messageTheme,
-  }) : super(key: key);
+  });
+  final StreamMessageThemeData messageTheme;
 
   @override
   State<ChannelFileDisplayScreen> createState() =>
@@ -49,7 +50,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
           AppLocalizations.of(context).files,
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-            fontSize: 16.0,
+            fontSize: 16,
           ),
         ),
         leading: const StreamBackButton(),
@@ -69,26 +70,27 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      StreamSvgIcon.files(
-                        size: 136.0,
+                      StreamSvgIcon(
+                        icon: StreamSvgIcons.files,
+                        size: 136,
                         color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),
-                      const SizedBox(height: 16.0),
+                      const SizedBox(height: 16),
                       Text(
                         AppLocalizations.of(context).noFiles,
                         style: TextStyle(
-                          fontSize: 14.0,
+                          fontSize: 14,
                           color: StreamChatTheme.of(context)
                               .colorTheme
                               .textHighEmphasis,
                         ),
                       ),
-                      const SizedBox(height: 8.0),
+                      const SizedBox(height: 8),
                       Text(
                         AppLocalizations.of(context).filesAppearHere,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 14.0,
+                          fontSize: 14,
                           color: StreamChatTheme.of(context)
                               .colorTheme
                               .textHighEmphasis
@@ -101,7 +103,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
               }
               final media = <Attachment, Message>{};
 
-              for (var item in items) {
+              for (final item in items) {
                 item.message.attachments
                     .where((e) => e.type == 'file')
                     .forEach((e) {
@@ -118,9 +120,9 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                 child: ListView.builder(
                   itemBuilder: (context, position) {
                     return Padding(
-                      padding: const EdgeInsets.all(1.0),
+                      padding: const EdgeInsets.all(1),
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8),
                         child: StreamFileAttachment(
                           message: media.values.toList()[position],
                           file: media.keys.toList()[position],

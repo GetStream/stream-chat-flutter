@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -18,9 +20,9 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
     ),
   );
 
-  late final _circleAnimation = Tween(
-    begin: 0.0,
-    end: 1000.0,
+  late final _circleAnimation = Tween<double>(
+    begin: 0,
+    end: 1000,
   ).animate(CurvedAnimation(
     parent: _animationController,
     curve: Curves.easeInOut,
@@ -34,8 +36,8 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
     curve: Curves.easeInOut,
   ));
 
-  late final _scaleAnimation = Tween(
-    begin: 1.0,
+  late final _scaleAnimation = Tween<double>(
+    begin: 1,
     end: 1.5,
   ).animate(CurvedAnimation(
     parent: _scaleAnimationController,
@@ -106,8 +108,8 @@ mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T>
               return Transform.scale(
                 scale: _circleAnimation.value,
                 child: Container(
-                  width: 1.0,
-                  height: 1.0,
+                  width: 1,
+                  height: 1,
                   decoration: BoxDecoration(
                     color: Colors.white
                         .withOpacity(1 - _animationController.value),

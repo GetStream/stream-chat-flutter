@@ -1,16 +1,15 @@
 import 'dart:async';
 
-import 'package:sample_app/utils/localizations.dart';
-import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:go_router/go_router.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-
-import '../pages/chat_info_screen.dart';
-import '../pages/group_info_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sample_app/pages/chat_info_screen.dart';
+import 'package:sample_app/pages/group_info_screen.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/widgets/search_text_field.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChannelList extends StatefulWidget {
   const ChannelList({super.key});
@@ -62,7 +61,6 @@ class _ChannelList extends State<ChannelList> {
       'members',
       [StreamChat.of(context).currentUser!.id],
     ),
-    presence: true,
     limit: 30,
   );
 
@@ -77,14 +75,12 @@ class _ChannelList extends State<ChannelList> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_isSearchActive) {
-          _controller.clear();
-          setState(() => _isSearchActive = false);
-          return false;
-        }
-        return true;
+    return PopScope(
+      canPop: _isSearchActive == false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _controller.clear();
+        setState(() => _isSearchActive = false);
       },
       child: NotificationListener<ScrollUpdateNotification>(
         onNotification: (ScrollNotification scrollInfo) {
@@ -96,7 +92,6 @@ class _ChannelList extends State<ChannelList> {
         },
         child: NestedScrollView(
           controller: _scrollController,
-          floatHeaderSlivers: false,
           headerSliverBuilder: (_, __) => [
             SliverToBoxAdapter(
               child: SearchTextField(
@@ -121,9 +116,10 @@ class _ChannelList extends State<ChannelList> {
                             child: Center(
                               child: Column(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: StreamSvgIcon.search(
+                                  const Padding(
+                                    padding: EdgeInsets.all(24),
+                                    child: StreamSvgIcon(
+                                      icon: StreamSvgIcons.search,
                                       size: 96,
                                       color: Colors.grey,
                                     ),
@@ -170,7 +166,6 @@ class _ChannelList extends State<ChannelList> {
                   },
                 )
               : SlidableAutoCloseBehavior(
-                  closeWhenOpened: true,
                   child: RefreshIndicator(
                     onRefresh: _channelListController.refresh,
                     child: StreamChannelListView(
@@ -236,7 +231,8 @@ class _ChannelList extends State<ChannelList> {
                               if (canDeleteChannel)
                                 CustomSlidableAction(
                                   backgroundColor: backgroundColor,
-                                  child: StreamSvgIcon.delete(
+                                  child: StreamSvgIcon(
+                                    icon: StreamSvgIcons.delete,
                                     color: chatTheme.colorTheme.accentError,
                                   ),
                                   onPressed: (_) async {
@@ -248,7 +244,8 @@ class _ChannelList extends State<ChannelList> {
                                           'Are you sure you want to delete this conversation?',
                                       okText: 'Delete',
                                       cancelText: 'Cancel',
-                                      icon: StreamSvgIcon.delete(
+                                      icon: StreamSvgIcon(
+                                        icon: StreamSvgIcons.delete,
                                         color: chatTheme.colorTheme.accentError,
                                       ),
                                     );
@@ -274,7 +271,8 @@ class _ChannelList extends State<ChannelList> {
                           child: Padding(
                             padding: const EdgeInsets.all(8),
                             child: StreamScrollViewEmptyWidget(
-                              emptyIcon: StreamSvgIcon.message(
+                              emptyIcon: StreamSvgIcon(
+                                icon: StreamSvgIcons.message,
                                 size: 148,
                                 color: StreamChatTheme.of(context)
                                     .colorTheme

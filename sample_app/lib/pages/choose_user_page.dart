@@ -1,16 +1,15 @@
-import 'package:sample_app/state/init_data.dart';
-import 'package:sample_app/utils/app_config.dart';
-import 'package:sample_app/utils/localizations.dart';
-import 'package:sample_app/widgets/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/state/init_data.dart';
+import 'package:sample_app/utils/app_config.dart';
+import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import '../routes/routes.dart';
 
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
@@ -27,7 +26,6 @@ class ChooseUserPage extends StatelessWidget {
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.only(
@@ -46,7 +44,7 @@ class ChooseUserPage extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 13.0),
+              padding: const EdgeInsets.only(bottom: 13),
               child: Text(
                 AppLocalizations.of(context).welcomeToStreamChat,
                 style: StreamChatTheme.of(context).textTheme.title,
@@ -150,7 +148,8 @@ class ChooseUserPage extends StatelessWidget {
                                       .textLowEmphasis,
                                 ),
                           ),
-                          trailing: StreamSvgIcon.arrowRight(
+                          trailing: StreamSvgIcon(
+                            icon: StreamSvgIcons.arrowRight,
                             color: StreamChatTheme.of(context)
                                 .colorTheme
                                 .accentPrimary,
@@ -163,7 +162,8 @@ class ChooseUserPage extends StatelessWidget {
                         leading: CircleAvatar(
                           backgroundColor:
                               StreamChatTheme.of(context).colorTheme.borders,
-                          child: StreamSvgIcon.settings(
+                          child: StreamSvgIcon(
+                            icon: StreamSvgIcons.settings,
                             color: StreamChatTheme.of(context)
                                 .colorTheme
                                 .textHighEmphasis,

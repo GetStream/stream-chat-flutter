@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppLocalizations {
+
+  AppLocalizations(this.locale);
   static const _localizedValues = <String, Map<String, String>>{
     'en': {
       'add_a_group_name': 'Add a group name',
@@ -64,7 +66,7 @@ class AppLocalizations {
       'online': 'Online',
       'on_the_platform': 'On the platform',
       'operation_could_not_be_completed':
-          'The operation couldn\'t be completed.',
+          "The operation couldn't be completed.",
       'owner': 'Owner',
       'photos_and_videos': 'Photos & Videos',
       'photos_or_videos_will_appear_here':
@@ -98,7 +100,7 @@ class AppLocalizations {
       'add_a_group_name': 'Aggiungi un nome al gruppo',
       'add_group_members': 'Aggiungi un membro',
       'advanced_options': 'Opzioni Avanzate',
-      'api_key_error': 'Per favore inserisci l\'API Key',
+      'api_key_error': "Per favore inserisci l'API Key",
       'attachment': 'allegato',
       'attachments': 'allegati',
       'cancel': 'Annulla',
@@ -117,7 +119,7 @@ class AppLocalizations {
       'files': 'File',
       'files_appear_here': 'I file inviati in questa chat compariranno qui',
       'group_shared_with_user_appear_here':
-          'I gruppi in comune con quest\'utente compariranno qui',
+          "I gruppi in comune con quest'utente compariranno qui",
       'last_seen': 'Ultimo accesso',
       'leave': 'Lascia',
       'leave_conversation': 'Lascia conversazione',
@@ -155,7 +157,7 @@ class AppLocalizations {
       'online': 'Online',
       'on_the_platform': 'Sulla piattaforma',
       'operation_could_not_be_completed':
-          'Non é stato possibile completare l\'operazione.',
+          "Non é stato possibile completare l'operazione.",
       'owner': 'Proprietario',
       'photos_and_videos': 'Foto & Video',
       'photos_or_videos_will_appear_here':
@@ -170,7 +172,7 @@ class AppLocalizations {
           'Sei sicuro di voler rimuovere questo membro?',
       'search': 'Cerca',
       'select_user_to_try_flutter_sdk':
-          'Seleziona un utente per provare l\'SDK Flutter',
+          "Seleziona un utente per provare l'SDK Flutter",
       'shared_groups': 'Gruppi in comune',
       'sign_out': 'Sign out',
       'something_went_wrong_error_message': 'Qualcosa é andato storto',
@@ -179,7 +181,7 @@ class AppLocalizations {
       'to': 'A',
       'type_a_name_hint': 'Scrivi un nome',
       'user_id': 'User ID',
-      'user_id_error': 'Per favore inserisci l\'ID dell\'utente',
+      'user_id_error': "Per favore inserisci l'ID dell'utente",
       'username_optional': 'Username (opzionale)',
       'user_token': 'Token Utente',
       'user_token_error': 'Per favore inserisci il token',
@@ -189,8 +191,6 @@ class AppLocalizations {
   };
 
   final Locale locale;
-
-  AppLocalizations(this.locale);
 
   String get addAGroupName {
     return _localizedValues[locale.languageCode]!['add_a_group_name']!;

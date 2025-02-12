@@ -1,21 +1,22 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class SearchTextField extends StatelessWidget {
-  final TextEditingController? controller;
-  final ValueChanged<String>? onChanged;
-  final String hintText;
-  final VoidCallback? onTap;
-  final bool showCloseButton;
-
   const SearchTextField({
-    Key? key,
+    super.key,
     required this.controller,
     this.onChanged,
     this.onTap,
     this.hintText = 'Search',
     this.showCloseButton = true,
-  }) : super(key: key);
+  });
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
+  final String hintText;
+  final VoidCallback? onTap;
+  final bool showCloseButton;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,8 @@ class SearchTextField extends StatelessWidget {
                     left: 8,
                     right: 8,
                   ),
-                  child: StreamSvgIcon.search(
+                  child: StreamSvgIcon(
+                    icon: StreamSvgIcons.search,
                     color:
                         StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                     size: 24,
@@ -59,7 +61,7 @@ class SearchTextField extends StatelessWidget {
                         .colorTheme
                         .textHighEmphasis
                         .withOpacity(.5)),
-                contentPadding: const EdgeInsets.all(0),
+                contentPadding: EdgeInsets.zero,
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.circular(24),
@@ -71,10 +73,9 @@ class SearchTextField extends StatelessWidget {
             Material(
               color: Colors.transparent,
               child: IconButton(
-                padding: const EdgeInsets.all(0),
-                icon: StreamSvgIcon.closeSmall(
-                  color: Colors.grey,
-                ),
+                color: Colors.grey,
+                padding: EdgeInsets.zero,
+                icon: const StreamSvgIcon(icon: StreamSvgIcons.closeSmall),
                 splashRadius: 24,
                 onPressed: () {
                   if (controller!.text.isNotEmpty) {
