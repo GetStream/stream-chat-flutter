@@ -1,7 +1,7 @@
 name: stream_chat_example
 description: A new Flutter project.
 
-publish_to: "none"
+publish_to: none
 version: 1.0.0+1
 
 # Note: The environment configuration and dependency versions are managed by Melos.
