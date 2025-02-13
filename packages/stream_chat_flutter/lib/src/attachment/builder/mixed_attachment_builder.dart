@@ -102,6 +102,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
     return Padding(
       padding: padding,
       child: Column(
+        spacing: padding.vertical / 2,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (urls != null)
@@ -134,9 +135,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
             _giphyAttachmentBuilder.build(context, message, {
               AttachmentType.giphy: giphys,
             }),
-        ].insertBetween(
-          SizedBox(height: padding.vertical / 2),
-        ),
+        ],
       ),
     );
   }

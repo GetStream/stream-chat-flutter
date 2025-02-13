@@ -886,10 +886,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
               !(widget.actionsBuilder != null)
           ? const Offstage()
           : Row(
+              spacing: widget.spaceBetweenActions,
               mainAxisSize: MainAxisSize.min,
-              children: _actionsList().insertBetween(
-                SizedBox(width: widget.spaceBetweenActions),
-              ),
+              children: _actionsList(),
             ),
     );
   }

@@ -196,9 +196,6 @@ class _QuotedMessage extends StatelessWidget {
       );
     }
 
-    // Add some spacing between the children.
-    children = children.insertBetween(const SizedBox(width: 8));
-
     return Container(
       decoration: BoxDecoration(
         color: _getBackgroundColor(context),
@@ -216,6 +213,7 @@ class _QuotedMessage extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       child: Row(
+        spacing: 8,
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment:
             reverse ? MainAxisAlignment.end : MainAxisAlignment.start,

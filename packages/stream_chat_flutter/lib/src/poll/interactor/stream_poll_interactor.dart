@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_footer.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_header.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_options_list_view.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template streamPollInteractor}
@@ -100,6 +99,7 @@ class StreamPollInteractor extends StatelessWidget {
     return Padding(
       padding: padding,
       child: Column(
+        spacing: 8,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -129,7 +129,7 @@ class StreamPollInteractor extends StatelessWidget {
             onSuggestOption: onSuggestOption,
             onSeeMoreOptions: onSeeMoreOptions,
           ),
-        ].insertBetween(const SizedBox(height: 8)),
+        ],
       ),
     );
   }

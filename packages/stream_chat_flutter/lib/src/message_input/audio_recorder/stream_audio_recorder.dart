@@ -299,6 +299,7 @@ class RecordStateHoldRecordingContent extends StatelessWidget {
         child: SwipeToLockButton(),
       ),
       child: Row(
+        spacing: 8,
         children: [
           IgnorePointer(
             child: PlaybackTimerIndicator(duration: recordingTime),
@@ -320,7 +321,7 @@ class RecordStateHoldRecordingContent extends StatelessWidget {
               child: recordButton,
             ),
           ),
-        ].insertBetween(const SizedBox(width: 8)),
+        ],
       ),
     );
   }
@@ -601,6 +602,7 @@ class SwipeToLockButton extends StatelessWidget {
         color: theme.colorTheme.inputBg,
       ),
       child: Column(
+        spacing: 8,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           StreamSvgIcon(
@@ -617,7 +619,7 @@ class SwipeToLockButton extends StatelessWidget {
               color: theme.colorTheme.textLowEmphasis,
             ),
           ],
-        ].insertBetween(const SizedBox(height: 8)),
+        ],
       ),
     );
   }

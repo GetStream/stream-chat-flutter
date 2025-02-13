@@ -272,6 +272,7 @@ class PollVotesByOptionItem extends StatelessWidget {
           ? theme.pollOptionsWinnerDecoration
           : theme.pollOptionsDecoration,
       child: Column(
+        spacing: 16,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -325,7 +326,7 @@ class PollVotesByOptionItem extends StatelessWidget {
                 context.translations.showAllVotesLabel(count: pollVotesCount),
               ),
             ),
-        ].insertBetween(const SizedBox(height: 16)),
+        ],
       ),
     );
   }
