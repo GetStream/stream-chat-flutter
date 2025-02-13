@@ -18,7 +18,7 @@ issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 #   2. Add it to the melos.yaml file for future updates.
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.6.2
 
 dependencies:
   async: ^2.11.0

@@ -32,9 +32,9 @@ runs:
     - name: Install Flutter
       uses: subosito/flutter-action@v2
       with:
-        # Forcing to 3.24.5 for right now as pana has an issue with Dart 3.6 https://github.com/dart-lang/dartdoc/issues/3947
-        flutter-version: "3.24.5"
         cache: true
+        channel: stable
+        flutter-version: "3.x"
         cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
     - name: Install Pana
