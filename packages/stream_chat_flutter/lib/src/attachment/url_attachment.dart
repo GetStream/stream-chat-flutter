@@ -101,6 +101,7 @@ class StreamUrlAttachment extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
+              spacing: 4,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 if (urlAttachment.title != null)
@@ -135,7 +136,7 @@ class StreamUrlAttachment extends StatelessWidget {
                       style: messageTheme.urlAttachmentTextStyle,
                     );
                   }),
-              ].insertBetween(const SizedBox(height: 4)),
+              ],
             ),
           ),
         ],

@@ -105,6 +105,7 @@ class PollFooter extends StatelessWidget {
     final translations = context.translations;
 
     return Column(
+      spacing: 2,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -138,7 +139,7 @@ class PollFooter extends StatelessWidget {
             title: translations.endVoteLabel,
             onPressed: onEndVote,
           ),
-      ].insertBetween(const SizedBox(height: 2)),
+      ],
     );
   }
 }

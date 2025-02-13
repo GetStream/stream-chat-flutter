@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 
 /// {@template matrix}
 /// A matrix represents a 2D array of integers.
@@ -180,11 +179,13 @@ class FlexGrid extends StatelessWidget {
     var childIndex = 0;
 
     return Flex(
+      spacing: spacing,
       direction: primaryDirection,
       children: <Widget>[
         for (final row in pattern)
           Expanded(
             child: Flex(
+              spacing: runSpacing,
               direction: secondaryDirection,
               children: <Widget>[
                 ...row.map((flex) {
@@ -215,14 +216,10 @@ class FlexGrid extends StatelessWidget {
                     child: children[childIndex++],
                   );
                 }),
-              ].insertBetween(
-                Gap(direction: secondaryDirection, spacing: runSpacing),
-              ),
+              ],
             ),
           ),
-      ].insertBetween(
-        Gap(direction: primaryDirection, spacing: spacing),
-      ),
+      ],
     );
   }
 }

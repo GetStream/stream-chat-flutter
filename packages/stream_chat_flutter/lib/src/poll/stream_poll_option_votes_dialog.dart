@@ -123,6 +123,7 @@ class _StreamPollOptionVotesDialogState
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          spacing: 16,
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -164,7 +165,7 @@ class _StreamPollOptionVotesDialogState
                 ),
               ),
             ),
-          ].insertBetween(const SizedBox(height: 16)),
+          ],
         ),
       ),
     );
