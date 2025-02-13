@@ -52,7 +52,7 @@ command:
       get_thumbnail_video: ^0.7.3
       go_router: ^14.6.2
       http_parser: ^4.0.2
-      image_gallery_saver_plus: ^3.0.5
+      image_gallery_saver_plus: ^4.0.0-0.alpha
       image_picker: ^1.1.2
       image_size_getter: ^2.3.0
       jiffy: ^6.2.1
