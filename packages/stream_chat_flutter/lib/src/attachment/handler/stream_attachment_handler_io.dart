@@ -196,7 +196,6 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
     // Now that the file is saved, we need to copy it to the user's gallery
     // because the gallery only shows files that are in the gallery folder.
-    // await ImageGallerySaverPlus.saveFile(path);
     await Gal.putImage(path);
 
     // Once the file is copied to the gallery, we can delete the temporary file.
