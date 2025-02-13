@@ -28,6 +28,8 @@ android {
 
     compileSdkVersion 35
 
+    ndkVersion "26.2.11394342"
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
