@@ -23,6 +23,7 @@ class StreamVoiceRecordingLoading extends StatelessWidget {
         height: theme.size!.height,
         width: theme.size!.width,
         child: CircularProgressIndicator(
+          // ignore: unnecessary_null_checks
           strokeWidth: theme.strokeWidth!,
           color: theme.color,
         ),

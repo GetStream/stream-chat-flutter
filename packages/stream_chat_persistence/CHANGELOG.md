@@ -1,3 +1,7 @@
+## Upcoming
+
+- Updated minimum Flutter version to 3.27.4 for the SDK.
+
 ## 9.3.0
 
 - Updated `stream_chat` dependency to [`9.3.0`](https://pub.dev/packages/stream_chat/changelog).
