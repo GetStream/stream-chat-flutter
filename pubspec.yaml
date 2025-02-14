@@ -1,7 +1,7 @@
 name: stream_chat_flutter_workspace
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.6.2
 
 dev_dependencies:
   code_builder: ^4.10.1
