@@ -3,6 +3,7 @@
 🔄 Changed
 
 - Updated minimum Flutter version to 3.27.4 for the SDK.
+- Replaced [image_gallery_saver_plus](https://pub.dev/packages/image_gallery_saver_plus) with [gal](https://pub.dev/packages/gal)
 
 ## 9.3.0
 

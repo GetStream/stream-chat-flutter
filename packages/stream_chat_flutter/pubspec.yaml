@@ -37,9 +37,9 @@ dependencies:
   flutter_markdown: ^0.7.2+1
   flutter_portal: ^1.1.4
   flutter_svg: ^2.0.10+1
+  gal: ^2.3.1
   get_thumbnail_video: ^0.7.3
   http_parser: ^4.0.2
-  image_gallery_saver_plus: ^3.0.5
   image_picker: ^1.1.2
   image_size_getter: ^2.3.0
   jiffy: ^6.2.1
