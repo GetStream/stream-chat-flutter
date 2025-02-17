@@ -2489,7 +2489,7 @@ class ChannelClientState {
         updateMessage(message);
       }
 
-      if (_countMessageAsUnread(message)) {
+      if (!_channel.isMuted &&_countMessageAsUnread(message)) {
         unreadCount += 1;
       }
     }));
