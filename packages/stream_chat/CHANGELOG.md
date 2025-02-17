@@ -1,3 +1,8 @@
+🐞 Fixed
+
+- [[#2016]](https://github.com/GetStream/stream-chat-flutter/issues/2016) Fix muted channel's unreadCount incorrectly
+  updated
+
 ## 9.4.0
 
 🔄 Changed
