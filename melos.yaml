@@ -58,7 +58,7 @@ command:
       jiffy: ^6.2.1
       jose: ^0.3.4
       json_annotation: ^4.9.0
-      just_audio: ^0.9.38
+      just_audio: ^0.9.46
       logging: ^1.2.0
       lottie: ^3.1.2
       media_kit: ^1.1.10+1
@@ -78,11 +78,31 @@ command:
       share_plus: ^10.0.2
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
-      stream_chat: ^9.4.0
-      stream_chat_flutter: ^9.4.0
-      stream_chat_flutter_core: ^9.4.0
-      stream_chat_localizations: ^9.4.0
-      stream_chat_persistence: ^9.4.0
+      stream_chat:
+        git:
+          url: https://github.com/qdhayana/stream-chat-flutter.git
+          ref: master
+          path: packages/stream_chat
+      stream_chat_flutter:
+          git:
+            url: https://github.com/qdhayana/stream-chat-flutter.git
+            ref: master
+            path: packages/stream_chat_flutter
+      stream_chat_flutter_core:
+        git:
+          url: https://github.com/qdhayana/stream-chat-flutter.git
+          ref: master
+          path: packages/stream_chat_flutter_core
+      stream_chat_localizations:
+        git:
+          url: https://github.com/qdhayana/stream-chat-flutter.git
+          ref: master
+          path: packages/stream_chat_flutter_localizations
+      stream_chat_persistence:
+        git:
+          url: https://github.com/qdhayana/stream-chat-flutter.git
+          ref: master
+          path: packages/stream_chat_flutter_persistence
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       synchronized: ^3.1.0+1

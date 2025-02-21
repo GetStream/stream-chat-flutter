@@ -27,7 +27,7 @@ void main() {
         home: StreamChat(
           client: client,
           streamChatThemeData: theme,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: Scaffold(
             body: Center(
               child: StreamReactionBubble(
@@ -67,7 +67,7 @@ void main() {
         home: StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: Scaffold(
             body: Center(
               child: StreamReactionBubble(
@@ -107,7 +107,7 @@ void main() {
         home: StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: Scaffold(
             body: Center(
               child: StreamReactionBubble(
@@ -155,7 +155,7 @@ void main() {
         home: StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: Scaffold(
             body: Center(
               child: StreamReactionBubble(
@@ -203,7 +203,7 @@ void main() {
         theme: themeData,
         home: StreamChat(
           client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           child: Scaffold(
             body: Center(

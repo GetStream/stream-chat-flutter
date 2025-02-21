@@ -23,8 +23,16 @@ dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-  stream_chat: ^9.4.0
-  stream_chat_persistence: ^9.4.0
+  stream_chat:
+    git:
+      url: https://github.com/qdhayana/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat
+  stream_chat_persistence:
+    git:
+      url: https://github.com/qdhayana/stream-chat-flutter.git
+      ref: master
+      path: packages/stream_chat_flutter_persistence
 
 flutter:
   uses-material-design: true

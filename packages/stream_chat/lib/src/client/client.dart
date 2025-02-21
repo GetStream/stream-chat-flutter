@@ -219,7 +219,13 @@ class StreamChatClient {
   set _wsConnectionStatus(ConnectionStatus status) =>
       _wsConnectionStatusController.add(status);
 
-  bool isInForeground = true;
+  bool _isInForeground = true;
+
+  bool get isInForeground => _isInForeground;
+
+  set isInForeground(bool value) {
+    _isInForeground = value;
+  }
 
   /// The current status value of the [_ws] connection
   ConnectionStatus get wsConnectionStatus =>

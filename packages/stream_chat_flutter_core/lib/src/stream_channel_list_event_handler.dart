@@ -129,7 +129,7 @@ mixin class StreamChannelListEventHandler {
 
   /// Function which gets called to check if the channel status
   /// contain in the filter
-  bool? filterChannelStatus(Filter filter, {EventChannel? channel}) {
+  bool? filterChannelStatus(Filter filter, {ChannelModel? channel}) {
     final filterList = filter.value as List;
     final filterType = filterList
         .firstWhereOrNull((filter) => filter.key == 'status') as Filter?;

@@ -567,6 +567,9 @@ class StreamChatThemeData {
         ),
         audioWaveformSliderTheme: audioWaveformSliderTheme,
       ),
+      voiceRecordingTheme: colorTheme.brightness == Brightness.dark
+          ? StreamVoiceRecordingThemeData.dark()
+          : StreamVoiceRecordingThemeData.light(),
     );
   }
 

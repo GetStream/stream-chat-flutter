@@ -74,7 +74,7 @@ void main() {
         home: StreamChat(
           streamChatThemeData: theme,
           client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: StreamChannel(
             showLoading: false,
             channel: channel,
@@ -129,7 +129,7 @@ void main() {
         home: StreamChat(
           streamChatThemeData: theme,
           client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: StreamChannel(
             showLoading: false,
             channel: channel,
@@ -184,7 +184,7 @@ void main() {
         home: StreamChat(
           streamChatThemeData: theme,
           client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: StreamChannel(
             showLoading: false,
             channel: channel,
