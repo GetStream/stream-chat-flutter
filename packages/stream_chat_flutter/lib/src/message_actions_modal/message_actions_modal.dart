@@ -313,7 +313,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final answer = await showConfirmationBottomSheet(
       context,
       title: context.translations.flagMessageLabel,
-      icon: StreamSvgIcon.flag(
+      icon: StreamSvgIcon(
+        icon: StreamSvgIcons.flag,
         color: streamChatThemeData.colorTheme.accentError,
         size: 24,
       ),
@@ -328,7 +329,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         await client.flagMessage(widget.message.id);
         await showInfoBottomSheet(
           context,
-          icon: StreamSvgIcon.flag(
+          icon: StreamSvgIcon(
+            icon: StreamSvgIcons.flag,
             color: theme.colorTheme.accentError,
             size: 24,
           ),
@@ -341,7 +343,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             err.errorCode == ChatErrorCode.inputError) {
           await showInfoBottomSheet(
             context,
-            icon: StreamSvgIcon.flag(
+            icon: StreamSvgIcon(
+              icon: StreamSvgIcons.flag,
               color: theme.colorTheme.accentError,
               size: 24,
             ),
@@ -377,7 +380,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final answer = await showConfirmationBottomSheet(
       context,
       title: context.translations.deleteMessageLabel,
-      icon: StreamSvgIcon.flag(
+      icon: StreamSvgIcon(
+        icon: StreamSvgIcons.flag,
         color: StreamChatTheme.of(context).colorTheme.accentError,
         size: 24,
       ),
@@ -406,7 +410,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   void _showErrorAlertBottomSheet() {
     showInfoBottomSheet(
       context,
-      icon: StreamSvgIcon.error(
+      icon: StreamSvgIcon(
+        icon: StreamSvgIcons.error,
         color: StreamChatTheme.of(context).colorTheme.accentError,
         size: 24,
       ),

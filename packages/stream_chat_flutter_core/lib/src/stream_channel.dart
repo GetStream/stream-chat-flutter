@@ -160,7 +160,9 @@ class StreamChannelState extends State<StreamChannel> {
     if (_bottomPaginationEnded ||
         _queryBottomMessagesController.value ||
         channel.state == null ||
-        channel.state!.isUpToDate) return;
+        channel.state!.isUpToDate) {
+      return;
+    }
     _queryBottomMessagesController.safeAdd(true);
 
     if (channel.state!.messages.isEmpty) {
@@ -205,7 +207,9 @@ class StreamChannelState extends State<StreamChannel> {
   }) async {
     if (_topPaginationEnded ||
         _queryTopMessagesController.value ||
-        channel.state == null) return;
+        channel.state == null) {
+      return;
+    }
     _queryTopMessagesController.safeAdd(true);
 
     Message? message;
@@ -412,10 +416,13 @@ class StreamChannelState extends State<StreamChannel> {
   void initState() {
     super.initState();
     _populateFutures();
+
+    // Start watching the channel if it's not yet initialized.
+    if (channel.state == null) channel.watch();
   }
 
   void _populateFutures() {
-    _futures = [widget.channel.initialized];
+    _futures = [channel.initialized];
     if (initialMessageId != null) {
       _futures.add(_loadChannelAtMessage);
     } else if (channel.state != null && channel.state!.unreadCount > 0) {
@@ -443,8 +450,12 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   void didUpdateWidget(covariant StreamChannel oldWidget) {
-    if (oldWidget.initialMessageId != initialMessageId) {
+    if (oldWidget.channel != channel ||
+        oldWidget.initialMessageId != initialMessageId) {
       _populateFutures();
+
+      // Start watching the channel if it's not yet initialized.
+      if (channel.state == null) channel.watch();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -458,30 +469,28 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = FutureBuilder<List<bool>>(
-      future: Future.wait(_futures),
-      initialData: [
-        channel.state != null,
-        _futures.length == 1,
-      ],
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          final error = snapshot.error!;
-          final stackTrace = snapshot.stackTrace;
-          return widget.errorBuilder(context, error, stackTrace);
-        }
+    return Material(
+      child: FutureBuilder<List<bool>>(
+        future: Future.wait(_futures),
+        initialData: [
+          channel.state != null,
+          _futures.length == 1,
+        ],
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            final error = snapshot.error!;
+            final stackTrace = snapshot.stackTrace;
+            return widget.errorBuilder(context, error, stackTrace);
+          }
 
-        final dataLoaded = snapshot.data?.every((it) => it) == true;
-        if (widget.showLoading && !dataLoaded) {
-          return widget.loadingBuilder(context);
-        }
-        return widget.child;
-      },
+          final dataLoaded = snapshot.data?.every((it) => it) == true;
+          if (widget.showLoading && !dataLoaded) {
+            return widget.loadingBuilder(context);
+          }
+          return widget.child;
+        },
+      ),
     );
-    if (_futures.length > 1) {
-      child = Material(child: child);
-    }
-    return child;
   }
 }
 

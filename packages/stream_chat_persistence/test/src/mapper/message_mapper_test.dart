@@ -30,6 +30,16 @@ void main() {
         assetUrl: 'testAssetUrl',
       ),
     );
+    final poll = Poll(
+      id: 'testPollId',
+      name: 'testQuestion',
+      options: const [
+        PollOption(
+          id: 'testOptionId',
+          text: 'testOptionText',
+        ),
+      ],
+    );
     final entity = MessageEntity(
       id: 'testMessageId',
       attachments: attachments.map((it) => jsonEncode(it.toData())).toList(),
@@ -37,6 +47,7 @@ void main() {
       type: 'testType',
       parentId: 'testParentId',
       quotedMessageId: quotedMessage.id,
+      pollId: poll.id,
       command: 'testCommand',
       localCreatedAt: DateTime.now(),
       remoteCreatedAt: DateTime.now().add(const Duration(seconds: 1)),
@@ -55,6 +66,7 @@ void main() {
       state: jsonEncode(MessageState.sent),
       localUpdatedAt: DateTime.now(),
       remoteUpdatedAt: DateTime.now().add(const Duration(seconds: 1)),
+      messageTextUpdatedAt: DateTime.now().add(const Duration(minutes: 5)),
       extraData: {'extra_test_data': 'extraData'},
       userId: user.id,
       localDeletedAt: DateTime.now(),
@@ -76,6 +88,7 @@ void main() {
       latestReactions: reactions,
       ownReactions: reactions,
       quotedMessage: quotedMessage,
+      poll: poll,
     );
 
     expect(message, isA<Message>());
@@ -83,6 +96,7 @@ void main() {
     expect(message.type, entity.type);
     expect(message.parentId, entity.parentId);
     expect(message.quotedMessageId, entity.quotedMessageId);
+    expect(message.pollId, entity.pollId);
     expect(message.command, entity.command);
     expect(message.localCreatedAt, isSameDateAs(entity.localCreatedAt));
     expect(message.remoteCreatedAt, isSameDateAs(entity.remoteCreatedAt));
@@ -99,6 +113,10 @@ void main() {
     expect(message.state, MessageState.fromJson(jsonDecode(entity.state)));
     expect(message.localUpdatedAt, isSameDateAs(entity.localUpdatedAt));
     expect(message.remoteUpdatedAt, isSameDateAs(entity.remoteUpdatedAt));
+    expect(
+      message.messageTextUpdatedAt,
+      isSameDateAs(entity.messageTextUpdatedAt),
+    );
     expect(message.extraData, entity.extraData);
     expect(message.user!.id, entity.userId);
     expect(message.localDeletedAt, isSameDateAs(entity.localDeletedAt));
@@ -143,12 +161,23 @@ void main() {
         assetUrl: 'testAssetUrl',
       ),
     );
+    final poll = Poll(
+      id: 'testPollId',
+      name: 'testQuestion',
+      options: const [
+        PollOption(
+          id: 'testOptionId',
+          text: 'testOptionText',
+        ),
+      ],
+    );
     final message = Message(
       id: 'testMessageId',
       attachments: attachments,
       type: 'testType',
       parentId: 'testParentId',
       quotedMessageId: quotedMessage.id,
+      pollId: poll.id,
       command: 'testCommand',
       localCreatedAt: DateTime.now(),
       createdAt: DateTime.now().add(const Duration(seconds: 1)),
@@ -166,6 +195,7 @@ void main() {
       ),
       localUpdatedAt: DateTime.now(),
       updatedAt: DateTime.now().add(const Duration(seconds: 1)),
+      messageTextUpdatedAt: DateTime.now().add(const Duration(minutes: 5)),
       extraData: const {'extra_test_data': 'extraData'},
       user: user,
       localDeletedAt: DateTime.now(),
@@ -187,6 +217,7 @@ void main() {
     expect(entity.type, message.type);
     expect(entity.parentId, message.parentId);
     expect(entity.quotedMessageId, message.quotedMessageId);
+    expect(entity.pollId, message.pollId);
     expect(entity.command, message.command);
     expect(entity.localCreatedAt, isSameDateAs(message.localCreatedAt));
     expect(entity.remoteCreatedAt, isSameDateAs(message.remoteCreatedAt));
@@ -200,6 +231,10 @@ void main() {
     expect(entity.state, jsonEncode(message.state));
     expect(entity.localUpdatedAt, isSameDateAs(message.localUpdatedAt));
     expect(entity.remoteUpdatedAt, isSameDateAs(message.remoteUpdatedAt));
+    expect(
+      entity.messageTextUpdatedAt,
+      isSameDateAs(message.messageTextUpdatedAt),
+    );
     expect(entity.extraData, message.extraData);
     expect(entity.userId, message.user!.id);
     expect(entity.localDeletedAt, isSameDateAs(message.localDeletedAt));

@@ -84,6 +84,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => '메시지가 삭제되었습니다';
 
   @override
+  String get editedMessageLabel => '편집됨';
+
+  @override
   String get messageReactionsLabel => '메시지에 대한 응답';
 
   @override
@@ -441,4 +444,157 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get markUnreadError =>
       '메시지를 읽지 않음으로 표시하는 중 오류가 발생했습니다. 가장 최근 100개의 채널 메시지보다 오래된 읽지 않은 메시지는'
       ' 표시할 수 없습니다.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return '새 투표 만들기';
+    return '투표 만들기';
+  }
+
+  @override
+  String get questionsLabel => '질문';
+
+  @override
+  String get askAQuestionLabel => '질문하기';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return '질문은 $min자 이상이어야 합니다.';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return '질문은 최대 $max자여야 합니다.';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return '옵션';
+    return '선택';
+  }
+
+  @override
+  String get pollOptionEmptyError => '옵션은 비워 둘 수 없습니다.';
+
+  @override
+  String get pollOptionDuplicateError => '이것은 이미 선택 사항입니다';
+
+  @override
+  String get addAnOptionLabel => '옵션 추가';
+
+  @override
+  String get multipleAnswersLabel => '복수 답변';
+
+  @override
+  String get maximumVotesPerPersonLabel => '1인당 최대 투표 수';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return '투표 수는 $min개 이상이어야 합니다.';
+    }
+
+    if (max != null && votes > max) {
+      return '투표 수는 최대 $max개여야 합니다.';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => '익명 투표';
+
+  @override
+  String get pollOptionsLabel => '투표 옵션';
+
+  @override
+  String get suggestAnOptionLabel => '옵션 제안';
+
+  @override
+  String get enterANewOptionLabel => '새 옵션 입력';
+
+  @override
+  String get addACommentLabel => '댓글 추가';
+
+  @override
+  String get pollCommentsLabel => '투표 댓글';
+
+  @override
+  String get updateYourCommentLabel => '댓글 업데이트';
+
+  @override
+  String get enterYourCommentLabel => '댓글 입력';
+
+  @override
+  String get createLabel => '생성';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => '투표 종료',
+      unique: () => '하나 선택',
+      limited: (count) => '최대 $count 선택',
+      all: () => '하나 이상 선택',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return '모든 옵션 보기';
+    return '모든 $count 옵션 보기';
+  }
+
+  @override
+  String get viewCommentsLabel => '댓글 보기';
+
+  @override
+  String get viewResultsLabel => '결과 보기';
+
+  @override
+  String get endVoteLabel => '투표 종료';
+
+  @override
+  String get pollResultsLabel => '투표 결과';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return '모든 투표 보기';
+    return '모든 $count 투표 보기';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 표',
+        1 => '1 표',
+        _ => '$count 표',
+      };
+
+  @override
+  String get noPollVotesLabel => '현재 투표가 없습니다';
+
+  @override
+  String get loadingPollVotesError => '투표 로딩 오류';
+
+  @override
+  String get repliedToLabel => '회신:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    return '$count개의 새 스레드';
+  }
+
+  @override
+  String get slideToCancelLabel => '슬라이드하여 취소';
+
+  @override
+  String get holdToRecordLabel => '길게 눌러서 녹음, 놓아서 전송';
 }

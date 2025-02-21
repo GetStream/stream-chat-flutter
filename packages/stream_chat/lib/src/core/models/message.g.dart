@@ -21,10 +21,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       silent: json['silent'] as bool? ?? false,
       shadowed: json['shadowed'] as bool? ?? false,
       reactionCounts: (json['reaction_counts'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as int),
+        (k, e) => MapEntry(k, (e as num).toInt()),
       ),
       reactionScores: (json['reaction_scores'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as int),
+        (k, e) => MapEntry(k, (e as num).toInt()),
       ),
       latestReactions: (json['latest_reactions'] as List<dynamic>?)
           ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
@@ -37,7 +37,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
           ? null
           : Message.fromJson(json['quoted_message'] as Map<String, dynamic>),
       quotedMessageId: json['quoted_message_id'] as String?,
-      replyCount: json['reply_count'] as int? ?? 0,
+      replyCount: (json['reply_count'] as num?)?.toInt() ?? 0,
       threadParticipants: (json['thread_participants'] as List<dynamic>?)
           ?.map((e) => User.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -52,6 +52,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       deletedAt: json['deleted_at'] == null
           ? null
           : DateTime.parse(json['deleted_at'] as String),
+      messageTextUpdatedAt: json['message_text_updated_at'] == null
+          ? null
+          : DateTime.parse(json['message_text_updated_at'] as String),
       user: json['user'] == null
           ? null
           : User.fromJson(json['user'] as Map<String, dynamic>),
@@ -65,33 +68,28 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       pinnedBy: json['pinned_by'] == null
           ? null
           : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
+      poll: json['poll'] == null
+          ? null
+          : Poll.fromJson(json['poll'] as Map<String, dynamic>),
+      pollId: json['poll_id'] as String?,
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),
     );
 
-Map<String, dynamic> _$MessageToJson(Message instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-    'text': instance.text,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('type', Message._typeToJson(instance.type));
-  val['attachments'] = instance.attachments.map((e) => e.toJson()).toList();
-  val['mentioned_users'] = User.toIds(instance.mentionedUsers);
-  val['parent_id'] = instance.parentId;
-  val['quoted_message_id'] = instance.quotedMessageId;
-  val['show_in_channel'] = instance.showInChannel;
-  val['silent'] = instance.silent;
-  val['pinned'] = instance.pinned;
-  val['pin_expires'] = instance.pinExpires?.toIso8601String();
-  val['extra_data'] = instance.extraData;
-  return val;
-}
+Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
+      'id': instance.id,
+      'text': instance.text,
+      if (Message._typeToJson(instance.type) case final value?) 'type': value,
+      'attachments': instance.attachments.map((e) => e.toJson()).toList(),
+      'mentioned_users': User.toIds(instance.mentionedUsers),
+      'parent_id': instance.parentId,
+      'quoted_message_id': instance.quotedMessageId,
+      'show_in_channel': instance.showInChannel,
+      'silent': instance.silent,
+      'pinned': instance.pinned,
+      'pin_expires': instance.pinExpires?.toIso8601String(),
+      'poll_id': instance.pollId,
+      'extra_data': instance.extraData,
+    };

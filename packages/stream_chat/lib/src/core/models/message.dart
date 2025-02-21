@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
+import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
@@ -44,11 +45,14 @@ class Message extends Equatable {
     this.localUpdatedAt,
     DateTime? deletedAt,
     this.localDeletedAt,
+    this.messageTextUpdatedAt,
     this.user,
     this.pinned = false,
     this.pinnedAt,
     DateTime? pinExpires,
     this.pinnedBy,
+    this.poll,
+    String? pollId,
     this.extraData = const {},
     this.state = const MessageState.initial(),
     this.i18n,
@@ -57,7 +61,8 @@ class Message extends Equatable {
         remoteCreatedAt = createdAt,
         remoteUpdatedAt = updatedAt,
         remoteDeletedAt = deletedAt,
-        _quotedMessageId = quotedMessageId;
+        _quotedMessageId = quotedMessageId,
+        _pollId = pollId;
 
   /// Create a new instance from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -192,6 +197,10 @@ class Message extends Equatable {
   @JsonKey(includeToJson: false)
   DateTime? get deletedAt => localDeletedAt ?? remoteDeletedAt;
 
+  /// Reserved field indicating when the message text was edited.
+  @JsonKey(includeToJson: false)
+  final DateTime? messageTextUpdatedAt;
+
   /// Indicates when the message was deleted locally.
   @JsonKey(includeToJson: false, includeFromJson: false)
   final DateTime? localDeletedAt;
@@ -219,6 +228,14 @@ class Message extends Equatable {
   /// Reserved field indicating who pinned the message.
   @JsonKey(includeToJson: false)
   final User? pinnedBy;
+
+  /// The poll associated with this message.
+  @JsonKey(includeToJson: false)
+  final Poll? poll;
+
+  /// The ID of the [poll] associated with this message.
+  String? get pollId => _pollId ?? poll?.id;
+  final String? _pollId;
 
   /// Message custom extraData.
   final Map<String, Object?> extraData;
@@ -265,12 +282,15 @@ class Message extends Equatable {
     'created_at',
     'updated_at',
     'deleted_at',
+    'message_text_updated_at',
     'user',
     'pinned',
     'pinned_at',
     'pin_expires',
     'pinned_by',
     'i18n',
+    'poll',
+    'poll_id',
   ];
 
   /// Serialize to json.
@@ -304,11 +324,14 @@ class Message extends Equatable {
     DateTime? localUpdatedAt,
     DateTime? deletedAt,
     DateTime? localDeletedAt,
+    DateTime? messageTextUpdatedAt,
     User? user,
     bool? pinned,
     DateTime? pinnedAt,
     Object? pinExpires = _nullConst,
     User? pinnedBy,
+    Poll? poll,
+    String? pollId,
     Map<String, Object?>? extraData,
     MessageState? state,
     Map<String, String>? i18n,
@@ -373,12 +396,15 @@ class Message extends Equatable {
       localUpdatedAt: localUpdatedAt ?? this.localUpdatedAt,
       deletedAt: deletedAt ?? remoteDeletedAt,
       localDeletedAt: localDeletedAt ?? this.localDeletedAt,
+      messageTextUpdatedAt: messageTextUpdatedAt ?? this.messageTextUpdatedAt,
       user: user ?? this.user,
       pinned: pinned ?? this.pinned,
       pinnedAt: pinnedAt ?? this.pinnedAt,
       pinExpires:
           pinExpires == _nullConst ? this.pinExpires : pinExpires as DateTime?,
       pinnedBy: pinnedBy ?? this.pinnedBy,
+      poll: poll ?? this.poll,
+      pollId: pollId ?? _pollId,
       extraData: extraData ?? this.extraData,
       state: state ?? this.state,
       i18n: i18n ?? this.i18n,
@@ -413,11 +439,14 @@ class Message extends Equatable {
       localUpdatedAt: other.localUpdatedAt,
       deletedAt: other.remoteDeletedAt,
       localDeletedAt: other.localDeletedAt,
+      messageTextUpdatedAt: other.messageTextUpdatedAt,
       user: other.user,
       pinned: other.pinned,
       pinnedAt: other.pinnedAt,
       pinExpires: other.pinExpires,
       pinnedBy: other.pinnedBy,
+      poll: other.poll,
+      pollId: other.pollId,
       extraData: other.extraData,
       state: other.state,
       i18n: other.i18n,
@@ -472,11 +501,14 @@ class Message extends Equatable {
         remoteUpdatedAt,
         localDeletedAt,
         remoteDeletedAt,
+        messageTextUpdatedAt,
         user,
         pinned,
         pinnedAt,
         pinExpires,
         pinnedBy,
+        poll,
+        pollId,
         extraData,
         state,
         i18n,

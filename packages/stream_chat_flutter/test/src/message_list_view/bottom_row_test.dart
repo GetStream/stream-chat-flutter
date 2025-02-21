@@ -28,7 +28,7 @@ void main() {
 
   testWidgets('BottomRow', (tester) async {
     final theme = StreamChatThemeData.light();
-    final onThreadTap = MockVoidSingleParamCallback<Message>();
+    final onThreadTap = MockValueChanged<Message>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -45,6 +45,7 @@ void main() {
                 showUsername: false,
                 showInChannel: true,
                 showTimeStamp: false,
+                showEditedLabel: false,
                 reverse: false,
                 showSendingIndicator: false,
                 hasUrlAttachments: false,

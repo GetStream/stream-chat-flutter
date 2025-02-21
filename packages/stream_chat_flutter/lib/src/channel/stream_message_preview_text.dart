@@ -34,29 +34,36 @@ class StreamMessagePreviewText extends StatelessWidget {
       caseSensitive: false,
     );
 
-    final messageTextParts = [
-      ...messageAttachments.map((it) {
-        if (it.type == AttachmentType.image) {
-          return '📷';
-        } else if (it.type == AttachmentType.video) {
-          return '🎬';
-        } else if (it.type == AttachmentType.giphy) {
-          return '[GIF]';
-        }
-        return it == message.attachments.last
-            ? (it.title ?? 'File')
-            : '${it.title ?? 'File'} , ';
-      }),
-      if (messageText != null)
-        if (messageMentionedUsers.isNotEmpty)
-          ...mentionedUsersRegex.allMatchesWithSep(messageText)
-        else
-          messageText,
-    ];
+    final messageTextParts = switch (message.isDeleted) {
+      // Show the deleted message label if the message is deleted.
+      true => [context.translations.messageDeletedLabel],
+      // Otherwise, combine the message text with the attachments and poll.
+      false => [
+          ...messageAttachments.map(
+            (it) => switch (it.type) {
+              AttachmentType.image => '📷',
+              AttachmentType.video => '🎬',
+              AttachmentType.giphy => '[GIF]',
+              AttachmentType.audio => '🎧',
+              AttachmentType.voiceRecording => '🎤',
+              _ => it == message.attachments.last
+                  ? (it.title ?? 'File')
+                  : '${it.title ?? 'File'},',
+            },
+          ),
+          if (message.poll?.name case final pollName?) '📊 $pollName',
+          if (messageText != null && messageText.isNotEmpty)
+            if (messageMentionedUsers.isNotEmpty)
+              ...mentionedUsersRegex.allMatchesWithSep(messageText)
+            else
+              messageText.trim(),
+        ]
+    };
 
-    final fontStyle = (message.isSystem || message.isDeleted)
-        ? FontStyle.italic
-        : FontStyle.normal;
+    final fontStyle = switch (message.isSystem || message.isDeleted) {
+      true => FontStyle.italic,
+      false => FontStyle.normal,
+    };
 
     final regularTextStyle = textStyle?.copyWith(fontStyle: fontStyle);
 
@@ -66,29 +73,29 @@ class StreamMessagePreviewText extends StatelessWidget {
     );
 
     final spans = [
-      for (final part in messageTextParts)
-        if (messageMentionedUsers.isNotEmpty &&
-            messageMentionedUsers.any((it) => '@${it.name}' == part))
-          TextSpan(
+      ...messageTextParts.map((part) {
+        if (messageMentionedUsers.any((it) => '@${it.name}' == part)) {
+          return TextSpan(
             text: part,
             style: mentionsTextStyle,
-          )
-        else if (messageAttachments.isNotEmpty &&
-            messageAttachments
-                .where((it) => it.title != null)
-                .any((it) => it.title == part))
-          TextSpan(
+          );
+        }
+
+        if (messageAttachments.any((it) => it.title == part)) {
+          return TextSpan(
             text: part,
             style: regularTextStyle?.copyWith(
               fontStyle: FontStyle.italic,
             ),
-          )
-        else
-          TextSpan(
-            text: part,
-            style: regularTextStyle,
-          ),
-    ];
+          );
+        }
+
+        return TextSpan(
+          text: part,
+          style: regularTextStyle,
+        );
+      })
+    ].insertBetween(const TextSpan(text: ' '));
 
     return Text.rich(
       TextSpan(children: spans),

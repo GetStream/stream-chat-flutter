@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get_thumbnail_video/index.dart';
 import 'package:get_thumbnail_video/video_thumbnail.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:thumblr/thumblr.dart' as thumblr;
 
 ///
@@ -41,29 +41,27 @@ class _IVideoService {
     int timeMs = 0,
     int quality = 10,
   }) async {
-    if (kIsWeb || video == null) {
-      final placeholder = await generatePlaceholderThumbnail();
-      return placeholder;
-    }
-    if (isDesktopDevice) {
-      try {
+    // If the video path is not supplied, return a placeholder image.
+    if (video == null) return generatePlaceholderThumbnail();
+
+    try {
+      // If the device is a desktop, use thumblr to generate the thumbnail.
+      if (isDesktopDevice) {
         final thumbnail = await thumblr.generateThumbnail(filePath: video);
         final byteData = await thumbnail.image.toByteData(
           format: ui.ImageByteFormat.png,
         );
-        final bytesList = byteData?.buffer.asUint8List() ?? Uint8List(0);
-        if (bytesList.isNotEmpty) {
+
+        final bytesList = byteData?.buffer.asUint8List();
+        if (bytesList != null && bytesList.isNotEmpty) {
           return bytesList;
-        } else {
-          return await generatePlaceholderThumbnail();
         }
-      } catch (e) {
-        // If the thumbnail generation fails, return a placeholder image.
-        final placeholder = await generatePlaceholderThumbnail();
-        return placeholder;
+
+        return await generatePlaceholderThumbnail();
       }
-    } else if (isMobileDevice) {
-      return VideoThumbnail.thumbnailData(
+
+      // Otherwise, use the VideoThumbnail package to generate the thumbnail.
+      return await VideoThumbnail.thumbnailData(
         video: video,
         headers: headers,
         imageFormat: imageFormat,
@@ -72,14 +70,18 @@ class _IVideoService {
         timeMs: timeMs,
         quality: quality,
       );
+    } catch (_) {
+      // If the thumbnail generation fails, return a placeholder image.
+      return generatePlaceholderThumbnail();
     }
-    throw Exception('Could not generate thumbnail');
   }
 
   /// Generates a placeholder thumbnail by loading placeholder.png from assets.
   Future<Uint8List> generatePlaceholderThumbnail() async {
-    final placeholder = await rootBundle
-        .load('packages/stream_chat_flutter/images/placeholder.png');
+    final placeholder = await rootBundle.load(
+      'packages/stream_chat_flutter/lib/assets/images/placeholder.png',
+    );
+
     return placeholder.buffer.asUint8List();
   }
 }

@@ -112,4 +112,44 @@ class EventType {
 
   /// Event sent when the user's mutes list is updated
   static const String notificationMutesUpdated = 'notification.mutes_updated';
+
+  /// Event sent when the AI indicator is updated
+  static const String aiIndicatorUpdate = 'ai_indicator.update';
+
+  /// Event sent when the AI indicator is stopped
+  static const String aiIndicatorStop = 'ai_indicator.stop';
+
+  /// Event sent when the AI indicator is cleared
+  static const String aiIndicatorClear = 'ai_indicator.clear';
+
+  /// Event sent when a poll is updated.
+  static const String pollUpdated = 'poll.updated';
+
+  /// Event sent when a answer is casted on a poll.
+  static const String pollAnswerCasted = 'poll.answer_casted';
+
+  /// Event sent when a vote is casted on a poll.
+  static const String pollVoteCasted = 'poll.vote_casted';
+
+  /// Event sent when a vote is changed on a poll.
+  static const String pollVoteChanged = 'poll.vote_changed';
+
+  /// Event sent when a vote is removed from a poll.
+  static const String pollVoteRemoved = 'poll.vote_removed';
+
+  /// Event sent when a answer is removed from a poll.
+  static const String pollAnswerRemoved = 'poll.answer_removed';
+
+  /// Event sent when a poll is closed.
+  static const String pollClosed = 'poll.closed';
+
+  /// Event sent when a poll is deleted.
+  static const String pollDeleted = 'poll.deleted';
+
+  /// Event sent when a thread is updated.
+  static const String threadUpdated = 'thread.updated';
+
+  /// Event sent when a new message is added to a thread.
+  static const String notificationThreadMessageNew =
+      'notification.thread_message_new';
 }

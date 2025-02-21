@@ -6,6 +6,8 @@ import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/poll.dart';
+import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -169,6 +171,12 @@ abstract class ChatPersistenceClient {
   /// Updates all the channels using the new [channels] data.
   Future<void> updateChannels(List<ChannelModel> channels);
 
+  /// Updates all the polls using the new [polls] data.
+  Future<void> updatePolls(List<Poll> polls);
+
+  /// Deletes all the polls by [pollIds].
+  Future<void> deletePollsByIds(List<String> pollIds);
+
   /// Updates all the members of a particular channle [cid]
   /// with the new [members] data
   Future<void> updateMembers(String cid, List<Member> members) =>
@@ -194,11 +202,17 @@ abstract class ChatPersistenceClient {
   /// Updates the pinned message reactions data with the new [reactions] data
   Future<void> updatePinnedMessageReactions(List<Reaction> reactions);
 
+  /// Updates the poll votes data with the new [pollVotes] data
+  Future<void> updatePollVotes(List<PollVote> pollVotes);
+
   /// Deletes all the reactions by [messageIds]
   Future<void> deleteReactionsByMessageId(List<String> messageIds);
 
   /// Deletes all the pinned messages reactions by [messageIds]
   Future<void> deletePinnedMessageReactionsByMessageId(List<String> messageIds);
+
+  /// Deletes all the poll votes by [pollIds]
+  Future<void> deletePollVotesByPollIds(List<String> pollIds);
 
   /// Deletes all the members by channel [cids]
   Future<void> deleteMembersByCids(List<String> cids);
@@ -245,49 +259,64 @@ abstract class ChatPersistenceClient {
     final reactions = <Reaction>[];
     final pinnedReactions = <Reaction>[];
 
+    final polls = <Poll>[];
+    final pollVotes = <PollVote>[];
+    final pollVotesToDelete = <String>[];
+
     for (final state in channelStates) {
       final channel = state.channel;
-      if (channel != null) {
-        channels.add(channel);
+      // Continue if channel is not available.
+      if (channel == null) continue;
+      channels.add(channel);
 
-        final cid = channel.cid;
-        final reads = state.read;
-        final members = state.members;
-        final Iterable<Message>? messages;
-        if (CurrentPlatform.isWeb) {
-          messages = state.messages?.where((it) => !it.attachments.any(
-                (attachment) =>
-                    attachment.uploadState != const UploadState.success(),
-              ));
-        } else {
-          messages = state.messages;
-        }
-        final pinnedMessages = state.pinnedMessages;
+      final cid = channel.cid;
+      final reads = state.read;
+      final members = state.members;
+      final messages = switch (CurrentPlatform.isWeb) {
+        true => state.messages?.where(
+            (it) => !it.attachments.any(
+              (it) => it.uploadState != const UploadState.success(),
+            ),
+          ),
+        _ => state.messages,
+      };
 
-        // Preparing deletion data
-        membersToDelete.add(cid);
-        reactionsToDelete.addAll(state.messages?.map((it) => it.id) ?? []);
-        pinnedReactionsToDelete
-            .addAll(state.pinnedMessages?.map((it) => it.id) ?? []);
+      final pinnedMessages = state.pinnedMessages;
 
-        // preparing addition data
-        channelWithReads[cid] = reads;
-        channelWithMembers[cid] = members;
-        channelWithMessages[cid] = messages?.toList();
-        channelWithPinnedMessages[cid] = pinnedMessages;
+      // Preparing deletion data
+      membersToDelete.add(cid);
+      reactionsToDelete.addAll(messages?.map((it) => it.id) ?? []);
+      pinnedReactionsToDelete.addAll(pinnedMessages?.map((it) => it.id) ?? []);
 
-        reactions.addAll(messages?.expand(_expandReactions) ?? []);
-        pinnedReactions.addAll(pinnedMessages?.expand(_expandReactions) ?? []);
+      // preparing addition data
+      channelWithReads[cid] = reads;
+      channelWithMembers[cid] = members;
+      channelWithMessages[cid] = messages?.toList();
+      channelWithPinnedMessages[cid] = pinnedMessages;
 
-        users.addAll([
-          channel.createdBy,
-          ...messages?.map((it) => it.user) ?? <User>[],
-          ...reads?.map((it) => it.user) ?? <User>[],
-          ...members?.map((it) => it.user) ?? <User>[],
-          ...reactions.map((it) => it.user),
-          ...pinnedReactions.map((it) => it.user),
-        ].withNullifyer);
-      }
+      reactions.addAll(messages?.expand(_expandReactions) ?? []);
+      pinnedReactions.addAll(pinnedMessages?.expand(_expandReactions) ?? []);
+
+      polls.addAll([
+        ...?messages?.map((it) => it.poll),
+        ...?pinnedMessages?.map((it) => it.poll),
+      ].withNullifyer);
+
+      pollVotesToDelete.addAll(polls.map((it) => it.id));
+
+      pollVotes.addAll(polls.expand(_expandPollVotes));
+
+      users.addAll([
+        channel.createdBy,
+        ...?messages?.map((it) => it.user),
+        ...?pinnedMessages?.map((it) => it.user),
+        ...?reads?.map((it) => it.user),
+        ...?members?.map((it) => it.user),
+        ...reactions.map((it) => it.user),
+        ...pinnedReactions.map((it) => it.user),
+        ...polls.map((it) => it.createdBy),
+        ...pollVotes.map((it) => it.user),
+      ].withNullifyer);
     }
 
     // Removing old members and reactions data as they may have
@@ -296,12 +325,14 @@ abstract class ChatPersistenceClient {
       deleteMembersByCids(membersToDelete),
       deleteReactionsByMessageId(reactionsToDelete),
       deletePinnedMessageReactionsByMessageId(pinnedReactionsToDelete),
+      deletePollVotesByPollIds(pollVotesToDelete),
     ]);
 
     // Updating first as does not depend on any other table.
     await Future.wait([
       updateUsers(users.toList(growable: false)),
       updateChannels(channels.toList(growable: false)),
+      updatePolls(polls.toList(growable: false)),
     ]);
 
     // All has a foreign key relation with channels table.
@@ -314,10 +345,9 @@ abstract class ChatPersistenceClient {
 
     // Both has a foreign key relation with messages, pinnedMessages table.
     await Future.wait([
-      updateReactions(reactions.toList(growable: false)),
-      updatePinnedMessageReactions(
-        pinnedReactions.toList(growable: false),
-      ),
+      updateReactions(reactions),
+      updatePinnedMessageReactions(pinnedReactions),
+      updatePollVotes(pollVotes),
     ]);
   }
 
@@ -327,6 +357,17 @@ abstract class ChatPersistenceClient {
     return [
       if (own != null) ...own.where((r) => r.userId != null),
       if (latest != null) ...latest.where((r) => r.userId != null),
+    ];
+  }
+
+  List<PollVote> _expandPollVotes(Poll poll) {
+    final latestAnswers = poll.latestAnswers;
+    final latestVotes = poll.latestVotesByOption.values;
+    final ownVotesAndAnswers = poll.ownVotesAndAnswers;
+    return [
+      ...latestAnswers,
+      ...latestVotes.expand((it) => it),
+      ...ownVotesAndAnswers,
     ];
   }
 }

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
+import 'package:gal/gal.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/common.dart';
@@ -196,7 +196,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
     // Now that the file is saved, we need to copy it to the user's gallery
     // because the gallery only shows files that are in the gallery folder.
-    await ImageGallerySaverPlus.saveFile(path);
+    await Gal.putImage(path);
 
     // Once the file is copied to the gallery, we can delete the temporary file.
     await file.delete();

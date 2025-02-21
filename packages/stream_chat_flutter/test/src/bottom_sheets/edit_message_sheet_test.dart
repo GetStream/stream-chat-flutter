@@ -1,7 +1,7 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../material_app_wrapper.dart';
@@ -68,27 +68,22 @@ void main() {
       expect(find.byType(StreamMessageInput), findsOneWidget);
     });
 
-    testGoldens(
+    goldenTest(
       'golden test for EditMessageSheet',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialAppWrapper(
-            builder: (context, child) => StreamChat(
-              client: MockClient(),
-              child: child,
-            ),
-            home: Scaffold(
-                body: Center(
-              child: EditMessageSheet(
-                channel: MockChannel(),
-                message: Message(id: 'msg123', text: 'Hello World!'),
-              ),
-            )),
+      fileName: 'edit_message_sheet_0',
+      constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+      builder: () => MaterialAppWrapper(
+        builder: (context, child) => StreamChat(
+          client: MockClient(),
+          child: child,
+        ),
+        home: Scaffold(
+          bottomSheet: EditMessageSheet(
+            channel: MockChannel(),
+            message: Message(id: 'msg123', text: 'Hello World!'),
           ),
-        );
-
-        await screenMatchesGolden(tester, 'edit_message_sheet_0');
-      },
+        ),
+      ),
     );
 
     tearDown(() {

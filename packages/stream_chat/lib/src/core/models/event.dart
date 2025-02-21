@@ -16,6 +16,8 @@ class Event {
     this.me,
     this.user,
     this.message,
+    this.poll,
+    this.pollVote,
     this.totalUnreadCount,
     this.unreadChannels,
     this.reaction,
@@ -26,6 +28,12 @@ class Event {
     this.channelType,
     this.parentId,
     this.hardDelete,
+    this.aiState,
+    this.aiMessage,
+    this.messageId,
+    this.thread,
+    this.unreadThreadMessages,
+    this.unreadThreads,
     this.extraData = const {},
     this.isLocal = true,
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
@@ -65,8 +73,14 @@ class Event {
   /// The message sent with the event
   final Message? message;
 
+  /// The poll sent with the event
+  final Poll? poll;
+
+  /// The poll vote sent with the event
+  final PollVote? pollVote;
+
   /// The channel sent with the event
-  final EventChannel? channel;
+  final ChannelModel? channel;
 
   /// The member sent with the event
   final Member? member;
@@ -93,6 +107,25 @@ class Event {
   /// This is true if the message has been hard deleted
   @JsonKey(includeIfNull: false)
   final bool? hardDelete;
+
+  /// The current state of the AI assistant.
+  @JsonKey(unknownEnumValue: AITypingState.idle)
+  final AITypingState? aiState;
+
+  /// Additional message from the AI assistant.
+  final String? aiMessage;
+
+  /// The message id to which the event belongs.
+  final String? messageId;
+
+  /// The thread object sent with the event.
+  final Thread? thread;
+
+  /// The number of unread thread messages.
+  final int? unreadThreadMessages;
+
+  /// The number of unread threads.
+  final int? unreadThreads;
 
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
@@ -125,6 +158,8 @@ class Event {
     'me',
     'user',
     'message',
+    'poll',
+    'poll_vote',
     'total_unread_count',
     'unread_channels',
     'reaction',
@@ -136,6 +171,12 @@ class Event {
     'parent_id',
     'hard_delete',
     'is_local',
+    'ai_state',
+    'ai_message',
+    'message_id',
+    'thread',
+    'unread_thread_messages',
+    'unread_threads',
   ];
 
   /// Serialize to json
@@ -154,7 +195,9 @@ class Event {
     OwnUser? me,
     User? user,
     Message? message,
-    EventChannel? channel,
+    Poll? poll,
+    PollVote? pollVote,
+    ChannelModel? channel,
     Member? member,
     Reaction? reaction,
     int? totalUnreadCount,
@@ -162,6 +205,12 @@ class Event {
     bool? online,
     String? parentId,
     bool? hardDelete,
+    AITypingState? aiState,
+    String? aiMessage,
+    String? messageId,
+    Thread? thread,
+    int? unreadThreadMessages,
+    int? unreadThreads,
     Map<String, Object?>? extraData,
   }) =>
       Event(
@@ -172,6 +221,8 @@ class Event {
         me: me ?? this.me,
         user: user ?? this.user,
         message: message ?? this.message,
+        poll: poll ?? this.poll,
+        pollVote: pollVote ?? this.pollVote,
         totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
         unreadChannels: unreadChannels ?? this.unreadChannels,
         reaction: reaction ?? this.reaction,
@@ -182,53 +233,41 @@ class Event {
         channelType: channelType ?? this.channelType,
         parentId: parentId ?? this.parentId,
         hardDelete: hardDelete ?? this.hardDelete,
-        extraData: extraData ?? this.extraData,
+        aiState: aiState ?? this.aiState,
+        aiMessage: aiMessage ?? this.aiMessage,
+        messageId: messageId ?? this.messageId,
+        thread: thread ?? this.thread,
+        unreadThreadMessages: unreadThreadMessages ?? this.unreadThreadMessages,
+        unreadThreads: unreadThreads ?? this.unreadThreads,
         isLocal: isLocal,
+        extraData: extraData ?? this.extraData,
       );
 }
 
-/// The channel embedded in the event object
-@JsonSerializable(
-  createToJson: false,
-)
-class EventChannel extends ChannelModel {
-  /// Constructor used for json serialization
-  EventChannel({
-    this.members,
-    super.id,
-    super.type,
-    required String super.cid,
-    super.ownCapabilities,
-    required ChannelConfig super.config,
-    super.createdBy,
-    super.frozen,
-    super.lastMessageAt,
-    required DateTime super.createdAt,
-    required DateTime super.updatedAt,
-    super.deletedAt,
-    super.memberCount,
-    Map<String, Object?>? extraData,
-    super.cooldown,
-    super.team,
-    super.disabled,
-    super.hidden,
-    super.truncatedAt,
-  }) : super(extraData: extraData ?? {});
+/// {@template aiState}
+/// The current typing state of the AI assistant.
+///
+/// This is used to determine the state of the AI assistant when it's generating
+/// a response for the provided query.
+/// {@endtemplate}
+enum AITypingState {
+  /// The AI assistant is idle.
+  @JsonValue('AI_STATE_IDLE')
+  idle,
 
-  /// Create a new instance from a json
-  factory EventChannel.fromJson(Map<String, dynamic> json) =>
-      _$EventChannelFromJson(Serializer.moveToExtraDataFromRoot(
-        json,
-        topLevelFields,
-      ));
+  /// The AI assistant is in an error state.
+  @JsonValue('AI_STATE_ERROR')
+  error,
 
-  /// A paginated list of channel members
-  final List<Member>? members;
+  /// The AI assistant is checking external sources.
+  @JsonValue('AI_STATE_CHECKING_SOURCES')
+  checkingSources,
 
-  /// Known top level fields.
-  /// Useful for [Serializer] methods.
-  static final topLevelFields = [
-    'members',
-    ...ChannelModel.topLevelFields,
-  ];
+  /// The AI assistant is thinking.
+  @JsonValue('AI_STATE_THINKING')
+  thinking,
+
+  /// The AI assistant is generating a response.
+  @JsonValue('AI_STATE_GENERATING')
+  generating,
 }

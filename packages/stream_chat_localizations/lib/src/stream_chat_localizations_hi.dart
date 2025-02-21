@@ -84,6 +84,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'संदेश हटाये';
 
   @override
+  String get editedMessageLabel => 'संपादित';
+
+  @override
   String get messageReactionsLabel => 'संदेश प्रतिक्रियाएं';
 
   @override
@@ -456,4 +459,161 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get markUnreadError =>
       'संदेश को अपठित मार्क करने में त्रुटि। सबसे नए 100 चैनल संदेश से पहले के'
       ' सभी अपठित संदेशों को अपठित मार्क नहीं किया जा सकता है।';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'एक नया पोल बनाएँ';
+    return 'पोल बनाएँ';
+  }
+
+  @override
+  String get questionsLabel => 'प्रश्न';
+
+  @override
+  String get askAQuestionLabel => 'प्रश्न पूछें';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'प्रश्न कम से कम $min अक्षर का होना चाहिए';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'प्रश्न अधिकतम $max अक्षर का हो सकता है';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) => 'विकल्प';
+
+  @override
+  String get pollOptionEmptyError => 'विकल्प खाली नहीं हो सकता';
+
+  @override
+  String get pollOptionDuplicateError => 'यह पहले से ही एक विकल्प है';
+
+  @override
+  String get addAnOptionLabel => 'विकल्प जोड़ें';
+
+  @override
+  String get multipleAnswersLabel => 'एक से अधिक उत्तर';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'प्रति व्यक्ति अधिकतम वोट';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'वोटों की गिनती कम से कम $min होनी चाहिए';
+    }
+
+    if (max != null && votes > max) {
+      return 'वोटों की गिनती ज्यादा से ज्यादा $max हो सकती है';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'अज्ञात पोल';
+
+  @override
+  String get suggestAnOptionLabel => 'विकल्प सुझाएं';
+
+  @override
+  String get addACommentLabel => 'कमेंट जोड़ें';
+
+  @override
+  String get createLabel => 'क्रिएट करें';
+
+  @override
+  String get endVoteLabel => 'वोट समाप्त करें';
+
+  @override
+  String get enterANewOptionLabel => 'एक नया विकल्प दर्ज करें';
+
+  @override
+  String get enterYourCommentLabel => 'अपनी टिप्पणी दर्ज करें';
+
+  @override
+  String get loadingPollVotesError => 'पोल वोट लोड करने में त्रुटि';
+
+  @override
+  String get noPollVotesLabel => 'कोई पोल वोट नहीं';
+
+  @override
+  String get pollCommentsLabel => 'पोल टिप्पणियाँ';
+
+  @override
+  String get pollOptionsLabel => 'पोल विकल्प';
+
+  @override
+  String get pollResultsLabel => 'पोल परिणाम';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'मतदान समाप्त',
+      unique: () => 'एक चुनें',
+      limited: (count) => '$count तक चुनें',
+      all: () => 'एक या अधिक चुनें',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count != null) {
+      return 'सभी $count विकल्प देखें';
+    }
+    return 'सभी विकल्प देखें';
+  }
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count != null) {
+      return 'सभी $count वोट दिखाएं';
+    }
+    return 'सभी वोट दिखाएं';
+  }
+
+  @override
+  String get updateYourCommentLabel => 'अपनी टिप्पणी अपडेट करें';
+
+  @override
+  String get viewCommentsLabel => 'टिप्पणियाँ देखें';
+
+  @override
+  String get viewResultsLabel => 'परिणाम देखें';
+
+  @override
+  String voteCountLabel({int? count}) {
+    if (count != null) {
+      return '$count वोट';
+    }
+    return 'वोट';
+  }
+
+  @override
+  String get repliedToLabel => 'जवाब दिया:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 नया थ्रेड';
+    return '$count नए थ्रेड्स';
+  }
+
+  @override
+  String get slideToCancelLabel => 'रद्द करने के लिए स्लाइड करें';
+
+  @override
+  String get holdToRecordLabel =>
+      'रिकॉर्ड करने के लिए दबाए रखें, भेजने के लिए छोड़ें';
 }

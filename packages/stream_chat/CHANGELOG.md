@@ -1,6 +1,59 @@
+## 9.4.0
+
+🔄 Changed
+
+- Updated minimum Flutter version to 3.27.4 for the SDK.
+
+## 9.3.0
+
+✅ Added
+
+- Added support for overriding the `baseUrl` of the websocket.
+
+  ```dart
+  final client = StreamChatClient(
+    apiKey,
+    logLevel: Level.INFO,
+    baseWsUrl: 'http://localhost:8080',
+  );
+  ```
+
+## 9.2.0
+
+- Bug fixes and improvements
+
+## 9.1.0
+
+✅ Added
+
+- Added support for Threads v2 feature, which allows users to query all the threads.
+
+## 9.0.0
+
+✅ Added
+
+- Added support for Polls feature, which allows users to create and vote on polls in chat messages.
+
+🔄 Changed
+
+- Updated minimum Dart version to 3.5.4 for the SDK.
+
+## 8.3.0
+
+✅ Added
+
+- Added support for AI assistant states and events.
+
+## 8.2.0
+
+✅ Added
+
+- Added user blocking to the client.
+
 ## 8.1.0
 
 ✅ Added
+
 - Added `httpClientAdapter` to `StreamHttpClient` that enables the use native http implementations
 
 🔄 Changed
@@ -26,20 +79,24 @@
 ## 7.2.1
 
 ✅ Added
+
 - Added `voiceRecording` attachment type
 
 ## 7.2.0-hotfix.1
 
- - Version to keep in sync with the rest of the packages
-  
+- Version to keep in sync with the rest of the packages
+
 ## 7.2.0
 
 ✅ Added
-- Added `markUnread` method to `Channel` that marks messages from the provided message id onwards as unread
+
+- Added `markUnread` method to `Channel` that marks messages from the provided message id onwards as
+  unread
 
 ## 7.1.0
 
 🐞 Fixed
+
 - Fixes a thread message causing reply messages on the main thread to be considered deleted
 
 ## 7.0.2
@@ -59,7 +116,7 @@
   **might** produce a **breaking change** if you your code depends in `UUID` `3.x.x` directly or indirectly.
 
 ## 7.0.0
-  
+
 - 🛑️ Breaking
 
 - Removed deprecated `channelQuery.sort` property. Use `channelStateSort` instead.

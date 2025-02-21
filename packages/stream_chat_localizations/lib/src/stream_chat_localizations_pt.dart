@@ -82,6 +82,9 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Mensagem excluída';
 
   @override
+  String get editedMessageLabel => 'Editado';
+
+  @override
   String get messageReactionsLabel => 'Reações às mensagens';
 
   @override
@@ -461,4 +464,159 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get markUnreadError =>
       'Erro ao marcar a mensagem como não lida. Não é possível marcar mensagens'
       ' não lidas mais antigas do que as 100 mensagens mais recentes do canal.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Criar uma nova sondagem';
+    return 'Criar sondagem';
+  }
+
+  @override
+  String get questionsLabel => 'Perguntas';
+
+  @override
+  String get askAQuestionLabel => 'Fazer uma pergunta';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'A pergunta deve ter pelo menos $min caracteres';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'A pergunta deve ter, no máximo, $max caracteres';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Opções';
+    return 'Opção';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'A opção não pode estar vazia';
+
+  @override
+  String get pollOptionDuplicateError => 'Esta já é uma opção';
+
+  @override
+  String get addAnOptionLabel => 'Adicionar uma opção';
+
+  @override
+  String get multipleAnswersLabel => 'Respostas múltiplas';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Máximo de votos por pessoa';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'A contagem dos votos deve ser de, pelo menos, $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'A contagem dos votos deve ser, no máximo, $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Votação anônima';
+
+  @override
+  String get pollOptionsLabel => 'Opções de votação';
+
+  @override
+  String get suggestAnOptionLabel => 'Sugerir uma opção';
+
+  @override
+  String get enterANewOptionLabel => 'Inserir uma nova opção';
+
+  @override
+  String get addACommentLabel => 'Adicionar um comentário';
+
+  @override
+  String get pollCommentsLabel => 'Comentários da votação';
+
+  @override
+  String get updateYourCommentLabel => 'Atualizar seu comentário';
+
+  @override
+  String get enterYourCommentLabel => 'Inserir seu comentário';
+
+  @override
+  String get createLabel => 'Criar';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Votação encerrada',
+      unique: () => 'Selecionar um',
+      limited: (count) => 'Selecionar até $count',
+      all: () => 'Selecionar um ou mais',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Ver todas as opções';
+    return 'Ver todas as $count opções';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Ver comentários';
+
+  @override
+  String get viewResultsLabel => 'Ver resultados';
+
+  @override
+  String get endVoteLabel => 'Encerrar votação';
+
+  @override
+  String get pollResultsLabel => 'Resultados da votação';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Mostrar todos os votos';
+    return 'Mostrar todos os $count votos';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 votos',
+        1 => '1 voto',
+        _ => '$count votos',
+      };
+
+  @override
+  String get noPollVotesLabel => 'Não há votos no momento';
+
+  @override
+  String get loadingPollVotesError => 'Erro ao carregar os votos';
+
+  @override
+  String get repliedToLabel => 'respondeu a:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 novo tópico';
+    return '$count novos tópicos';
+  }
+
+  @override
+  String get slideToCancelLabel => 'Deslize para cancelar';
+
+  @override
+  String get holdToRecordLabel =>
+      'Mantenha pressionado para gravar, solte para enviar';
 }

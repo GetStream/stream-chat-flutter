@@ -43,7 +43,7 @@ class Channels extends Table {
   TextColumn get createdById => text().nullable()();
 
   /// Map of custom channel extraData
-  TextColumn get extraData => text().nullable().map(MapConverter<Object?>())();
+  TextColumn get extraData => text().nullable().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {cid};

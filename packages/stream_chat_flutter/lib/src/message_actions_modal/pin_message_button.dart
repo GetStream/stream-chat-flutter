@@ -29,7 +29,8 @@ class PinMessageButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
-            StreamSvgIcon.pin(
+            StreamSvgIcon(
+              icon: StreamSvgIcons.pin,
               color: streamChatThemeData.primaryIconTheme.color,
               size: 24,
             ),

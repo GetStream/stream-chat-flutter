@@ -1,7 +1,7 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -177,9 +177,11 @@ void main() {
     );
   });
 
-  testGoldens(
+  goldenTest(
     'control test',
-    (WidgetTester tester) async {
+    fileName: 'message_text',
+    constraints: const BoxConstraints.tightFor(width: 300, height: 200),
+    builder: () {
       final currentUser = OwnUser(id: 'user-id');
       final client = MockClient();
       final clientState = MockClientState();
@@ -216,9 +218,8 @@ and a list:
 
 cool.''';
 
-      await tester.pumpWidgetBuilder(
-        MaterialAppWrapper(
-            home: SimpleFrame(
+      return MaterialAppWrapper(
+        home: SimpleFrame(
           child: StreamChat(
             client: client,
             connectivityStream: Stream.value(InternetStatus.connected),
@@ -234,10 +235,8 @@ cool.''';
               ),
             ),
           ),
-        )),
-        surfaceSize: const Size(500, 500),
+        ),
       );
-      await screenMatchesGolden(tester, 'message_text');
     },
   );
 }

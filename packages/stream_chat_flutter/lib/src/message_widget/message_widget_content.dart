@@ -41,6 +41,7 @@ class MessageWidgetContent extends StatelessWidget {
     required this.hasQuotedMessage,
     required this.hasUrlAttachments,
     required this.hasNonUrlAttachments,
+    required this.hasPoll,
     required this.isOnlyEmoji,
     required this.isGiphy,
     required this.attachmentBuilders,
@@ -60,7 +61,9 @@ class MessageWidgetContent extends StatelessWidget {
     required this.showThreadReplyIndicator,
     required this.showTimeStamp,
     required this.showUsername,
+    required this.showEditedLabel,
     required this.messageWidget,
+    required this.onThreadTap,
     this.onUserAvatarTap,
     this.borderRadiusGeometry,
     this.borderSide,
@@ -135,6 +138,9 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
 
+  /// {@macro hasPoll}
+  final bool hasPoll;
+
   /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
 
@@ -158,6 +164,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro onReplyTap}
   final void Function(Message)? onReplyTap;
+
+  /// {@macro onThreadTap}
+  final void Function(Message)? onThreadTap;
 
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
@@ -209,6 +218,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro showUsername}
   final bool showUsername;
+
+  /// {@macro showEdited}
+  final bool showEditedLabel;
 
   /// {@macro showTopUserAvatar}
   final bool showTopUserAvatar;
@@ -309,7 +321,7 @@ class MessageWidgetContent extends StatelessWidget {
                                 hasQuotedMessage: hasQuotedMessage,
                                 hasUrlAttachments: hasUrlAttachments,
                                 hasNonUrlAttachments: hasNonUrlAttachments,
-                                isOnlyEmoji: isOnlyEmoji,
+                                hasPoll: hasPoll,isOnlyEmoji: isOnlyEmoji,
                                 isGiphy: isGiphy,
                                 attachmentBuilders: attachmentBuilders,
                                 attachmentPadding: attachmentPadding,
@@ -394,7 +406,10 @@ class MessageWidgetContent extends StatelessWidget {
                 right: reverse ? 0 : null,
                 left: reverse ? null : 0,
                 bottom: showBottomRow ? 18 : -2,
-                child: StreamSvgIcon.error(size: 20),
+                child: const StreamSvgIcon(
+                  size: 20,
+                  icon: StreamSvgIcons.error,
+                ),
               ),
           ],
         ),
@@ -404,6 +419,7 @@ class MessageWidgetContent extends StatelessWidget {
 
   Widget _buildBottomRow(BuildContext context) {
     final defaultWidget = BottomRow(
+      onThreadTap: onThreadTap,
       message: message,
       reverse: reverse,
       messageTheme: messageTheme,
@@ -416,6 +432,7 @@ class MessageWidgetContent extends StatelessWidget {
       showThreadReplyIndicator: showThreadReplyIndicator,
       showTimeStamp: showTimeStamp,
       showUsername: showUsername,
+      showEditedLabel: showEditedLabel,
       streamChatTheme: streamChatTheme,
       streamChat: streamChat,
       hasNonUrlAttachments: hasNonUrlAttachments,

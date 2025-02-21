@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/file_attachment_thumbnail.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -171,7 +171,8 @@ class _Trailing extends StatelessWidget {
 
     if (message.state.isCompleted) {
       return IconButton(
-        icon: StreamSvgIcon.cloudDownload(
+        icon: StreamSvgIcon(
+          icon: StreamSvgIcons.cloudDownload,
           color: theme.colorTheme.textHighEmphasis,
         ),
         visualDensity: VisualDensity.compact,
@@ -193,7 +194,10 @@ class _Trailing extends StatelessWidget {
       preparing: () => Padding(
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
-          icon: StreamSvgIcon.close(color: theme.colorTheme.barsBg),
+          icon: StreamSvgIcon(
+            icon: StreamSvgIcons.close,
+            color: theme.colorTheme.barsBg,
+          ),
           fillColor: theme.colorTheme.overlayDark,
           onPressed: () => channel.cancelAttachmentUpload(attachmentId),
         ),
@@ -201,7 +205,10 @@ class _Trailing extends StatelessWidget {
       inProgress: (_, __) => Padding(
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
-          icon: StreamSvgIcon.close(color: theme.colorTheme.barsBg),
+          icon: StreamSvgIcon(
+            icon: StreamSvgIcons.close,
+            color: theme.colorTheme.barsBg,
+          ),
           fillColor: theme.colorTheme.overlayDark,
           onPressed: () => channel.cancelAttachmentUpload(attachmentId),
         ),
@@ -211,13 +218,19 @@ class _Trailing extends StatelessWidget {
         child: CircleAvatar(
           backgroundColor: theme.colorTheme.accentPrimary,
           maxRadius: 12,
-          child: StreamSvgIcon.check(color: theme.colorTheme.barsBg),
+          child: StreamSvgIcon(
+            icon: StreamSvgIcons.check,
+            color: theme.colorTheme.barsBg,
+          ),
         ),
       ),
       failed: (_) => Padding(
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
-          icon: StreamSvgIcon.retry(color: theme.colorTheme.barsBg),
+          icon: StreamSvgIcon(
+            icon: StreamSvgIcons.retry,
+            color: theme.colorTheme.barsBg,
+          ),
           fillColor: theme.colorTheme.overlayDark,
           onPressed: () => channel.retryAttachmentUpload(
             message.id,

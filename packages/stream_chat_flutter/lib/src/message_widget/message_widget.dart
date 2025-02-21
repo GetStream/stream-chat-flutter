@@ -63,6 +63,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onConfirmDeleteTap,
     this.showUsername = true,
     this.showTimestamp = true,
+    this.showEditedLabel = true,
     this.showReactions = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
@@ -269,6 +270,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showTimestamp;
 
+  /// {@template showTimestamp}
+  /// Show edited label if message is edited
+  /// {@endtemplate}
+  final bool showEditedLabel;
+
   /// {@template showReplyMessage}
   /// Show reply action
   /// {@endtemplate}
@@ -421,6 +427,7 @@ class StreamMessageWidget extends StatefulWidget {
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
     bool? showTimestamp,
+    bool? showEditedLabel,
     bool? showReplyMessage,
     bool? showThreadReplyMessage,
     bool? showEditMessage,
@@ -472,6 +479,7 @@ class StreamMessageWidget extends StatefulWidget {
       widthFactor: widthFactor ?? this.widthFactor,
       showUserAvatar: showUserAvatar ?? this.showUserAvatar,
       showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
+      showEditedLabel: showEditedLabel ?? this.showEditedLabel,
       showReactions: showReactions ?? this.showReactions,
       showThreadReplyIndicator:
       showThreadReplyIndicator ?? this.showThreadReplyIndicator,
@@ -533,6 +541,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
   bool get showTimeStamp => widget.showTimestamp;
 
+  bool get showEditedLabel => widget.showEditedLabel;
+
+  bool get isTextEdited => widget.message.messageTextUpdatedAt != null;
+
   bool get showInChannel => widget.showInChannelIndicator;
 
   /// {@template hasQuotedMessage}
@@ -571,6 +583,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       widget.message.attachments
           .any((it) => it.type != AttachmentType.urlPreview);
 
+  /// {@template hasPoll}
+  /// `true` if the [message] contains a poll.
+  /// {@endtemplate}
+  bool get hasPoll => widget.message.poll != null;
+
   /// {@template hasUrlAttachments}
   /// `true` if any of the [message]'s attachments are a giphy with a
   /// [Attachment.titleLink].
@@ -593,7 +610,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           showUsername ||
           showTimeStamp ||
           showInChannel ||
-          showSendingIndicator;
+          showSendingIndicator ||
+      isTextEdited;
 
   /// {@template isPinned}
   /// Whether [StreamMessageWidget.message] is pinned or not.
@@ -615,7 +633,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   bool get shouldShowEditAction =>
       widget.showEditMessage &&
           !isDeleteFailed &&
-          !widget.message.attachments
+          !hasPoll &&
+      !widget.message.attachments
               .any((element) => element.type == AttachmentType.giphy);
 
   bool get shouldShowResendAction =>
@@ -627,12 +646,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           widget.message.text
               ?.trim()
               .isNotEmpty == true;
-
-  bool get shouldShowEditMessage =>
-      widget.showEditMessage &&
-          !isDeleteFailed &&
-          !widget.message.attachments
-              .any((element) => element.type == AttachmentType.giphy);
 
   bool get shouldShowThreadReplyAction =>
       widget.showThreadReplyMessage &&
@@ -686,6 +699,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           duration: const Duration(seconds: 1),
           color: widget.message.pinned && widget.showPinHighlight
               ? _streamChatTheme.colorTheme.highlight
+              // ignore: deprecated_member_use
               : _streamChatTheme.colorTheme.barsBg.withOpacity(0),
           child: Portal(
             child: PlatformWidgetBuilder(
@@ -712,6 +726,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       streamChatTheme: _streamChatTheme,
                       showUsername: showUsername,
                       showTimeStamp: showTimeStamp,
+                      showEditedLabel: showEditedLabel,
                       showThreadReplyIndicator: showThreadReplyIndicator,
                       showSendingIndicator: showSendingIndicator,
                       showInChannel: showInChannel,
@@ -722,6 +737,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       reverse: widget.reverse,
                       message: widget.message,
                       hasNonUrlAttachments: hasNonUrlAttachments,
+                      hasPoll: hasPoll,
                       hasQuotedMessage: hasQuotedMessage,
                       textPadding: widget.textPadding,
                       attachmentBuilders: widget.attachmentBuilders,
@@ -729,6 +745,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                       attachmentShape: widget.attachmentShape,
                       onAttachmentTap: widget.onAttachmentTap,
                       onReplyTap: widget.onReplyTap,
+                      onThreadTap: widget.onThreadTap,
                       onShowMessage: widget.onShowMessage,
                       attachmentActionsModalBuilder:
                       widget.attachmentActionsModalBuilder,
@@ -795,7 +812,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowReplyAction) ...[
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.reply(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
           title: Text(context.translations.replyLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
@@ -805,7 +822,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       ],
       if (widget.showMarkUnreadMessage)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.messageUnread(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.messageUnread),
           title: Text(context.translations.markAsUnreadLabel),
           onClick: () async {
             try {
@@ -825,7 +842,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowThreadReplyAction)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.thread(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
           title: Text(context.translations.threadReplyLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
@@ -834,7 +851,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowCopyAction)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.copy(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
           title: Text(context.translations.copyMessageLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
@@ -858,7 +875,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowEditAction) ...[
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.edit(color: Colors.grey),
+          leading: const StreamSvgIcon(
+            color: Colors.grey,
+            icon: StreamSvgIcons.edit,
+          ),
           title: Text(context.translations.editMessageLabel),
           onClick: () {
             Navigator.of(context, rootNavigator: true).pop();
@@ -891,9 +911,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       ],
       if (widget.showPinButton)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.pin(
-            color: Colors.grey,
+          leading: const StreamSvgIcon(
             size: 24,
+            color: Colors.grey,
+            icon: StreamSvgIcons.pin,
           ),
           title: Text(
             context.translations.togglePinUnpinText(
@@ -915,7 +936,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowResendAction)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.iconSendMessage(),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
           title: Text(
             context.translations.toggleResendOrResendEditedMessage(
               isUpdateFailed: widget.message.state.isUpdatingFailed,
@@ -936,7 +957,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       if (shouldShowDeleteAction)
         StreamChatContextMenuItem(
-          leading: StreamSvgIcon.delete(color: Colors.red),
+          leading: const StreamSvgIcon(
+            color: Colors.red,
+            icon: StreamSvgIcons.delete,
+          ),
           title: Text(
             context.translations.deleteMessageLabel,
             style: const TextStyle(color: Colors.red),

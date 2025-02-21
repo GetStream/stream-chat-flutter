@@ -143,8 +143,9 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                 videoPackages.values.first.player.stop();
                 Navigator.of(context).pop();
               },
-              child: StreamSvgIcon.close(
+              child: const StreamSvgIcon(
                 size: 30,
+                icon: StreamSvgIcons.close,
               ),
             ),
           ),

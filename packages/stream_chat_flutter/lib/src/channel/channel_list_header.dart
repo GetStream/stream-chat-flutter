@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChannelListHeader}
@@ -164,27 +163,17 @@ class StreamChannelListHeader extends StatelessWidget
                     child: IconButton(
                       icon: StreamConnectionStatusBuilder(
                         statusBuilder: (context, status) {
-                          Color? color;
-                          switch (status) {
-                            case ConnectionStatus.connected:
-                              color = chatThemeData.colorTheme.accentPrimary;
-                              break;
-                            case ConnectionStatus.connecting:
-                              color = Colors.grey;
-                              break;
-                            case ConnectionStatus.disconnected:
-                              color = Colors.grey;
-                              break;
-                          }
-                          return SvgPicture.asset(
-                            'svgs/icon_pen_write.svg',
-                            package: 'stream_chat_flutter',
-                            width: 24,
-                            height: 24,
-                            colorFilter: ColorFilter.mode(
-                              color,
-                              BlendMode.srcIn,
-                            ),
+                          final color = switch (status) {
+                            ConnectionStatus.connected =>
+                              chatThemeData.colorTheme.accentPrimary,
+                            ConnectionStatus.connecting => Colors.grey,
+                            ConnectionStatus.disconnected => Colors.grey,
+                          };
+
+                          return StreamSvgIcon(
+                            size: 24,
+                            color: color,
+                            icon: StreamSvgIcons.penWrite,
                           );
                         },
                       ),
@@ -206,8 +195,6 @@ class StreamChannelListHeader extends StatelessWidget
                         return _ConnectingTitleState();
                       case ConnectionStatus.disconnected:
                         return _DisconnectedTitleState(client: _client);
-                      default:
-                        return const Offstage();
                     }
                   },
                 ),

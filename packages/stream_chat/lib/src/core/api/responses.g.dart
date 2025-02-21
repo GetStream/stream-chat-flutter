@@ -9,9 +9,9 @@ part of 'responses.dart';
 ErrorResponse _$ErrorResponseFromJson(Map<String, dynamic> json) =>
     ErrorResponse()
       ..duration = json['duration'] as String?
-      ..code = json['code'] as int?
+      ..code = (json['code'] as num?)?.toInt()
       ..message = json['message'] as String?
-      ..statusCode = json['StatusCode'] as int?
+      ..statusCode = (json['StatusCode'] as num?)?.toInt()
       ..moreInfo = json['more_info'] as String?;
 
 Map<String, dynamic> _$ErrorResponseToJson(ErrorResponse instance) =>
@@ -279,7 +279,7 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
               ?.map((e) => Member.fromJson(e as Map<String, dynamic>))
               .toList() ??
           []
-      ..watcherCount = json['watcher_count'] as int? ?? 0
+      ..watcherCount = (json['watcher_count'] as num?)?.toInt() ?? 0
       ..read = (json['read'] as List<dynamic>?)
               ?.map((e) => Read.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -304,7 +304,7 @@ CallTokenPayload _$CallTokenPayloadFromJson(Map<String, dynamic> json) =>
     CallTokenPayload()
       ..duration = json['duration'] as String?
       ..token = json['token'] as String?
-      ..agoraUid = json['agora_uid'] as int?
+      ..agoraUid = (json['agora_uid'] as num?)?.toInt()
       ..agoraAppId = json['agora_app_id'] as String?;
 
 CreateCallPayload _$CreateCallPayloadFromJson(Map<String, dynamic> json) =>
@@ -313,3 +313,107 @@ CreateCallPayload _$CreateCallPayloadFromJson(Map<String, dynamic> json) =>
       ..call = json['call'] == null
           ? null
           : CallPayload.fromJson(json['call'] as Map<String, dynamic>);
+
+UserBlockResponse _$UserBlockResponseFromJson(Map<String, dynamic> json) =>
+    UserBlockResponse()
+      ..duration = json['duration'] as String?
+      ..blockedByUserId = json['blocked_by_user_id'] as String? ?? ''
+      ..blockedUserId = json['blocked_user_id'] as String? ?? ''
+      ..createdAt = DateTime.parse(json['created_at'] as String);
+
+BlockedUsersResponse _$BlockedUsersResponseFromJson(
+        Map<String, dynamic> json) =>
+    BlockedUsersResponse()
+      ..duration = json['duration'] as String?
+      ..blocks = (json['blocks'] as List<dynamic>?)
+              ?.map((e) => UserBlock.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+
+CreatePollResponse _$CreatePollResponseFromJson(Map<String, dynamic> json) =>
+    CreatePollResponse()
+      ..duration = json['duration'] as String?
+      ..poll = Poll.fromJson(json['poll'] as Map<String, dynamic>);
+
+GetPollResponse _$GetPollResponseFromJson(Map<String, dynamic> json) =>
+    GetPollResponse()
+      ..duration = json['duration'] as String?
+      ..poll = Poll.fromJson(json['poll'] as Map<String, dynamic>);
+
+UpdatePollResponse _$UpdatePollResponseFromJson(Map<String, dynamic> json) =>
+    UpdatePollResponse()
+      ..duration = json['duration'] as String?
+      ..poll = Poll.fromJson(json['poll'] as Map<String, dynamic>);
+
+CreatePollOptionResponse _$CreatePollOptionResponseFromJson(
+        Map<String, dynamic> json) =>
+    CreatePollOptionResponse()
+      ..duration = json['duration'] as String?
+      ..pollOption =
+          PollOption.fromJson(json['poll_option'] as Map<String, dynamic>);
+
+GetPollOptionResponse _$GetPollOptionResponseFromJson(
+        Map<String, dynamic> json) =>
+    GetPollOptionResponse()
+      ..duration = json['duration'] as String?
+      ..pollOption =
+          PollOption.fromJson(json['poll_option'] as Map<String, dynamic>);
+
+UpdatePollOptionResponse _$UpdatePollOptionResponseFromJson(
+        Map<String, dynamic> json) =>
+    UpdatePollOptionResponse()
+      ..duration = json['duration'] as String?
+      ..pollOption =
+          PollOption.fromJson(json['poll_option'] as Map<String, dynamic>);
+
+CastPollVoteResponse _$CastPollVoteResponseFromJson(
+        Map<String, dynamic> json) =>
+    CastPollVoteResponse()
+      ..duration = json['duration'] as String?
+      ..vote = PollVote.fromJson(json['vote'] as Map<String, dynamic>);
+
+RemovePollVoteResponse _$RemovePollVoteResponseFromJson(
+        Map<String, dynamic> json) =>
+    RemovePollVoteResponse()
+      ..duration = json['duration'] as String?
+      ..vote = PollVote.fromJson(json['vote'] as Map<String, dynamic>);
+
+QueryPollsResponse _$QueryPollsResponseFromJson(Map<String, dynamic> json) =>
+    QueryPollsResponse()
+      ..duration = json['duration'] as String?
+      ..polls = (json['polls'] as List<dynamic>?)
+              ?.map((e) => Poll.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          []
+      ..next = json['next'] as String?;
+
+QueryPollVotesResponse _$QueryPollVotesResponseFromJson(
+        Map<String, dynamic> json) =>
+    QueryPollVotesResponse()
+      ..duration = json['duration'] as String?
+      ..votes = (json['votes'] as List<dynamic>?)
+              ?.map((e) => PollVote.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          []
+      ..next = json['next'] as String?;
+
+GetThreadResponse _$GetThreadResponseFromJson(Map<String, dynamic> json) =>
+    GetThreadResponse()
+      ..duration = json['duration'] as String?
+      ..thread = Thread.fromJson(json['thread'] as Map<String, dynamic>);
+
+UpdateThreadResponse _$UpdateThreadResponseFromJson(
+        Map<String, dynamic> json) =>
+    UpdateThreadResponse()
+      ..duration = json['duration'] as String?
+      ..thread = Thread.fromJson(json['thread'] as Map<String, dynamic>);
+
+QueryThreadsResponse _$QueryThreadsResponseFromJson(
+        Map<String, dynamic> json) =>
+    QueryThreadsResponse()
+      ..duration = json['duration'] as String?
+      ..threads = (json['threads'] as List<dynamic>?)
+              ?.map((e) => Thread.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          []
+      ..next = json['next'] as String?;

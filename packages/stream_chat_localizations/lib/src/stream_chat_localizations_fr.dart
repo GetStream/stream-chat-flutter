@@ -86,6 +86,9 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Message supprimé';
 
   @override
+  String get editedMessageLabel => 'Édité';
+
+  @override
   String get messageReactionsLabel => 'Réactions aux messages';
 
   @override
@@ -464,4 +467,162 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
       'Erreur lors de la marque du message comme non lu. Impossible de marquer'
       ' des messages non lus plus anciens que les 100 derniers messages'
       ' du canal.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Créer un sondage';
+    return 'Créer sondage';
+  }
+
+  @override
+  String get questionsLabel => 'Questions';
+
+  @override
+  String get askAQuestionLabel => 'Poser une question';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'La question doit comporter au moins $min caractères';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'La question doit comporter au plus $max caractères';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Options';
+    return 'Option';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'L’option ne peut pas être vide';
+
+  @override
+  String get pollOptionDuplicateError => 'C’est déjà une option';
+
+  @override
+  String get addAnOptionLabel => 'Ajouter une option';
+
+  @override
+  String get multipleAnswersLabel => 'Réponses multiples';
+
+  @override
+  String get maximumVotesPerPersonLabel =>
+      'Nombre maximum de votes par personne';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'Le décompte des votes doit être d’au moins $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'Le décompte des votes doit être d’au plus $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Sondage anonyme';
+
+  @override
+  String get pollOptionsLabel => 'Options du sondage';
+
+  @override
+  String get suggestAnOptionLabel => 'Suggérer une option';
+
+  @override
+  String get enterANewOptionLabel => 'Saisir une nouvelle option';
+
+  @override
+  String get addACommentLabel => 'Ajouter un commentaire';
+
+  @override
+  String get pollCommentsLabel => 'Commentaires du sondage';
+
+  @override
+  String get updateYourCommentLabel => 'Mettre à jour votre commentaire';
+
+  @override
+  String get enterYourCommentLabel => 'Saisir votre commentaire';
+
+  @override
+  String get createLabel => 'Créer';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Vote terminé',
+      unique: () => 'Sélectionner un',
+      limited: (count) => "Sélectionner jusqu'à $count",
+      all: () => 'Sélectionner un ou plusieurs',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Voir toutes les options';
+    return 'Voir toutes les $count options';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Voir les commentaires';
+
+  @override
+  String get viewResultsLabel => 'Voir les résultats';
+
+  @override
+  String get endVoteLabel => 'Terminer le vote';
+
+  @override
+  String get pollResultsLabel => 'Résultats du sondage';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Afficher tous les votes';
+    return 'Afficher tous les $count votes';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 vote',
+        1 => '1 vote',
+        _ => '$count votes',
+      };
+
+  @override
+  String get noPollVotesLabel =>
+      "Il n'y a pas de votes de sondage actuellement";
+
+  @override
+  String get loadingPollVotesError =>
+      'Erreur de chargement des votes du sondage';
+
+  @override
+  String get repliedToLabel => 'répondu à:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 Nouveau fil';
+    return '$count Nouveaux fils';
+  }
+
+  @override
+  String get slideToCancelLabel => 'Glissez pour annuler';
+
+  @override
+  String get holdToRecordLabel =>
+      'Maintenez pour enregistrer, relâchez pour envoyer';
 }

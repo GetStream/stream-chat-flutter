@@ -20,13 +20,14 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) =>
       updatedAt: json['updated_at'] == null
           ? null
           : DateTime.parse(json['updated_at'] as String),
-      maxMessageLength: json['max_message_length'] as int? ?? 0,
+      maxMessageLength: (json['max_message_length'] as num?)?.toInt() ?? 0,
       messageRetention: json['message_retention'] as String? ?? '',
       mutes: json['mutes'] as bool? ?? false,
       reactions: json['reactions'] as bool? ?? false,
       readEvents: json['read_events'] as bool? ?? false,
       replies: json['replies'] as bool? ?? false,
       search: json['search'] as bool? ?? false,
+      polls: json['polls'] as bool? ?? false,
       typingEvents: json['typing_events'] as bool? ?? false,
       uploads: json['uploads'] as bool? ?? false,
       urlEnrichment: json['url_enrichment'] as bool? ?? false,
@@ -46,6 +47,7 @@ Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) =>
       'read_events': instance.readEvents,
       'replies': instance.replies,
       'search': instance.search,
+      'polls': instance.polls,
       'typing_events': instance.typingEvents,
       'uploads': instance.uploads,
       'url_enrichment': instance.urlEnrichment,

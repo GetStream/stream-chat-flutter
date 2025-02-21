@@ -25,6 +25,16 @@ class MockChannel extends Mock implements Channel {
   Future<bool> get initialized async => true;
 
   @override
+  Future<ChannelState> watch({
+    bool presence = false,
+    PaginationParams? messagesPagination,
+    PaginationParams? membersPagination,
+    PaginationParams? watchersPagination,
+  }) {
+    return Future.value(ChannelState());
+  }
+
+  @override
   // ignore: prefer_expression_function_bodies
   Future<void> keyStroke([String? parentId]) async {
     return;
@@ -46,8 +56,8 @@ class MockVoidCallback extends Mock {
   void call();
 }
 
-class MockVoidSingleParamCallback<T> extends Mock {
-  void call(T param);
+class MockValueChanged<T> extends Mock {
+  void call(T value);
 }
 
 class MockAttachmentHandler extends Mock implements StreamAttachmentHandler {}
@@ -67,3 +77,5 @@ class MockStreamMemberListController extends Mock
   @override
   PagedValue<int, Member> value = const PagedValue.loading();
 }
+
+class MockMessage extends Mock implements Message {}

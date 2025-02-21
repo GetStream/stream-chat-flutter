@@ -109,6 +109,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Message deleted';
 
   @override
+  String get editedMessageLabel => 'Edited';
+
+  @override
   String get messageReactionsLabel => 'Message Reactions';
 
   @override
@@ -481,6 +484,160 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get markUnreadError =>
       'Error marking message unread. Cannot mark unread messages older than'
       ' the newest 100 channel messages.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Create a new poll';
+    return 'Create Poll';
+  }
+
+  @override
+  String get questionsLabel => 'Questions';
+
+  @override
+  String get askAQuestionLabel => 'Ask a question';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'Question must be at least $min characters long';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'Question must be at most $max characters long';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Options';
+    return 'Option';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'Option cannot be empty';
+
+  @override
+  String get pollOptionDuplicateError => 'This is already an option';
+
+  @override
+  String get addAnOptionLabel => 'Add an option';
+
+  @override
+  String get multipleAnswersLabel => 'Multiple answers';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Maximum votes per person';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'Vote count must be at least $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'Vote count must be at most $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Anonymous poll';
+
+  @override
+  String get pollOptionsLabel => 'Poll Options';
+
+  @override
+  String get suggestAnOptionLabel => 'Suggest an option';
+
+  @override
+  String get enterANewOptionLabel => 'Enter a new option';
+
+  @override
+  String get addACommentLabel => 'Add a comment';
+
+  @override
+  String get pollCommentsLabel => 'Poll Comments';
+
+  @override
+  String get updateYourCommentLabel => 'Update your comment';
+
+  @override
+  String get enterYourCommentLabel => 'Enter your comment';
+
+  @override
+  String get createLabel => 'Create';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Vote ended',
+      unique: () => 'Select one',
+      limited: (count) => 'Select up to $count',
+      all: () => 'Select one or more',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'See all options';
+    return 'See all $count options';
+  }
+
+  @override
+  String get viewCommentsLabel => 'View Comments';
+
+  @override
+  String get viewResultsLabel => 'View Results';
+
+  @override
+  String get endVoteLabel => 'End Vote';
+
+  @override
+  String get pollResultsLabel => 'Poll Results';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Show all votes';
+    return 'Show all $count votes';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 votes',
+        1 => '1 vote',
+        _ => '$count votes',
+      };
+
+  @override
+  String get noPollVotesLabel => 'There are no poll votes currently';
+
+  @override
+  String get loadingPollVotesError => 'Error loading poll votes';
+
+  @override
+  String get repliedToLabel => 'replied to:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 new thread';
+    return '$count new threads';
+  }
+
+  @override
+  String get slideToCancelLabel => 'Slide to cancel';
+
+  @override
+  String get holdToRecordLabel => 'Hold to record, release to send.';
 }
 
 void main() async {

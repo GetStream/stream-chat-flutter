@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// Widget that displays a photo or video item from the gallery.
@@ -83,7 +83,7 @@ class StreamPhotoGalleryTile extends StatelessWidget {
           child: FadeInImage(
             fadeInDuration: const Duration(milliseconds: 300),
             placeholder: const AssetImage(
-              'images/placeholder.png',
+              'lib/assets/images/placeholder.png',
               package: 'stream_chat_flutter',
             ),
             fit: BoxFit.cover,
@@ -103,6 +103,7 @@ class StreamPhotoGalleryTile extends StatelessWidget {
               opacity: selected ? 1.0 : 0.0,
               child: Container(
                 color:
+                    // ignore: deprecated_member_use
                     chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.5),
                 alignment: Alignment.topRight,
                 padding: const EdgeInsets.only(
@@ -112,8 +113,9 @@ class StreamPhotoGalleryTile extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 12,
                   backgroundColor: chatThemeData.colorTheme.barsBg,
-                  child: StreamSvgIcon.check(
+                  child: StreamSvgIcon(
                     size: 24,
+                    icon: StreamSvgIcons.check,
                     color: chatThemeData.colorTheme.textHighEmphasis,
                   ),
                 ),
@@ -122,10 +124,10 @@ class StreamPhotoGalleryTile extends StatelessWidget {
           ),
         ),
         if (media.type == AssetType.video) ...[
-          Positioned(
+          const Positioned(
             left: 8,
             bottom: 10,
-            child: StreamSvgIcon.videoCall(),
+            child: StreamSvgIcon(icon: StreamSvgIcons.videoCall),
           ),
           Positioned(
             right: 4,

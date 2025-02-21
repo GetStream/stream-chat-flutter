@@ -83,7 +83,8 @@ class StreamUserMentionTile extends StatelessWidget {
                   right: 18,
                   left: 8,
                 ),
-                child: StreamSvgIcon.mentions(
+                child: StreamSvgIcon(
+                  icon: StreamSvgIcons.mentions,
                   color: chatThemeData.colorTheme.accentPrimary,
                 ),
               ),

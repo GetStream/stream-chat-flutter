@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart'
-    show IterableExtension, ListEquality;
+import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
@@ -1036,6 +1035,134 @@ class Channel {
     return _client.sendEvent(id!, type, event);
   }
 
+  final _pollLock = Lock();
+
+  /// Send a message with a poll to this channel.
+  ///
+  /// Optionally provide a [messageText] to send a message along with the poll.
+  Future<SendMessageResponse> sendPoll(
+    Poll poll, {
+    String messageText = '',
+  }) async {
+    _checkInitialized();
+    final res = await _pollLock.synchronized(() => _client.createPoll(poll));
+    return sendMessage(
+      Message(
+        text: messageText,
+        poll: res.poll,
+        pollId: res.poll.id,
+      ),
+    );
+  }
+
+  /// Updates the [poll] in this channel.
+  Future<UpdatePollResponse> updatePoll(Poll poll) {
+    _checkInitialized();
+    return _pollLock.synchronized(() => _client.updatePoll(poll));
+  }
+
+  /// Deletes the given [poll] from this channel.
+  Future<EmptyResponse> deletePoll(Poll poll) {
+    _checkInitialized();
+    return _pollLock.synchronized(() => _client.deletePoll(poll.id));
+  }
+
+  /// Close the given [poll].
+  Future<UpdatePollResponse> closePoll(Poll poll) {
+    _checkInitialized();
+    return _pollLock.synchronized(() => _client.closePoll(poll.id));
+  }
+
+  /// Create a new poll option for the given [poll].
+  Future<CreatePollOptionResponse> createPollOption(
+    Poll poll,
+    PollOption option,
+  ) {
+    _checkInitialized();
+    return _pollLock.synchronized(
+      () => _client.createPollOption(poll.id, option),
+    );
+  }
+
+  final _pollVoteLock = Lock();
+
+  /// Cast a vote on the given [poll] with the given [option].
+  Future<CastPollVoteResponse> castPollVote(
+    Message message,
+    Poll poll,
+    PollOption option,
+  ) async {
+    _checkInitialized();
+
+    final optionId = option.id;
+    if (optionId == null) {
+      throw ArgumentError('Option id cannot be null');
+    }
+
+    return _pollVoteLock.synchronized(
+      () => _client.castPollVote(
+        message.id,
+        poll.id,
+        optionId: optionId,
+      ),
+    );
+  }
+
+  /// Add a new answer to the given [poll].
+  Future<CastPollVoteResponse> addPollAnswer(
+    Message message,
+    Poll poll, {
+    required String answerText,
+  }) {
+    _checkInitialized();
+    return _pollVoteLock.synchronized(
+      () => _client.addPollAnswer(
+        message.id,
+        poll.id,
+        answerText: answerText,
+      ),
+    );
+  }
+
+  /// Remove a vote on the given [poll] with the given [vote].
+  Future<RemovePollVoteResponse> removePollVote(
+    Message message,
+    Poll poll,
+    PollVote vote,
+  ) {
+    _checkInitialized();
+
+    final voteId = vote.id;
+    if (voteId == null) {
+      throw ArgumentError('Vote id cannot be null');
+    }
+
+    return _pollVoteLock.synchronized(
+      () => _client.removePollVote(
+        message.id,
+        poll.id,
+        voteId,
+      ),
+    );
+  }
+
+  /// Query the poll votes for the given [pollId] with the given [filter] and
+  /// [sort] options.
+  Future<QueryPollVotesResponse> queryPollVotes(
+    String pollId, {
+    Filter? filter,
+    List<SortOption>? sort,
+    PaginationParams pagination = const PaginationParams(),
+  }) {
+    _checkInitialized();
+    return _client.queryPollVotes(
+      pollId,
+      filter: filter,
+      sort: sort,
+      pagination: pagination,
+    );
+  }
+
   /// Send a reaction to this channel.
   ///
   /// Set [enforceUnique] to true to remove the existing user reaction.
@@ -1156,6 +1283,16 @@ class Channel {
       state?.updateMessage(message);
       rethrow;
     }
+  }
+
+  /// Sends an event to stop AI response generation, leaving the message in
+  /// its current state.
+  Future<EmptyResponse> stopAIResponse() async {
+    return sendEvent(
+      Event(
+        type: EventType.aiIndicatorStop,
+      ),
+    );
   }
 
   /// Update the channel's [name].
@@ -1380,6 +1517,18 @@ class Channel {
     state!.unreadCount = channelUnreadCount;
 
     return response;
+  }
+
+  /// Mark the thread with [threadId] in the channel as read.
+  Future<EmptyResponse> markThreadRead(String threadId) {
+    _checkInitialized();
+    return client.markThreadRead(id!, type, threadId);
+  }
+
+  /// Mark the thread with [threadId] in the channel as unread.
+  Future<EmptyResponse> markThreadUnread(String threadId) {
+    _checkInitialized();
+    return client.markThreadUnread(id!, type, threadId);
   }
 
   void _initState(ChannelState channelState) {
@@ -1790,6 +1939,24 @@ class ChannelClientState {
 
     _listenReactionDeleted();
 
+    /* Start of poll events */
+
+    _listenPollUpdated();
+
+    _listenPollClosed();
+
+    _listenPollAnswerCasted();
+
+    _listenPollVoteCasted();
+
+    _listenPollVoteChanged();
+
+    _listenPollAnswerRemoved();
+
+    _listenPollVoteRemoved();
+
+    /* End of poll events */
+
     _listenReadEvents();
 
     _listenUnreadEvents();
@@ -1961,8 +2128,8 @@ class ChannelClientState {
           final existingWatchers = channelState.watchers;
           updateChannelState(channelState.copyWith(
             watchers: [
-              ...?existingWatchers,
               watcher,
+              ...?existingWatchers?.where((user) => user.id != watcher.id),
             ],
           ));
         }
@@ -1977,9 +2144,9 @@ class ChannelClientState {
         if (watcher != null) {
           final existingWatchers = channelState.watchers;
           updateChannelState(channelState.copyWith(
-            watchers: existingWatchers
-                ?.where((user) => user.id != watcher.id)
-                .toList(growable: false),
+            watchers: [
+              ...?existingWatchers?.where((user) => user.id != watcher.id)
+            ],
           ));
         }
       }),
@@ -2042,6 +2209,198 @@ class ChannelClientState {
     _retryQueue.add(failedMessages);
   }
 
+  Message? _findPollMessage(String pollId) {
+    final message = messages.firstWhereOrNull((it) => it.pollId == pollId);
+    if (message != null) return message;
+
+    final threadMessage = threads.values.flattened.firstWhereOrNull((it) {
+      return it.pollId == pollId;
+    });
+
+    return threadMessage;
+  }
+
+  void _listenPollUpdated() {
+    _subscriptions.add(_channel.on(EventType.pollUpdated).listen((event) {
+      final eventPoll = event.poll;
+      if (eventPoll == null) return;
+
+      final pollMessage = _findPollMessage(eventPoll.id);
+      if (pollMessage == null) return;
+
+      final oldPoll = pollMessage.poll;
+
+      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
+      final ownVotesAndAnswers =
+          oldPoll?.ownVotesAndAnswers ?? eventPoll.ownVotesAndAnswers;
+
+      final poll = eventPoll.copyWith(
+        latestAnswers: latestAnswers,
+        ownVotesAndAnswers: ownVotesAndAnswers,
+      );
+
+      final message = pollMessage.copyWith(poll: poll);
+      updateMessage(message);
+    }));
+  }
+
+  void _listenPollClosed() {
+    _subscriptions.add(_channel.on(EventType.pollClosed).listen((event) {
+      final eventPoll = event.poll;
+      if (eventPoll == null) return;
+
+      final pollMessage = _findPollMessage(eventPoll.id);
+      if (pollMessage == null) return;
+
+      final oldPoll = pollMessage.poll;
+      final poll = oldPoll?.copyWith(isClosed: true) ?? eventPoll;
+
+      final message = pollMessage.copyWith(poll: poll);
+      updateMessage(message);
+    }));
+  }
+
+  void _listenPollAnswerCasted() {
+    _subscriptions.add(_channel.on(EventType.pollAnswerCasted).listen((event) {
+      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+      if (eventPoll == null || eventPollVote == null) return;
+
+      final pollMessage = _findPollMessage(eventPoll.id);
+      if (pollMessage == null) return;
+
+      final oldPoll = pollMessage.poll;
+
+      final latestAnswers = <String, PollVote>{
+        for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
+        eventPollVote.id!: eventPollVote,
+      };
+
+      final currentUserId = _channel.client.state.currentUser?.id;
+      final ownVotesAndAnswers = <String, PollVote>{
+        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+        if (eventPollVote.userId == currentUserId)
+          eventPollVote.id!: eventPollVote,
+      };
+
+      final poll = eventPoll.copyWith(
+        latestAnswers: [...latestAnswers.values],
+        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+      );
+
+      final message = pollMessage.copyWith(poll: poll);
+      updateMessage(message);
+    }));
+  }
+
+  void _listenPollVoteCasted() {
+    _subscriptions.add(_channel.on(EventType.pollVoteCasted).listen((event) {
+      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+      if (eventPoll == null || eventPollVote == null) return;
+
+      final pollMessage = _findPollMessage(eventPoll.id);
+      if (pollMessage == null) return;
+
+      final oldPoll = pollMessage.poll;
+
+      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
+      final currentUserId = _channel.client.state.currentUser?.id;
+      final ownVotesAndAnswers = <String, PollVote>{
+        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+        if (eventPollVote.userId == currentUserId)
+          eventPollVote.id!: eventPollVote,
+      };
+
+      final poll = eventPoll.copyWith(
+        latestAnswers: latestAnswers,
+        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+      );
+
+      final message = pollMessage.copyWith(poll: poll);
+      updateMessage(message);
+    }));
+  }
+
+  void _listenPollAnswerRemoved() {
+    _subscriptions.add(_channel.on(EventType.pollAnswerRemoved).listen((event) {
+      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+      if (eventPoll == null || eventPollVote == null) return;
+
+      final pollMessage = _findPollMessage(eventPoll.id);
+      if (pollMessage == null) return;
+
+      final oldPoll = pollMessage.poll;
+
+      final latestAnswers = <String, PollVote>{
+        for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
+      }..remove(eventPollVote.id);
+
+      final ownVotesAndAnswers = <String, PollVote>{
+        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+      }..remove(eventPollVote.id);
+
+      final poll = eventPoll.copyWith(
+        latestAnswers: [...latestAnswers.values],
+        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+      );
+
+      final message = pollMessage.copyWith(poll: poll);
+      updateMessage(message);
+    }));
+  }
+
+  void _listenPollVoteRemoved() {
+    _subscriptions.add(_channel.on(EventType.pollVoteRemoved).listen((event) {
+      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+      if (eventPoll == null || eventPollVote == null) return;
+
+      final pollMessage = _findPollMessage(eventPoll.id);
+      if (pollMessage == null) return;
+
+      final oldPoll = pollMessage.poll;
+
+      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
+      final ownVotesAndAnswers = <String, PollVote>{
+        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+      }..remove(eventPollVote.id);
+
+      final poll = eventPoll.copyWith(
+        latestAnswers: latestAnswers,
+        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+      );
+
+      final message = pollMessage.copyWith(poll: poll);
+      updateMessage(message);
+    }));
+  }
+
+  void _listenPollVoteChanged() {
+    _subscriptions.add(_channel.on(EventType.pollVoteChanged).listen((event) {
+      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+      if (eventPoll == null || eventPollVote == null) return;
+
+      final pollMessage = _findPollMessage(eventPoll.id);
+      if (pollMessage == null) return;
+
+      final oldPoll = pollMessage.poll;
+
+      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
+      final currentUserId = _channel.client.state.currentUser?.id;
+      final ownVotesAndAnswers = <String, PollVote>{
+        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+        if (eventPollVote.userId == currentUserId)
+          eventPollVote.id!: eventPollVote,
+      };
+
+      final poll = eventPoll.copyWith(
+        latestAnswers: latestAnswers,
+        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+      );
+
+      final message = pollMessage.copyWith(poll: poll);
+      updateMessage(message);
+    }));
+  }
+
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
       final oldMessage =
@@ -2089,6 +2448,8 @@ class ChannelClientState {
               threads[event.message?.parentId]
                   ?.firstWhereOrNull((e) => e.id == event.message?.id);
       final message = event.message!.copyWith(
+        poll: oldMessage?.poll,
+        pollId: oldMessage?.pollId,
         ownReactions: oldMessage?.ownReactions,
       );
       updateMessage(message);
@@ -2367,7 +2728,7 @@ class ChannelClientState {
         channelStateStream.map((cs) => cs.members),
         _channel.client.state.usersStream,
         (members, users) =>
-            members!.map((e) => e!.copyWith(user: users[e.user!.id])).toList(),
+            [...?members?.map((e) => e!.copyWith(user: users[e.user!.id]))],
       ).distinct(const ListEquality().equals);
 
   /// Channel watcher count.
@@ -2387,7 +2748,7 @@ class ChannelClientState {
           List<User>?, Map<String?, User?>, List<User>>(
         channelStateStream.map((cs) => cs.watchers),
         _channel.client.state.usersStream,
-        (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
+        (watchers, users) => [...?watchers?.map((e) => users[e.id] ?? e)],
       ).distinct(const ListEquality().equals);
 
   /// Channel member for the current user.

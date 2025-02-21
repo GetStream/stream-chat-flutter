@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamMessageText}
@@ -42,12 +41,11 @@ class StreamMessageText extends StatelessWidget {
             .text
             ?.replaceAll('\n', '\n\n')
             .trim();
-        final themeData = Theme.of(context);
-        return MarkdownBody(
+
+        return StreamMarkdownMessage(
           data: messageText ?? '',
+          messageTheme: messageTheme,
           selectable: isDesktopDeviceOrWeb,
-          onTapText: () {},
-          // onSelectionChanged: (val, selection, cause) {},
           onTapLink: (
             String link,
             String? href,
@@ -69,20 +67,6 @@ class StreamMessageText extends StatelessWidget {
               }
             }
           },
-          styleSheet: MarkdownStyleSheet.fromTheme(
-            themeData.copyWith(
-              textTheme: themeData.textTheme.apply(
-                bodyColor: messageTheme.messageTextStyle?.color,
-                decoration: messageTheme.messageTextStyle?.decoration,
-                decorationColor: messageTheme.messageTextStyle?.decorationColor,
-                decorationStyle: messageTheme.messageTextStyle?.decorationStyle,
-                fontFamily: messageTheme.messageTextStyle?.fontFamily,
-              ),
-            ),
-          ).copyWith(
-            a: messageTheme.messageLinksStyle,
-            p: messageTheme.messageTextStyle,
-          ),
         );
       },
     );

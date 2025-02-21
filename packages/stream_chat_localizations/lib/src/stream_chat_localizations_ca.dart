@@ -86,6 +86,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Missatge esborrat';
 
   @override
+  String get editedMessageLabel => 'Editat';
+
+  @override
   String get messageReactionsLabel => 'Reaccions dels missatges';
 
   @override
@@ -462,4 +465,159 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       'Error en marcar el missatge com a no llegit. No es poden marcar'
       ' missatges no llegits més antics que els 100 missatges més recents del'
       ' canal.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Crear una enquesta nova';
+    return 'Crea enquesta';
+  }
+
+  @override
+  String get questionsLabel => 'Preguntes';
+
+  @override
+  String get askAQuestionLabel => 'Fes una pregunta';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'La pregunta ha de tenir com a mínim $min caràcters';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'La pregunta ha de tenir com a màxim $max caràcters';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Opcions';
+    return 'Opció';
+  }
+
+  @override
+  String get pollOptionEmptyError => "L'opció no pot estar buida";
+
+  @override
+  String get pollOptionDuplicateError => 'Això ja és una opció';
+
+  @override
+  String get addAnOptionLabel => 'Afegeix una opció';
+
+  @override
+  String get multipleAnswersLabel => 'Respostes múltiples';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Màxim de vots per persona';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'El recompte de vots ha de ser com a mínim de $min';
+    }
+
+    if (max != null && votes > max) {
+      return 'El recompte de vots ha de ser com a màxim de $max';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Votació anònima';
+
+  @override
+  String get pollOptionsLabel => 'Opcions de votació';
+
+  @override
+  String get suggestAnOptionLabel => 'Suggerir una opció';
+
+  @override
+  String get enterANewOptionLabel => 'Introduïu una nova opció';
+
+  @override
+  String get addACommentLabel => 'Afegir un comentari';
+
+  @override
+  String get pollCommentsLabel => 'Comentaris de la votació';
+
+  @override
+  String get updateYourCommentLabel => 'Actualitzar el vostre comentari';
+
+  @override
+  String get enterYourCommentLabel => 'Introduïu el vostre comentari';
+
+  @override
+  String get createLabel => 'Crear';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Votació finalitzada',
+      unique: () => 'Seleccionar un',
+      limited: (count) => 'Seleccionar fins a $count',
+      all: () => 'Seleccionar un o més',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Veure totes les opcions';
+    return 'Veure totes les $count opcions';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Veure comentaris';
+
+  @override
+  String get viewResultsLabel => 'Veure resultats';
+
+  @override
+  String get endVoteLabel => 'Finalitzar votació';
+
+  @override
+  String get pollResultsLabel => 'Resultats de la votació';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Mostrar tots els vots';
+    return 'Mostrar tots els $count vots';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 vots',
+        1 => '1 vot',
+        _ => '$count vots',
+      };
+
+  @override
+  String get noPollVotesLabel => 'No hi ha vots en aquest moment';
+
+  @override
+  String get loadingPollVotesError => 'Error en carregar els vots';
+
+  @override
+  String get repliedToLabel => 'resposta a:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 fil nou';
+    return '$count fils nous';
+  }
+
+  @override
+  String get slideToCancelLabel => 'Llisca per cancel·lar';
+
+  @override
+  String get holdToRecordLabel =>
+      'Mantén premut per gravar, deixa anar per enviar';
 }

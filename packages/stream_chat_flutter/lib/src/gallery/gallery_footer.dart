@@ -86,8 +86,9 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
               else
                 IconButton(
                   key: shareButtonKey,
-                  icon: StreamSvgIcon.iconShare(
+                  icon: StreamSvgIcon(
                     size: 24,
+                    icon: StreamSvgIcons.share,
                     color: galleryFooterThemeData.shareIconColor,
                   ),
                   onPressed: () async {
@@ -144,7 +145,8 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                 ),
               ),
               IconButton(
-                icon: StreamSvgIcon.iconGrid(
+                icon: StreamSvgIcon(
+                  icon: StreamSvgIcons.grid,
                   color: galleryFooterThemeData.gridIconButtonColor,
                 ),
                 onPressed: () => _showPhotosModal(context),
@@ -194,7 +196,8 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: IconButton(
-                      icon: StreamSvgIcon.close(
+                      icon: StreamSvgIcon(
+                        icon: StreamSvgIcons.close,
                         color: galleryFooterThemeData.bottomSheetCloseIconColor,
                       ),
                       onPressed: () => Navigator.of(context).maybePop(),
@@ -261,12 +264,14 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                               clipBehavior: Clip.antiAlias,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
+                                // ignore: deprecated_member_use
                                 color: Colors.white.withOpacity(0.6),
                                 boxShadow: [
                                   BoxShadow(
                                     blurRadius: 8,
                                     color: chatThemeData
                                         .colorTheme.textHighEmphasis
+                                        // ignore: deprecated_member_use
                                         .withOpacity(0.3),
                                   ),
                                 ],

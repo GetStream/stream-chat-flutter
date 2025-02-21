@@ -200,7 +200,7 @@ class StreamChannelListTile extends StatelessWidget {
                     return const Offstage();
                   }
                   return unreadIndicatorBuilder?.call(context) ??
-                      StreamUnreadIndicator(cid: channel.cid);
+                      StreamUnreadIndicator.channels(cid: channel.cid);
                 },
               ),
             ],
@@ -330,10 +330,14 @@ class ChannelListTileSubtitle extends StatelessWidget {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          StreamSvgIcon.mute(size: 16),
-          Text(
-            '  ${context.translations.channelIsMutedText}',
-            style: textStyle,
+          const StreamSvgIcon(size: 16, icon: StreamSvgIcons.mute),
+          Expanded(
+            child: Text(
+              '  ${context.translations.channelIsMutedText}',
+              style: textStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       );

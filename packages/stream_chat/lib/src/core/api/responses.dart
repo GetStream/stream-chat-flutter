@@ -10,9 +10,14 @@ import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/poll.dart';
+import 'package:stream_chat/src/core/models/poll_option.dart';
+import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
+import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/models/user_block.dart';
 
 part 'responses.g.dart';
 
@@ -529,4 +534,190 @@ class CreateCallPayload extends _BaseResponse {
 
   /// The call object.
   CallPayload? call;
+}
+
+/// Contains information about a [User] that was banned from a [Channel] or App.
+@JsonSerializable(createToJson: false)
+class UserBlockResponse extends _BaseResponse {
+  /// User that banned the [user].
+  @JsonKey(defaultValue: '')
+  late String blockedByUserId;
+
+  /// Reason for the ban.
+  @JsonKey(defaultValue: '')
+  late String blockedUserId;
+
+  /// Timestamp when the [user] was banned.
+  late DateTime createdAt;
+
+  /// Create a new instance from a json
+  static UserBlockResponse fromJson(Map<String, dynamic> json) =>
+      _$UserBlockResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryBlockedUsers] api call
+@JsonSerializable(createToJson: false)
+class BlockedUsersResponse extends _BaseResponse {
+  /// Updated users
+  @JsonKey(defaultValue: [])
+  late List<UserBlock> blocks;
+
+  /// Create a new instance from a json
+  static BlockedUsersResponse fromJson(Map<String, dynamic> json) =>
+      _$BlockedUsersResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.createPoll] api call
+@JsonSerializable(createToJson: false)
+class CreatePollResponse extends _BaseResponse {
+  /// Created poll
+  late Poll poll;
+
+  /// Create a new instance from a json
+  static CreatePollResponse fromJson(Map<String, dynamic> json) =>
+      _$CreatePollResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getPoll] api call
+@JsonSerializable(createToJson: false)
+class GetPollResponse extends _BaseResponse {
+  /// Fetched poll
+  late Poll poll;
+
+  /// Create a new instance from a json
+  static GetPollResponse fromJson(Map<String, dynamic> json) =>
+      _$GetPollResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updatePoll] api call
+@JsonSerializable(createToJson: false)
+class UpdatePollResponse extends _BaseResponse {
+  /// Updated poll
+  late Poll poll;
+
+  /// Create a new instance from a json
+  static UpdatePollResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdatePollResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.createPollOption] api call
+@JsonSerializable(createToJson: false)
+class CreatePollOptionResponse extends _BaseResponse {
+  /// Created poll option
+  late PollOption pollOption;
+
+  /// Create a new instance from a json
+  static CreatePollOptionResponse fromJson(Map<String, dynamic> json) =>
+      _$CreatePollOptionResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getPollOption] api call
+@JsonSerializable(createToJson: false)
+class GetPollOptionResponse extends _BaseResponse {
+  /// Fetched poll option
+  late PollOption pollOption;
+
+  /// Create a new instance from a json
+  static GetPollOptionResponse fromJson(Map<String, dynamic> json) =>
+      _$GetPollOptionResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updatePollOption] api call
+@JsonSerializable(createToJson: false)
+class UpdatePollOptionResponse extends _BaseResponse {
+  /// Updated poll option
+  late PollOption pollOption;
+
+  /// Create a new instance from a json
+  static UpdatePollOptionResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdatePollOptionResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.castPollVote] api call
+@JsonSerializable(createToJson: false)
+class CastPollVoteResponse extends _BaseResponse {
+  /// Casted vote
+  late PollVote vote;
+
+  /// Create a new instance from a json
+  static CastPollVoteResponse fromJson(Map<String, dynamic> json) =>
+      _$CastPollVoteResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.removePollVote] api call
+@JsonSerializable(createToJson: false)
+class RemovePollVoteResponse extends EmptyResponse {
+  /// Deleted vote
+  late PollVote vote;
+
+  /// Create a new instance from a json
+  static RemovePollVoteResponse fromJson(Map<String, dynamic> json) =>
+      _$RemovePollVoteResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryPolls] api call
+@JsonSerializable(createToJson: false)
+class QueryPollsResponse extends _BaseResponse {
+  /// List of polls returned by the query
+  @JsonKey(defaultValue: [])
+  late List<Poll> polls;
+
+  /// Poll id of where to start searching from for next [results]
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryPollsResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryPollsResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryPollVotes] api call
+@JsonSerializable(createToJson: false)
+class QueryPollVotesResponse extends _BaseResponse {
+  /// List of poll votes returned by the query
+  @JsonKey(defaultValue: [])
+  late List<PollVote> votes;
+
+  /// Poll vote id of where to start searching from for next [results]
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryPollVotesResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryPollVotesResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getThread] api call
+@JsonSerializable(createToJson: false)
+class GetThreadResponse extends _BaseResponse {
+  /// The thread returned by the api call
+  late Thread thread;
+
+  /// Create a new instance from a json
+  static GetThreadResponse fromJson(Map<String, dynamic> json) =>
+      _$GetThreadResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updateThread] api call
+@JsonSerializable(createToJson: false)
+class UpdateThreadResponse extends _BaseResponse {
+  /// The thread returned by the api call
+  late Thread thread;
+
+  /// Create a new instance from a json
+  static UpdateThreadResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdateThreadResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryThreads] api call
+@JsonSerializable(createToJson: false)
+class QueryThreadsResponse extends _BaseResponse {
+  /// List of threads returned by the query
+  @JsonKey(defaultValue: [])
+  late List<Thread> threads;
+
+  /// The next page token
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryThreadsResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryThreadsResponseFromJson(json);
 }

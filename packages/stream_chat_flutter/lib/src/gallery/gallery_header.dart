@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/attachment_actions_modal/attachment_actions_modal.dart';
-import 'package:stream_chat_flutter/src/misc/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
@@ -88,7 +88,8 @@ class StreamGalleryHeader extends StatelessWidget
       elevation: elevation,
       leading: showBackButton
           ? IconButton(
-              icon: StreamSvgIcon.close(
+              icon: StreamSvgIcon(
+                icon: StreamSvgIcons.close,
                 color: galleryHeaderThemeData.closeButtonColor,
                 size: 24,
               ),
@@ -102,7 +103,8 @@ class StreamGalleryHeader extends StatelessWidget
       actions: <Widget>[
         if (!message.isEphemeral)
           IconButton(
-            icon: StreamSvgIcon.iconMenuPoint(
+            icon: StreamSvgIcon(
+              icon: StreamSvgIcons.menuPoint,
               color: galleryHeaderThemeData.iconMenuPointColor,
             ),
             onPressed: () => _showMessageActionModalBottomSheet(context),

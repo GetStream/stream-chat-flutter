@@ -30,7 +30,7 @@ class Users extends Table {
   BoolColumn get banned => boolean().withDefault(const Constant(false))();
 
   /// Map of custom user extraData
-  TextColumn get extraData => text().map(MapConverter<Object?>())();
+  TextColumn get extraData => text().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -58,68 +58,61 @@ class _StreamReactionPickerState extends State<StreamReactionPicker>
           vertical: 8,
         ),
         child: Row(
+          spacing: 16,
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
-          children: reactionIcons
-              .map<Widget>((reactionIcon) {
-                final ownReactionIndex =
-                    widget.message.ownReactions?.indexWhere(
-                          (reaction) => reaction.type == reactionIcon.type,
-                        ) ??
-                        -1;
-                final index = reactionIcons.indexOf(reactionIcon);
+          children: reactionIcons.map<Widget>((reactionIcon) {
+            final ownReactionIndex = widget.message.ownReactions?.indexWhere(
+                  (reaction) => reaction.type == reactionIcon.type,
+                ) ??
+                -1;
+            final index = reactionIcons.indexOf(reactionIcon);
 
-                final child = reactionIcon.builder(
-                  context,
-                  ownReactionIndex != -1,
-                  24,
-                );
+            final child = reactionIcon.builder(
+              context,
+              ownReactionIndex != -1,
+              24,
+            );
 
-                return ConstrainedBox(
-                  constraints: const BoxConstraints.tightFor(
-                    height: 24,
-                    width: 24,
-                  ),
-                  child: RawMaterialButton(
-                    elevation: 0,
-                    shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    constraints: const BoxConstraints.tightFor(
-                      height: 24,
-                      width: 24,
-                    ),
-                    onPressed: () {
-                      if (ownReactionIndex != -1) {
-                        removeReaction(
-                          context,
-                          widget.message.ownReactions![ownReactionIndex],
-                        );
-                      } else {
-                        sendReaction(
-                          context,
-                          reactionIcon.type,
-                        );
-                      }
-                    },
-                    child: AnimatedBuilder(
-                      animation: animations[index],
-                      builder: (context, child) => Transform.scale(
-                        scale: animations[index].value,
-                        child: child,
-                      ),
-                      child: child,
-                    ),
-                  ),
-                );
-              })
-              .insertBetween(
-                const SizedBox(
-                  width: 16,
+            return ConstrainedBox(
+              constraints: const BoxConstraints.tightFor(
+                height: 24,
+                width: 24,
+              ),
+              child: RawMaterialButton(
+                elevation: 0,
+                shape: ContinuousRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              )
-              .toList(),
+                constraints: const BoxConstraints.tightFor(
+                  height: 24,
+                  width: 24,
+                ),
+                onPressed: () {
+                  if (ownReactionIndex != -1) {
+                    removeReaction(
+                      context,
+                      widget.message.ownReactions![ownReactionIndex],
+                    );
+                  } else {
+                    sendReaction(
+                      context,
+                      reactionIcon.type,
+                    );
+                  }
+                },
+                child: AnimatedBuilder(
+                  animation: animations[index],
+                  builder: (context, child) => Transform.scale(
+                    scale: animations[index].value,
+                    child: child,
+                  ),
+                  child: child,
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );

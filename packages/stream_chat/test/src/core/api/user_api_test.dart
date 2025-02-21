@@ -115,4 +115,71 @@ void main() {
         })).called(1);
     verifyNoMoreInteractions(client);
   });
+
+  test('blockUser', () async {
+    const targetUserId = 'test-target-user-id';
+
+    const path = '/users/block';
+
+    when(() => client.post(path, data: {
+          'blocked_user_id': targetUserId,
+        })).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'blocked_by_user_id': 'deven',
+          'blocked_user_id': 'jaap',
+          'created_at': '2024-10-01 12:45:23.456',
+        },
+      ),
+    );
+
+    final res = await userApi.blockUser(targetUserId);
+
+    expect(res, isNotNull);
+
+    verify(() => client.post(path, data: {
+          'blocked_user_id': targetUserId,
+        })).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('unblockUser', () async {
+    const targetUserId = 'test-target-user-id';
+
+    const path = '/users/unblock';
+
+    when(() => client.post(path, data: {
+          'blocked_user_id': targetUserId,
+        })).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: <String, dynamic>{},
+      ),
+    );
+
+    final res = await userApi.unblockUser(targetUserId);
+
+    expect(res, isNotNull);
+
+    verify(() => client.post(path, data: {
+          'blocked_user_id': targetUserId,
+        })).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('queryBlockedUsers', () async {
+    const path = '/users/block';
+
+    when(() => client.get(path)).thenAnswer(
+      (_) async => successResponse(path, data: <String, dynamic>{}),
+    );
+
+    final res = await userApi.queryBlockedUsers();
+
+    expect(res, isNotNull);
+
+    verify(() => client.get(path)).called(1);
+    verifyNoMoreInteractions(client);
+  });
 }

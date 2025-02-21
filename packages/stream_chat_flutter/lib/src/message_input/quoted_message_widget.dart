@@ -120,6 +120,8 @@ class _QuotedMessage extends StatelessWidget {
 
   bool get _isDeleted => message.isDeleted || message.deletedAt != null;
 
+  bool get _isPoll => message.poll != null;
+
   @override
   Widget build(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
@@ -139,6 +141,18 @@ class _QuotedMessage extends StatelessWidget {
           style: messageTheme.messageTextStyle?.copyWith(
             fontStyle: FontStyle.italic,
             color: messageTheme.createdAtStyle?.color,
+          ),
+        ),
+      ];
+    } else if (_isPoll) {
+      // Show poll message
+      children = [
+        Flexible(
+          child: Text(
+            '📊 ${message.poll?.name}',
+            style: messageTheme.messageTextStyle?.copyWith(
+              fontSize: 12,
+            ),
           ),
         ),
       ];
@@ -182,9 +196,6 @@ class _QuotedMessage extends StatelessWidget {
       );
     }
 
-    // Add some spacing between the children.
-    children = children.insertBetween(const SizedBox(width: 8));
-
     return Container(
       decoration: BoxDecoration(
         color: _getBackgroundColor(context),
@@ -202,6 +213,7 @@ class _QuotedMessage extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       child: Row(
+        spacing: 8,
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment:
             reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -249,7 +261,8 @@ class _ParseAttachments extends StatelessWidget {
 
     var clipBehavior = Clip.none;
     ShapeDecoration? decoration;
-    if (attachment.type != AttachmentType.file) {
+    if (attachment.type != AttachmentType.file &&
+        attachment.type != AttachmentType.voiceRecording) {
       clipBehavior = Clip.hardEdge;
       decoration = ShapeDecoration(
         shape: RoundedRectangleBorder(
@@ -327,6 +340,7 @@ class _ParseAttachments extends StatelessWidget {
       AttachmentType.video: _createMediaThumbnail,
       AttachmentType.urlPreview: _createUrlThumbnail,
       AttachmentType.file: _createFileThumbnail,
+      AttachmentType.voiceRecording: _createFileThumbnail,
     };
   }
 }

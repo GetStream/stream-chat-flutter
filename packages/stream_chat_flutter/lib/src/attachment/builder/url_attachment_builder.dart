@@ -87,12 +87,11 @@ class UrlAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       child = _buildUrlPreview(urlPreviews.first);
     } else {
       child = Column(
+        // Add a small vertical padding between each attachment.
+        spacing: padding.vertical / 2,
         children: <Widget>[
           for (final urlPreview in urlPreviews) _buildUrlPreview(urlPreview),
-        ].insertBetween(
-          // Add a small vertical padding between each attachment.
-          SizedBox(height: padding.vertical / 2),
-        ),
+        ],
       );
     }
 

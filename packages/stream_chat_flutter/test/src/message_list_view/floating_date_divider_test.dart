@@ -22,7 +22,7 @@ void main() {
         const ItemPosition(
           index: 0,
           itemLeadingEdge: 0,
-          itemTrailingEdge: 0,
+          itemTrailingEdge: 0.1, // Trailing edge is slightly visible.
         ),
       ],
     );

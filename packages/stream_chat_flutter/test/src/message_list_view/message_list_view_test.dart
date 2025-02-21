@@ -96,7 +96,10 @@ void main() {
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
-                    image: AssetImage('images/placeholder.png'),
+                    image: AssetImage(
+                      'lib/assets/images/placeholder.png',
+                      package: 'stream_chat_flutter',
+                    ),
                     fit: BoxFit.none,
                   ),
                 ),
@@ -162,7 +165,10 @@ void main() {
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
-                    image: AssetImage('images/placeholder.png'),
+                    image: AssetImage(
+                      'lib/assets/images/placeholder.png',
+                      package: 'stream_chat_flutter',
+                    ),
                     fit: BoxFit.none,
                   ),
                 ),
@@ -206,7 +212,10 @@ void main() {
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
-                    image: AssetImage('images/placeholder.png'),
+                    image: AssetImage(
+                      'lib/assets/images/placeholder.png',
+                      package: 'stream_chat_flutter',
+                    ),
                     fit: BoxFit.none,
                   ),
                 ),

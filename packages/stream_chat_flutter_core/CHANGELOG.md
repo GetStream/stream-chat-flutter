@@ -1,3 +1,40 @@
+## 9.4.0
+
+- Updated minimum Flutter version to 3.27.4 for the SDK.
+
+## 9.3.0
+
+- Updated `stream_chat` dependency to [`9.3.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 9.2.0
+
+- Updated `stream_chat` dependency to [`9.2.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 9.1.0
+
+✅ Added
+
+- Added `StreamThreadListController` to load and paginate list of threads.
+
+## 9.0.0
+
+✅ Added
+
+- Added `StreamPollController` to create and manage a poll based on the passed configs.
+- Added `StreamPollVoteListController` to manage the list of votes for a poll.
+
+🔄 Changed
+
+- Updated minimum Flutter version to 3.24.5 for the SDK.
+
+## 8.3.0
+
+- Updated `stream_chat` dependency to [`8.3.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 8.2.0
+
+- Updated `stream_chat` dependency to [`8.2.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 8.1.0
 
 🔄 Changed

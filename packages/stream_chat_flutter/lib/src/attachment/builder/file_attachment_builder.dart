@@ -70,12 +70,11 @@ class FileAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       child = _buildFileAttachment(files.first);
     } else {
       child = Column(
+        // Add a small vertical padding between each attachment.
+        spacing: padding.vertical / 2,
         children: <Widget>[
           for (final file in files) _buildFileAttachment(file),
-        ].insertBetween(
-          // Add a small vertical padding between each attachment.
-          SizedBox(height: padding.vertical / 2),
-        ),
+        ],
       );
     }
 

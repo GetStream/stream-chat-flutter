@@ -4,7 +4,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template streamBackButton}
 /// A custom back button implementation
 /// {@endtemplate}
-// ignore: prefer-match-file-name
 class StreamBackButton extends StatelessWidget {
   /// {@macro streamBackButton}
   const StreamBackButton({
@@ -25,39 +24,40 @@ class StreamBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        RawMaterialButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
+    final theme = StreamChatTheme.of(context);
+
+    Widget icon = StreamSvgIcon(
+      size: 24,
+      icon: StreamSvgIcons.left,
+      color: theme.colorTheme.textHighEmphasis,
+    );
+
+    if (showUnreadCount) {
+      icon = Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          icon,
+          PositionedDirectional(
+            top: -4,
+            start: 12,
+            child: switch (channelId) {
+              final cid? => StreamUnreadIndicator.channels(cid: cid),
+              _ => StreamUnreadIndicator(),
+            },
           ),
-          elevation: 0,
-          highlightElevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          onPressed: () {
-            if (onPressed != null) {
-              onPressed!();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
-          padding: const EdgeInsets.all(14),
-          child: StreamSvgIcon.left(
-            size: 24,
-            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-          ),
-        ),
-        if (showUnreadCount)
-          Positioned(
-            top: 7,
-            right: 7,
-            child: StreamUnreadIndicator(
-              cid: channelId,
-            ),
-          ),
-      ],
+        ],
+      );
+    }
+
+    return IconButton(
+      icon: icon,
+      onPressed: () {
+        if (onPressed case final onPressed?) {
+          return onPressed();
+        }
+
+        Navigator.maybePop(context);
+      },
     );
   }
 }

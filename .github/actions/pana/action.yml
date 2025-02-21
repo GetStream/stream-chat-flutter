@@ -1,0 +1,52 @@
+name: Pana Workflow
+
+inputs:
+  min_score:
+    required: false
+    type: number
+    default: 120
+  pana_version:
+    required: false
+    type: string
+  runs_on:
+    required: false
+    type: string
+    default: "ubuntu-latest"
+  working_directory:
+    required: false
+    type: string
+    default: "."
+
+runs:
+  using: "composite"
+  steps:
+    - name: Temporary Override Local Dependencies
+      uses: mikefarah/yq@master
+      with:
+        cmd: |
+          yq eval '.dependencies.stream_chat_flutter = {"path": "../stream_chat_flutter"}' -i packages/stream_chat_localizations/pubspec.yaml
+          yq eval '.dependencies.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_flutter_core/pubspec.yaml
+          yq eval '.dependencies.stream_chat_flutter_core = {"path": "../stream_chat_flutter_core"}' -i packages/stream_chat_flutter/pubspec.yaml
+          yq eval '.dependencies.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_persistence/pubspec.yaml
+    
+    - name: Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        cache: true
+        channel: stable
+        flutter-version: "3.x"
+        cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+    - name: Install Pana
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+      run: flutter pub global activate pana ${{inputs.pana_version}}
+
+    - name: Verify Pana Score
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+      run: |
+        PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
+        echo "Score: $PANA_SCORE"
+        IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0];
+        if (( $SCORE < ${{inputs.min_score}} )); then echo "The minimum score of ${{inputs.min_score}} was not met!"; exit 1; fi

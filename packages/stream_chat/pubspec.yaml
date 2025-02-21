@@ -1,13 +1,25 @@
 name: stream_chat
 homepage: https://getstream.io/
 description: The official Dart client for Stream Chat, a service for building chat applications.
-version: 8.1.0
+version: 9.4.0
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 publish_to: 'none'
 
+# Note: The environment configuration and dependency versions are managed by Melos.
+#
+# Do not edit them manually.
+#
+# Steps to update dependencies:
+#   1. Modify the version in the melos.yaml file.
+#   2. Run `melos bootstrap` to apply changes.
+#
+# Steps to add a new dependency:
+#   1. Add the dependency to this list.
+#   2. Add it to the melos.yaml file for future updates.
+
 environment:
-  sdk: '>=3.4.0 <4.0.0'
+  sdk: ^3.6.2
 
 dependencies:
   async: ^2.11.0
@@ -20,7 +32,7 @@ dependencies:
   json_annotation: ^4.9.0
   logging: ^1.2.0
   meta: ^1.9.1
-  mime: ^1.0.5
+  mime: ^2.0.0
   rate_limiter: ^1.0.0
   rxdart: ^0.28.0
   synchronized: ^3.1.0+1

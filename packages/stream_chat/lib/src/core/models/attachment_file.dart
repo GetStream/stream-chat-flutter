@@ -28,7 +28,7 @@ class AttachmentFile {
           'File by path is not supported in web, Please provide bytes',
         ),
         assert(
-          name?.contains('.') ?? true,
+          name == null || name.isEmpty || name.contains('.'),
           'Invalid file name, should also contain file extension',
         ),
         _name = name;
@@ -47,8 +47,10 @@ class AttachmentFile {
   final String? _name;
 
   /// File name including its extension.
-  String? get name =>
-      _name ?? path?.split(CurrentPlatform.isWindows ? r'\' : '/').last;
+  String? get name {
+    if (_name case final name? when name.isNotEmpty) return name;
+    return path?.split(CurrentPlatform.isWindows ? r'\' : '/').last;
+  }
 
   /// Byte data for this file. Particularly useful if you want to manipulate
   /// its data or easily upload to somewhere else.
@@ -69,22 +71,18 @@ class AttachmentFile {
 
   /// Converts this into a [MultipartFile]
   Future<MultipartFile> toMultipartFile() async {
-    MultipartFile multiPartFile;
-
-    if (CurrentPlatform.isWeb) {
-      multiPartFile = MultipartFile.fromBytes(
-        bytes!,
-        filename: name,
-        contentType: mediaType,
-      );
-    } else {
-      multiPartFile = await MultipartFile.fromFile(
-        path!,
-        filename: name,
-        contentType: mediaType,
-      );
-    }
-    return multiPartFile;
+    return switch (CurrentPlatform.type) {
+      PlatformType.web => MultipartFile.fromBytes(
+          bytes!,
+          filename: name,
+          contentType: mediaType,
+        ),
+      _ => await MultipartFile.fromFile(
+          path!,
+          filename: name,
+          contentType: mediaType,
+        ),
+    };
   }
 
   /// Creates a copy of this [AttachmentFile] but with the given fields
@@ -106,7 +104,7 @@ class AttachmentFile {
 
 /// Union class to hold various [UploadState] of a attachment.
 @freezed
-class UploadState with _$UploadState {
+sealed class UploadState with _$UploadState {
   // Dummy private constructor in order to use getters
   const UploadState._();
 

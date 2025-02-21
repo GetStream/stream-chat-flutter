@@ -1,7 +1,7 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -63,6 +63,11 @@ void main() {
     );
   });
 
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(methodChannel, null);
+  });
+
   testWidgets(
     'control test',
     (WidgetTester tester) async {
@@ -92,27 +97,27 @@ void main() {
     },
   );
 
-  testGoldens(
+  goldenTest(
     'golden test for the group with "user123" and "user456"',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialAppWrapper(
-          home: StreamChat(
-            client: client,
-            streamChatThemeData: StreamChatThemeData.light(),
-            child: StreamChannel(
-              channel: channel,
-              child: Scaffold(
-                body: Center(
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: StreamGroupAvatar(
-                      members: [
-                        member,
-                        member2,
-                      ],
-                    ),
+    fileName: 'group_avatar_0',
+    constraints: const BoxConstraints.tightFor(width: 300, height: 300),
+    builder: () {
+      return MaterialAppWrapper(
+        home: StreamChat(
+          client: client,
+          streamChatThemeData: StreamChatThemeData.light(),
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: StreamGroupAvatar(
+                    members: [
+                      member,
+                      member2,
+                    ],
                   ),
                 ),
               ),
@@ -120,117 +125,6 @@ void main() {
           ),
         ),
       );
-
-      await screenMatchesGolden(tester, 'group_avatar_0');
     },
   );
-
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(methodChannel, null);
-  });
-
-  /*testGoldens(
-    'golden test for the name "demo user"',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: GroupAvatar(
-                  members: [
-                    Member(userId: 'user123'),
-                    Member(userId: 'user456'),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await screenMatchesGolden(tester, 'group_avatar_0');
-    },
-  );
-
-  testGoldens(
-    'golden test for the name "demo"',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: GroupAvatar(
-                  members: [
-                    Member(userId: 'user123'),
-                    Member(userId: 'user456'),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await screenMatchesGolden(tester, 'group_avatar_1');
-    },
-  );
-
-  testGoldens(
-    'control special character test',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: GroupAvatar(
-                  members: [
-                    Member(userId: 'user123'),
-                    Member(userId: 'user456'),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await screenMatchesGolden(tester, 'group_avatar_3');
-    },
-  );
-
-  testGoldens(
-    'control special character test 2',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: GroupAvatar(
-                  members: [
-                    Member(userId: 'user123'),
-                    Member(userId: 'user456'),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await screenMatchesGolden(tester, 'group_avatar_3');
-    },
-  );*/
 }

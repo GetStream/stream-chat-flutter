@@ -81,6 +81,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Nachricht gelöscht';
 
   @override
+  String get editedMessageLabel => 'Bearbeitet';
+
+  @override
   String get messageReactionsLabel => 'Nachricht-Reaktionen';
 
   @override
@@ -456,4 +459,158 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Fehler beim Markieren der Nachricht als ungelesen. Kann keine älteren'
       ' ungelesenen Nachrichten markieren als die neuesten 100'
       ' Kanalnachrichten.';
+
+  @override
+  String createPollLabel({bool isNew = false}) {
+    if (isNew) return 'Erstellen einer neuen Umfrage';
+    return 'Umfrage erstellen';
+  }
+
+  @override
+  String get questionsLabel => 'Fragen';
+
+  @override
+  String get askAQuestionLabel => 'Stellen Sie eine Frage';
+
+  @override
+  String? pollQuestionValidationError(int length, Range<int> range) {
+    final (:min, :max) = range;
+
+    // Check if the question is too short.
+    if (min != null && length < min) {
+      return 'Die Frage muss mindestens $min Zeichen lang sein';
+    }
+
+    // Check if the question is too long.
+    if (max != null && length > max) {
+      return 'Die Frage darf höchstens $max Zeichen lang sein';
+    }
+
+    return null;
+  }
+
+  @override
+  String optionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Optionen';
+    return 'Option';
+  }
+
+  @override
+  String get pollOptionEmptyError => 'Option darf nicht leer sein';
+
+  @override
+  String get pollOptionDuplicateError => 'Dies ist bereits eine Option';
+
+  @override
+  String get addAnOptionLabel => 'Option hinzufügen';
+
+  @override
+  String get multipleAnswersLabel => 'Mehrere Antworten';
+
+  @override
+  String get maximumVotesPerPersonLabel => 'Maximale Stimmen pro Person';
+
+  @override
+  String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
+    final (:min, :max) = range;
+
+    if (min != null && votes < min) {
+      return 'Die Stimmenauszählung muss mindestens $min betragen';
+    }
+
+    if (max != null && votes > max) {
+      return 'Die Stimmenauszählung darf höchstens $max betragen';
+    }
+
+    return null;
+  }
+
+  @override
+  String get anonymousPollLabel => 'Anonyme Umfrage';
+
+  @override
+  String get pollOptionsLabel => 'Umfrage-Optionen';
+
+  @override
+  String get suggestAnOptionLabel => 'Option vorschlagen';
+
+  @override
+  String get enterANewOptionLabel => 'Neue Option eingeben';
+
+  @override
+  String get addACommentLabel => 'Kommentar hinzufügen';
+
+  @override
+  String get pollCommentsLabel => 'Umfrage-Kommentare';
+
+  @override
+  String get updateYourCommentLabel => 'Kommentar aktualisieren';
+
+  @override
+  String get enterYourCommentLabel => 'Kommentar eingeben';
+
+  @override
+  String get createLabel => 'Erstellen';
+
+  @override
+  String pollVotingModeLabel(PollVotingMode votingMode) {
+    return votingMode.when(
+      disabled: () => 'Abstimmung beendet',
+      unique: () => 'Eine auswählen',
+      limited: (count) => 'Bis zu $count auswählen',
+      all: () => 'Eine oder mehrere auswählen',
+    );
+  }
+
+  @override
+  String seeAllOptionsLabel({int? count}) {
+    if (count == null) return 'Alle Optionen anzeigen';
+    return 'Alle $count Optionen anzeigen';
+  }
+
+  @override
+  String get viewCommentsLabel => 'Kommentare anzeigen';
+
+  @override
+  String get viewResultsLabel => 'Ergebnisse anzeigen';
+
+  @override
+  String get endVoteLabel => 'Abstimmung beenden';
+
+  @override
+  String get pollResultsLabel => 'Umfrage-Ergebnisse';
+
+  @override
+  String showAllVotesLabel({int? count}) {
+    if (count == null) return 'Alle Stimmen anzeigen';
+    return 'Alle $count Stimmen anzeigen';
+  }
+
+  @override
+  String voteCountLabel({int? count}) => switch (count) {
+        null || < 1 => '0 Stimmen',
+        1 => '1 Stimme',
+        _ => '$count Stimmen',
+      };
+
+  @override
+  String get noPollVotesLabel => 'Derzeit keine Umfrage-Stimmen';
+
+  @override
+  String get loadingPollVotesError => 'Fehler beim Laden der Umfrage-Stimmen';
+
+  @override
+  String get repliedToLabel => 'antwortete:';
+
+  @override
+  String newThreadsLabel({required int count}) {
+    if (count == 1) return '1 neuer Thread';
+    return '$count neue Threads';
+  }
+
+  @override
+  String get slideToCancelLabel => 'Zum Abbrechen schieben';
+
+  @override
+  String get holdToRecordLabel => 'Zum Aufnehmen halten, zum Senden loslassen';
 }
