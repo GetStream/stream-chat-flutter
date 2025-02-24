@@ -62,19 +62,25 @@ class StreamMessageSendButton extends StatelessWidget {
       );
     }
 
+    final idleSendIcon = switch (idleSendButton) {
+      final idleButton? => idleButton,
+      _ => const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
+    };
+
+    final activeSendIcon = switch (activeSendButton) {
+      final activeButton? => activeButton,
+      _ => const StreamSvgIcon(icon: StreamSvgIcons.circleUp),
+    };
+
     final theme = StreamMessageInputTheme.of(context);
+    final icon = isIdle ? idleSendIcon : activeSendIcon;
     final onPressed = isIdle ? null : onSendMessage;
     return StreamMessageInputIconButton(
       key: const Key('send_button'),
-      icon: StreamSvgIcon(icon: _sendButtonIcon),
+      icon: icon,
       color: theme.sendButtonColor,
       disabledColor: theme.sendButtonIdleColor,
       onPressed: onPressed,
     );
-  }
-
-  StreamSvgIconData get _sendButtonIcon {
-    if (isIdle) return StreamSvgIcons.sendMessage;
-    return StreamSvgIcons.circleUp;
   }
 }
