@@ -4,6 +4,7 @@
 
 - Fixed `StreamMessageInput` not able to edit the ogAttachments.
 - Fixed `MessageWidget` showing pinned background for deleted messages.
+- [[#2118]](https://github.com/GetStream/stream-chat-flutter/issues/2118) Fixed message input buttons not being able to customized.
 
 ✅ Added
 
