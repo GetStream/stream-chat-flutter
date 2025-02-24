@@ -34,7 +34,7 @@ dependencies:
   stream_chat:
     git:
       url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
+      ref: flutter-3.29.0
       path: packages/stream_chat
 
 dev_dependencies:
