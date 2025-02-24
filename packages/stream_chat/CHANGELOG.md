@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#1774]](https://github.com/GetStream/stream-chat-flutter/issues/1774) Fixed failed to execute 'close' on 'WebSocket'.
+
 ## 9.4.0
 
 🔄 Changed
