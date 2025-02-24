@@ -2796,19 +2796,40 @@ class ChannelClientState {
   }
 
   bool _countMessageAsUnread(Message message) {
-    final userId = _channel.client.state.currentUser?.id;
-    final userIsMuted =
-        _channel.client.state.currentUser?.mutes.firstWhereOrNull(
-              (m) => m.user.id == message.user?.id,
-            ) !=
-            null;
-    final isThreadMessage = message.parentId != null;
+    // Don't count if the message is silent or shadowed.
+    if (message.silent) return false;
+    if (message.shadowed) return false;
 
-    return !message.silent &&
-        !message.shadowed &&
-        message.user?.id != userId &&
-        !userIsMuted &&
-        !isThreadMessage;
+    // Don't count if the channel is muted.
+    if (_channel.isMuted) return false;
+
+    // Don't count if the channel doesn't allow read events.
+    if (!_channel.ownCapabilities.contains(PermissionType.readEvents)) {
+      return false;
+    }
+
+    // Don't count thread replies which are not shown in the channel as unread.
+    if (message.parentId != null && message.showInChannel == false) {
+      return false;
+    }
+
+    // Don't count if the message doesn't have a user.
+    final messageUser = message.user;
+    if (messageUser == null) return false;
+
+    // Don't count if the current user is not set.
+    final currentUser = _channel.client.state.currentUser;
+    if (currentUser == null) return false;
+
+    // Don't count user's own messages as unread.
+    if (messageUser.id == currentUser.id) return false;
+
+    // Don't count messages from muted users as unread.
+    final isMuted = currentUser.mutes.any((it) => it.user.id == messageUser.id);
+    if (isMuted) return false;
+
+    // If we've passed all checks, count the message as unread.
+    return true;
   }
 
   /// Counts the number of unread messages mentioning the current user.
