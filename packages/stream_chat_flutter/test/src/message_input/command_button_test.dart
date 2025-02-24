@@ -44,32 +44,28 @@ void main() {
       ),
     );
 
-    final iconFound = find.byWidget(icon);
-    expect(iconFound, findsOneWidget);
+    expect(find.byIcon(Icons.add), findsOneWidget);
   });
 
-  testWidgets('CommandButton should not accept both color and icon',
-      (tester) async {
-    expect(
-      () => MaterialApp(
+  testWidgets('CommandButton should accept color', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
         home: Scaffold(
           body: Center(
             child: CommandButton(
               color: Colors.red,
-              icon: const Icon(Icons.add),
               onPressed: () {},
             ),
           ),
         ),
       ),
-      throwsA(
-        isA<AssertionError>().having(
-          (e) => e.message,
-          'message',
-          'Either icon or color should be provided',
-        ),
-      ),
     );
+
+    final buttonFinder = find.byType(CommandButton);
+    expect(buttonFinder, findsOneWidget);
+
+    final button = tester.widget<CommandButton>(buttonFinder);
+    expect(button.color, Colors.red);
   });
 
   goldenTest(
