@@ -2,6 +2,10 @@
 
 🐞 Fixed
 
+- [[#1964]](https://github.com/GetStream/stream-chat-flutter/issues/1964) Channel.membership field is not updated
+
+🐞 Fixed
+
 - [[#2016]](https://github.com/GetStream/stream-chat-flutter/issues/2016) Fix muted channel's unreadCount incorrectly updated.
 
 ## 9.4.0
