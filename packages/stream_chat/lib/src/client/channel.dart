@@ -1608,7 +1608,8 @@ class Channel {
     _checkInitialized();
     final res = await _client.getMessagesById(id!, type, messageIDs);
     final messages = res.messages;
-    state?.updateChannelState(ChannelState(messages: messages));
+    state
+        ?.updateChannelState(state!._channelState.copyWith(messages: messages));
     return res;
   }
 
@@ -2043,11 +2044,16 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.memberAdded).listen((Event e) {
       final member = e.member;
       final existingMembers = channelState.members ?? [];
+      final updatedMembership =
+      member!.userId == _channel._client.state.currentUser?.id
+          ? member
+          : channelState.membership;
       updateChannelState(channelState.copyWith(
         members: [
           ...existingMembers,
-          member!,
+          member,
         ],
+        membership: updatedMembership,
       ));
     }));
   }
@@ -2057,13 +2063,18 @@ class ChannelClientState {
       final user = e.user;
       final existingMembers = channelState.members ?? [];
       final existingRead = channelState.read ?? [];
+      final updatedMembership =
+      user!.id == _channel._client.state.currentUser?.id
+          ? null
+          : channelState.membership;
       updateChannelState(channelState.copyWith(
         members: existingMembers
-            .where((m) => m.userId != user!.id)
+            .where((m) => m.userId != user.id)
             .toList(growable: false),
         read: existingRead
-            .where((r) => r.user.id != user!.id)
+            .where((r) => r.user.id != user.id)
             .toList(growable: false),
+        membership: updatedMembership,
       ));
     }));
   }
@@ -2072,10 +2083,15 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.memberUpdated).listen((Event e) {
       final member = e.member;
       final existingMembers = channelState.members ?? [];
+      final updatedMembership =
+      member!.userId == _channel._client.state.currentUser?.id
+          ? member
+          : channelState.membership;
       updateChannelState(channelState.copyWith(
         members: existingMembers
-            .map((m) => m.userId == member!.userId ? member : m)
+            .map((m) => m.userId == member.userId ? member : m)
             .toList(growable: false),
+        membership: updatedMembership,
       ));
     }));
   }
@@ -2177,10 +2193,15 @@ class ChannelClientState {
 
     if (memberIndex == -1) return;
     currentMembers[memberIndex] = member;
+    final updatedMembership =
+    member.userId == _channel._client.state.currentUser?.id
+        ? member
+        : channelState.membership;
 
     updateChannelState(
       channelState.copyWith(
         members: currentMembers,
+        membership: updatedMembership,
       ),
     );
   }
@@ -2912,7 +2933,7 @@ class ChannelClientState {
 
     _checkExpiredAttachmentMessages(updatedState);
 
-    _channelState = _channelState.copyWith(
+    _channelState = ChannelState(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
       watchers: newWatchers,
@@ -2920,6 +2941,7 @@ class ChannelClientState {
       members: newMembers,
       read: newReads,
       pinnedMessages: updatedState.pinnedMessages,
+      membership: updatedState.membership,
     );
   }
 
@@ -3011,14 +3033,19 @@ class ChannelClientState {
                 newMembers.indexWhere((m) => m.userId == event.user!.id);
             if (oldMemberIndex > -1) {
               final oldMember = newMembers.removeAt(oldMemberIndex);
+              final updatedMembership =
+              event.user!.id == _channel._client.state.currentUser?.id
+                  ? channelState.membership?.copyWith(user: event.user)
+                  : channelState.membership;
               updateChannelState(
-                ChannelState(
+                _channelState.copyWith(
                   members: [
                     ...newMembers,
                     oldMember.copyWith(
                       user: event.user,
                     ),
                   ],
+                  membership: updatedMembership,
                 ),
               );
             }

@@ -1,4 +1,4 @@
-import 'package:stream_chat/stream_chat.dart' show ChannelState, Event;
+import 'package:stream_chat/stream_chat.dart' show Event;
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
@@ -193,7 +193,8 @@ mixin class StreamChannelListEventHandler {
       if (memberIndex < 0) return channel;
 
       members[memberIndex] = members[memberIndex].copyWith(user: user);
-      final updatedState = ChannelState(members: [...members]);
+      final updatedState =
+          channel.state!.channelState.copyWith(members: [...members]);
       channel.state!.updateChannelState(updatedState);
 
       return channel;

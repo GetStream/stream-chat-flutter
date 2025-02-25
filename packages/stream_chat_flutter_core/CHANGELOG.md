@@ -1,3 +1,7 @@
+🐞 Fixed
+
+- [[#1964]](https://github.com/GetStream/stream-chat-flutter/issues/1964) Channel.membership field is not updated
+
 ## 9.4.0
 
 - Updated minimum Flutter version to 3.27.4 for the SDK.
