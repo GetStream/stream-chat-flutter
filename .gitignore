@@ -46,6 +46,7 @@ GeneratedPluginRegistrant.*
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/app/.cxx
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -105,6 +106,7 @@ Podfile.lock
 
 # Other ignored files
 google-services.json
+!sample_app/android/app/google-services.json
 .melos_tool/
 .packages/flutter_widgets/example/ios/Flutter/.last_build_id
 .packages/dart_client/example/ios/Flutter/.last_build_id
