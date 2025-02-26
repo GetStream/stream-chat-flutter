@@ -96,8 +96,8 @@ class Attachment extends Equatable {
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
   String? get type {
-    // If the attachment contains titleLink but is not of type giphy, we
-    // consider it as a urlPreview.
+    // If the attachment contains ogScrapeUrl as well as titleLink, we consider
+    // it as a urlPreview.
     if (ogScrapeUrl != null && titleLink != null) {
       return AttachmentType.urlPreview;
     }
