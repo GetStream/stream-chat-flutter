@@ -51,11 +51,10 @@ class Attachment extends Equatable {
     this.originalHeight,
     Map<String, Object?> extraData = const {},
     this.file,
-    UploadState? uploadState,
+    this.uploadState = const UploadState.preparing(),
   })  : id = id ?? const Uuid().v4(),
         _type = type,
         title = title ?? file?.name,
-        _uploadState = uploadState,
         localUri = file?.path != null ? Uri.parse(file!.path!) : null,
         // For backwards compatibility,
         // set 'file_size', 'mime_type' in [extraData].
@@ -99,7 +98,7 @@ class Attachment extends Equatable {
   String? get type {
     // If the attachment contains titleLink but is not of type giphy, we
     // consider it as a urlPreview.
-    if (_type != AttachmentType.giphy && titleLink != null) {
+    if (ogScrapeUrl != null && titleLink != null) {
       return AttachmentType.urlPreview;
     }
 
@@ -163,15 +162,8 @@ class Attachment extends Equatable {
   final AttachmentFile? file;
 
   /// The current upload state of the attachment
-  UploadState get uploadState {
-    if (_uploadState case final state?) return state;
-
-    return ((assetUrl != null || imageUrl != null || thumbUrl != null)
-        ? const UploadState.success()
-        : const UploadState.preparing());
-  }
-
-  final UploadState? _uploadState;
+  @JsonKey(defaultValue: UploadState.success)
+  final UploadState uploadState;
 
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;

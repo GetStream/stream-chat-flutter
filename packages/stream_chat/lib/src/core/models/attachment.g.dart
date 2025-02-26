@@ -36,7 +36,7 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
           ? null
           : AttachmentFile.fromJson(json['file'] as Map<String, dynamic>),
       uploadState: json['upload_state'] == null
-          ? null
+          ? const UploadState.success()
           : UploadState.fromJson(json['upload_state'] as Map<String, dynamic>),
     );
 
