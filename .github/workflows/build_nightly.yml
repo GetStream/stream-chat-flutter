@@ -1,0 +1,116 @@
+name: build_nightly
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: sample_app
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_deploy_ios:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Setup Ruby and Gems
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: sample_app/ios
+          bundler-cache: true
+
+      - name: Install firebase-tools
+        run: npm install -g firebase-tools
+
+      - name: Copy google service account
+        run: |
+          echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" > ${{GITHUB_WORKSPACE}}/firebase-service-account.json
+
+      - name: Build and release
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{GITHUB_WORKSPACE}}/firebase-service-account.json
+        run: |
+          flutter build ios --no-codesign
+          cd ios
+          bundle exec fastlane deploy_to_firebase
+
+  build_and_deploy_android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build
+        run: flutter build apk
+
+      - name: Deploy
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{secrets.SAMPLE_FIREBASE_ANDROID_APPID}}
+          serviceCredentialsFileContent: ${{secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS}}
+          groups: stream-testers
+          debug: true
+          file: sample_app/build/app/outputs/apk/release/app-release.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-stream-chat-v1
+          path: sample_app/build/app/outputs/apk/release/app-release.apk
+
+  build_and_deploy_web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: config git
+        run: |
+          git config --global user.email "$(git log --format='%ae' HEAD^!)"
+          git config --global user.name "$(git log --format='%an' HEAD^!)"
+          git fetch origin gh-pages:gh-pages
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          flutter-version: 3.29.0
+
+      - name: Build and Deploy
+        uses: bluefireteam/flutter-gh-pages@v7
+        with:
+          baseHref: /flutter-samples/
+          workingDir: sample_app
+
+
