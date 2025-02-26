@@ -2,7 +2,8 @@
 
 🔄 Changed
 
-- Simplified the logic for setting and clearing OG attachments by removing the `_ogAttachment` field and directly working with the attachments list.
+- Simplified the logic for setting and clearing OG attachments by removing the `_ogAttachment` field
+  and directly working with the attachments list.
 
 ## 9.4.0
 
@@ -75,10 +76,8 @@
 
 ## 7.2.0-hotfix.1
 
-- Updated `stream_chat` dependency to [
-  `7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
-- Reverted the `connectivity_plus` dependency bump
-  causing [1889](https://github.com/GetStream/stream-chat-flutter/issues/1889)
+- Updated `stream_chat` dependency to [`7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
+- Reverted the `connectivity_plus` dependency bump causing [1889](https://github.com/GetStream/stream-chat-flutter/issues/1889)
 
 ## 7.2.0
 
@@ -107,8 +106,7 @@
 
 🐞 Fixed
 
-- Fixed video attachment
-  uploading. [#1754](https://github.com/GetStream/stream-chat-flutter/pull/1754)
+- [[#1754]](https://github.com/GetStream/stream-chat-flutter/pull/1754) Fixed video attachment uploading.
 
 ## 6.10.0
 
