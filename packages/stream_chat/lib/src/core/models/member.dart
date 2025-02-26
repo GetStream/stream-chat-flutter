@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'member.g.dart';
 
@@ -22,16 +23,37 @@ class Member extends Equatable {
     this.banned = false,
     this.banExpires,
     this.shadowBanned = false,
+    this.extraData = const {},
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Member.fromJson(Map<String, dynamic> json) {
-    final member = _$MemberFromJson(json);
+    final member = _$MemberFromJson(
+      Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
+    );
     return member.copyWith(
       userId: member.user?.id,
     );
   }
+
+  /// Known top level fields.
+  ///
+  /// Useful for [Serializer] methods.
+  static const _topLevelFields = [
+    'user',
+    'invite_accepted_at',
+    'invite_rejected_at',
+    'invited',
+    'channel_role',
+    'user_id',
+    'is_moderator',
+    'banned',
+    'ban_expires',
+    'shadow_banned',
+    'created_at',
+    'updated_at',
+  ];
 
   /// The interested user
   final User? user;
@@ -69,6 +91,9 @@ class Member extends Equatable {
   /// The last date of update
   final DateTime updatedAt;
 
+  /// Map of custom member extraData.
+  final Map<String, Object?> extraData;
+
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({
     User? user,
@@ -84,6 +109,7 @@ class Member extends Equatable {
     bool? banned,
     DateTime? banExpires,
     bool? shadowBanned,
+    Map<String, Object?>? extraData,
   }) =>
       Member(
         user: user ?? this.user,
@@ -98,10 +124,13 @@ class Member extends Equatable {
         isModerator: isModerator ?? this.isModerator,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        extraData: extraData ?? this.extraData,
       );
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => _$MemberToJson(this);
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
+        _$MemberToJson(this),
+      );
 
   @override
   List<Object?> get props => [
@@ -117,5 +146,6 @@ class Member extends Equatable {
         shadowBanned,
         createdAt,
         updatedAt,
+        extraData,
       ];
 }
