@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Simplified the logic for setting and clearing OG attachments by removing the `_ogAttachment` field and directly working with the attachments list.
+
 ## 9.4.0
 
 - Updated minimum Flutter version to 3.27.4 for the SDK.
@@ -42,7 +48,7 @@
 - Changed minimum Flutter version to 3.22 for the SDK.
 - Updated `stream_chat` dependency to [`8.1.0`](https://pub.dev/packages/stream_chat/changelog).
 
-## 8.0.0 
+## 8.0.0
 
 🐞 Fixed
 
@@ -56,7 +62,7 @@
 
 🔄 Changed
 
-- Changed minimum Flutter version to 3.19 for the SDK. 
+- Changed minimum Flutter version to 3.19 for the SDK.
 - Updated `stream_chat` dependency to [`7.3.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.2.2
@@ -65,12 +71,14 @@
 
 ## 7.2.1
 
-  - Updated `stream_chat` dependency to [`7.2.1`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat` dependency to [`7.2.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.2.0-hotfix.1
 
-  - Updated `stream_chat` dependency to [`7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
-  - Reverted the `connectivity_plus` dependency bump causing [1889](https://github.com/GetStream/stream-chat-flutter/issues/1889)
+- Updated `stream_chat` dependency to [
+  `7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
+- Reverted the `connectivity_plus` dependency bump
+  causing [1889](https://github.com/GetStream/stream-chat-flutter/issues/1889)
 
 ## 7.2.0
 
@@ -99,7 +107,8 @@
 
 🐞 Fixed
 
-- Fixed video attachment uploading. [#1754](https://github.com/GetStream/stream-chat-flutter/pull/1754)
+- Fixed video attachment
+  uploading. [#1754](https://github.com/GetStream/stream-chat-flutter/pull/1754)
 
 ## 6.10.0
 
