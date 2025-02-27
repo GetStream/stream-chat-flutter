@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` not able to edit the ogAttachments.
+
 ## 9.4.0
 
 🔄 Changed

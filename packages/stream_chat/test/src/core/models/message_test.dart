@@ -51,8 +51,6 @@ void main() {
                 'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif',
             'asset_url':
                 'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4',
-            'og_scrape_url':
-                'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA'
           })
         ],
         showInChannel: true,

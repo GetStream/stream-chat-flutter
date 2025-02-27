@@ -38,6 +38,7 @@ void main() {
                     extraData: const {
                       'mime_type': 'gif',
                     },
+                    uploadState: const UploadState.success(),
                   ),
                 ),
               ),
