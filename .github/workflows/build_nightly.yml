@@ -2,13 +2,17 @@ name: build_nightly
 
 on:
   push:
-    branches:
-      - develop
+#    branches:
+#      - develop
   workflow_dispatch:
 
 defaults:
   run:
     working-directory: sample_app
+
+env:
+  FLUTTER_VERSION: "3.29.0"
+  FLUTTER_CHANNEL: stable
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,13 +23,19 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 40
     steps:
+      - name: Install Bot SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Setup Ruby and Gems
@@ -39,13 +49,11 @@ jobs:
 
       - name: Copy google service account
         run: |
-          echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" > ${{GITHUB_WORKSPACE}}/firebase-service-account.json
+          echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" > ${{env.GITHUB_WORKSPACE}}/firebase-service-account.json
 
       - name: Build and release
         env:
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{GITHUB_WORKSPACE}}/firebase-service-account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ${{env.GITHUB_WORKSPACE}}/firebase-service-account.json
         run: |
           flutter build ios --no-codesign
           cd ios
@@ -55,6 +63,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Install Bot SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -66,7 +79,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Build
@@ -82,7 +96,7 @@ jobs:
           file: sample_app/build/app/outputs/apk/release/app-release.apk
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-stream-chat-v1
           path: sample_app/build/app/outputs/apk/release/app-release.apk
@@ -103,12 +117,12 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-          flutter-version: 3.29.0
 
       - name: Build and Deploy
-        uses: bluefireteam/flutter-gh-pages@v7
+        uses: bluefireteam/flutter-gh-pages@v9
         with:
           baseHref: /flutter-samples/
           workingDir: sample_app
