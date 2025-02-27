@@ -2,8 +2,8 @@ name: build_nightly
 
 on:
   push:
-    branches:
-      - develop
+#    branches:
+#      - develop
   workflow_dispatch:
 
 defaults:
