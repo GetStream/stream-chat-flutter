@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Fixed `StreamMessageInput` not able to edit the ogAttachments.
+- Fixed `MessageWidget` showing pinned background for deleted messages.
 
 ## 9.4.0
 

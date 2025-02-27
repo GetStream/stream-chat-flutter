@@ -605,7 +605,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// {@template isPinned}
   /// Whether [StreamMessageWidget.message] is pinned or not.
   /// {@endtemplate}
-  bool get isPinned => widget.message.pinned;
+  bool get isPinned => widget.message.pinned && !widget.message.isDeleted;
 
   /// {@template shouldShowReactions}
   /// Should show message reactions if [StreamMessageWidget.showReactions] is
@@ -680,7 +680,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         type: MaterialType.transparency,
         child: AnimatedContainer(
           duration: const Duration(seconds: 1),
-          color: widget.message.pinned && widget.showPinHighlight
+          color: isPinned && widget.showPinHighlight
               ? _streamChatTheme.colorTheme.highlight
               // ignore: deprecated_member_use
               : _streamChatTheme.colorTheme.barsBg.withOpacity(0),
@@ -891,13 +891,13 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           ),
           title: Text(
             context.translations.togglePinUnpinText(
-              pinned: widget.message.pinned,
+              pinned: isPinned,
             ),
           ),
           onClick: () async {
             Navigator.of(context, rootNavigator: true).pop();
             try {
-              if (!widget.message.pinned) {
+              if (!isPinned) {
                 await channel.pinMessage(widget.message);
               } else {
                 await channel.unpinMessage(widget.message);
