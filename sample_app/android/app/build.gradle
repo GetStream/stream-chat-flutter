@@ -42,7 +42,7 @@ android {
     defaultConfig {
         applicationId "io.getstream.chat.android.flutter.sample"
         minSdkVersion 23
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true

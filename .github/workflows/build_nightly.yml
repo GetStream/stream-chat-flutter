@@ -2,13 +2,30 @@ name: build_nightly
 
 on:
   push:
-    branches:
-      - develop
+#    branches:
+#      - develop
   workflow_dispatch:
+    inputs:
+      build_ios:
+        type: boolean
+        description: iOS
+        default: true
+      build_android:
+        type: boolean
+        description: Android
+        default: true
+      build_web:
+        type: boolean
+        description: Web
+        default: true
 
 defaults:
   run:
     working-directory: sample_app
+
+env:
+  FLUTTER_VERSION: "3.29.0"
+  FLUTTER_CHANNEL: stable
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,14 +35,22 @@ jobs:
   build_and_deploy_ios:
     runs-on: macos-latest
     timeout-minutes: 40
+    if: ${{ github.event_name == 'push' || inputs.build_ios == true }}
+#    if: false
     steps:
+      - name: Install Bot SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Setup Ruby and Gems
@@ -39,13 +64,13 @@ jobs:
 
       - name: Copy google service account
         run: |
-          echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" > ${{GITHUB_WORKSPACE}}/firebase-service-account.json
+          echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" | base64 --decode | jq > ${{ github.workspace }}/sample_app/ios/firebase-service-account.json
 
       - name: Build and release
         env:
+          GOOGLE_APPLICATION_CREDENTIALS: "${{ github.workspace }}/sample_app/ios/firebase-service-account.json"
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{GITHUB_WORKSPACE}}/firebase-service-account.json
+          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
         run: |
           flutter build ios --no-codesign
           cd ios
@@ -54,42 +79,56 @@ jobs:
   build_and_deploy_android:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    if: ${{ github.event_name == 'push' || inputs.build_android == true }}
     steps:
+      - name: Install Bot SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup Java
         uses: actions/setup-java@v1
         with:
-          java-version: '12.x'
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Build
         run: flutter build apk
 
+      - name: Copy google service account
+        run: |
+          echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" | base64 --decode | jq > ${{ github.workspace }}/sample_app/android/firebase-service-account.json
+
       - name: Deploy
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{secrets.SAMPLE_FIREBASE_ANDROID_APPID}}
-          serviceCredentialsFileContent: ${{secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS}}
+          serviceCredentialsFile: "${{ github.workspace }}/sample_app/android/firebase-service-account.json"
           groups: stream-testers
           debug: true
-          file: sample_app/build/app/outputs/apk/release/app-release.apk
+          file: "${{ github.workspace }}/sample_app/build/app/outputs/flutter-apk/app-release.apk"
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-stream-chat-v1
-          path: sample_app/build/app/outputs/apk/release/app-release.apk
+          path: "${{ github.workspace }}/sample_app/build/app/outputs/flutter-apk/app-release.apk"
 
   build_and_deploy_web:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+#    if: ${{ github.event_name == 'push' || inputs.build_web == true }}
+    if: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -103,14 +142,14 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-          flutter-version: 3.29.0
 
       - name: Build and Deploy
-        uses: bluefireteam/flutter-gh-pages@v7
+        uses: bluefireteam/flutter-gh-pages@v9
         with:
-          baseHref: /flutter-samples/
+          baseHref: /stream-chat-flutter/
           workingDir: sample_app
 
 
