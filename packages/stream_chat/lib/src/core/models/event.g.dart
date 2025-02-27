@@ -42,6 +42,9 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
           : Member.fromJson(json['member'] as Map<String, dynamic>),
       channelId: json['channel_id'] as String?,
       channelType: json['channel_type'] as String?,
+      channelLastMessageAt: json['channel_last_message_at'] == null
+          ? null
+          : DateTime.parse(json['channel_last_message_at'] as String),
       parentId: json['parent_id'] as String?,
       hardDelete: json['hard_delete'] as bool?,
       aiState: $enumDecodeNullable(_$AITypingStateEnumMap, json['ai_state'],
@@ -62,6 +65,8 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'cid': instance.cid,
       'channel_id': instance.channelId,
       'channel_type': instance.channelType,
+      'channel_last_message_at':
+          instance.channelLastMessageAt?.toIso8601String(),
       'connection_id': instance.connectionId,
       'created_at': instance.createdAt.toIso8601String(),
       'me': instance.me?.toJson(),
