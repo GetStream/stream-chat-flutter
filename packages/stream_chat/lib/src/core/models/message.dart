@@ -241,12 +241,6 @@ class Message extends Equatable {
   /// The list of those users who have restricted visibility for this message.
   final List<String>? restrictedVisibility;
 
-  /// Returns true if the message has restricted visibility.
-  bool get hasRestrictedVisibility {
-    final visibility = restrictedVisibility;
-    return visibility != null && visibility.isNotEmpty;
-  }
-
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
