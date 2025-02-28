@@ -1,4 +1,5 @@
 import 'package:mocktail/mocktail.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -12,6 +13,7 @@ void main() {
   ChannelState _generateChannelState(
     String channelId,
     String channelType, {
+    DateTime? lastMessageAt,
     bool mockChannelConfig = false,
   }) {
     ChannelConfig? config;
@@ -24,6 +26,7 @@ void main() {
       id: channelId,
       type: channelType,
       config: config,
+      lastMessageAt: lastMessageAt,
     );
     final state = ChannelState(channel: channel);
     return state;
@@ -2850,5 +2853,221 @@ void main() {
             )).called(1);
       });
     });
+  });
+
+  group('WS events', () {
+    late final client = MockStreamChatClient();
+
+    setUpAll(() {
+      // Fallback values
+      registerFallbackValue(FakeMessage());
+      registerFallbackValue(FakeAttachmentFile());
+      registerFallbackValue(FakeEvent());
+
+      // detached loggers
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+
+      final retryPolicy = RetryPolicy(
+        shouldRetry: (_, __, ___) => false,
+        delayFactor: Duration.zero,
+      );
+      when(() => client.retryPolicy).thenReturn(retryPolicy);
+
+      // fake clientState
+      final clientState = FakeClientState();
+      when(() => client.state).thenReturn(clientState);
+
+      // client logger
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+    });
+
+    group(
+      '${EventType.messageNew} or ${EventType.notificationMessageNew}',
+      () {
+        final initialLastMessageAt = DateTime.now();
+        late PublishSubject<Event> eventController;
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        late Channel channel;
+
+        setUp(() {
+          final localEvent = Event(type: 'event.local');
+          when(() => client.on(any(), any(), any(), any()))
+              .thenAnswer((_) => Stream.value(localEvent));
+
+          eventController = PublishSubject<Event>();
+          when(() => client.on(
+                EventType.messageNew,
+                EventType.notificationMessageNew,
+              )).thenAnswer((_) => eventController.stream);
+
+          final channelState = _generateChannelState(
+            channelId,
+            channelType,
+            mockChannelConfig: true,
+            lastMessageAt: initialLastMessageAt,
+          );
+
+          channel = Channel.fromState(client, channelState);
+        });
+
+        tearDown(() {
+          eventController.close();
+          channel.dispose();
+        });
+
+        Event createNewMessageEvent(Message message) {
+          return Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            message: message,
+          );
+        }
+
+        test(
+          "should update 'channel.lastMessageAt'",
+          () async {
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+
+            final message = Message(
+              id: 'test-message-id',
+              user: client.state.currentUser,
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            final newMessageEvent = createNewMessageEvent(message);
+            eventController.add(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.lastMessageAt, equals(message.createdAt));
+            expect(channel.lastMessageAt, isNot(initialLastMessageAt));
+          },
+        );
+
+        test(
+          "should not update 'channel.lastMessageAt' when 'message.createdAt' is older",
+          () async {
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+
+            final message = Message(
+              id: 'test-message-id',
+              user: client.state.currentUser,
+              // Older than the current 'channel.lastMessageAt'.
+              createdAt: initialLastMessageAt.subtract(const Duration(days: 1)),
+            );
+
+            final newMessageEvent = createNewMessageEvent(message);
+            eventController.add(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.lastMessageAt, isNot(message.createdAt));
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+          },
+        );
+
+        test(
+          "should not update 'channel.lastMessageAt' when Message is shadowed",
+          () async {
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+
+            final message = Message(
+              id: 'test-message-id',
+              user: client.state.currentUser,
+              shadowed: true,
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            final newMessageEvent = createNewMessageEvent(message);
+            eventController.add(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.lastMessageAt, isNot(message.createdAt));
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+          },
+        );
+
+        test(
+          "should not update 'channel.lastMessageAt' when Message is ephemeral",
+          () async {
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+
+            final message = Message(
+              type: 'ephemeral',
+              id: 'test-message-id',
+              user: client.state.currentUser,
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            final newMessageEvent = createNewMessageEvent(message);
+            eventController.add(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.lastMessageAt, isNot(message.createdAt));
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+          },
+        );
+
+        test(
+          "should not update 'channel.lastMessageAt' when Message has restricted visibility",
+          () async {
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+
+            final message = Message(
+              id: 'test-message-id',
+              user: client.state.currentUser,
+              restrictedVisibility: const ['user-1'],
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            final newMessageEvent = createNewMessageEvent(message);
+            eventController.add(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.lastMessageAt, isNot(message.createdAt));
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+          },
+        );
+
+        test(
+          "should not update 'channel.lastMessageAt' when Message is system and skip is enabled",
+          () async {
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+
+            when(
+              () => channel.config?.skipLastMsgUpdateForSystemMsgs,
+            ).thenReturn(true);
+
+            final message = Message(
+              type: 'system',
+              id: 'test-message-id',
+              user: client.state.currentUser,
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            final newMessageEvent = createNewMessageEvent(message);
+            eventController.add(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.lastMessageAt, isNot(message.createdAt));
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+          },
+        );
+      },
+    );
   });
 }
