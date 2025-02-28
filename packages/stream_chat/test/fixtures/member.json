@@ -11,5 +11,6 @@
   },
   "channel_role": "channel_member",
   "created_at": "2020-01-28T22:17:30.95443Z",
-  "updated_at": "2020-01-28T22:17:30.95443Z"
+  "updated_at": "2020-01-28T22:17:30.95443Z",
+  "some_custom_field": "with_custom_data"
 }
