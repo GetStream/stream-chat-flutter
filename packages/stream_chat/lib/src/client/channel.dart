@@ -2511,7 +2511,9 @@ class ChannelClientState {
     final currentUser = _channel._client.state.currentUser;
     final restrictedVisibility = message.restrictedVisibility;
     if (restrictedVisibility case final visibility?) {
-      if (!visibility.contains(currentUser?.id)) return false;
+      if (visibility.isNotEmpty && !visibility.contains(currentUser?.id)) {
+        return false;
+      }
     }
 
     return true;
