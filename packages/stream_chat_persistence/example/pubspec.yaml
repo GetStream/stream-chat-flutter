@@ -26,12 +26,12 @@ dependencies:
   stream_chat:
     git:
       url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: flutter-3.29.0
+      ref: master
       path: packages/stream_chat
   stream_chat_persistence:
     git:
       url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: flutter-3.29.0
+      ref: master
       path: packages/stream_chat_flutter_persistence
 
 flutter:

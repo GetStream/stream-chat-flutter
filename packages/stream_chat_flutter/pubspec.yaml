@@ -60,7 +60,7 @@ dependencies:
   stream_chat_flutter_core:
     git:
       url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: flutter-3.29.0
+      ref: master
       path: packages/stream_chat_flutter_core
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
@@ -90,7 +90,4 @@ flutter:
 platforms:
   android:
   ios:
-  linux:
-  macos:
   web:
-  windows:

@@ -37,17 +37,17 @@ dependencies:
   stream_chat_flutter:
     git:
       url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: flutter-3.29.0
+      ref: master
       path: packages/stream_chat_flutter
   stream_chat_localizations:
     git:
       url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: flutter-3.29.0
+      ref: master
       path: packages/stream_chat_flutter_localizations
   stream_chat_persistence:
     git:
       url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: flutter-3.29.0
+      ref: master
       path: packages/stream_chat_flutter_persistence
   streaming_shared_preferences: ^2.0.0
   uuid: ^4.4.0

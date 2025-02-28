@@ -48,7 +48,7 @@ command:
       flutter_secure_storage: ^9.2.2
       flutter_slidable: ^3.1.1
       flutter_svg: ^2.0.10+1
-      freezed_annotation: ^2.4.1
+      freezed_annotation: ^3.0.0
       gal: ^2.3.1
       get_thumbnail_video: ^0.7.3
       go_router: ^14.6.2
@@ -81,27 +81,27 @@ command:
       stream_chat:
         git:
           url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: flutter-3.29.0
+          ref: master
           path: packages/stream_chat
       stream_chat_flutter:
-          git:
-            url: https://github.com/qdhayana/stream-chat-flutter.git
-            ref: flutter-3.29.0
-            path: packages/stream_chat_flutter
+        git:
+          url: https://github.com/qdhayana/stream-chat-flutter.git
+          ref: master
+          path: packages/stream_chat_flutter
       stream_chat_flutter_core:
         git:
           url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: flutter-3.29.0
+          ref: master
           path: packages/stream_chat_flutter_core
       stream_chat_localizations:
         git:
           url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: flutter-3.29.0
+          ref: master
           path: packages/stream_chat_flutter_localizations
       stream_chat_persistence:
         git:
           url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: flutter-3.29.0
+          ref: master
           path: packages/stream_chat_flutter_persistence
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
@@ -120,7 +120,7 @@ command:
       fake_async: ^1.3.1
       faker_dart: ^0.2.1
       flutter_launcher_icons: ^0.14.2
-      freezed: ^2.4.2
+      freezed: ^3.0.0
       json_serializable: ^6.7.1
       mocktail: ^1.0.0
       path: ^1.8.3
