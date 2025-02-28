@@ -18,6 +18,7 @@ void main() {
       expect(event.aiMessage, 'Some message');
       expect(event.unreadThreadMessages, 2);
       expect(event.unreadThreads, 3);
+      expect(event.channelLastMessageAt, isA<DateTime>());
     });
 
     test('should serialize to json correctly', () {
@@ -36,6 +37,7 @@ void main() {
         messageId: 'messageId',
         unreadThreadMessages: 2,
         unreadThreads: 3,
+        channelLastMessageAt: DateTime.parse('2019-03-27T17:40:17.155892Z'),
       );
 
       expect(
@@ -66,6 +68,7 @@ void main() {
           'thread': null,
           'unread_thread_messages': 2,
           'unread_threads': 3,
+          'channel_last_message_at': '2019-03-27T17:40:17.155892Z',
         },
       );
     });
@@ -82,6 +85,7 @@ void main() {
       expect(newEvent.isLocal, false);
       expect(newEvent.unreadThreadMessages, 2);
       expect(newEvent.unreadThreads, 3);
+      expect(newEvent.channelLastMessageAt, isA<DateTime>());
 
       newEvent = event.copyWith(
         type: 'test',
@@ -94,6 +98,7 @@ void main() {
         channelType: 'testtype',
         unreadThreadMessages: 6,
         unreadThreads: 7,
+        channelLastMessageAt: DateTime.parse('2020-01-29T03:22:47.636130Z'),
       );
 
       expect(newEvent.channelType, 'testtype');
@@ -106,6 +111,10 @@ void main() {
       expect(newEvent.user!.id, 'test');
       expect(newEvent.unreadThreadMessages, 6);
       expect(newEvent.unreadThreads, 7);
+      expect(
+        newEvent.channelLastMessageAt,
+        DateTime.parse('2020-01-29T03:22:47.636130Z'),
+      );
     });
   });
 }
