@@ -2952,7 +2952,7 @@ void main() {
         );
 
         test(
-          "should update 'channel.lastMessageAt' when Message has restricted visibility but not for current user",
+          "should update 'channel.lastMessageAt' when Message has restricted visibility only for the current user",
           () async {
             expect(channel.lastMessageAt, equals(initialLastMessageAt));
 
@@ -3045,7 +3045,7 @@ void main() {
         );
 
         test(
-          "should not update 'channel.lastMessageAt' when Message has restricted visibility",
+          "should not update 'channel.lastMessageAt' when Message has restricted visibility but not for the current user",
           () async {
             expect(channel.lastMessageAt, equals(initialLastMessageAt));
 
