@@ -13,6 +13,10 @@
 
 - [[#2101]](https://github.com/GetStream/stream-chat-flutter/issues/2101) Added support for system messages not updating `channel.lastMessageAt`
 
+✅ Added
+
+- [[#2101]](https://github.com/GetStream/stream-chat-flutter/issues/2101) Added support for system messages not updating `channel.lastMessageAt`
+
 ## 9.4.0
 
 🔄 Changed
