@@ -26,6 +26,7 @@ class Event {
     this.member,
     this.channelId,
     this.channelType,
+    this.channelLastMessageAt,
     this.parentId,
     this.hardDelete,
     this.aiState,
@@ -57,6 +58,9 @@ class Event {
 
   /// The channel type to which the event belongs
   final String? channelType;
+
+  /// The dateTime at which the last message was sent in the channel.
+  final DateTime? channelLastMessageAt;
 
   /// The connection id in which the event has been sent
   final String? connectionId;
@@ -168,6 +172,7 @@ class Event {
     'member',
     'channel_id',
     'channel_type',
+    'channel_last_message_at',
     'parent_id',
     'hard_delete',
     'is_local',
@@ -190,6 +195,7 @@ class Event {
     String? cid,
     String? channelId,
     String? channelType,
+    DateTime? channelLastMessageAt,
     String? connectionId,
     DateTime? createdAt,
     OwnUser? me,
@@ -231,6 +237,7 @@ class Event {
         member: member ?? this.member,
         channelId: channelId ?? this.channelId,
         channelType: channelType ?? this.channelType,
+        channelLastMessageAt: channelLastMessageAt ?? this.channelLastMessageAt,
         parentId: parentId ?? this.parentId,
         hardDelete: hardDelete ?? this.hardDelete,
         aiState: aiState ?? this.aiState,

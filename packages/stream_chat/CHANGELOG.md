@@ -9,6 +9,10 @@
 
 - Refactored identifying the `Attachment.uploadState` logic for local and remote attachments. Also updated the logic for determining the attachment type to check for ogScrapeUrl instead of `AttachmentType.giphy`.
 
+✅ Added
+
+- [[#2101]](https://github.com/GetStream/stream-chat-flutter/issues/2101) Added support for system messages not updating `channel.lastMessageAt`
+
 ## 9.4.0
 
 🔄 Changed

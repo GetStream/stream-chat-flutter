@@ -29,6 +29,7 @@ void main() {
       expect(message.pinExpires, null);
       expect(message.pinnedBy, null);
       expect(message.i18n, null);
+      expect(message.restrictedVisibility, isA<List<String>>());
     });
 
     test('should serialize to json correctly', () {
@@ -55,6 +56,7 @@ void main() {
         ],
         showInChannel: true,
         parentId: 'parentId',
+        restrictedVisibility: const ['user-id-3'],
         extraData: const {'hey': 'test'},
       );
 

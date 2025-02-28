@@ -1911,11 +1911,13 @@ class ChannelClientState {
   ChannelClientState(
     this._channel,
     ChannelState channelState,
-    //ignore: unnecessary_parenthesis
-  ) : _debouncedUpdatePersistenceChannelState = ((ChannelState state) =>
-                _channel._client.chatPersistenceClient
-                    ?.updateChannelState(state))
-            .debounced(const Duration(seconds: 1)) {
+  ) : _debouncedUpdatePersistenceChannelState = debounce(
+          (ChannelState state) {
+            final persistenceClient = _channel._client.chatPersistenceClient;
+            return persistenceClient?.updateChannelState(state);
+          },
+          const Duration(seconds: 1),
+        ) {
     _retryQueue = RetryQueue(
       channel: _channel,
       logger: _channel.client.detachedLogger(
@@ -2495,6 +2497,28 @@ class ChannelClientState {
     }));
   }
 
+  // Logic taken from the backend SDK
+  // https://github.com/GetStream/chat/blob/9245c2b3f7e679267d57ee510c60e93de051cb8e/types/channel.go#L1136-L1150
+  bool _shouldUpdateChannelLastMessageAt(Message message) {
+    if (message.shadowed) return false;
+    if (message.isEphemeral) return false;
+
+    final config = channelState.channel?.config;
+    if (message.isSystem && config?.skipLastMsgUpdateForSystemMsgs == true) {
+      return false;
+    }
+
+    final currentUser = _channel._client.state.currentUser;
+    final restrictedVisibility = message.restrictedVisibility;
+    if (restrictedVisibility case final visibility?) {
+      if (visibility.isNotEmpty && !visibility.contains(currentUser?.id)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   /// Updates the [message] in the state if it exists. Adds it otherwise.
   void updateMessage(Message message) {
     // Determine if the message should be displayed in the channel view.
@@ -2547,12 +2571,19 @@ class ChannelClientState {
       // Handle updates to pinned messages.
       final newPinnedMessages = _updatePinnedMessages(message);
 
+      // Calculate the new last message at time.
+      var lastMessageAt = _channelState.channel?.lastMessageAt;
+      lastMessageAt ??= message.createdAt;
+      if (_shouldUpdateChannelLastMessageAt(message)) {
+        lastMessageAt = [lastMessageAt, message.createdAt].max;
+      }
+
       // Apply the updated lists to the channel state.
       _channelState = _channelState.copyWith(
         messages: newMessages.sorted(_sortByCreatedAt),
         pinnedMessages: newPinnedMessages,
         channel: _channelState.channel?.copyWith(
-          lastMessageAt: message.createdAt,
+          lastMessageAt: lastMessageAt,
         ),
       );
     }

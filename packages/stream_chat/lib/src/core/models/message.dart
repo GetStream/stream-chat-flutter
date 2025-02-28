@@ -56,6 +56,7 @@ class Message extends Equatable {
     this.extraData = const {},
     this.state = const MessageState.initial(),
     this.i18n,
+    this.restrictedVisibility,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
         remoteCreatedAt = createdAt,
@@ -237,6 +238,10 @@ class Message extends Equatable {
   String? get pollId => _pollId ?? poll?.id;
   final String? _pollId;
 
+  /// The list of those users who have restricted visibility for this message.
+  @JsonKey(includeToJson: false)
+  final List<String>? restrictedVisibility;
+
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
@@ -291,6 +296,7 @@ class Message extends Equatable {
     'i18n',
     'poll',
     'poll_id',
+    'restricted_visibility',
   ];
 
   /// Serialize to json.
@@ -335,6 +341,7 @@ class Message extends Equatable {
     Map<String, Object?>? extraData,
     MessageState? state,
     Map<String, String>? i18n,
+    List<String>? restrictedVisibility,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -408,6 +415,7 @@ class Message extends Equatable {
       extraData: extraData ?? this.extraData,
       state: state ?? this.state,
       i18n: i18n ?? this.i18n,
+      restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
     );
   }
 
@@ -450,6 +458,7 @@ class Message extends Equatable {
       extraData: other.extraData,
       state: other.state,
       i18n: other.i18n,
+      restrictedVisibility: other.restrictedVisibility,
     );
   }
 
@@ -512,5 +521,6 @@ class Message extends Equatable {
         extraData,
         state,
         i18n,
+        restrictedVisibility,
       ];
 }

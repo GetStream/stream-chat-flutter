@@ -76,6 +76,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),
+      restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
