@@ -2952,6 +2952,30 @@ void main() {
         );
 
         test(
+          "should update 'channel.lastMessageAt' when Message has restricted visibility but not for current user",
+          () async {
+            expect(channel.lastMessageAt, equals(initialLastMessageAt));
+
+            final message = Message(
+              id: 'test-message-id',
+              user: client.state.currentUser,
+              // Message is visible to the current user.
+              restrictedVisibility: [client.state.currentUser!.id],
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            final newMessageEvent = createNewMessageEvent(message);
+            eventController.add(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.lastMessageAt, equals(message.createdAt));
+            expect(channel.lastMessageAt, isNot(initialLastMessageAt));
+          },
+        );
+
+        test(
           "should not update 'channel.lastMessageAt' when 'message.createdAt' is older",
           () async {
             expect(channel.lastMessageAt, equals(initialLastMessageAt));
@@ -3028,6 +3052,7 @@ void main() {
             final message = Message(
               id: 'test-message-id',
               user: client.state.currentUser,
+              // Message is only visible to user-1 not the current user.
               restrictedVisibility: const ['user-1'],
               createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
             );
