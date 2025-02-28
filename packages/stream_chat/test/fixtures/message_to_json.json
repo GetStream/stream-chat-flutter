@@ -23,8 +23,5 @@
   "pin_expires": null,
   "poll_id": null,
   "show_in_channel": true,
-  "restricted_visibility": [
-    "user-id-3"
-  ],
   "hey": "test"
 }

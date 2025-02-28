@@ -94,6 +94,5 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'pinned': instance.pinned,
       'pin_expires': instance.pinExpires?.toIso8601String(),
       'poll_id': instance.pollId,
-      'restricted_visibility': instance.restrictedVisibility,
       'extra_data': instance.extraData,
     };

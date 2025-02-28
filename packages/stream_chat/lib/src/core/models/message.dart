@@ -239,6 +239,7 @@ class Message extends Equatable {
   final String? _pollId;
 
   /// The list of those users who have restricted visibility for this message.
+  @JsonKey(includeToJson: false)
   final List<String>? restrictedVisibility;
 
   /// Message custom extraData.
