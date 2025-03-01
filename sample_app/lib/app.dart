@@ -4,8 +4,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/scheduler.dart' hide Priority;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    hide Message;
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sample_app/firebase_options.dart';
@@ -23,6 +25,27 @@ import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
+import 'firebase_options.dart';
+
+// Define supported notification types
+const expectedNotificationTypes = [
+  EventType.messageNew,
+  EventType.messageUpdated,
+  EventType.reactionNew,
+  EventType.reactionUpdated,
+];
+
+const notificationChannelId = 'stream_GetStreamFlutterClient';
+const notificationChannelName = 'Stream Notifications';
+const notificationChannelDescription = 'Notifications for Stream messages';
+
+// Define platform constants
+const bool kIsIOS = bool.fromEnvironment('dart.io.is_ios');
+
+// Initialize FlutterLocalNotificationsPlugin for background messages
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 /// Constructs callback for background notification handling.
 ///
 /// Will be invoked from another Isolate, that's why it's required to
@@ -36,10 +59,13 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
   final data = message.data;
   // ensure that Push Notification was sent by Stream.
   if (data['sender'] != 'stream.chat') {
+    debugPrint('[onBackgroundMessage] #firebase; not sent by Stream');
     return;
   }
-  // ensure that Push Notification relates to a new message event.
-  if (data['type'] != 'message.new') {
+  final eventType = data['type'];
+  // ensure that Push Notification relates to a supported event type
+  if (!expectedNotificationTypes.contains(eventType)) {
+    debugPrint('[onBackgroundMessage] #firebase; unexpected type: $eventType');
     return;
   }
   // If you're going to use Firebase services in the background, make sure
@@ -55,7 +81,12 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
     userId = await secureStorage.read(key: kStreamUserId);
     token = await secureStorage.read(key: kStreamToken);
   }
-  if (userId == null || token == null) {
+  if (userId == null) {
+    debugPrint('[onBackgroundMessage] #firebase; user not found');
+    return;
+  }
+  if (token == null) {
+    debugPrint('[onBackgroundMessage] #firebase; token not found');
     return;
   }
   final chatClient = buildStreamChatClient(apiKey ?? kDefaultStreamApiKey);
@@ -71,13 +102,139 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
       await chatPersistentClient.connect(userId);
     }
 
-    final messageId = data['id'];
+    final messageId = data['message_id'];
+    if (messageId == null) {
+      debugPrint('[onBackgroundMessage] #firebase; messageId not found');
+      return;
+    }
     final cid = data['cid'];
+    if (cid == null) {
+      debugPrint('[onBackgroundMessage] #firebase; cid not found');
+      return;
+    }
     // pre-cache the new message using client and persistence.
     final response = await chatClient.getMessage(messageId);
     await chatPersistentClient.updateMessages(cid, [response.message]);
+
+    final title = data['title'];
+    final body = data['body'];
+
+    // Show Android notification
+    if (!kIsWeb && !kIsIOS) {
+      await _showAndroidNotification(
+        eventType: eventType,
+        cid: cid,
+        messageId: messageId,
+        title: message.notification?.title ?? title ?? 'Fallback title',
+        body: message.notification?.body ?? body ?? 'Fallback body',
+      );
+    }
   } catch (e, stk) {
     debugPrint('[onBackgroundMessage] #firebase; failed: $e; $stk');
+  }
+}
+
+/// Shows an Android notification for a background message
+Future<void> _showAndroidNotification({
+  required String eventType,
+  required String cid,
+  required String messageId,
+  required String title,
+  required String body,
+}) async {
+  try {
+    // Create notification channel for Android
+    await _createNotificationChannel();
+
+    // Initialize the Android notification channel
+    const androidNotificationDetails = AndroidNotificationDetails(
+      notificationChannelId,
+      notificationChannelName,
+      channelDescription: notificationChannelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
+      enableVibration: true,
+      playSound: true,
+      // Using default sound instead of custom sound resource
+      // sound: RawResourceAndroidNotificationSound('notification_sound'),
+      // Using default app icon instead of custom icon
+      // icon: 'ic_notification',
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+    );
+
+    // Initialize the plugin with click handler
+    // Use the default app icon for notifications
+    const initializationSettingsAndroid = AndroidInitializationSettings(
+      'ic_notification_in_app',
+    );
+    const initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+
+    // Initialize the plugin with a notification click handler
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        debugPrint(
+            '[onBackgroundMessage] #firebase; notification clicked: ${response.payload}');
+        // The payload contains the channel information (channelType:channelId)
+        // This will be handled when the app is opened
+      },
+    );
+
+    // Generate a unique notification ID
+    final notificationId = (eventType + cid + messageId).hashCode;
+
+    // Show the notification
+    await flutterLocalNotificationsPlugin.show(
+      notificationId, // Notification ID
+      title, // Notification title
+      body, // Notification body
+      notificationDetails,
+      payload: cid,
+    );
+
+    debugPrint(
+        '[onBackgroundMessage] #firebase; android notification shown successfully: ID=$notificationId, Title="$title"');
+  } catch (e) {
+    debugPrint(
+        '[onBackgroundMessage] #firebase; failed to show notification: $e');
+  }
+}
+
+/// Creates the notification channel for Android
+Future<void> _createNotificationChannel() async {
+  try {
+    const channel = AndroidNotificationChannel(
+      notificationChannelId,
+      notificationChannelName,
+      description: notificationChannelDescription,
+      importance: Importance.high,
+      enableVibration: true,
+      playSound: true,
+      showBadge: true,
+    );
+
+    // Create the channel
+    final androidPlugin =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidPlugin != null) {
+      await androidPlugin.createNotificationChannel(channel);
+      debugPrint(
+          '[onBackgroundMessage] #firebase; notification channel created');
+    } else {
+      debugPrint(
+          '[onBackgroundMessage] #firebase; failed to resolve Android plugin');
+    }
+  } catch (e) {
+    debugPrint(
+        '[onBackgroundMessage] #firebase; notification channel failed: $e');
   }
 }
 
@@ -200,9 +357,10 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
       debugPrint('[onMessageOpenedApp] #firebase; message: ${message.toMap()}');
       // This callback is getting invoked when the user clicks
       // on the notification in case if notification was shown by OS.
-      final channelType = (message.data['channel_type'] as String?) ?? '';
-      final channelId = (message.data['channel_id'] as String?) ?? '';
       final channelCid = (message.data['cid'] as String?) ?? '';
+      final parts = channelCid.split(':');
+      final channelType = parts[0];
+      final channelId = parts[1];
       var channel = client.state.channels[channelCid];
       if (channel == null) {
         channel = client.channel(
