@@ -5,6 +5,10 @@
 - Fixed `StreamMessageInput` not able to edit the ogAttachments.
 - Fixed `MessageWidget` showing pinned background for deleted messages.
 
+🔄 Changed
+
+- Updated the message list view to prevent pinning messages that have restricted visibility.
+
 ## 9.4.0
 
 🔄 Changed
