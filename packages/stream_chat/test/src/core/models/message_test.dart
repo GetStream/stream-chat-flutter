@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
@@ -64,6 +66,88 @@ void main() {
         message.toJson(),
         jsonFixture('message_to_json.json'),
       );
+    });
+  });
+
+  group('MessageVisibility Extension Tests', () {
+    group('hasRestrictedVisibility', () {
+      test('should return false when restrictedVisibility is null', () {
+        final message = Message(restrictedVisibility: null);
+        expect(message.hasRestrictedVisibility, false);
+      });
+
+      test('should return false when restrictedVisibility is empty', () {
+        final message = Message(restrictedVisibility: const []);
+        expect(message.hasRestrictedVisibility, false);
+      });
+
+      test('should return true when restrictedVisibility has entries', () {
+        final message = Message(restrictedVisibility: const ['user1', 'user2']);
+        expect(message.hasRestrictedVisibility, true);
+      });
+    });
+
+    group('isVisibleTo', () {
+      test('should return true when restrictedVisibility is null', () {
+        final message = Message(restrictedVisibility: null);
+        expect(message.isVisibleTo('anyUser'), true);
+      });
+
+      test('should return true when restrictedVisibility is empty', () {
+        final message = Message(restrictedVisibility: const []);
+        expect(message.isVisibleTo('anyUser'), true);
+      });
+
+      test('should return true when user is in restrictedVisibility list', () {
+        final message =
+            Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
+        expect(message.isVisibleTo('user2'), true);
+      });
+
+      test('should return false when user is not in restrictedVisibility list',
+          () {
+        final message =
+            Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
+        expect(message.isVisibleTo('user4'), false);
+      });
+
+      test('should handle case sensitivity correctly', () {
+        final message = Message(restrictedVisibility: const ['User1', 'USER2']);
+        expect(message.isVisibleTo('user1'), false,
+            reason: 'Should be case sensitive');
+        expect(message.isVisibleTo('User1'), true);
+      });
+    });
+
+    group('isNotVisibleTo', () {
+      test('should return false when restrictedVisibility is null', () {
+        final message = Message(restrictedVisibility: null);
+        expect(message.isNotVisibleTo('anyUser'), false);
+      });
+
+      test('should return false when restrictedVisibility is empty', () {
+        final message = Message(restrictedVisibility: const []);
+        expect(message.isNotVisibleTo('anyUser'), false);
+      });
+
+      test('should return false when user is in restrictedVisibility list', () {
+        final message =
+            Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
+        expect(message.isNotVisibleTo('user2'), false);
+      });
+
+      test('should return true when user is not in restrictedVisibility list',
+          () {
+        final message =
+            Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
+        expect(message.isNotVisibleTo('user4'), true);
+      });
+
+      test('should be the exact opposite of isVisibleTo', () {
+        final message = Message(restrictedVisibility: const ['user1', 'user2']);
+        const userId = 'testUser';
+        expect(message.isNotVisibleTo(userId), !message.isVisibleTo(userId));
+      });
     });
   });
 }
