@@ -52,6 +52,7 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
         mentionedUsers:
             mentionedUsers.map((e) => User.fromJson(jsonDecode(e))).toList(),
         i18n: i18n,
+        restrictedVisibility: restrictedVisibility,
       );
 }
 
@@ -90,5 +91,6 @@ extension PMessageX on Message {
         pinExpires: pinExpires,
         pinnedByUserId: pinnedBy?.id,
         i18n: i18n,
+        restrictedVisibility: restrictedVisibility,
       );
 }
