@@ -1095,7 +1095,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          _userPermissions.contains(PermissionType.pinMessage),
+          _userPermissions.contains(PermissionType.pinMessage) &&
+          // Pinning a restricted visibility message is not allowed, simply
+          // because pinning a message is meant to bring attention to that
+          // message, that is not possible with a message that is only visible
+          // to a subset of users.
+          !message.hasRestrictedVisibility,
     );
 
     if (widget.parentMessageBuilder != null) {
@@ -1453,7 +1458,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          _userPermissions.contains(PermissionType.pinMessage),
+          _userPermissions.contains(PermissionType.pinMessage) &&
+          // Pinning a restricted visibility message is not allowed, simply
+          // because pinning a message is meant to bring attention to that
+          // message, that is not possible with a message that is only visible
+          // to a subset of users.
+          !message.hasRestrictedVisibility,
     );
 
     if (widget.messageBuilder != null) {

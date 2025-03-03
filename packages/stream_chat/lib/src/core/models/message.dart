@@ -238,8 +238,12 @@ class Message extends Equatable {
   String? get pollId => _pollId ?? poll?.id;
   final String? _pollId;
 
-  /// The list of those users who have restricted visibility for this message.
-  @JsonKey(includeToJson: false)
+  /// The list of user ids that should be able to see the message.
+  ///
+  /// If null or empty, the message is visible to all users.
+  /// If populated, only users whose ids are included in this list can see
+  /// the message.
+  @JsonKey(includeIfNull: false)
   final List<String>? restrictedVisibility;
 
   /// Message custom extraData.
@@ -523,4 +527,56 @@ class Message extends Equatable {
         i18n,
         restrictedVisibility,
       ];
+}
+
+/// Extension that adds visibility control functionality to Message objects.
+///
+/// This extension provides methods to determine if a message is visible to a
+/// specific user based on the [Message.restrictedVisibility] list.
+extension MessageVisibility on Message {
+  /// Checks if this message has any visibility restrictions applied.
+  ///
+  /// Returns true if the restrictedVisibility list exists and contains at
+  /// least one entry, indicating that visibility of this message is restricted
+  /// to specific users.
+  ///
+  /// Returns false if the restrictedVisibility list is null or empty,
+  /// indicating that this message is visible to all users.
+  bool get hasRestrictedVisibility {
+    final visibility = restrictedVisibility;
+    if (visibility == null || visibility.isEmpty) return false;
+
+    return true;
+  }
+
+  /// Determines if a message is visible to a specific user based on
+  /// restricted visibility settings.
+  ///
+  /// Returns true in the following cases:
+  /// - The restrictedVisibility list is null or empty (visible to everyone)
+  /// - The provided userId is found in the restrictedVisibility list
+  ///
+  /// Returns false if the restrictedVisibility list exists and doesn't
+  /// contain the provided userId.
+  ///
+  /// [userId] The unique identifier of the user to check visibility for.
+  bool isVisibleTo(String userId) {
+    final visibility = restrictedVisibility;
+    if (visibility == null || visibility.isEmpty) return true;
+
+    return visibility.contains(userId);
+  }
+
+  /// Determines if a message is not visible to a specific user based on
+  /// restricted visibility settings.
+  ///
+  /// Returns true if the restrictedVisibility list exists and doesn't
+  /// contain the provided userId.
+  ///
+  /// Returns false in the following cases:
+  /// - The restrictedVisibility list is null or empty (visible to everyone)
+  /// - The provided userId is found in the restrictedVisibility list
+  ///
+  /// [userId] The unique identifier of the user to check visibility for.
+  bool isNotVisibleTo(String userId) => !isVisibleTo(userId);
 }

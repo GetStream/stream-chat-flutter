@@ -81,6 +81,7 @@ void main() {
         'hi_text': 'नमस्ते',
         'language': 'en',
       },
+      restrictedVisibility: const ['user-id-2'],
     );
     final message = entity.toMessage(
       user: user,
@@ -137,6 +138,7 @@ void main() {
       expect(messageAttachment.type, entityAttachment.type);
       expect(messageAttachment.assetUrl, entityAttachment.assetUrl);
     }
+    expect(message.restrictedVisibility, entity.restrictedVisibility);
   });
 
   test('toEntity should map message into MessageEntity', () {
@@ -210,6 +212,7 @@ void main() {
         'hi_text': 'नमस्ते',
         'language': 'en',
       },
+      restrictedVisibility: const ['user-id-2'],
     );
     final entity = message.toPinnedEntity(cid: cid);
     expect(entity, isA<PinnedMessageEntity>());
@@ -251,5 +254,6 @@ void main() {
       message.attachments.map((it) => jsonEncode(it.toData())).toList(),
     );
     expect(entity.i18n, message.i18n);
+    expect(entity.restrictedVisibility, message.restrictedVisibility);
   });
 }
