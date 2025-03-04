@@ -25,7 +25,10 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "restricted_visibility": [
+        "user-id-3"
+      ]
     },
     {
       "id": "dry-meadow-0-e8e74482-b4cd-48db-9d1e-30e6c191786f",

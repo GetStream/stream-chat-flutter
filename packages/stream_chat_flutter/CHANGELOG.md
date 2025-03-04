@@ -11,6 +11,7 @@
 
 🔄 Changed
 
+- Updated the message list view to prevent pinning messages that have restricted visibility.
 - Deprecated `StreamMessageInput.useNativeAttachmentPickerOnMobile` in favor of `StreamMessageInput.useNativeAttachmentPicker`.
 
 ## 9.4.0

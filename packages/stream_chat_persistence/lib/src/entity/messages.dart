@@ -126,6 +126,10 @@ class Messages extends Table {
   TextColumn get i18n =>
       text().nullable().map(NullableMapConverter<String>())();
 
+  /// The list of user ids that should be able to see the message.
+  TextColumn get restrictedVisibility =>
+      text().nullable().map(ListConverter<String>())();
+
   /// Message custom extraData
   TextColumn get extraData => text().nullable().map(MapConverter())();
 
