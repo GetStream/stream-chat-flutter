@@ -67,19 +67,19 @@ jobs:
           echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" | base64 --decode | jq > ${{ github.workspace }}/sample_app/ios/firebase-service-account.json
 
       - name: Build and release
+        working-directory: sample_app/ios
         env:
           GOOGLE_APPLICATION_CREDENTIALS: "${{ github.workspace }}/sample_app/ios/firebase-service-account.json"
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
         run: |
-          flutter build ios --no-codesign
-          cd ios
           bundle exec fastlane deploy_to_firebase
 
   build_and_deploy_android:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: ${{ github.event_name == 'push' || inputs.build_android == true }}
+#    if: ${{ github.event_name == 'push' || inputs.build_android == true }}
+    if: false
     steps:
       - name: Install Bot SSH Key
         uses: webfactory/ssh-agent@v0.9.0
