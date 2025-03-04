@@ -5,9 +5,14 @@
 - Fixed `StreamMessageInput` not able to edit the ogAttachments.
 - Fixed `MessageWidget` showing pinned background for deleted messages.
 
+✅ Added
+
+- Introduced `StreamMessageInput.useSystemAttachmentPicker` for system media picker support.
+
 🔄 Changed
 
 - Updated the message list view to prevent pinning messages that have restricted visibility.
+- Deprecated `StreamMessageInput.useNativeAttachmentPickerOnMobile` in favor of `StreamMessageInput.useSystemAttachmentPicker`.
 
 ## 9.4.0
 
