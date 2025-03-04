@@ -1,6 +1,8 @@
 fastlane_version "2.226.0"
 default_platform :ios
 
+import '../../Fastfile'
+
 before_all do
   if is_ci
     setup_ci()
@@ -20,6 +22,18 @@ lane :match_me do
   )
 end
 
+lane :build do |options|
+    fetch_dependencies
+
+    sign_enabled = options[:sign_enabled] || false
+    sign_param = sign_enabled ? '' : '--no-codesign'
+
+    config_only = options[:config_only] || false
+    config_param = config_only ? '--config-only' : ''
+
+    sh_on_root(command: "flutter build ios --no-pub --suppress-analytics --release #{sign_param} #{config_param}")
+end
+
 desc "Installs all Certs and Profiles necessary for appstore"
 lane :match_appstore do
   match(
@@ -35,15 +49,17 @@ end
 lane :deploy_to_firebase do
     match_me
 
-    gym(
-        workspace: "./Runner.xcworkspace",
-        scheme: "Runner",
-        export_method: "ad-hoc",
-        export_options: "./fastlane/beta_gym_export_options.plist",
-        silent: true,
-        clean: true,
-        include_symbols: true,
-        output_directory: "./dist"
+    build(
+        sign_enabled: true,
+    )
+
+    build_app(
+      scheme: "Runner",
+      export_method: "ad-hoc",
+      silent: true,
+      clean: true,
+      include_symbols: true,
+      output_directory: './dist',
     )
 
     message = changelog_from_git_commits(commits_count: 10)
