@@ -16,6 +16,7 @@ extension MemberEntityX on MemberEntity {
         invited: invited,
         inviteRejectedAt: inviteRejectedAt,
         isModerator: isModerator,
+        extraData: extraData ?? {},
       );
 }
 

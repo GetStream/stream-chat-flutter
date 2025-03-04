@@ -22,6 +22,7 @@ void main() {
       banned: math.Random().nextBool(),
       shadowBanned: math.Random().nextBool(),
       isModerator: math.Random().nextBool(),
+      extraData: {'test_extra_data': 'testData'},
     );
     final member = entity.toMember(user: user);
     expect(member, isA<Member>());
@@ -35,6 +36,7 @@ void main() {
     expect(member.banned, entity.banned);
     expect(member.shadowBanned, entity.shadowBanned);
     expect(member.isModerator, entity.isModerator);
+    expect(member.extraData, entity.extraData);
   });
 
   test('toEntity show map member into MemberEntity', () {
@@ -51,6 +53,7 @@ void main() {
       banned: math.Random().nextBool(),
       shadowBanned: math.Random().nextBool(),
       isModerator: math.Random().nextBool(),
+      extraData: {'test_extra_data': 'testData'},
     );
     final entity = member.toEntity(cid: cid);
     expect(entity, isA<MemberEntity>());
@@ -65,5 +68,6 @@ void main() {
     expect(entity.banned, member.banned);
     expect(entity.shadowBanned, member.shadowBanned);
     expect(entity.isModerator, member.isModerator);
+    expect(entity.extraData, member.extraData);
   });
 }

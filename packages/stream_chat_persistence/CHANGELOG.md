@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Add member.extraData field
+
 ## 9.4.0
 
 - Updated minimum Flutter version to 3.27.4 for the SDK.
