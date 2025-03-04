@@ -308,6 +308,7 @@ class StreamChatThemeData {
             colorTheme.disabled,
           ],
         ),
+        useNativeAttachmentPicker: false,
       ),
       galleryHeaderTheme: StreamGalleryHeaderThemeData(
         closeButtonColor: colorTheme.textHighEmphasis,

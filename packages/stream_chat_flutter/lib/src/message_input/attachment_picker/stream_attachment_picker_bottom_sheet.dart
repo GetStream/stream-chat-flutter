@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -80,6 +79,8 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
+  bool useNativeAttachmentPicker = false,
+  @Deprecated("Use 'useNativeAttachmentPicker' instead.")
   bool useNativeAttachmentPickerOnMobile = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
@@ -113,13 +114,19 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
         initialPoll: initialPoll,
         initialAttachments: initialAttachments,
         builder: (context, controller, child) {
-          final currentPlatform = defaultTargetPlatform;
-          final isWebOrDesktop = kIsWeb ||
-              currentPlatform == TargetPlatform.macOS ||
-              currentPlatform == TargetPlatform.linux ||
-              currentPlatform == TargetPlatform.windows;
+          final isWebOrDesktop = switch (CurrentPlatform.type) {
+            PlatformType.web ||
+            PlatformType.macOS ||
+            PlatformType.linux ||
+            PlatformType.windows =>
+              true,
+            _ => false,
+          };
 
-          if (isWebOrDesktop || useNativeAttachmentPickerOnMobile) {
+          final useNativePicker = useNativeAttachmentPicker || //
+              useNativeAttachmentPickerOnMobile;
+
+          if (useNativePicker || isWebOrDesktop) {
             return webOrDesktopAttachmentPickerBuilder.call(
               context: context,
               onError: onError,
