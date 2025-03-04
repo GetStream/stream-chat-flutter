@@ -53,7 +53,7 @@ void main() {
       banned: math.Random().nextBool(),
       shadowBanned: math.Random().nextBool(),
       isModerator: math.Random().nextBool(),
-      extraData: {'test_extra_data': 'testData'},
+      extraData: const {'test_extra_data': 'testData'},
     );
     final entity = member.toEntity(cid: cid);
     expect(entity, isA<MemberEntity>());
