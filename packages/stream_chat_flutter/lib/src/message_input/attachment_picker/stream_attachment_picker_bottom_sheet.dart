@@ -79,8 +79,8 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,
-  bool useNativeAttachmentPicker = false,
-  @Deprecated("Use 'useNativeAttachmentPicker' instead.")
+  bool useSystemAttachmentPicker = false,
+  @Deprecated("Use 'useSystemAttachmentPicker' instead.")
   bool useNativeAttachmentPickerOnMobile = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
@@ -123,10 +123,10 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
             _ => false,
           };
 
-          final useNativePicker = useNativeAttachmentPicker || //
+          final useSystemPicker = useSystemAttachmentPicker || //
               useNativeAttachmentPickerOnMobile;
 
-          if (useNativePicker || isWebOrDesktop) {
+          if (useSystemPicker || isWebOrDesktop) {
             return webOrDesktopAttachmentPickerBuilder.call(
               context: context,
               onError: onError,

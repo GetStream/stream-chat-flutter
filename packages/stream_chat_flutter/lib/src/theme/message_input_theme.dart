@@ -75,7 +75,7 @@ class StreamMessageInputThemeData with Diagnosticable {
     this.enableSafeArea,
     this.elevation,
     this.shadow,
-    this.useNativeAttachmentPicker,
+    this.useSystemAttachmentPicker,
   });
 
   /// Duration of the [MessageInput] send button animation
@@ -136,7 +136,7 @@ class StreamMessageInputThemeData with Diagnosticable {
   /// media picker handles permissions internally.
   /// 3. Simplicity: Simplifies the implementation by leveraging the built-in
   /// functionality of the system media picker.
-  final bool? useNativeAttachmentPicker;
+  final bool? useSystemAttachmentPicker;
 
   /// Returns a new [StreamMessageInputThemeData]
   /// replacing some of its properties
@@ -157,7 +157,7 @@ class StreamMessageInputThemeData with Diagnosticable {
     bool? enableSafeArea,
     double? elevation,
     BoxShadow? shadow,
-    bool? useNativeAttachmentPicker,
+    bool? useSystemAttachmentPicker,
   }) {
     return StreamMessageInputThemeData(
       sendAnimationDuration:
@@ -178,8 +178,8 @@ class StreamMessageInputThemeData with Diagnosticable {
       enableSafeArea: enableSafeArea ?? this.enableSafeArea,
       elevation: elevation ?? this.elevation,
       shadow: shadow ?? this.shadow,
-      useNativeAttachmentPicker:
-          useNativeAttachmentPicker ?? this.useNativeAttachmentPicker,
+      useSystemAttachmentPicker:
+          useSystemAttachmentPicker ?? this.useSystemAttachmentPicker,
     );
   }
 
@@ -214,7 +214,7 @@ class StreamMessageInputThemeData with Diagnosticable {
       enableSafeArea: a.enableSafeArea,
       elevation: lerpDouble(a.elevation, b.elevation, t),
       shadow: BoxShadow.lerp(a.shadow, b.shadow, t),
-      useNativeAttachmentPicker: b.useNativeAttachmentPicker,
+      useSystemAttachmentPicker: b.useSystemAttachmentPicker,
     );
   }
 
@@ -240,7 +240,7 @@ class StreamMessageInputThemeData with Diagnosticable {
       enableSafeArea: other.enableSafeArea,
       elevation: other.elevation,
       shadow: other.shadow,
-      useNativeAttachmentPicker: other.useNativeAttachmentPicker,
+      useSystemAttachmentPicker: other.useSystemAttachmentPicker,
     );
   }
 
@@ -265,7 +265,7 @@ class StreamMessageInputThemeData with Diagnosticable {
           enableSafeArea == other.enableSafeArea &&
           elevation == other.elevation &&
           shadow == other.shadow &&
-          useNativeAttachmentPicker == other.useNativeAttachmentPicker;
+          useSystemAttachmentPicker == other.useSystemAttachmentPicker;
 
   @override
   int get hashCode =>
@@ -285,7 +285,7 @@ class StreamMessageInputThemeData with Diagnosticable {
       elevation.hashCode ^
       shadow.hashCode ^
       enableSafeArea.hashCode ^
-      useNativeAttachmentPicker.hashCode;
+      useSystemAttachmentPicker.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -308,6 +308,6 @@ class StreamMessageInputThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('shadow', shadow))
       ..add(DiagnosticsProperty('enableSafeArea', enableSafeArea))
       ..add(DiagnosticsProperty(
-          'useNativeAttachmentPicker', useNativeAttachmentPicker));
+          'useSystemAttachmentPicker', useSystemAttachmentPicker));
   }
 }

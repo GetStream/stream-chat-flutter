@@ -157,14 +157,14 @@ class StreamMessageInput extends StatefulWidget {
     this.ogPreviewFilter = _defaultOgPreviewFilter,
     this.hintGetter = _defaultHintGetter,
     this.contentInsertionConfiguration,
-    bool useNativeAttachmentPicker = false,
+    bool useSystemAttachmentPicker = false,
     @Deprecated(
-      'Use useNativeAttachmentPicker instead. '
+      'Use useSystemAttachmentPicker instead. '
       'This feature was deprecated after v9.4.0',
     )
     bool useNativeAttachmentPickerOnMobile = false,
     this.pollConfig,
-  }) : useNativeAttachmentPicker = useNativeAttachmentPicker || //
+  }) : useSystemAttachmentPicker = useSystemAttachmentPicker || //
             useNativeAttachmentPickerOnMobile;
 
   /// The predicate used to send a message on desktop/web
@@ -390,15 +390,15 @@ class StreamMessageInput extends StatefulWidget {
   /// media picker handles permissions internally.
   /// 3. Simplicity: Simplifies the implementation by leveraging the built-in
   /// functionality of the system media picker.
-  final bool useNativeAttachmentPicker;
+  final bool useSystemAttachmentPicker;
 
   /// Forces use of native attachment picker on mobile instead of the custom
   /// Stream attachment picker.
   @Deprecated(
-    'Use useNativeAttachmentPicker instead. '
+    'Use useSystemAttachmentPicker instead. '
     'This feature was deprecated after v9.4.0',
   )
-  bool get useNativeAttachmentPickerOnMobile => useNativeAttachmentPicker;
+  bool get useNativeAttachmentPickerOnMobile => useSystemAttachmentPicker;
 
   /// The configuration to use while creating a poll.
   ///
@@ -1006,8 +1006,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       });
 
     final messageInputTheme = StreamMessageInputTheme.of(context);
-    final useNativePicker = widget.useNativeAttachmentPicker ||
-        (messageInputTheme.useNativeAttachmentPicker ?? false);
+    final useSystemPicker = widget.useSystemAttachmentPicker ||
+        (messageInputTheme.useSystemAttachmentPicker ?? false);
 
     final value = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
@@ -1016,7 +1016,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       pollConfig: widget.pollConfig,
       initialPoll: initialPoll,
       initialAttachments: initialAttachments,
-      useNativeAttachmentPicker: useNativePicker,
+      useSystemAttachmentPicker: useSystemPicker,
     );
 
     if (value == null || value is! AttachmentPickerValue) return;
