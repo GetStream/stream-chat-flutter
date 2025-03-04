@@ -32,6 +32,7 @@ void main() {
         inviteAcceptedAt: DateTime.now(),
         channelRole: 'testRole',
         updatedAt: DateTime.now(),
+        extraData: const {'extra_test_field': 'extraTestData'},
       ),
     );
     await database.userDao.updateUsers(users);
@@ -68,6 +69,7 @@ void main() {
         fetchedMember.inviteAcceptedAt,
         isSameDateAs(member.inviteAcceptedAt),
       );
+      expect(fetchedMember.extraData, member.extraData);
     }
   });
 
@@ -95,6 +97,7 @@ void main() {
         fetchedMember.inviteAcceptedAt,
         isSameDateAs(member.inviteAcceptedAt),
       );
+      expect(fetchedMember.extraData, member.extraData);
     }
 
     // Modifying one of the member and also adding one new

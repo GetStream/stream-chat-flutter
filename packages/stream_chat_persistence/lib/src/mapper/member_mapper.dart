@@ -35,5 +35,6 @@ extension MemberX on Member {
         inviteAcceptedAt: inviteAcceptedAt,
         channelRole: channelRole,
         updatedAt: updatedAt,
+        extraData: extraData,
       );
 }
