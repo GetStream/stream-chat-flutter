@@ -199,28 +199,31 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     attachments = [];
   }
 
-  // Only used to store the value locally in order to remove it if we call
-  // [clearOGAttachment] or [setOGAttachment] again.
-  Attachment? _ogAttachment;
-
   /// Returns the og attachment of the message if set
-  Attachment? get ogAttachment =>
-      attachments.firstWhereOrNull((it) => it.id == _ogAttachment?.id);
+  Attachment? get ogAttachment {
+    return attachments.firstWhereOrNull((it) => it.ogScrapeUrl != null);
+  }
 
   /// Sets the og attachment in the message.
   void setOGAttachment(Attachment attachment) {
-    attachments = [...attachments]
-      ..remove(_ogAttachment)
-      ..insert(0, attachment);
-    _ogAttachment = attachment;
+    final updatedAttachments = [...attachments];
+    // Remove the existing og attachment if it exists.
+    if (ogAttachment case final existingOGAttachment?) {
+      updatedAttachments.remove(existingOGAttachment);
+    }
+
+    // Add the new og attachment at the beginning of the list.
+    updatedAttachments.insert(0, attachment);
+
+    // Update the attachments list.
+    attachments = updatedAttachments;
   }
 
   /// Removes the og attachment.
   void clearOGAttachment() {
-    if (_ogAttachment != null) {
-      removeAttachment(_ogAttachment!);
+    if (ogAttachment case final existingOGAttachment?) {
+      removeAttachment(existingOGAttachment);
     }
-    _ogAttachment = null;
   }
 
   /// Returns the poll in the message.

@@ -480,16 +480,18 @@ class StreamMessageInputState extends State<StreamMessageInput>
     assert(_controller != null, '');
 
     registerForRestoration(_controller!, 'messageInputController');
-    _effectiveController
-      ..removeListener(_onChangedDebounced)
-      ..addListener(_onChangedDebounced);
-    if (!_isEditing && _timeOut <= 0) _startSlowMode();
+    _initialiseEffectiveController();
   }
 
   void _initialiseEffectiveController() {
     _effectiveController
       ..removeListener(_onChangedDebounced)
       ..addListener(_onChangedDebounced);
+
+    // Call the listener once to make sure the initial state is reflected
+    // correctly in the UI.
+    _onChangedDebounced.call();
+
     if (!_isEditing && _timeOut <= 0) _startSlowMode();
   }
 

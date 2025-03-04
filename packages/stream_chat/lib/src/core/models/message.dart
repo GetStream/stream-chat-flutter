@@ -56,6 +56,7 @@ class Message extends Equatable {
     this.extraData = const {},
     this.state = const MessageState.initial(),
     this.i18n,
+    this.restrictedVisibility,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
         remoteCreatedAt = createdAt,
@@ -237,6 +238,14 @@ class Message extends Equatable {
   String? get pollId => _pollId ?? poll?.id;
   final String? _pollId;
 
+  /// The list of user ids that should be able to see the message.
+  ///
+  /// If null or empty, the message is visible to all users.
+  /// If populated, only users whose ids are included in this list can see
+  /// the message.
+  @JsonKey(includeIfNull: false)
+  final List<String>? restrictedVisibility;
+
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
@@ -291,6 +300,7 @@ class Message extends Equatable {
     'i18n',
     'poll',
     'poll_id',
+    'restricted_visibility',
   ];
 
   /// Serialize to json.
@@ -335,6 +345,7 @@ class Message extends Equatable {
     Map<String, Object?>? extraData,
     MessageState? state,
     Map<String, String>? i18n,
+    List<String>? restrictedVisibility,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -408,6 +419,7 @@ class Message extends Equatable {
       extraData: extraData ?? this.extraData,
       state: state ?? this.state,
       i18n: i18n ?? this.i18n,
+      restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
     );
   }
 
@@ -450,6 +462,7 @@ class Message extends Equatable {
       extraData: other.extraData,
       state: other.state,
       i18n: other.i18n,
+      restrictedVisibility: other.restrictedVisibility,
     );
   }
 
@@ -512,5 +525,58 @@ class Message extends Equatable {
         extraData,
         state,
         i18n,
+        restrictedVisibility,
       ];
+}
+
+/// Extension that adds visibility control functionality to Message objects.
+///
+/// This extension provides methods to determine if a message is visible to a
+/// specific user based on the [Message.restrictedVisibility] list.
+extension MessageVisibility on Message {
+  /// Checks if this message has any visibility restrictions applied.
+  ///
+  /// Returns true if the restrictedVisibility list exists and contains at
+  /// least one entry, indicating that visibility of this message is restricted
+  /// to specific users.
+  ///
+  /// Returns false if the restrictedVisibility list is null or empty,
+  /// indicating that this message is visible to all users.
+  bool get hasRestrictedVisibility {
+    final visibility = restrictedVisibility;
+    if (visibility == null || visibility.isEmpty) return false;
+
+    return true;
+  }
+
+  /// Determines if a message is visible to a specific user based on
+  /// restricted visibility settings.
+  ///
+  /// Returns true in the following cases:
+  /// - The restrictedVisibility list is null or empty (visible to everyone)
+  /// - The provided userId is found in the restrictedVisibility list
+  ///
+  /// Returns false if the restrictedVisibility list exists and doesn't
+  /// contain the provided userId.
+  ///
+  /// [userId] The unique identifier of the user to check visibility for.
+  bool isVisibleTo(String userId) {
+    final visibility = restrictedVisibility;
+    if (visibility == null || visibility.isEmpty) return true;
+
+    return visibility.contains(userId);
+  }
+
+  /// Determines if a message is not visible to a specific user based on
+  /// restricted visibility settings.
+  ///
+  /// Returns true if the restrictedVisibility list exists and doesn't
+  /// contain the provided userId.
+  ///
+  /// Returns false in the following cases:
+  /// - The restrictedVisibility list is null or empty (visible to everyone)
+  /// - The provided userId is found in the restrictedVisibility list
+  ///
+  /// [userId] The unique identifier of the user to check visibility for.
+  bool isNotVisibleTo(String userId) => !isVisibleTo(userId);
 }

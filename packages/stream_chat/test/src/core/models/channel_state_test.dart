@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -42,6 +40,10 @@ void main() {
         DateTime.parse('2020-01-29T03:23:02.843948Z'),
       );
       expect(channelState.messages![0].user, isA<User>());
+      expect(
+        channelState.messages![0].restrictedVisibility,
+        isA<List<String>>(),
+      );
       expect(channelState.watcherCount, 5);
     });
 
@@ -58,8 +60,6 @@ void main() {
         pinnedMessages: [],
         watchers: [],
       );
-
-      print(jsonEncode(channelState.messages?.first));
 
       expect(
         channelState.toJson(),

@@ -15,7 +15,10 @@ class MockClientState extends Mock implements ClientState {}
 
 class MockChannel extends Mock implements Channel {
   MockChannel({
-    this.ownCapabilities = const ['send-message'],
+    this.ownCapabilities = const [
+      PermissionType.sendMessage,
+      PermissionType.uploadFile,
+    ],
   });
 
   @override

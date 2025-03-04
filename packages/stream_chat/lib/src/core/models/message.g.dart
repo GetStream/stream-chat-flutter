@@ -76,6 +76,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),
+      restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -91,5 +94,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'pinned': instance.pinned,
       'pin_expires': instance.pinExpires?.toIso8601String(),
       'poll_id': instance.pollId,
+      if (instance.restrictedVisibility case final value?)
+        'restricted_visibility': value,
       'extra_data': instance.extraData,
     };

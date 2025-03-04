@@ -62,5 +62,8 @@
   "reply_count": 0,
   "created_at": "2020-01-28T22:17:31.107978Z",
   "updated_at": "2020-01-28T22:17:31.130506Z",
-  "mentioned_users": []
+  "mentioned_users": [],
+  "restricted_visibility": [
+    "user-id-3"
+  ]
 }
