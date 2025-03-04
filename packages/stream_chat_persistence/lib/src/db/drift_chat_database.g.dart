@@ -6120,6 +6120,14 @@ class $MembersTable extends Members
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("is_moderator" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, dynamic>?>(
+              $MembersTable.$converterextraDatan);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -6147,6 +6155,7 @@ class $MembersTable extends Members
         banned,
         shadowBanned,
         isModerator,
+        extraData,
         createdAt,
         updatedAt
       ];
@@ -6212,6 +6221,7 @@ class $MembersTable extends Members
           isModerator.isAcceptableOrUnknown(
               data['is_moderator']!, _isModeratorMeta));
     }
+    context.handle(_extraDataMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -6247,6 +6257,9 @@ class $MembersTable extends Members
           .read(DriftSqlType.bool, data['${effectivePrefix}shadow_banned'])!,
       isModerator: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_moderator'])!,
+      extraData: $MembersTable.$converterextraDatan.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -6258,6 +6271,11 @@ class $MembersTable extends Members
   $MembersTable createAlias(String alias) {
     return $MembersTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
+      MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
+      NullAwareTypeConverter.wrap($converterextraData);
 }
 
 class MemberEntity extends DataClass implements Insertable<MemberEntity> {
@@ -6288,6 +6306,9 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   /// True if the user is a moderator of the channel
   final bool isModerator;
 
+  /// Map of custom channel extraData
+  final Map<String, dynamic>? extraData;
+
   /// The date of creation
   final DateTime createdAt;
 
@@ -6303,6 +6324,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       required this.banned,
       required this.shadowBanned,
       required this.isModerator,
+      this.extraData,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -6323,6 +6345,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     map['banned'] = Variable<bool>(banned);
     map['shadow_banned'] = Variable<bool>(shadowBanned);
     map['is_moderator'] = Variable<bool>(isModerator);
+    if (!nullToAbsent || extraData != null) {
+      map['extra_data'] =
+          Variable<String>($MembersTable.$converterextraDatan.toSql(extraData));
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -6343,6 +6369,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       banned: serializer.fromJson<bool>(json['banned']),
       shadowBanned: serializer.fromJson<bool>(json['shadowBanned']),
       isModerator: serializer.fromJson<bool>(json['isModerator']),
+      extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -6360,6 +6387,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       'banned': serializer.toJson<bool>(banned),
       'shadowBanned': serializer.toJson<bool>(shadowBanned),
       'isModerator': serializer.toJson<bool>(isModerator),
+      'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -6375,6 +6403,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           bool? banned,
           bool? shadowBanned,
           bool? isModerator,
+          Value<Map<String, dynamic>?> extraData = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       MemberEntity(
@@ -6391,6 +6420,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
         banned: banned ?? this.banned,
         shadowBanned: shadowBanned ?? this.shadowBanned,
         isModerator: isModerator ?? this.isModerator,
+        extraData: extraData.present ? extraData.value : this.extraData,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -6414,6 +6444,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           : this.shadowBanned,
       isModerator:
           data.isModerator.present ? data.isModerator.value : this.isModerator,
+      extraData: data.extraData.present ? data.extraData.value : this.extraData,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -6431,6 +6462,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           ..write('banned: $banned, ')
           ..write('shadowBanned: $shadowBanned, ')
           ..write('isModerator: $isModerator, ')
+          ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -6448,6 +6480,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       banned,
       shadowBanned,
       isModerator,
+      extraData,
       createdAt,
       updatedAt);
   @override
@@ -6463,6 +6496,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           other.banned == this.banned &&
           other.shadowBanned == this.shadowBanned &&
           other.isModerator == this.isModerator &&
+          other.extraData == this.extraData &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -6477,6 +6511,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   final Value<bool> banned;
   final Value<bool> shadowBanned;
   final Value<bool> isModerator;
+  final Value<Map<String, dynamic>?> extraData;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -6490,6 +6525,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.banned = const Value.absent(),
     this.shadowBanned = const Value.absent(),
     this.isModerator = const Value.absent(),
+    this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -6504,6 +6540,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.banned = const Value.absent(),
     this.shadowBanned = const Value.absent(),
     this.isModerator = const Value.absent(),
+    this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -6519,6 +6556,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     Expression<bool>? banned,
     Expression<bool>? shadowBanned,
     Expression<bool>? isModerator,
+    Expression<String>? extraData,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -6533,6 +6571,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       if (banned != null) 'banned': banned,
       if (shadowBanned != null) 'shadow_banned': shadowBanned,
       if (isModerator != null) 'is_moderator': isModerator,
+      if (extraData != null) 'extra_data': extraData,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -6549,6 +6588,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       Value<bool>? banned,
       Value<bool>? shadowBanned,
       Value<bool>? isModerator,
+      Value<Map<String, dynamic>?>? extraData,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<int>? rowid}) {
@@ -6562,6 +6602,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       banned: banned ?? this.banned,
       shadowBanned: shadowBanned ?? this.shadowBanned,
       isModerator: isModerator ?? this.isModerator,
+      extraData: extraData ?? this.extraData,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -6598,6 +6639,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     if (isModerator.present) {
       map['is_moderator'] = Variable<bool>(isModerator.value);
     }
+    if (extraData.present) {
+      map['extra_data'] = Variable<String>(
+          $MembersTable.$converterextraDatan.toSql(extraData.value));
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -6622,6 +6667,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
           ..write('banned: $banned, ')
           ..write('shadowBanned: $shadowBanned, ')
           ..write('isModerator: $isModerator, ')
+          ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -7691,8 +7737,8 @@ final class $$ChannelsTableReferences
                   db.channels.cid, db.messages.channelCid));
 
   $$MessagesTableProcessedTableManager get messagesRefs {
-    final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$MessagesTableTableManager($_db, $_db.messages).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_messagesRefsTable($_db));
     return ProcessedTableManager(
@@ -7706,8 +7752,8 @@ final class $$ChannelsTableReferences
                   $_aliasNameGenerator(db.channels.cid, db.members.channelCid));
 
   $$MembersTableProcessedTableManager get membersRefs {
-    final manager = $$MembersTableTableManager($_db, $_db.members)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$MembersTableTableManager($_db, $_db.members).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_membersRefsTable($_db));
     return ProcessedTableManager(
@@ -7721,8 +7767,8 @@ final class $$ChannelsTableReferences
               $_aliasNameGenerator(db.channels.cid, db.reads.channelCid));
 
   $$ReadsTableProcessedTableManager get readsRefs {
-    final manager = $$ReadsTableTableManager($_db, $_db.reads)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$ReadsTableTableManager($_db, $_db.reads).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_readsRefsTable($_db));
     return ProcessedTableManager(
@@ -8251,8 +8297,10 @@ final class $$MessagesTableReferences
           $_aliasNameGenerator(db.messages.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -8267,7 +8315,7 @@ final class $$MessagesTableReferences
 
   $$ReactionsTableProcessedTableManager get reactionsRefs {
     final manager = $$ReactionsTableTableManager($_db, $_db.reactions)
-        .filter((f) => f.messageId.id($_item.id));
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_reactionsRefsTable($_db));
     return ProcessedTableManager(
@@ -9034,7 +9082,7 @@ final class $$PinnedMessagesTableReferences extends BaseReferences<
       get pinnedMessageReactionsRefs {
     final manager = $$PinnedMessageReactionsTableTableManager(
             $_db, $_db.pinnedMessageReactions)
-        .filter((f) => f.messageId.id($_item.id));
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache =
         $_typedResult.readTableOrNull(_pinnedMessageReactionsRefsTable($_db));
@@ -9701,7 +9749,7 @@ final class $$PollsTableReferences
 
   $$PollVotesTableProcessedTableManager get pollVotesRefs {
     final manager = $$PollVotesTableTableManager($_db, $_db.pollVotes)
-        .filter((f) => f.pollId.id($_item.id));
+        .filter((f) => f.pollId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_pollVotesRefsTable($_db));
     return ProcessedTableManager(
@@ -10128,9 +10176,10 @@ final class $$PollVotesTableReferences extends BaseReferences<
       .createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
 
   $$PollsTableProcessedTableManager? get pollId {
-    if ($_item.pollId == null) return null;
+    final $_column = $_itemColumn<String>('poll_id');
+    if ($_column == null) return null;
     final manager = $$PollsTableTableManager($_db, $_db.polls)
-        .filter((f) => f.id($_item.pollId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_pollIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10433,8 +10482,10 @@ final class $$PinnedMessageReactionsTableReferences extends BaseReferences<
           db.pinnedMessageReactions.messageId, db.pinnedMessages.id));
 
   $$PinnedMessagesTableProcessedTableManager get messageId {
+    final $_column = $_itemColumn<String>('message_id')!;
+
     final manager = $$PinnedMessagesTableTableManager($_db, $_db.pinnedMessages)
-        .filter((f) => f.id($_item.messageId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10729,8 +10780,10 @@ final class $$ReactionsTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.reactions.messageId, db.messages.id));
 
   $$MessagesTableProcessedTableManager get messageId {
+    final $_column = $_itemColumn<String>('message_id')!;
+
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.id($_item.messageId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -11230,6 +11283,7 @@ typedef $$MembersTableCreateCompanionBuilder = MembersCompanion Function({
   Value<bool> banned,
   Value<bool> shadowBanned,
   Value<bool> isModerator,
+  Value<Map<String, dynamic>?> extraData,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -11244,6 +11298,7 @@ typedef $$MembersTableUpdateCompanionBuilder = MembersCompanion Function({
   Value<bool> banned,
   Value<bool> shadowBanned,
   Value<bool> isModerator,
+  Value<Map<String, dynamic>?> extraData,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -11258,8 +11313,10 @@ final class $$MembersTableReferences
           $_aliasNameGenerator(db.members.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -11301,6 +11358,12 @@ class $$MembersTableFilterComposer
 
   ColumnFilters<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
+          String>
+      get extraData => $composableBuilder(
+          column: $table.extraData,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -11365,6 +11428,9 @@ class $$MembersTableOrderingComposer
   ColumnOrderings<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get extraData => $composableBuilder(
+      column: $table.extraData, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -11425,6 +11491,10 @@ class $$MembersTableAnnotationComposer
   GeneratedColumn<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      get extraData => $composableBuilder(
+          column: $table.extraData, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -11484,6 +11554,7 @@ class $$MembersTableTableManager extends RootTableManager<
             Value<bool> banned = const Value.absent(),
             Value<bool> shadowBanned = const Value.absent(),
             Value<bool> isModerator = const Value.absent(),
+            Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -11498,6 +11569,7 @@ class $$MembersTableTableManager extends RootTableManager<
             banned: banned,
             shadowBanned: shadowBanned,
             isModerator: isModerator,
+            extraData: extraData,
             createdAt: createdAt,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -11512,6 +11584,7 @@ class $$MembersTableTableManager extends RootTableManager<
             Value<bool> banned = const Value.absent(),
             Value<bool> shadowBanned = const Value.absent(),
             Value<bool> isModerator = const Value.absent(),
+            Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -11526,6 +11599,7 @@ class $$MembersTableTableManager extends RootTableManager<
             banned: banned,
             shadowBanned: shadowBanned,
             isModerator: isModerator,
+            extraData: extraData,
             createdAt: createdAt,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -11609,8 +11683,10 @@ final class $$ReadsTableReferences
       .createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(

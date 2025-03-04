@@ -1,6 +1,7 @@
 ## Upcoming
 
 - Added support for `Message.restrictedVisibility` field.
+- Added support for `Member.extraData` field.
 
 ## 9.4.0
 
