@@ -46,6 +46,7 @@ GeneratedPluginRegistrant.*
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/app/.cxx
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -128,5 +129,6 @@ gradle-wrapper.jar
 !/pubspec.lock
 !**/example/web/sql-wasm.js
 !**/example/web/sql-wasm.wasm
+!/sample_app/android/app/google-services.json
 !/sample_app/web/sql-wasm.js
 !/sample_app/web/sql-wasm.wasm
