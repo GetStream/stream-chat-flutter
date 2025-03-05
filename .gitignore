@@ -106,7 +106,6 @@ Podfile.lock
 
 # Other ignored files
 google-services.json
-!sample_app/android/app/google-services.json
 .melos_tool/
 .packages/flutter_widgets/example/ios/Flutter/.last_build_id
 .packages/dart_client/example/ios/Flutter/.last_build_id
@@ -130,5 +129,6 @@ gradle-wrapper.jar
 !/pubspec.lock
 !**/example/web/sql-wasm.js
 !**/example/web/sql-wasm.wasm
+!/sample_app/android/app/google-services.json
 !/sample_app/web/sql-wasm.js
 !/sample_app/web/sql-wasm.wasm
