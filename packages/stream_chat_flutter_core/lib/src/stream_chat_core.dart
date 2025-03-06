@@ -110,8 +110,8 @@ class StreamChatCoreState extends State<StreamChatCore>
   var _isConnectionAvailable = true;
 
   Future<SystemEnvironment> get _getSystemEnvironment async {
-    late final String? osVersion;
-    late final String? deviceModel;
+    String? osVersion;
+    String? deviceModel;
 
     try {
       switch (CurrentPlatform.type) {
@@ -154,8 +154,8 @@ class StreamChatCoreState extends State<StreamChatCore>
       }
     } catch (_) {}
 
-    late final String? appName;
-    late final String? appVersion;
+    String? appName;
+    String? appVersion;
 
     try {
       final packageInfo = await PackageInfo.fromPlatform();
