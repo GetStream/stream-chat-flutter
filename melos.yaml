@@ -32,7 +32,7 @@ command:
       contextmenu: ^3.0.0
       cupertino_icons: ^1.0.3
       desktop_drop: ^0.5.0
-      device_info_plus: ^11.3.3
+      device_info_plus: ^11.3.0
       diacritic: ^0.1.5
       dio: ^5.4.3+1
       drift: ^2.22.1
