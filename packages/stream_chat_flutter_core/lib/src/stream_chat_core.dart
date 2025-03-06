@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
@@ -94,13 +96,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   Timer? _disconnectTimer;
 
   @override
-  Widget build(BuildContext context) {
-    StreamChatClient.additionalHeaders = {
-      'X-Stream-Client': '${StreamChatClient.defaultUserAgent}-'
-          'core-${StreamChatClient.packageVersion}',
-    };
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 
   /// The current user
   User? get currentUser => client.state.currentUser;
@@ -113,11 +109,80 @@ class StreamChatCoreState extends State<StreamChatCore>
   var _isInForeground = true;
   var _isConnectionAvailable = true;
 
+  Future<SystemEnvironment> get _getSystemEnvironment async {
+    late final String? osVersion;
+    late final String? deviceModel;
+
+    try {
+      switch (CurrentPlatform.type) {
+        case PlatformType.android:
+          final info = await DeviceInfoPlugin().androidInfo;
+          osVersion = info.version.release;
+          deviceModel = '${info.manufacturer} ${info.model}';
+          break;
+
+        case PlatformType.ios:
+          final info = await DeviceInfoPlugin().iosInfo;
+          osVersion = info.systemVersion;
+          deviceModel = info.utsname.machine;
+          break;
+
+        case PlatformType.macOS:
+          final info = await DeviceInfoPlugin().macOsInfo;
+          osVersion = [info.majorVersion, info.minorVersion, info.patchVersion]
+              .join('.');
+          deviceModel = info.model;
+          break;
+
+        case PlatformType.windows:
+          final info = await DeviceInfoPlugin().windowsInfo;
+          osVersion = [info.majorVersion, info.minorVersion, info.buildNumber]
+              .join('.');
+          deviceModel = null;
+          break;
+
+        case PlatformType.linux:
+          final info = await DeviceInfoPlugin().linuxInfo;
+          osVersion = '${info.name} ${info.version}';
+          deviceModel = null;
+          break;
+
+        default:
+          osVersion = null;
+          deviceModel = null;
+          break;
+      }
+    } catch (_) {}
+
+    late final String? appName;
+    late final String? appVersion;
+
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      appName = packageInfo.appName;
+      appVersion = packageInfo.version;
+    } catch (_) {}
+
+    return SystemEnvironment(
+      sdkName: 'stream-chat',
+      sdkIdentifier: 'flutter',
+      sdkVersion: StreamChatClient.packageVersion,
+      appName: appName,
+      appVersion: appVersion,
+      osName: CurrentPlatform.name,
+      osVersion: osVersion,
+      deviceModel: deviceModel,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _subscribeToConnectivityChange(widget.connectivityStream);
+
+    // Update the client system environment.
+    unawaited(_getSystemEnvironment.then(client.updateSystemEnvironment));
   }
 
   void _subscribeToConnectivityChange([

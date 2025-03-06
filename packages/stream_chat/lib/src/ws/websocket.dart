@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/error/error.dart';
+import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -34,6 +35,7 @@ class WebSocket with TimerHelper {
     required this.apiKey,
     required this.baseUrl,
     required this.tokenManager,
+    this.systemEnvironmentManager,
     this.handler,
     Logger? logger,
     this.webSocketChannelProvider,
@@ -52,8 +54,17 @@ class WebSocket with TimerHelper {
   /// WS base url
   final String baseUrl;
 
+  /// Manager responsible for handling authentication tokens.
   ///
+  /// Used to retrieve tokens for websocket connections and refreshing expired
+  /// tokens.
   final TokenManager tokenManager;
+
+  /// Manager that provides system environment information like SDK version and
+  /// platform details.
+  ///
+  /// Used to send client identification in websocket connection requests.
+  final SystemEnvironmentManager? systemEnvironmentManager;
 
   /// Functions that will be called every time a new event is received from the
   /// connection
@@ -157,11 +168,14 @@ class WebSocket with TimerHelper {
       'user_token': token.rawValue,
       'server_determines_connection_id': true,
     };
+
+    final userAgent = systemEnvironmentManager?.userAgent;
     final qs = {
       'json': jsonEncode(params),
       'api_key': apiKey,
       'authorization': token.rawValue,
       'stream-auth-type': token.authType.name,
+      if (userAgent != null) 'X-Stream-Client': jsonEncode(userAgent),
       ...queryParameters,
     };
 
