@@ -130,11 +130,6 @@ class StreamChatState extends State<StreamChat> {
                   connectivityStream: widget.connectivityStream,
                   child: Builder(
                     builder: (context) {
-                      StreamChatClient.additionalHeaders = {
-                        'X-Stream-Client':
-                            '${StreamChatClient.defaultUserAgent}-'
-                                'ui-${StreamChatClient.packageVersion}',
-                      };
                       return widget.child ?? const Offstage();
                     },
                   ),

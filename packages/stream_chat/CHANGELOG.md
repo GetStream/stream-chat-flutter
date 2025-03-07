@@ -12,6 +12,7 @@
 🔄 Changed
 
 - Refactored identifying the `Attachment.uploadState` logic for local and remote attachments. Also updated the logic for determining the attachment type to check for ogScrapeUrl instead of `AttachmentType.giphy`.
+- Improved the `x-stream-client` header generation for better client identification and analytics.
 
 ✅ Added
 

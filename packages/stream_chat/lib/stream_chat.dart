@@ -57,4 +57,5 @@ export 'src/core/util/extension.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
 export 'src/permission_type.dart';
+export 'src/system_environment.dart';
 export 'src/ws/connection_status.dart';
