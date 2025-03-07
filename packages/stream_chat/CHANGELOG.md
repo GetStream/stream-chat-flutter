@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+- [[#1775]](https://github.com/GetStream/stream-chat-flutter/issues/1775) Fix incorrect message order.
+
 ✅ Added
 
 - Add member.extraData field
