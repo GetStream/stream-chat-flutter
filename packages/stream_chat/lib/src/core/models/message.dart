@@ -167,7 +167,21 @@ class Message extends Equatable {
   /// Returns the latest between [localCreatedAt] and [remoteCreatedAt].
   /// If both are null, returns [DateTime.now].
   @JsonKey(includeToJson: false)
-  DateTime get createdAt => localCreatedAt ?? remoteCreatedAt ?? DateTime.now();
+  DateTime get createdAt {
+    final localCreatedAt = this.localCreatedAt;
+    final remoteCreatedAt = this.remoteCreatedAt;
+    if (localCreatedAt == null) {
+      return remoteCreatedAt ?? DateTime.now();
+    } else if (remoteCreatedAt == null) {
+      return localCreatedAt;
+    } else {
+      if (localCreatedAt.isAfter(remoteCreatedAt)) {
+        return localCreatedAt;
+      } else {
+        return remoteCreatedAt;
+      }
+    }
+  }
 
   /// Indicates when the message was created locally.
   @JsonKey(includeToJson: false, includeFromJson: false)
