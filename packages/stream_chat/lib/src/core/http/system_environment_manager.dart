@@ -1,5 +1,6 @@
 // ignore_for_file: use_setters_to_change_properties
 
+import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/system_environment.dart';
 import 'package:stream_chat/version.dart';
 
@@ -9,12 +10,16 @@ import 'package:stream_chat/version.dart';
 class SystemEnvironmentManager {
   /// {@macro systemEnvironmentManager}
   SystemEnvironmentManager({
-    SystemEnvironment environment = const SystemEnvironment(
-      sdkName: 'stream-chat',
-      sdkIdentifier: 'dart',
-      sdkVersion: PACKAGE_VERSION,
-    ),
-  }) : _environment = environment;
+    SystemEnvironment? environment,
+  }) : _environment = switch (environment) {
+          final env? => env,
+          _ => SystemEnvironment(
+              sdkName: 'stream-chat',
+              sdkIdentifier: 'dart',
+              sdkVersion: PACKAGE_VERSION,
+              osName: CurrentPlatform.name,
+            ),
+        };
 
   /// Returns the Stream client user agent string based on the current
   /// [environment] value.
