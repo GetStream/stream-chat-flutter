@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_getters_setters
-
 import 'dart:async';
 
 import 'package:dio/dio.dart';
@@ -14,6 +12,7 @@ import 'package:stream_chat/src/core/api/stream_chat_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
+import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
@@ -27,10 +26,10 @@ import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/system_environment.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/version.dart';
@@ -85,7 +84,6 @@ class StreamChatClient {
       baseUrl: baseURL,
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
-      headers: {'X-Stream-Client': defaultUserAgent},
     );
 
     _chatApi = chatApi ??
@@ -94,6 +92,7 @@ class StreamChatClient {
           options: options,
           tokenManager: _tokenManager,
           connectionIdManager: _connectionIdManager,
+          systemEnvironmentManager: _systemEnvironmentManager,
           attachmentFileUploaderProvider: attachmentFileUploaderProvider,
           logger: detachedLogger('🕸️'),
           interceptors: chatApiInterceptors,
@@ -105,11 +104,9 @@ class StreamChatClient {
           apiKey: apiKey,
           baseUrl: baseWsUrl ?? options.baseUrl,
           tokenManager: _tokenManager,
+          systemEnvironmentManager: _systemEnvironmentManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
-          queryParameters: {
-            'X-Stream-Client': '$defaultUserAgent-$packageVersion',
-          },
         );
 
     _retryPolicy = retryPolicy ??
@@ -130,10 +127,31 @@ class StreamChatClient {
 
   final _tokenManager = TokenManager();
   final _connectionIdManager = ConnectionIdManager();
+  static final _systemEnvironmentManager = SystemEnvironmentManager();
+
+  /// Updates the system environment information used by the client.
+  ///
+  /// It allows you to set environment-specific information that will be
+  /// included in API requests, such as the application name, platform details,
+  /// and version information.
+  ///
+  /// Example:
+  /// ```dart
+  /// client.updateSystemEnvironment(
+  ///   SystemEnvironment(
+  ///     name: 'my_app',
+  ///     version: '1.0.0',
+  ///   ),
+  /// );
+  /// ```
+  ///
+  /// See [SystemEnvironment] for more information on the available fields.
+  void updateSystemEnvironment(SystemEnvironment environment) {
+    _systemEnvironmentManager.updateEnvironment(environment);
+  }
 
   /// Default user agent for all requests
-  static String defaultUserAgent =
-      'stream-chat-dart-client-${CurrentPlatform.name}';
+  static String defaultUserAgent = _systemEnvironmentManager.userAgent;
 
   /// Additional headers for all requests
   static Map<String, Object?> additionalHeaders = {};
