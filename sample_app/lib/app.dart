@@ -5,9 +5,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' hide Priority;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sample_app/firebase_options.dart';
@@ -24,8 +24,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
-
-import 'firebase_options.dart';
 
 // Define supported notification types
 const expectedNotificationTypes = [
