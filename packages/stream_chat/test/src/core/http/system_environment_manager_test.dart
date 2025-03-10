@@ -1,6 +1,7 @@
-// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
+// ignore_for_file: avoid_redundant_argument_values
 
 import 'package:stream_chat/src/core/http/system_environment_manager.dart';
+import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_chat/src/system_environment.dart';
 import 'package:stream_chat/version.dart';
 import 'package:test/test.dart';
@@ -48,7 +49,12 @@ void main() {
     });
 
     test('userAgent returns proper header string', () {
-      expect(manager.userAgent, equals('stream-chat-dart-v$PACKAGE_VERSION'));
+      expect(
+        manager.userAgent,
+        equals(
+          'stream-chat-dart-v$PACKAGE_VERSION|os=${CurrentPlatform.name}',
+        ),
+      );
     });
   });
 
