@@ -3027,7 +3027,7 @@ void main() {
             expect(channel.lastMessageAt, equals(initialLastMessageAt));
 
             final message = Message(
-              type: 'ephemeral',
+              type: MessageType.ephemeral,
               id: 'test-message-id',
               user: client.state.currentUser,
               createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
@@ -3078,7 +3078,7 @@ void main() {
             ).thenReturn(true);
 
             final message = Message(
-              type: 'system',
+              type: MessageType.system,
               id: 'test-message-id',
               user: client.state.currentUser,
               createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),

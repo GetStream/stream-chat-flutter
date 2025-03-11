@@ -9,7 +9,9 @@ part of 'message.dart';
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       id: json['id'] as String?,
       text: json['text'] as String?,
-      type: json['type'] as String? ?? 'regular',
+      type: json['type'] == null
+          ? MessageType.regular
+          : MessageType.fromJson(json['type'] as String),
       attachments: (json['attachments'] as List<dynamic>?)
               ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -84,7 +86,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'id': instance.id,
       'text': instance.text,
-      if (Message._typeToJson(instance.type) case final value?) 'type': value,
+      if (MessageType.toJson(instance.type) case final value?) 'type': value,
       'attachments': instance.attachments.map((e) => e.toJson()).toList(),
       'mentioned_users': User.toIds(instance.mentionedUsers),
       'parent_id': instance.parentId,
