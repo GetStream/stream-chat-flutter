@@ -235,6 +235,10 @@ class StreamChatThemeData {
         messageAuthorStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         messageTextStyle: textTheme.body,
+        messageDeletedStyle: textTheme.body.copyWith(
+          color: colorTheme.textLowEmphasis,
+          fontStyle: FontStyle.italic,
+        ),
         createdAtStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
@@ -263,6 +267,10 @@ class StreamChatThemeData {
         reactionsBorderColor: colorTheme.borders,
         reactionsMaskColor: colorTheme.appBg,
         messageTextStyle: textTheme.body,
+        messageDeletedStyle: textTheme.body.copyWith(
+          color: colorTheme.textLowEmphasis,
+          fontStyle: FontStyle.italic,
+        ),
         createdAtStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         messageAuthorStyle:

@@ -8,6 +8,7 @@
 ✅ Added
 
 - Introduced `StreamMessageInput.useSystemAttachmentPicker` for system media picker support.
+- Introduced `StreamMessageThemeData.messageDeletedStyle` to style the text on a deleted message.
 
 🔄 Changed
 
