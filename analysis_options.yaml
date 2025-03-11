@@ -70,7 +70,6 @@ linter:
     - null_closures
     - one_member_abstracts
     - only_throw_errors
-    - package_api_docs
     - package_prefixed_library_names
     - parameter_assignments
     - prefer_adjacent_string_concatenation
