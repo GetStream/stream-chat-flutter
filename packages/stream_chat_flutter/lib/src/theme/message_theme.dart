@@ -44,7 +44,8 @@ class StreamMessageThemeData with Diagnosticable {
   final TextStyle? createdAtStyle;
 
   /// Text style for the text on a deleted message
-  /// If not set [messageTextStyle] is used with [FontStyle.italic] and [createdAtStyle.color].
+  /// If not set [messageTextStyle] is used with [FontStyle.italic] and
+  /// [createdAtStyle.color].
   final TextStyle? messageDeletedStyle;
 
   /// Text style for replies
