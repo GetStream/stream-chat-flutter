@@ -4,6 +4,7 @@
 
 - Simplified the logic for setting and clearing OG attachments by removing the `_ogAttachment` field
   and directly working with the attachments list.
+- Added proper userAgent and systemEnvironment information for better diagnostics and analytics.
 
 ## 9.4.0
 
