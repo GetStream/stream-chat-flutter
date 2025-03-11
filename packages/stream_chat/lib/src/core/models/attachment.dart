@@ -342,15 +342,15 @@ class Attachment extends Equatable {
 /// {@endtemplate}
 extension type const AttachmentType(String rawType) implements String {
   /// Backend specified types.
-  static const AttachmentType image = AttachmentType('image');
-  static const AttachmentType file = AttachmentType('file');
-  static const AttachmentType giphy = AttachmentType('giphy');
-  static const AttachmentType video = AttachmentType('video');
-  static const AttachmentType audio = AttachmentType('audio');
-  static const AttachmentType voiceRecording = AttachmentType('voiceRecording');
+  static const image = AttachmentType('image');
+  static const file = AttachmentType('file');
+  static const giphy = AttachmentType('giphy');
+  static const video = AttachmentType('video');
+  static const audio = AttachmentType('audio');
+  static const voiceRecording = AttachmentType('voiceRecording');
 
   /// Application custom types.
-  static const AttachmentType urlPreview = AttachmentType('url_preview');
+  static const urlPreview = AttachmentType('url_preview');
 
   /// Create a new instance from a json string.
   static AttachmentType? fromJson(String? rawType) {
