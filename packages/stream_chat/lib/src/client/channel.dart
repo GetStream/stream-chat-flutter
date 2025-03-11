@@ -2195,7 +2195,7 @@ class ChannelClientState {
   /// [EventType.messageNew] will not be pushed on to message list.
   bool get isUpToDate => _isUpToDateController.value;
 
-  set isUpToDate(bool isUpToDate) => _isUpToDateController.add(isUpToDate);
+  set isUpToDate(bool isUpToDate) => _isUpToDateController.safeAdd(isUpToDate);
 
   /// [isUpToDate] flag count as a stream.
   Stream<bool> get isUpToDateStream => _isUpToDateController.stream;
@@ -2967,7 +2967,7 @@ class ChannelClientState {
   final Debounce _debouncedUpdatePersistenceChannelState;
 
   set _channelState(ChannelState v) {
-    _channelStateController.add(v);
+    _channelStateController.safeAdd(v);
     _debouncedUpdatePersistenceChannelState.call([v]);
   }
 
@@ -3011,7 +3011,7 @@ class ChannelClientState {
             if (user != null && user.id != currentUser.id) {
               final events = {...typingEvents};
               events[user] = event;
-              _typingEventsController.add(events);
+              _typingEventsController.safeAdd(events);
             }
           },
         ),
@@ -3022,7 +3022,7 @@ class ChannelClientState {
             final user = event.user;
             if (user != null && user.id != currentUser.id) {
               final events = {...typingEvents}..remove(user);
-              _typingEventsController.add(events);
+              _typingEventsController.safeAdd(events);
             }
           },
         ),
