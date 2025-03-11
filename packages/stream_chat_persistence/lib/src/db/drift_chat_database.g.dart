@@ -6306,7 +6306,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   /// True if the user is a moderator of the channel
   final bool isModerator;
 
-  /// Map of custom channel extraData
+  /// Map of custom member extraData
   final Map<String, dynamic>? extraData;
 
   /// The date of creation
@@ -7737,8 +7737,8 @@ final class $$ChannelsTableReferences
                   db.channels.cid, db.messages.channelCid));
 
   $$MessagesTableProcessedTableManager get messagesRefs {
-    final manager = $$MessagesTableTableManager($_db, $_db.messages).filter(
-        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+    final manager = $$MessagesTableTableManager($_db, $_db.messages)
+        .filter((f) => f.channelCid.cid($_item.cid));
 
     final cache = $_typedResult.readTableOrNull(_messagesRefsTable($_db));
     return ProcessedTableManager(
@@ -7752,8 +7752,8 @@ final class $$ChannelsTableReferences
                   $_aliasNameGenerator(db.channels.cid, db.members.channelCid));
 
   $$MembersTableProcessedTableManager get membersRefs {
-    final manager = $$MembersTableTableManager($_db, $_db.members).filter(
-        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+    final manager = $$MembersTableTableManager($_db, $_db.members)
+        .filter((f) => f.channelCid.cid($_item.cid));
 
     final cache = $_typedResult.readTableOrNull(_membersRefsTable($_db));
     return ProcessedTableManager(
@@ -7767,8 +7767,8 @@ final class $$ChannelsTableReferences
               $_aliasNameGenerator(db.channels.cid, db.reads.channelCid));
 
   $$ReadsTableProcessedTableManager get readsRefs {
-    final manager = $$ReadsTableTableManager($_db, $_db.reads).filter(
-        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+    final manager = $$ReadsTableTableManager($_db, $_db.reads)
+        .filter((f) => f.channelCid.cid($_item.cid));
 
     final cache = $_typedResult.readTableOrNull(_readsRefsTable($_db));
     return ProcessedTableManager(
@@ -8297,10 +8297,8 @@ final class $$MessagesTableReferences
           $_aliasNameGenerator(db.messages.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
-    final $_column = $_itemColumn<String>('channel_cid')!;
-
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid.sqlEquals($_column));
+        .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -8315,7 +8313,7 @@ final class $$MessagesTableReferences
 
   $$ReactionsTableProcessedTableManager get reactionsRefs {
     final manager = $$ReactionsTableTableManager($_db, $_db.reactions)
-        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
+        .filter((f) => f.messageId.id($_item.id));
 
     final cache = $_typedResult.readTableOrNull(_reactionsRefsTable($_db));
     return ProcessedTableManager(
@@ -9082,7 +9080,7 @@ final class $$PinnedMessagesTableReferences extends BaseReferences<
       get pinnedMessageReactionsRefs {
     final manager = $$PinnedMessageReactionsTableTableManager(
             $_db, $_db.pinnedMessageReactions)
-        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
+        .filter((f) => f.messageId.id($_item.id));
 
     final cache =
         $_typedResult.readTableOrNull(_pinnedMessageReactionsRefsTable($_db));
@@ -9749,7 +9747,7 @@ final class $$PollsTableReferences
 
   $$PollVotesTableProcessedTableManager get pollVotesRefs {
     final manager = $$PollVotesTableTableManager($_db, $_db.pollVotes)
-        .filter((f) => f.pollId.id.sqlEquals($_itemColumn<String>('id')!));
+        .filter((f) => f.pollId.id($_item.id));
 
     final cache = $_typedResult.readTableOrNull(_pollVotesRefsTable($_db));
     return ProcessedTableManager(
@@ -10176,10 +10174,9 @@ final class $$PollVotesTableReferences extends BaseReferences<
       .createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
 
   $$PollsTableProcessedTableManager? get pollId {
-    final $_column = $_itemColumn<String>('poll_id');
-    if ($_column == null) return null;
+    if ($_item.pollId == null) return null;
     final manager = $$PollsTableTableManager($_db, $_db.polls)
-        .filter((f) => f.id.sqlEquals($_column));
+        .filter((f) => f.id($_item.pollId!));
     final item = $_typedResult.readTableOrNull(_pollIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10482,10 +10479,8 @@ final class $$PinnedMessageReactionsTableReferences extends BaseReferences<
           db.pinnedMessageReactions.messageId, db.pinnedMessages.id));
 
   $$PinnedMessagesTableProcessedTableManager get messageId {
-    final $_column = $_itemColumn<String>('message_id')!;
-
     final manager = $$PinnedMessagesTableTableManager($_db, $_db.pinnedMessages)
-        .filter((f) => f.id.sqlEquals($_column));
+        .filter((f) => f.id($_item.messageId!));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10780,10 +10775,8 @@ final class $$ReactionsTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.reactions.messageId, db.messages.id));
 
   $$MessagesTableProcessedTableManager get messageId {
-    final $_column = $_itemColumn<String>('message_id')!;
-
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.id.sqlEquals($_column));
+        .filter((f) => f.id($_item.messageId!));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -11313,10 +11306,8 @@ final class $$MembersTableReferences
           $_aliasNameGenerator(db.members.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
-    final $_column = $_itemColumn<String>('channel_cid')!;
-
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid.sqlEquals($_column));
+        .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -11683,10 +11674,8 @@ final class $$ReadsTableReferences
       .createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
-    final $_column = $_itemColumn<String>('channel_cid')!;
-
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid.sqlEquals($_column));
+        .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(

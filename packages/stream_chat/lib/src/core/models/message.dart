@@ -165,7 +165,7 @@ class Message extends Equatable {
   /// Returns the latest between [localCreatedAt] and [remoteCreatedAt].
   /// If both are null, returns [DateTime.now].
   @JsonKey(includeToJson: false)
-  DateTime get createdAt => localCreatedAt ?? remoteCreatedAt ?? DateTime.now();
+  DateTime get createdAt => remoteCreatedAt ?? localCreatedAt ?? DateTime.now();
 
   /// Indicates when the message was created locally.
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -180,7 +180,7 @@ class Message extends Equatable {
   /// Returns the latest between [localUpdatedAt] and [remoteUpdatedAt].
   /// If both are null, returns [createdAt].
   @JsonKey(includeToJson: false)
-  DateTime get updatedAt => localUpdatedAt ?? remoteUpdatedAt ?? createdAt;
+  DateTime get updatedAt => remoteUpdatedAt ?? localUpdatedAt ?? createdAt;
 
   /// Indicates when the message was updated locally.
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -194,7 +194,7 @@ class Message extends Equatable {
   ///
   /// Returns the latest between [localDeletedAt] and [remoteDeletedAt].
   @JsonKey(includeToJson: false)
-  DateTime? get deletedAt => localDeletedAt ?? remoteDeletedAt;
+  DateTime? get deletedAt => remoteDeletedAt ?? localDeletedAt;
 
   /// Reserved field indicating when the message text was edited.
   @JsonKey(includeToJson: false)
