@@ -67,12 +67,12 @@ mixin class StreamChannelListEventHandler {
 
     if (channelId == null || channelType == null) return;
 
+    final currentChannels = [...controller.currentItems];
+
     final channel = await controller.getChannel(
       id: channelId,
       type: channelType,
     );
-
-    final currentChannels = [...controller.currentItems];
 
     final updatedChannels = [
       channel,
