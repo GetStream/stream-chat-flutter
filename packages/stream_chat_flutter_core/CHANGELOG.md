@@ -6,6 +6,9 @@
   and directly working with the attachments list.
 - Added proper userAgent and systemEnvironment information for better diagnostics and analytics.
 
+🐞 Fixed
+- type '_$Loading<int, Channel>' is not a subtype of type 'Success<int, Channel>' in type cast [#1894](https://github.com/GetStream/stream-chat-flutter/issues/1894)
+
 ## 9.4.0
 
 - Updated minimum Flutter version to 3.27.4 for the SDK.
