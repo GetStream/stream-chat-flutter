@@ -2982,7 +2982,7 @@ class ChannelClientState {
       BehaviorSubject.seeded({});
 
   set _threads(Map<String, List<Message>> threads) {
-    _threadsController.add(threads);
+    _threadsController.safeAdd(threads);
     _channel.client.chatPersistenceClient?.updateChannelThreads(
       _channel.cid!,
       threads,
