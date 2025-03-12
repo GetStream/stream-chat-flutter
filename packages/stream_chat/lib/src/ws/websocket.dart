@@ -10,6 +10,7 @@ import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/timer_helper.dart';
@@ -108,7 +109,7 @@ class WebSocket with TimerHelper {
       BehaviorSubject.seeded(ConnectionStatus.disconnected);
 
   set _connectionStatus(ConnectionStatus status) =>
-      _connectionStatusController.add(status);
+      _connectionStatusController.safeAdd(status);
 
   /// The current connection status value
   ConnectionStatus get connectionStatus => _connectionStatusController.value;
