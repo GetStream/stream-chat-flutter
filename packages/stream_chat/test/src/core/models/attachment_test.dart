@@ -98,5 +98,73 @@ void main() {
       expect(newAttachment.fileSize, 9);
       expect(newAttachment.mimeType, 'image/png');
     });
+
+    group('AttachmentType', () {
+      test('should work with string equality', () {
+        expect(AttachmentType.image == 'image', isTrue);
+        expect(AttachmentType.file == 'file', isTrue);
+        expect(AttachmentType.giphy == 'giphy', isTrue);
+        expect(AttachmentType.video == 'video', isTrue);
+        expect(AttachmentType.audio == 'audio', isTrue);
+        expect(AttachmentType.voiceRecording == 'voiceRecording', isTrue);
+        expect(AttachmentType.urlPreview == 'url_preview', isTrue);
+      });
+
+      test('should create from string correctly', () {
+        expect(AttachmentType.fromJson('image'), AttachmentType.image);
+        expect(AttachmentType.fromJson('file'), AttachmentType.file);
+        expect(AttachmentType.fromJson('new'), const AttachmentType('new'));
+      });
+
+      test('should work in switch statements', () {
+        const type = AttachmentType.image;
+
+        final result = switch (type) {
+          AttachmentType.image => 'image',
+          AttachmentType.file => 'file',
+          _ => 'other',
+        };
+
+        expect(result, 'image');
+      });
+    });
+
+    group('AttachmentTypeHelper', () {
+      test('should identify attachment types correctly', () {
+        final imageAttachment = Attachment(type: 'image');
+        expect(imageAttachment.isImage, isTrue);
+        expect(imageAttachment.isFile, isFalse);
+
+        final fileAttachment = Attachment(type: 'file');
+        expect(fileAttachment.isFile, isTrue);
+        expect(fileAttachment.isImage, isFalse);
+
+        final giphyAttachment = Attachment(type: 'giphy');
+        expect(giphyAttachment.isGiphy, isTrue);
+
+        final videoAttachment = Attachment(type: 'video');
+        expect(videoAttachment.isVideo, isTrue);
+
+        final audioAttachment = Attachment(type: 'audio');
+        expect(audioAttachment.isAudio, isTrue);
+
+        final voiceAttachment = Attachment(type: 'voiceRecording');
+        expect(voiceAttachment.isVoiceRecording, isTrue);
+
+        // Test URL preview detection
+        final urlAttachment = Attachment(
+          type: 'url_preview',
+          titleLink: 'https://example.com',
+        );
+        expect(urlAttachment.isUrlPreview, isTrue);
+
+        // Test automatic URL preview detection
+        final autoUrlAttachment = Attachment(
+          ogScrapeUrl: 'https://example.com',
+          titleLink: 'https://example.com',
+        );
+        expect(autoUrlAttachment.isUrlPreview, isTrue);
+      });
+    });
   });
 }

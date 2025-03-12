@@ -1553,17 +1553,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final channel = StreamChannel.of(context).channel;
 
     try {
-      Future sendingFuture;
-      if (_isEditing) {
-        sendingFuture = channel.updateMessage(message);
-      } else {
-        sendingFuture = channel.sendMessage(message);
-      }
+      final resp = await switch (_isEditing) {
+        true => channel.updateMessage(message),
+        false => channel.sendMessage(message),
+      };
 
-      final resp = await sendingFuture;
-      if (resp.message?.isError ?? false) {
+      if (resp.message.isError) {
         _effectiveController.message = message;
       }
+
       _startSlowMode();
       widget.onMessageSent?.call(resp.message);
     } catch (e, stk) {

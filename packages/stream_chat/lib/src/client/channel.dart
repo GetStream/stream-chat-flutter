@@ -2550,7 +2550,7 @@ class ChannelClientState {
 
           // Update the quotedMessage only if the updatedMessage indicates
           // deletion.
-          if (message.type == 'deleted') {
+          if (message.isDeleted) {
             return it.copyWith(
               quotedMessage: updatedMessage.copyWith(
                 type: message.type,

@@ -149,5 +149,50 @@ void main() {
         expect(message.isNotVisibleTo(userId), !message.isVisibleTo(userId));
       });
     });
+
+    group('MessageType Extension Tests', () {
+      test('should correctly compare extension type with string values', () {
+        final regularMessage = Message(type: MessageType.regular);
+        final ephemeralMessage = Message(type: MessageType.ephemeral);
+        final errorMessage = Message(type: MessageType.error);
+        final replyMessage = Message(type: MessageType.reply);
+        final systemMessage = Message(type: MessageType.system);
+        final deletedMessage = Message(type: MessageType.deleted);
+
+        // Test comparing extension type with string literals
+        expect(regularMessage.type == 'regular', isTrue);
+        expect(ephemeralMessage.type == 'ephemeral', isTrue);
+        expect(errorMessage.type == 'error', isTrue);
+        expect(replyMessage.type == 'reply', isTrue);
+        expect(systemMessage.type == 'system', isTrue);
+        expect(deletedMessage.type == 'deleted', isTrue);
+
+        // Test the helper methods
+        expect(regularMessage.isRegular, isTrue);
+        expect(ephemeralMessage.isEphemeral, isTrue);
+        expect(errorMessage.isError, isTrue);
+        expect(replyMessage.isReply, isTrue);
+        expect(systemMessage.isSystem, isTrue);
+        expect(deletedMessage.isDeleted, isTrue);
+      });
+
+      test('should correctly handle string assignment to MessageType', () {
+        final message = Message(type: 'regular');
+        expect(message.type, equals(MessageType.regular));
+        expect(message.isRegular, isTrue);
+
+        final customTypeMessage = Message(type: 'custom_type');
+        expect(customTypeMessage.type, equals('custom_type'));
+      });
+
+      test('should correctly serialize and deserialize from json', () {
+        expect(MessageType.toJson(MessageType.regular), equals('regular'));
+        expect(MessageType.toJson(MessageType.system), equals('system'));
+        expect(MessageType.toJson(MessageType.ephemeral), isNull);
+
+        expect(MessageType.fromJson('regular'), equals(MessageType.regular));
+        expect(MessageType.fromJson('custom'), equals('custom'));
+      });
+    });
   });
 }

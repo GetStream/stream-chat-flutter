@@ -8,7 +8,7 @@ part of 'attachment.dart';
 
 Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
       id: json['id'] as String?,
-      type: json['type'] as String?,
+      type: AttachmentType.fromJson(json['type'] as String?),
       titleLink: json['title_link'] as String?,
       title: json['title'] as String?,
       thumbUrl: json['thumb_url'] as String?,
@@ -42,7 +42,7 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
 
 Map<String, dynamic> _$AttachmentToJson(Attachment instance) =>
     <String, dynamic>{
-      if (instance.type case final value?) 'type': value,
+      if (AttachmentType.toJson(instance.type) case final value?) 'type': value,
       if (instance.titleLink case final value?) 'title_link': value,
       if (instance.title case final value?) 'title': value,
       if (instance.thumbUrl case final value?) 'thumb_url': value,

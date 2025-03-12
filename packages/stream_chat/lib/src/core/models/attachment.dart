@@ -10,19 +10,6 @@ import 'package:uuid/uuid.dart';
 
 part 'attachment.g.dart';
 
-mixin AttachmentType {
-  /// Backend specified types.
-  static const image = 'image';
-  static const file = 'file';
-  static const giphy = 'giphy';
-  static const video = 'video';
-  static const audio = 'audio';
-  static const voiceRecording = 'voiceRecording';
-
-  /// Application custom types.
-  static const urlPreview = 'url_preview';
-}
-
 /// The class that contains the information about an attachment
 @JsonSerializable(includeIfNull: false)
 class Attachment extends Equatable {
@@ -53,7 +40,10 @@ class Attachment extends Equatable {
     this.file,
     this.uploadState = const UploadState.preparing(),
   })  : id = id ?? const Uuid().v4(),
-        _type = type,
+        _type = switch (type) {
+          String() => AttachmentType(type),
+          _ => null,
+        },
         title = title ?? file?.name,
         localUri = file?.path != null ? Uri.parse(file!.path!) : null,
         // For backwards compatibility,
@@ -95,7 +85,12 @@ class Attachment extends Equatable {
 
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
-  String? get type {
+  @JsonKey(
+    includeIfNull: false,
+    toJson: AttachmentType.toJson,
+    fromJson: AttachmentType.fromJson,
+  )
+  AttachmentType? get type {
     // If the attachment contains ogScrapeUrl as well as titleLink, we consider
     // it as a urlPreview.
     if (ogScrapeUrl != null && titleLink != null) {
@@ -105,7 +100,7 @@ class Attachment extends Equatable {
     return _type;
   }
 
-  final String? _type;
+  final AttachmentType? _type;
 
   /// The raw attachment type.
   String? get rawType => _type;
@@ -336,4 +331,56 @@ class Attachment extends Equatable {
         uploadState,
         extraData,
       ];
+}
+
+/// {@template attachmentType}
+/// A type of attachment that determines how the attachment is displayed and
+/// handled by the system.
+///
+/// It can be one of the backend-specified types (image, file, giphy, video,
+/// audio, voiceRecording) or application custom types like urlPreview.
+/// {@endtemplate}
+extension type const AttachmentType(String rawType) implements String {
+  /// Backend specified types.
+  static const image = AttachmentType('image');
+  static const file = AttachmentType('file');
+  static const giphy = AttachmentType('giphy');
+  static const video = AttachmentType('video');
+  static const audio = AttachmentType('audio');
+  static const voiceRecording = AttachmentType('voiceRecording');
+
+  /// Application custom types.
+  static const urlPreview = AttachmentType('url_preview');
+
+  /// Create a new instance from a json string.
+  static AttachmentType? fromJson(String? rawType) {
+    if (rawType == null) return null;
+    return AttachmentType(rawType);
+  }
+
+  /// Serialize to json string.
+  static String? toJson(String? type) => type;
+}
+
+extension AttachmentTypeHelper on Attachment {
+  /// True if the attachment is an image.
+  bool get isImage => type == AttachmentType.image;
+
+  /// True if the attachment is a file.
+  bool get isFile => type == AttachmentType.file;
+
+  /// True if the attachment is a gif created using Giphy.
+  bool get isGiphy => type == AttachmentType.giphy;
+
+  /// True if the attachment is a video.
+  bool get isVideo => type == AttachmentType.video;
+
+  /// True if the attachment is an audio file.
+  bool get isAudio => type == AttachmentType.audio;
+
+  /// True if the attachment is a voice recording.
+  bool get isVoiceRecording => type == AttachmentType.voiceRecording;
+
+  /// True if the attachment is a URL preview.
+  bool get isUrlPreview => type == AttachmentType.urlPreview;
 }

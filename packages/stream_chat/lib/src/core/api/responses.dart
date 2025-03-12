@@ -81,10 +81,7 @@ class QueryChannelsResponse extends _BaseResponse {
 
 /// Model response for [StreamChatClient.queryChannels] api call
 @JsonSerializable(createToJson: false)
-class TranslateMessageResponse extends _BaseResponse {
-  /// Translated message
-  late Message message;
-
+class TranslateMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static TranslateMessageResponse fromJson(Map<String, dynamic> json) =>
       _$TranslateMessageResponseFromJson(json);
@@ -191,10 +188,7 @@ typedef SendImageResponse = SendAttachmentResponse;
 
 /// Model response for [Channel.sendReaction] api call
 @JsonSerializable(createToJson: false)
-class SendReactionResponse extends _BaseResponse {
-  /// Message returned by the api call
-  late Message message;
-
+class SendReactionResponse extends MessageResponse {
   /// The reaction created by the api call
   late Reaction reaction;
 
@@ -229,12 +223,15 @@ class UpdateUsersResponse extends _BaseResponse {
       _$UpdateUsersResponseFromJson(json);
 }
 
-/// Model response for [StreamChatClient.updateMessage] api call
-@JsonSerializable(createToJson: false)
-class UpdateMessageResponse extends _BaseResponse {
+/// Base Model response for message based api calls.
+class MessageResponse extends _BaseResponse {
   /// Message returned by the api call
   late Message message;
+}
 
+/// Model response for [StreamChatClient.updateMessage] api call
+@JsonSerializable(createToJson: false)
+class UpdateMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static UpdateMessageResponse fromJson(Map<String, dynamic> json) =>
       _$UpdateMessageResponseFromJson(json);
@@ -242,10 +239,7 @@ class UpdateMessageResponse extends _BaseResponse {
 
 /// Model response for [Channel.sendMessage] api call
 @JsonSerializable(createToJson: false)
-class SendMessageResponse extends _BaseResponse {
-  /// Message returned by the api call
-  late Message message;
-
+class SendMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static SendMessageResponse fromJson(Map<String, dynamic> json) =>
       _$SendMessageResponseFromJson(json);
@@ -253,10 +247,7 @@ class SendMessageResponse extends _BaseResponse {
 
 /// Model response for [StreamChatClient.getMessage] api call
 @JsonSerializable(createToJson: false)
-class GetMessageResponse extends _BaseResponse {
-  /// Message returned by the api call
-  late Message message;
-
+class GetMessageResponse extends MessageResponse {
   /// Channel of the message
   ChannelModel? channel;
 
