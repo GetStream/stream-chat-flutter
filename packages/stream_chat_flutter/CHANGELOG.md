@@ -1,7 +1,8 @@
-## Upcoming
+## 9.6.0
 
 - [[#2118]](https://github.com/GetStream/stream-chat-flutter/issues/2118) Fixed message input
   buttons not being able to customized.
+- [[#1775]](https://github.com/GetStream/stream-chat-flutter/issues/1775) Fix incorrect message order.
 
 ## 9.5.0
 
