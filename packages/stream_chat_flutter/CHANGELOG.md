@@ -2,7 +2,7 @@
 
 🐞 Fixed
 
-- [[#2137]](https://github.com/GetStream/stream-chat-flutter/issues/2137) Fixed invalid assertions
+- [[#2118]](https://github.com/GetStream/stream-chat-flutter/issues/2118) Fixed invalid assertions
   applied on message input command and attachment button.
 
 ## 9.6.0
