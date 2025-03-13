@@ -601,8 +601,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   // ignore: no-empty-block
   void _focusNodeListener() {}
 
-  PermissionState? _permissionState;
-
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
@@ -1574,6 +1572,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   void dispose() {
+    _effectiveController.cancelCooldown();
+    // ignore: cascade_invocations
     _effectiveController.removeListener(_onChangedDebounced);
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);
