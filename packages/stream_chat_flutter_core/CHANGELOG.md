@@ -1,4 +1,7 @@
-## 9.5.0+1
+## Upcoming
+
+🔄 Changed
+
 - Increase range of allowed version `device_info_plus`.
 
 ## 9.5.0
