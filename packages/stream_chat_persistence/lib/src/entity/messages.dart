@@ -59,7 +59,7 @@ class Messages extends Table {
   /// If both are null, returns [currentDateAndTime].
   Expression<DateTime> get createdAt {
     return coalesce<DateTime>(
-      [localCreatedAt, remoteCreatedAt, currentDateAndTime],
+      [remoteCreatedAt, localCreatedAt, currentDateAndTime],
     );
   }
 
@@ -75,7 +75,7 @@ class Messages extends Table {
   /// If both are null, returns [createdAt].
   Expression<DateTime> get updatedAt {
     return coalesce<DateTime>(
-      [localUpdatedAt, remoteUpdatedAt, createdAt],
+      [remoteUpdatedAt, localUpdatedAt, createdAt],
     );
   }
 
@@ -90,7 +90,7 @@ class Messages extends Table {
   /// Returns the latest between [localDeletedAt] and [remoteDeletedAt].
   Expression<DateTime> get deletedAt {
     return coalesce<DateTime>(
-      [localDeletedAt, remoteDeletedAt],
+      [remoteDeletedAt, localDeletedAt],
     );
   }
 
