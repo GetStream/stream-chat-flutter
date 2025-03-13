@@ -596,8 +596,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   // ignore: no-empty-block
   void _focusNodeListener() {}
 
-  PermissionState? _permissionState;
-
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
