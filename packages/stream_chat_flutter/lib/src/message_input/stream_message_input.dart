@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
@@ -125,8 +124,10 @@ class StreamMessageInput extends StatefulWidget {
     this.hideSendAsDm = false,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
-    this.idleSendButton,
-    this.activeSendButton,
+    Widget? idleSendIcon,
+    @Deprecated("Use 'idleSendIcon' instead") Widget? idleSendButton,
+    Widget? activeSendIcon,
+    @Deprecated("Use 'activeSendIcon' instead") Widget? activeSendButton,
     this.showCommandsButton = true,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
@@ -164,7 +165,17 @@ class StreamMessageInput extends StatefulWidget {
     )
     bool useNativeAttachmentPickerOnMobile = false,
     this.pollConfig,
-  }) : useSystemAttachmentPicker = useSystemAttachmentPicker || //
+  })  : assert(
+          idleSendIcon == null || idleSendButton == null,
+          'idleSendIcon and idleSendButton cannot be used together',
+        ),
+        idleSendIcon = idleSendIcon ?? idleSendButton,
+        assert(
+          activeSendIcon == null || activeSendButton == null,
+          'activeSendIcon and activeSendButton cannot be used together',
+        ),
+        activeSendIcon = activeSendIcon ?? activeSendButton,
+        useSystemAttachmentPicker = useSystemAttachmentPicker || //
             useNativeAttachmentPickerOnMobile;
 
   /// The predicate used to send a message on desktop/web
@@ -292,10 +303,18 @@ class StreamMessageInput extends StatefulWidget {
   final bool autofocus;
 
   /// Send button widget in an idle state
-  final Widget? idleSendButton;
+  final Widget? idleSendIcon;
+
+  /// Send button widget in an idle state
+  @Deprecated("Use 'idleSendIcon' instead")
+  Widget? get idleSendButton => idleSendIcon;
 
   /// Send button widget in an active state
-  final Widget? activeSendButton;
+  final Widget? activeSendIcon;
+
+  /// Send button widget in an active state
+  @Deprecated("Use 'activeSendIcon' instead")
+  Widget? get activeSendButton => activeSendIcon;
 
   /// Customize the tile for the mentions overlay.
   final UserMentionTileBuilder? userMentionsTileBuilder;
@@ -470,7 +489,7 @@ class StreamMessageInput extends StatefulWidget {
 
 /// State of [StreamMessageInput]
 class StreamMessageInputState extends State<StreamMessageInput>
-    with RestorationMixin<StreamMessageInput>, WidgetsBindingObserver {
+    with RestorationMixin<StreamMessageInput> {
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool _actionsShrunk = false;
@@ -514,7 +533,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     if (widget.messageInputController == null) {
       _createLocalController();
     } else {
@@ -542,29 +560,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _streamChatTheme = StreamChatTheme.of(context);
     _messageInputTheme = StreamMessageInputTheme.of(context);
     super.didChangeDependencies();
-  }
-
-  bool _askingForPermission = false;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.resumed &&
-        _permissionState != null &&
-        !_askingForPermission) {
-      _askingForPermission = true;
-
-      try {
-        final newPermissionState = await PhotoManager.requestPermissionExtend();
-        if (newPermissionState != _permissionState && mounted) {
-          setState(() {
-            _permissionState = newPermissionState;
-          });
-        }
-      } catch (_) {}
-
-      _askingForPermission = false;
-    }
-    super.didChangeAppLifecycleState(state);
   }
 
   @override
@@ -600,8 +595,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   // ignore: no-empty-block
   void _focusNodeListener() {}
-
-  PermissionState? _permissionState;
 
   @override
   Widget build(BuildContext context) {
@@ -840,16 +833,16 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildSendButton(BuildContext context) {
-    if (widget.sendButtonBuilder != null) {
-      return widget.sendButtonBuilder!(context, _effectiveController);
+    if (widget.sendButtonBuilder case final builder?) {
+      return builder(context, _effectiveController);
     }
 
     return StreamMessageSendButton(
       onSendMessage: sendMessage,
       timeOut: _effectiveController.cooldownTimeOut,
       isIdle: !widget.validator(_effectiveController.message),
-      idleSendButton: widget.idleSendButton,
-      activeSendButton: widget.activeSendButton,
+      idleSendIcon: widget.idleSendIcon,
+      activeSendIcon: widget.activeSendIcon,
     );
   }
 
@@ -1580,7 +1573,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _focusNode?.dispose();
     _onChangedDebounced.cancel();
     _audioRecorderController.dispose();
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

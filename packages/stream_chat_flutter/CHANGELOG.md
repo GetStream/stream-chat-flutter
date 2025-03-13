@@ -1,3 +1,8 @@
+## Upcoming
+
+- [[#2118]](https://github.com/GetStream/stream-chat-flutter/issues/2118) Fixed message input
+  buttons not being able to customized.
+
 ## 9.5.0
 
 🐞 Fixed
