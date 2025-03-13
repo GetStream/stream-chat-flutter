@@ -258,8 +258,34 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.cooldown ?? 0);
   }
 
+  /// Remaining cooldown duration in seconds for the channel.
+  ///
+  /// Returns 0 if there is no cooldown active.
+  int getRemainingCooldown() {
+    _checkInitialized();
+
+    final cooldownDuration = cooldown;
+    if (cooldownDuration <= 0) return 0;
+
+    final userLastMessageAt = currentUserLastMessageAt;
+    if (userLastMessageAt == null) return 0;
+
+    if (ownCapabilities.contains(PermissionType.skipSlowMode)) return 0;
+
+    final currentTime = DateTime.timestamp();
+    final elapsedTime = currentTime.difference(userLastMessageAt).inSeconds;
+
+    return max(0, cooldownDuration - elapsedTime);
+  }
+
   /// Stores time at which cooldown was started
-  DateTime? cooldownStartedAt;
+  @Deprecated(
+    "Use a combination of 'remainingCooldown' and 'currentUserLastMessageAt'",
+  )
+  DateTime? get cooldownStartedAt {
+    if (getRemainingCooldown() <= 0) return null;
+    return currentUserLastMessageAt;
+  }
 
   /// Channel creation date.
   DateTime? get createdAt {
@@ -283,6 +309,47 @@ class Channel {
   Stream<DateTime?> get lastMessageAtStream {
     _checkInitialized();
     return state!.channelStateStream.map((cs) => cs.channel?.lastMessageAt);
+  }
+
+  DateTime? _currentUserLastMessageAt(List<Message>? messages) {
+    final currentUserId = client.state.currentUser?.id;
+    if (currentUserId == null) return null;
+
+    final validMessages = messages?.where((message) {
+      if (message.isEphemeral) return false;
+      if (message.user?.id != currentUserId) return false;
+      return true;
+    });
+
+    return validMessages?.map((m) => m.createdAt).max;
+  }
+
+  /// The date of the last message sent by the current user.
+  DateTime? get currentUserLastMessageAt {
+    _checkInitialized();
+
+    // If the channel is not up to date, we can't rely on the last message
+    // from the current user.
+    if (!state!.isUpToDate) return null;
+
+    final messages = state!.channelState.messages;
+    return _currentUserLastMessageAt(messages);
+  }
+
+  /// The date of the last message sent by the current user as a stream.
+  Stream<DateTime?> get currentUserLastMessageAtStream {
+    _checkInitialized();
+
+    return CombineLatestStream.combine2<bool, List<Message>?, DateTime?>(
+      state!.isUpToDateStream,
+      state!.channelStateStream.map((state) => state.messages),
+      (isUpToDate, messages) {
+        // If the channel is not up to date, we can't rely on the last message
+        // from the current user.
+        if (!isUpToDate) return null;
+        return _currentUserLastMessageAt(messages);
+      },
+    );
   }
 
   /// Channel updated date.
@@ -635,7 +702,7 @@ class Channel {
           );
 
       state!.updateMessage(sentMessage);
-      if (cooldown > 0) cooldownStartedAt = DateTime.now();
+
       return response;
     } catch (e) {
       if (e is StreamChatNetworkError && e.isRetriable) {

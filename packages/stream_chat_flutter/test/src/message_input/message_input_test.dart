@@ -20,6 +20,7 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
+      when(channel.getRemainingCooldown).thenReturn(0);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.extraDataStream).thenAnswer(
@@ -89,8 +90,7 @@ void main() {
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
-      when(() => channel.cooldown).thenReturn(10);
-      when(() => channel.cooldownStartedAt).thenReturn(DateTime.now());
+      when(channel.getRemainingCooldown).thenReturn(10);
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
@@ -131,17 +131,21 @@ void main() {
         ]),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: StreamMessageInput(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: StreamMessageInput(),
+              ),
             ),
           ),
         ),
-      ));
+      );
+
+      await tester.pump(Duration.zero);
 
       expect(find.text('Slow mode ON'), findsOneWidget);
     },

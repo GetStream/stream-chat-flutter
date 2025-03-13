@@ -1,3 +1,4 @@
+import 'dart:async' show Timer;
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
@@ -108,6 +109,44 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   /// Sets the text of the message.
   set text(String text) {
     _textFieldController.text = text;
+  }
+
+  /// The current [cooldownTimeOut] of the slow mode.
+  ///
+  /// Defaults to 0, which means slow mode is not active.
+  int get cooldownTimeOut => _cooldownTimeOut;
+  int _cooldownTimeOut = 0;
+
+  Timer? _cooldownTimer;
+
+  /// Starts the slow mode timer.
+  void startCooldown(int cooldown) {
+    if (cooldown <= 0) return;
+
+    // Start the slow mode timer.
+    _cooldownTimer ??= _setPeriodicTimer(
+      immediate: true,
+      const Duration(seconds: 1),
+      (timer) {
+        final elapsed = timer.tick;
+        if (elapsed >= cooldown) return cancelCooldown();
+
+        final updatedTimeOut = cooldown - elapsed;
+        if (_cooldownTimeOut == updatedTimeOut) return;
+
+        _cooldownTimeOut = updatedTimeOut;
+        if (hasListeners) notifyListeners();
+      },
+    );
+  }
+
+  /// Cancels the slow mode timer.
+  void cancelCooldown() {
+    _cooldownTimer?.cancel();
+    _cooldownTimer = null;
+
+    _cooldownTimeOut = 0;
+    if (hasListeners) notifyListeners();
   }
 
   /// The currently selected [text].
@@ -288,6 +327,8 @@ class StreamMessageInputController extends ValueNotifier<Message> {
 
   @override
   void dispose() {
+    _cooldownTimer?.cancel();
+    _cooldownTimer = null;
     _textFieldController
       ..removeListener(_textFieldListener)
       ..dispose();
@@ -331,4 +372,14 @@ class StreamRestorableMessageInputController
 
   @override
   String toPrimitives() => json.encode(value.message);
+}
+
+Timer _setPeriodicTimer(
+  Duration duration,
+  void Function(Timer) callback, {
+  bool immediate = false,
+}) {
+  final timer = Timer.periodic(duration, callback);
+  if (immediate) callback.call(timer);
+  return timer;
 }
