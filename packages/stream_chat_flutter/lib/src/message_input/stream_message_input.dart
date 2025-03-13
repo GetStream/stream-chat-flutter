@@ -509,10 +509,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _effectiveController
       ..removeListener(_onChangedDebounced)
       ..addListener(_onChangedDebounced);
-
-    // Call the listener once to make sure the initial state is reflected
-    // correctly in the UI.
-    _onChangedDebounced.call();
   }
 
   @override
@@ -526,11 +522,18 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
     _effectiveFocusNode.addListener(_focusNodeListener);
 
-    // Resumes the cooldown if the channel has currently an active cooldown.
     WidgetsBinding.instance.endOfFrame.then((_) {
-      if (!mounted || _isEditing) return;
-      final channel = StreamChannel.of(context).channel;
-      _effectiveController.startCooldown(channel.remainingCooldown);
+      if (!mounted) return;
+
+      // Call the listener once to make sure the initial state is reflected
+      // correctly in the UI.
+      _onChangedDebounced.call();
+
+      // Resumes the cooldown if the channel has currently an active cooldown.
+      if (_isEditing case false) {
+        final channel = StreamChannel.of(context).channel;
+        _effectiveController.startCooldown(channel.remainingCooldown);
+      }
     });
   }
 
@@ -1571,8 +1574,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   void dispose() {
-    _effectiveController.cancelCooldown();
-    // ignore: cascade_invocations
     _effectiveController.removeListener(_onChangedDebounced);
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);

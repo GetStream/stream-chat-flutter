@@ -327,6 +327,8 @@ class StreamMessageInputController extends ValueNotifier<Message> {
 
   @override
   void dispose() {
+    _cooldownTimer?.cancel();
+    _cooldownTimer = null;
     _textFieldController
       ..removeListener(_textFieldListener)
       ..dispose();
