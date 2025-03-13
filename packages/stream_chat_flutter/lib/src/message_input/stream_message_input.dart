@@ -513,8 +513,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
     // Call the listener once to make sure the initial state is reflected
     // correctly in the UI.
     _onChangedDebounced.call();
-
-    if (!_isEditing && _timeOut <= 0) _startSlowMode();
   }
 
   @override
@@ -527,6 +525,13 @@ class StreamMessageInputState extends State<StreamMessageInput>
       _initialiseEffectiveController();
     }
     _effectiveFocusNode.addListener(_focusNodeListener);
+
+    // Resumes the cooldown if the channel has currently an active cooldown.
+    WidgetsBinding.instance.endOfFrame.then((_) {
+      if (!mounted || _isEditing) return;
+      final channel = StreamChannel.of(context).channel;
+      _effectiveController.startCooldown(channel.remainingCooldown);
+    });
   }
 
   @override
@@ -592,38 +597,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   // ignore: no-empty-block
   void _focusNodeListener() {}
-
-  int _timeOut = 0;
-  Timer? _slowModeTimer;
-
-  PermissionState? _permissionState;
-
-  void _startSlowMode() {
-    if (!mounted) {
-      return;
-    }
-    final channel = StreamChannel.of(context).channel;
-    final cooldownStartedAt = channel.cooldownStartedAt;
-    if (cooldownStartedAt != null) {
-      final diff = DateTime.now().difference(cooldownStartedAt).inSeconds;
-      if (diff < channel.cooldown) {
-        _timeOut = channel.cooldown - diff;
-        if (_timeOut > 0) {
-          _slowModeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-            if (_timeOut == 0) {
-              timer.cancel();
-            } else {
-              if (mounted) {
-                setState(() => _timeOut -= 1);
-              }
-            }
-          });
-        }
-      }
-    }
-  }
-
-  void _stopSlowMode() => _slowModeTimer?.cancel();
 
   @override
   Widget build(BuildContext context) {
@@ -868,7 +841,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     return StreamMessageSendButton(
       onSendMessage: sendMessage,
-      timeOut: _timeOut,
+      timeOut: _effectiveController.cooldownTimeOut,
       isIdle: !widget.validator(_effectiveController.message),
       idleSendButton: widget.idleSendButton,
       activeSendButton: widget.activeSendButton,
@@ -1265,7 +1238,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       hintType = HintType.searchGif;
     } else if (_effectiveController.attachments.isNotEmpty) {
       hintType = HintType.addACommentOrSend;
-    } else if (_timeOut != 0) {
+    } else if (_effectiveController.cooldownTimeOut > 0) {
       hintType = HintType.slowModeOn;
     } else {
       hintType = HintType.writeAMessage;
@@ -1479,7 +1452,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    if (_timeOut > 0 ||
+    if (_effectiveController.cooldownTimeOut > 0 ||
         (_effectiveController.text.trim().isEmpty &&
             _effectiveController.attachments.isEmpty)) {
       return;
@@ -1562,7 +1535,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
         _effectiveController.message = message;
       }
 
-      _startSlowMode();
+      // We don't want to start the cooldown if an already sent message is
+      // being edited.
+      if (_isEditing case false) {
+        _effectiveController.startCooldown(channel.remainingCooldown);
+      }
+
       widget.onMessageSent?.call(resp.message);
     } catch (e, stk) {
       if (widget.onError != null) {
@@ -1591,11 +1569,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   void dispose() {
+    _effectiveController.cancelCooldown();
+    // ignore: cascade_invocations
     _effectiveController.removeListener(_onChangedDebounced);
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);
     _focusNode?.dispose();
-    _stopSlowMode();
     _onChangedDebounced.cancel();
     _audioRecorderController.dispose();
     WidgetsBinding.instance.removeObserver(this);
