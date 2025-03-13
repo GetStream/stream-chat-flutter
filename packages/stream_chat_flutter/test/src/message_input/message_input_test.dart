@@ -20,7 +20,7 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
-      when(() => channel.remainingCooldown).thenReturn(0);
+      when(channel.getRemainingCooldown).thenReturn(0);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.extraDataStream).thenAnswer(
@@ -90,7 +90,7 @@ void main() {
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
-      when(() => channel.remainingCooldown).thenReturn(10);
+      when(channel.getRemainingCooldown).thenReturn(10);
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));

@@ -35,7 +35,7 @@ void main() {
 
     testWidgets('appears on tap', (tester) async {
       final channel = MockChannel();
-      when(() => channel.remainingCooldown).thenReturn(0);
+      when(channel.getRemainingCooldown).thenReturn(0);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -78,7 +78,7 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 300, height: 300),
       builder: () {
         final channel = MockChannel();
-        when(() => channel.remainingCooldown).thenReturn(0);
+        when(channel.getRemainingCooldown).thenReturn(0);
 
         return MaterialAppWrapper(
           builder: (context, child) => StreamChat(

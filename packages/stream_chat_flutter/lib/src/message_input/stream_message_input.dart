@@ -532,7 +532,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       // Resumes the cooldown if the channel has currently an active cooldown.
       if (_isEditing case false) {
         final channel = StreamChannel.of(context).channel;
-        _effectiveController.startCooldown(channel.remainingCooldown);
+        _effectiveController.startCooldown(channel.getRemainingCooldown());
       }
     });
   }
@@ -1543,7 +1543,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       // We don't want to start the cooldown if an already sent message is
       // being edited.
       if (_isEditing case false) {
-        _effectiveController.startCooldown(channel.remainingCooldown);
+        _effectiveController.startCooldown(channel.getRemainingCooldown());
       }
 
       widget.onMessageSent?.call(resp.message);

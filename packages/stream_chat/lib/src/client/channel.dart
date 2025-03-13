@@ -261,7 +261,7 @@ class Channel {
   /// Remaining cooldown duration in seconds for the channel.
   ///
   /// Returns 0 if there is no cooldown active.
-  int get remainingCooldown {
+  int getRemainingCooldown() {
     _checkInitialized();
 
     final cooldownDuration = cooldown;
@@ -283,7 +283,7 @@ class Channel {
     "Use a combination of 'remainingCooldown' and 'currentUserLastMessageAt'",
   )
   DateTime? get cooldownStartedAt {
-    if (remainingCooldown == 0) return null;
+    if (getRemainingCooldown() <= 0) return null;
     return currentUserLastMessageAt;
   }
 
