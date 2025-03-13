@@ -2,6 +2,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../material_app_wrapper.dart';
@@ -33,6 +34,9 @@ void main() {
     });
 
     testWidgets('appears on tap', (tester) async {
+      final channel = MockChannel();
+      when(() => channel.remainingCooldown).thenReturn(0);
+
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
@@ -48,7 +52,7 @@ void main() {
                     onPressed: () => showModalBottomSheet(
                       context: context,
                       builder: (_) => EditMessageSheet(
-                        channel: MockChannel(),
+                        channel: channel,
                         message: Message(id: 'msg123', text: 'Hello World!'),
                       ),
                     ),
@@ -72,18 +76,23 @@ void main() {
       'golden test for EditMessageSheet',
       fileName: 'edit_message_sheet_0',
       constraints: const BoxConstraints.tightFor(width: 300, height: 300),
-      builder: () => MaterialAppWrapper(
-        builder: (context, child) => StreamChat(
-          client: MockClient(),
-          child: child,
-        ),
-        home: Scaffold(
-          bottomSheet: EditMessageSheet(
-            channel: MockChannel(),
-            message: Message(id: 'msg123', text: 'Hello World!'),
+      builder: () {
+        final channel = MockChannel();
+        when(() => channel.remainingCooldown).thenReturn(0);
+
+        return MaterialAppWrapper(
+          builder: (context, child) => StreamChat(
+            client: MockClient(),
+            child: child,
           ),
-        ),
-      ),
+          home: Scaffold(
+            bottomSheet: EditMessageSheet(
+              channel: channel,
+              message: Message(id: 'msg123', text: 'Hello World!'),
+            ),
+          ),
+        );
+      },
     );
 
     tearDown(() {
