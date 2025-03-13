@@ -15,10 +15,21 @@ class StreamMessageSendButton extends StatelessWidget {
     this.isCommandEnabled = false,
     @Deprecated('Will be removed in the next major version')
     this.isEditEnabled = false,
-    this.idleSendButton,
-    this.activeSendButton,
+    Widget? idleSendIcon,
+    @Deprecated("Use 'idleSendIcon' instead") Widget? idleSendButton,
+    Widget? activeSendIcon,
+    @Deprecated("Use 'activeSendIcon' instead") Widget? activeSendButton,
     required this.onSendMessage,
-  });
+  })  : assert(
+          idleSendIcon == null || idleSendButton == null,
+          'idleSendIcon and idleSendButton cannot be used together',
+        ),
+        idleSendIcon = idleSendIcon ?? idleSendButton,
+        assert(
+          activeSendIcon == null || activeSendButton == null,
+          'activeSendIcon and activeSendButton cannot be used together',
+        ),
+        activeSendIcon = activeSendIcon ?? activeSendButton;
 
   /// Time out related to slow mode.
   final int timeOut;
@@ -34,11 +45,19 @@ class StreamMessageSendButton extends StatelessWidget {
   @Deprecated('It will be removed in the next major version')
   final bool isEditEnabled;
 
+  /// The icon to display when the button is idle.
+  final Widget? idleSendIcon;
+
   /// The widget to display when the button is disabled.
-  final Widget? idleSendButton;
+  @Deprecated("Use 'idleSendIcon' instead")
+  Widget? get idleSendButton => idleSendIcon;
+
+  /// The icon to display when the button is active.
+  final Widget? activeSendIcon;
 
   /// The widget to display when the button is enabled.
-  final Widget? activeSendButton;
+  @Deprecated("Use 'activeSendIcon' instead")
+  Widget? get activeSendButton => activeSendIcon;
 
   /// The callback to call when the button is pressed.
   final VoidCallback onSendMessage;
@@ -62,18 +81,18 @@ class StreamMessageSendButton extends StatelessWidget {
       );
     }
 
-    final idleSendIcon = switch (idleSendButton) {
-      final idleButton? => idleButton,
+    final idleIcon = switch (idleSendIcon) {
+      final idleIcon? => idleIcon,
       _ => const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
     };
 
-    final activeSendIcon = switch (activeSendButton) {
-      final activeButton? => activeButton,
+    final activeIcon = switch (activeSendIcon) {
+      final activeIcon? => activeIcon,
       _ => const StreamSvgIcon(icon: StreamSvgIcons.circleUp),
     };
 
     final theme = StreamMessageInputTheme.of(context);
-    final icon = isIdle ? idleSendIcon : activeSendIcon;
+    final icon = isIdle ? idleIcon : activeIcon;
     final onPressed = isIdle ? null : onSendMessage;
     return StreamMessageInputIconButton(
       key: const Key('send_button'),

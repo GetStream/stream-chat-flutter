@@ -86,7 +86,7 @@ void main() {
           _wrapWithStreamChatApp(
             StreamMessageSendButton(
               isIdle: true,
-              idleSendButton: customIdleButton,
+              idleSendIcon: customIdleButton,
               onSendMessage: () {},
             ),
           ),
@@ -106,7 +106,7 @@ void main() {
           _wrapWithStreamChatApp(
             StreamMessageSendButton(
               isIdle: false,
-              activeSendButton: customActiveButton,
+              activeSendIcon: customActiveButton,
               onSendMessage: () {},
             ),
           ),
