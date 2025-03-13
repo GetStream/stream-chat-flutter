@@ -1,4 +1,4 @@
-## Upcoming
+## 9.6.0
 
 🔄 Changed
 
