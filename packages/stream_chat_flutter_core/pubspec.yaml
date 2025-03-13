@@ -1,7 +1,7 @@
 name: stream_chat_flutter_core
 homepage: https://github.com/GetStream/stream-chat-flutter
 description: Stream Chat official Flutter SDK Core. Build your own chat experience using Dart and Flutter.
-version: 9.5.0
+version: 9.5.0+1
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
@@ -24,7 +24,7 @@ environment:
 dependencies:
   collection: ^1.17.2
   connectivity_plus: ^6.0.3
-  device_info_plus: ^11.3.0
+  device_info_plus: ">=10.1.2 <12.0.0"
   flutter:
     sdk: flutter
   freezed_annotation: ^2.4.1
