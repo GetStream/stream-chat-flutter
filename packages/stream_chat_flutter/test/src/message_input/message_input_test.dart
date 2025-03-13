@@ -20,6 +20,7 @@ void main() {
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
+      when(() => channel.remainingCooldown).thenReturn(0);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.extraDataStream).thenAnswer(

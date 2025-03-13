@@ -386,6 +386,7 @@ void main() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => channel.state).thenReturn(channelState);
+      when(() => channel.remainingCooldown).thenReturn(0);
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
