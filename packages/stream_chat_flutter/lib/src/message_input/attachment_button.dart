@@ -13,11 +13,7 @@ class AttachmentButton extends StatelessWidget {
     this.color,
     this.icon,
     this.size = kDefaultMessageInputIconSize,
-  }) : assert(
-            (icon == null && color == null) ||
-                (icon != null && color == null) ||
-                (icon == null && color != null),
-            'Either icon or color should be provided');
+  });
 
   /// The color of the button.
   /// Should be set if no [icon] is provided.
