@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/clear_input_item_button.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 typedef _Builders = Map<String, QuotedMessageAttachmentThumbnailBuilder>;
@@ -255,7 +256,7 @@ class _ParseAttachments extends StatelessWidget {
     );
 
     // Return empty container if no attachment widget is returned.
-    if (attachmentWidget == null) return const SizedBox.shrink();
+    if (attachmentWidget == null) return const Empty();
 
     final colorTheme = StreamChatTheme.of(context).colorTheme;
 

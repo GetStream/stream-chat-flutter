@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
@@ -44,7 +45,7 @@ class StreamUnreadThreadsBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (unreadThreads.isEmpty) {
-      return const SizedBox.shrink();
+      return const Empty();
     }
 
     final theme = StreamChatTheme.of(context);

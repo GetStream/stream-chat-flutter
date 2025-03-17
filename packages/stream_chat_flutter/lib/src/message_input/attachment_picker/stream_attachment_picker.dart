@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The default maximum size for media attachments.
@@ -461,7 +462,7 @@ class _StreamMobileAttachmentPickerBottomSheetState
             Expanded(
               child: _currentOption.optionViewBuilder
                       ?.call(context, widget.controller) ??
-                  const SizedBox.shrink(),
+                  const Empty(),
             ),
           ],
         );
@@ -629,7 +630,7 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
     _error = null;
     _stackTrace = null;
 
-    return widget.child ?? const SizedBox.shrink();
+    return widget.child ?? const Empty();
   }
 }
 
@@ -697,7 +698,7 @@ class OptionDrawer extends StatelessWidget {
       height = 40.0;
     }
 
-    final leading = title ?? const SizedBox.shrink();
+    final leading = title ?? const Empty();
 
     Widget trailing;
     if (actions.isNotEmpty) {
@@ -708,7 +709,7 @@ class OptionDrawer extends StatelessWidget {
         children: actions,
       );
     } else {
-      trailing = const SizedBox.shrink();
+      trailing = const Empty();
     }
 
     return Card(

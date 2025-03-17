@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kTransitionDuration = Duration(milliseconds: 167);
@@ -239,7 +240,7 @@ class _PollTextFieldErrorState extends State<PollTextFieldError>
   @override
   Widget build(BuildContext context) {
     final errorText = widget.errorText;
-    if (errorText == null) return const SizedBox.shrink();
+    if (errorText == null) return const Empty();
 
     return Container(
       padding: widget.padding,

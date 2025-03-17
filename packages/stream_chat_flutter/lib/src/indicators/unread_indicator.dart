@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamUnreadIndicator}
@@ -66,7 +67,7 @@ class StreamUnreadIndicator extends StatelessWidget {
         stream: stream,
         initialData: initialData,
         builder: (context, unreadCount) {
-          if (unreadCount == 0) return const SizedBox.shrink();
+          if (unreadCount == 0) return const Empty();
 
           return Badge(
             textColor: Colors.white,

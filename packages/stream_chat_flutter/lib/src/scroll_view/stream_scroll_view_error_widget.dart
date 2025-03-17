@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that is displayed when a [StreamScrollView] encounters an error
@@ -62,7 +63,7 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
     final titleText = AnimatedDefaultTextStyle(
       style: errorTitleStyle ?? chatThemeData.textTheme.headline,
       duration: kThemeChangeDuration,
-      child: errorTitle ?? const SizedBox(),
+      child: errorTitle ?? const Empty(),
     );
 
     final retryButtonText = AnimatedDefaultTextStyle(

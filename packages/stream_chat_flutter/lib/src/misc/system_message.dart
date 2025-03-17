@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamSystemMessage}
@@ -23,7 +24,7 @@ class StreamSystemMessage extends StatelessWidget {
     final message = this.message.replaceMentions(linkify: false);
 
     final messageText = message.text;
-    if (messageText == null) return const SizedBox.shrink();
+    if (messageText == null) return const Empty();
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,

@@ -6,6 +6,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/gallery_navigation_item.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Returns an instance of [FullScreenMediaDesktop].
@@ -369,7 +370,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                           );
                         }
 
-                        return const SizedBox();
+                        return const Empty();
                       },
                     ),
                   );
