@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChannelInfo}
@@ -115,7 +116,7 @@ class _ConnectedTitleState extends StatelessWidget {
     }
 
     if (!showTypingIndicator) {
-      return alternativeWidget ?? const Offstage();
+      return alternativeWidget ?? const Empty();
     }
 
     return StreamTypingIndicator(

@@ -13,6 +13,7 @@ import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.d
 import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/gradient_box_border.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -879,7 +880,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       secondChild: widget.disableAttachments &&
               !widget.showCommandsButton &&
               !(widget.actionsBuilder != null)
-          ? const Offstage()
+          ? const Empty()
           : Row(
               spacing: widget.spaceBetweenActions,
               mainAxisSize: MainAxisSize.min,
@@ -1322,7 +1323,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildReplyToMessage() {
-    if (!_hasQuotedMessage) return const Offstage();
+    if (!_hasQuotedMessage) return const Empty();
     final quotedMessage = _effectiveController.message.quotedMessage!;
 
     final quotedMessageBuilder = widget.quotedMessageBuilder;
@@ -1355,7 +1356,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }).toList(growable: false);
 
     // If there are no attachments, return an empty widget
-    if (nonOGAttachments.isEmpty) return const Offstage();
+    if (nonOGAttachments.isEmpty) return const Empty();
 
     // If the user has provided a custom attachment list builder, use that.
     final attachmentListBuilder = widget.attachmentListBuilder;

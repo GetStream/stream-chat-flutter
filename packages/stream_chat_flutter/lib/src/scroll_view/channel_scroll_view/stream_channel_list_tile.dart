@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_widget/sending_indicator_builder.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a channel preview.
@@ -197,7 +198,7 @@ class StreamChannelListTile extends StatelessWidget {
                 comparator: const ListEquality().equals,
                 builder: (context, members) {
                   if (members.isEmpty) {
-                    return const Offstage();
+                    return const Empty();
                   }
                   return unreadIndicatorBuilder?.call(context) ??
                       StreamUnreadIndicator.channels(cid: channel.cid);
@@ -224,7 +225,7 @@ class StreamChannelListTile extends StatelessWidget {
 
                   if (lastMessage == null ||
                       (lastMessage.user?.id != currentUser.id)) {
-                    return const Offstage();
+                    return const Empty();
                   }
 
                   final hasNonUrlAttachments = lastMessage.attachments
@@ -391,7 +392,7 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
             _lastMessage = lastMessage;
           }
 
-          if (_lastMessage == null) return const Offstage();
+          if (_lastMessage == null) return const Empty();
 
           return StreamMessagePreviewText(
             message: _lastMessage!,
