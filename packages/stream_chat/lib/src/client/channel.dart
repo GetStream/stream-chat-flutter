@@ -889,7 +889,7 @@ class Channel {
     if (message.remoteCreatedAt == null) {
       state!.deleteMessage(
         message.copyWith(
-          type: 'deleted',
+          type: MessageType.deleted,
           localDeletedAt: DateTime.now(),
           state: MessageState.deleted(hard: hard),
         ),
@@ -908,7 +908,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      type: 'deleted',
+      type: MessageType.deleted,
       deletedAt: DateTime.now(),
       state: MessageState.deleting(hard: hard),
     );
