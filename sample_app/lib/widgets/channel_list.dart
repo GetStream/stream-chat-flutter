@@ -174,8 +174,7 @@ class _ChannelList extends State<ChannelList> {
                         final chatTheme = StreamChatTheme.of(context);
                         final backgroundColor = chatTheme.colorTheme.inputBg;
                         final channel = channels[index];
-                        final canDeleteChannel = channel.ownCapabilities
-                            .contains(PermissionType.deleteChannel);
+                        final canDeleteChannel = channel.canDeleteChannel;
                         return Slidable(
                           groupTag: 'channels-actions',
                           endActionPane: ActionPane(

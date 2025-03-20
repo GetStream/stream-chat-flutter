@@ -144,7 +144,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             ),
             onTap: onLeaveChannelTap,
           ),
-        if (channel.ownCapabilities.contains(PermissionType.deleteChannel))
+        if (channel.canDeleteChannel)
           StreamOptionListTile(
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

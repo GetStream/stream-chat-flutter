@@ -345,7 +345,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   int? _messageListLength;
   StreamChannelState? streamChannel;
   late StreamChatThemeData _streamTheme;
-  late List<String> _userPermissions;
   late int unreadCount;
 
   double get _initialAlignment {
@@ -399,7 +398,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     super.didChangeDependencies();
     final newStreamChannel = StreamChannel.of(context);
     _streamTheme = StreamChatTheme.of(context);
-    _userPermissions = newStreamChannel.channel.ownCapabilities;
 
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
@@ -1095,7 +1093,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          _userPermissions.contains(PermissionType.pinMessage) &&
+          streamChannel?.channel.canPinMessage == true &&
           // Pinning a restricted visibility message is not allowed, simply
           // because pinning a message is meant to bring attention to that
           // message, that is not possible with a message that is only visible
@@ -1380,10 +1378,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       },
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
-      showThreadReplyMessage: !isThreadMessage &&
-          streamChannel?.channel.ownCapabilities
-                  .contains(PermissionType.sendReply) ==
-              true,
+      showThreadReplyMessage:
+          !isThreadMessage && streamChannel?.channel.canSendReply == true,
       showFlagButton: !isMyMessage,
       borderSide: borderSide,
       onThreadTap: _onThreadTap,
@@ -1458,7 +1454,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         FocusScope.of(context).unfocus();
       },
       showPinButton: currentUserMember != null &&
-          _userPermissions.contains(PermissionType.pinMessage) &&
+          streamChannel?.channel.canPinMessage == true &&
           // Pinning a restricted visibility message is not allowed, simply
           // because pinning a message is meant to bring attention to that
           // message, that is not possible with a message that is only visible

@@ -599,8 +599,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    if (channel.state != null &&
-        !channel.ownCapabilities.contains(PermissionType.sendMessage)) {
+    if (channel.state != null && !channel.canSendMessage) {
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -891,8 +890,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   List<Widget> _actionsList() {
     final channel = StreamChannel.of(context).channel;
     final defaultActions = <Widget>[
-      if (!widget.disableAttachments &&
-          channel.ownCapabilities.contains(PermissionType.uploadFile))
+      if (!widget.disableAttachments && channel.canUploadFile)
         _buildAttachmentButton(context),
       if (widget.showCommandsButton &&
           !_isEditing &&
@@ -969,9 +967,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         if (it != AttachmentPickerType.poll) return false;
         if (_effectiveController.message.parentId != null) return true;
         final channel = StreamChannel.of(context).channel;
-        if (channel.ownCapabilities.contains(PermissionType.sendPoll)) {
-          return false;
-        }
+        if (channel.canSendPoll) return false;
 
         return true;
       });
@@ -1202,8 +1198,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       value = value.trim();
 
       final channel = StreamChannel.of(context).channel;
-      if (value.isNotEmpty &&
-          channel.ownCapabilities.contains(PermissionType.sendTypingEvents)) {
+      if (value.isNotEmpty && channel.canSendTypingEvents) {
         // Notify the server that the user started typing.
         channel.keyStroke(_effectiveController.message.parentId).onError(
           (error, stackTrace) {
@@ -1270,10 +1265,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     // Reset the og attachment if the text doesn't contain any url
     if (matchedUrls.isEmpty ||
-        !StreamChannel.of(context)
-            .channel
-            .ownCapabilities
-            .contains(PermissionType.sendLinks)) {
+        !StreamChannel.of(context).channel.canSendLinks) {
       _effectiveController.clearOGAttachment();
       return;
     }
@@ -1460,7 +1452,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final channel = streamChannel.channel;
     var message = _effectiveController.value;
 
-    if (!channel.ownCapabilities.contains(PermissionType.sendLinks) &&
+    if (!channel.canSendLinks &&
         _urlRegex.allMatches(message.text ?? '').any((element) =>
             element.group(0)?.split('.').last.isValidTLD() == true)) {
       showInfoBottomSheet(

@@ -108,14 +108,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final user = StreamChat.of(context).currentUser;
     final orientation = mediaQueryData.orientation;
 
-    final _userPermissions = StreamChannel.of(context).channel.ownCapabilities;
-    final hasReactionPermission =
-        _userPermissions.contains(PermissionType.sendReaction);
-
     final fontSize = widget.messageTheme.messageTextStyle?.fontSize;
     final streamChatThemeData = StreamChatTheme.of(context);
 
     final channel = StreamChannel.of(context).channel;
+
+    final canSendReaction = channel.canSendReaction;
 
     final child = Center(
       child: SingleChildScrollView(
@@ -126,7 +124,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                if (widget.showReactionPicker && hasReactionPermission)
+                if (widget.showReactionPicker && canSendReaction)
                   LayoutBuilder(
                     builder: (context, constraints) {
                       return Align(

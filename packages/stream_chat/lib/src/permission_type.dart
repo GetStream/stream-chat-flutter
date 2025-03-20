@@ -1,4 +1,5 @@
 /// Describes capabilities of a user vis-a-vis a channel
+@Deprecated("Use 'ChannelCapability' instead")
 class PermissionType {
   /// Capability required to send a message in the channel
   /// Channel is not frozen (or user has UseFrozenChannel permission)
