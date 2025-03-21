@@ -316,28 +316,28 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
       // User logged in
       if (userId != null) {
         // Requests notification permission.
-        await FirebaseMessaging.instance.requestPermission();
-        // Sets callback for background messages.
-        FirebaseMessaging.onBackgroundMessage(_onFirebaseBackgroundMessage);
-        // Sets callback for the notification click event.
-        firebaseSubscriptions.add(FirebaseMessaging.onMessageOpenedApp
-            .listen(_onFirebaseMessageOpenedApp(client)));
-        // Sets callback for foreground messages
-        firebaseSubscriptions.add(FirebaseMessaging.onMessage
-            .listen(_onFirebaseForegroundMessage(client)));
-        // Sets callback for the token refresh event.
-        firebaseSubscriptions.add(FirebaseMessaging.instance.onTokenRefresh
-            .listen(_onFirebaseTokenRefresh(client)));
-
-        final token = await FirebaseMessaging.instance.getToken();
-        debugPrint('[onTokenInit] #firebase; token: $token');
-        if (token != null) {
-          // replace with your push provider, e.g., 'PushProvider.xiaomi'
-          const pushProvider = PushProvider.firebase;
-
-          // add Token to Stream
-          await client.addDevice(token, pushProvider);
-        }
+        // await FirebaseMessaging.instance.requestPermission();
+        // // Sets callback for background messages.
+        // FirebaseMessaging.onBackgroundMessage(_onFirebaseBackgroundMessage);
+        // // Sets callback for the notification click event.
+        // firebaseSubscriptions.add(FirebaseMessaging.onMessageOpenedApp
+        //     .listen(_onFirebaseMessageOpenedApp(client)));
+        // // Sets callback for foreground messages
+        // firebaseSubscriptions.add(FirebaseMessaging.onMessage
+        //     .listen(_onFirebaseForegroundMessage(client)));
+        // // Sets callback for the token refresh event.
+        // firebaseSubscriptions.add(FirebaseMessaging.instance.onTokenRefresh
+        //     .listen(_onFirebaseTokenRefresh(client)));
+        //
+        // final token = await FirebaseMessaging.instance.getToken();
+        // debugPrint('[onTokenInit] #firebase; token: $token');
+        // if (token != null) {
+        //   // replace with your push provider, e.g., 'PushProvider.xiaomi'
+        //   const pushProvider = PushProvider.firebase;
+        //
+        //   // add Token to Stream
+        //   await client.addDevice(token, pushProvider);
+        // }
       }
       // User logged out
       else {

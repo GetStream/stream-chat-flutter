@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template streamChatContextMenuItem}
 /// Builds a context menu item according to Stream design specification.
 /// {@endtemplate}
+@Deprecated("Use 'StreamMessageActionItem' instead.")
 class StreamChatContextMenuItem extends StatelessWidget {
   /// {@macro streamChatContextMenuItem}
   const StreamChatContextMenuItem({
