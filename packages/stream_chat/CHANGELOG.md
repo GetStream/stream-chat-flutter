@@ -1,3 +1,19 @@
+## Upcoming
+
+✅ Added
+
+- Added new helper extensions on `Channel` to provide a convenient way to check if the current user
+  has specific capabilities in a channel.
+
+  ```dart
+  final canSendMessage = channel.canSendMessage;
+  final canSendReaction = channel.canSendReaction;
+  ```
+
+🔄 Changed
+
+- Deprecated `PermissionType` in favor of `ChannelCapability`.
+
 ## 9.6.0
 
 🐞 Fixed

@@ -16,13 +16,13 @@ class MockClientState extends Mock implements ClientState {}
 class MockChannel extends Mock implements Channel {
   MockChannel({
     this.ownCapabilities = const [
-      PermissionType.sendMessage,
-      PermissionType.uploadFile,
+      ChannelCapability.sendMessage,
+      ChannelCapability.uploadFile,
     ],
   });
 
   @override
-  final List<String> ownCapabilities;
+  final List<ChannelCapability> ownCapabilities;
 
   @override
   Future<bool> get initialized async => true;

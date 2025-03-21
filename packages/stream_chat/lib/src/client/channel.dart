@@ -270,7 +270,7 @@ class Channel {
     final userLastMessageAt = currentUserLastMessageAt;
     if (userLastMessageAt == null) return 0;
 
-    if (ownCapabilities.contains(PermissionType.skipSlowMode)) return 0;
+    if (canSkipSlowMode) return 0;
 
     final currentTime = DateTime.timestamp();
     final elapsedTime = currentTime.difference(userLastMessageAt).inSeconds;
@@ -413,11 +413,11 @@ class Channel {
   }
 
   /// List of user permissions on this channel
-  List<String> get ownCapabilities =>
+  List<ChannelCapability> get ownCapabilities =>
       state?._channelState.channel?.ownCapabilities ?? [];
 
   /// List of user permissions on this channel
-  Stream<List<String>> get ownCapabilitiesStream {
+  Stream<List<ChannelCapability>> get ownCapabilitiesStream {
     _checkInitialized();
     return state!.channelStateStream
         .map((cs) => cs.channel?.ownCapabilities ?? [])
@@ -2899,9 +2899,7 @@ class ChannelClientState {
     if (_channel.isMuted) return false;
 
     // Don't count if the channel doesn't allow read events.
-    if (!_channel.ownCapabilities.contains(PermissionType.readEvents)) {
-      return false;
-    }
+    if (!_channel.canReceiveReadEvents) return false;
 
     // Don't count thread replies which are not shown in the channel as unread.
     if (message.parentId != null && message.showInChannel == false) {
@@ -3213,5 +3211,189 @@ extension on Iterable<Message> {
     }
 
     return messageMap.values;
+  }
+}
+
+/// Extension methods for checking channel capabilities on a Channel instance.
+///
+/// These methods provide a convenient way to check if the current user has
+/// specific capabilities in a channel.
+extension ChannelCapabilityCheck on Channel {
+  /// True, if the current user can send a message to this channel.
+  bool get canSendMessage {
+    return ownCapabilities.contains(ChannelCapability.sendMessage);
+  }
+
+  /// True, if the current user can send a reply to this channel.
+  bool get canSendReply {
+    return ownCapabilities.contains(ChannelCapability.sendReply);
+  }
+
+  /// True, if the current user can send a message with restricted visibility.
+  bool get canSendRestrictedVisibilityMessage {
+    return ownCapabilities.contains(
+      ChannelCapability.sendRestrictedVisibilityMessage,
+    );
+  }
+
+  /// True, if the current user can send reactions.
+  bool get canSendReaction {
+    return ownCapabilities.contains(ChannelCapability.sendReaction);
+  }
+
+  /// True, if the current user can attach links to messages.
+  bool get canSendLinks {
+    return ownCapabilities.contains(ChannelCapability.sendLinks);
+  }
+
+  /// True, if the current user can attach files to messages.
+  bool get canCreateAttachment {
+    return ownCapabilities.contains(ChannelCapability.createAttachment);
+  }
+
+  /// True, if the current user can freeze or unfreeze channel.
+  bool get canFreezeChannel {
+    return ownCapabilities.contains(ChannelCapability.freezeChannel);
+  }
+
+  /// True, if the current user can enable or disable slow mode.
+  bool get canSetChannelCooldown {
+    return ownCapabilities.contains(ChannelCapability.setChannelCooldown);
+  }
+
+  /// True, if the current user can leave channel (remove own membership).
+  bool get canLeaveChannel {
+    return ownCapabilities.contains(ChannelCapability.leaveChannel);
+  }
+
+  /// True, if the current user can join channel (add own membership).
+  bool get canJoinChannel {
+    return ownCapabilities.contains(ChannelCapability.joinChannel);
+  }
+
+  /// True, if the current user can pin a message.
+  bool get canPinMessage {
+    return ownCapabilities.contains(ChannelCapability.pinMessage);
+  }
+
+  /// True, if the current user can delete any message from the channel.
+  bool get canDeleteAnyMessage {
+    return ownCapabilities.contains(ChannelCapability.deleteAnyMessage);
+  }
+
+  /// True, if the current user can delete own messages from the channel.
+  bool get canDeleteOwnMessage {
+    return ownCapabilities.contains(ChannelCapability.deleteOwnMessage);
+  }
+
+  /// True, if the current user can update any message in the channel.
+  bool get canUpdateAnyMessage {
+    return ownCapabilities.contains(ChannelCapability.updateAnyMessage);
+  }
+
+  /// True, if the current user can update own messages in the channel.
+  bool get canUpdateOwnMessage {
+    return ownCapabilities.contains(ChannelCapability.updateOwnMessage);
+  }
+
+  /// True, if the current user can use message search.
+  bool get canSearchMessages {
+    return ownCapabilities.contains(ChannelCapability.searchMessages);
+  }
+
+  /// True, if the current user can send typing events.
+  bool get canSendTypingEvents {
+    return ownCapabilities.contains(ChannelCapability.sendTypingEvents);
+  }
+
+  /// True, if the current user can upload message attachments.
+  bool get canUploadFile {
+    return ownCapabilities.contains(ChannelCapability.uploadFile);
+  }
+
+  /// True, if the current user can delete channel.
+  bool get canDeleteChannel {
+    return ownCapabilities.contains(ChannelCapability.deleteChannel);
+  }
+
+  /// True, if the current user can update channel data.
+  bool get canUpdateChannel {
+    return ownCapabilities.contains(ChannelCapability.updateChannel);
+  }
+
+  /// True, if the current user can update channel members.
+  bool get canUpdateChannelMembers {
+    return ownCapabilities.contains(ChannelCapability.updateChannelMembers);
+  }
+
+  /// True, if the current user can update thread data.
+  bool get canUpdateThread {
+    return ownCapabilities.contains(ChannelCapability.updateThread);
+  }
+
+  /// True, if the current user can quote a message.
+  bool get canQuoteMessage {
+    return ownCapabilities.contains(ChannelCapability.quoteMessage);
+  }
+
+  /// True, if the current user can ban channel members.
+  bool get canBanChannelMembers {
+    return ownCapabilities.contains(ChannelCapability.banChannelMembers);
+  }
+
+  /// True, if the current user can flag a message.
+  bool get canFlagMessage {
+    return ownCapabilities.contains(ChannelCapability.flagMessage);
+  }
+
+  /// True, if the current user can mute a channel.
+  bool get canMuteChannel {
+    return ownCapabilities.contains(ChannelCapability.muteChannel);
+  }
+
+  /// True, if the current user can send custom events.
+  bool get canSendCustomEvents {
+    return ownCapabilities.contains(ChannelCapability.sendCustomEvents);
+  }
+
+  /// True, if the current user has read events capability.
+  bool get canReceiveReadEvents {
+    return ownCapabilities.contains(ChannelCapability.readEvents);
+  }
+
+  /// True, if the current user has connect events capability.
+  bool get canReceiveConnectEvents {
+    return ownCapabilities.contains(ChannelCapability.connectEvents);
+  }
+
+  /// True, if the current user can send and receive typing events.
+  bool get canUseTypingEvents {
+    return ownCapabilities.contains(ChannelCapability.typingEvents);
+  }
+
+  /// True, if channel slow mode is active.
+  bool get isInSlowMode {
+    return ownCapabilities.contains(ChannelCapability.slowMode);
+  }
+
+  /// True, if the current user is allowed to post messages as usual even if the
+  /// channel is in slow mode.
+  bool get canSkipSlowMode {
+    return ownCapabilities.contains(ChannelCapability.skipSlowMode);
+  }
+
+  /// True, if the current user can create a poll.
+  bool get canSendPoll {
+    return ownCapabilities.contains(ChannelCapability.sendPoll);
+  }
+
+  /// True, if the current user can vote in a poll.
+  bool get canCastPollVote {
+    return ownCapabilities.contains(ChannelCapability.castPollVote);
+  }
+
+  /// True, if the current user can query poll votes.
+  bool get canQueryPollVotes {
+    return ownCapabilities.contains(ChannelCapability.queryPollVotes);
   }
 }

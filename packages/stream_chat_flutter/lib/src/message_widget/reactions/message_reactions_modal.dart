@@ -41,11 +41,9 @@ class StreamMessageReactionsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).currentUser;
-    final _userPermissions = StreamChannel.of(context).channel.ownCapabilities;
+    final channel = StreamChannel.of(context).channel;
     final orientation = MediaQuery.of(context).orientation;
-
-    final hasReactionPermission =
-        _userPermissions.contains(PermissionType.sendReaction);
+    final canSendReaction = channel.canSendReaction;
     final fontSize = messageTheme.messageTextStyle?.fontSize;
 
     final child = Center(
@@ -57,7 +55,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                if (showReactionPicker && hasReactionPermission)
+                if (showReactionPicker && canSendReaction)
                   LayoutBuilder(
                     builder: (context, constraints) {
                       return Align(
