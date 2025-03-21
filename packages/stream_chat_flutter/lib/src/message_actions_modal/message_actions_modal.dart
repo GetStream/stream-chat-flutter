@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/mark_unread_message_button.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messageActionsModal}
@@ -297,9 +298,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
-            messageAction.leading ?? const Offstage(),
+            messageAction.leading ?? const Empty(),
             const SizedBox(width: 16),
-            messageAction.title ?? const Offstage(),
+            messageAction.title ?? const Empty(),
           ],
         ),
       ),

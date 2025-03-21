@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template floatingDateDivider}
@@ -43,7 +44,7 @@ class FloatingDateDivider extends StatelessWidget {
       valueListenable: itemPositionListener,
       builder: (context, positions, child) {
         if (positions.isEmpty || messages.isEmpty) {
-          return const Offstage();
+          return const Empty();
         }
 
         var index = switch (reverse) {
@@ -54,7 +55,7 @@ class FloatingDateDivider extends StatelessWidget {
         if ((index == null) ||
             (!isThreadConversation && index == itemCount - 2) ||
             (isThreadConversation && index == itemCount - 1)) {
-          return const Offstage();
+          return const Empty();
         }
 
         if (index <= 2 || index >= itemCount - 3) {

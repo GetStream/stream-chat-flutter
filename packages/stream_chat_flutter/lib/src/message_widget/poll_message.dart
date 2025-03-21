@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_add_comment_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_suggest_option_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/stream_poll_interactor.dart';
@@ -59,10 +60,10 @@ class _PollMessageState extends State<PollMessage> {
       valueListenable: _messageNotifier,
       builder: (context, message, child) {
         final poll = message.poll;
-        if (poll == null) return const SizedBox.shrink();
+        if (poll == null) return const Empty();
 
         final currentUser = StreamChat.of(context).currentUser;
-        if (currentUser == null) return const SizedBox.shrink();
+        if (currentUser == null) return const Empty();
 
         final channel = StreamChannel.of(context).channel;
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/avatars/user_avatar.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -246,7 +247,7 @@ class OptionVoters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (voters.isEmpty) return const SizedBox.shrink();
+    if (voters.isEmpty) return const Empty();
 
     final theme = StreamChatTheme.of(context);
 

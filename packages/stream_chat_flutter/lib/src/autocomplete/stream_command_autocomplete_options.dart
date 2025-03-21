@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template commands_overlay}
@@ -31,7 +32,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
       return normalizedName.contains(normalizedQuery);
     });
 
-    if (commands == null || commands.isEmpty) return const SizedBox.shrink();
+    if (commands == null || commands.isEmpty) return const Empty();
 
     final streamChatTheme = StreamChatTheme.of(context);
     final colorTheme = streamChatTheme.colorTheme;

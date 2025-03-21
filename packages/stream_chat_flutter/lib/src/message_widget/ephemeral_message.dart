@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_widget/giphy_ephemeral_message.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template streamEphemeralMessage}
@@ -38,6 +39,6 @@ class StreamEphemeralMessage extends StatelessWidget {
     assert(true, 'Ephemeral message not handled, Please add a handler');
 
     // Show nothing if we don't know how to handle the message.
-    return const SizedBox.shrink();
+    return const Empty();
   }
 }

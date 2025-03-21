@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_th
 import 'package:stream_chat_flutter/src/attachment/voice_recording_attachment.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -100,7 +101,7 @@ class StreamMessageInputAttachmentList extends StatelessWidget {
 
     // If there are no attachments, return an empty widget.
     if (files.isEmpty && media.isEmpty && voices.isEmpty) {
-      return const SizedBox.shrink();
+      return const Empty();
     }
 
     return SingleChildScrollView(

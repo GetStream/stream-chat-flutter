@@ -12,6 +12,7 @@ import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
 import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
@@ -660,7 +661,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   separatorBuilder: (context, i) {
                     if (i == itemCount - 2) {
                       if (widget.parentMessage == null) {
-                        return const Offstage();
+                        return const Empty();
                       }
 
                       if (widget.threadSeparatorBuilder != null) {
@@ -679,7 +680,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                         if (messages.isNotEmpty) {
                           return _buildDateDivider(messages.last);
                         }
-                        if (_isThreadConversation) return const Offstage();
+                        if (_isThreadConversation) return const Empty();
                         return const SizedBox(height: 52);
                       }
                       return const SizedBox(height: 8);
@@ -693,7 +694,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       return const SizedBox(height: 8);
                     }
 
-                    if (i == 1 || i == itemCount - 4) return const Offstage();
+                    if (i == 1 || i == itemCount - 4) return const Empty();
 
                     late final Message message, nextMessage;
                     if (widget.reverse) {
@@ -765,7 +766,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   itemBuilder: (context, i) {
                     if (i == itemCount - 1) {
                       if (widget.parentMessage == null) {
-                        return const Offstage();
+                        return const Empty();
                       }
                       return buildParentMessage(widget.parentMessage!);
                     }
@@ -773,10 +774,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     if (i == itemCount - 2) {
                       if (widget.reverse) {
                         return widget.headerBuilder?.call(context) ??
-                            const Offstage();
+                            const Empty();
                       } else {
                         return widget.footerBuilder?.call(context) ??
-                            const Offstage();
+                            const Empty();
                       }
                     }
 
@@ -806,10 +807,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     if (i == 0) {
                       if (widget.reverse) {
                         return widget.footerBuilder?.call(context) ??
-                            const Offstage();
+                            const Empty();
                       } else {
                         return widget.headerBuilder?.call(context) ??
-                            const Offstage();
+                            const Empty();
                       }
                     }
 
@@ -864,7 +865,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 if (!snapshot || value) {
                   return child!;
                 }
-                return const Offstage();
+                return const Empty();
               },
             ),
           ),
@@ -1119,9 +1120,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       stream: streamChannel!.channel.state!.unreadCountStream,
       builder: (_, snapshot) {
         if (snapshot.hasError) {
-          return const Offstage();
+          return const Empty();
         } else if (!snapshot.hasData) {
-          return const Offstage();
+          return const Empty();
         }
         final unreadCount = snapshot.data!;
         if (widget.scrollToBottomBuilder != null) {
@@ -1198,9 +1199,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       stream: streamChannel!.channel.state!.unreadCountStream,
       builder: (_, snapshot) {
         if (snapshot.hasError) {
-          return const Offstage();
+          return const Empty();
         } else if (!snapshot.hasData) {
-          return const Offstage();
+          return const Empty();
         }
         final unreadCount = snapshot.data!;
 
@@ -1217,7 +1218,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 e.userId ==
                 streamChannel!.channel.client.state.currentUser!.id);
 
-        if (!showUnread) return const Offstage();
+        if (!showUnread) return const Empty();
 
         final lastReadMessageId =
             streamChannel!.channel.state!.currentUserRead?.lastReadMessageId;

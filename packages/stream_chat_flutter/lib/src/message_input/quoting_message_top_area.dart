@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template quotingMessageTopArea}
@@ -53,7 +54,7 @@ class QuotingMessageTopArea extends StatelessWidget {
         ),
       );
     } else {
-      return const SizedBox.shrink();
+      return const Empty();
     }
   }
 }

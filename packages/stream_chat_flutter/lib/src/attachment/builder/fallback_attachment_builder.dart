@@ -28,6 +28,6 @@ class FallbackAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   ) {
     // Returns an empty widget because this builder will be used as a fallback
     // when no other builder can handle the attachments.
-    return const SizedBox.shrink();
+    return const Empty();
   }
 }

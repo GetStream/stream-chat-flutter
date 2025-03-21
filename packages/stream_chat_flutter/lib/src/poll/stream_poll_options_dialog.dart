@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_options_list_view.dart';
 import 'package:stream_chat_flutter/src/theme/poll_options_dialog_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
@@ -24,7 +25,7 @@ Future<T?> showStreamPollOptionsDialog<T extends Object?>({
           valueListenable: messageNotifier,
           builder: (context, message, child) {
             final poll = message.poll;
-            if (poll == null) return const SizedBox.shrink();
+            if (poll == null) return const Empty();
 
             final channel = StreamChannel.of(context).channel;
 
