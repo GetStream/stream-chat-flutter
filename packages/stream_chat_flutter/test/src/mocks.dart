@@ -22,7 +22,7 @@ class MockChannel extends Mock implements Channel {
   });
 
   @override
-  final List<String> ownCapabilities;
+  final List<ChannelCapability> ownCapabilities;
 
   @override
   Future<bool> get initialized async => true;

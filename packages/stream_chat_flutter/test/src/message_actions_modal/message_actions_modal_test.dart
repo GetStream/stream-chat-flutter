@@ -71,7 +71,10 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel(
-        ownCapabilities: ['send-message', 'send-reaction'],
+        ownCapabilities: [
+          ChannelCapability.sendMessage,
+          ChannelCapability.sendReaction,
+        ],
       );
 
       when(() => client.state).thenReturn(clientState);

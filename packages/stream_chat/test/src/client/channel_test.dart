@@ -16,7 +16,7 @@ void main() {
     String channelId,
     String channelType, {
     DateTime? lastMessageAt,
-    List<String>? ownCapabilities,
+    List<ChannelCapability>? ownCapabilities,
     bool mockChannelConfig = false,
   }) {
     ChannelConfig? config;
@@ -3100,7 +3100,7 @@ void main() {
     );
   });
 
-  group('ChannelCapabilityExtension', () {
+  group('ChannelCapabilityCheck', () {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     late final client = MockStreamChatClient();

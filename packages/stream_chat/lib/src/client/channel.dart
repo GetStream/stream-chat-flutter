@@ -413,11 +413,11 @@ class Channel {
   }
 
   /// List of user permissions on this channel
-  List<String> get ownCapabilities =>
+  List<ChannelCapability> get ownCapabilities =>
       state?._channelState.channel?.ownCapabilities ?? [];
 
   /// List of user permissions on this channel
-  Stream<List<String>> get ownCapabilitiesStream {
+  Stream<List<ChannelCapability>> get ownCapabilitiesStream {
     _checkInitialized();
     return state!.channelStateStream
         .map((cs) => cs.channel?.ownCapabilities ?? [])
@@ -3218,7 +3218,7 @@ extension on Iterable<Message> {
 ///
 /// These methods provide a convenient way to check if the current user has
 /// specific capabilities in a channel.
-extension ChannelCapabilityExtension on Channel {
+extension ChannelCapabilityCheck on Channel {
   /// True, if the current user can send a message to this channel.
   bool get canSendMessage {
     return ownCapabilities.contains(ChannelCapability.sendMessage);
