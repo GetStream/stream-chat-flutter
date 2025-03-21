@@ -7,6 +7,10 @@ import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_buil
 import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
+import 'package:stream_chat_flutter/src/message_actions/message_action.dart';
+import 'package:stream_chat_flutter/src/message_actions/message_action_item.dart';
+import 'package:stream_chat_flutter/src/message_actions/message_actions_builder.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -778,198 +782,356 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   List<Widget> _buildContextMenu() {
     final channel = StreamChannel.of(context).channel;
 
-    return [
-      if (widget.showReactionPicker)
-        StreamChatContextMenuItem(
-          child: StreamChannel(
-            channel: channel,
-            child: ContextMenuReactionPicker(
-              message: widget.message,
-            ),
-          ),
-        ),
-      if (shouldShowReplyAction) ...[
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
-          title: Text(context.translations.replyLabel),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            widget.onReplyTap!(widget.message);
-          },
-        ),
-      ],
-      if (widget.showMarkUnreadMessage)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.messageUnread),
-          title: Text(context.translations.markAsUnreadLabel),
-          onClick: () async {
-            try {
-              await channel.markUnread(widget.message.id);
-            } catch (ex) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    context.translations.markUnreadError,
-                  ),
-                ),
-              );
-            }
+    final actions = StreamMessageActionsBuilder.buildActions(
+      context: context,
+      message: widget.message,
+      channel: channel,
+      customActions: widget.customActions,
+      onActionTap: (message, action) async {
+        print('Action tapped: ${action.type}');
+      },
+    );
 
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-        ),
-      if (shouldShowThreadReplyAction)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
-          title: Text(context.translations.threadReplyLabel),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            widget.onThreadTap!(widget.message);
-          },
-        ),
-      if (shouldShowCopyAction)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
-          title: Text(context.translations.copyMessageLabel),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            var messageToCopy = widget.message.text;
-            for (final user in widget.message.mentionedUsers.toSet()) {
-              final userId = user.id;
-              final userName = user.name;
-              messageToCopy = messageToCopy?.replaceAll(
-                    RegExp('@($userId|$userName)'),
-                    '@$userName',
-                  ) ??
-                  '';
-            }
+    final enabledActions = <StreamMessageActionType, bool>{
+      StreamMessageActionType.reply: widget.showReplyMessage,
+      StreamMessageActionType.threadReply: widget.showThreadReplyMessage,
+      StreamMessageActionType.markUnread: widget.showMarkUnreadMessage,
+      StreamMessageActionType.retry: widget.showResendMessage,
+      StreamMessageActionType.editMessage: widget.showEditMessage,
+      StreamMessageActionType.copyMessage: widget.showCopyMessage,
+      StreamMessageActionType.flagMessage: widget.showFlagButton,
+      StreamMessageActionType.pinMessage: widget.showPinButton,
+      StreamMessageActionType.deleteMessage: widget.showDeleteMessage,
+    };
 
-            if (messageToCopy != null) {
-              Clipboard.setData(
-                ClipboardData(text: messageToCopy),
-              );
-            }
-          },
-        ),
-      if (shouldShowEditAction) ...[
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(
-            color: Colors.grey,
-            icon: StreamSvgIcons.edit,
-          ),
-          title: Text(context.translations.editMessageLabel),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            showModalBottomSheet(
-              context: context,
-              elevation: 2,
-              clipBehavior: Clip.hardEdge,
-              isScrollControlled: true,
-              backgroundColor:
-                  StreamMessageInputTheme.of(context).inputBackgroundColor,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-              ),
-              builder: (_) => EditMessageSheet(
-                message: widget.message,
-                channel: StreamChannel.of(context).channel,
-                editMessageInputBuilder: widget.editMessageInputBuilder,
-              ),
-            );
-          },
-        ),
-      ],
-      if (widget.showPinButton)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(
-            size: 24,
-            color: Colors.grey,
-            icon: StreamSvgIcons.pin,
-          ),
-          title: Text(
-            context.translations.togglePinUnpinText(
-              pinned: isPinned,
-            ),
-          ),
-          onClick: () async {
-            Navigator.of(context, rootNavigator: true).pop();
-            try {
-              if (!isPinned) {
-                await channel.pinMessage(widget.message);
-              } else {
-                await channel.unpinMessage(widget.message);
-              }
-            } catch (e) {
-              throw Exception(e);
-            }
-          },
-        ),
-      if (shouldShowResendAction)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
-          title: Text(
-            context.translations.toggleResendOrResendEditedMessage(
-              isUpdateFailed: widget.message.state.isUpdatingFailed,
-            ),
-          ),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            final isUpdateFailed = widget.message.state.isUpdatingFailed;
-            final channel = StreamChannel.of(context).channel;
-            if (isUpdateFailed) {
-              channel.updateMessage(widget.message);
-            } else {
-              channel.sendMessage(widget.message);
-            }
-          },
-        ),
-      if (shouldShowDeleteAction)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(
-            color: Colors.red,
-            icon: StreamSvgIcons.delete,
-          ),
-          title: Text(
-            context.translations.deleteMessageLabel,
-            style: const TextStyle(color: Colors.red),
-          ),
-          onClick: () async {
-            Navigator.of(context, rootNavigator: true).pop();
-            final deleted = await showDialog<bool?>(
-              context: context,
-              barrierDismissible: false,
-              builder: (_) => const DeleteMessageDialog(),
-            );
-            if (deleted == true) {
-              try {
-                final onConfirmDeleteTap = widget.onConfirmDeleteTap;
-                if (onConfirmDeleteTap != null) {
-                  await onConfirmDeleteTap(widget.message);
-                } else {
-                  await StreamChannel.of(context)
-                      .channel
-                      .deleteMessage(widget.message);
-                }
-              } catch (e) {
-                showDialog(
-                  context: context,
-                  builder: (_) => const MessageDialog(),
-                );
-              }
-            }
-          },
-        ),
-      ...widget.customActions.map(
-        (e) => StreamChatContextMenuItem(
-          leading: e.leading,
-          title: e.title,
-          onClick: () => e.onTap?.call(widget.message),
-        ),
-      ),
-    ];
+    // actions.removeWhere((it) => !(enabledActions[it.type] ?? true));
+
+    return actions.map((action) {
+      return StreamMessageActionItem(
+        message: widget.message,
+        action: action,
+      );
+    }).toList();
+
+    // return [
+    //   if (widget.showReactionPicker)
+    //     StreamChatContextMenuItem(
+    //       child: StreamChannel(
+    //         channel: channel,
+    //         child: ContextMenuReactionPicker(
+    //           message: widget.message,
+    //         ),
+    //       ),
+    //     ),
+    //   if (shouldShowReplyAction) ...[
+    //     ReplyMessageButton(
+    //       onTap: () {
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //         widget.onReplyTap!(widget.message);
+    //       },
+    //     ),
+    //     // StreamChatContextMenuItem(
+    //     //   leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
+    //     //   title: Text(context.translations.replyLabel),
+    //     //   onClick: () {
+    //     //     Navigator.of(context, rootNavigator: true).pop();
+    //     //     widget.onReplyTap!(widget.message);
+    //     //   },
+    //     // ),
+    //   ],
+    //   if (widget.showMarkUnreadMessage)
+    //     MarkUnreadMessageButton(
+    //       onTap: () async {
+    //         try {
+    //           await channel.markUnread(widget.message.id);
+    //         } catch (ex) {
+    //           ScaffoldMessenger.of(context).showSnackBar(
+    //             SnackBar(
+    //               content: Text(
+    //                 context.translations.markUnreadError,
+    //               ),
+    //             ),
+    //           );
+    //         }
+    //
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //       },
+    //     ),
+    //   // StreamChatContextMenuItem(
+    //   //   leading: const StreamSvgIcon(icon: StreamSvgIcons.messageUnread),
+    //   //   title: Text(context.translations.markAsUnreadLabel),
+    //   //   onClick: () async {
+    //   //     try {
+    //   //       await channel.markUnread(widget.message.id);
+    //   //     } catch (ex) {
+    //   //       ScaffoldMessenger.of(context).showSnackBar(
+    //   //         SnackBar(
+    //   //           content: Text(
+    //   //             context.translations.markUnreadError,
+    //   //           ),
+    //   //         ),
+    //   //       );
+    //   //     }
+    //   //
+    //   //     Navigator.of(context, rootNavigator: true).pop();
+    //   //   },
+    //   // ),
+    //   if (shouldShowThreadReplyAction)
+    //     ThreadReplyButton(
+    //       onTap: () {
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //         widget.onThreadTap!(widget.message);
+    //       },
+    //     ),
+    //   // StreamChatContextMenuItem(
+    //   //   leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
+    //   //   title: Text(context.translations.threadReplyLabel),
+    //   //   onClick: () {
+    //   //     Navigator.of(context, rootNavigator: true).pop();
+    //   //     widget.onThreadTap!(widget.message);
+    //   //   },
+    //   // ),
+    //   if (shouldShowCopyAction)
+    //     CopyMessageButton(
+    //       onTap: () {
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //         var messageToCopy = widget.message.text;
+    //         for (final user in widget.message.mentionedUsers.toSet()) {
+    //           final userId = user.id;
+    //           final userName = user.name;
+    //           messageToCopy = messageToCopy?.replaceAll(
+    //                 RegExp('@($userId|$userName)'),
+    //                 '@$userName',
+    //               ) ??
+    //               '';
+    //         }
+    //
+    //         if (messageToCopy != null) {
+    //           Clipboard.setData(
+    //             ClipboardData(text: messageToCopy),
+    //           );
+    //         }
+    //       },
+    //     ),
+    //   // StreamChatContextMenuItem(
+    //   //   leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
+    //   //   title: Text(context.translations.copyMessageLabel),
+    //   //   onClick: () {
+    //   //     Navigator.of(context, rootNavigator: true).pop();
+    //   //     var messageToCopy = widget.message.text;
+    //   //     for (final user in widget.message.mentionedUsers.toSet()) {
+    //   //       final userId = user.id;
+    //   //       final userName = user.name;
+    //   //       messageToCopy = messageToCopy?.replaceAll(
+    //   //             RegExp('@($userId|$userName)'),
+    //   //             '@$userName',
+    //   //           ) ??
+    //   //           '';
+    //   //     }
+    //   //
+    //   //     if (messageToCopy != null) {
+    //   //       Clipboard.setData(
+    //   //         ClipboardData(text: messageToCopy),
+    //   //       );
+    //   //     }
+    //   //   },
+    //   // ),
+    //   if (shouldShowEditAction)
+    //     EditMessageButton(
+    //       onTap: () {
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //         showModalBottomSheet(
+    //           context: context,
+    //           elevation: 2,
+    //           clipBehavior: Clip.hardEdge,
+    //           isScrollControlled: true,
+    //           backgroundColor:
+    //               StreamMessageInputTheme.of(context).inputBackgroundColor,
+    //           shape: const RoundedRectangleBorder(
+    //             borderRadius: BorderRadius.only(
+    //               topLeft: Radius.circular(16),
+    //               topRight: Radius.circular(16),
+    //             ),
+    //           ),
+    //           builder: (_) => EditMessageSheet(
+    //             message: widget.message,
+    //             channel: StreamChannel.of(context).channel,
+    //             editMessageInputBuilder: widget.editMessageInputBuilder,
+    //           ),
+    //         );
+    //       },
+    //     ),
+    //   // StreamChatContextMenuItem(
+    //   //   leading: const StreamSvgIcon(
+    //   //     color: Colors.grey,
+    //   //     icon: StreamSvgIcons.edit,
+    //   //   ),
+    //   //   title: Text(context.translations.editMessageLabel),
+    //   //   onClick: () {
+    //   //     Navigator.of(context, rootNavigator: true).pop();
+    //   //     showModalBottomSheet(
+    //   //       context: context,
+    //   //       elevation: 2,
+    //   //       clipBehavior: Clip.hardEdge,
+    //   //       isScrollControlled: true,
+    //   //       backgroundColor:
+    //   //           StreamMessageInputTheme.of(context).inputBackgroundColor,
+    //   //       shape: const RoundedRectangleBorder(
+    //   //         borderRadius: BorderRadius.only(
+    //   //           topLeft: Radius.circular(16),
+    //   //           topRight: Radius.circular(16),
+    //   //         ),
+    //   //       ),
+    //   //       builder: (_) => EditMessageSheet(
+    //   //         message: widget.message,
+    //   //         channel: StreamChannel.of(context).channel,
+    //   //         editMessageInputBuilder: widget.editMessageInputBuilder,
+    //   //       ),
+    //   //     );
+    //   //   },
+    //   // ),
+    //   if (widget.showPinButton)
+    //     PinMessageButton(
+    //       pinned: isPinned,
+    //       onTap: () {
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //         try {
+    //           if (!isPinned) {
+    //             channel.pinMessage(widget.message);
+    //           } else {
+    //             channel.unpinMessage(widget.message);
+    //           }
+    //         } catch (e) {
+    //           throw Exception(e);
+    //         }
+    //       },
+    //     ),
+    //   // StreamChatContextMenuItem(
+    //   //   leading: const StreamSvgIcon(
+    //   //     size: 24,
+    //   //     color: Colors.grey,
+    //   //     icon: StreamSvgIcons.pin,
+    //   //   ),
+    //   //   title: Text(
+    //   //     context.translations.togglePinUnpinText(
+    //   //       pinned: isPinned,
+    //   //     ),
+    //   //   ),
+    //   //   onClick: () async {
+    //   //     Navigator.of(context, rootNavigator: true).pop();
+    //   //     try {
+    //   //       if (!isPinned) {
+    //   //         await channel.pinMessage(widget.message);
+    //   //       } else {
+    //   //         await channel.unpinMessage(widget.message);
+    //   //       }
+    //   //     } catch (e) {
+    //   //       throw Exception(e);
+    //   //     }
+    //   //   },
+    //   // ),
+    //   if (shouldShowResendAction)
+    //     ResendMessageButton(
+    //       isUpdateFailed: isUpdateFailed,
+    //       onTap: () {
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //         if (isUpdateFailed) {
+    //           channel.updateMessage(widget.message);
+    //         } else {
+    //           channel.sendMessage(widget.message);
+    //         }
+    //       },
+    //     ),
+    //   // StreamChatContextMenuItem(
+    //   //   leading: const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
+    //   //   title: Text(
+    //   //     context.translations.toggleResendOrResendEditedMessage(
+    //   //       isUpdateFailed: widget.message.state.isUpdatingFailed,
+    //   //     ),
+    //   //   ),
+    //   //   onClick: () {
+    //   //     Navigator.of(context, rootNavigator: true).pop();
+    //   //     final isUpdateFailed = widget.message.state.isUpdatingFailed;
+    //   //     final channel = StreamChannel.of(context).channel;
+    //   //     if (isUpdateFailed) {
+    //   //       channel.updateMessage(widget.message);
+    //   //     } else {
+    //   //       channel.sendMessage(widget.message);
+    //   //     }
+    //   //   },
+    //   // ),
+    //   if (shouldShowDeleteAction)
+    //     DeleteMessageButton(
+    //       isDeleteFailed: isDeleteFailed,
+    //       onTap: () {
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //         showDialog(
+    //           context: context,
+    //           builder: (_) => const DeleteMessageDialog(),
+    //         ).then((deleted) async {
+    //           if (deleted == true) {
+    //             try {
+    //               final onConfirmDeleteTap = widget.onConfirmDeleteTap;
+    //               if (onConfirmDeleteTap != null) {
+    //                 await onConfirmDeleteTap(widget.message);
+    //               } else {
+    //                 await StreamChannel.of(context)
+    //                     .channel
+    //                     .deleteMessage(widget.message);
+    //               }
+    //             } catch (e) {
+    //               showDialog(
+    //                 context: context,
+    //                 builder: (_) => const MessageDialog(),
+    //               );
+    //             }
+    //           }
+    //         });
+    //       },
+    //     ),
+    //   // StreamChatContextMenuItem(
+    //   //   leading: const StreamSvgIcon(
+    //   //     color: Colors.red,
+    //   //     icon: StreamSvgIcons.delete,
+    //   //   ),
+    //   //   title: Text(
+    //   //     context.translations.deleteMessageLabel,
+    //   //     style: const TextStyle(color: Colors.red),
+    //   //   ),
+    //   //   onClick: () async {
+    //   //     Navigator.of(context, rootNavigator: true).pop();
+    //   //     final deleted = await showDialog<bool?>(
+    //   //       context: context,
+    //   //       barrierDismissible: false,
+    //   //       builder: (_) => const DeleteMessageDialog(),
+    //   //     );
+    //   //     if (deleted == true) {
+    //   //       try {
+    //   //         final onConfirmDeleteTap = widget.onConfirmDeleteTap;
+    //   //         if (onConfirmDeleteTap != null) {
+    //   //           await onConfirmDeleteTap(widget.message);
+    //   //         } else {
+    //   //           await StreamChannel.of(context)
+    //   //               .channel
+    //   //               .deleteMessage(widget.message);
+    //   //         }
+    //   //       } catch (e) {
+    //   //         showDialog(
+    //   //           context: context,
+    //   //           builder: (_) => const MessageDialog(),
+    //   //         );
+    //   //       }
+    //   //     }
+    //   //   },
+    //   // ),
+    //   ...widget.customActions.map(
+    //     (e) => StreamChatContextMenuItem(
+    //       leading: e.leading,
+    //       title: e.title,
+    //       onClick: () => e.onTap?.call(widget.message),
+    //     ),
+    //   ),
+    // ];
   }
 
   void _showMessageReactionsModal(BuildContext context) {
@@ -1031,6 +1193,16 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   void _showMessageActionModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
 
+    final actions = StreamMessageActionsBuilder.buildActions(
+      context: context,
+      message: widget.message,
+      channel: channel,
+      customActions: widget.customActions,
+      onActionTap: (message, action) async {
+        print('Action tapped: ${action.type}');
+      },
+    );
+
     showDialog(
       useRootNavigator: false,
       context: context,
@@ -1040,6 +1212,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         return StreamChannel(
           channel: channel,
           child: MessageActionsModal(
+            messageActions: actions,
             messageWidget: widget.copyWith(
               key: const Key('MessageWidget'),
               message: widget.message.copyWith(
@@ -1096,12 +1269,55 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             showFlagButton: widget.showFlagButton,
             showPinButton: widget.showPinButton,
             showMarkUnreadMessage: widget.showMarkUnreadMessage,
-            customActions: widget.customActions,
           ),
         );
       },
     );
   }
+
+  // static Future<void> _onDeleteActionTap(
+  //     BuildContext context,
+  //     Message message,
+  //     Channel channel,
+  //     ) async {
+  //   final theme = StreamChatTheme.of(context);
+  //
+  //   final confirmDelete = await showConfirmationBottomSheet(
+  //     context,
+  //     title: context.translations.deleteMessageLabel,
+  //     question: context.translations.deleteMessageQuestion,
+  //     okText: context.translations.deleteLabel,
+  //     cancelText: context.translations.cancelLabel,
+  //     icon: StreamSvgIcon(
+  //       icon: StreamSvgIcons.delete,
+  //       color: theme.colorTheme.accentError,
+  //     ),
+  //   );
+  //
+  //   if (confirmDelete == null || confirmDelete == false) return;
+  //
+  //   try {
+  //     await channel.deleteMessage(message);
+  //   } catch (_) {
+  //     return _showErrorAlertBottomSheet(context);
+  //   }
+  // }
+  //
+  // static Future<void> _showErrorAlertBottomSheet(
+  //     BuildContext context,
+  //     ) {
+  //   final theme = StreamChatTheme.of(context);
+  //   return showInfoBottomSheet(
+  //     context,
+  //     title: context.translations.somethingWentWrongError,
+  //     details: context.translations.operationCouldNotBeCompletedText,
+  //     okText: context.translations.okLabel,
+  //     icon: StreamSvgIcon(
+  //       icon: StreamSvgIcons.error,
+  //       color: theme.colorTheme.accentError,
+  //     ),
+  //   );
+  // }
 
   /// Calculates if the reaction picker tail should be enabled.
   bool calculateReactionTailEnabled(ReactionTailType type) {

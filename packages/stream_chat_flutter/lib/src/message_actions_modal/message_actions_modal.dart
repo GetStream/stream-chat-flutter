@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart' hide ButtonStyle;
+import 'package:stream_chat_flutter/src/message_actions/message_action_item.dart';
+import 'package:stream_chat_flutter/src/message_actions/message_actions_builder.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/mam_widgets.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/mark_unread_message_button.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
@@ -16,6 +18,7 @@ class MessageActionsModal extends StatefulWidget {
     required this.message,
     required this.messageWidget,
     required this.messageTheme,
+    required this.messageActions,
     this.showReactionPicker = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
@@ -31,7 +34,6 @@ class MessageActionsModal extends StatefulWidget {
     this.showPinButton = true,
     this.editMessageInputBuilder,
     this.reverse = false,
-    this.customActions = const [],
     this.onCopyTap,
   });
 
@@ -93,7 +95,7 @@ class MessageActionsModal extends StatefulWidget {
   final bool reverse;
 
   /// List of custom actions
-  final List<StreamMessageAction> customActions;
+  final Set<StreamMessageAction> messageActions;
 
   @override
   _MessageActionsModalState createState() => _MessageActionsModalState();
@@ -163,80 +165,81 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (widget.showReplyMessage &&
-                              widget.message.state.isCompleted)
-                            ReplyButton(
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                if (widget.onReplyTap != null) {
-                                  widget.onReplyTap?.call(widget.message);
-                                }
-                              },
-                            ),
-                          if (widget.showThreadReplyMessage &&
-                              (widget.message.state.isCompleted) &&
-                              widget.message.parentId == null)
-                            ThreadReplyButton(
+                        children: <Widget>{
+                          // if (widget.showReplyMessage &&
+                          //     widget.message.state.isCompleted)
+                          //   ReplyButton(
+                          //     onTap: () {
+                          //       Navigator.of(context).pop();
+                          //       if (widget.onReplyTap != null) {
+                          //         widget.onReplyTap?.call(widget.message);
+                          //       }
+                          //     },
+                          //   ),
+                          // if (widget.showThreadReplyMessage &&
+                          //     (widget.message.state.isCompleted) &&
+                          //     widget.message.parentId == null)
+                          //   ThreadReplyButton(
+                          //     message: widget.message,
+                          //     onThreadReplyTap: widget.onThreadReplyTap,
+                          //   ),
+                          // if (widget.showMarkUnreadMessage)
+                          //   MarkUnreadMessageButton(onTap: () async {
+                          //     try {
+                          //       await channel.markUnread(widget.message.id);
+                          //     } catch (ex) {
+                          //       ScaffoldMessenger.of(context).showSnackBar(
+                          //         SnackBar(
+                          //           content: Text(
+                          //             context.translations.markUnreadError,
+                          //           ),
+                          //         ),
+                          //       );
+                          //     }
+                          //
+                          //     Navigator.of(context).pop();
+                          //   }),
+                          // if (widget.showResendMessage)
+                          //   ResendMessageButton(
+                          //     message: widget.message,
+                          //     channel: channel,
+                          //   ),
+                          // if (widget.showEditMessage)
+                          //   EditMessageButton(
+                          //     onTap: () {
+                          //       Navigator.of(context).pop();
+                          //       _showEditBottomSheet(context);
+                          //     },
+                          //   ),
+                          // if (widget.showCopyMessage)
+                          //   CopyMessageButton(
+                          //     onTap: () {
+                          //       widget.onCopyTap?.call(widget.message);
+                          //       Navigator.of(context).pop();
+                          //     },
+                          //   ),
+                          // if (widget.showFlagButton)
+                          //   FlagMessageButton(
+                          //     onTap: _showFlagDialog,
+                          //   ),
+                          // if (widget.showPinButton)
+                          //   PinMessageButton(
+                          //     onTap: _togglePin,
+                          //     pinned: widget.message.pinned,
+                          //   ),
+                          // if (widget.showDeleteMessage)
+                          //   DeleteMessageButton(
+                          //     isDeleteFailed:
+                          //         widget.message.state.isDeletingFailed,
+                          //     onTap: _showDeleteBottomSheet,
+                          //   ),
+                          ...widget.messageActions.map(
+                            (action) => StreamMessageActionItem(
+                              action: action,
                               message: widget.message,
-                              onThreadReplyTap: widget.onThreadReplyTap,
                             ),
-                          if (widget.showMarkUnreadMessage)
-                            MarkUnreadMessageButton(onTap: () async {
-                              try {
-                                await channel.markUnread(widget.message.id);
-                              } catch (ex) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      context.translations.markUnreadError,
-                                    ),
-                                  ),
-                                );
-                              }
-
-                              Navigator.of(context).pop();
-                            }),
-                          if (widget.showResendMessage)
-                            ResendMessageButton(
-                              message: widget.message,
-                              channel: channel,
-                            ),
-                          if (widget.showEditMessage)
-                            EditMessageButton(
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                _showEditBottomSheet(context);
-                              },
-                            ),
-                          if (widget.showCopyMessage)
-                            CopyMessageButton(
-                              onTap: () {
-                                widget.onCopyTap?.call(widget.message);
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          if (widget.showFlagButton)
-                            FlagMessageButton(
-                              onTap: _showFlagDialog,
-                            ),
-                          if (widget.showPinButton)
-                            PinMessageButton(
-                              onTap: _togglePin,
-                              pinned: widget.message.pinned,
-                            ),
-                          if (widget.showDeleteMessage)
-                            DeleteMessageButton(
-                              isDeleteFailed:
-                                  widget.message.state.isDeletingFailed,
-                              onTap: _showDeleteBottomSheet,
-                            ),
-                          ...widget.customActions
-                              .map((action) => _buildCustomAction(
-                                    context,
-                                    action,
-                                  )),
-                        ].insertBetween(
+                          ),
+                        }.insertBetween(
                           Container(
                             height: 1,
                             color: streamChatThemeData.colorTheme.borders,
