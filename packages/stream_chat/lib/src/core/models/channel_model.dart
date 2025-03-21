@@ -68,15 +68,8 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final String cid;
 
-  static List<ChannelCapability>? _ownCapabilitiesFromJson(
-    List<String>? ownCapabilities,
-  ) {
-    if (ownCapabilities == null) return null;
-    return [...ownCapabilities.map(ChannelCapability.new)];
-  }
-
   /// List of various capabilities that a user can have in a channel.
-  @JsonKey(includeToJson: false, fromJson: _ownCapabilitiesFromJson)
+  @JsonKey(includeToJson: false)
   final List<ChannelCapability>? ownCapabilities;
 
   /// The channel configuration data
