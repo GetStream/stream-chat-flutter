@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/pages/thread_page.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sample_app/routes/routes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ThreadListPage extends StatefulWidget {
@@ -36,23 +37,10 @@ class _ThreadListPageState extends State<ThreadListPage> {
         Expanded(
           child: StreamThreadListView(
             controller: controller,
-            onThreadTap: (thread) async {
-              final channelCid = thread.channelCid;
-
-              final channel = StreamChat.of(context).client.channel(
-                    channelCid.split(':')[0],
-                    id: channelCid.split(':')[1],
-                  );
-
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) {
-                    return StreamChannel(
-                      channel: channel,
-                      child: ThreadPage(parent: thread.parentMessage!),
-                    );
-                  },
-                ),
+            onThreadTap: (thread) {
+              GoRouter.of(context).pushNamed(
+                Routes.THREAD_PAGE.name,
+                extra: thread,
               );
             },
           ),

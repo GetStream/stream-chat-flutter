@@ -125,4 +125,24 @@ final appRoutes = [
     builder: (BuildContext context, GoRouterState state) =>
         const AdvancedOptionsPage(),
   ),
+  GoRoute(
+    name: Routes.THREAD_PAGE.name,
+    path: Routes.THREAD_PAGE.path,
+    builder: (BuildContext context, GoRouterState state) {
+      final thread = state.extra! as Thread;
+
+      final client = StreamChat.of(context).client;
+      final channel = client.channel(
+        thread.channel!.type,
+        id: thread.channel!.id,
+      );
+
+      if (channel.state == null) channel.watch();
+
+      return StreamChannel(
+        channel: channel,
+        child: ThreadPage(parent: thread.parentMessage!),
+      );
+    },
+  ),
 ];

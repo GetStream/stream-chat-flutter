@@ -23,6 +23,14 @@ typedef ErrorWidgetBuilder = Widget Function(
   StackTrace? stackTrace,
 );
 
+Color _getDefaultBackgroundColor(BuildContext context) {
+  final brightness = Theme.of(context).brightness;
+  return switch (brightness) {
+    Brightness.light => const Color(0xfff7f7f8),
+    Brightness.dark => const Color(0xff000000),
+  };
+}
+
 /// Widget used to provide information about the channel to the widget tree
 ///
 /// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
@@ -58,7 +66,13 @@ class StreamChannel extends StatefulWidget {
   final ErrorWidgetBuilder errorBuilder;
 
   static Widget _defaultLoadingBuilder(BuildContext context) {
-    return const Center(child: CircularProgressIndicator.adaptive());
+    final backgroundColor = _getDefaultBackgroundColor(context);
+    return Material(
+      color: backgroundColor,
+      child: const Center(
+        child: CircularProgressIndicator.adaptive(),
+      ),
+    );
   }
 
   static Widget _defaultErrorBuilder(
@@ -66,14 +80,18 @@ class StreamChannel extends StatefulWidget {
     Object error,
     StackTrace? stackTrace,
   ) {
-    if (error is DioException) {
-      if (error.type == DioExceptionType.badResponse) {
-        return Center(child: Text(error.message ?? 'Bad response'));
-      }
-      return const Center(child: Text('Check your connection and retry'));
-    }
-
-    return Center(child: Text(error.toString()));
+    final backgroundColor = _getDefaultBackgroundColor(context);
+    return Material(
+      color: backgroundColor,
+      child: Center(
+        child: switch (error) {
+          DioException(type: DioExceptionType.badResponse) =>
+            Text(error.message ?? 'Bad response'),
+          DioException() => const Text('Check your connection and retry'),
+          _ => Text(error.toString()),
+        },
+      ),
+    );
   }
 
   /// Use this method to get the current [StreamChannelState] instance
@@ -415,9 +433,6 @@ class StreamChannelState extends State<StreamChannel> {
   void initState() {
     super.initState();
     _populateFutures();
-
-    // Start watching the channel if it's not yet initialized.
-    if (channel.state == null) channel.watch();
   }
 
   void _populateFutures() {
@@ -452,9 +467,6 @@ class StreamChannelState extends State<StreamChannel> {
     if (oldWidget.channel != channel ||
         oldWidget.initialMessageId != initialMessageId) {
       _populateFutures();
-
-      // Start watching the channel if it's not yet initialized.
-      if (channel.state == null) channel.watch();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -468,27 +480,26 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: FutureBuilder<List<bool>>(
-        future: Future.wait(_futures),
-        initialData: [
-          channel.state != null,
-          _futures.length == 1,
-        ],
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            final error = snapshot.error!;
-            final stackTrace = snapshot.stackTrace;
-            return widget.errorBuilder(context, error, stackTrace);
-          }
+    return FutureBuilder<List<bool>>(
+      future: Future.wait(_futures),
+      initialData: [
+        channel.state != null,
+        _futures.length == 1,
+      ],
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          final error = snapshot.error!;
+          final stackTrace = snapshot.stackTrace;
+          return widget.errorBuilder(context, error, stackTrace);
+        }
 
-          final dataLoaded = snapshot.data?.every((it) => it) == true;
-          if (widget.showLoading && !dataLoaded) {
-            return widget.loadingBuilder(context);
-          }
-          return widget.child;
-        },
-      ),
+        final dataLoaded = snapshot.data?.every((it) => it) == true;
+        if (widget.showLoading && !dataLoaded) {
+          return widget.loadingBuilder(context);
+        }
+
+        return widget.child;
+      },
     );
   }
 }
