@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed issue with not being able to use a non-initialized `Channel` in `StreamChannel`
+  widget. [#2080](https://github.com/GetStream/stream-chat-flutter/issues/2080)
+
 ## 9.6.0
 
 🔄 Changed
