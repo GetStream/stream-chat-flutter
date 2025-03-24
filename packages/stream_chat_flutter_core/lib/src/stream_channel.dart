@@ -409,66 +409,57 @@ class StreamChannelState extends State<StreamChannel> {
   /// Reloads the channel with latest message
   Future<void> reloadChannel() => _queryAtMessage(limit: 30);
 
-  late List<Future<bool>> _futures;
+  Future<void> _maybeInitChannel() async {
+    // If the channel doesn't have an ID yet, it hasn't been created on the
+    // server so we don't need to initialize it.
+    if (channel.id == null) return;
 
-  Future<bool> get _loadChannelAtMessage async {
-    try {
-      await loadChannelAtMessage(initialMessageId);
-      return true;
-    } catch (_) {
-      rethrow;
+    // Otherwise, we first initialize the channel if it's not yet initialized.
+    if (channel.state == null) await channel.watch();
+
+    // First we try to load the channel at the initial message if
+    // 'initialMessageId' is provided in the widget.
+    if (widget.initialMessageId case final initialMessageId?) {
+      return loadChannelAtMessage(initialMessageId);
+    }
+
+    // Otherwise, we should load the channel at the first unread
+    // message if available.
+    if (channel.state case final state? when state.unreadCount > 0) {
+      final currentUserRead = state.read.firstWhereOrNull(
+        (it) => it.user.id == channel.client.state.currentUser?.id,
+      );
+
+      // Skip if we don't have read state for the current user.
+      if (currentUserRead == null) return;
+
+      // Load the channel at the last read message if available.
+      if (currentUserRead.lastReadMessageId case final lastReadMessageId?) {
+        return loadChannelAtMessage(lastReadMessageId);
+      }
+
+      // Otherwise, load the channel at the last read date.
+      return loadChannelAtTimestamp(currentUserRead.lastRead);
     }
   }
 
-  Future<bool> _loadChannelAtTimestamp(DateTime timestamp) async {
-    try {
-      await loadChannelAtTimestamp(timestamp);
-      return true;
-    } catch (_) {
-      rethrow;
-    }
-  }
+  late Future<void> _channelInitFuture;
 
   @override
   void initState() {
     super.initState();
-    _populateFutures();
-  }
-
-  void _populateFutures() {
-    _futures = [channel.initialized];
-    if (initialMessageId != null) {
-      _futures.add(_loadChannelAtMessage);
-    } else if (channel.state != null && channel.state!.unreadCount > 0) {
-      final read = channel.state!.read.firstWhereOrNull(
-        (it) => it.user.id == channel.client.state.currentUser?.id,
-      );
-
-      if (read == null) return;
-
-      final messages = channel.state!.messages;
-      final lastRead = read.lastRead;
-
-      final hasNewMessages =
-          messages.any((it) => it.createdAt.isAfter(lastRead));
-      final hasOldMessages =
-          messages.any((it) => it.createdAt.isBeforeOrEqualTo(lastRead));
-
-      // Only load messages if the unread message is in-between the messages.
-      // Otherwise, we can just load the channel normally.
-      if (hasNewMessages && hasOldMessages) {
-        _futures.add(_loadChannelAtTimestamp(lastRead));
-      }
-    }
+    _channelInitFuture = _maybeInitChannel();
   }
 
   @override
-  void didUpdateWidget(covariant StreamChannel oldWidget) {
-    if (oldWidget.channel != channel ||
-        oldWidget.initialMessageId != initialMessageId) {
-      _populateFutures();
-    }
+  void didUpdateWidget(StreamChannel oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.channel.cid != widget.channel.cid ||
+        oldWidget.initialMessageId != widget.initialMessageId) {
+      print('Channel CID or initial message ID changed');
+      // Re-initialize channel if the channel CID or initial message ID changes.
+      _channelInitFuture = _maybeInitChannel();
+    }
   }
 
   @override
@@ -480,12 +471,8 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<bool>>(
-      future: Future.wait(_futures),
-      initialData: [
-        channel.state != null,
-        _futures.length == 1,
-      ],
+    return FutureBuilder<void>(
+      future: _channelInitFuture,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           final error = snapshot.error!;
@@ -493,19 +480,12 @@ class StreamChannelState extends State<StreamChannel> {
           return widget.errorBuilder(context, error, stackTrace);
         }
 
-        final dataLoaded = snapshot.data?.every((it) => it) == true;
-        if (widget.showLoading && !dataLoaded) {
-          return widget.loadingBuilder(context);
+        if (snapshot.connectionState != ConnectionState.done) {
+          if (widget.showLoading) return widget.loadingBuilder(context);
         }
 
         return widget.child;
       },
     );
-  }
-}
-
-extension on DateTime {
-  bool isBeforeOrEqualTo(DateTime other) {
-    return isBefore(other) || isAtSameMomentAs(other);
   }
 }

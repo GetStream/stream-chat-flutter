@@ -137,8 +137,6 @@ final appRoutes = [
         id: thread.channel!.id,
       );
 
-      if (channel.state == null) channel.watch();
-
       return StreamChannel(
         channel: channel,
         child: ThreadPage(parent: thread.parentMessage!),
