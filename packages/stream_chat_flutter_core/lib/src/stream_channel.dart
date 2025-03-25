@@ -410,9 +410,9 @@ class StreamChannelState extends State<StreamChannel> {
   Future<void> reloadChannel() => _queryAtMessage(limit: 30);
 
   Future<void> _maybeInitChannel() async {
-    // If the channel doesn't have an ID yet, it hasn't been created on the
+    // If the channel doesn't have an CID yet, it hasn't been created on the
     // server so we don't need to initialize it.
-    if (channel.id == null) return;
+    if (channel.cid == null) return;
 
     // Otherwise, we first initialize the channel if it's not yet initialized.
     if (channel.state == null) await channel.watch();
@@ -456,7 +456,6 @@ class StreamChannelState extends State<StreamChannel> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.channel.cid != widget.channel.cid ||
         oldWidget.initialMessageId != widget.initialMessageId) {
-      print('Channel CID or initial message ID changed');
       // Re-initialize channel if the channel CID or initial message ID changes.
       _channelInitFuture = _maybeInitChannel();
     }
