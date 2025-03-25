@@ -6,283 +6,416 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'mocks.dart';
 
 void main() {
-  List<Message> _generateMessages({
-    int count = 3,
-    int offset = 0,
-    bool threads = false,
-  }) {
-    final users = List.generate(count, (index) {
-      index = count + offset;
-      return User(id: 'testUserId$index');
-    });
-    final messages = List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return Message(
-          id: 'testMessageId$index',
-          type: 'testType',
-          user: users[index],
-          createdAt: DateTime.now(),
-          replyCount: index,
-          updatedAt: DateTime.now(),
-          extraData: const {'extra_test_field': 'extraTestData'},
-          text: 'Dummy text #$index',
-          pinned: true,
-          pinnedAt: DateTime.now(),
-          pinnedBy: User(id: 'testUserId$index'),
-        );
-      },
-    );
-    final threadMessages = List.generate(
-      count,
-      (index) {
-        index = index + offset;
-        return Message(
-          id: 'testThreadMessageId$index',
-          type: 'testType',
-          user: users[index],
-          parentId: messages[0].id,
-          createdAt: DateTime.now(),
-          replyCount: index,
-          updatedAt: DateTime.now(),
-          extraData: const {'extra_test_field': 'extraTestData'},
-          text: 'Dummy text #$index',
-          pinned: true,
-          pinnedAt: DateTime.now(),
-          pinnedBy: User(id: 'testUserId$index'),
-        );
-      },
-    );
-    return threads ? threadMessages : messages;
-  }
-
   testWidgets(
-    'should render StreamChannel if both channel and child is provided',
+    'should expose channel state through StreamChannel.of() context method',
     (tester) async {
       final mockChannel = MockChannel();
-      const streamChannelKey = Key('streamChannel');
-      const childKey = Key('childKey');
-      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
-      when(() => mockChannel.state.unreadCount).thenReturn(0);
-      final streamChannel = StreamChannel(
-        key: streamChannelKey,
-        channel: mockChannel,
-        child: const Offstage(key: childKey),
-      );
+      StreamChannelState? channelState;
 
-      await tester.pumpWidget(streamChannel);
-
-      expect(find.byKey(streamChannelKey), findsOneWidget);
-      expect(find.byKey(childKey), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'should build error widget if channel.initialized throws',
-    (tester) async {
-      final mockChannel = MockChannel();
-      const streamChannelKey = Key('streamChannel');
-      const childKey = Key('childKey');
-      final streamChannel = StreamChannel(
-        key: streamChannelKey,
-        channel: mockChannel,
-        child: const Offstage(key: childKey),
-      );
-
-      const errorMessage = 'Error! Error! Error!';
-      final error = DioException(
-        type: DioExceptionType.badResponse,
-        message: errorMessage,
-        requestOptions: RequestOptions(),
-      );
-      when(() => mockChannel.initialized)
-          .thenAnswer((_) => Future.error(error));
-      when(() => mockChannel.state.unreadCount).thenReturn(0);
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: streamChannel,
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.text(errorMessage), findsOneWidget);
-
-      verify(() => mockChannel.initialized).called(1);
-    },
-  );
-
-  testWidgets(
-    'should show circular progress indicator showLoading is true '
-    'and channel is still not initialized',
-    (tester) async {
-      final mockChannel = MockChannel();
-      const streamChannelKey = Key('streamChannel');
-      const childKey = Key('childKey');
-      final streamChannel = StreamChannel(
-        key: streamChannelKey,
-        channel: mockChannel,
-        child: const Offstage(key: childKey),
-      );
-
-      when(() => mockChannel.initialized).thenAnswer((_) async => false);
-      when(() => mockChannel.state.unreadCount).thenReturn(0);
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: streamChannel,
-        ),
-      );
-
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-      verify(() => mockChannel.initialized).called(1);
-    },
-  );
-
-  testWidgets(
-    'should preload extra messages if initialMessageId is provided',
-    (tester) async {
-      final mockChannel = MockChannel();
-      const streamChannelKey = Key('streamChannel');
-      const childKey = Key('childKey');
-      final streamChannel = StreamChannel(
-        key: streamChannelKey,
-        channel: mockChannel,
-        initialMessageId: 'testInitialMessageId',
-        child: const Offstage(key: childKey),
-      );
-
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
-      final messages = _generateMessages();
-      when(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).thenAnswer((_) async => ChannelState(messages: messages));
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: streamChannel,
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      verify(() => mockChannel.initialized).called(1);
-      verify(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).called(1);
-    },
-  );
-
-  testWidgets(
-    'should rebuild StreamChannel with updated widget data '
-    'on calling setState()',
-    (tester) async {
-      StateSetter? _stateSetter;
-
-      var initialMessageId = 'testInitialMessageId';
-
-      final mockChannel = MockChannel();
-      const streamChannelKey = Key('streamChannel');
-      const childKey = Key('childKey');
-      StreamChannel streamChannelBuilder(String initialMessageId) =>
-          StreamChannel(
-            key: streamChannelKey,
+      // Build a widget that accesses the channel state
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
             channel: mockChannel,
-            initialMessageId: initialMessageId,
-            child: const Offstage(key: childKey),
-          );
-
-      final paginationParams = PaginationParams(
-        idAround: initialMessageId,
-        limit: 20,
-      );
-
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
-
-      final messages = _generateMessages();
-
-      when(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: paginationParams,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).thenAnswer((_) async => ChannelState(messages: messages));
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: StatefulBuilder(
-            builder: (context, stateSetter) {
-              // Assigning stateSetter for rebuilding StreamChannel
-              _stateSetter = stateSetter;
-              return streamChannelBuilder(initialMessageId);
-            },
+            child: Builder(
+              builder: (context) {
+                // Access the channel state
+                channelState = StreamChannel.of(context);
+                return const Text('Child Widget');
+              },
+            ),
           ),
         ),
       );
 
+      await tester.pumpWidget(testWidget);
       await tester.pumpAndSettle();
 
-      verify(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: paginationParams,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).called(1);
+      // Verify we can access the channel state
+      expect(channelState, isNotNull);
+      expect(channelState?.channel, equals(mockChannel));
+    },
+  );
 
-      _stateSetter?.call(() => initialMessageId = 'testInitialMessageId2');
+  testWidgets(
+    'should render child widget when channel has no CID (locally created)',
+    (tester) async {
+      final nonInitializedMockChannel = NonInitializedMockChannel();
+      when(() => nonInitializedMockChannel.cid).thenReturn(null);
 
-      final updatedPaginationParams = paginationParams.copyWith(
-        idAround: initialMessageId,
+      // A simple widget that provides StreamChannel
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: nonInitializedMockChannel,
+            child: const Text('Child Widget'),
+          ),
+        ),
       );
 
-      when(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: updatedPaginationParams,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).thenAnswer((_) async => ChannelState(messages: messages));
+      // Pump the widget
+      await tester.pumpWidget(testWidget);
 
+      // Initially should show loading
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('Child Widget'), findsNothing);
+
+      // Wait for initialization to complete
       await tester.pumpAndSettle();
 
-      verify(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: updatedPaginationParams,
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-            preferOffline: any(named: 'preferOffline'),
-          )).called(1);
+      // Now should show the child
+      expect(find.text('Child Widget'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'should display loading indicator then render child for initialized channel',
+    (tester) async {
+      final mockChannel = MockChannel();
+      when(() => mockChannel.cid).thenReturn('test:channel');
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
+
+      // A simple widget that provides StreamChannel
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: mockChannel,
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      // Pump the widget
+      await tester.pumpWidget(testWidget);
+
+      // Initially should show loading
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('Child Widget'), findsNothing);
+
+      // Wait for initialization to complete
+      await tester.pumpAndSettle();
+
+      // Now should show the child
+      expect(find.text('Child Widget'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'should call watch() to initialize channel with valid CID before rendering child',
+    (tester) async {
+      final nonInitializedMockChannel = NonInitializedMockChannel();
+      when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
+      when(nonInitializedMockChannel.watch).thenAnswer(
+        (_) async => ChannelState(),
+      );
+
+      // A simple widget that provides StreamChannel
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: nonInitializedMockChannel,
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      // Pump the widget
+      await tester.pumpWidget(testWidget);
+
+      // Initially should show loading
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('Child Widget'), findsNothing);
+
+      // Wait for initialization to complete
+      await tester.pumpAndSettle();
+
+      // Now should show the child
+      expect(find.text('Child Widget'), findsOneWidget);
+
+      // Verify watch was called
+      verify(nonInitializedMockChannel.watch).called(1);
+    },
+  );
+
+  testWidgets(
+    'should immediately show child and skip loading when showLoading is false',
+    (tester) async {
+      final nonInitializedMockChannel = NonInitializedMockChannel();
+      when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
+      when(nonInitializedMockChannel.watch).thenAnswer(
+        (_) async => ChannelState(),
+      );
+
+      // A simple widget that provides StreamChannel
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: nonInitializedMockChannel,
+            showLoading: false,
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      // Pump the widget
+      await tester.pumpWidget(testWidget);
+
+      // Should show the child directly
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text('Child Widget'), findsOneWidget);
+
+      // Wait for initialization to complete
+      await tester.pumpAndSettle();
+
+      // Should still show the child
+      expect(find.text('Child Widget'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'should use provided loadingBuilder for custom loading indicator',
+    (tester) async {
+      final nonInitializedMockChannel = NonInitializedMockChannel();
+      when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
+      when(nonInitializedMockChannel.watch).thenAnswer(
+        (_) => Future.microtask(ChannelState.new),
+      );
+
+      // A widget with custom loading indicator
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: nonInitializedMockChannel,
+            loadingBuilder: (_) => const Text('Custom Loading'),
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(testWidget);
+
+      // Should show custom loading widget
+      expect(find.text('Custom Loading'), findsOneWidget);
+      expect(find.text('Child Widget'), findsNothing);
+
+      // Wait for initialization to complete
+      await tester.pumpAndSettle();
+
+      // Now should show the child
+      expect(find.text('Child Widget'), findsOneWidget);
+      expect(find.text('Custom Loading'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'should display default error widget when channel initialization fails',
+    (tester) async {
+      final nonInitializedMockChannel = NonInitializedMockChannel();
+      when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
+      // Important: Making initialization fail with a direct error
+      when(nonInitializedMockChannel.watch).thenThrow('Failed to connect');
+
+      // A widget with custom error handler
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: nonInitializedMockChannel,
+            // The default error builder will show the error message
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(testWidget);
+
+      // Initially should show loading
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Wait for error to occur
+      await tester.pumpAndSettle();
+
+      // Should show error widget with the error message
+      expect(find.text('Failed to connect'), findsOneWidget);
+      expect(find.text('Child Widget'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'should use provided errorBuilder when channel initialization fails',
+    (tester) async {
+      final nonInitializedMockChannel = NonInitializedMockChannel();
+      when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
+      // Important: Making initialization fail with a direct error
+      when(nonInitializedMockChannel.watch).thenThrow('Failed to connect');
+
+      // A widget with custom error handler
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: nonInitializedMockChannel,
+            errorBuilder: (_, error, stk) => const Text('Custom Error'),
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(testWidget);
+
+      // Initially should show loading
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Wait for error to occur
+      await tester.pumpAndSettle();
+
+      // Should show error widget with the error message
+      expect(find.text('Custom Error'), findsOneWidget);
+      expect(find.text('Child Widget'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'should query channel at specific message when initialMessageId is provided',
+    (tester) async {
+      final mockChannel = MockChannel();
+      when(() => mockChannel.cid).thenReturn('test:channel');
+
+      when(
+        () => mockChannel.query(
+          messagesPagination: any(named: 'messagesPagination'),
+          preferOffline: any(named: 'preferOffline'),
+        ),
+      ).thenAnswer((_) async => ChannelState());
+
+      // Build a widget with initialMessageId
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: mockChannel,
+            initialMessageId: 'test-message-id',
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(testWidget);
+      await tester.pumpAndSettle();
+
+      // Verify query was called to load the channel at the initial message
+      verify(
+        () => mockChannel.query(
+          messagesPagination: any(named: 'messagesPagination'),
+          preferOffline: any(named: 'preferOffline'),
+        ),
+      ).called(1);
+    },
+  );
+
+  testWidgets(
+    'should reinitialize and call watch() when channel CID changes',
+    (tester) async {
+      // First channel
+      final mockChannel1 = MockChannel();
+      when(() => mockChannel1.cid).thenReturn('test:channel1');
+      when(() => mockChannel1.state.unreadCount).thenReturn(0);
+
+      // Build with first channel
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChannel(
+            channel: mockChannel1,
+            child: const Text('Channel Content'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Second channel
+      final mockChannel2 = NonInitializedMockChannel();
+      when(() => mockChannel2.cid).thenReturn('test:channel2');
+      when(mockChannel2.watch).thenAnswer((_) async => ChannelState());
+
+      // Update widget with second channel
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChannel(
+            channel: mockChannel2,
+            child: const Text('Channel Content'),
+          ),
+        ),
+      );
+
+      // Initially should show loading
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Wait for channel initialization
+      await tester.pumpAndSettle();
+
+      // Verify watch was called on the second channel
+      verify(mockChannel2.watch).called(1);
+
+      // Verify the content is displayed
+      expect(find.text('Channel Content'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'should reinitialize and query again when initialMessageId changes',
+    (tester) async {
+      final mockChannel = MockChannel();
+      when(() => mockChannel.cid).thenReturn('test:channel1');
+
+      when(
+        () => mockChannel.query(
+          messagesPagination: any(named: 'messagesPagination'),
+          preferOffline: any(named: 'preferOffline'),
+        ),
+      ).thenAnswer((_) async => ChannelState());
+
+      // First initial message ID
+      const initialMessageId1 = 'test-message-id-1';
+
+      // Build with first channel
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChannel(
+            channel: mockChannel,
+            initialMessageId: initialMessageId1,
+            child: const Text('Channel Content'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Second initial message ID
+      const initialMessageId2 = 'test-message-id-2';
+
+      // Update widget with second channel
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChannel(
+            channel: mockChannel,
+            initialMessageId: initialMessageId2,
+            child: const Text('Channel Content'),
+          ),
+        ),
+      );
+
+      // Initially should show loading
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Wait for channel initialization
+      await tester.pumpAndSettle();
+
+      // Verify watch was called twice with different initial message IDs
+      verify(
+        () => mockChannel.query(
+          messagesPagination: any(named: 'messagesPagination'),
+          preferOffline: any(named: 'preferOffline'),
+        ),
+      ).called(2);
+
+      // Verify the content is displayed
+      expect(find.text('Channel Content'), findsOneWidget);
     },
   );
 }
