@@ -22,8 +22,6 @@ abstract class Routes {
       ChannelRouteConfig(name: 'group_info_screen', path: 'group_info_screen');
   static const RouteConfig CHANNEL_LIST_PAGE =
       RouteConfig(name: 'channel_list_page', path: '/channels');
-  static const RouteConfig THREAD_PAGE =
-      RouteConfig(name: 'thread_page', path: '/thread');
 }
 
 class RouteConfig {
