@@ -116,6 +116,8 @@ class StreamMessageListView extends StatefulWidget {
     this.messageFilter,
     this.onMessageTap,
     this.onSystemMessageTap,
+    this.onEphemeralMessageTap,
+    this.onMessageLongPress,
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.unreadMessagesSeparatorBuilder,
@@ -293,12 +295,24 @@ class StreamMessageListView extends StatefulWidget {
   /// Predicate used to filter messages
   final bool Function(Message)? messageFilter;
 
-  /// Called when any message is tapped except a system message
-  /// (use [onSystemMessageTap] instead)
+  /// Called when a regular message is tapped.
+  ///
+  /// For system, ephemeral, and moderated messages, use [onSystemMessageTap],
+  /// and [onEphemeralMessageTap] respectively.
   final OnMessageTap? onMessageTap;
 
-  /// Called when system message is tapped
+  /// Called when a system message is tapped.
+  ///
+  /// For regular messages, use [onMessageTap].
   final OnMessageTap? onSystemMessageTap;
+
+  /// Called when a ephemeral message is tapped.
+  ///
+  /// For regular messages, use [onMessageTap].
+  final OnMessageTap? onEphemeralMessageTap;
+
+  /// Called when a regular message is long pressed.
+  final OnMessageLongPress? onMessageLongPress;
 
   /// Builder used to build the thread separator in case it's a thread view
   final Function(BuildContext context, Message parentMessage)?
@@ -1019,10 +1033,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final isMyMessage =
         message.user!.id == StreamChat.of(context).currentUser!.id;
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
-    final currentUser = StreamChat.of(context).currentUser;
-    final members = StreamChannel.of(context).channel.state?.members ?? [];
-    final currentUserMember =
-        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
     final hasFileAttachment =
         message.attachments.any((it) => it.type == AttachmentType.file);
@@ -1039,6 +1049,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final borderSide = isOnlyEmoji ? BorderSide.none : null;
 
     final defaultMessageWidget = StreamMessageWidget(
+      message: message,
+      reverse: isMyMessage,
+      showUsername: !isMyMessage,
+      showReactions: !message.isDeleted && !message.state.isDeletingFailed,
+      showReactionPicker: !message.isDeleted && !message.state.isDeletingFailed,
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,
@@ -1046,9 +1061,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showDeleteMessage: false,
       showEditMessage: false,
       showMarkUnreadMessage: false,
-      message: message,
-      reverse: isMyMessage,
-      showUsername: !isMyMessage,
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
       attachmentPadding: EdgeInsets.all(
@@ -1089,17 +1101,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      onMessageTap: (message) {
-        widget.onMessageTap?.call(message);
-        FocusScope.of(context).unfocus();
-      },
-      showPinButton: currentUserMember != null &&
-          streamChannel?.channel.canPinMessage == true &&
-          // Pinning a restricted visibility message is not allowed, simply
-          // because pinning a message is meant to bring attention to that
-          // message, that is not possible with a message that is only visible
-          // to a subset of users.
-          !message.hasRestrictedVisibility,
+      onMessageTap: widget.onMessageTap,
+      onMessageLongPress: widget.onMessageLongPress,
     );
 
     if (widget.parentMessageBuilder != null) {
@@ -1260,22 +1263,35 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
+  Widget buildSystemMessage(Message message) {
+    if (widget.systemMessageBuilder case final builder?) {
+      return builder(context, message);
+    }
+
+    return StreamSystemMessage(
+      message: message,
+      onMessageTap: widget.onSystemMessageTap,
+    );
+  }
+
+  Widget buildEphemeralMessage(Message message) {
+    if (widget.ephemeralMessageBuilder case final builder?) {
+      return builder(context, message);
+    }
+
+    return StreamEphemeralMessage(
+      message: message,
+      onMessageTap: widget.onEphemeralMessageTap,
+    );
+  }
+
   Widget buildMessage(Message message, List<Message> messages, int index) {
-    if ((message.isSystem || message.isError) &&
-        message.text?.isNotEmpty == true) {
-      return widget.systemMessageBuilder?.call(context, message) ??
-          StreamSystemMessage(
-            message: message,
-            onMessageTap: (message) {
-              widget.onSystemMessageTap?.call(message);
-              FocusScope.of(context).unfocus();
-            },
-          );
+    if (message.isSystem || message.isError) {
+      return buildSystemMessage(message);
     }
 
     if (message.isEphemeral) {
-      return widget.ephemeralMessageBuilder?.call(context, message) ??
-          StreamEphemeralMessage(message: message);
+      return buildEphemeralMessage(message);
     }
 
     final userId = StreamChat.of(context).currentUser!.id;
@@ -1342,15 +1358,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final borderSide = isOnlyEmoji ? BorderSide.none : null;
 
-    final currentUser = StreamChat.of(context).currentUser;
-    final members = StreamChannel.of(context).channel.state?.members ?? [];
-    final currentUserMember =
-        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
-
     Widget messageWidget = StreamMessageWidget(
       message: message,
       reverse: isMyMessage,
-      showReactions: !message.isDeleted,
+      showReactions: !message.isDeleted && !message.state.isDeletingFailed,
+      showReactionPicker: !message.isDeleted && !message.state.isDeletingFailed,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       showInChannelIndicator: showInChannelIndicator,
       showThreadReplyIndicator: showThreadReplyIndicator,
@@ -1450,17 +1462,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      onMessageTap: (message) {
-        widget.onMessageTap?.call(message);
-        FocusScope.of(context).unfocus();
-      },
-      showPinButton: currentUserMember != null &&
-          streamChannel?.channel.canPinMessage == true &&
-          // Pinning a restricted visibility message is not allowed, simply
-          // because pinning a message is meant to bring attention to that
-          // message, that is not possible with a message that is only visible
-          // to a subset of users.
-          !message.hasRestrictedVisibility,
+      onMessageTap: widget.onMessageTap,
+      onMessageLongPress: widget.onMessageLongPress,
     );
 
     if (widget.messageBuilder != null) {

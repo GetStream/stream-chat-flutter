@@ -212,6 +212,11 @@ typedef OnQuotedMessageTap = void Function(String?);
 /// {@endtemplate}
 typedef OnMessageTap = void Function(Message);
 
+/// {@template onMessageLongPress}
+/// The action to perform when a message is long-pressed.
+/// {@endtemplate}
+typedef OnMessageLongPress = void Function(Message);
+
 /// {@template onReactionsTap}
 /// The action to perform when a message's reactions are tapped.
 /// {@endtemplate}

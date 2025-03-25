@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/gallery_navigation_item.dart';
+import 'package:stream_chat_flutter/src/message_action/message_action_item.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -123,12 +123,11 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
       children: [
         ContextMenuArea(
           verticalPadding: 0,
-          builder: (_) => [
-            DownloadMenuItem(
-              attachment:
-                  widget.mediaAttachmentPackages[_currentPage.value].attachment,
-            ),
-          ],
+          builder: (context) {
+            final index = _currentPage.value;
+            final mediaAttachment = widget.mediaAttachmentPackages[index];
+            return [DownloadMenuItem(mediaAttachment: mediaAttachment)];
+          },
           child: _PlaylistPlayer(
             packages: videoPackages.values.toList(),
             autoStart: widget.autoplayVideos,
@@ -360,7 +359,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                               verticalPadding: 0,
                               builder: (_) => [
                                 DownloadMenuItem(
-                                  attachment: attachment,
+                                  mediaAttachment: currentAttachmentPackage,
                                 ),
                               ],
                               child: Video(
@@ -379,6 +378,45 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// {@template streamDownloadMenuItem}
+/// A context menu item for downloading an attachment from a message.
+///
+/// This widget displays a download option in a context menu, allowing users to
+/// download the attachment associated with a message.
+///
+/// It uses [StreamMessageActionItem] and [StreamMessageAction] to create a
+/// consistent UI with other message actions.
+/// {@endtemplate}
+class DownloadMenuItem extends StatelessWidget {
+  /// {@macro streamDownloadMenuItem}
+  const DownloadMenuItem({
+    super.key,
+    required this.mediaAttachment,
+  });
+
+  /// The attachment package containing the message and attachment to download.
+  final StreamAttachmentPackage mediaAttachment;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamMessageActionItem(
+      message: mediaAttachment.message,
+      action: StreamMessageAction(
+        leading: const StreamSvgIcon(icon: StreamSvgIcons.download),
+        title: Text(context.translations.downloadLabel),
+        onTap: (_) async {
+          final popped = await Navigator.of(context).maybePop();
+          if (popped) {
+            StreamAttachmentHandler.instance.downloadAttachment(
+              mediaAttachment.attachment,
+            );
+          }
+        },
       ),
     );
   }
