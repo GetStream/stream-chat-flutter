@@ -4,6 +4,9 @@ import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/comparator_helper.dart'
+    show ComparatorHelper;
+import 'package:stream_chat/stream_chat.dart' show ChannelSortField;
 
 part 'channel_state.g.dart';
 

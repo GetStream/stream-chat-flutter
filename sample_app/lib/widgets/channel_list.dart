@@ -61,6 +61,10 @@ class _ChannelList extends State<ChannelList> {
       'members',
       [StreamChat.of(context).currentUser!.id],
     ),
+    channelStateSort: [
+      const SortOption(ChannelSortField.pinnedAt),
+      const SortOption(ChannelSortField.lastMessageAt),
+    ],
     limit: 30,
   );
 
@@ -141,9 +145,10 @@ class _ChannelList extends State<ChannelList> {
                     index,
                     defaultWidget,
                   ) {
+                    final messageResponse = messageResponses[index];
+
                     return defaultWidget.copyWith(
                       onTap: () async {
-                        final messageResponse = messageResponses[index];
                         FocusScope.of(context).requestFocus(FocusNode());
                         final client = StreamChat.of(context).client;
                         final router = GoRouter.of(context);
@@ -172,8 +177,8 @@ class _ChannelList extends State<ChannelList> {
                       controller: _channelListController,
                       itemBuilder: (context, channels, index, defaultWidget) {
                         final chatTheme = StreamChatTheme.of(context);
-                        final backgroundColor = chatTheme.colorTheme.inputBg;
                         final channel = channels[index];
+                        final backgroundColor = chatTheme.colorTheme.inputBg;
                         final canDeleteChannel = channel.canDeleteChannel;
                         return Slidable(
                           groupTag: 'channels-actions',
@@ -256,7 +261,12 @@ class _ChannelList extends State<ChannelList> {
                                 ),
                             ],
                           ),
-                          child: defaultWidget,
+                          child: ColoredBox(
+                            color: channel.isPinned
+                                ? Colors.amberAccent
+                                : Colors.transparent,
+                            child: defaultWidget,
+                          ),
                         );
                       },
                       onChannelTap: (channel) {

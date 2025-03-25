@@ -54,6 +54,13 @@ QueryMembersResponse _$QueryMembersResponseFromJson(
               .toList() ??
           [];
 
+PartialUpdateMemberResponse _$PartialUpdateMemberResponseFromJson(
+        Map<String, dynamic> json) =>
+    PartialUpdateMemberResponse()
+      ..duration = json['duration'] as String?
+      ..channelMember =
+          Member.fromJson(json['channel_member'] as Map<String, dynamic>);
+
 QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) =>
     QueryUsersResponse()
       ..duration = json['duration'] as String?

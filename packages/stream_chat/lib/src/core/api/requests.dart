@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/util/comparator_helper.dart';
+import 'package:stream_chat/stream_chat.dart' show Channel;
 
 part 'requests.g.dart';
 
@@ -39,10 +42,22 @@ class SortOption<T> {
 
   /// Sorting field Comparator required for offline sorting
   @JsonKey(includeToJson: false, includeFromJson: false)
-  final Comparator<T>? comparator;
+  Comparator<T>? comparator;
 
   /// Serialize model to json
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
+}
+
+extension type const ChannelSortField(String field) implements String {
+  static const defaultSort = ChannelSortField('last_updated');
+  static const createdAt = ChannelSortField('created_at');
+  static const updatedAt = ChannelSortField('updated_at');
+  static const lastMessageAt = ChannelSortField('last_message_at');
+  static const pinnedAt = ChannelSortField('pinned_at');
+  static const memberCount = ChannelSortField('member_count');
+  static const cid = ChannelSortField('cid');
+  static const hasUnread = ChannelSortField('has_unread');
+  static const unreadCount = ChannelSortField('unread_count');
 }
 
 /// Pagination options.

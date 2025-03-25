@@ -1,4 +1,4 @@
-import 'package:stream_chat/stream_chat.dart' show ChannelState, Event;
+import 'package:stream_chat/stream_chat.dart' show Channel, ChannelState, Event;
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
@@ -49,8 +49,17 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a channel is updated.
   ///
   /// By default, this updates the channel received in the event.
-  // ignore: no-empty-block
-  void onChannelUpdated(Event event, StreamChannelListController controller) {}
+  void onChannelUpdated(Event event, StreamChannelListController controller) {
+    final channels = [...controller.currentItems];
+    _sortChannels(channels, controller);
+    controller.channels = channels;
+  }
+
+  void onMemberUpdated(Event event, StreamChannelListController controller) {
+    final channels = [...controller.currentItems];
+    _sortChannels(channels, controller);
+    controller.channels = channels;
+  }
 
   /// Function which gets called for the event
   /// [EventType.channelVisible].
@@ -200,5 +209,24 @@ mixin class StreamChannelListEventHandler {
     });
 
     controller.channels = [...updatedChannels];
+  }
+
+  void _sortChannels(
+    List<Channel> channels,
+    StreamChannelListController controller,
+  ) {
+    channels.sort((a, b) {
+      for (final sortOption in controller.channelStateSort ?? []) {
+        final comparator = Channel.getComparator(
+          field: sortOption.field,
+          direction: sortOption.direction,
+        );
+        if (comparator != null) {
+          final compared = comparator(a, b);
+          if (compared != 0) return compared;
+        }
+      }
+      return 0;
+    });
   }
 }

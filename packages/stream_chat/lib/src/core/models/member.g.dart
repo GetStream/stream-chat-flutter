@@ -31,6 +31,12 @@ Member _$MemberFromJson(Map<String, dynamic> json) => Member(
           ? null
           : DateTime.parse(json['ban_expires'] as String),
       shadowBanned: json['shadow_banned'] as bool? ?? false,
+      pinnedAt: json['pinned_at'] == null
+          ? null
+          : DateTime.parse(json['pinned_at'] as String),
+      archivedAt: json['archived_at'] == null
+          ? null
+          : DateTime.parse(json['archived_at'] as String),
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
     );
 
@@ -45,6 +51,8 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
       'banned': instance.banned,
       'ban_expires': instance.banExpires?.toIso8601String(),
       'shadow_banned': instance.shadowBanned,
+      'pinned_at': instance.pinnedAt?.toIso8601String(),
+      'archived_at': instance.archivedAt?.toIso8601String(),
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
       'extra_data': instance.extraData,

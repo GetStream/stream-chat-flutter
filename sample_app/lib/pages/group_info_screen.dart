@@ -44,6 +44,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   late ValueNotifier<bool?> mutedBool = ValueNotifier(channel.isMuted);
 
+  late ValueNotifier<bool?> isPinned = ValueNotifier(channel.isPinned);
+
   late final channel = StreamChannel.of(context).channel;
 
   late StreamUserListController _userListController;
@@ -522,6 +524,48 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   onTap: () {},
                 );
               }),
+        StreamBuilder<bool>(
+            stream: channel.isPinnedStream,
+            builder: (context, snapshot) {
+              isPinned.value = snapshot.data;
+
+              return StreamOptionListTile(
+                tileColor: StreamChatTheme.of(context).colorTheme.appBg,
+                separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
+                title: 'Pin group',
+                titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+                leading: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: StreamSvgIcon(
+                    icon: StreamSvgIcons.pin,
+                    size: 24,
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .textHighEmphasis
+                        .withOpacity(0.5),
+                  ),
+                ),
+                trailing: snapshot.data == null
+                    ? const CircularProgressIndicator()
+                    : ValueListenableBuilder<bool?>(
+                        valueListenable: isPinned,
+                        builder: (context, value, _) {
+                          return CupertinoSwitch(
+                            value: value!,
+                            onChanged: (val) {
+                              isPinned.value = val;
+
+                              if (snapshot.data!) {
+                                channel.unpin();
+                              } else {
+                                channel.pin();
+                              }
+                            },
+                          );
+                        }),
+                onTap: () {},
+              );
+            }),
         StreamOptionListTile(
           title: AppLocalizations.of(context).pinnedMessages,
           tileColor: StreamChatTheme.of(context).colorTheme.appBg,
