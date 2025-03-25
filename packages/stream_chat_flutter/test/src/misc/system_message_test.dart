@@ -54,6 +54,9 @@ void main() {
         ),
       ));
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       await tester.tap(find.byType(StreamSystemMessage));
 
       expect(find.text('demo message'), findsOneWidget);

@@ -1,3 +1,15 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed issue with not being able to use a non-initialized `Channel` in `StreamChannel`
+  widget. [#2080](https://github.com/GetStream/stream-chat-flutter/issues/2080)
+
+🔄 Changed
+
+- Updated `StreamChannel` to provide proper background colors in the `defaultLoadingBuilder` and `defaultErrorBuilder`
+- Removed redundant `Material` widget wrapping in the `build` method of `StreamChannelState`
+
 ## 9.6.0
 
 🔄 Changed

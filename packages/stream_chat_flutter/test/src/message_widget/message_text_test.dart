@@ -76,6 +76,9 @@ void main() {
         ),
       ));
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       expect(find.byType(MarkdownBody), findsOneWidget);
     },
   );
@@ -133,6 +136,9 @@ void main() {
           ),
         );
 
+        // wait for the initial state to be rendered.
+        await tester.pump(Duration.zero);
+
         expect(find.byType(MarkdownBody), findsOneWidget);
 
         final widgets = tester.allWidgets;
@@ -168,6 +174,9 @@ void main() {
             ),
           ),
         );
+
+        // wait for the initial state to be rendered.
+        await tester.pump(Duration.zero);
 
         expect(find.byType(MarkdownBody), findsOneWidget);
 

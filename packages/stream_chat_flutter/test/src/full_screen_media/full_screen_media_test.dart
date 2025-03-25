@@ -98,6 +98,9 @@ void main() {
         ),
       ));
 
+      // wait for the initial state to be rendered.
+      await tester.pump(Duration.zero);
+
       expect(find.byType(PhotoView), findsOneWidget);
       expect(find.byType(StreamSvgIcon), findsNWidgets(4));
     },

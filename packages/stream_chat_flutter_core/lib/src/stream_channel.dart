@@ -23,6 +23,14 @@ typedef ErrorWidgetBuilder = Widget Function(
   StackTrace? stackTrace,
 );
 
+Color _getDefaultBackgroundColor(BuildContext context) {
+  final brightness = Theme.of(context).brightness;
+  return switch (brightness) {
+    Brightness.light => const Color(0xfff7f7f8),
+    Brightness.dark => const Color(0xff000000),
+  };
+}
+
 /// Widget used to provide information about the channel to the widget tree
 ///
 /// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
@@ -58,7 +66,13 @@ class StreamChannel extends StatefulWidget {
   final ErrorWidgetBuilder errorBuilder;
 
   static Widget _defaultLoadingBuilder(BuildContext context) {
-    return const Center(child: CircularProgressIndicator.adaptive());
+    final backgroundColor = _getDefaultBackgroundColor(context);
+    return Material(
+      color: backgroundColor,
+      child: const Center(
+        child: CircularProgressIndicator.adaptive(),
+      ),
+    );
   }
 
   static Widget _defaultErrorBuilder(
@@ -66,14 +80,18 @@ class StreamChannel extends StatefulWidget {
     Object error,
     StackTrace? stackTrace,
   ) {
-    if (error is DioException) {
-      if (error.type == DioExceptionType.badResponse) {
-        return Center(child: Text(error.message ?? 'Bad response'));
-      }
-      return const Center(child: Text('Check your connection and retry'));
-    }
-
-    return Center(child: Text(error.toString()));
+    final backgroundColor = _getDefaultBackgroundColor(context);
+    return Material(
+      color: backgroundColor,
+      child: Center(
+        child: switch (error) {
+          DioException(type: DioExceptionType.badResponse) =>
+            Text(error.message ?? 'Bad response'),
+          DioException() => const Text('Check your connection and retry'),
+          _ => Text(error.toString()),
+        },
+      ),
+    );
   }
 
   /// Use this method to get the current [StreamChannelState] instance
@@ -391,72 +409,56 @@ class StreamChannelState extends State<StreamChannel> {
   /// Reloads the channel with latest message
   Future<void> reloadChannel() => _queryAtMessage(limit: 30);
 
-  late List<Future<bool>> _futures;
+  Future<void> _maybeInitChannel() async {
+    // If the channel doesn't have an CID yet, it hasn't been created on the
+    // server so we don't need to initialize it.
+    if (channel.cid == null) return;
 
-  Future<bool> get _loadChannelAtMessage async {
-    try {
-      await loadChannelAtMessage(initialMessageId);
-      return true;
-    } catch (_) {
-      rethrow;
+    // Otherwise, we first initialize the channel if it's not yet initialized.
+    if (channel.state == null) await channel.watch();
+
+    // First we try to load the channel at the initial message if
+    // 'initialMessageId' is provided in the widget.
+    if (widget.initialMessageId case final initialMessageId?) {
+      return loadChannelAtMessage(initialMessageId);
+    }
+
+    // Otherwise, we should load the channel at the first unread
+    // message if available.
+    if (channel.state case final state? when state.unreadCount > 0) {
+      final currentUserRead = state.read.firstWhereOrNull(
+        (it) => it.user.id == channel.client.state.currentUser?.id,
+      );
+
+      // Skip if we don't have read state for the current user.
+      if (currentUserRead == null) return;
+
+      // Load the channel at the last read message if available.
+      if (currentUserRead.lastReadMessageId case final lastReadMessageId?) {
+        return loadChannelAtMessage(lastReadMessageId);
+      }
+
+      // Otherwise, load the channel at the last read date.
+      return loadChannelAtTimestamp(currentUserRead.lastRead);
     }
   }
 
-  Future<bool> _loadChannelAtTimestamp(DateTime timestamp) async {
-    try {
-      await loadChannelAtTimestamp(timestamp);
-      return true;
-    } catch (_) {
-      rethrow;
-    }
-  }
+  late Future<void> _channelInitFuture;
 
   @override
   void initState() {
     super.initState();
-    _populateFutures();
-
-    // Start watching the channel if it's not yet initialized.
-    if (channel.state == null) channel.watch();
-  }
-
-  void _populateFutures() {
-    _futures = [channel.initialized];
-    if (initialMessageId != null) {
-      _futures.add(_loadChannelAtMessage);
-    } else if (channel.state != null && channel.state!.unreadCount > 0) {
-      final read = channel.state!.read.firstWhereOrNull(
-        (it) => it.user.id == channel.client.state.currentUser?.id,
-      );
-
-      if (read == null) return;
-
-      final messages = channel.state!.messages;
-      final lastRead = read.lastRead;
-
-      final hasNewMessages =
-          messages.any((it) => it.createdAt.isAfter(lastRead));
-      final hasOldMessages =
-          messages.any((it) => it.createdAt.isBeforeOrEqualTo(lastRead));
-
-      // Only load messages if the unread message is in-between the messages.
-      // Otherwise, we can just load the channel normally.
-      if (hasNewMessages && hasOldMessages) {
-        _futures.add(_loadChannelAtTimestamp(lastRead));
-      }
-    }
+    _channelInitFuture = _maybeInitChannel();
   }
 
   @override
-  void didUpdateWidget(covariant StreamChannel oldWidget) {
-    if (oldWidget.channel != channel ||
-        oldWidget.initialMessageId != initialMessageId) {
-      _populateFutures();
-
-      // Start watching the channel if it's not yet initialized.
-      if (channel.state == null) channel.watch();
-    }
+  void didUpdateWidget(StreamChannel oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.channel.cid != widget.channel.cid ||
+        oldWidget.initialMessageId != widget.initialMessageId) {
+      // Re-initialize channel if the channel CID or initial message ID changes.
+      _channelInitFuture = _maybeInitChannel();
+    }
   }
 
   @override
@@ -468,33 +470,21 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: FutureBuilder<List<bool>>(
-        future: Future.wait(_futures),
-        initialData: [
-          channel.state != null,
-          _futures.length == 1,
-        ],
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            final error = snapshot.error!;
-            final stackTrace = snapshot.stackTrace;
-            return widget.errorBuilder(context, error, stackTrace);
-          }
+    return FutureBuilder<void>(
+      future: _channelInitFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          final error = snapshot.error!;
+          final stackTrace = snapshot.stackTrace;
+          return widget.errorBuilder(context, error, stackTrace);
+        }
 
-          final dataLoaded = snapshot.data?.every((it) => it) == true;
-          if (widget.showLoading && !dataLoaded) {
-            return widget.loadingBuilder(context);
-          }
-          return widget.child;
-        },
-      ),
+        if (snapshot.connectionState != ConnectionState.done) {
+          if (widget.showLoading) return widget.loadingBuilder(context);
+        }
+
+        return widget.child;
+      },
     );
-  }
-}
-
-extension on DateTime {
-  bool isBeforeOrEqualTo(DateTime other) {
-    return isBefore(other) || isAtSameMomentAs(other);
   }
 }

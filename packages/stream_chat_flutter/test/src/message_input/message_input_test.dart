@@ -72,6 +72,9 @@ void main() {
         ),
       ));
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byKey(const Key('messageInputText')), findsOneWidget);
     },
@@ -145,7 +148,8 @@ void main() {
         ),
       );
 
-      await tester.pump(Duration.zero);
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
 
       expect(find.text('Slow mode ON'), findsOneWidget);
     },
