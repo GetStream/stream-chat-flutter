@@ -92,6 +92,10 @@ class StreamMessageReactionsModal extends StatelessWidget {
     };
 
     return StreamMessageModal(
+      alignment: switch (reverse) {
+        true => Alignment.centerRight,
+        false => Alignment.centerLeft,
+      },
       headerBuilder: (context) {
         return Column(
           spacing: 10,
@@ -111,17 +115,14 @@ class StreamMessageReactionsModal extends StatelessWidget {
         final hasReactions = reactions != null && reactions.isNotEmpty;
         if (!hasReactions) return const Empty();
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ReactionsCard(
-              message: message,
-              currentUser: currentUser,
-              messageTheme: messageTheme,
-              onUserAvatarTap: onUserAvatarTap,
-            ),
-          ],
+        return FractionallySizedBox(
+          widthFactor: 0.78,
+          child: ReactionsCard(
+            message: message,
+            currentUser: currentUser,
+            messageTheme: messageTheme,
+            onUserAvatarTap: onUserAvatarTap,
+          ),
         );
       },
     );
