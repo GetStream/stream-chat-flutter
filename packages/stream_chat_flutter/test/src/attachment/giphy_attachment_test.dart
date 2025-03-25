@@ -47,6 +47,9 @@ void main() {
         ),
       );
 
+      // wait for the initial state to be rendered.
+      await tester.pump(Duration.zero);
+
       expect(find.text('GIPHY'), findsOneWidget);
     },
   );

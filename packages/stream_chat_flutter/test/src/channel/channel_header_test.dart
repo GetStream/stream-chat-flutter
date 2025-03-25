@@ -68,6 +68,9 @@ void main() {
         ),
       );
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       expect(find.text('test'), findsOneWidget);
       expect(find.byType(StreamChannelAvatar), findsOneWidget);
       expect(find.byType(StreamBackButton), findsOneWidget);
@@ -139,6 +142,9 @@ void main() {
           ),
         ),
       );
+
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
 
       expect(
           tester
@@ -294,6 +300,9 @@ void main() {
         ),
       );
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       expect(find.text('test'), findsNothing);
       expect(find.byType(StreamBackButton), findsNothing);
       expect(find.byType(StreamChannelAvatar), findsNothing);
@@ -367,6 +376,9 @@ void main() {
           ),
         ),
       );
+
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
 
       expect(find.byType(StreamBackButton), findsNothing);
       expect(
@@ -451,6 +463,9 @@ void main() {
           ),
         ),
       );
+
+      // wait for the initial state to be rendered.
+      await tester.pump(Duration.zero);
 
       await tester.tap(find.byType(StreamBackButton));
       await tester.tap(find.byType(StreamChannelAvatar));
