@@ -4,6 +4,9 @@ import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/comparator_helper.dart'
+    show ComparatorHelper;
+import 'package:stream_chat/stream_chat.dart' show ChannelSortField, SortOption;
 
 part 'channel_state.g.dart';
 
@@ -74,4 +77,40 @@ class ChannelState {
         read: read ?? this.read,
         membership: membership ?? this.membership,
       );
+
+  static Comparator<ChannelState>? getComparator(
+      SortOption<ChannelState> sortOption) {
+    Comparator<ChannelState> _compare(Function(ChannelState) getField) {
+      return (ChannelState channelStateA, ChannelState channelStateB) {
+        return ComparatorHelper.compareWithNull(
+          getField(channelStateA),
+          getField(channelStateB),
+          sortOption.direction,
+        );
+      };
+    }
+
+    return switch (sortOption.field) {
+      ChannelSortField.defaultSort => _compare(
+          (state) => state.channel?.lastMessageAt ?? state.channel?.createdAt,
+        ),
+      ChannelSortField.createdAt =>
+        _compare((state) => state.channel?.createdAt),
+      ChannelSortField.updatedAt =>
+        _compare((state) => state.channel?.updatedAt),
+      ChannelSortField.lastMessageAt =>
+        _compare((state) => state.channel?.lastMessageAt),
+      ChannelSortField.pinnedAt =>
+        _compare((state) => state.membership?.pinnedAt),
+      ChannelSortField.memberCount =>
+        _compare((state) => state.members?.length),
+      ChannelSortField.cid => _compare((state) => state.channel?.cid),
+      _ => null,
+    };
+  }
+}
+
+extension ChannelStateSortOptionExtension on SortOption<ChannelState> {
+  Comparator<ChannelState>? get defaultComparator =>
+      ChannelState.getComparator(this);
 }

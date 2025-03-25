@@ -234,6 +234,24 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.hidden == true);
   }
 
+  bool get isPinned {
+    _checkInitialized();
+    return membership?.pinnedAt != null;
+  }
+
+  Stream<bool> get isPinnedStream {
+    return membershipStream.map((m) => m?.pinnedAt != null);
+  }
+
+  bool get isArchived {
+    _checkInitialized();
+    return membership?.archivedAt != null;
+  }
+
+  Stream<bool> get isArchivedStream {
+    return membershipStream.map((m) => m?.archivedAt != null);
+  }
+
   /// The last date at which the channel got truncated.
   DateTime? get truncatedAt {
     _checkInitialized();
@@ -1899,6 +1917,39 @@ class Channel {
     return _client.showChannel(id!, type);
   }
 
+  Future<Member> pin() async {
+    _checkInitialized();
+
+    final response =
+        await _client.pinChannel(channelId: id!, channelType: type);
+
+    return response.channelMember;
+  }
+
+  Future<Member?> unpin() async {
+    _checkInitialized();
+
+    final response =
+        await _client.unpinChannel(channelId: id!, channelType: type);
+    return response.channelMember;
+  }
+
+  Future<Member?> archive() async {
+    _checkInitialized();
+
+    final response =
+        await _client.archiveChannel(channelId: id!, channelType: type);
+    return response.channelMember;
+  }
+
+  Future<Member?> unarchive() async {
+    _checkInitialized();
+
+    final response =
+        await _client.unarchiveChannel(channelId: id!, channelType: type);
+    return response.channelMember;
+  }
+
   /// Stream of [Event] coming from websocket connection specific for the
   /// channel. Pass an eventType as parameter in order to filter just a type
   /// of event.
@@ -2141,10 +2192,21 @@ class ChannelClientState {
     _subscriptions.add(_channel.on(EventType.memberUpdated).listen((Event e) {
       final member = e.member;
       final existingMembers = channelState.members ?? [];
+
+      final isCurrentUser =
+          _channel.client.state.currentUser?.id == e.member?.user?.id &&
+              e.member?.user?.id != null;
+
+      if (isCurrentUser) {
+        _channel.client.logger
+            .severe('listenMemberUpdated pinned_at: ${member!.pinnedAt}');
+      }
+
       updateChannelState(channelState.copyWith(
         members: existingMembers
             .map((m) => m.userId == member!.userId ? member : m)
             .toList(growable: false),
+        membership: isCurrentUser ? member : null,
       ));
     }));
   }
@@ -3013,6 +3075,7 @@ class ChannelClientState {
       members: newMembers,
       read: newReads,
       pinnedMessages: updatedState.pinnedMessages,
+      membership: updatedState.membership,
     );
   }
 
@@ -3102,7 +3165,18 @@ class ChannelClientState {
             final newMembers = List<Member>.from(members);
             final oldMemberIndex =
                 newMembers.indexWhere((m) => m.userId == event.user!.id);
+
+            final isCurrentUser =
+                _channel.client.state.currentUser?.id == event.user?.id &&
+                    event.user?.id != null;
+
             if (oldMemberIndex > -1) {
+              if (isCurrentUser) {
+                _channel.client.logger.severe(
+                  'updating membership from typing events, pinned_at: ${_channel.membership?.pinnedAt}',
+                );
+              }
+
               final oldMember = newMembers.removeAt(oldMemberIndex);
               updateChannelState(
                 ChannelState(
@@ -3112,6 +3186,9 @@ class ChannelClientState {
                       user: event.user,
                     ),
                   ],
+                  membership: isCurrentUser
+                      ? _channel.membership?.copyWith(user: event.user)
+                      : null,
                 ),
               );
             }

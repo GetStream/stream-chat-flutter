@@ -256,7 +256,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }) async {
     assert(_debugIsConnected, '');
     assert(() {
-      if (channelStateSort?.any((it) => it.comparator == null) ?? false) {
+      if (channelStateSort?.any(
+              (it) => it.comparator == null && it.defaultComparator == null) ??
+          false) {
         throw ArgumentError(
           'SortOption requires a comparator in order to sort',
         );
@@ -276,7 +278,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     var comparator = _defaultChannelStateComparator;
     if (channelStateSort != null && channelStateSort.isNotEmpty) {
       comparator = _combineComparators(
-        channelStateSort.map((it) => it.comparator).withNullifyer,
+        channelStateSort
+            .map((it) => it.comparator ?? it.defaultComparator)
+            .withNullifyer,
       );
     }
     channelStates.sort(comparator);

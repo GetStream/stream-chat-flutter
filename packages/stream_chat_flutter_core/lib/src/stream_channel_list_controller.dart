@@ -117,6 +117,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         presence: presence,
         paginationParams: PaginationParams(limit: limit),
       )) {
+        _sortChannels(channels);
         final nextKey = channels.length < limit ? null : channels.length;
         value = PagedValue(
           items: channels,
@@ -148,6 +149,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       )) {
         final previousItems = previousValue.items;
         final newItems = previousItems + channels;
+        _sortChannels(newItems);
         final nextKey = channels.length < limit ? null : newItems.length;
         value = PagedValue(
           items: newItems,
@@ -164,6 +166,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
 
   /// Replaces the previously loaded channels with the passed [channels].
   set channels(List<Channel> channels) {
+    _sortChannels(channels);
     if (value.isSuccess) {
       final currentValue = value.asSuccess;
       value = currentValue.copyWith(items: channels);
@@ -250,6 +253,8 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       } else if (eventType == 'user.presence.changed' ||
           eventType == EventType.userUpdated) {
         _eventHandler.onUserPresenceChanged(event, this);
+      } else if (eventType == EventType.memberUpdated) {
+        _eventHandler.onMemberUpdated(event, this);
       }
     });
   }
@@ -270,6 +275,29 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// Resumes all subscriptions added to this composite.
   void resumeEventsSubscription() {
     _channelEventSubscription?.resume();
+  }
+
+  void _sortChannels(List<Channel> channels) {
+    channels.sort((a, b) {
+      final stateA = a.state?.channelState;
+      final stateB = b.state?.channelState;
+      if (stateA == null || stateB == null) return 0;
+
+      for (final sortOption
+          in channelStateSort ?? <SortOption<ChannelState>>[]) {
+        final comparator =
+            sortOption.comparator ?? ChannelState.getComparator(sortOption);
+        if (comparator != null) {
+          try {
+            final compared = comparator(stateA, stateB);
+            if (compared != 0) return compared;
+          } catch (e) {
+            print(e);
+          }
+        }
+      }
+      return 0;
+    });
   }
 
   @override

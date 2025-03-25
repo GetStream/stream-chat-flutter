@@ -1765,6 +1765,86 @@ class StreamChatClient {
     return closeConnection();
   }
 
+  Future<PartialUpdateMemberResponse> pinChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    final currentUser = state.currentUser;
+    if (currentUser == null) {
+      throw const StreamChatError(
+        'User is not set on client, '
+        'use `connectUser` or `connectAnonymousUser` instead',
+      );
+    }
+
+    return _chatApi.channel.pinChannel(
+      channelId: channelId,
+      channelType: channelType,
+      userId: currentUser.id,
+      pin: true,
+    );
+  }
+
+  Future<PartialUpdateMemberResponse> unpinChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    final currentUser = state.currentUser;
+    if (currentUser == null) {
+      throw const StreamChatError(
+        'User is not set on client, '
+        'use `connectUser` or `connectAnonymousUser` instead',
+      );
+    }
+
+    return _chatApi.channel.pinChannel(
+      channelId: channelId,
+      channelType: channelType,
+      userId: currentUser.id,
+      pin: false,
+    );
+  }
+
+  Future<PartialUpdateMemberResponse> archiveChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    final currentUser = state.currentUser;
+    if (currentUser == null) {
+      throw const StreamChatError(
+        'User is not set on client, '
+        'use `connectUser` or `connectAnonymousUser` instead',
+      );
+    }
+
+    return _chatApi.channel.archiveChannel(
+      channelId: channelId,
+      channelType: channelType,
+      userId: currentUser.id,
+      archive: true,
+    );
+  }
+
+  Future<PartialUpdateMemberResponse> unarchiveChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    final currentUser = state.currentUser;
+    if (currentUser == null) {
+      throw const StreamChatError(
+        'User is not set on client, '
+        'use `connectUser` or `connectAnonymousUser` instead',
+      );
+    }
+
+    return _chatApi.channel.archiveChannel(
+      channelId: channelId,
+      channelType: channelType,
+      userId: currentUser.id,
+      archive: false,
+    );
+  }
+
   /// Call this function to dispose the client
   Future<void> dispose() async {
     logger.info('Disposing new StreamChatClient');

@@ -1,4 +1,5 @@
-import 'package:stream_chat/stream_chat.dart' show ChannelState, Event;
+import 'package:stream_chat/stream_chat.dart'
+    show Channel, ChannelState, Event, SortOption;
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
@@ -49,8 +50,13 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a channel is updated.
   ///
   /// By default, this updates the channel received in the event.
-  // ignore: no-empty-block
-  void onChannelUpdated(Event event, StreamChannelListController controller) {}
+  void onChannelUpdated(Event event, StreamChannelListController controller) {
+    controller.channels = [...controller.currentItems];
+  }
+
+  void onMemberUpdated(Event event, StreamChannelListController controller) {
+    controller.channels = [...controller.currentItems];
+  }
 
   /// Function which gets called for the event
   /// [EventType.channelVisible].
@@ -201,4 +207,5 @@ mixin class StreamChannelListEventHandler {
 
     controller.channels = [...updatedChannels];
   }
+
 }

@@ -70,7 +70,9 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     PaginationParams? paginationParams,
   }) async {
     assert(() {
-      if (sort != null && sort.any((it) => it.comparator == null)) {
+      if (sort != null &&
+          sort.any(
+              (it) => it.comparator == null)) {
         throw ArgumentError(
           'SortOption requires a comparator in order to sort',
         );

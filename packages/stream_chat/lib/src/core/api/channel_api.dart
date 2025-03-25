@@ -374,4 +374,52 @@ class ChannelApi {
     );
     return EmptyResponse.fromJson(response.data);
   }
+
+  Future<PartialUpdateMemberResponse> pinChannel({
+    required String channelId,
+    required String channelType,
+    required String userId,
+    required bool pin,
+  }) {
+    return _updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      userId: userId,
+      set: pin ? {'pinned': true} : null,
+      unset: pin ? null : ['pinned'],
+    );
+  }
+
+  Future<PartialUpdateMemberResponse> archiveChannel({
+    required String channelId,
+    required String channelType,
+    required String userId,
+    required bool archive,
+  }) {
+    return _updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      userId: userId,
+      set: archive ? {'archived': true} : null,
+      unset: archive ? null : ['archived'],
+    );
+  }
+
+  /// Updates some of the member data
+  Future<PartialUpdateMemberResponse> _updateMemberPartial({
+    required String channelId,
+    required String channelType,
+    required String userId,
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) async {
+    final response = await _client.patch(
+      '${_getChannelUrl(channelId, channelType)}/member/$userId',
+      data: {
+        if (set != null) 'set': set,
+        if (unset != null) 'unset': unset,
+      },
+    );
+    return PartialUpdateMemberResponse.fromJson(response.data);
+  }
 }

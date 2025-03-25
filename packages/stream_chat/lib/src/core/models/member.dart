@@ -23,6 +23,8 @@ class Member extends Equatable {
     this.banned = false,
     this.banExpires,
     this.shadowBanned = false,
+    this.pinnedAt,
+    this.archivedAt,
     this.extraData = const {},
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
@@ -53,6 +55,8 @@ class Member extends Equatable {
     'shadow_banned',
     'created_at',
     'updated_at',
+    'pinned_at',
+    'archived_at'
   ];
 
   /// The interested user
@@ -84,6 +88,12 @@ class Member extends Equatable {
 
   /// True if the member is shadow banned from the channel
   final bool shadowBanned;
+
+  /// The date at which the channel was pinned by the member
+  final DateTime? pinnedAt;
+
+  /// The date at which the channel was archived by the member
+  final DateTime? archivedAt;
 
   /// The date of creation
   final DateTime createdAt;
@@ -122,6 +132,8 @@ class Member extends Equatable {
         channelRole: channelRole ?? this.channelRole,
         userId: userId ?? this.userId,
         isModerator: isModerator ?? this.isModerator,
+        pinnedAt: pinnedAt,
+        archivedAt: archivedAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         extraData: extraData ?? this.extraData,
@@ -144,6 +156,8 @@ class Member extends Equatable {
         banned,
         banExpires,
         shadowBanned,
+        pinnedAt,
+        archivedAt,
         createdAt,
         updatedAt,
         extraData,

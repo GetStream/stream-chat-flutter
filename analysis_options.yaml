@@ -36,6 +36,7 @@ linter:
     - annotate_overrides
     - avoid_bool_literals_in_conditional_expressions
     - avoid_catching_errors
+    - avoid_dynamic_calls
     - avoid_init_to_null
     - avoid_null_checks_in_equality_operators
     - avoid_positional_boolean_parameters
