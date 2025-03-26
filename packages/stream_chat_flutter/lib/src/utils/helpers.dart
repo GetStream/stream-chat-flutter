@@ -110,17 +110,15 @@ Future<bool?> showConfirmationBottomSheet(
                     child: Container(
                       alignment: Alignment.center,
                       child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        child: Text(
-                          cancelText,
-                          style: chatThemeData.textTheme.bodyBold.copyWith(
-                            color: chatThemeData.colorTheme.textHighEmphasis
-                                // ignore: deprecated_member_use
-                                .withOpacity(0.5),
-                          ),
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: TextButton.styleFrom(
+                          textStyle: chatThemeData.textTheme.bodyBold,
+                          foregroundColor:
+                              chatThemeData.colorTheme.textHighEmphasis
+                                  // ignore: deprecated_member_use
+                                  .withOpacity(0.5),
                         ),
+                        child: Text(cancelText),
                       ),
                     ),
                   ),
@@ -129,12 +127,11 @@ Future<bool?> showConfirmationBottomSheet(
                     alignment: Alignment.center,
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
-                      child: Text(
-                        okText,
-                        style: chatThemeData.textTheme.bodyBold.copyWith(
-                          color: chatThemeData.colorTheme.accentError,
-                        ),
+                      style: TextButton.styleFrom(
+                        textStyle: chatThemeData.textTheme.bodyBold,
+                        foregroundColor: chatThemeData.colorTheme.accentError,
                       ),
+                      child: Text(okText),
                     ),
                   ),
                 ),

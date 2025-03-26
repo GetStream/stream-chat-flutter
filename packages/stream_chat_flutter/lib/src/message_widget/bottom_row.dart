@@ -186,13 +186,26 @@ class BottomRow extends StatelessWidget {
     const usernameKey = Key('username');
 
     final children = [
+      if (showSendingIndicator)
+        switch (sendingIndicatorBuilder) {
+          final builder? => builder(context, message),
+          _ => SendingIndicatorBuilder(
+              messageTheme: messageTheme,
+              message: message,
+              hasNonUrlAttachments: hasNonUrlAttachments,
+              streamChat: streamChat,
+              streamChatTheme: streamChatTheme,
+            ),
+        },
       if (showUsername)
-        usernameBuilder?.call(context, message) ??
-            Username(
+        switch (usernameBuilder) {
+          final builder? => builder(context, message),
+          _ => Username(
               key: usernameKey,
               message: message,
               messageTheme: messageTheme,
             ),
+        },
       if (showEditedLabel && isEdited)
         Text(
           context.translations.editedMessageLabel,
@@ -204,15 +217,6 @@ class BottomRow extends StatelessWidget {
           style: messageTheme.createdAtStyle,
           formatter: (_, date) => Jiffy.parseFromDateTime(date).jm,
         ),
-      if (showSendingIndicator)
-        sendingIndicatorBuilder?.call(context, message) ??
-            SendingIndicatorBuilder(
-              messageTheme: messageTheme,
-              message: message,
-              hasNonUrlAttachments: hasNonUrlAttachments,
-              streamChat: streamChat,
-              streamChatTheme: streamChatTheme,
-            ),
     ];
 
     final showThreadTail =

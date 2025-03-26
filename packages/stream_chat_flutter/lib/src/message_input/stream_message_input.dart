@@ -1514,17 +1514,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _sendOrUpdateMessage({
     required Message message,
   }) async {
-    final channel = StreamChannel.of(context).channel;
-
     try {
-      final resp = await switch (_isEditing) {
+      final channel = StreamChannel.of(context).channel;
+
+      // Note: edited messages which are bounced back with an error needs to be
+      // sent as new messages as the backend doesn't store them.
+      final resp = await switch (_isEditing && !message.isBouncedWithError) {
         true => channel.updateMessage(message),
         false => channel.sendMessage(message),
       };
-
-      if (resp.message.isError) {
-        _effectiveController.message = message;
-      }
 
       // We don't want to start the cooldown if an already sent message is
       // being edited.

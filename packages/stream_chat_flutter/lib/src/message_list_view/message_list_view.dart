@@ -111,11 +111,15 @@ class StreamMessageListView extends StatefulWidget {
     this.emptyBuilder,
     this.systemMessageBuilder,
     this.ephemeralMessageBuilder,
+    this.moderatedMessageBuilder,
     this.messageListBuilder,
     this.errorBuilder,
     this.messageFilter,
     this.onMessageTap,
     this.onSystemMessageTap,
+    this.onEphemeralMessageTap,
+    this.onModeratedMessageTap,
+    this.onMessageLongPress,
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
     this.unreadMessagesSeparatorBuilder,
@@ -158,6 +162,9 @@ class StreamMessageListView extends StatefulWidget {
 
   /// {@macro ephemeralMessageBuilder}
   final EphemeralMessageBuilder? ephemeralMessageBuilder;
+
+  /// {@macro moderatedMessageBuilder}
+  final ModeratedMessageBuilder? moderatedMessageBuilder;
 
   /// {@macro parentMessageBuilder}
   final ParentMessageBuilder? parentMessageBuilder;
@@ -293,12 +300,23 @@ class StreamMessageListView extends StatefulWidget {
   /// Predicate used to filter messages
   final bool Function(Message)? messageFilter;
 
-  /// Called when any message is tapped except a system message
-  /// (use [onSystemMessageTap] instead)
+  /// Called when a regular message is tapped.
+  ///
+  /// For system, ephemeral, and moderated messages, use [onSystemMessageTap],
+  /// [onEphemeralMessageTap], and [onModeratedMessageTap] respectively.
   final OnMessageTap? onMessageTap;
 
-  /// Called when system message is tapped
+  /// Called when system message is tapped.
   final OnMessageTap? onSystemMessageTap;
+
+  /// Called when ephemeral message is tapped.
+  final OnMessageTap? onEphemeralMessageTap;
+
+  /// Called when moderated message is tapped.
+  final OnMessageTap? onModeratedMessageTap;
+
+  /// Called when a regular message is long pressed.
+  final OnMessageLongPress? onMessageLongPress;
 
   /// Builder used to build the thread separator in case it's a thread view
   final Function(BuildContext context, Message parentMessage)?
@@ -812,25 +830,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       }
                     }
 
-                    const bottomMessageIndex = 2; // 1 -> loader // 0 -> footer
+                    // Offset the index to account for two extra items
+                    // (loader and footer) at the bottom of the ListView.
+                    final messageIndex = i - 2;
+                    final message = messages[messageIndex];
 
-                    final message = messages[i - 2];
-                    Widget messageWidget;
-
-                    if (i == bottomMessageIndex) {
-                      messageWidget = _buildBottomMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel!,
-                        i - 2,
-                      );
-                    } else {
-                      messageWidget = buildMessage(message, messages, i - 2);
-                    }
                     return KeyedSubtree(
                       key: ValueKey(message.id),
-                      child: messageWidget,
+                      child: buildMessage(message, messages, messageIndex),
                     );
                   },
                 ),
@@ -989,28 +996,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget _buildDateDivider(Message message) {
-    final divider = widget.dateDividerBuilder != null
-        ? widget.dateDividerBuilder!(
-            message.createdAt.toLocal(),
-          )
-        : Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: StreamDateDivider(
-              dateTime: message.createdAt.toLocal(),
-            ),
-          );
-    return divider;
-  }
-
-  Widget _buildBottomMessage(
-    BuildContext context,
-    Message message,
-    List<Message> messages,
-    StreamChannelState streamChannel,
-    int index,
-  ) {
-    final messageWidget = buildMessage(message, messages, index);
-    return messageWidget;
+    final createdAt = message.createdAt.toLocal();
+    return switch (widget.dateDividerBuilder) {
+      final builder? => builder(createdAt),
+      _ => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: StreamDateDivider(dateTime: createdAt),
+        ),
+    };
   }
 
   Widget buildParentMessage(
@@ -1089,10 +1082,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      onMessageTap: (message) {
-        widget.onMessageTap?.call(message);
-        FocusScope.of(context).unfocus();
-      },
+      onMessageTap: widget.onMessageTap,
+      onMessageLongPress: widget.onMessageLongPress,
       showPinButton: currentUserMember != null &&
           streamChannel?.channel.canPinMessage == true &&
           // Pinning a restricted visibility message is not allowed, simply
@@ -1260,22 +1251,56 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
+  Widget buildSystemMessage(Message message) {
+    if (widget.systemMessageBuilder case final builder?) {
+      return builder(context, message);
+    }
+
+    return StreamSystemMessage(
+      message: message,
+      onMessageTap: switch (widget.onSystemMessageTap) {
+        final onTap? => (message) {
+            onTap(message);
+            FocusScope.of(context).unfocus();
+          },
+        _ => null,
+      },
+    );
+  }
+
+  Widget buildModeratedMessage(Message message) {
+    if (widget.moderatedMessageBuilder case final builder?) {
+      return builder(context, message);
+    }
+
+    return StreamModeratedMessage(
+      message: message,
+      onMessageTap: widget.onModeratedMessageTap,
+    );
+  }
+
+  Widget buildEphemeralMessage(Message message) {
+    if (widget.ephemeralMessageBuilder case final builder?) {
+      return builder(context, message);
+    }
+
+    return StreamEphemeralMessage(
+      message: message,
+      onMessageTap: widget.onEphemeralMessageTap,
+    );
+  }
+
   Widget buildMessage(Message message, List<Message> messages, int index) {
-    if ((message.isSystem || message.isError) &&
-        message.text?.isNotEmpty == true) {
-      return widget.systemMessageBuilder?.call(context, message) ??
-          StreamSystemMessage(
-            message: message,
-            onMessageTap: (message) {
-              widget.onSystemMessageTap?.call(message);
-              FocusScope.of(context).unfocus();
-            },
-          );
+    if (message.isSystem) {
+      return buildSystemMessage(message);
     }
 
     if (message.isEphemeral) {
-      return widget.ephemeralMessageBuilder?.call(context, message) ??
-          StreamEphemeralMessage(message: message);
+      return buildEphemeralMessage(message);
+    }
+
+    if (message.isError && !message.isBounced) {
+      return buildModeratedMessage(message);
     }
 
     final userId = StreamChat.of(context).currentUser!.id;
@@ -1450,10 +1475,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       messageTheme: isMyMessage
           ? _streamTheme.ownMessageTheme
           : _streamTheme.otherMessageTheme,
-      onMessageTap: (message) {
-        widget.onMessageTap?.call(message);
-        FocusScope.of(context).unfocus();
-      },
+      onMessageTap: widget.onMessageTap,
+      onMessageLongPress: widget.onMessageLongPress,
       showPinButton: currentUserMember != null &&
           streamChannel?.channel.canPinMessage == true &&
           // Pinning a restricted visibility message is not allowed, simply
