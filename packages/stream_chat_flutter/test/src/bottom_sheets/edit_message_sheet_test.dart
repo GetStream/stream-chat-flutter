@@ -1,6 +1,5 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -10,29 +9,6 @@ import '../mocks.dart';
 
 void main() {
   group('EditMessageSheet tests', () {
-    const methodChannel =
-        MethodChannel('dev.fluttercommunity.plus/connectivity_status');
-    setUp(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(methodChannel,
-              (MethodCall methodCall) async {
-        if (methodCall.method == 'listen') {
-          try {
-            await TestDefaultBinaryMessengerBinding
-                .instance.defaultBinaryMessenger
-                .handlePlatformMessage(
-              methodChannel.name,
-              methodChannel.codec.encodeSuccessEnvelope(['wifi']),
-              (_) {},
-            );
-          } catch (e) {
-            print(e);
-          }
-        }
-        return null;
-      });
-    });
-
     testWidgets('appears on tap', (tester) async {
       final channel = MockChannel();
       when(channel.getRemainingCooldown).thenReturn(0);
@@ -41,6 +17,7 @@ void main() {
         MaterialApp(
           builder: (context, child) => StreamChat(
             client: MockClient(),
+            connectivityStream: Stream.value([ConnectivityResult.wifi]),
             child: child,
           ),
           home: Scaffold(
@@ -94,10 +71,5 @@ void main() {
         );
       },
     );
-
-    tearDown(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(methodChannel, null);
-    });
   });
 }
