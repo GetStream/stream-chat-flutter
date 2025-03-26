@@ -638,5 +638,5 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get moderationReviewModalDescription =>
-      'Réfléchissez à la façon dont votre commentaire pourrait affecter les autres et assurez-vous de respecter nos directives communautaires.';
+      '''Réfléchissez à la façon dont votre commentaire pourrait affecter les autres et assurez-vous de respecter nos directives communautaires.''';
 }

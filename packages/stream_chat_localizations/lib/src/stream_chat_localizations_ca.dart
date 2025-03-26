@@ -633,5 +633,5 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get moderationReviewModalDescription =>
-      "Considera com el teu comentari podria fer sentir als altres i assegura't de seguir les nostres Directrius de la Comunitat.";
+      """Considera com el teu comentari podria fer sentir als altres i assegura't de seguir les nostres Directrius de la Comunitat.""";
 }

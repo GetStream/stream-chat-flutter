@@ -619,5 +619,5 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get moderationReviewModalDescription =>
-      'Tenk på hvordan kommentaren din kan få andre til å føle seg, og sørg for å følge retningslinjene for fellesskapet vårt.';
+      '''Tenk på hvordan kommentaren din kan få andre til å føle seg, og sørg for å følge retningslinjene for fellesskapet vårt.''';
 }

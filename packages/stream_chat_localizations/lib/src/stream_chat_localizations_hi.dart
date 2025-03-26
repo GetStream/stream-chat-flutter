@@ -629,5 +629,5 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get moderationReviewModalDescription =>
-      'विचार करें कि आपकी टिप्पणी से दूसरों को कैसा महसूस हो सकता है और सुनिश्चित करें कि आप हमारे सामुदायिक दिशानिर्देशों का पालन करें।';
+      '''विचार करें कि आपकी टिप्पणी से दूसरों को कैसा महसूस हो सकता है और सुनिश्चित करें कि आप हमारे सामुदायिक दिशानिर्देशों का पालन करें।''';
 }

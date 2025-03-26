@@ -1137,5 +1137,5 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get moderationReviewModalDescription =>
-      'Consider how your comment might make others feel and be sure to follow our Community Guidelines.';
+      '''Consider how your comment might make others feel and be sure to follow our Community Guidelines.''';
 }

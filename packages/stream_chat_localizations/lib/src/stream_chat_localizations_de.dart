@@ -626,5 +626,5 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get moderationReviewModalDescription =>
-      'Bedenke, wie dein Kommentar auf andere wirken könnte, und halte dich an unsere Community-Richtlinien.';
+      '''Bedenke, wie dein Kommentar auf andere wirken könnte, und halte dich an unsere Community-Richtlinien.''';
 }

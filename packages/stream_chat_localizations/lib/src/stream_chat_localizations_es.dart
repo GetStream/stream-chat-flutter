@@ -635,5 +635,5 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get moderationReviewModalDescription =>
-      'Considera cómo tu comentario podría hacer sentir a los demás y asegúrate de seguir nuestras Normas de la Comunidad.';
+      '''Considera cómo tu comentario podría hacer sentir a los demás y asegúrate de seguir nuestras Normas de la Comunidad.''';
 }
