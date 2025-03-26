@@ -205,21 +205,21 @@ void main() {
           originalText: 'original text',
         ),
       );
-      
+
       final bouncedMessage = Message(
         moderation: const Moderation(
           action: ModerationAction.bounce,
           originalText: 'original text',
         ),
       );
-      
+
       final removedMessage = Message(
         moderation: const Moderation(
           action: ModerationAction.remove,
           originalText: 'original text',
         ),
       );
-      
+
       final shadowedMessage = Message(
         moderation: const Moderation(
           action: ModerationAction.shadow,
@@ -232,19 +232,19 @@ void main() {
       expect(flaggedMessage.isBounced, isFalse);
       expect(flaggedMessage.isRemoved, isFalse);
       expect(flaggedMessage.isShadowed, isFalse);
-      
+
       // Bounced message
       expect(bouncedMessage.isFlagged, isFalse);
       expect(bouncedMessage.isBounced, isTrue);
       expect(bouncedMessage.isRemoved, isFalse);
       expect(bouncedMessage.isShadowed, isFalse);
-      
+
       // Removed message
       expect(removedMessage.isFlagged, isFalse);
       expect(removedMessage.isBounced, isFalse);
       expect(removedMessage.isRemoved, isTrue);
       expect(removedMessage.isShadowed, isFalse);
-      
+
       // Shadowed message
       expect(shadowedMessage.isFlagged, isFalse);
       expect(shadowedMessage.isBounced, isFalse);
@@ -262,14 +262,14 @@ void main() {
         ),
       );
       expect(bouncedWithErrorMessage.isBouncedWithError, isTrue);
-      
+
       // No moderation
       final noModerationMessage = Message(moderation: null);
       expect(noModerationMessage.isFlagged, isFalse);
       expect(noModerationMessage.isBounced, isFalse);
       expect(noModerationMessage.isRemoved, isFalse);
       expect(noModerationMessage.isShadowed, isFalse);
-      
+
       // Custom moderation action
       final customModerationMessage = Message(
         moderation: const Moderation(
@@ -282,7 +282,7 @@ void main() {
       expect(customModerationMessage.isRemoved, isFalse);
       expect(customModerationMessage.isShadowed, isFalse);
     });
-    
+
     test('should handle backward compatibility with moderation_details', () {
       final json = {
         'id': 'test-message-id',
