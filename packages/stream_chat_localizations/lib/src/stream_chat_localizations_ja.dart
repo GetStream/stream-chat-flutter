@@ -601,8 +601,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get sendAnywayLabel => 'それでも送信';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'メッセージはモデレーションポリシーによってブロックされました';
+  String get moderatedMessageBlockedText => 'メッセージはモデレーションポリシーによってブロックされました';
 
   @override
   String get moderationReviewModalTitle => 'よろしいですか？';

@@ -602,8 +602,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get sendAnywayLabel => '그래도 보내기';
 
   @override
-  String get moderatedMessageBlockedText =>
-      '메시지가 조정 정책에 의해 차단되었습니다';
+  String get moderatedMessageBlockedText => '메시지가 조정 정책에 의해 차단되었습니다';
 
   @override
   String get moderationReviewModalTitle => '확실합니까?';
