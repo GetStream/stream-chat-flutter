@@ -5,10 +5,6 @@
 - [[#2118]](https://github.com/GetStream/stream-chat-flutter/issues/2118) Fixed invalid assertions
   applied on message input command and attachment button.
 
-✅ Added
-
-- Added support for new message moderation feature in the SDK.
-
 ## 9.6.0
 
 🐞 Fixed
@@ -17,11 +13,6 @@
   buttons not being able to customized.
 - [[#1775]](https://github.com/GetStream/stream-chat-flutter/issues/1775) Fix incorrect message order.
 
-🔄 Changed
-
-- Updated the message list view to prevent pinning messages that have restricted visibility.
-- Deprecated `StreamMessageInput.useNativeAttachmentPickerOnMobile` in favor of `StreamMessageInput.useSystemAttachmentPicker`.
-
 ## 9.5.0
 
 🐞 Fixed
@@ -29,12 +20,15 @@
 - Fixed `StreamMessageInput` not able to edit the ogAttachments.
 - Fixed `MessageWidget` showing pinned background for deleted messages.
 
+✅ Added
+
+- Introduced `StreamMessageInput.useSystemAttachmentPicker` for system media picker support.
+- Introduced `StreamMessageThemeData.messageDeletedStyle` to style the text on a deleted message.
+
 🔄 Changed
 
-- Updated `jiffy` dependency to `^6.2.1`.
-- Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
-- Updated `stream_chat_flutter_core` dependency
-  to [`7.0.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+- Updated the message list view to prevent pinning messages that have restricted visibility.
+- Deprecated `StreamMessageInput.useNativeAttachmentPickerOnMobile` in favor of `StreamMessageInput.useSystemAttachmentPicker`.
 
 ## 9.4.0
 
