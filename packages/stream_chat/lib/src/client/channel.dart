@@ -2568,6 +2568,7 @@ class ChannelClientState {
   // Logic taken from the backend SDK
   // https://github.com/GetStream/chat/blob/9245c2b3f7e679267d57ee510c60e93de051cb8e/types/channel.go#L1136-L1150
   bool _shouldUpdateChannelLastMessageAt(Message message) {
+    if (message.isError) return false;
     if (message.shadowed) return false;
     if (message.isEphemeral) return false;
 
@@ -2585,7 +2586,13 @@ class ChannelClientState {
   }
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
+  ///
+  /// Additionally, cleans up all the stale error messages from the state which
+  /// requires no action from the user.
   void updateMessage(Message message) {
+    // Cleanup stale error messages.
+    _cleanUpStaleErrorMessages();
+
     // Determine if the message should be displayed in the channel view.
     if (message.parentId == null || message.showInChannel == true) {
       // Create a new list of messages to avoid modifying the original
@@ -2657,6 +2664,16 @@ class ChannelClientState {
     if (message.parentId != null) {
       updateThreadInfo(message.parentId!, [message]);
     }
+  }
+
+  // Cleans up all the stale error messages which requires no action.
+  void _cleanUpStaleErrorMessages() {
+    final errorMessages = messages.where((message) {
+      return message.isError && !message.isBounced;
+    });
+
+    if (errorMessages.isEmpty) return;
+    return errorMessages.forEach(removeMessage);
   }
 
   /// Updates the list of pinned messages based on the current message's
