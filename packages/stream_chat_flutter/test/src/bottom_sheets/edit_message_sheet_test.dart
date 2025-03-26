@@ -60,6 +60,7 @@ void main() {
         return MaterialAppWrapper(
           builder: (context, child) => StreamChat(
             client: MockClient(),
+            connectivityStream: Stream.value([ConnectivityResult.wifi]),
             child: child,
           ),
           home: Scaffold(
