@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
+import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -2855,6 +2856,51 @@ void main() {
               channelType,
               any(that: isSameEventAs(typingStopEvent)),
             )).called(1);
+      });
+    });
+
+    // This test verifies that stale error messages (error messages without bounce moderation)
+    // are automatically cleaned up when we send a new message.
+    group('stale error message cleanup', () {
+      final channelState = _generateChannelState(channelId, channelType);
+
+      final errorMessage = Message(type: MessageType.error);
+      final bouncedErrorMessage = Message(
+        type: MessageType.error,
+        moderation: const Moderation(
+          action: ModerationAction.bounce,
+          originalText: 'original text',
+        ),
+      );
+
+      // Test case: sending a message cleans up stale error messages
+      test('when sending a new message', () async {
+        // Channel with 2 error messages
+        final channel = Channel.fromState(
+          client,
+          channelState.copyWith(
+            messages: [errorMessage, bouncedErrorMessage],
+          ),
+        );
+
+        // Set up the mock response for sending message
+        final newMessage = Message(text: 'New message');
+
+        when(() => client.sendMessage(any(), channelId, channelType))
+            .thenAnswer((_) async => SendMessageResponse()
+              ..message = newMessage.copyWith(state: MessageState.sent));
+
+        // Send a new message
+        await channel.sendMessage(newMessage);
+        final messages = channel.state!.messages;
+
+        // Verify the cleanup
+        expect(messages.length, 2);
+        expect(messages.any((m) => m.id == errorMessage.id), false);
+        expect(messages.any((m) => m.id == bouncedErrorMessage.id), true);
+        expect(messages.any((m) => m.id == newMessage.id), true);
+
+        verify(() => client.sendMessage(any(), channelId, channelType));
       });
     });
   });
