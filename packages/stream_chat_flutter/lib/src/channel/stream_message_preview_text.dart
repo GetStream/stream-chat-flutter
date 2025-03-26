@@ -20,6 +20,17 @@ class StreamMessagePreviewText extends StatelessWidget {
   /// The style to use for the text.
   final TextStyle? textStyle;
 
+  /// The default preview predicate which determines if the message should be
+  /// shown in the preview or not.
+  static bool defaultPredicate(Message message) {
+    if (message.isShadowed) return false;
+    if (message.isDeleted) return false;
+    if (message.isError) return false;
+    if (message.isEphemeral) return false;
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final messageText = message
