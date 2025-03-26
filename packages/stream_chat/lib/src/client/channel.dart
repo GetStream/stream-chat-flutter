@@ -644,6 +644,10 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
+
+    // Clean up stale error messages before sending a new message.
+    state!.cleanUpStaleErrorMessages();
+
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
@@ -2586,13 +2590,7 @@ class ChannelClientState {
   }
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
-  ///
-  /// Additionally, cleans up all the stale error messages from the state which
-  /// requires no action from the user.
   void updateMessage(Message message) {
-    // Cleanup stale error messages.
-    _cleanUpStaleErrorMessages();
-
     // Determine if the message should be displayed in the channel view.
     if (message.parentId == null || message.showInChannel == true) {
       // Create a new list of messages to avoid modifying the original
@@ -2666,8 +2664,8 @@ class ChannelClientState {
     }
   }
 
-  // Cleans up all the stale error messages which requires no action.
-  void _cleanUpStaleErrorMessages() {
+  /// Cleans up all the stale error messages which requires no action.
+  void cleanUpStaleErrorMessages() {
     final errorMessages = messages.where((message) {
       return message.isError && !message.isBounced;
     });
