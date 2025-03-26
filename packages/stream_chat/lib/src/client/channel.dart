@@ -885,8 +885,9 @@ class Channel {
   }) async {
     _checkInitialized();
 
-    // Directly deleting the local messages which are not yet sent to server.
-    if (message.remoteCreatedAt == null) {
+    // Directly deleting the local messages and bounced error messages as they
+    // are not available on the server.
+    if (message.remoteCreatedAt == null || message.isBouncedWithError) {
       state!.deleteMessage(
         message.copyWith(
           type: MessageType.deleted,
