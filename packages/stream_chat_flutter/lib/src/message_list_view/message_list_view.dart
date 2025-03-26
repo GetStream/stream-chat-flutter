@@ -1258,13 +1258,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     return StreamSystemMessage(
       message: message,
-      onMessageTap: switch (widget.onSystemMessageTap) {
-        final onTap? => (message) {
-            onTap(message);
-            FocusScope.of(context).unfocus();
-          },
-        _ => null,
-      },
+      onMessageTap: widget.onSystemMessageTap,
     );
   }
 
