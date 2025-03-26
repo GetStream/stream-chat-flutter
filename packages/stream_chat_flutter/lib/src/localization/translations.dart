@@ -493,6 +493,18 @@ abstract class Translations {
 
   /// The label for "Hold to record"
   String get holdToRecordLabel;
+
+  /// The label for "Send Anyway"
+  String get sendAnywayLabel;
+
+  /// Text shown when a message was blocked by moderation policies
+  String get moderatedMessageBlockedText;
+
+  /// The title of the moderated message warning dialog
+  String get moderationReviewModalTitle;
+
+  /// The content text of the moderated message warning dialog
+  String get moderationReviewModalDescription;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1112,4 +1124,18 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get holdToRecordLabel => 'Hold to record, release to send.';
+
+  @override
+  String get sendAnywayLabel => 'Send Anyway';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Message was blocked by moderation policies';
+
+  @override
+  String get moderationReviewModalTitle => 'Are you sure?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      'Consider how your comment might make others feel and be sure to follow our Community Guidelines.';
 }

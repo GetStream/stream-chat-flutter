@@ -1,3 +1,10 @@
+## Upcoming
+
+- Added translations for new `sendAnywayLabel` label.
+- Added translations for new `moderatedMessageBlockedText` text.
+- Added translations for new `moderationReviewModalTitle` text.
+- Added translations for new `moderationReviewModalDescription` text.
+
 ## 9.6.0
 
 - Updated `stream_chat_flutter` dependency to [`9.6.0`](https://pub.dev/packages/stream_chat/changelog).
