@@ -5,6 +5,10 @@
 - [[#2118]](https://github.com/GetStream/stream-chat-flutter/issues/2118) Fixed invalid assertions
   applied on message input command and attachment button.
 
+✅ Added
+
+- Added support for new message moderation feature in the SDK.
+
 ## 9.6.0
 
 🐞 Fixed

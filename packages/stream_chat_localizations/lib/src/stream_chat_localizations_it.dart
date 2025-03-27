@@ -625,4 +625,18 @@ Attenzione: il limite massimo di $limit file è stato superato.
   @override
   String get holdToRecordLabel =>
       'Tieni premuto per registrare, rilascia per inviare';
+
+  @override
+  String get sendAnywayLabel => 'Invia comunque';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Messaggio bloccato dalle politiche di moderazione';
+
+  @override
+  String get moderationReviewModalTitle => 'Sei sicuro?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Considera come il tuo commento potrebbe far sentire gli altri e assicurati di seguire le nostre Linee guida della Comunità.''';
 }

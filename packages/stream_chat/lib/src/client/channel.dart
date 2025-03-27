@@ -644,6 +644,10 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
+
+    // Clean up stale error messages before sending a new message.
+    state!.cleanUpStaleErrorMessages();
+
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
@@ -885,11 +889,12 @@ class Channel {
   }) async {
     _checkInitialized();
 
-    // Directly deleting the local messages which are not yet sent to server.
-    if (message.remoteCreatedAt == null) {
+    // Directly deleting the local messages and bounced error messages as they
+    // are not available on the server.
+    if (message.remoteCreatedAt == null || message.isBouncedWithError) {
       state!.deleteMessage(
         message.copyWith(
-          type: 'deleted',
+          type: MessageType.deleted,
           localDeletedAt: DateTime.now(),
           state: MessageState.deleted(hard: hard),
         ),
@@ -908,7 +913,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      type: 'deleted',
+      type: MessageType.deleted,
       deletedAt: DateTime.now(),
       state: MessageState.deleting(hard: hard),
     );
@@ -2567,6 +2572,7 @@ class ChannelClientState {
   // Logic taken from the backend SDK
   // https://github.com/GetStream/chat/blob/9245c2b3f7e679267d57ee510c60e93de051cb8e/types/channel.go#L1136-L1150
   bool _shouldUpdateChannelLastMessageAt(Message message) {
+    if (message.isError) return false;
     if (message.shadowed) return false;
     if (message.isEphemeral) return false;
 
@@ -2656,6 +2662,16 @@ class ChannelClientState {
     if (message.parentId != null) {
       updateThreadInfo(message.parentId!, [message]);
     }
+  }
+
+  /// Cleans up all the stale error messages which requires no action.
+  void cleanUpStaleErrorMessages() {
+    final errorMessages = messages.where((message) {
+      return message.isError && !message.isBounced;
+    });
+
+    if (errorMessages.isEmpty) return;
+    return errorMessages.forEach(removeMessage);
   }
 
   /// Updates the list of pinned messages based on the current message's

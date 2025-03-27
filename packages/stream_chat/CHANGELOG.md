@@ -10,6 +10,8 @@
   final canSendReaction = channel.canSendReaction;
   ```
 
+- Added support for message moderation feature.
+
 🔄 Changed
 
 - Deprecated `PermissionType` in favor of `ChannelCapability`.

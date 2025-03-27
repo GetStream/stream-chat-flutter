@@ -597,4 +597,17 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => '길게 눌러서 녹음, 놓아서 전송';
+
+  @override
+  String get sendAnywayLabel => '그래도 보내기';
+
+  @override
+  String get moderatedMessageBlockedText => '메시지가 조정 정책에 의해 차단되었습니다';
+
+  @override
+  String get moderationReviewModalTitle => '확실합니까?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '귀하의 댓글이 다른 사람들에게 어떤 느낌을 줄 수 있는지 고려하고 커뮤니티 가이드라인을 준수하십시오.';
 }

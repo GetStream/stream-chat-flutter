@@ -365,7 +365,7 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
         initialData: widget.channel.state!.messages,
         builder: (context, messages) {
           final lastMessage = messages.lastWhereOrNull(
-            (m) => !m.shadowed && !m.isDeleted,
+            StreamMessagePreviewText.defaultPredicate,
           );
 
           if (widget.channel.state?.isUpToDate == true) {

@@ -620,4 +620,18 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   @override
   String get holdToRecordLabel =>
       'Mantén premut per gravar, deixa anar per enviar';
+
+  @override
+  String get sendAnywayLabel => 'Enviar igualment';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Missatge bloquejat per les polítiques de moderació';
+
+  @override
+  String get moderationReviewModalTitle => 'Estàs segur?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      """Considera com el teu comentari podria fer sentir als altres i assegura't de seguir les nostres Directrius de la Comunitat.""";
 }

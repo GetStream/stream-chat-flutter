@@ -402,10 +402,10 @@ void main() {
             child: child,
           ),
           theme: themeData,
-          home: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: SizedBox(
+          home: Builder(
+            builder: (context) => StreamChannel(
+              showLoading: false,
+              channel: channel,
               child: MessageActionsModal(
                 messageWidget: const Text('test'),
                 message: Message(
@@ -415,6 +415,11 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                onEditMessageTap: (message) => showEditMessageSheet(
+                  context: context,
+                  message: message,
+                  channel: channel,
+                ),
               ),
             ),
           ),

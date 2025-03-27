@@ -2,6 +2,7 @@
 
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
@@ -193,6 +194,110 @@ void main() {
         expect(MessageType.fromJson('regular'), equals(MessageType.regular));
         expect(MessageType.fromJson('custom'), equals('custom'));
       });
+    });
+  });
+
+  group('MessageModerationHelper', () {
+    test('should correctly identify different moderation actions', () {
+      final flaggedMessage = Message(
+        moderation: const Moderation(
+          action: ModerationAction.flag,
+          originalText: 'original text',
+        ),
+      );
+
+      final bouncedMessage = Message(
+        moderation: const Moderation(
+          action: ModerationAction.bounce,
+          originalText: 'original text',
+        ),
+      );
+
+      final removedMessage = Message(
+        moderation: const Moderation(
+          action: ModerationAction.remove,
+          originalText: 'original text',
+        ),
+      );
+
+      final shadowedMessage = Message(
+        moderation: const Moderation(
+          action: ModerationAction.shadow,
+          originalText: 'original text',
+        ),
+      );
+
+      // Flagged message
+      expect(flaggedMessage.isFlagged, isTrue);
+      expect(flaggedMessage.isBounced, isFalse);
+      expect(flaggedMessage.isRemoved, isFalse);
+      expect(flaggedMessage.isShadowed, isFalse);
+
+      // Bounced message
+      expect(bouncedMessage.isFlagged, isFalse);
+      expect(bouncedMessage.isBounced, isTrue);
+      expect(bouncedMessage.isRemoved, isFalse);
+      expect(bouncedMessage.isShadowed, isFalse);
+
+      // Removed message
+      expect(removedMessage.isFlagged, isFalse);
+      expect(removedMessage.isBounced, isFalse);
+      expect(removedMessage.isRemoved, isTrue);
+      expect(removedMessage.isShadowed, isFalse);
+
+      // Shadowed message
+      expect(shadowedMessage.isFlagged, isFalse);
+      expect(shadowedMessage.isBounced, isFalse);
+      expect(shadowedMessage.isRemoved, isFalse);
+      expect(shadowedMessage.isShadowed, isTrue);
+    });
+
+    test('should handle special cases in moderation', () {
+      // Bounced message with error
+      final bouncedWithErrorMessage = Message(
+        type: MessageType.error,
+        moderation: const Moderation(
+          action: ModerationAction.bounce,
+          originalText: 'original text',
+        ),
+      );
+      expect(bouncedWithErrorMessage.isBouncedWithError, isTrue);
+
+      // No moderation
+      final noModerationMessage = Message(moderation: null);
+      expect(noModerationMessage.isFlagged, isFalse);
+      expect(noModerationMessage.isBounced, isFalse);
+      expect(noModerationMessage.isRemoved, isFalse);
+      expect(noModerationMessage.isShadowed, isFalse);
+
+      // Custom moderation action
+      final customModerationMessage = Message(
+        moderation: const Moderation(
+          action: ModerationAction('custom'),
+          originalText: 'original text',
+        ),
+      );
+      expect(customModerationMessage.isFlagged, isFalse);
+      expect(customModerationMessage.isBounced, isFalse);
+      expect(customModerationMessage.isRemoved, isFalse);
+      expect(customModerationMessage.isShadowed, isFalse);
+    });
+
+    test('should handle backward compatibility with moderation_details', () {
+      final json = {
+        'id': 'test-message-id',
+        'text': 'Hello world',
+        'moderation_details': {
+          'action': 'flag',
+          'original_text': 'original message text',
+        },
+      };
+
+      final message = Message.fromJson(json);
+      expect(message.moderation, isNotNull);
+      expect(message.moderation?.action, ModerationAction.flag);
+      expect(message.moderation?.originalText, 'original message text');
+      expect(message.isFlagged, isTrue);
     });
   });
 }

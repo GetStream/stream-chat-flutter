@@ -606,4 +606,18 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Hold for å ta opp, slipp for å sende';
+
+  @override
+  String get sendAnywayLabel => 'Send likevel';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Meldingen ble blokkert av modereringsregler';
+
+  @override
+  String get moderationReviewModalTitle => 'Er du sikker?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Tenk på hvordan kommentaren din kan få andre til å føle seg, og sørg for å følge retningslinjene for fellesskapet vårt.''';
 }

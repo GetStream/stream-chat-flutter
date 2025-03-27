@@ -16,7 +16,7 @@ class StreamSystemMessage extends StatelessWidget {
   final Message message;
 
   /// The action to perform when tapping on the message.
-  final void Function(Message)? onMessageTap;
+  final OnMessageTap? onMessageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +26,20 @@ class StreamSystemMessage extends StatelessWidget {
     final messageText = message.text;
     if (messageText == null) return const Empty();
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onMessageTap == null ? null : () => onMessageTap!(message),
-      child: Text(
-        messageText,
-        textAlign: TextAlign.center,
-        softWrap: true,
-        style: theme.textTheme.captionBold.copyWith(
-          color: theme.colorTheme.textLowEmphasis,
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: switch (onMessageTap) {
+          final onTap? => () => onTap(message),
+          _ => null,
+        },
+        child: Text(
+          messageText,
+          softWrap: true,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.captionBold.copyWith(
+            color: theme.colorTheme.textLowEmphasis,
+          ),
         ),
       ),
     );

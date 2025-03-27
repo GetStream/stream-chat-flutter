@@ -596,4 +596,17 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => '長押しで録音、離すと送信';
+
+  @override
+  String get sendAnywayLabel => 'それでも送信';
+
+  @override
+  String get moderatedMessageBlockedText => 'メッセージはモデレーションポリシーによってブロックされました';
+
+  @override
+  String get moderationReviewModalTitle => 'よろしいですか？';
+
+  @override
+  String get moderationReviewModalDescription =>
+      'あなたのコメントが他の人にどのような影響を与えるかを考え、コミュニティガイドラインに従ってください。';
 }

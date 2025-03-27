@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
+import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -57,6 +58,7 @@ class Message extends Equatable {
     this.state = const MessageState.initial(),
     this.i18n,
     this.restrictedVisibility,
+    this.moderation,
   })  : id = id ?? const Uuid().v4(),
         type = MessageType(type),
         pinExpires = pinExpires?.toUtc(),
@@ -244,6 +246,16 @@ class Message extends Equatable {
   @JsonKey(includeIfNull: false)
   final List<String>? restrictedVisibility;
 
+  static Object? _moderationReadValue(Map<Object?, Object?> json, String key) {
+    // For backward compatibility, we fallback to 'moderation_details' key
+    // if 'moderation' key is not present.
+    return json[key] ?? json['moderation_details'];
+  }
+
+  /// The moderation details for this message.
+  @JsonKey(includeToJson: false, readValue: _moderationReadValue)
+  final Moderation? moderation;
+
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
@@ -287,6 +299,8 @@ class Message extends Equatable {
     'poll',
     'poll_id',
     'restricted_visibility',
+    'moderation',
+    'moderation_details',
   ];
 
   /// Serialize to json.
@@ -332,6 +346,7 @@ class Message extends Equatable {
     MessageState? state,
     Map<String, String>? i18n,
     List<String>? restrictedVisibility,
+    Moderation? moderation,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -406,6 +421,7 @@ class Message extends Equatable {
       state: state ?? this.state,
       i18n: i18n ?? this.i18n,
       restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
+      moderation: moderation ?? this.moderation,
     );
   }
 
@@ -449,6 +465,7 @@ class Message extends Equatable {
       state: other.state,
       i18n: other.i18n,
       restrictedVisibility: other.restrictedVisibility,
+      moderation: other.moderation,
     );
   }
 
@@ -512,6 +529,7 @@ class Message extends Equatable {
         state,
         i18n,
         restrictedVisibility,
+        moderation,
       ];
 }
 
@@ -631,4 +649,25 @@ extension MessageVisibility on Message {
   ///
   /// [userId] The unique identifier of the user to check visibility for.
   bool isNotVisibleTo(String userId) => !isVisibleTo(userId);
+}
+
+/// Extension that adds moderation functionality to Message objects.
+///
+/// This extension provides methods to determine if a message is flagged,
+/// bounced, removed, or shadowed by the moderation system.
+extension MessageModerationHelper on Message {
+  /// True if the message is flagged by the moderation system.
+  bool get isFlagged => moderation?.action == ModerationAction.flag;
+
+  /// True if the message is bounced by the moderation system.
+  bool get isBounced => moderation?.action == ModerationAction.bounce;
+
+  /// True if the message is removed by the moderation system.
+  bool get isRemoved => moderation?.action == ModerationAction.remove;
+
+  /// True if the message is shadowed by the moderation system.
+  bool get isShadowed => moderation?.action == ModerationAction.shadow;
+
+  /// True if the message is bounced with an error by the moderation system.
+  bool get isBouncedWithError => isBounced && isError;
 }

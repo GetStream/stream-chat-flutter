@@ -613,4 +613,18 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Zum Aufnehmen halten, zum Senden loslassen';
+
+  @override
+  String get sendAnywayLabel => 'Trotzdem senden';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Nachricht wurde durch Moderationsrichtlinien blockiert';
+
+  @override
+  String get moderationReviewModalTitle => 'Bist du sicher?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Bedenke, wie dein Kommentar auf andere wirken könnte, und halte dich an unsere Community-Richtlinien.''';
 }

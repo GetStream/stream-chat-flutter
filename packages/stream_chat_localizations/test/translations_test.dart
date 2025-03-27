@@ -291,6 +291,10 @@ void main() {
       expect(localizations.newThreadsLabel(count: 3), isNotNull);
       expect(localizations.slideToCancelLabel, isNotNull);
       expect(localizations.holdToRecordLabel, isNotNull);
+      expect(localizations.sendAnywayLabel, isNotNull);
+      expect(localizations.moderatedMessageBlockedText, isNotNull);
+      expect(localizations.moderationReviewModalTitle, isNotNull);
+      expect(localizations.moderationReviewModalDescription, isNotNull);
     });
   }
 

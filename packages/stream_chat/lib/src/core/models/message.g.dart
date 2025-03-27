@@ -81,6 +81,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      moderation: Message._moderationReadValue(json, 'moderation') == null
+          ? null
+          : Moderation.fromJson(Message._moderationReadValue(json, 'moderation')
+              as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{

@@ -619,4 +619,18 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   @override
   String get holdToRecordLabel =>
       'Mantenha pressionado para gravar, solte para enviar';
+
+  @override
+  String get sendAnywayLabel => 'Enviar mesmo assim';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Mensagem bloqueada pelas políticas de moderação';
+
+  @override
+  String get moderationReviewModalTitle => 'Tem certeza?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Considere como seu comentário pode fazer os outros se sentirem e certifique-se de seguir nossas Diretrizes da Comunidade.''';
 }
