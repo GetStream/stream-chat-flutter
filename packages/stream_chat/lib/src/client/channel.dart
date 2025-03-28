@@ -1680,7 +1680,7 @@ class Channel {
     _checkInitialized();
     final res = await _client.getMessagesById(id!, type, messageIDs);
     final messages = res.messages;
-    state?.updateChannelState(ChannelState(messages: messages));
+    state!.updateChannelState(state!.channelState.copyWith(messages: messages));
     return res;
   }
 
@@ -2115,42 +2115,52 @@ class ChannelClientState {
 
   void _listenMemberAdded() {
     _subscriptions.add(_channel.on(EventType.memberAdded).listen((Event e) {
-      final member = e.member;
+      final member = e.member!;
       final existingMembers = channelState.members ?? [];
-      updateChannelState(channelState.copyWith(
-        members: [
-          ...existingMembers,
-          member!,
-        ],
-      ));
+      final currentUserId = _channel._client.state.currentUser!.id;
+
+      updateChannelState(
+        channelState.copyWith(
+          members: [...existingMembers, member],
+          membership: member.userId == currentUserId ? member : null,
+        ),
+      );
     }));
   }
 
   void _listenMemberRemoved() {
     _subscriptions.add(_channel.on(EventType.memberRemoved).listen((Event e) {
-      final user = e.user;
-      final existingMembers = channelState.members ?? [];
+      final user = e.user!;
       final existingRead = channelState.read ?? [];
-      updateChannelState(channelState.copyWith(
-        members: existingMembers
-            .where((m) => m.userId != user!.id)
-            .toList(growable: false),
-        read: existingRead
-            .where((r) => r.user.id != user!.id)
-            .toList(growable: false),
-      ));
+      final existingMembers = channelState.members ?? [];
+      final currentUserId = _channel._client.state.currentUser!.id;
+
+      updateChannelState(
+        channelState.copyWith(
+          read: [...existingRead.where((r) => r.user.id != user.id)],
+          members: [...existingMembers.where((m) => m.userId != user.id)],
+          membership: user.id == currentUserId ? null : channelState.membership,
+        ),
+      );
     }));
   }
 
   void _listenMemberUpdated() {
     _subscriptions.add(_channel.on(EventType.memberUpdated).listen((Event e) {
-      final member = e.member;
+      final member = e.member!;
       final existingMembers = channelState.members ?? [];
-      updateChannelState(channelState.copyWith(
-        members: existingMembers
-            .map((m) => m.userId == member!.userId ? member : m)
-            .toList(growable: false),
-      ));
+      final currentUserId = _channel._client.state.currentUser!.id;
+
+      updateChannelState(
+        channelState.copyWith(
+          membership: member.userId == currentUserId ? member : null,
+          members: [
+            ...existingMembers.map(
+              (m) => m.userId == member.userId ? member : m,
+            ),
+          ],
+        ),
+      );
     }));
   }
 
@@ -3027,6 +3037,7 @@ class ChannelClientState {
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: newMembers,
+      membership: updatedState.membership,
       read: newReads,
       pinnedMessages: updatedState.pinnedMessages,
     );
@@ -3115,22 +3126,23 @@ class ChannelClientState {
           return members.any((m) => m.userId == user.id);
         }).listen(
           (event) {
-            final newMembers = List<Member>.from(members);
-            final oldMemberIndex =
-                newMembers.indexWhere((m) => m.userId == event.user!.id);
-            if (oldMemberIndex > -1) {
-              final oldMember = newMembers.removeAt(oldMemberIndex);
-              updateChannelState(
-                ChannelState(
-                  members: [
-                    ...newMembers,
-                    oldMember.copyWith(
-                      user: event.user,
-                    ),
-                  ],
-                ),
-              );
-            }
+            final user = event.user!;
+            final existingMembers = [...?channelState.members];
+            final currentUserId = _channel.client.state.currentUser?.id;
+
+            updateChannelState(
+              channelState.copyWith(
+                members: [
+                  ...existingMembers.map(
+                    (m) => m.userId == user.id ? m.copyWith(user: user) : m,
+                  ),
+                ],
+                membership: switch (user.id == currentUserId) {
+                  true => channelState.membership?.copyWith(user: user),
+                  false => channelState.membership,
+                },
+              ),
+            );
           },
         ),
       );
