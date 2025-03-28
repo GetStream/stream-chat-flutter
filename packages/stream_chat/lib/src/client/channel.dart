@@ -2142,8 +2142,40 @@ class ChannelClientState {
   }
 
   void _listenMemberUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.memberUpdated).listen(
+    _subscriptions
+      // Listen to events containing member users
+      ..add(_channel.on().listen(
+        (event) {
+          final user = event.user;
+          if (user == null) return;
+
+          final existingMembers = [...?channelState.members];
+          final existingMembership = channelState.membership;
+
+          // Return if the user is not a existing member of the channel.
+          if (!existingMembers.any((m) => m.userId == user.id)) {
+            return;
+          }
+
+          Member? maybeUpdateMemberUser(Member? existingMember) {
+            if (existingMember == null) return null;
+            if (existingMember.userId == user.id) {
+              return existingMember.copyWith(user: user);
+            }
+            return existingMember;
+          }
+
+          updateChannelState(
+            channelState.copyWith(
+              membership: maybeUpdateMemberUser(existingMembership),
+              members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
+            ),
+          );
+        },
+      ))
+
+      // Listen to member updated events.
+      ..add(_channel.on(EventType.memberUpdated).listen(
         (Event e) {
           final member = e.member!;
           final existingMembers = channelState.members ?? [];
@@ -2162,38 +2194,7 @@ class ChannelClientState {
             ),
           );
         },
-      ),
-    );
-
-    _channel.on().listen(
-      (event) {
-        final user = event.user;
-        if (user == null) return;
-
-        final existingMembers = [...?channelState.members];
-        final existingMembership = channelState.membership;
-
-        // Return if the user is not a existing member of the channel.
-        if (!existingMembers.any((m) => m.userId == user.id)) {
-          return;
-        }
-
-        Member? maybeUpdateMemberUser(Member? existingMember) {
-          if (existingMember == null) return null;
-          if (existingMember.userId == user.id) {
-            return existingMember.copyWith(user: user);
-          }
-          return existingMember;
-        }
-
-        updateChannelState(
-          channelState.copyWith(
-            membership: maybeUpdateMemberUser(existingMembership),
-            members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
-          ),
-        );
-      },
-    );
+      ));
   }
 
   void _listenChannelUpdated() {
