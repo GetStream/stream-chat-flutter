@@ -189,9 +189,7 @@ mixin class StreamChannelListEventHandler {
       final existingMembers = [...channel.state!.members];
 
       // Return if the user is not a existing member of the channel.
-      if (!existingMembers.any((m) => m.userId == user.id)) {
-        return channel;
-      }
+      if (!existingMembers.any((m) => m.userId == user.id)) return channel;
 
       Member? maybeUpdateMemberUser(Member? existingMember) {
         if (existingMember == null) return null;
