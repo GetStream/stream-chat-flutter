@@ -52,7 +52,7 @@ dependencies:
   photo_manager: ^3.2.0
   photo_view: ^0.15.0
   rate_limiter: ^1.0.0
-  record: ^5.2.0
+  record: ">=5.2.0 <7.0.0"
   rxdart: ^0.28.0
   share_plus: ^10.0.2
   shimmer: ^3.0.0
