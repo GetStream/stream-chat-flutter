@@ -1,4 +1,4 @@
-import 'package:stream_chat/stream_chat.dart' show ChannelState, Event;
+import 'package:stream_chat/stream_chat.dart' show Event, Member;
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
@@ -185,16 +185,28 @@ mixin class StreamChannelListEventHandler {
     final channels = [...controller.currentItems];
 
     final updatedChannels = channels.map((channel) {
-      final members = [...channel.state!.members];
-      final memberIndex = members.indexWhere(
-        (it) => user.id == (it.userId ?? it.user?.id),
+      final existingMembership = channel.membership;
+      final existingMembers = [...channel.state!.members];
+
+      // Return if the user is not a existing member of the channel.
+      if (!existingMembers.any((m) => m.userId == user.id)) {
+        return channel;
+      }
+
+      Member? maybeUpdateMemberUser(Member? existingMember) {
+        if (existingMember == null) return null;
+        if (existingMember.userId == user.id) {
+          return existingMember.copyWith(user: user);
+        }
+        return existingMember;
+      }
+
+      channel.state!.updateChannelState(
+        channel.state!.channelState.copyWith(
+          membership: maybeUpdateMemberUser(existingMembership),
+          members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
+        ),
       );
-
-      if (memberIndex < 0) return channel;
-
-      members[memberIndex] = members[memberIndex].copyWith(user: user);
-      final updatedState = ChannelState(members: [...members]);
-      channel.state!.updateChannelState(updatedState);
 
       return channel;
     });

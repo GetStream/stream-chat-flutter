@@ -7,12 +7,6 @@ import 'package:stream_chat/src/core/models/user.dart';
 
 part 'channel_state.g.dart';
 
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
-
 /// The class that contains the information about a channel
 @JsonSerializable()
 class ChannelState {
@@ -68,17 +62,8 @@ class ChannelState {
     int? watcherCount,
     List<User>? watchers,
     List<Read>? read,
-    Object? membership = _nullConst,
+    Member? membership,
   }) {
-    assert(() {
-      if (membership is! Member &&
-          membership != null &&
-          membership is! _NullConst) {
-        throw ArgumentError('`membership` can only be set as Member or null');
-      }
-      return true;
-    }(), 'Validate type for membership');
-
     return ChannelState(
       channel: channel ?? this.channel,
       messages: messages ?? this.messages,
@@ -87,10 +72,7 @@ class ChannelState {
       watcherCount: watcherCount ?? this.watcherCount,
       watchers: watchers ?? this.watchers,
       read: read ?? this.read,
-      membership: switch (membership) {
-        _nullConst => this.membership,
-        _ => membership as Member?,
-      },
+      membership: membership ?? this.membership,
     );
   }
 }

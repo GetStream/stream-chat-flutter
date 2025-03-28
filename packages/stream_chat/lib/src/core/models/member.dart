@@ -16,7 +16,7 @@ class Member extends Equatable {
     this.inviteRejectedAt,
     this.invited = false,
     this.channelRole,
-    this.userId,
+    String? userId,
     this.isModerator = false,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -24,18 +24,14 @@ class Member extends Equatable {
     this.banExpires,
     this.shadowBanned = false,
     this.extraData = const {},
-  })  : createdAt = createdAt ?? DateTime.now(),
+  })  : userId = userId ?? user?.id,
+        createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory Member.fromJson(Map<String, dynamic> json) {
-    final member = _$MemberFromJson(
-      Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
-    );
-    return member.copyWith(
-      userId: member.user?.id,
-    );
-  }
+  factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
+        Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
+      );
 
   /// Known top level fields.
   ///
