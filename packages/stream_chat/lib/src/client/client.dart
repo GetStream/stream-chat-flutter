@@ -554,7 +554,7 @@ class StreamChatClient {
     String? eventType3,
     String? eventType4,
   ]) {
-    if (eventType == null) return eventStream;
+    if (eventType == null || eventType == EventType.any) return eventStream;
     return eventStream.where((event) =>
         event.type == eventType ||
         event.type == eventType2 ||

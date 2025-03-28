@@ -93,7 +93,7 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
 class FakeClientState extends Fake implements ClientState {
   @override
-  OwnUser? get currentUser => OwnUser(id: 'test-user-id');
+  OwnUser? get currentUser => OwnUser(id: 'test-user-id', name: 'Test User');
 
   @override
   int totalUnreadCount = 0;

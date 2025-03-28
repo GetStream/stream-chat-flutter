@@ -18,19 +18,6 @@ void main() {
       },
     );
     when(() => channel.client.retryPolicy).thenReturn(retryPolicy);
-
-    when(() => channel.client.on(EventType.connectionRecovered)).thenAnswer(
-      (_) => Stream.value(Event(
-        type: EventType.connectionRecovered,
-        online: false,
-      )),
-    );
-
-    when(() => channel.on(any(), any(), any(), any())).thenAnswer(
-      (_) => Stream.value(
-        Event(type: EventType.any),
-      ),
-    );
   });
 
   setUp(() {

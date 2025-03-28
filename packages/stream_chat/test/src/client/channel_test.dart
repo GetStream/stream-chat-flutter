@@ -1,7 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:mocktail/mocktail.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
@@ -145,10 +144,6 @@ void main() {
       );
       when(() => client.retryPolicy).thenReturn(retryPolicy);
 
-      final event = Event(type: 'event.local');
-      when(() => client.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.value(event));
-
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
@@ -202,10 +197,6 @@ void main() {
         delayFactor: Duration.zero,
       );
       when(() => client.retryPolicy).thenReturn(retryPolicy);
-
-      final event = Event(type: 'event.local');
-      when(() => client.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.value(event));
 
       // fake clientState
       final clientState = FakeClientState();
@@ -2762,12 +2753,9 @@ void main() {
       const eventType = 'test.event';
       final event = Event(type: eventType, cid: channelCid);
 
-      when(() => client.on(eventType, any(), any(), any()))
-          .thenAnswer((_) => Stream.value(event));
+      Future.microtask(() => client.addEvent(event));
 
-      expectLater(channel.on(eventType), emitsInOrder([event]));
-
-      verify(() => client.on(eventType, any(), any(), any())).called(1);
+      return expectLater(channel.on(eventType), emitsInOrder([event]));
     });
 
     group(
@@ -2938,22 +2926,11 @@ void main() {
       '${EventType.messageNew} or ${EventType.notificationMessageNew}',
       () {
         final initialLastMessageAt = DateTime.now();
-        late PublishSubject<Event> eventController;
         const channelId = 'test-channel-id';
         const channelType = 'test-channel-type';
         late Channel channel;
 
         setUp(() {
-          final localEvent = Event(type: 'event.local');
-          when(() => client.on(any(), any(), any(), any()))
-              .thenAnswer((_) => Stream.value(localEvent));
-
-          eventController = PublishSubject<Event>();
-          when(() => client.on(
-                EventType.messageNew,
-                EventType.notificationMessageNew,
-              )).thenAnswer((_) => eventController.stream);
-
           final channelState = _generateChannelState(
             channelId,
             channelType,
@@ -2964,10 +2941,7 @@ void main() {
           channel = Channel.fromState(client, channelState);
         });
 
-        tearDown(() {
-          eventController.close();
-          channel.dispose();
-        });
+        tearDown(() => channel.dispose());
 
         Event createNewMessageEvent(Message message) {
           return Event(
@@ -2989,7 +2963,7 @@ void main() {
             );
 
             final newMessageEvent = createNewMessageEvent(message);
-            eventController.add(newMessageEvent);
+            client.addEvent(newMessageEvent);
 
             // Wait for the event to get processed
             await Future.delayed(Duration.zero);
@@ -3013,7 +2987,7 @@ void main() {
             );
 
             final newMessageEvent = createNewMessageEvent(message);
-            eventController.add(newMessageEvent);
+            client.addEvent(newMessageEvent);
 
             // Wait for the event to get processed
             await Future.delayed(Duration.zero);
@@ -3036,7 +3010,7 @@ void main() {
             );
 
             final newMessageEvent = createNewMessageEvent(message);
-            eventController.add(newMessageEvent);
+            client.addEvent(newMessageEvent);
 
             // Wait for the event to get processed
             await Future.delayed(Duration.zero);
@@ -3059,7 +3033,7 @@ void main() {
             );
 
             final newMessageEvent = createNewMessageEvent(message);
-            eventController.add(newMessageEvent);
+            client.addEvent(newMessageEvent);
 
             // Wait for the event to get processed
             await Future.delayed(Duration.zero);
@@ -3082,7 +3056,7 @@ void main() {
             );
 
             final newMessageEvent = createNewMessageEvent(message);
-            eventController.add(newMessageEvent);
+            client.addEvent(newMessageEvent);
 
             // Wait for the event to get processed
             await Future.delayed(Duration.zero);
@@ -3106,7 +3080,7 @@ void main() {
             );
 
             final newMessageEvent = createNewMessageEvent(message);
-            eventController.add(newMessageEvent);
+            client.addEvent(newMessageEvent);
 
             // Wait for the event to get processed
             await Future.delayed(Duration.zero);
@@ -3133,7 +3107,7 @@ void main() {
             );
 
             final newMessageEvent = createNewMessageEvent(message);
-            eventController.add(newMessageEvent);
+            client.addEvent(newMessageEvent);
 
             // Wait for the event to get processed
             await Future.delayed(Duration.zero);
@@ -3144,6 +3118,110 @@ void main() {
         );
       },
     );
+
+    group('Member Events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test(
+        'should update membership when member is updated and is current user',
+        () async {
+          final currentUser = client.state.currentUser;
+          final currentMember = Member(user: currentUser);
+
+          // Setup initial membership
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              members: [currentMember],
+              membership: currentMember,
+            ),
+          );
+
+          // Verify initial state
+          expect(channel.membership, isNotNull);
+          expect(channel.membership?.channelRole, isNull);
+          expect(channel.membership?.isModerator, false);
+
+          // Create updated member with same userId but updated properties
+          final updatedMember = currentMember.copyWith(
+            channelRole: 'moderator',
+            isModerator: true,
+          );
+
+          // Create member updated event
+          final memberUpdatedEvent = Event(
+            cid: channel.cid,
+            type: EventType.memberUpdated,
+            user: currentUser,
+            member: updatedMember,
+          );
+
+          // Dispatch event
+          client.addEvent(memberUpdatedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify membership is updated with new properties
+          expect(channel.membership, isNotNull);
+          expect(channel.membership?.userId, equals(currentUser?.id));
+          expect(channel.membership?.channelRole, equals('moderator'));
+          expect(channel.membership?.isModerator, isTrue);
+        },
+      );
+
+      test(
+        'should update membership user when any event containing user is updated',
+        () async {
+          final currentUser = client.state.currentUser;
+          final currentMember = Member(user: currentUser);
+
+          // Setup initial membership
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              members: [currentMember],
+              membership: currentMember,
+            ),
+          );
+
+          // Verify initial state
+          expect(channel.membership, isNotNull);
+          expect(channel.membership?.user?.id, equals(currentUser?.id));
+          expect(channel.membership?.user?.role, equals(currentUser?.role));
+
+          // Create updated user with same userId but updated properties
+          final updatedUser = currentUser?.copyWith(role: 'moderator');
+
+          // Create any event with same updated user as membership.
+          final anyEvent = Event(
+            cid: channel.cid,
+            type: EventType.any,
+            user: updatedUser,
+          );
+
+          // Dispatch event
+          client.addEvent(anyEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify membership is updated with new properties
+          expect(channel.membership, isNotNull);
+          expect(channel.membership?.user?.id, equals(updatedUser?.id));
+          expect(channel.membership?.user?.role, equals(updatedUser?.role));
+        },
+      );
+    });
   });
 
   group('ChannelCapabilityCheck', () {
@@ -3163,10 +3241,6 @@ void main() {
         delayFactor: Duration.zero,
       );
       when(() => client.retryPolicy).thenReturn(retryPolicy);
-
-      final event = Event(type: 'event.local');
-      when(() => client.on(any(), any(), any(), any()))
-          .thenAnswer((_) => Stream.value(event));
 
       // fake clientState
       final clientState = FakeClientState();
