@@ -2153,9 +2153,7 @@ class ChannelClientState {
           final existingMembership = channelState.membership;
 
           // Return if the user is not a existing member of the channel.
-          if (!existingMembers.any((m) => m.userId == user.id)) {
-            return;
-          }
+          if (!existingMembers.any((m) => m.userId == user.id)) return;
 
           Member? maybeUpdateMemberUser(Member? existingMember) {
             if (existingMember == null) return null;

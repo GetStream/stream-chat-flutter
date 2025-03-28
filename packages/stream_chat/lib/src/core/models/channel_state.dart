@@ -63,16 +63,15 @@ class ChannelState {
     List<User>? watchers,
     List<Read>? read,
     Member? membership,
-  }) {
-    return ChannelState(
-      channel: channel ?? this.channel,
-      messages: messages ?? this.messages,
-      members: members ?? this.members,
-      pinnedMessages: pinnedMessages ?? this.pinnedMessages,
-      watcherCount: watcherCount ?? this.watcherCount,
-      watchers: watchers ?? this.watchers,
-      read: read ?? this.read,
-      membership: membership ?? this.membership,
-    );
-  }
+  }) =>
+      ChannelState(
+        channel: channel ?? this.channel,
+        messages: messages ?? this.messages,
+        members: members ?? this.members,
+        pinnedMessages: pinnedMessages ?? this.pinnedMessages,
+        watcherCount: watcherCount ?? this.watcherCount,
+        watchers: watchers ?? this.watchers,
+        read: read ?? this.read,
+        membership: membership ?? this.membership,
+      );
 }
