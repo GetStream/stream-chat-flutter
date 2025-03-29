@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -167,6 +169,10 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUserStream).thenAnswer(
+        (_) => Stream.value(OwnUser(id: 'user-id')),
+      );
+
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(channel.getRemainingCooldown).thenReturn(0);
@@ -200,7 +206,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Add some text to the input field
-        final textField = find.byType(StreamMessageInput);
+        final textField = find.byType(StreamMessageTextField);
         await tester.enterText(textField, 'Hello world');
         await tester.pump();
 
@@ -241,7 +247,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Add some text to the input field
-        final textField = find.byType(StreamMessageInput);
+        final textField = find.byType(StreamMessageTextField);
         await tester.enterText(textField, 'Hello world');
         await tester.pump();
 
@@ -256,6 +262,102 @@ void main() {
 
         // Verify that the message was not sent.
         verifyNever(() => channel.sendMessage(any()));
+      },
+    );
+
+    testWidgets(
+      'should clear quoted message when Esc key is pressed on desktop',
+      (tester) async {
+        final quotedMessage = Message(text: 'I am a quoted message');
+        final initialMessage = Message(quotedMessage: quotedMessage);
+
+        final messageInputController = StreamMessageInputController(
+          message: initialMessage,
+        );
+
+        var onQuotedMessageClearedCalled = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              child: StreamChannel(
+                channel: channel,
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageInput(
+                    messageInputController: messageInputController,
+                    onQuotedMessageCleared: () {
+                      onQuotedMessageClearedCalled = true;
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Tap the message input to focus it
+        final textField = find.byType(StreamMessageTextField);
+        await tester.tap(textField);
+        await tester.pump();
+
+        // Simulate pressing Escape key
+        await simulateKeyDownEvent(LogicalKeyboardKey.escape, tester: tester);
+
+        await tester.pumpAndSettle();
+
+        // Verify that the onQuotedMessageCleared callback was called
+        expect(onQuotedMessageClearedCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'should not clear quoted message contains text and Esc key is pressed on desktop',
+      (tester) async {
+        final quotedMessage = Message(text: 'I am a quoted message');
+        final initialMessage = Message(quotedMessage: quotedMessage);
+
+        final messageInputController = StreamMessageInputController(
+          message: initialMessage,
+        );
+
+        var onQuotedMessageClearedCalled = false;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              child: StreamChannel(
+                channel: channel,
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageInput(
+                    messageInputController: messageInputController,
+                    onQuotedMessageCleared: () {
+                      onQuotedMessageClearedCalled = true;
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Add some text to the input field
+        final textField = find.byType(StreamMessageTextField);
+        await tester.enterText(textField, 'Hello world');
+        await tester.pump();
+
+        // Simulate pressing Enter key
+        await simulateKeyDownEvent(LogicalKeyboardKey.escape, tester: tester);
+
+        await tester.pumpAndSettle();
+
+        // Verify that the onQuotedMessageCleared callback was not called
+        expect(onQuotedMessageClearedCalled, isFalse);
       },
     );
   });
