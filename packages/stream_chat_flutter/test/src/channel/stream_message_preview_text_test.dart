@@ -25,6 +25,7 @@ void main() {
     Message message, {
     String? language,
     TextStyle? textStyle,
+    ChannelModel? channel,
   }) async {
     final client = MockClient();
     final clientState = MockClientState();
@@ -44,6 +45,7 @@ void main() {
                 message: message,
                 language: language,
                 textStyle: textStyle,
+                channel: channel,
               ),
             ),
           ),
@@ -174,6 +176,22 @@ void main() {
         expect(find.text('📹 Video'), findsOneWidget);
       });
 
+      testWidgets('renders video attachment with text', (tester) async {
+        final message = Message(
+          text: 'Check this out',
+          user: User(id: 'other-user-id', name: 'Other User'),
+          attachments: [
+            Attachment(
+              type: AttachmentType.video,
+            ),
+          ],
+        );
+
+        await pumpMessagePreview(tester, message);
+
+        expect(find.text('📹 Check this out'), findsOneWidget);
+      });
+
       testWidgets('renders file attachment', (tester) async {
         final message = Message(
           text: '',
@@ -205,6 +223,38 @@ void main() {
         await pumpMessagePreview(tester, message);
 
         expect(find.text('🎧 Audio'), findsOneWidget);
+      });
+
+      testWidgets('renders audio attachment with text', (tester) async {
+        final message = Message(
+          text: 'Check this out',
+          user: User(id: 'other-user-id', name: 'Other User'),
+          attachments: [
+            Attachment(
+              type: AttachmentType.audio,
+            ),
+          ],
+        );
+
+        await pumpMessagePreview(tester, message);
+
+        expect(find.text('🎧 Check this out'), findsOneWidget);
+      });
+
+      testWidgets('renders giphy attachment with text', (tester) async {
+        final message = Message(
+          text: 'Check this out',
+          user: User(id: 'other-user-id', name: 'Other User'),
+          attachments: [
+            Attachment(
+              type: AttachmentType.giphy,
+            ),
+          ],
+        );
+
+        await pumpMessagePreview(tester, message);
+
+        expect(find.text('/giphy Check this out'), findsOneWidget);
       });
 
       testWidgets('renders voice recording attachment', (tester) async {
@@ -382,6 +432,111 @@ void main() {
       await pumpMessagePreview(tester, message, language: 'fr');
 
       expect(find.text('Bonjour, monde!'), findsOneWidget);
+    });
+
+    group('Channel-specific behaviors', () {
+      testWidgets(
+        'prepends "You:" for current user\'s messages in group channels',
+        (tester) async {
+          final channel = ChannelModel(
+            id: 'test-channel',
+            type: 'messaging',
+            memberCount: 3,
+          );
+
+          final message = Message(
+            text: 'Hello everyone',
+            user: User(id: 'test-user-id', name: 'Test User'), // Current user
+          );
+
+          await pumpMessagePreview(tester, message, channel: channel);
+
+          expect(find.text('You: Hello everyone'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'prepends author name for other messages in group channels',
+        (tester) async {
+          final channel = ChannelModel(
+            id: 'test-channel',
+            type: 'messaging',
+            memberCount: 3,
+          );
+
+          final message = Message(
+            text: 'Hello everyone',
+            user: User(id: 'other-user-id', name: 'Jane Doe'),
+          );
+
+          await pumpMessagePreview(tester, message, channel: channel);
+
+          expect(find.text('Jane Doe: Hello everyone'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'does not prepend author name in 1:1 channels',
+        (tester) async {
+          final channel = ChannelModel(
+            id: 'test-channel',
+            type: 'messaging',
+            memberCount: 2,
+          );
+
+          final message = Message(
+            text: 'Hello there',
+            user: User(id: 'other-user-id', name: 'Jane Doe'),
+          );
+
+          await pumpMessagePreview(tester, message, channel: channel);
+
+          expect(find.text('Hello there'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'falls back to user language for translation when available',
+        (tester) async {
+          final client = MockClient();
+          final clientState = MockClientState();
+          final currentUser = OwnUser(
+            id: 'test-user-id',
+            name: 'Test User',
+            language: 'es', // Spanish language
+          );
+
+          when(() => client.state).thenReturn(clientState);
+          when(() => clientState.currentUser).thenReturn(currentUser);
+
+          final message = Message(
+            text: 'Hello, world!',
+            user: User(id: 'other-user-id', name: 'Other User'),
+            i18n: const {
+              'es_text': 'Hola, mundo!',
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: StreamChat(
+                  client: client,
+                  streamChatThemeData: StreamChatThemeData.light(),
+                  child: Center(
+                    child: StreamMessagePreviewText(
+                      message: message,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pump();
+
+          expect(find.text('Hola, mundo!'), findsOneWidget);
+        },
+      );
     });
   });
 }
