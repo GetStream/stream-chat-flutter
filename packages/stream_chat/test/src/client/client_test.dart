@@ -2294,6 +2294,173 @@ void main() {
       verifyNoMoreInteractions(api.user);
     });
 
+    group('Block user state management', () {
+      test('blockUser should update blockedUserIds on client state', () async {
+        final testUser = OwnUser(id: 'test-user');
+        const userId = 'blocked-user-id';
+
+        // Verify initial state
+        expect(client.state.currentUser?.blockedUserIds, isEmpty);
+
+        when(() => api.user.blockUser(userId)).thenAnswer(
+          (_) async => UserBlockResponse()
+            ..blockedUserId = userId
+            ..blockedByUserId = testUser.id
+            ..createdAt = DateTime.now(),
+        );
+
+        await client.blockUser(userId);
+
+        // Verify - should now include the blocked user ID
+        expect(client.state.currentUser?.blockedUserIds, contains(userId));
+        verify(() => api.user.blockUser(userId)).called(1);
+        verifyNoMoreInteractions(api.user);
+      });
+
+      test(
+        'blockUser should not duplicate existing blocked user IDs',
+        () async {
+          const userId = 'blocked-user-id';
+          client.state.currentUser = client.state.currentUser?.copyWith(
+            blockedUserIds: const [userId],
+          );
+
+          // Verify the user is already in the blocked list
+          expect(client.state.currentUser?.blockedUserIds, contains(userId));
+
+          when(() => api.user.blockUser(userId)).thenAnswer(
+            (_) async => UserBlockResponse()
+              ..blockedUserId = userId
+              ..blockedByUserId = client.state.currentUser!.id
+              ..createdAt = DateTime.now(),
+          );
+
+          await client.blockUser(userId);
+
+          // Verify - should still have only one entry
+          expect(client.state.currentUser?.blockedUserIds, contains(userId));
+          expect(client.state.currentUser?.blockedUserIds.length, 1);
+          verify(() => api.user.blockUser(userId)).called(1);
+          verifyNoMoreInteractions(api.user);
+        },
+      );
+
+      test('unblockUser should remove user from blockedUserIds', () async {
+        const blockedUserId = 'blocked-user-id';
+        const otherBlockedId = 'other-blocked-id';
+        client.state.currentUser = client.state.currentUser?.copyWith(
+          blockedUserIds: const [blockedUserId, otherBlockedId],
+        );
+
+        // Verify initial state includes both blocked IDs
+        expect(
+          client.state.currentUser?.blockedUserIds,
+          containsAll([blockedUserId, otherBlockedId]),
+        );
+
+        when(() => api.user.unblockUser(blockedUserId)).thenAnswer(
+          (_) async => EmptyResponse(),
+        );
+
+        await client.unblockUser(blockedUserId);
+
+        // Verify - blockedUserId should be removed
+        expect(
+          client.state.currentUser?.blockedUserIds,
+          contains(otherBlockedId),
+        );
+
+        expect(
+          client.state.currentUser?.blockedUserIds,
+          isNot(contains(blockedUserId)),
+        );
+
+        verify(() => api.user.unblockUser(blockedUserId)).called(1);
+        verifyNoMoreInteractions(api.user);
+      });
+
+      test(
+        'unblockUser should be resilient if user ID not in blocked list',
+        () async {
+          const nonBlockedUserId = 'not-in-list';
+          const otherBlockedId = 'other-blocked-id';
+          client.state.currentUser = client.state.currentUser?.copyWith(
+            blockedUserIds: const [otherBlockedId],
+          );
+
+          // Verify initial state
+          expect(
+            client.state.currentUser?.blockedUserIds,
+            contains(otherBlockedId),
+          );
+
+          expect(
+            client.state.currentUser?.blockedUserIds,
+            isNot(contains(nonBlockedUserId)),
+          );
+
+          when(() => api.user.unblockUser(nonBlockedUserId)).thenAnswer(
+            (_) async => EmptyResponse(),
+          );
+
+          await client.unblockUser(nonBlockedUserId);
+
+          // Verify - should remain unchanged
+          expect(client.state.currentUser?.blockedUserIds,
+              contains(otherBlockedId));
+          expect(client.state.currentUser?.blockedUserIds,
+              isNot(contains(nonBlockedUserId)));
+          verify(() => api.user.unblockUser(nonBlockedUserId)).called(1);
+          verifyNoMoreInteractions(api.user);
+        },
+      );
+
+      test(
+        'queryBlockedUsers should update client state with blockedUserIds',
+        () async {
+          const blockedId1 = 'blocked-1';
+          const blockedId2 = 'blocked-2';
+
+          // Verify initial state
+          expect(client.state.currentUser?.blockedUserIds, isEmpty);
+
+          // Create mock users
+          final blockedUser1 = User(id: 'blocked-user-1');
+          final blockedUser2 = User(id: 'blocked-user-2');
+
+          // Mock the queryBlockedUsers API call
+          when(() => api.user.queryBlockedUsers()).thenAnswer(
+            (_) async => BlockedUsersResponse()
+              ..blocks = [
+                UserBlock(
+                  user: user,
+                  userId: user.id,
+                  blockedUser: blockedUser1,
+                  blockedUserId: blockedId1,
+                ),
+                UserBlock(
+                  user: user,
+                  userId: user.id,
+                  blockedUser: blockedUser2,
+                  blockedUserId: blockedId2,
+                ),
+              ],
+          );
+
+          await client.queryBlockedUsers();
+
+          // Verify - should now include both blocked IDs
+          expect(
+            client.state.currentUser?.blockedUserIds,
+            containsAll([blockedId1, blockedId2]),
+          );
+
+          verify(() => api.user.queryBlockedUsers()).called(1);
+          verifyNoMoreInteractions(api.user);
+        },
+      );
+    });
+
     test('`.shadowBan`', () async {
       const userId = 'test-user-id';
 
