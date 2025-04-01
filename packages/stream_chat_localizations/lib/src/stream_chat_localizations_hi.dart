@@ -81,7 +81,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get messageDeletedText => 'यह संदेश हटा दिया गया है।';
 
   @override
-  String get messageDeletedLabel => 'संदेश हटाये';
+  String get messageDeletedLabel => 'संदेश हटा दिया गया';
+
+  @override
+  String get systemMessageLabel => 'सिस्टम संदेश';
 
   @override
   String get editedMessageLabel => 'संपादित';
@@ -629,5 +632,32 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get moderationReviewModalDescription =>
-      '''विचार करें कि आपकी टिप्पणी से दूसरों को कैसा महसूस हो सकता है और सुनिश्चित करें कि आप हमारे सामुदायिक दिशानिर्देशों का पालन करें।''';
+      '''इस बात पर विचार करें कि आपकी टिप्पणी से दूसरों को कैसा महसूस हो सकता है और सुनिश्चित करें कि आप हमारे समुदाय दिशानिर्देशों का पालन करें।''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'ध्वनि रिकॉर्डिंग';
+
+  @override
+  String get audioAttachmentText => 'ऑडियो';
+
+  @override
+  String get imageAttachmentText => 'फोटो';
+
+  @override
+  String get videoAttachmentText => 'वीडियो';
+
+  @override
+  String get pollYouVotedText => 'आपने वोट दिया';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username ने वोट दिया';
+
+  @override
+  String get pollYouCreatedText => 'आपने बनाया';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username ने बनाया';
 }

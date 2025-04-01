@@ -1,6 +1,9 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../mocks.dart';
 
 void main() {
   final user1 = User(id: 'uid1', name: 'User 1');
@@ -75,18 +78,27 @@ Widget _wrapWithMaterialApp(
   Widget widget, {
   Brightness? brightness,
 }) {
+  final client = MockClient();
+  final clientState = MockClientState();
+  final currentUser = OwnUser(id: 'current-user-id', name: 'Current User');
+
+  when(() => client.state).thenReturn(clientState);
+  when(() => clientState.currentUser).thenReturn(currentUser);
+
   return MaterialApp(
-    home: StreamChatConfiguration(
-      data: StreamChatConfigurationData(),
-      child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
-        child: Builder(builder: (context) {
+    home: StreamChat(
+      client: client,
+      streamChatConfigData: StreamChatConfigurationData(),
+      connectivityStream: Stream.value([ConnectivityResult.wifi]),
+      streamChatThemeData: StreamChatThemeData(brightness: brightness),
+      child: Builder(
+        builder: (context) {
           final theme = StreamChatTheme.of(context);
           return Scaffold(
             backgroundColor: theme.colorTheme.appBg,
             body: Center(child: widget),
           );
-        }),
+        },
       ),
     ),
   );
