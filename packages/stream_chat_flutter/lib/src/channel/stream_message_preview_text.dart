@@ -62,18 +62,19 @@ class StreamMessagePreviewText extends StatelessWidget {
     );
   }
 
-  /// Returns the preview text based on the message context
   String _getPreviewText(
     BuildContext context,
     Message message,
     User currentUser,
   ) {
+    final translations = context.translations;
+
     if (message.isDeleted) {
-      return context.translations.messageDeletedLabel;
+      return translations.messageDeletedLabel;
     }
 
     if (message.isSystem) {
-      return message.text ?? 'Empty System Message';
+      return message.text ?? translations.systemMessageLabel;
     }
 
     if (message.poll case final poll?) {
@@ -81,7 +82,7 @@ class StreamMessagePreviewText extends StatelessWidget {
     }
 
     final previewText = _previewMessageContextText(context, message);
-    if (previewText == null) return 'No messages';
+    if (previewText == null) return translations.emptyMessagePreviewText;
 
     // TODO: Handle Author name, Requires channel member count (breaking)
 
@@ -93,23 +94,29 @@ class StreamMessagePreviewText extends StatelessWidget {
     Poll poll,
     User currentUser,
   ) {
+    final translations = context.translations;
+
     // If the poll already contains some votes, we will preview the latest voter
     // and the poll name
     if (poll.latestVotes.firstOrNull?.user case final latestVoter?) {
       if (latestVoter.id == currentUser.id) {
-        return '📊 You voted: "${poll.name}"';
+        final youVoted = translations.pollYouVotedText;
+        return '📊 $youVoted: "${poll.name}"';
       }
 
-      return '📊 ${latestVoter.name} voted: "${poll.name}"';
+      final someoneVoted = translations.pollSomeoneVotedText(latestVoter.name);
+      return '📊 $someoneVoted: "${poll.name}"';
     }
 
     // Otherwise, we will show the creator of the poll and the poll name
     if (poll.createdBy case final creator?) {
       if (creator.id == currentUser.id) {
-        return '📊 You created: "${poll.name}"';
+        final youCreated = translations.pollYouCreatedText;
+        return '📊 $youCreated: "${poll.name}"';
       }
 
-      return '📊 ${creator.name} created: "${poll.name}"';
+      final someoneCreated = translations.pollSomeoneCreatedText(creator.name);
+      return '📊 $someoneCreated: "${poll.name}"';
     }
 
     // Otherwise, we will show the poll name if it exists.
@@ -121,11 +128,12 @@ class StreamMessagePreviewText extends StatelessWidget {
     return '📊';
   }
 
-  /// Gets the message content text, considering translations, attachments, and poll
   String? _previewMessageContextText(
     BuildContext context,
     Message message,
   ) {
+    final translations = context.translations;
+
     final messageText = switch (message.text) {
       final messageText? when messageText.isNotEmpty => messageText,
       _ => null,
@@ -145,12 +153,12 @@ class StreamMessagePreviewText extends StatelessWidget {
       };
 
       final attachmentTitle = switch (attachment.type) {
-        AttachmentType.audio => messageText ?? 'Audio',
+        AttachmentType.audio => messageText ?? translations.audioAttachmentText,
         AttachmentType.file => attachment.title ?? messageText,
-        AttachmentType.image => messageText ?? 'Image',
-        AttachmentType.video => messageText ?? 'Video',
+        AttachmentType.image => messageText ?? translations.imageAttachmentText,
+        AttachmentType.video => messageText ?? translations.videoAttachmentText,
         AttachmentType.giphy => messageText,
-        AttachmentType.voiceRecording => messageText ?? 'Voice recording',
+        AttachmentType.voiceRecording => translations.voiceRecordingText,
         _ => null,
       };
 

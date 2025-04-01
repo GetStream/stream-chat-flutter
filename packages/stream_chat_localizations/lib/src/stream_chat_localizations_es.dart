@@ -84,7 +84,10 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get messageDeletedText => 'Este mensaje ha sido borrado.';
 
   @override
-  String get messageDeletedLabel => 'Mensaje borrado';
+  String get messageDeletedLabel => 'Mensaje eliminado';
+
+  @override
+  String get systemMessageLabel => 'Mensaje del sistema';
 
   @override
   String get editedMessageLabel => 'Editado';
@@ -635,5 +638,32 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get moderationReviewModalDescription =>
-      '''Considera cómo tu comentario podría hacer sentir a los demás y asegúrate de seguir nuestras Normas de la Comunidad.''';
+      '''Considera cómo tu comentario podría hacer sentir a los demás y asegúrate de seguir nuestras Directrices de la Comunidad.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Grabación de voz';
+
+  @override
+  String get audioAttachmentText => 'Audio';
+
+  @override
+  String get imageAttachmentText => 'Imagen';
+
+  @override
+  String get videoAttachmentText => 'Video';
+
+  @override
+  String get pollYouVotedText => 'Has votado';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username ha votado';
+
+  @override
+  String get pollYouCreatedText => 'Has creado';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username ha creado';
 }

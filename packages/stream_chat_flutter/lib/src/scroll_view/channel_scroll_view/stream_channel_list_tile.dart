@@ -4,7 +4,6 @@ import 'package:stream_chat_flutter/src/message_widget/sending_indicator_builder
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:collection/collection.dart' show IterableComparableExtension;
 
 /// A widget that displays a channel preview.
 ///
@@ -388,7 +387,14 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
         final message = messages.lastWhereOrNull(widget.lastMessagePredicate);
         final latestLastMessage = [message, _currentLastMessage].latest;
 
-        if (latestLastMessage == null) return const Empty();
+        if (latestLastMessage == null) {
+          return Text(
+            maxLines: 1,
+            context.translations.emptyMessagesText,
+            style: widget.textStyle,
+            overflow: TextOverflow.ellipsis,
+          );
+        }
 
         return StreamMessagePreviewText(
           message: latestLastMessage,

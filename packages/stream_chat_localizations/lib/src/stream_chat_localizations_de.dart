@@ -81,6 +81,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Nachricht gelöscht';
 
   @override
+  String get systemMessageLabel => 'Systemnachricht';
+
+  @override
   String get editedMessageLabel => 'Bearbeitet';
 
   @override
@@ -626,5 +629,32 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get moderationReviewModalDescription =>
-      '''Bedenke, wie dein Kommentar auf andere wirken könnte, und halte dich an unsere Community-Richtlinien.''';
+      '''Bedenke, wie dein Kommentar andere beeinflussen könnte, und achte darauf, unsere Community-Richtlinien einzuhalten.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Sprachaufnahme';
+
+  @override
+  String get audioAttachmentText => 'Audio';
+
+  @override
+  String get imageAttachmentText => 'Bild';
+
+  @override
+  String get videoAttachmentText => 'Video';
+
+  @override
+  String get pollYouVotedText => 'Du hast abgestimmt';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username hat abgestimmt';
+
+  @override
+  String get pollYouCreatedText => 'Du hast erstellt';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username hat erstellt';
 }

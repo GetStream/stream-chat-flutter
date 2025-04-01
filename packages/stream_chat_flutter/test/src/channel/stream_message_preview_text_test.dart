@@ -90,14 +90,11 @@ void main() {
     });
 
     testWidgets('renders empty system message', (tester) async {
-      final message = Message(
-        text: null,
-        type: MessageType.system,
-      );
+      final message = Message(type: MessageType.system);
 
       await pumpMessagePreview(tester, message);
 
-      expect(find.text('Empty System Message'), findsOneWidget);
+      expect(find.text('System Message'), findsOneWidget);
     });
 
     testWidgets('renders empty message with no attachments', (tester) async {
@@ -108,7 +105,7 @@ void main() {
 
       await pumpMessagePreview(tester, message);
 
-      expect(find.text('No messages'), findsOneWidget);
+      expect(find.text(''), findsOneWidget);
     });
 
     testWidgets('renders message with mentioned users in bold', (tester) async {
@@ -223,7 +220,7 @@ void main() {
 
         await pumpMessagePreview(tester, message);
 
-        expect(find.text('🎤 Voice recording'), findsOneWidget);
+        expect(find.text('🎤 Voice Recording'), findsOneWidget);
       });
 
       testWidgets('renders unknown attachment type with text', (tester) async {
