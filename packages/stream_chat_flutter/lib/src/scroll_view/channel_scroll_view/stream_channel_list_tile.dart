@@ -399,7 +399,7 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
         return StreamMessagePreviewText(
           message: latestLastMessage,
           textStyle: widget.textStyle,
-          language: widget.channel.client.state.currentUser?.language,
+          channel: widget.channel.state?.channelState.channel,
         );
       },
     );

@@ -7,12 +7,16 @@ class StreamMessagePreviewText extends StatelessWidget {
   const StreamMessagePreviewText({
     super.key,
     required this.message,
+    this.channel,
     this.language,
     this.textStyle,
   });
 
   /// The message to display.
   final Message message;
+
+  /// The channel to which the message belongs.
+  final ChannelModel? channel;
 
   /// The language to use for translations.
   final String? language;
@@ -23,7 +27,8 @@ class StreamMessagePreviewText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = StreamChat.of(context).currentUser!;
-    final translatedMessage = message.translate(language ?? 'en');
+    final translationLanguage = language ?? currentUser.language ?? 'en';
+    final translatedMessage = message.translate(translationLanguage);
     final previewMessage = translatedMessage.replaceMentions(linkify: false);
 
     final previewText = _getPreviewText(context, previewMessage, currentUser);
@@ -84,7 +89,15 @@ class StreamMessagePreviewText extends StatelessWidget {
     final previewText = _previewMessageContextText(context, message);
     if (previewText == null) return translations.emptyMessagePreviewText;
 
-    // TODO: Handle Author name, Requires channel member count (breaking)
+    if (channel case final channel?) {
+      if (message.user?.id == currentUser.id) {
+        return '${translations.youText}: $previewText';
+      }
+
+      if (channel.memberCount > 2) {
+        return '${message.user?.name}: $previewText';
+      }
+    }
 
     return previewText;
   }
@@ -147,7 +160,7 @@ class StreamMessagePreviewText extends StatelessWidget {
         AttachmentType.file => '📄',
         AttachmentType.image => '📷',
         AttachmentType.video => '📹',
-        AttachmentType.giphy => '[GIF]',
+        AttachmentType.giphy => '/giphy',
         AttachmentType.voiceRecording => '🎤',
         _ => null,
       };
