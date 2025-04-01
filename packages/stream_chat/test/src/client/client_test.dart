@@ -2321,9 +2321,7 @@ void main() {
         'blockUser should not duplicate existing blocked user IDs',
         () async {
           const userId = 'blocked-user-id';
-          client.state.currentUser = client.state.currentUser?.copyWith(
-            blockedUserIds: const [userId],
-          );
+          client.state.blockedUserIds = const [userId];
 
           // Verify the user is already in the blocked list
           expect(client.state.currentUser?.blockedUserIds, contains(userId));
@@ -2348,9 +2346,7 @@ void main() {
       test('unblockUser should remove user from blockedUserIds', () async {
         const blockedUserId = 'blocked-user-id';
         const otherBlockedId = 'other-blocked-id';
-        client.state.currentUser = client.state.currentUser?.copyWith(
-          blockedUserIds: const [blockedUserId, otherBlockedId],
-        );
+        client.state.blockedUserIds = const [blockedUserId, otherBlockedId];
 
         // Verify initial state includes both blocked IDs
         expect(
@@ -2384,9 +2380,7 @@ void main() {
         () async {
           const nonBlockedUserId = 'not-in-list';
           const otherBlockedId = 'other-blocked-id';
-          client.state.currentUser = client.state.currentUser?.copyWith(
-            blockedUserIds: const [otherBlockedId],
-          );
+          client.state.blockedUserIds = const [otherBlockedId];
 
           // Verify initial state
           expect(
