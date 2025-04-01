@@ -20,6 +20,7 @@
 🔄 Changed
 
 - Deprecated `PermissionType` in favor of `ChannelCapability`.
+- Deprecated third party calls related APIs (Agora and 100ms).
 
 ## 9.6.0
 
