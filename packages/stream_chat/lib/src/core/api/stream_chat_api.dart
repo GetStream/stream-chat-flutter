@@ -70,7 +70,9 @@ class StreamChatApi {
   ThreadsApi? _threads;
 
   /// Api dedicated to call operations
+  @Deprecated('Will be removed in the next major version')
   CallApi get call => _call ??= CallApi(_client);
+  @Deprecated('Will be removed in the next major version')
   CallApi? _call;
 
   /// Api dedicated to channel operations

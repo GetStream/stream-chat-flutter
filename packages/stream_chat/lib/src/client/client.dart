@@ -667,10 +667,12 @@ class StreamChatClient {
   }
 
   /// Returns a token associated with the [callId].
+  @Deprecated('Will be removed in the next major version')
   Future<CallTokenPayload> getCallToken(String callId) async =>
       _chatApi.call.getCallToken(callId);
 
   /// Creates a new call.
+  @Deprecated('Will be removed in the next major version')
   Future<CreateCallPayload> createCall({
     required String callId,
     required String callType,

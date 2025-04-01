@@ -4365,32 +4365,6 @@ void main() {
       expect(response.message, isA<Message>());
     });
 
-    test('CallTokenPayload', () {
-      const jsonExample = '''
-      {"duration": "3ms",
-      "agora_app_id":"test",
-      "agora_uid": 12,
-      "token": "token"}
-      ''';
-      final response = CallTokenPayload.fromJson(json.decode(jsonExample));
-      expect(response.agoraAppId, isA<String>());
-      expect(response.agoraUid, isA<int>());
-      expect(response.token, isA<String>());
-    });
-
-    test('CreateCallPayload', () {
-      const jsonExample = '''
-      {"call": 
-      {"id":"test",
-      "provider": "test",
-      "agora": {"channel":"test"},
-      "hms":{"room_id":"test", "room_name":"test"}
-      }}
-      ''';
-      final response = CreateCallPayload.fromJson(json.decode(jsonExample));
-      expect(response.call, isA<CallPayload>());
-    });
-
     test('UserBlockResponse', () {
       const jsonExample = '''
       {
