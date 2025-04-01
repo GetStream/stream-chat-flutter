@@ -12,6 +12,11 @@
 
 - Added support for message moderation feature.
 
+🐞 Fixed
+
+- [[#1964]](https://github.com/GetStream/stream-chat-flutter/issues/1964) Fixes `Channel.membership`
+  field not updating correctly.
+
 🔄 Changed
 
 - Deprecated `PermissionType` in favor of `ChannelCapability`.

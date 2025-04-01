@@ -1680,7 +1680,7 @@ class Channel {
     _checkInitialized();
     final res = await _client.getMessagesById(id!, type, messageIDs);
     final messages = res.messages;
-    state?.updateChannelState(ChannelState(messages: messages));
+    state!.updateChannelState(state!.channelState.copyWith(messages: messages));
     return res;
   }
 
@@ -2115,43 +2115,84 @@ class ChannelClientState {
 
   void _listenMemberAdded() {
     _subscriptions.add(_channel.on(EventType.memberAdded).listen((Event e) {
-      final member = e.member;
+      final member = e.member!;
       final existingMembers = channelState.members ?? [];
-      updateChannelState(channelState.copyWith(
-        members: [
-          ...existingMembers,
-          member!,
-        ],
-      ));
+
+      updateChannelState(
+        channelState.copyWith(
+          members: [...existingMembers, member],
+        ),
+      );
     }));
   }
 
   void _listenMemberRemoved() {
     _subscriptions.add(_channel.on(EventType.memberRemoved).listen((Event e) {
-      final user = e.user;
-      final existingMembers = channelState.members ?? [];
+      final user = e.user!;
       final existingRead = channelState.read ?? [];
-      updateChannelState(channelState.copyWith(
-        members: existingMembers
-            .where((m) => m.userId != user!.id)
-            .toList(growable: false),
-        read: existingRead
-            .where((r) => r.user.id != user!.id)
-            .toList(growable: false),
-      ));
+      final existingMembers = channelState.members ?? [];
+
+      updateChannelState(
+        channelState.copyWith(
+          read: [...existingRead.where((r) => r.user.id != user.id)],
+          members: [...existingMembers.where((m) => m.userId != user.id)],
+        ),
+      );
     }));
   }
 
   void _listenMemberUpdated() {
-    _subscriptions.add(_channel.on(EventType.memberUpdated).listen((Event e) {
-      final member = e.member;
-      final existingMembers = channelState.members ?? [];
-      updateChannelState(channelState.copyWith(
-        members: existingMembers
-            .map((m) => m.userId == member!.userId ? member : m)
-            .toList(growable: false),
+    _subscriptions
+      // Listen to events containing member users
+      ..add(_channel.on().listen(
+        (event) {
+          final user = event.user;
+          if (user == null) return;
+
+          final existingMembers = [...?channelState.members];
+          final existingMembership = channelState.membership;
+
+          // Return if the user is not a existing member of the channel.
+          if (!existingMembers.any((m) => m.userId == user.id)) return;
+
+          Member? maybeUpdateMemberUser(Member? existingMember) {
+            if (existingMember == null) return null;
+            if (existingMember.userId == user.id) {
+              return existingMember.copyWith(user: user);
+            }
+            return existingMember;
+          }
+
+          updateChannelState(
+            channelState.copyWith(
+              membership: maybeUpdateMemberUser(existingMembership),
+              members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
+            ),
+          );
+        },
+      ))
+
+      // Listen to member updated events.
+      ..add(_channel.on(EventType.memberUpdated).listen(
+        (Event e) {
+          final member = e.member!;
+          final existingMembers = channelState.members ?? [];
+          final existingMembership = channelState.membership;
+
+          Member? maybeUpdateMember(Member? existingMember) {
+            if (existingMember == null) return null;
+            if (existingMember.userId == member.userId) return member;
+            return existingMember;
+          }
+
+          updateChannelState(
+            channelState.copyWith(
+              membership: maybeUpdateMember(existingMembership),
+              members: [...existingMembers.map(maybeUpdateMember).nonNulls],
+            ),
+          );
+        },
       ));
-    }));
   }
 
   void _listenChannelUpdated() {
@@ -3027,6 +3068,7 @@ class ChannelClientState {
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: newMembers,
+      membership: updatedState.membership,
       read: newReads,
       pinnedMessages: updatedState.pinnedMessages,
     );
@@ -3104,32 +3146,6 @@ class ChannelClientState {
             if (user != null && user.id != currentUser.id) {
               final events = {...typingEvents}..remove(user);
               _typingEventsController.safeAdd(events);
-            }
-          },
-        ),
-      )
-      ..add(
-        _channel.on().where((event) {
-          final user = event.user;
-          if (user == null) return false;
-          return members.any((m) => m.userId == user.id);
-        }).listen(
-          (event) {
-            final newMembers = List<Member>.from(members);
-            final oldMemberIndex =
-                newMembers.indexWhere((m) => m.userId == event.user!.id);
-            if (oldMemberIndex > -1) {
-              final oldMember = newMembers.removeAt(oldMemberIndex);
-              updateChannelState(
-                ChannelState(
-                  members: [
-                    ...newMembers,
-                    oldMember.copyWith(
-                      user: event.user,
-                    ),
-                  ],
-                ),
-              );
             }
           },
         ),
