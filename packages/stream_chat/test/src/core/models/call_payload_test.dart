@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:stream_chat/src/core/models/call_payload.dart';
 import 'package:test/test.dart';
 
+@Deprecated('Will be removed in the next major version')
 void main() {
   test('CallPayload', () {
     const jsonExample = '''
