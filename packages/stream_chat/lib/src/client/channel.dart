@@ -3031,34 +3031,34 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final _existingStateMessages = [...messages];
+    final _existingStateMessages = <Message>[...messages];
     final newMessages = <Message>[
-      ..._existingStateMessages.merge(updatedState.messages),
+      ..._existingStateMessages.merge(
+        updatedState.messages,
+        key: (message) => message.id,
+        update: (original, updated) => updated.syncWith(original),
+      ),
     ].sorted(_sortByCreatedAt);
 
-    final _existingStateWatchers = _channelState.watchers ?? [];
-    final _updatedStateWatchers = updatedState.watchers ?? [];
+    final _existingStateWatchers = <User>[...?_channelState.watchers];
     final newWatchers = <User>[
-      ..._updatedStateWatchers,
-      ..._existingStateWatchers
-          .where((w) =>
-              !_updatedStateWatchers.any((newWatcher) => newWatcher.id == w.id))
-          .toList(),
+      ..._existingStateWatchers.merge(
+        updatedState.watchers,
+        key: (watcher) => watcher.id,
+        update: (original, updated) => updated,
+      ),
     ];
 
-    final newMembers = <Member>[
-      ...updatedState.members ?? [],
-    ];
-
-    final _existingStateRead = _channelState.read ?? [];
-    final _updatedStateRead = updatedState.read ?? [];
+    final _existingStateRead = <Read>[...?_channelState.read];
     final newReads = <Read>[
-      ..._updatedStateRead,
-      ..._existingStateRead
-          .where((r) =>
-              !_updatedStateRead.any((newRead) => newRead.user.id == r.user.id))
-          .toList(),
+      ..._existingStateRead.merge(
+        updatedState.read,
+        key: (read) => read.user.id,
+        update: (original, updated) => updated,
+      ),
     ];
+
+    final newMembers = <Member>[...?updatedState.members];
 
     _checkExpiredAttachmentMessages(updatedState);
 
@@ -3226,24 +3226,6 @@ class ChannelClientState {
 bool _pinIsValid(Message message) {
   final now = DateTime.now();
   return message.pinExpires!.isAfter(now);
-}
-
-extension on Iterable<Message> {
-  Iterable<Message> merge(Iterable<Message>? other) {
-    if (other == null) return this;
-
-    final messageMap = {for (final message in this) message.id: message};
-
-    for (final message in other) {
-      messageMap.update(
-        message.id,
-        message.syncWith,
-        ifAbsent: () => message,
-      );
-    }
-
-    return messageMap.values;
-  }
 }
 
 /// Extension methods for checking channel capabilities on a Channel instance.
