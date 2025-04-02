@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- [[#2171]](https://github.com/GetStream/stream-chat-flutter/issues/2171) Fixed [Flutter Web]
+  dynamic TypeError
+
 ## 8.3.0
 
 ✅ Added
