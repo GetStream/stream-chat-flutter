@@ -1,6 +1,9 @@
 name: check_db_entities
 
-on: [pull_request]
+on: 
+  pull_request:
+    paths:
+      - 'packages/stream_chat_persistence/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
