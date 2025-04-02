@@ -4,6 +4,8 @@ import 'package:stream_chat_persistence/src/converter/list_converter.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/converter/voting_visibility_converter.dart';
 
+// A temp comment to trigger check_db_entities workflow.
+
 /// Represents a [Polls] table in [MoorChatDatabase].
 @DataClassName('PollEntity')
 class Polls extends Table {
