@@ -500,6 +500,7 @@ class OGAttachmentResponse extends _BaseResponse {
 }
 
 /// The response to [CallApi.getCallToken]
+@Deprecated('Will be removed in the next major version')
 @JsonSerializable(createToJson: false)
 class CallTokenPayload extends _BaseResponse {
   /// Create a new instance from a [json].
@@ -517,6 +518,7 @@ class CallTokenPayload extends _BaseResponse {
 }
 
 /// The response to [CallApi.createCall]
+@Deprecated('Will be removed in the next major version')
 @JsonSerializable(createToJson: false)
 class CreateCallPayload extends _BaseResponse {
   /// Create a new instance from a [json].

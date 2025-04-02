@@ -5,6 +5,7 @@ part 'call_payload.g.dart';
 
 /// Model containing the information about a call.
 @JsonSerializable(createToJson: false)
+@Deprecated('Will be removed in the next major version')
 class CallPayload extends Equatable {
   /// Create a new instance.
   const CallPayload({
