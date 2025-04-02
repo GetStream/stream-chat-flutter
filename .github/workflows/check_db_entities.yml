@@ -1,8 +1,6 @@
-name: 'Check Database Entity Modifications'
-on:
-  pull_request:
-    paths:
-      - 'packages/stream_chat_persistence/lib/src/entity/**'
+name: check_db_entities
+
+on: [pull_request]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -51,8 +49,8 @@ jobs:
         id: find_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: 'Database Entity Files Modified'
+          comment-author: github-actions[bot]
+          body-includes: Database Entity Files Modified
 
       - name: 💬 Create or Update Comment
         if: steps.check_entities.outputs.has_changes == 'true'
