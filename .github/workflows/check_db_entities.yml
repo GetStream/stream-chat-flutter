@@ -19,7 +19,7 @@ jobs:
         id: check_entities
         run: |
           ENTITY_DIR="packages/stream_chat_persistence/lib/src/entity"
-          TEMP_FILE="touchedEntities"
+          TEMP_FILE="modified_entities"
           BASE_BRANCH="${{ github.base_ref }}"
           
           echo "Using base branch: origin/$BASE_BRANCH for comparison"
