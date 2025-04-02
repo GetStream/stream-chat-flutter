@@ -7,6 +7,10 @@ import 'package:stream_chat_persistence/src/converter/voting_visibility_converte
 /// Represents a [Polls] table in [MoorChatDatabase].
 @DataClassName('PollEntity')
 class Polls extends Table {
+
+
+
+
   /// The unique identifier of the poll.
   TextColumn get id => text()();
 
