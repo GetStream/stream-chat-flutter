@@ -46,6 +46,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   late ValueNotifier<bool?> isPinned = ValueNotifier(channel.isPinned);
 
+  late ValueNotifier<bool?> isArchived = ValueNotifier(channel.isArchived);
+
   late final channel = StreamChannel.of(context).channel;
 
   late StreamUserListController _userListController;
@@ -559,6 +561,48 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                 channel.unpin();
                               } else {
                                 channel.pin();
+                              }
+                            },
+                          );
+                        }),
+                onTap: () {},
+              );
+            }),
+        StreamBuilder<bool>(
+            stream: channel.isArchivedStream,
+            builder: (context, snapshot) {
+              isArchived.value = snapshot.data;
+
+              return StreamOptionListTile(
+                tileColor: StreamChatTheme.of(context).colorTheme.appBg,
+                separatorColor: StreamChatTheme.of(context).colorTheme.disabled,
+                title: 'Archive group',
+                titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+                leading: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: StreamSvgIcon(
+                    icon: StreamSvgIcons.pin,
+                    size: 24,
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .textHighEmphasis
+                        .withOpacity(0.5),
+                  ),
+                ),
+                trailing: snapshot.data == null
+                    ? const CircularProgressIndicator()
+                    : ValueListenableBuilder<bool?>(
+                        valueListenable: isArchived,
+                        builder: (context, value, _) {
+                          return CupertinoSwitch(
+                            value: value!,
+                            onChanged: (val) {
+                              isArchived.value = val;
+
+                              if (snapshot.data!) {
+                                channel.unarchive();
+                              } else {
+                                channel.archive();
                               }
                             },
                           );

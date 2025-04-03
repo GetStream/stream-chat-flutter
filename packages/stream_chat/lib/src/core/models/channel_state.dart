@@ -79,7 +79,8 @@ class ChannelState {
       );
 
   static Comparator<ChannelState>? getComparator(
-      SortOption<ChannelState> sortOption) {
+    SortOption<ChannelState> sortOption,
+  ) {
     Comparator<ChannelState> _compare(Function(ChannelState) getField) {
       return (ChannelState channelStateA, ChannelState channelStateB) {
         return ComparatorHelper.compareWithNull(

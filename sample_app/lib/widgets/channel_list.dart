@@ -61,10 +61,13 @@ class _ChannelList extends State<ChannelList> {
 
   late final _channelListController = StreamChannelListController(
     client: StreamChat.of(context).client,
-    filter: Filter.in_(
-      'members',
-      [StreamChat.of(context).currentUser!.id],
-    ),
+    filter: Filter.and([
+      Filter.in_(
+        'members',
+        [StreamChat.of(context).currentUser!.id],
+      ),
+      Filter.equal('archived', false),
+    ]),
     channelStateSort: [
       const SortOption(ChannelSortField.pinnedAt),
       const SortOption(ChannelSortField.lastMessageAt),
