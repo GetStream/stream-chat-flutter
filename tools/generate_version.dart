@@ -12,32 +12,32 @@ Future<void> main() async {
   final packageDir = p.join(rootDir, 'packages', packageName);
   final pubspecPath = p.join(packageDir, 'pubspec.yaml');
   final versionFilePath = p.join(packageDir, 'lib', 'version.dart');
-  
+
   print('Reading version from $pubspecPath');
-  
+
   // Read version from pubspec.yaml
   final yamlMap = loadYaml(File(pubspecPath).readAsStringSync()) as YamlMap;
   final version = yamlMap['version'] as String;
-  
+
   print('Found version: $version');
-  
+
   // Read the existing version file
   final versionFile = File(versionFilePath);
   if (!versionFile.existsSync()) {
     print('Error: Version file not found at $versionFilePath');
     return;
   }
-  
+
   final fileContent = versionFile.readAsStringSync();
-  
+
   // Update the version constant
   final updatedContent = fileContent.replaceFirst(
-    RegExp('const PACKAGE_VERSION = .+;'), 
+    RegExp('const PACKAGE_VERSION = .+;'),
     "const PACKAGE_VERSION = '$version';",
   );
-  
+
   // Write the changes back to the file
   await versionFile.writeAsString(updatedContent);
-  
+
   print('✓ Successfully updated version to $version in $versionFilePath');
 }
