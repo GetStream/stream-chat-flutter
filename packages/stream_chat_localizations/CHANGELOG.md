@@ -1,4 +1,4 @@
-## Upcoming
+## 9.7.0
 
 - Added translations for new `sendAnywayLabel` label.
 - Added translations for new `moderatedMessageBlockedText` text.
