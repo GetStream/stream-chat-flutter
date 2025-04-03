@@ -4,4 +4,4 @@ import 'package:stream_chat/src/client/client.dart';
 
 /// Current package version
 /// Used in [StreamChatClient] to build the `x-stream-client` header
-const PACKAGE_VERSION = '9.6.0';
+const PACKAGE_VERSION = '9.7.0';
