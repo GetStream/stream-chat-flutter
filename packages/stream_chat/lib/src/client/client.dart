@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
