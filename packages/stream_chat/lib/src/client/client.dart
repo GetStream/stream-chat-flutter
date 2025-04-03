@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
@@ -1451,6 +1452,68 @@ class StreamChatClient {
         ...options,
       });
 
+  final _userBlockLock = Lock();
+
+  /// Blocks a user with the provided [userId].
+  Future<UserBlockResponse> blockUser(String userId) async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.blockUser(userId),
+      );
+
+      final blockedUserId = response.blockedUserId;
+      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
+      if (!currentBlockedUserIds.contains(blockedUserId)) {
+        // Add the new blocked user to the blocked user list.
+        state.blockedUserIds = [...currentBlockedUserIds, blockedUserId];
+      }
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error blocking user', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Unblocks a previously blocked user with the provided [userId].
+  Future<EmptyResponse> unblockUser(String userId) async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.unblockUser(userId),
+      );
+
+      final unblockedUserId = userId;
+      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
+      if (currentBlockedUserIds.contains(unblockedUserId)) {
+        // Remove the unblocked user from the blocked user list.
+        state.blockedUserIds = currentBlockedUserIds..remove(unblockedUserId);
+      }
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error unblocking user', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Retrieves a list of all users that the current user has blocked.
+  Future<BlockedUsersResponse> queryBlockedUsers() async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.queryBlockedUsers(),
+      );
+
+      // Update the blocked user IDs with the latest data.
+      final blockedUserIds = response.blocks.map((it) => it.blockedUserId);
+      state.blockedUserIds = [...blockedUserIds.nonNulls];
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error querying blocked users', e, stk);
+      rethrow;
+    }
+  }
+
   /// Mutes a user
   Future<EmptyResponse> muteUser(String userId) =>
       _chatApi.moderation.muteUser(userId);
@@ -1458,18 +1521,6 @@ class StreamChatClient {
   /// Unmutes a user
   Future<EmptyResponse> unmuteUser(String userId) =>
       _chatApi.moderation.unmuteUser(userId);
-
-  /// Blocks a user
-  Future<UserBlockResponse> blockUser(String userId) =>
-      _chatApi.user.blockUser(userId);
-
-  /// Unblocks a user
-  Future<EmptyResponse> unblockUser(String userId) =>
-      _chatApi.user.unblockUser(userId);
-
-  /// Requests users with a given query.
-  Future<BlockedUsersResponse> queryBlockedUsers() =>
-      _chatApi.user.queryBlockedUsers();
 
   /// Flag a message
   Future<EmptyResponse> flagMessage(String messageId) =>
@@ -1995,6 +2046,11 @@ class ClientState {
   /// Removes the channel from the cached list of [channels]
   void removeChannel(String channelCid) {
     channels = channels..remove(channelCid);
+  }
+
+  @visibleForTesting
+  set blockedUserIds(List<String> blockedUserIds) {
+    currentUser = currentUser?.copyWith(blockedUserIds: blockedUserIds);
   }
 
   /// Used internally for optimistic update of unread count

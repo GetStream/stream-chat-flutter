@@ -22,6 +22,10 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
               .toList() ??
           const [],
       unreadThreads: (json['unread_threads'] as num?)?.toInt() ?? 0,
+      blockedUserIds: (json['blocked_user_ids'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       id: json['id'] as String,
       role: json['role'] as String?,
       createdAt: json['created_at'] == null
