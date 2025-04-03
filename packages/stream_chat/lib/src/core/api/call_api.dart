@@ -2,6 +2,7 @@ import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 
 /// Defines the api dedicated to call operations.
+@Deprecated('Will be removed in the next major version')
 class CallApi {
   /// Initialize a new call api
   CallApi(this._client);

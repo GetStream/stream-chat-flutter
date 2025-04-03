@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 
 import '../../mocks.dart';
 
+@Deprecated('Will be removed in the next major version')
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
         data: data,

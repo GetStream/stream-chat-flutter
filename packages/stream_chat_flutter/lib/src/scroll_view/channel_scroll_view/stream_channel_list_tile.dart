@@ -341,6 +341,7 @@ class ChannelLastMessageText extends StatefulWidget {
     super.key,
     required this.channel,
     this.textStyle,
+    this.lastMessagePredicate = _defaultLastMessagePredicate,
   }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
@@ -352,33 +353,67 @@ class ChannelLastMessageText extends StatefulWidget {
   /// The style of the text displayed
   final TextStyle? textStyle;
 
+  /// The predicate to determine if the message should be considered for the
+  /// last message.
+  ///
+  /// This predicate is used to filter out messages that should not be
+  /// considered for the last message.
+  final bool Function(Message) lastMessagePredicate;
+
+  // The default predicate to determine if the message should be
+  // considered for the last message.
+  static bool _defaultLastMessagePredicate(Message message) {
+    if (message.isShadowed) return false;
+    if (message.isDeleted) return false;
+    if (message.isError) return false;
+    if (message.isEphemeral) return false;
+
+    return true;
+  }
+
   @override
   State<ChannelLastMessageText> createState() => _ChannelLastMessageTextState();
 }
 
 class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
-  Message? _lastMessage;
+  Message? _currentLastMessage;
 
   @override
-  Widget build(BuildContext context) => BetterStreamBuilder<List<Message>>(
-        stream: widget.channel.state!.messagesStream,
-        initialData: widget.channel.state!.messages,
-        builder: (context, messages) {
-          final lastMessage = messages.lastWhereOrNull(
-            (m) => !m.shadowed && !m.isDeleted,
+  Widget build(BuildContext context) {
+    return BetterStreamBuilder<List<Message>>(
+      stream: widget.channel.state!.messagesStream,
+      initialData: widget.channel.state!.messages,
+      builder: (context, messages) {
+        final message = messages.lastWhereOrNull(widget.lastMessagePredicate);
+        final latestLastMessage = [message, _currentLastMessage].latest;
+
+        if (latestLastMessage == null) {
+          return Text(
+            maxLines: 1,
+            context.translations.emptyMessagesText,
+            style: widget.textStyle,
+            overflow: TextOverflow.ellipsis,
           );
+        }
 
-          if (widget.channel.state?.isUpToDate == true) {
-            _lastMessage = lastMessage;
-          }
+        return StreamMessagePreviewText(
+          message: latestLastMessage,
+          textStyle: widget.textStyle,
+          channel: widget.channel.state?.channelState.channel,
+        );
+      },
+    );
+  }
+}
 
-          if (_lastMessage == null) return const Empty();
+extension on Iterable<Message?> {
+  Message? get latest {
+    return reduce((a, b) {
+      if (a == null) return b;
+      if (b == null) return a;
 
-          return StreamMessagePreviewText(
-            message: _lastMessage!,
-            textStyle: widget.textStyle,
-            language: widget.channel.client.state.currentUser?.language,
-          );
-        },
-      );
+      if (a.createdAt.isAfter(b.createdAt)) return a;
+      return b;
+    });
+  }
 }

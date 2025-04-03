@@ -85,6 +85,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Message deleted';
 
   @override
+  String get systemMessageLabel => 'System Message';
+
+  @override
   String get editedMessageLabel => 'Edited';
 
   @override
@@ -615,4 +618,45 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Hold to record, release to send.';
+
+  @override
+  String get sendAnywayLabel => 'Send Anyway';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Message was blocked by moderation policies';
+
+  @override
+  String get moderationReviewModalTitle => 'Are you sure?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Consider how your comment might make others feel and be sure to follow our Community Guidelines.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Voice Recording';
+
+  @override
+  String get audioAttachmentText => 'Audio';
+
+  @override
+  String get imageAttachmentText => 'Image';
+
+  @override
+  String get videoAttachmentText => 'Video';
+
+  @override
+  String get pollYouVotedText => 'You voted';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username voted';
+
+  @override
+  String get pollYouCreatedText => 'You created';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username created';
 }

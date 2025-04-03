@@ -83,7 +83,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get messageDeletedText => 'Aquest missatge ha estat esborrat';
 
   @override
-  String get messageDeletedLabel => 'Missatge esborrat';
+  String get messageDeletedLabel => 'Missatge eliminat';
+
+  @override
+  String get systemMessageLabel => 'Missatge del sistema';
 
   @override
   String get editedMessageLabel => 'Editat';
@@ -620,4 +623,45 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   @override
   String get holdToRecordLabel =>
       'Mantén premut per gravar, deixa anar per enviar';
+
+  @override
+  String get sendAnywayLabel => 'Enviar igualment';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Missatge bloquejat per les polítiques de moderació';
+
+  @override
+  String get moderationReviewModalTitle => 'Estàs segur?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Considera com el teu comentari pot fer sentir als altres i assegura't de seguir les nostres Directrius de la Comunitat.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Enregistrament de veu';
+
+  @override
+  String get audioAttachmentText => 'Àudio';
+
+  @override
+  String get imageAttachmentText => 'Imatge';
+
+  @override
+  String get videoAttachmentText => 'Vídeo';
+
+  @override
+  String get pollYouVotedText => 'Has votat';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username ha votat';
+
+  @override
+  String get pollYouCreatedText => 'Has creat';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username ha creat';
 }

@@ -449,39 +449,40 @@ class StreamMessageInput extends StatefulWidget {
     return true;
   }
 
-  static bool _defaultValidator(Message message) =>
-      message.text?.isNotEmpty == true || message.attachments.isNotEmpty;
+  static bool _defaultValidator(Message message) {
+    // The message is valid if it has text or attachments.
+    if (message.attachments.isNotEmpty) return true;
+    if (message.text?.trim() case final text? when text.isNotEmpty) return true;
+
+    return false;
+  }
 
   static bool _defaultSendMessageKeyPredicate(
     FocusNode node,
     KeyEvent event,
   ) {
-    if (CurrentPlatform.isWeb ||
-        CurrentPlatform.isMacOS ||
-        CurrentPlatform.isWindows ||
-        CurrentPlatform.isLinux) {
-      // On desktop/web, send the message when the user presses the enter key.
-      return event is KeyUpEvent &&
-          event.logicalKey == LogicalKeyboardKey.enter;
-    }
+    // Do not handle the event if the user is using a mobile device.
+    if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) return false;
 
-    return false;
+    // Do not send the message if the shift key is pressed. Generally, this
+    // means the user is trying to add a new line.
+    if (HardwareKeyboard.instance.isShiftPressed) return false;
+
+    // Otherwise, send the message when the user presses the enter key.
+    final isEnterKeyPressed = event.logicalKey == LogicalKeyboardKey.enter;
+    return isEnterKeyPressed && event is KeyDownEvent;
   }
 
   static bool _defaultClearQuotedMessageKeyPredicate(
     FocusNode node,
     KeyEvent event,
   ) {
-    if (CurrentPlatform.isWeb ||
-        CurrentPlatform.isMacOS ||
-        CurrentPlatform.isWindows ||
-        CurrentPlatform.isLinux) {
-      // On desktop/web, clear the quoted message when the user presses the escape key.
-      return event is KeyUpEvent &&
-          event.logicalKey == LogicalKeyboardKey.escape;
-    }
+    // Do not handle the event if the user is using a mobile device.
+    if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) return false;
 
-    return false;
+    // Otherwise, Clear the quoted message when the user presses the escape key.
+    final isEscapeKeyPressed = event.logicalKey == LogicalKeyboardKey.escape;
+    return isEscapeKeyPressed && event is KeyDownEvent;
   }
 
   @override
@@ -1039,22 +1040,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
             _buildAttachments(),
             LimitedBox(
               maxHeight: widget.maxHeight,
-              child: PlatformWidgetBuilder(
-                web: (context, child) => Focus(
-                  skipTraversal: true,
-                  onKeyEvent: _handleKeyPressed,
-                  child: child!,
-                ),
-                desktop: (context, child) => Focus(
-                  skipTraversal: true,
-                  onKeyEvent: _handleKeyPressed,
-                  child: child!,
-                ),
-                mobile: (context, child) => Focus(
-                  skipTraversal: true,
-                  onKeyEvent: _handleKeyPressed,
-                  child: child!,
-                ),
+              child: Focus(
+                skipTraversal: true,
+                onKeyEvent: _handleKeyPressed,
                 child: StreamMessageTextField(
                   key: const Key('messageInputText'),
                   maxLines: widget.maxLines,
@@ -1514,17 +1502,15 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _sendOrUpdateMessage({
     required Message message,
   }) async {
-    final channel = StreamChannel.of(context).channel;
-
     try {
-      final resp = await switch (_isEditing) {
+      final channel = StreamChannel.of(context).channel;
+
+      // Note: edited messages which are bounced back with an error needs to be
+      // sent as new messages as the backend doesn't store them.
+      final resp = await switch (_isEditing && !message.isBouncedWithError) {
         true => channel.updateMessage(message),
         false => channel.sendMessage(message),
       };
-
-      if (resp.message.isError) {
-        _effectiveController.message = message;
-      }
 
       // We don't want to start the cooldown if an already sent message is
       // being edited.

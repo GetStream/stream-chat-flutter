@@ -14,7 +14,7 @@ class EditMessageButton extends StatelessWidget {
   });
 
   /// The callback to perform when the button is tapped.
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

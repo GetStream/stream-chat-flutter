@@ -554,7 +554,7 @@ class StreamChatClient {
     String? eventType3,
     String? eventType4,
   ]) {
-    if (eventType == null) return eventStream;
+    if (eventType == null || eventType == EventType.any) return eventStream;
     return eventStream.where((event) =>
         event.type == eventType ||
         event.type == eventType2 ||
@@ -667,10 +667,12 @@ class StreamChatClient {
   }
 
   /// Returns a token associated with the [callId].
+  @Deprecated('Will be removed in the next major version')
   Future<CallTokenPayload> getCallToken(String callId) async =>
       _chatApi.call.getCallToken(callId);
 
   /// Creates a new call.
+  @Deprecated('Will be removed in the next major version')
   Future<CreateCallPayload> createCall({
     required String callId,
     required String callType,

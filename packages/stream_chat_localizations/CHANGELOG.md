@@ -1,3 +1,20 @@
+## Upcoming
+
+- Added translations for new `sendAnywayLabel` label.
+- Added translations for new `moderatedMessageBlockedText` text.
+- Added translations for new `moderationReviewModalTitle` text.
+- Added translations for new `moderationReviewModalDescription` text.
+- Added translations for new `emptyMessagePreviewText` text.
+- Added translations for new `voiceRecordingText` text.
+- Added translations for new `audioAttachmentText` text.
+- Added translations for new `imageAttachmentText` text.
+- Added translations for new `videoAttachmentText` text.
+- Added translations for new `pollYouVotedText` text.
+- Added translations for new `pollSomeoneVotedText` text.
+- Added translations for new `pollYouCreatedText` text.
+- Added translations for new `pollSomeoneCreatedText` text.
+- Added translations for new `systemMessageLabel` label.
+
 ## 9.6.0
 
 - Updated `stream_chat_flutter` dependency to [`9.6.0`](https://pub.dev/packages/stream_chat/changelog).

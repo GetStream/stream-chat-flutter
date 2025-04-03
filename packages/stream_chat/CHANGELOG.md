@@ -10,9 +10,19 @@
   final canSendReaction = channel.canSendReaction;
   ```
 
+- Added support for message moderation feature.
+
+🐞 Fixed
+
+- [[#1964]](https://github.com/GetStream/stream-chat-flutter/issues/1964) Fixes `Channel.membership`
+  field not updating correctly.
+- [[#2171]](https://github.com/GetStream/stream-chat-flutter/issues/2171) Fixed [Flutter Web]
+  dynamic TypeError
+
 🔄 Changed
 
 - Deprecated `PermissionType` in favor of `ChannelCapability`.
+- Deprecated third party calls related APIs (Agora and 100ms).
 
 ## 9.6.0
 

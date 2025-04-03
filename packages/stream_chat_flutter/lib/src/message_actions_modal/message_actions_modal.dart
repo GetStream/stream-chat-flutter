@@ -21,6 +21,7 @@ class MessageActionsModal extends StatefulWidget {
     this.showDeleteMessage = true,
     this.showEditMessage = true,
     this.onReplyTap,
+    this.onEditMessageTap,
     this.onConfirmDeleteTap,
     this.onThreadReplyTap,
     this.showCopyMessage = true,
@@ -47,6 +48,9 @@ class MessageActionsModal extends StatefulWidget {
 
   /// The action to perform when "reply" is tapped
   final OnMessageTap? onReplyTap;
+
+  /// The action to perform when "Edit Message" is tapped.
+  final OnMessageTap? onEditMessageTap;
 
   /// The action to perform when delete confirmation button is tapped.
   final Future<void> Function(Message)? onConfirmDeleteTap;
@@ -205,16 +209,15 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             ),
                           if (widget.showEditMessage)
                             EditMessageButton(
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                _showEditBottomSheet(context);
+                              onTap: switch (widget.onEditMessageTap) {
+                                final onTap? => () => onTap(widget.message),
+                                _ => null,
                               },
                             ),
                           if (widget.showCopyMessage)
                             CopyMessageButton(
                               onTap: () {
                                 widget.onCopyTap?.call(widget.message);
-                                Navigator.of(context).pop();
                               },
                             ),
                           if (widget.showFlagButton)
@@ -417,28 +420,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       details: context.translations.operationCouldNotBeCompletedText,
       title: context.translations.somethingWentWrongError,
       okText: context.translations.okLabel,
-    );
-  }
-
-  void _showEditBottomSheet(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    showModalBottomSheet(
-      context: context,
-      elevation: 2,
-      clipBehavior: Clip.hardEdge,
-      isScrollControlled: true,
-      backgroundColor: StreamMessageInputTheme.of(context).inputBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-      ),
-      builder: (context) => EditMessageSheet(
-        channel: channel,
-        message: widget.message,
-        editMessageInputBuilder: widget.editMessageInputBuilder,
-      ),
     );
   }
 }

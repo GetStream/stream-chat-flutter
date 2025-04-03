@@ -662,6 +662,10 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
+
+    // Clean up stale error messages before sending a new message.
+    state!.cleanUpStaleErrorMessages();
+
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
@@ -903,11 +907,12 @@ class Channel {
   }) async {
     _checkInitialized();
 
-    // Directly deleting the local messages which are not yet sent to server.
-    if (message.remoteCreatedAt == null) {
+    // Directly deleting the local messages and bounced error messages as they
+    // are not available on the server.
+    if (message.remoteCreatedAt == null || message.isBouncedWithError) {
       state!.deleteMessage(
         message.copyWith(
-          type: 'deleted',
+          type: MessageType.deleted,
           localDeletedAt: DateTime.now(),
           state: MessageState.deleted(hard: hard),
         ),
@@ -926,7 +931,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      type: 'deleted',
+      type: MessageType.deleted,
       deletedAt: DateTime.now(),
       state: MessageState.deleting(hard: hard),
     );
@@ -1693,7 +1698,7 @@ class Channel {
     _checkInitialized();
     final res = await _client.getMessagesById(id!, type, messageIDs);
     final messages = res.messages;
-    state?.updateChannelState(ChannelState(messages: messages));
+    state!.updateChannelState(state!.channelState.copyWith(messages: messages));
     return res;
   }
 
@@ -2161,54 +2166,84 @@ class ChannelClientState {
 
   void _listenMemberAdded() {
     _subscriptions.add(_channel.on(EventType.memberAdded).listen((Event e) {
-      final member = e.member;
+      final member = e.member!;
       final existingMembers = channelState.members ?? [];
-      updateChannelState(channelState.copyWith(
-        members: [
-          ...existingMembers,
-          member!,
-        ],
-      ));
+
+      updateChannelState(
+        channelState.copyWith(
+          members: [...existingMembers, member],
+        ),
+      );
     }));
   }
 
   void _listenMemberRemoved() {
     _subscriptions.add(_channel.on(EventType.memberRemoved).listen((Event e) {
-      final user = e.user;
-      final existingMembers = channelState.members ?? [];
+      final user = e.user!;
       final existingRead = channelState.read ?? [];
-      updateChannelState(channelState.copyWith(
-        members: existingMembers
-            .where((m) => m.userId != user!.id)
-            .toList(growable: false),
-        read: existingRead
-            .where((r) => r.user.id != user!.id)
-            .toList(growable: false),
-      ));
+      final existingMembers = channelState.members ?? [];
+
+      updateChannelState(
+        channelState.copyWith(
+          read: [...existingRead.where((r) => r.user.id != user.id)],
+          members: [...existingMembers.where((m) => m.userId != user.id)],
+        ),
+      );
     }));
   }
 
   void _listenMemberUpdated() {
-    _subscriptions.add(_channel.on(EventType.memberUpdated).listen((Event e) {
-      final member = e.member;
-      final existingMembers = channelState.members ?? [];
+    _subscriptions
+      // Listen to events containing member users
+      ..add(_channel.on().listen(
+        (event) {
+          final user = event.user;
+          if (user == null) return;
 
-      final isCurrentUser =
-          _channel.client.state.currentUser?.id == e.member?.user?.id &&
-              e.member?.user?.id != null;
+          final existingMembers = [...?channelState.members];
+          final existingMembership = channelState.membership;
 
-      if (isCurrentUser) {
-        _channel.client.logger
-            .severe('listenMemberUpdated pinned_at: ${member!.pinnedAt}');
-      }
+          // Return if the user is not a existing member of the channel.
+          if (!existingMembers.any((m) => m.userId == user.id)) return;
 
-      updateChannelState(channelState.copyWith(
-        members: existingMembers
-            .map((m) => m.userId == member!.userId ? member : m)
-            .toList(growable: false),
-        membership: isCurrentUser ? member : null,
+          Member? maybeUpdateMemberUser(Member? existingMember) {
+            if (existingMember == null) return null;
+            if (existingMember.userId == user.id) {
+              return existingMember.copyWith(user: user);
+            }
+            return existingMember;
+          }
+
+          updateChannelState(
+            channelState.copyWith(
+              membership: maybeUpdateMemberUser(existingMembership),
+              members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
+            ),
+          );
+        },
+      ))
+
+      // Listen to member updated events.
+      ..add(_channel.on(EventType.memberUpdated).listen(
+        (Event e) {
+          final member = e.member!;
+          final existingMembers = channelState.members ?? [];
+          final existingMembership = channelState.membership;
+
+          Member? maybeUpdateMember(Member? existingMember) {
+            if (existingMember == null) return null;
+            if (existingMember.userId == member.userId) return member;
+            return existingMember;
+          }
+
+          updateChannelState(
+            channelState.copyWith(
+              membership: maybeUpdateMember(existingMembership),
+              members: [...existingMembers.map(maybeUpdateMember).nonNulls],
+            ),
+          );
+        },
       ));
-    }));
   }
 
   void _listenChannelUpdated() {
@@ -2629,6 +2664,7 @@ class ChannelClientState {
   // Logic taken from the backend SDK
   // https://github.com/GetStream/chat/blob/9245c2b3f7e679267d57ee510c60e93de051cb8e/types/channel.go#L1136-L1150
   bool _shouldUpdateChannelLastMessageAt(Message message) {
+    if (message.isError) return false;
     if (message.shadowed) return false;
     if (message.isEphemeral) return false;
 
@@ -2718,6 +2754,16 @@ class ChannelClientState {
     if (message.parentId != null) {
       updateThreadInfo(message.parentId!, [message]);
     }
+  }
+
+  /// Cleans up all the stale error messages which requires no action.
+  void cleanUpStaleErrorMessages() {
+    final errorMessages = messages.where((message) {
+      return message.isError && !message.isBounced;
+    });
+
+    if (errorMessages.isEmpty) return;
+    return errorMessages.forEach(removeMessage);
   }
 
   /// Updates the list of pinned messages based on the current message's
@@ -3036,34 +3082,34 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final _existingStateMessages = [...messages];
+    final _existingStateMessages = <Message>[...messages];
     final newMessages = <Message>[
-      ..._existingStateMessages.merge(updatedState.messages),
+      ..._existingStateMessages.merge(
+        updatedState.messages,
+        key: (message) => message.id,
+        update: (original, updated) => updated.syncWith(original),
+      ),
     ].sorted(_sortByCreatedAt);
 
-    final _existingStateWatchers = _channelState.watchers ?? [];
-    final _updatedStateWatchers = updatedState.watchers ?? [];
+    final _existingStateWatchers = <User>[...?_channelState.watchers];
     final newWatchers = <User>[
-      ..._updatedStateWatchers,
-      ..._existingStateWatchers
-          .where((w) =>
-              !_updatedStateWatchers.any((newWatcher) => newWatcher.id == w.id))
-          .toList(),
+      ..._existingStateWatchers.merge(
+        updatedState.watchers,
+        key: (watcher) => watcher.id,
+        update: (original, updated) => updated,
+      ),
     ];
 
-    final newMembers = <Member>[
-      ...updatedState.members ?? [],
-    ];
-
-    final _existingStateRead = _channelState.read ?? [];
-    final _updatedStateRead = updatedState.read ?? [];
+    final _existingStateRead = <Read>[...?_channelState.read];
     final newReads = <Read>[
-      ..._updatedStateRead,
-      ..._existingStateRead
-          .where((r) =>
-              !_updatedStateRead.any((newRead) => newRead.user.id == r.user.id))
-          .toList(),
+      ..._existingStateRead.merge(
+        updatedState.read,
+        key: (read) => read.user.id,
+        update: (original, updated) => updated,
+      ),
     ];
+
+    final newMembers = <Member>[...?updatedState.members];
 
     _checkExpiredAttachmentMessages(updatedState);
 
@@ -3073,9 +3119,9 @@ class ChannelClientState {
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: newMembers,
+      membership: updatedState.membership,
       read: newReads,
       pinnedMessages: updatedState.pinnedMessages,
-      membership: updatedState.membership,
     );
   }
 
@@ -3151,46 +3197,6 @@ class ChannelClientState {
             if (user != null && user.id != currentUser.id) {
               final events = {...typingEvents}..remove(user);
               _typingEventsController.safeAdd(events);
-            }
-          },
-        ),
-      )
-      ..add(
-        _channel.on().where((event) {
-          final user = event.user;
-          if (user == null) return false;
-          return members.any((m) => m.userId == user.id);
-        }).listen(
-          (event) {
-            final newMembers = List<Member>.from(members);
-            final oldMemberIndex =
-                newMembers.indexWhere((m) => m.userId == event.user!.id);
-
-            final isCurrentUser =
-                _channel.client.state.currentUser?.id == event.user?.id &&
-                    event.user?.id != null;
-
-            if (oldMemberIndex > -1) {
-              if (isCurrentUser) {
-                _channel.client.logger.severe(
-                  'updating membership from typing events, pinned_at: ${_channel.membership?.pinnedAt}',
-                );
-              }
-
-              final oldMember = newMembers.removeAt(oldMemberIndex);
-              updateChannelState(
-                ChannelState(
-                  members: [
-                    ...newMembers,
-                    oldMember.copyWith(
-                      user: event.user,
-                    ),
-                  ],
-                  membership: isCurrentUser
-                      ? _channel.membership?.copyWith(user: event.user)
-                      : null,
-                ),
-              );
             }
           },
         ),
@@ -3271,24 +3277,6 @@ class ChannelClientState {
 bool _pinIsValid(Message message) {
   final now = DateTime.now();
   return message.pinExpires!.isAfter(now);
-}
-
-extension on Iterable<Message> {
-  Iterable<Message> merge(Iterable<Message>? other) {
-    if (other == null) return this;
-
-    final messageMap = {for (final message in this) message.id: message};
-
-    for (final message in other) {
-      messageMap.update(
-        message.id,
-        message.syncWith,
-        ifAbsent: () => message,
-      );
-    }
-
-    return messageMap.values;
-  }
 }
 
 /// Extension methods for checking channel capabilities on a Channel instance.
