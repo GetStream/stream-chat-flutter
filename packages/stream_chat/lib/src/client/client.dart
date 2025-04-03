@@ -2047,6 +2047,7 @@ class ClientState {
     channels = channels..remove(channelCid);
   }
 
+  @visibleForTesting
   set blockedUserIds(List<String> blockedUserIds) {
     currentUser = currentUser?.copyWith(blockedUserIds: blockedUserIds);
   }
