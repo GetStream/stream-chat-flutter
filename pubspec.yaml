@@ -9,3 +9,4 @@ dev_dependencies:
   melos: ^6.2.0
   path: ^1.9.0
   recase: ^4.1.0
+  yaml: ^3.1.3
