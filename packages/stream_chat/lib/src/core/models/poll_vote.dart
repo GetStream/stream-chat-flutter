@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 
 part 'poll_vote.g.dart';
@@ -8,7 +9,7 @@ part 'poll_vote.g.dart';
 /// A model class representing a poll vote.
 /// {@endtemplate}
 @JsonSerializable()
-class PollVote extends Equatable {
+class PollVote extends Equatable with ComparableFieldProvider {
   /// {@macro streamPollVote}
   PollVote({
     this.id,
@@ -104,4 +105,39 @@ class PollVote extends Equatable {
         userId,
         user,
       ];
+
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      PollVoteSortKey.id => id,
+      PollVoteSortKey.createdAt => createdAt,
+      PollVoteSortKey.updatedAt => updatedAt,
+      PollVoteSortKey.answerText => answerText,
+      _ => null,
+    };
+
+    return ComparableField.fromValue(value);
+  }
+}
+
+/// Extension type representing sortable fields for [PollVote].
+///
+/// This type provides type-safe keys that can be used for sorting poll votes
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const PollVoteSortKey(String key) implements String {
+  /// Sort poll votes by their ID.
+  static const id = PollVoteSortKey('id');
+
+  /// Sort poll votes by their creation date.
+  ///
+  /// This is the default sort field (in ascending order).
+  static const createdAt = PollVoteSortKey('created_at');
+
+  /// Sort poll votes by their last update date.
+  static const updatedAt = PollVoteSortKey('updated_at');
+
+  /// Sort poll votes by their answer text.
+  ///
+  /// Only applicable for votes that have answer text.
+  static const answerText = PollVoteSortKey('answer_text');
 }

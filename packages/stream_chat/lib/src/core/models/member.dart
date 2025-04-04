@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
@@ -8,7 +9,7 @@ part 'member.g.dart';
 /// The class that contains the information about the user membership
 /// in a channel
 @JsonSerializable()
-class Member extends Equatable {
+class Member extends Equatable implements ComparableFieldProvider {
   /// Constructor used for json serialization
   Member({
     this.user,
@@ -144,4 +145,37 @@ class Member extends Equatable {
         updatedAt,
         extraData,
       ];
+
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      MemberSortKey.createdAt => createdAt,
+      MemberSortKey.userId => userId,
+      MemberSortKey.name => user?.name,
+      MemberSortKey.channelRole => channelRole,
+      _ => extraData[sortKey],
+    };
+
+    return ComparableField.fromValue(value);
+  }
+}
+
+/// Extension type representing sortable fields for [Member].
+///
+/// This type provides type-safe keys that can be used for sorting members
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const MemberSortKey(String key) implements String {
+  /// Sort members by their creation date in the channel.
+  static const createdAt = MemberSortKey('created_at');
+
+  /// Sort members by the user ID.
+  static const userId = MemberSortKey('user_id');
+
+  /// Sort members by user name.
+  ///
+  /// Note: This requires additional database joins and might be slower.
+  static const name = MemberSortKey('name');
+
+  /// Sort members by the channel role.
+  static const channelRole = MemberSortKey('channel_role');
 }

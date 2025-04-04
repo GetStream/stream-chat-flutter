@@ -2067,7 +2067,7 @@ void main() {
 
     test('`.queryPolls`', () async {
       final filter = Filter.in_('id', const ['test-poll-id']);
-      final sort = [const SortOption('created_at')];
+      final sort = [const SortOption<Poll>('created_at')];
       const pagination = PaginationParams(limit: 20);
 
       final polls = List.generate(
@@ -2109,7 +2109,7 @@ void main() {
     test('`.queryPollVotes`', () async {
       const pollId = 'test-poll-id';
       final filter = Filter.in_('id', const ['test-vote-id']);
-      final sort = [const SortOption('created_at')];
+      final sort = [const SortOption<PollVote>('created_at')];
       const pagination = PaginationParams(limit: 20);
 
       final votes = List.generate(

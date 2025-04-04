@@ -6,13 +6,15 @@ part of 'requests.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SortOption<T> _$SortOptionFromJson<T>(Map<String, dynamic> json) =>
+SortOption<T> _$SortOptionFromJson<T extends ComparableFieldProvider>(
+        Map<String, dynamic> json) =>
     SortOption<T>(
       json['field'] as String,
       direction: (json['direction'] as num?)?.toInt() ?? SortOption.DESC,
     );
 
-Map<String, dynamic> _$SortOptionToJson<T>(SortOption<T> instance) =>
+Map<String, dynamic> _$SortOptionToJson<T extends ComparableFieldProvider>(
+        SortOption<T> instance) =>
     <String, dynamic>{
       'field': instance.field,
       'direction': instance.direction,

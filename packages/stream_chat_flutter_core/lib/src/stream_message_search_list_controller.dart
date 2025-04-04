@@ -101,8 +101,8 @@ class StreamMessageSearchListController
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final List<SortOption>? sort;
-  List<SortOption>? _activeSort;
+  final Sort? sort;
+  Sort? _activeSort;
 
   /// The limit to apply to the user list. The default is set to
   /// [defaultUserPagedLimit].
@@ -130,7 +130,7 @@ class StreamMessageSearchListController
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(List<SortOption>? value) => _activeSort = value;
+  set sort(Sort? value) => _activeSort = value;
 
   @override
   Future<void> doInitialLoad() async {

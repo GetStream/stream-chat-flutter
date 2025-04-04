@@ -1,11 +1,17 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 
 /// The default channel page limit to load.
 const defaultUserPagedLimit = 10;
+
+/// The default sort used for the user list.
+const defaultUserListSort = [
+  SortOption<User>(UserSortKey.createdAt),
+];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -31,7 +37,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
   StreamUserListController({
     required this.client,
     this.filter,
-    this.sort,
+    this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
   })  : _activeFilter = filter,
@@ -43,7 +49,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
     super.value, {
     required this.client,
     this.filter,
-    this.sort,
+    this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
   })  : _activeFilter = filter,
@@ -66,8 +72,8 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final List<SortOption>? sort;
-  List<SortOption>? _activeSort;
+  final Sort<User>? sort;
+  Sort<User>? _activeSort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
@@ -86,7 +92,20 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(List<SortOption>? value) => _activeSort = value;
+  set sort(Sort<User>? value) => _activeSort = value;
+
+  @override
+  set value(PagedValue<int, User> newValue) {
+    super.value = switch (_activeSort) {
+      null => newValue,
+      final userSort => newValue.maybeMap(
+          orElse: () => newValue,
+          (success) => success.copyWith(
+            items: success.items.sorted(userSort.compare),
+          ),
+        ),
+    };
+  }
 
   @override
   Future<void> doInitialLoad() async {

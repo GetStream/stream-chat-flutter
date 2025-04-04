@@ -66,5 +66,169 @@ void main() {
         jsonFixture('channel_state_to_json.json'),
       );
     });
+
+    group('ComparableFieldProvider', () {
+      test('should return ComparableField for channel.lastMessageAt', () {
+        final channelState = createChannelState(
+          id: 'test-channel',
+          lastMessageAt: DateTime(2023, 6, 15),
+        );
+
+        final field = channelState.getComparableField(
+          ChannelSortKey.lastMessageAt,
+        );
+
+        expect(field, isNotNull);
+        expect(field!.value, equals(DateTime(2023, 6, 15)));
+      });
+
+      test('should return ComparableField for channel.createdAt', () {
+        final channelState = createChannelState(
+          id: 'test-channel',
+          createdAt: DateTime(2023, 6, 10),
+        );
+
+        final field = channelState.getComparableField(ChannelSortKey.createdAt);
+        expect(field, isNotNull);
+        expect(field!.value, equals(DateTime(2023, 6, 10)));
+      });
+
+      test('should return ComparableField for channel.updatedAt', () {
+        final channelState = createChannelState(
+          id: 'test-channel',
+          updatedAt: DateTime(2023, 6, 12),
+        );
+
+        final field = channelState.getComparableField(ChannelSortKey.updatedAt);
+        expect(field, isNotNull);
+        expect(field!.value, equals(DateTime(2023, 6, 12)));
+      });
+
+      test('should return ComparableField for channel.memberCount', () {
+        final channelState = createChannelState(
+          id: 'test-channel',
+          memberCount: 42,
+        );
+
+        final field =
+            channelState.getComparableField(ChannelSortKey.memberCount);
+        expect(field, isNotNull);
+        expect(field!.value, equals(42));
+      });
+
+      test('should return ComparableField for channel.extraData', () {
+        final channelState = createChannelState(
+          id: 'test-channel',
+          extraData: {'priority': 5},
+        );
+
+        final field = channelState.getComparableField('priority');
+        expect(field, isNotNull);
+        expect(field!.value, equals(5));
+      });
+
+      test('should return null for non-existent extraData keys', () {
+        final channelState = createChannelState(
+          id: 'test-channel',
+        );
+
+        final field = channelState.getComparableField('non_existent_key');
+        expect(field, isNull);
+      });
+
+      test('should compare two channel states correctly using createdAt', () {
+        final newerChannel = createChannelState(
+          id: 'newer',
+          createdAt: DateTime(2023, 6, 15),
+        );
+
+        final olderChannel = createChannelState(
+          id: 'older',
+          createdAt: DateTime(2023, 6, 10),
+        );
+
+        final newerField = newerChannel.getComparableField(
+          ChannelSortKey.createdAt,
+        );
+
+        final olderField = olderChannel.getComparableField(
+          ChannelSortKey.createdAt,
+        );
+
+        expect(newerField!.compareTo(olderField!), greaterThan(0));
+        expect(olderField.compareTo(newerField), lessThan(0));
+      });
+
+      test('should compare two channel states correctly using memberCount', () {
+        final largerChannel = createChannelState(
+          id: 'larger',
+          memberCount: 100,
+        );
+
+        final smallerChannel = createChannelState(
+          id: 'smaller',
+          memberCount: 50,
+        );
+
+        final largerField = largerChannel.getComparableField(
+          ChannelSortKey.memberCount,
+        );
+
+        final smallerField = smallerChannel.getComparableField(
+          ChannelSortKey.memberCount,
+        );
+
+        expect(largerField!.compareTo(smallerField!), greaterThan(0));
+        expect(smallerField.compareTo(largerField), lessThan(0));
+      });
+
+      test('should compare two channel states correctly using extraData', () {
+        final highPriorityChannel = createChannelState(
+          id: 'high-priority',
+          extraData: {'priority': 10},
+        );
+
+        final lowPriorityChannel = createChannelState(
+          id: 'low-priority',
+          extraData: {'priority': 1},
+        );
+
+        final highPriorityField = highPriorityChannel.getComparableField(
+          'priority',
+        );
+
+        final lowPriorityField = lowPriorityChannel.getComparableField(
+          'priority',
+        );
+
+        expect(highPriorityField!.compareTo(lowPriorityField!), greaterThan(0));
+        expect(lowPriorityField.compareTo(highPriorityField), lessThan(0));
+      });
+    });
   });
+}
+
+/// Helper function to create a ChannelState for testing
+ChannelState createChannelState({
+  required String id,
+  String type = 'messaging',
+  DateTime? createdAt,
+  DateTime? updatedAt,
+  DateTime? lastMessageAt,
+  int? memberCount,
+  Map<String, Object?>? extraData,
+}) {
+  return ChannelState(
+    channel: ChannelModel(
+      cid: '$type:$id',
+      id: id,
+      type: type,
+      lastMessageAt: lastMessageAt,
+      createdAt: createdAt ?? DateTime(2023),
+      updatedAt: updatedAt ?? DateTime(2023),
+      memberCount: memberCount ?? 0,
+      extraData: extraData ?? {},
+    ),
+    membership: Member(userId: 'user1'),
+  );
 }

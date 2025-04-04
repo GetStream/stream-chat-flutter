@@ -251,19 +251,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    List<SortOption<ChannelState>>? channelStateSort,
+    Sort<ChannelState>? channelStateSort,
     PaginationParams? paginationParams,
   }) async {
     assert(_debugIsConnected, '');
-    assert(() {
-      if (channelStateSort?.any((it) => it.comparator == null) ?? false) {
-        throw ArgumentError(
-          'SortOption requires a comparator in order to sort',
-        );
-      }
-      return true;
-    }(), '');
-
     _logger.info('getChannelStates');
 
     final channels = await db!.channelQueryDao.getChannels(filter: filter);
@@ -273,13 +264,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     );
 
     // Sort the channel states
-    var comparator = _defaultChannelStateComparator;
     if (channelStateSort != null && channelStateSort.isNotEmpty) {
-      comparator = _combineComparators(
-        channelStateSort.map((it) => it.comparator).withNullifyer,
-      );
+      channelStates.sort(channelStateSort.compare);
     }
-    channelStates.sort(comparator);
 
     final offset = paginationParams?.offset;
     if (offset != null && offset > 0 && channelStates.isNotEmpty) {
@@ -444,37 +431,5 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       await db!.disconnect();
       db = null;
     }
-  }
-}
-
-// Creates a new combined [Comparator] which sorts items
-// by the given [comparators].
-Comparator<T> _combineComparators<T>(Iterable<Comparator<T>> comparators) {
-  return (T a, T b) {
-    for (final comparator in comparators) {
-      try {
-        final result = comparator(a, b);
-        if (result != 0) return result;
-      } catch (e) {
-        // If the comparator throws an exception, we ignore it and
-        // continue with the next comparator.
-        continue;
-      }
-    }
-    return 0;
-  };
-}
-
-// The default [Comparator] used to sort [ChannelState]s.
-int _defaultChannelStateComparator(ChannelState a, ChannelState b) {
-  final dateA = a.channel?.lastMessageAt ?? a.channel?.createdAt;
-  final dateB = b.channel?.lastMessageAt ?? b.channel?.createdAt;
-
-  if (dateA == null && dateB == null) return 0;
-  if (dateA == null) return 1;
-  if (dateB == null) {
-    return -1;
-  } else {
-    return dateB.compareTo(dateA);
   }
 }

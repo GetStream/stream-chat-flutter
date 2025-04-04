@@ -17,7 +17,7 @@ class UserApi {
   Future<QueryUsersResponse> queryUsers({
     bool presence = false,
     Filter? filter,
-    List<SortOption>? sort,
+    Sort<User>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(

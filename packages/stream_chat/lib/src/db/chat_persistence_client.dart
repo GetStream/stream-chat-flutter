@@ -104,7 +104,7 @@ abstract class ChatPersistenceClient {
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    List<SortOption<ChannelState>>? channelStateSort,
+    Sort<ChannelState>? channelStateSort,
     PaginationParams? paginationParams,
   });
 

@@ -32,7 +32,7 @@ class GeneralApi {
   Future<SearchMessagesResponse> searchMessages(
     Filter filter, {
     String? query,
-    List<SortOption>? sort,
+    Sort? sort,
     PaginationParams? pagination,
     Filter? messageFilters,
   }) async {
@@ -75,7 +75,7 @@ class GeneralApi {
     Filter? filter,
     String? channelId,
     List<Member>? members,
-    List<SortOption>? sort,
+    Sort<Member>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(
