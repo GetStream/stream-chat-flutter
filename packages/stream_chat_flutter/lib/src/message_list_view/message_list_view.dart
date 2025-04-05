@@ -923,10 +923,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       // Wait for the frame to be rendered with the updated channel state.
       await WidgetsBinding.instance.endOfFrame;
-    }
-
-    // Scroll to the end of the list.
-    if (_scrollController?.isAttached == true) {
+    } else if (_scrollController?.isAttached == true) {
+      // Scroll to the end of the list.
       _scrollController!.scrollTo(
         index: max(
             messages.toList().indexWhere((element) =>
@@ -953,10 +951,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       // Wait for the frame to be rendered with the updated channel state.
       await WidgetsBinding.instance.endOfFrame;
-    }
-
-    // Scroll to the end of the list.
-    if (_scrollController?.isAttached == true) {
+    } else if (_scrollController?.isAttached == true) {
+      // Scroll to the end of the list.
       _scrollController!.scrollTo(
         index: max(
             messages
