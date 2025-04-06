@@ -4,6 +4,9 @@
 
 - [[#2150]](https://github.com/GetStream/stream-chat-flutter/issues/2150) Fixed Push notifications
   for mentions shows user ID instead of Username.
+- [[#2187]](https://github.com/GetStream/stream-chat-flutter/issues/2187) Fixed issue of StreamMessageListView
+  scrolling back up after reaching bottom when unread indicator or scroll to bottom button tapped
+  
 
 ## 9.7.0
 
