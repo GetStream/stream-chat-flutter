@@ -19,6 +19,9 @@ void main() {
       expect(event.unreadThreadMessages, 2);
       expect(event.unreadThreads, 3);
       expect(event.channelLastMessageAt, isA<DateTime>());
+      expect(event.lastReadAt, null);
+      expect(event.unreadMessages, null);
+      expect(event.lastReadMessageId, null);
     });
 
     test('should serialize to json correctly', () {
@@ -38,6 +41,9 @@ void main() {
         unreadThreadMessages: 2,
         unreadThreads: 3,
         channelLastMessageAt: DateTime.parse('2019-03-27T17:40:17.155892Z'),
+        lastReadAt: DateTime.parse('2020-02-10T10:00:00.000Z'),
+        unreadMessages: 5,
+        lastReadMessageId: 'last-read-message-id',
       );
 
       expect(
@@ -69,6 +75,9 @@ void main() {
           'unread_thread_messages': 2,
           'unread_threads': 3,
           'channel_last_message_at': '2019-03-27T17:40:17.155892Z',
+          'last_read_at': '2020-02-10T10:00:00.000Z',
+          'unread_messages': 5,
+          'last_read_message_id': 'last-read-message-id',
         },
       );
     });
@@ -86,6 +95,9 @@ void main() {
       expect(newEvent.unreadThreadMessages, 2);
       expect(newEvent.unreadThreads, 3);
       expect(newEvent.channelLastMessageAt, isA<DateTime>());
+      expect(newEvent.lastReadAt, null);
+      expect(newEvent.unreadMessages, null);
+      expect(newEvent.lastReadMessageId, null);
 
       newEvent = event.copyWith(
         type: 'test',
@@ -99,6 +111,9 @@ void main() {
         unreadThreadMessages: 6,
         unreadThreads: 7,
         channelLastMessageAt: DateTime.parse('2020-01-29T03:22:47.636130Z'),
+        lastReadAt: DateTime.parse('2020-02-10T10:00:00.000000Z'),
+        unreadMessages: 5,
+        lastReadMessageId: 'last-read-message-id',
       );
 
       expect(newEvent.channelType, 'testtype');
@@ -115,6 +130,12 @@ void main() {
         newEvent.channelLastMessageAt,
         DateTime.parse('2020-01-29T03:22:47.636130Z'),
       );
+      expect(
+        newEvent.lastReadAt,
+        DateTime.parse('2020-02-10T10:00:00.000000Z'),
+      );
+      expect(newEvent.unreadMessages, 5);
+      expect(newEvent.lastReadMessageId, 'last-read-message-id');
     });
   });
 }
