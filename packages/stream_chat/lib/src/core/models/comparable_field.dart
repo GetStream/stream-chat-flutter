@@ -37,7 +37,7 @@ class ComparableField<T> implements Comparable<ComparableField<T>> {
 ///
 /// Classes that implement this mixin can be used in sorting operations
 /// where the sort key is determined at runtime.
-mixin ComparableFieldProvider {
+abstract interface class ComparableFieldProvider {
   /// Gets a comparable field value for the given [sortKey].
   ///
   /// Returns a [ComparableField] or null if no comparable field with the given

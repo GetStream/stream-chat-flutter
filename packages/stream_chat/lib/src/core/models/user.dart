@@ -7,7 +7,7 @@ part 'user.g.dart';
 
 /// Class that defines a Stream Chat User.
 @JsonSerializable()
-class User extends Equatable with ComparableFieldProvider {
+class User extends Equatable implements ComparableFieldProvider {
   /// Creates a new user.
   ///
   /// {@template name}

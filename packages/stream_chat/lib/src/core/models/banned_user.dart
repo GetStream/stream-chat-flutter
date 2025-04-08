@@ -8,7 +8,7 @@ part 'banned_user.g.dart';
 
 /// Contains information about a [User] that was banned from a [Channel] or App.
 @JsonSerializable()
-class BannedUser extends Equatable with ComparableFieldProvider {
+class BannedUser extends Equatable implements ComparableFieldProvider {
   /// Creates a new instance of [BannedUser]
   const BannedUser({
     required this.user,

@@ -20,7 +20,7 @@ const _nullConst = _NullConst();
 
 /// The class that contains the information about a message.
 @JsonSerializable()
-class Message extends Equatable with ComparableFieldProvider {
+class Message extends Equatable implements ComparableFieldProvider {
   /// Constructor used for json serialization.
   Message({
     String? id,

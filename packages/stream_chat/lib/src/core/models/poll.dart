@@ -33,7 +33,7 @@ enum VotingVisibility {
 /// A model class representing a poll.
 /// {@endtemplate}
 @JsonSerializable()
-class Poll extends Equatable with ComparableFieldProvider {
+class Poll extends Equatable implements ComparableFieldProvider {
   /// {@macro streamPoll}
   Poll({
     String? id,

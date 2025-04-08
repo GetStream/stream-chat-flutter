@@ -9,7 +9,7 @@ part 'poll_vote.g.dart';
 /// A model class representing a poll vote.
 /// {@endtemplate}
 @JsonSerializable()
-class PollVote extends Equatable with ComparableFieldProvider {
+class PollVote extends Equatable implements ComparableFieldProvider {
   /// {@macro streamPollVote}
   PollVote({
     this.id,

@@ -138,7 +138,7 @@ void main() {
 }
 
 /// Test implementation of ComparableFieldProvider
-class TestProvider with ComparableFieldProvider {
+class TestProvider implements ComparableFieldProvider {
   TestProvider({
     this.name = 'test',
     this.age = 0,

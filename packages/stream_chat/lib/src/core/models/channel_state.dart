@@ -10,7 +10,7 @@ part 'channel_state.g.dart';
 
 /// The class that contains the information about a channel
 @JsonSerializable()
-class ChannelState with ComparableFieldProvider {
+class ChannelState implements ComparableFieldProvider {
   /// Constructor used for json serialization
   ChannelState({
     this.channel,

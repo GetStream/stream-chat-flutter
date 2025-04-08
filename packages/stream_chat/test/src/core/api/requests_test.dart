@@ -6,7 +6,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 /// Simple test model that implements ComparableFieldProvider
-class TestModel with ComparableFieldProvider {
+class TestModel implements ComparableFieldProvider {
   const TestModel({
     this.name,
     this.age,
