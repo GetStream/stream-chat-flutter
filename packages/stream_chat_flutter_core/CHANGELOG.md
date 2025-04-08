@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChannelState.getFirstUnreadMessage` to get the first unread message in the channel.
+
 ## 9.7.0
 
 🐞 Fixed
