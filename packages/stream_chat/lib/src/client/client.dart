@@ -633,37 +633,63 @@ class StreamChatClient {
       paginationParams,
     ]);
 
+    // Return results from cache if available
     if (_queryChannelsStreams.containsKey(hash)) {
-      yield await _queryChannelsStreams[hash]!;
-    } else {
-      final channels = await queryChannelsOffline(
+      try {
+        yield await _queryChannelsStreams[hash]!;
+        return;
+      } catch (e, stk) {
+        logger.severe('Error retrieving cached query results', e, stk);
+        // Cache is invalid, continue with fresh query
+        _queryChannelsStreams.remove(hash);
+      }
+    }
+
+    // Get offline results first
+    var offlineChannels = <Channel>[];
+    try {
+      offlineChannels = await queryChannelsOffline(
         filter: filter,
         channelStateSort: channelStateSort,
         paginationParams: paginationParams,
       );
-      if (channels.isNotEmpty) yield channels;
 
-      try {
-        final newQueryChannelsFuture = queryChannelsOnline(
-          filter: filter,
-          sort: channelStateSort,
-          state: state,
-          watch: watch,
-          presence: presence,
-          memberLimit: memberLimit,
-          messageLimit: messageLimit,
-          paginationParams: paginationParams,
-          waitForConnect: waitForConnect,
-        ).whenComplete(() {
-          _queryChannelsStreams.remove(hash);
-        });
+      if (offlineChannels.isNotEmpty) yield offlineChannels;
+    } catch (e, stk) {
+      logger.warning('Error querying channels offline', e, stk);
+      // Continue to online query even if offline fails
+    }
 
-        _queryChannelsStreams[hash] = newQueryChannelsFuture;
+    try {
+      final newQueryChannelsFuture = queryChannelsOnline(
+        filter: filter,
+        sort: channelStateSort,
+        state: state,
+        watch: watch,
+        presence: presence,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        paginationParams: paginationParams,
+        waitForConnect: waitForConnect,
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          logger.warning('Online channel query timed out');
+          throw TimeoutException('Channel query timed out');
+        },
+      ).whenComplete(() {
+        // Always clean up cache reference when done
+        _queryChannelsStreams.remove(hash);
+      });
 
-        yield await newQueryChannelsFuture;
-      } catch (_) {
-        if (channels.isEmpty) rethrow;
-      }
+      // Store the future in cache
+      _queryChannelsStreams[hash] = newQueryChannelsFuture;
+
+      yield await newQueryChannelsFuture;
+    } catch (e, stk) {
+      logger.severe('Error querying channels online', e, stk);
+      // Only rethrow if we have no channels to show the user
+      if (offlineChannels.isEmpty) rethrow;
     }
   }
 
