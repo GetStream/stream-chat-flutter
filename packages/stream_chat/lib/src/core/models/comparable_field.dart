@@ -33,9 +33,9 @@ class ComparableField<T> implements Comparable<ComparableField<T>> {
   }
 }
 
-/// A mixin that provides a way to access comparable fields by string keys.
+/// A interface that provides a way to access comparable fields by string keys.
 ///
-/// Classes that implement this mixin can be used in sorting operations
+/// Classes that implement this class can be used in sorting operations
 /// where the sort key is determined at runtime.
 abstract interface class ComparableFieldProvider {
   /// Gets a comparable field value for the given [sortKey].
