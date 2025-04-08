@@ -609,7 +609,7 @@ class StreamChatClient {
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
-    Sort<ChannelState>? channelStateSort,
+    SortOrder<ChannelState>? channelStateSort,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -718,7 +718,7 @@ class StreamChatClient {
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
-    Sort<ChannelState>? sort,
+    SortOrder<ChannelState>? sort,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -792,7 +792,7 @@ class StreamChatClient {
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
     Filter? filter,
-    Sort<ChannelState>? channelStateSort,
+    SortOrder<ChannelState>? channelStateSort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final offlineChannels = (await chatPersistenceClient?.getChannelStates(
@@ -831,7 +831,7 @@ class StreamChatClient {
   Future<QueryUsersResponse> queryUsers({
     bool? presence,
     Filter? filter,
-    Sort<User>? sort,
+    SortOrder<User>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _chatApi.user.queryUsers(
@@ -847,7 +847,7 @@ class StreamChatClient {
   /// Query banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
     required Filter filter,
-    Sort<BannedUser>? sort,
+    SortOrder<BannedUser>? sort,
     PaginationParams? pagination,
   }) =>
       _chatApi.moderation.queryBannedUsers(
@@ -860,7 +860,7 @@ class StreamChatClient {
   Future<SearchMessagesResponse> search(
     Filter filter, {
     String? query,
-    Sort? sort,
+    SortOrder? sort,
     PaginationParams? paginationParams,
     Filter? messageFilters,
   }) =>
@@ -1065,7 +1065,7 @@ class StreamChatClient {
     Filter? filter,
     String? channelId,
     List<Member>? members,
-    Sort<Member>? sort,
+    SortOrder<Member>? sort,
     PaginationParams? pagination,
   }) =>
       _chatApi.general.queryMembers(
@@ -1386,7 +1386,7 @@ class StreamChatClient {
   /// Queries Polls with the given [filter] and [sort] options.
   Future<QueryPollsResponse> queryPolls({
     Filter? filter,
-    Sort<Poll>? sort,
+    SortOrder<Poll>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) =>
       _chatApi.polls.queryPolls(
@@ -1400,7 +1400,7 @@ class StreamChatClient {
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
     Filter? filter,
-    Sort<PollVote>? sort,
+    SortOrder<PollVote>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) =>
       _chatApi.polls.queryPollVotes(

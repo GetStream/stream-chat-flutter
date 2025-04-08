@@ -79,8 +79,8 @@ class StreamPollVoteListController
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final Sort<PollVote>? sort;
-  Sort<PollVote>? _activeSort;
+  final SortOrder<PollVote>? sort;
+  SortOrder<PollVote>? _activeSort;
 
   /// The limit to apply to the poll vote list. The default is set to
   /// [defaultPollVotePagedLimit].
@@ -96,7 +96,7 @@ class StreamPollVoteListController
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(Sort<PollVote>? value) => _activeSort = value;
+  set sort(SortOrder<PollVote>? value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, PollVote> newValue) {

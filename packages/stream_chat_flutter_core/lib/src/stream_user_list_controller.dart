@@ -72,8 +72,8 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final Sort<User>? sort;
-  Sort<User>? _activeSort;
+  final SortOrder<User>? sort;
+  SortOrder<User>? _activeSort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
@@ -92,7 +92,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(Sort<User>? value) => _activeSort = value;
+  set sort(SortOrder<User>? value) => _activeSort = value;
 
   @override
   set value(PagedValue<int, User> newValue) {

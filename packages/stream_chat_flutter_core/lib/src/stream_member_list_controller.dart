@@ -70,8 +70,8 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final Sort<Member>? sort;
-  Sort<Member>? _activeSort;
+  final SortOrder<Member>? sort;
+  SortOrder<Member>? _activeSort;
 
   /// The limit to apply to the member list. The default is set to
   /// [defaultMemberPagedLimit].
@@ -87,7 +87,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(Sort<Member>? value) => _activeSort = value;
+  set sort(SortOrder<Member>? value) => _activeSort = value;
 
   @override
   set value(PagedValue<int, Member> newValue) {

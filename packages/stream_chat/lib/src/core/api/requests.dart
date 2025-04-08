@@ -12,10 +12,11 @@ part 'requests.g.dart';
 /// until a non-equal comparison is found.
 ///
 /// Example: `Sort<ChannelState>([pinnedAtSort, lastMessageAtSort])`
-typedef Sort<T extends ComparableFieldProvider> = List<SortOption<T>>;
+typedef SortOrder<T extends ComparableFieldProvider> = List<SortOption<T>>;
 
-/// Extension that allows a [Sort] to be used as a comparator function.
-extension CompositeComparator<T extends ComparableFieldProvider> on Sort<T> {
+/// Extension that allows a [SortOrder] to be used as a comparator function.
+extension CompositeComparator<T extends ComparableFieldProvider>
+    on SortOrder<T> {
   /// Compares two objects using all sort options in sequence.
   ///
   /// Returns the first non-zero comparison result, or 0 if all comparisons

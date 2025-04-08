@@ -162,7 +162,7 @@ class PollsApi {
   /// parameters.
   Future<QueryPollsResponse> queryPolls({
     Filter? filter,
-    Sort<Poll>? sort,
+    SortOrder<Poll>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) async {
     final response = await _client.post(
@@ -181,7 +181,7 @@ class PollsApi {
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
     Filter? filter,
-    Sort<PollVote>? sort,
+    SortOrder<PollVote>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) async {
     final response = await _client.post(

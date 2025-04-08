@@ -93,7 +93,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// created_at or member_count.
   ///
   /// Direction can be ascending or descending.
-  final Sort<ChannelState>? channelStateSort;
+  final SortOrder<ChannelState>? channelStateSort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
