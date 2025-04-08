@@ -420,4 +420,268 @@ void main() {
       expect(find.text('Channel Content'), findsOneWidget);
     },
   );
+
+  group('getFirstUnreadMessage', () {
+    final mockChannel = MockChannel();
+    tearDownAll(mockChannel.dispose);
+
+    setUp(() {
+      when(() => mockChannel.cid).thenReturn('test:channel1');
+
+      when(
+        () => mockChannel.query(
+          preferOffline: any(named: 'preferOffline'),
+          messagesPagination: any(named: 'messagesPagination'),
+        ),
+      ).thenAnswer((_) async => ChannelState());
+    });
+
+    tearDown(() => reset(mockChannel));
+
+    Future<StreamChannelState> _pumpStreamChannel(WidgetTester tester) async {
+      StreamChannelState? channelState;
+
+      // Build a widget that accesses the channel state
+      final testWidget = MaterialApp(
+        home: Scaffold(
+          body: StreamChannel(
+            channel: mockChannel,
+            child: Builder(
+              builder: (context) {
+                // Access the channel state
+                channelState = StreamChannel.of(context);
+                return const Text('Channel Content');
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(testWidget);
+      await tester.pumpAndSettle();
+
+      // Verify we can access the channel state
+      expect(channelState, isNotNull);
+
+      return channelState!;
+    }
+
+    testWidgets(
+      'Returns null when messages list is empty',
+      (tester) async {
+        when(() => mockChannel.state.messages).thenReturn([]);
+        when(() => mockChannel.state.unreadCount).thenReturn(0);
+
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        expect(streamChannel.getFirstUnreadMessage(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Returns null when there are no unread messages',
+      (tester) async {
+        final mockRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now(),
+          unreadMessages: 0,
+          lastReadMessageId: 'message1',
+        );
+
+        final messages = [
+          Message(
+            id: 'message1',
+            createdAt: DateTime.now(),
+            user: User(id: 'testUserId'),
+          ),
+        ];
+
+        when(() => mockChannel.state.unreadCount).thenReturn(0);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
+
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        expect(streamChannel.getFirstUnreadMessage(mockRead), isNull);
+      },
+    );
+
+    testWidgets(
+      'Returns null when last read message is the last message',
+      (tester) async {
+        final lastMessage = Message(
+          id: 'message2',
+          createdAt: DateTime.now(),
+          user: User(id: 'otherUserId'),
+        );
+
+        final mockRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now(),
+          unreadMessages: 1,
+          lastReadMessageId: lastMessage.id,
+        );
+
+        final messages = [
+          Message(
+            id: 'message1',
+            createdAt: DateTime.now(),
+            user: User(id: 'otherUserId'),
+          ),
+          lastMessage,
+        ];
+
+        when(() => mockChannel.state.unreadCount).thenReturn(1);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
+
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        expect(streamChannel.getFirstUnreadMessage(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Returns first unread message after last read',
+      (tester) async {
+        final unreadMessage = Message(
+          id: 'message3',
+          createdAt: DateTime.now(),
+          user: User(id: 'otherUserId'),
+        );
+
+        final mockRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now().subtract(const Duration(hours: 1)),
+          unreadMessages: 1,
+          lastReadMessageId: 'message1',
+        );
+
+        final messages = [
+          Message(
+            id: 'message1',
+            createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+            user: User(id: 'otherUserId'),
+          ),
+          Message(
+            id: 'message2',
+            createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
+            // This is from current user, should skip
+            user: User(id: 'testUserId'),
+          ),
+          unreadMessage,
+        ];
+
+        when(() => mockChannel.state.unreadCount).thenReturn(1);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
+
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        expect(streamChannel.getFirstUnreadMessage(), equals(unreadMessage));
+      },
+    );
+
+    testWidgets(
+      'Skips deleted messages',
+      (tester) async {
+        final regularUnreadMessage = Message(
+          id: 'message4',
+          createdAt: DateTime.now(),
+          user: User(id: 'otherUserId'),
+        );
+
+        final mockRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now().subtract(const Duration(hours: 1)),
+          unreadMessages: 2,
+          lastReadMessageId: 'message1',
+        );
+
+        final messages = [
+          Message(
+            id: 'message1',
+            createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+            user: User(id: 'otherUserId'),
+          ),
+          Message(
+            id: 'message2',
+            createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
+            type: MessageType.deleted, // Deleted message, should skip
+            user: User(id: 'otherUserId'),
+            deletedAt: DateTime.now(),
+          ),
+          Message(
+            id: 'message3',
+            createdAt: DateTime.now().subtract(const Duration(minutes: 15)),
+            type: MessageType.deleted, // Deleted message, should skip
+            user: User(id: 'otherUserId'),
+          ),
+          regularUnreadMessage,
+        ];
+
+        when(() => mockChannel.state.unreadCount).thenReturn(2);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
+
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        expect(
+          streamChannel.getFirstUnreadMessage(),
+          equals(regularUnreadMessage),
+        );
+      },
+    );
+
+    testWidgets(
+      'Can accept custom read object parameter',
+      (tester) async {
+        final unreadMessage = Message(
+          id: 'message2',
+          createdAt: DateTime.now(),
+          user: User(id: 'otherUserId'),
+        );
+
+        // Default read in channel state (no unread)
+        final defaultRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now(),
+          unreadMessages: 0,
+          lastReadMessageId: 'message2',
+        );
+
+        // Custom read to pass to the method (has unread)
+        final customRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now().subtract(const Duration(hours: 1)),
+          unreadMessages: 1,
+          lastReadMessageId: 'message1',
+        );
+
+        final messages = [
+          Message(
+            id: 'message1',
+            createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+            user: User(id: 'otherUserId'),
+          ),
+          unreadMessage,
+        ];
+
+        when(() => mockChannel.state.unreadCount).thenReturn(0);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(defaultRead);
+
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        // With default read - should return null
+        expect(streamChannel.getFirstUnreadMessage(), isNull);
+
+        // With custom read - should return unreadMessage
+        expect(
+          streamChannel.getFirstUnreadMessage(customRead),
+          equals(unreadMessage),
+        );
+      },
+    );
+  });
 }

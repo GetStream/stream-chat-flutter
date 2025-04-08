@@ -501,9 +501,7 @@ class StreamChannelState extends State<StreamChannel> {
     // Otherwise, we should load the channel at the first unread
     // message if available.
     if (channel.state case final state? when state.unreadCount > 0) {
-      final currentUserRead = state.read.firstWhereOrNull(
-        (it) => it.user.id == channel.client.state.currentUser?.id,
-      );
+      final currentUserRead = state.currentUserRead;
 
       // Skip if we don't have read state for the current user.
       if (currentUserRead == null) return;
