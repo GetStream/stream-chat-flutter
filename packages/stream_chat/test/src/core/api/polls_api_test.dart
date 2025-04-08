@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';

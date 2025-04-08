@@ -9,6 +9,7 @@ import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/api/stream_chat_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';

@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_redundant_argument_values
 
-import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
