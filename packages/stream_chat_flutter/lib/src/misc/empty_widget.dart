@@ -14,7 +14,10 @@ import 'package:flutter/widgets.dart';
 ///
 /// See also:
 ///  * [SizedBox.shrink], the underlying widget used by this extension type
-extension type const Empty._(Widget widget) implements Widget {
+class Empty extends StatelessWidget {
   /// Creates a widget that renders nothing and takes up no space.
-  const Empty() : this._(const SizedBox.shrink());
+  const Empty({super.key});
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
