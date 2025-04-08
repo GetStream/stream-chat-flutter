@@ -11,7 +11,7 @@ typedef OnUnreadIndicatorDismissTap = Future<void> Function();
 
 /// Function signature for handling taps on the unread indicator.
 /// [lastReadMessageId] is the ID of the last read message.
-typedef OnUnreadIndicatorTap = Future<void> Function(String lastReadMessageId);
+typedef OnUnreadIndicatorTap = Future<void> Function(String? lastReadMessageId);
 
 /// Function signature for building a custom unread indicator.
 ///
@@ -83,10 +83,7 @@ class UnreadIndicatorButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
           ),
           child: InkWell(
-            onTap: switch (currentUserRead.lastReadMessageId) {
-              final messageId? => () => onTap(messageId),
-              _ => null,
-            },
+            onTap: () => onTap(currentUserRead.lastReadMessageId),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 2, 8, 2),
               child: Row(

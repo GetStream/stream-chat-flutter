@@ -393,8 +393,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   StreamSubscription? _messageNewListener;
   StreamSubscription? _userReadListener;
 
-  Read? _userRead;
-  Message? _oldestUnreadMessage;
+  Message? _firstUnreadMessage;
 
   @override
   void initState() {
@@ -418,12 +417,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
 
-      _userRead = streamChannel?.channel.state!.currentUserRead;
-
       _messageNewListener?.cancel();
       _userReadListener?.cancel();
 
       unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
+      _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
+
       initialIndex = getInitialIndex(
         widget.initialScrollIndex,
         streamChannel!,
@@ -457,19 +456,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
       });
 
-      _userReadListener =
-          streamChannel!.channel.state?.readStream.listen((event) {
-        setState(() {
+      _userReadListener = streamChannel!.channel.state?.readStream.listen(
+        (event) => setState(() {
           unreadCount = streamChannel!.channel.state?.unreadCount ?? 0;
-          _userRead = streamChannel!.channel.state?.currentUserRead;
-        });
-      });
+          _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
+        }),
+      );
 
       if (_isThreadConversation) {
         streamChannel!.getReplies(widget.parentMessage!.id);
       }
-
-      unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
     }
   }
 
@@ -532,8 +528,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
-
-    _oldestUnreadMessage = messages.lastUnreadMessage(_userRead);
 
     for (var index = 0; index < messages.length; index++) {
       messagesIndex[messages[index].id] = index;
@@ -671,6 +665,25 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   //     Footer         ->        0                                             (count-8)
 
                   separatorBuilder: (context, i) {
+                    Widget maybeBuildWithUnreadMessagesSeparator({
+                      required Message message,
+                      required Widget separator,
+                    }) {
+                      if (unreadCount == 0) return separator;
+                      if (_isThreadConversation) return separator;
+                      if (_firstUnreadMessage?.id != message.id) {
+                        return separator;
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          separator,
+                          _buildUnreadMessagesSeparator(unreadCount),
+                        ],
+                      );
+                    }
+
                     if (i == itemCount - 2) {
                       if (widget.parentMessage == null) {
                         return const Empty();
@@ -690,8 +703,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                           ? widget.headerBuilder == null
                           : widget.footerBuilder == null) {
                         if (messages.isNotEmpty) {
-                          return _buildDateDivider(messages.last);
+                          final message = messages.last;
+                          return maybeBuildWithUnreadMessagesSeparator(
+                            message: message,
+                            separator: _buildDateDivider(message),
+                          );
                         }
+
                         if (_isThreadConversation) return const Empty();
                         return const SizedBox(height: 52);
                       }
@@ -759,21 +777,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       );
                     }
 
-                    if (!isPartOfThread &&
-                        unreadCount > 0 &&
-                        _oldestUnreadMessage?.id == nextMessage.id) {
-                      final unreadMessagesSeparator =
-                          _buildUnreadMessagesSeparator(unreadCount);
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          separator,
-                          unreadMessagesSeparator,
-                        ],
-                      );
-                    }
-                    return separator;
+                    return maybeBuildWithUnreadMessagesSeparator(
+                      message: nextMessage,
+                      separator: separator,
+                    );
                   },
                   itemBuilder: (context, i) {
                     if (i == itemCount - 1) {
@@ -937,27 +944,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
   }
 
-  Future<void> scrollToUnreadDefaultTapAction(String lastReadMessageId) async {
-    // If the channel does not contain the last read message, we need to load
-    // the channel at the last read message ID before scrolling.
-    if (!messages.any((it) => it.id == lastReadMessageId)) {
-      // Reset the pagination variables.
-      initialIndex = 0;
-      initialAlignment = 0;
-      _bottomPaginationActive = false;
+  Future<void> scrollToUnreadDefaultTapAction(String? lastReadMessageId) async {
+    // Scroll to the first unread message in the list.
+    final firstUnreadMessageIndex = messages.indexWhere((it) {
+      return it.id == _firstUnreadMessage?.id;
+    });
 
-      // Load the channel at the last read message ID.
-      await streamChannel!.loadChannelAtMessage(lastReadMessageId);
+    if (firstUnreadMessageIndex == -1) return;
 
-      // Wait for the frame to be rendered with the updated channel state.
-      await WidgetsBinding.instance.endOfFrame;
-    }
-
-    // Scroll to the end of the list.
     if (_scrollController?.isAttached == true) {
-      final index = messages.indexWhere((it) => it.id == lastReadMessageId);
       return _scrollController!.scrollTo(
-        index: max(index + 2, 0),
+        index: max(firstUnreadMessageIndex + 2, 0),
         alignment: 0.5, // center the message in the viewport
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOut,

@@ -406,6 +406,81 @@ class StreamChannelState extends State<StreamChannel> {
     return response.members;
   }
 
+  /// Returns the first unread message for the current user in the channel.
+  ///
+  /// This method determines which message should be considered as the first
+  /// unread message based on the user's read state.
+  ///
+  /// Returns null if:
+  /// - The current user's read state is null
+  /// - The channel has no unread messages
+  /// - The last read message is the most recent message in the channel
+  /// - The last read message can't be found in the current message list
+  ///
+  /// If there's no last read message ID (all messages are unread), it returns
+  /// the oldest regular message when pagination is complete.
+  Message? getFirstUnreadMessage([Read? currentUserRead]) {
+    final messages = channel.state?.messages;
+    if (messages == null || messages.isEmpty) return null;
+
+    Message? getOldestRegularMessage() {
+      // Only return a message if we've loaded all previous messages.
+      if (!_topPaginationEnded) return null;
+
+      return messages.firstWhereOrNull(
+        (it) => it.type == MessageType.regular || it.type == MessageType.reply,
+      );
+    }
+
+    final userRead = currentUserRead ?? channel.state?.currentUserRead;
+
+    // No read state available, consider oldest message as unread.
+    if (userRead == null) {
+      return getOldestRegularMessage();
+    }
+
+    // No unread messages.
+    if (userRead.unreadMessages <= 0) {
+      return null;
+    }
+
+    final lastReadMessageId = userRead.lastReadMessageId;
+    // No last read message ID, consider all messages unread.
+    if (lastReadMessageId == null) {
+      return getOldestRegularMessage();
+    }
+
+    // If the last read message is the last message in the channel, there are no
+    // unread messages
+    if (lastReadMessageId == messages.lastOrNull?.id) {
+      return null;
+    }
+
+    // Find the index of the last read message
+    final lastReadIndex = messages.indexWhere(
+      (message) => message.id == lastReadMessageId,
+    );
+
+    if (lastReadIndex == -1) {
+      // If there is a lastReadMessageId, and we loaded all messages, but can't
+      // find firstUnreadMessageId, then it means the lastReadMessageId is not
+      // reachable because the channel was truncated or hidden. So we return the
+      // oldest regular message already fetched.
+      return getOldestRegularMessage();
+    }
+
+    // Return the first valid unread message after the last read message
+    // Skip messages from the current user and deleted messages
+    return messages.sublist(lastReadIndex + 1).firstWhereOrNull((message) {
+      // Skip deleted messages
+      if (message.isDeleted) return false;
+      // Skip messages from the current user
+      if (message.user?.id == userRead.user.id) return false;
+
+      return true;
+    });
+  }
+
   /// Reloads the channel with latest message
   Future<void> reloadChannel() => _queryAtMessage(limit: 30);
 

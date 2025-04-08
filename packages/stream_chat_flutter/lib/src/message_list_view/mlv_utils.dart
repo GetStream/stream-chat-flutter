@@ -29,18 +29,13 @@ int getInitialIndex(
     if (initialMessageIndex != -1) return initialMessageIndex + 2;
   }
 
-  // Otherwise, check if the channel is unread and return the last read
-  // message index.
-  if (channel.state case final state? when state.unreadCount > 0) {
-    final read = state.currentUserRead;
+  // Otherwise, return the first unread message index if available.
+  if (channelState.getFirstUnreadMessage() case final firstUnreadMessage?) {
+    final firstUnreadMessageIndex = messages.indexWhere(
+      (it) => it.id == firstUnreadMessage.id,
+    );
 
-    if (read?.lastReadMessageId case final lastReadMessageId?) {
-      final lastReadMessageIndex = messages.indexWhere(
-        (it) => it.id == lastReadMessageId,
-      );
-
-      if (lastReadMessageIndex != -1) return lastReadMessageIndex + 2;
-    }
+    if (firstUnreadMessageIndex != -1) return firstUnreadMessageIndex + 2;
   }
 
   return 0;

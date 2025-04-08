@@ -2805,7 +2805,7 @@ class ChannelClientState {
             Read? maybeUpdateRead(Read? existingRead) {
               if (existingRead == null) return null;
               if (existingRead.user.id == user.id) {
-                return existingRead.copyWith(
+                return Read(
                   user: user,
                   lastRead: event.createdAt,
                   unreadMessages: event.unreadMessages,
@@ -2837,9 +2837,9 @@ class ChannelClientState {
             Read? maybeUpdateRead(Read? existingRead) {
               if (existingRead == null) return null;
               if (existingRead.user.id == user.id) {
-                return existingRead.copyWith(
+                return Read(
                   user: user,
-                  lastRead: event.lastReadAt,
+                  lastRead: event.lastReadAt!,
                   unreadMessages: event.unreadMessages,
                   lastReadMessageId: event.lastReadMessageId,
                 );
