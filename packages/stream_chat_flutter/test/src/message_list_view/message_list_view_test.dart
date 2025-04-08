@@ -43,6 +43,9 @@ void main() {
     when(() => channelClientState.membersStream)
         .thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.members).thenReturn([]);
+    when(() => channelClientState.currentUserRead).thenReturn(null);
+    when(() => channelClientState.currentUserReadStream)
+        .thenAnswer((_) => const Stream.empty());
   });
 
   // https://github.com/GetStream/stream-chat-flutter/issues/674
@@ -224,7 +227,7 @@ void main() {
                 channel: channel,
                 child: const StreamMessageListView(
                   key: nonEmptyWidgetKey,
-                  initialScrollIndex: 5,
+                  initialScrollIndex: 7,
                 ),
               ),
             ),
