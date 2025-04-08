@@ -219,13 +219,13 @@ void main() {
       expect(user.createdAt, null);
       expect(user.updatedAt, null);
     });
-    
+
     group('ComparableFieldProvider', () {
       test('should return ComparableField for user.id', () {
         final user = createTestUser(
           id: 'test-user',
         );
-        
+
         final field = user.getComparableField(UserSortKey.id);
         expect(field, isNotNull);
         expect(field!.value, equals('test-user'));
@@ -236,7 +236,7 @@ void main() {
           id: 'test-user',
           name: 'Test User',
         );
-        
+
         final field = user.getComparableField(UserSortKey.name);
         expect(field, isNotNull);
         expect(field!.value, equals('Test User'));
@@ -247,7 +247,7 @@ void main() {
           id: 'test-user',
           role: 'admin',
         );
-        
+
         final field = user.getComparableField(UserSortKey.role);
         expect(field, isNotNull);
         expect(field!.value, equals('admin'));
@@ -258,7 +258,7 @@ void main() {
           id: 'test-user',
           banned: true,
         );
-        
+
         final field = user.getComparableField(UserSortKey.banned);
         expect(field, isNotNull);
         expect(field!.value, isTrue);
@@ -270,7 +270,7 @@ void main() {
           id: 'test-user',
           lastActive: lastActive,
         );
-        
+
         final field = user.getComparableField(UserSortKey.lastActive);
         expect(field, isNotNull);
         expect(field!.value, equals(lastActive));
@@ -281,7 +281,7 @@ void main() {
           id: 'test-user',
           extraData: {'score': 42},
         );
-        
+
         final field = user.getComparableField('score');
         expect(field, isNotNull);
         expect(field!.value, equals(42));
@@ -291,7 +291,7 @@ void main() {
         final user = createTestUser(
           id: 'test-user',
         );
-        
+
         final field = user.getComparableField('non_existent_key');
         expect(field, isNull);
       });
@@ -301,15 +301,15 @@ void main() {
           id: 'user1',
           name: 'Alice',
         );
-        
+
         final user2 = createTestUser(
           id: 'user2',
           name: 'Bob',
         );
-        
+
         final field1 = user1.getComparableField(UserSortKey.name);
         final field2 = user2.getComparableField(UserSortKey.name);
-        
+
         expect(field1!.compareTo(field2!), lessThan(0)); // Alice < Bob
         expect(field2.compareTo(field1), greaterThan(0)); // Bob > Alice
       });
@@ -319,17 +319,21 @@ void main() {
           id: 'recent',
           lastActive: DateTime(2023, 6, 15),
         );
-        
+
         final lessRecentlyActive = createTestUser(
           id: 'old',
           lastActive: DateTime(2023, 6, 10),
         );
-        
-        final field1 = recentlyActive.getComparableField(UserSortKey.lastActive);
-        final field2 = lessRecentlyActive.getComparableField(UserSortKey.lastActive);
-        
-        expect(field1!.compareTo(field2!), greaterThan(0)); // More recent > Less recent
-        expect(field2.compareTo(field1), lessThan(0)); // Less recent < More recent
+
+        final field1 =
+            recentlyActive.getComparableField(UserSortKey.lastActive);
+        final field2 =
+            lessRecentlyActive.getComparableField(UserSortKey.lastActive);
+
+        expect(field1!.compareTo(field2!),
+            greaterThan(0)); // More recent > Less recent
+        expect(
+            field2.compareTo(field1), lessThan(0)); // Less recent < More recent
       });
 
       test('should compare two users correctly using banned status', () {
@@ -337,15 +341,15 @@ void main() {
           id: 'banned',
           banned: true,
         );
-        
+
         final notBannedUser = createTestUser(
           id: 'not-banned',
           banned: false,
         );
-        
+
         final field1 = bannedUser.getComparableField(UserSortKey.banned);
         final field2 = notBannedUser.getComparableField(UserSortKey.banned);
-        
+
         expect(field1!.compareTo(field2!), greaterThan(0)); // true > false
         expect(field2.compareTo(field1), lessThan(0)); // false < true
       });
@@ -356,7 +360,7 @@ void main() {
           id: 'without-name',
           name: null,
         );
-        
+
         final field = user.getComparableField(UserSortKey.name);
         expect(field, isNotNull);
         expect(field!.value, equals('without-name')); // Fallback to user id
