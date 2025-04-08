@@ -2749,6 +2749,58 @@ void main() {
       verify(() => client.showChannel(channelId, channelType)).called(1);
     });
 
+    // testing archiving
+    test('`.archive`', () async {
+      when(() => client.archiveChannel(
+          channelId: channelId, channelType: channelType)).thenAnswer(
+        (_) async => FakePartialUpdateMemberResponse(),
+      );
+
+      final res = await channel.archive();
+
+      expect(res, isNotNull);
+
+      verify(() => client.archiveChannel(
+          channelId: channelId, channelType: channelType)).called(1);
+    });
+
+    test('`.unarchive`', () async {
+      when(() => client.unarchiveChannel(
+          channelId: channelId, channelType: channelType)).thenAnswer(
+        (_) async => FakePartialUpdateMemberResponse(),
+      );
+
+      final res = await channel.unarchive();
+
+      expect(res, isNotNull);
+
+      verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
+    });
+
+    // testing pinning
+    test('`.pin`', () async {
+      when(() => client.pinChannel(channelId: channelId, channelType: channelType))
+          .thenAnswer((_) async => FakePartialUpdateMemberResponse());
+
+      final res = await channel.pin();
+
+      expect(res, isNotNull);
+
+      verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
+    });
+
+    test('`.unpin`', () async {
+      when(() => client.unpinChannel(channelId: channelId, channelType: channelType))
+          .thenAnswer((_) async => FakePartialUpdateMemberResponse());
+
+      final res = await channel.unpin();
+
+      expect(res, isNotNull);
+
+      verify(() => client.unpinChannel(channelId: channelId, channelType: channelType)).called(1);
+    });
+    
+
     test('`.on`', () async {
       const eventType = 'test.event';
       final event = Event(type: eventType, cid: channelCid);
