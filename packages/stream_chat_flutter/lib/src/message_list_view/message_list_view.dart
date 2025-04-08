@@ -230,11 +230,7 @@ class StreamMessageListView extends StatefulWidget {
   ///   },
   /// ),
   /// ```
-  final Widget Function(
-    int unreadCount,
-    Future<void> Function(String) scrollToUnreadDefaultTapAction,
-    Future<void> Function() dismissIndicatorDefaultTapAction,
-  )? unreadIndicatorBuilder;
+  final UnreadIndicatorBuilder? unreadIndicatorBuilder;
 
   /// If true will mark channel as read when the user scrolls to the bottom of the list
   final bool markReadWhenAtTheBottom;

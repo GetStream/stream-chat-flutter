@@ -6,15 +6,33 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:svg_icon_widget/svg_icon_widget.dart';
 
+/// Function signature for handling the dismiss action on the unread indicator.
 typedef OnUnreadIndicatorDismissTap = Future<void> Function();
+
+/// Function signature for handling taps on the unread indicator.
+/// [lastReadMessageId] is the ID of the last read message.
 typedef OnUnreadIndicatorTap = Future<void> Function(String lastReadMessageId);
+
+/// Function signature for building a custom unread indicator.
+///
+/// [unreadCount] is the number of unread messages.
+/// [onTap] is called when the indicator is tapped.
+/// [onDismissTap] is called when the dismiss action is triggered.
 typedef UnreadIndicatorBuilder = Widget Function(
   int unreadCount,
   OnUnreadIndicatorTap onTap,
   OnUnreadIndicatorDismissTap onDismissTap,
 );
 
+/// {@template unreadIndicatorButton}
+/// A button that displays the number of unread messages in a channel.
+///
+/// This widget listens to the current user's read state and shows
+/// an indicator when there are unread messages. Users can tap on the
+/// indicator to navigate to the oldest unread message or dismiss it.
+/// {@endtemplate}
 class UnreadIndicatorButton extends StatelessWidget {
+  /// {@macro unreadIndicatorButton}
   const UnreadIndicatorButton({
     super.key,
     required this.onTap,
@@ -22,10 +40,19 @@ class UnreadIndicatorButton extends StatelessWidget {
     this.unreadIndicatorBuilder,
   });
 
+  /// Callback triggered when the indicator is tapped.
+  ///
+  /// This is typically used to navigate to the oldest unread message.
   final OnUnreadIndicatorTap onTap;
 
+  /// Callback triggered when the dismiss button is tapped.
+  ///
+  /// This is typically used to mark all messages as read.
   final OnUnreadIndicatorDismissTap onDismissTap;
 
+  /// Optional builder for customizing the appearance of the unread indicator.
+  ///
+  /// If not provided, a default indicator will be built.
   final UnreadIndicatorBuilder? unreadIndicatorBuilder;
 
   @override
