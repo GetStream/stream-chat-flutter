@@ -87,7 +87,7 @@ void main() {
         memberCount: index + 3,
         lastMessageAt: now.add(Duration(hours: index)),
       ),
-    ).reversed.toList(growable: false);
+    ).toList(growable: false);
 
     await userDao.updateUsers(users);
     await channelDao.updateChannels(channels);
