@@ -8,39 +8,38 @@ int getInitialIndex(
   int? initialScrollIndex,
   StreamChannelState channelState,
   bool Function(Message)? messageFilter,
-  Read? read,
 ) {
-  if (initialScrollIndex != null) {
-    return initialScrollIndex;
-  }
+  if (initialScrollIndex != null) return initialScrollIndex;
 
-  final messages = channelState.channel.state!.messages
-      .where(messageFilter ??
-          defaultMessageFilter(
-            channelState.channel.client.state.currentUser!.id,
-          ))
-      .toList(growable: false);
+  final channel = channelState.channel;
+  final currentUser = channel.client.state.currentUser;
+  if (currentUser == null) return 0;
 
-  if (channelState.initialMessageId != null) {
-    final totalMessages = messages.length;
-    final messageIndex =
-        messages.indexWhere((e) => e.id == channelState.initialMessageId);
-    final index = totalMessages - messageIndex;
-    if (index != 0) return index + 1;
-    return index;
-  }
+  final messages = [
+    ...channelState.channel.state!.messages
+        .where(messageFilter ?? defaultMessageFilter(currentUser.id))
+  ].reversed.toList(growable: false);
 
-  if (read != null) {
-    final oldestUnreadMessage = messages.firstWhereOrNull(
-      (it) =>
-          it.user?.id != channelState.channel.client.state.currentUser?.id &&
-          it.createdAt.compareTo(read.lastRead) > 0,
+  // Return the initial message index if available.
+  if (channelState.initialMessageId case final initialMessageId?) {
+    final initialMessageIndex = messages.indexWhere(
+      (it) => it.id == initialMessageId,
     );
 
-    if (oldestUnreadMessage != null) {
-      final oldestUnreadMessageIndex = messages.indexOf(oldestUnreadMessage);
-      final index = messages.length - oldestUnreadMessageIndex;
-      return index + 1;
+    if (initialMessageIndex != -1) return initialMessageIndex + 2;
+  }
+
+  // Otherwise, check if the channel is unread and return the last read
+  // message index.
+  if (channel.state case final state? when state.unreadCount > 0) {
+    final read = state.currentUserRead;
+
+    if (read?.lastReadMessageId case final lastReadMessageId?) {
+      final lastReadMessageIndex = messages.indexWhere(
+        (it) => it.id == lastReadMessageId,
+      );
+
+      if (lastReadMessageIndex != -1) return lastReadMessageIndex + 2;
     }
   }
 
