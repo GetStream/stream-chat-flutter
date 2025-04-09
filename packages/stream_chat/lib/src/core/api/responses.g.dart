@@ -430,9 +430,8 @@ GetDraftMessageResponse _$GetDraftMessageResponseFromJson(
       ..duration = json['duration'] as String?
       ..draft = Draft.fromJson(json['draft'] as Map<String, dynamic>);
 
-QueryDraftMessagesResponse _$QueryDraftMessagesResponseFromJson(
-        Map<String, dynamic> json) =>
-    QueryDraftMessagesResponse()
+QueryDraftsResponse _$QueryDraftsResponseFromJson(Map<String, dynamic> json) =>
+    QueryDraftsResponse()
       ..duration = json['duration'] as String?
       ..drafts = (json['drafts'] as List<dynamic>?)
               ?.map((e) => Draft.fromJson(e as Map<String, dynamic>))

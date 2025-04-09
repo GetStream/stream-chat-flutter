@@ -88,14 +88,14 @@ class MessageApi {
     return GetDraftMessageResponse.fromJson(response.data);
   }
 
-  /// Retrieves a list of draft messages from the given [channelId] of type
-  /// [channelType].
+  /// Retrieves a list of draft messages for the current user.
   ///
-  /// Optionally, you can provide [pagination] parameters.
+  /// Optionally, you can provide a [filter] to filter the drafts,
+  /// a [sort] order to sort the drafts, and [pagination] parameters to paginate
+  /// the results.
   ///
-  /// Returns a [QueryDraftMessagesResponse] containing the list of draft
-  /// messages.
-  Future<QueryDraftMessagesResponse> queryDraftMessages({
+  /// Returns a [QueryDraftsResponse] containing the list of draft messages.
+  Future<QueryDraftsResponse> queryDrafts({
     Filter? filter,
     SortOrder<Draft>? sort,
     PaginationParams? pagination,
@@ -108,7 +108,7 @@ class MessageApi {
         if (pagination != null) ...pagination.toJson(),
       }),
     );
-    return QueryDraftMessagesResponse.fromJson(response.data);
+    return QueryDraftsResponse.fromJson(response.data);
   }
 
   /// Retrieves a list of messages by [messageIDs]

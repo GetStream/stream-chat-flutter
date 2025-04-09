@@ -738,9 +738,9 @@ class GetDraftMessageResponse extends DraftResponse {
       _$GetDraftMessageResponseFromJson(json);
 }
 
-/// Model response for [StreamChatClient.queryDraftMessages] api call
+/// Model response for [StreamChatClient.queryDrafts] api call
 @JsonSerializable(createToJson: false)
-class QueryDraftMessagesResponse extends _BaseResponse {
+class QueryDraftsResponse extends _BaseResponse {
   /// List of draft messages returned by the query
   @JsonKey(defaultValue: [])
   late List<Draft> drafts;
@@ -749,6 +749,6 @@ class QueryDraftMessagesResponse extends _BaseResponse {
   late String? next;
 
   /// Create a new instance from a json
-  static QueryDraftMessagesResponse fromJson(Map<String, dynamic> json) =>
-      _$QueryDraftMessagesResponseFromJson(json);
+  static QueryDraftsResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryDraftsResponseFromJson(json);
 }

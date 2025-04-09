@@ -1762,12 +1762,12 @@ class StreamChatClient {
       );
 
   /// Queries drafts for the current user.
-  Future<QueryDraftMessagesResponse> queryDraftMessages({
+  Future<QueryDraftsResponse> queryDrafts({
     Filter? filter,
     SortOrder<Draft>? sort,
     PaginationParams? pagination,
   }) =>
-      _chatApi.message.queryDraftMessages(
+      _chatApi.message.queryDrafts(
         sort: sort,
         pagination: pagination,
       );

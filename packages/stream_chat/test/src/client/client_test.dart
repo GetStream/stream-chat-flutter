@@ -2824,6 +2824,30 @@ void main() {
       verifyNoMoreInteractions(api.message);
     });
 
+    test('`.queryDraftMessages`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      final drafts = [
+        Draft(
+          channelCid: '$channelType:$channelId',
+          createdAt: DateTime.now(),
+          message: DraftMessage(id: 'test-message-id', text: 'Hello!'),
+        )
+      ];
+
+      when(() => api.message.queryDrafts())
+          .thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
+
+      final res = await client.queryDrafts();
+
+      expect(res, isNotNull);
+      expect(res.drafts.length, drafts.length);
+
+      verify(() => api.message.queryDrafts()).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
     test('`.getReplies`', () async {
       const parentId = 'test-parent-id';
 

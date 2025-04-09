@@ -610,4 +610,36 @@ void main() {
     verify(() => client.get(path, queryParameters: {'parent_id': parentId}));
     verifyNoMoreInteractions(client);
   });
+
+  test('queryDrafts', () async {
+    const path = '/drafts/query';
+
+    final draftMessages = List.generate(
+      3,
+      (index) => Draft(
+        channelCid: 'messaging:channel-$index',
+        createdAt: DateTime.now(),
+        message: DraftMessage(id: 'draft-$index', text: 'Draft message $index'),
+      ),
+    );
+
+    when(() => client.post(
+          path,
+          data: any(named: 'data'),
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'drafts': [...draftMessages.map((it) => it.toJson())],
+        }));
+
+    final res = await messageApi.queryDrafts();
+
+    expect(res, isNotNull);
+    expect(res.drafts.length, draftMessages.length);
+
+    verify(() => client.post(
+          path,
+          data: any(named: 'data'),
+        )).called(1);
+
+    verifyNoMoreInteractions(client);
+  });
 }
