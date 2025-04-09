@@ -10,6 +10,7 @@ import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.
 import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
+import 'package:stream_chat_flutter/src/message_list_view/unread_indicator_button.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
 import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
@@ -87,7 +88,7 @@ class StreamMessageListView extends StatefulWidget {
     this.scrollToBottomBuilder,
     this.showUnreadIndicator = true,
     this.unreadIndicatorBuilder,
-    this.markReadWhenAtTheBottom = false,
+    this.markReadWhenAtTheBottom = true,
     this.messageBuilder,
     this.parentMessageBuilder,
     this.parentMessage,
@@ -229,11 +230,7 @@ class StreamMessageListView extends StatefulWidget {
   ///   },
   /// ),
   /// ```
-  final Widget Function(
-    int unreadCount,
-    Future<void> Function(String) scrollToUnreadDefaultTapAction,
-    Future<void> Function() dismissIndicatorDefaultTapAction,
-  )? unreadIndicatorBuilder;
+  final UnreadIndicatorBuilder? unreadIndicatorBuilder;
 
   /// If true will mark channel as read when the user scrolls to the bottom of the list
   final bool markReadWhenAtTheBottom;
@@ -369,7 +366,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   double get _initialAlignment {
     final initialAlignment = widget.initialAlignment;
     if (initialAlignment != null) return initialAlignment;
-    return initialIndex == 0 ? 0 : 0.1;
+    return initialIndex == 0 ? 0 : 0.5;
   }
 
   bool get _upToDate => streamChannel!.channel.state!.isUpToDate;
@@ -396,8 +393,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   StreamSubscription? _messageNewListener;
   StreamSubscription? _userReadListener;
 
-  Read? _userRead;
-  Message? _oldestUnreadMessage;
+  Message? _firstUnreadMessage;
 
   @override
   void initState() {
@@ -421,17 +417,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
 
-      _userRead = streamChannel?.channel.state!.currentUserRead;
-
       _messageNewListener?.cancel();
       _userReadListener?.cancel();
 
       unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
+      _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
+
       initialIndex = getInitialIndex(
         widget.initialScrollIndex,
         streamChannel!,
         widget.messageFilter,
-        _userRead,
       );
 
       initialAlignment = _initialAlignment;
@@ -461,19 +456,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
       });
 
-      _userReadListener =
-          streamChannel!.channel.state?.readStream.listen((event) {
-        setState(() {
+      _userReadListener = streamChannel!.channel.state?.readStream.listen(
+        (event) => setState(() {
           unreadCount = streamChannel!.channel.state?.unreadCount ?? 0;
-          _userRead = streamChannel!.channel.state?.currentUserRead;
-        });
-      });
+          _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
+        }),
+      );
 
       if (_isThreadConversation) {
         streamChannel!.getReplies(widget.parentMessage!.id);
       }
-
-      unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
     }
   }
 
@@ -536,8 +528,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
-
-    _oldestUnreadMessage = messages.lastUnreadMessage(_userRead);
 
     for (var index = 0; index < messages.length; index++) {
       messagesIndex[messages[index].id] = index;
@@ -675,6 +665,25 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   //     Footer         ->        0                                             (count-8)
 
                   separatorBuilder: (context, i) {
+                    Widget maybeBuildWithUnreadMessagesSeparator({
+                      required Message message,
+                      required Widget separator,
+                    }) {
+                      if (unreadCount == 0) return separator;
+                      if (_isThreadConversation) return separator;
+                      if (_firstUnreadMessage?.id != message.id) {
+                        return separator;
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          separator,
+                          _buildUnreadMessagesSeparator(unreadCount),
+                        ],
+                      );
+                    }
+
                     if (i == itemCount - 2) {
                       if (widget.parentMessage == null) {
                         return const Empty();
@@ -694,8 +703,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                           ? widget.headerBuilder == null
                           : widget.footerBuilder == null) {
                         if (messages.isNotEmpty) {
-                          return _buildDateDivider(messages.last);
+                          final message = messages.last;
+                          return maybeBuildWithUnreadMessagesSeparator(
+                            message: message,
+                            separator: _buildDateDivider(message),
+                          );
                         }
+
                         if (_isThreadConversation) return const Empty();
                         return const SizedBox(height: 52);
                       }
@@ -763,21 +777,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       );
                     }
 
-                    if (!isPartOfThread &&
-                        unreadCount > 0 &&
-                        _oldestUnreadMessage?.id == nextMessage.id) {
-                      final unreadMessagesSeparator =
-                          _buildUnreadMessagesSeparator(unreadCount);
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          separator,
-                          unreadMessagesSeparator,
-                        ],
-                      );
-                    }
-                    return separator;
+                    return maybeBuildWithUnreadMessagesSeparator(
+                      message: nextMessage,
+                      separator: separator,
+                    );
                   },
                   itemBuilder: (context, i) {
                     if (i == itemCount - 1) {
@@ -848,8 +851,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (widget.showFloatingDateDivider)
           Positioned(
             top: 20,
-            left: 0,
-            right: 0,
             child: FloatingDateDivider(
               itemCount: itemCount,
               reverse: widget.reverse,
@@ -874,7 +875,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               },
             ),
           ),
-        if (widget.showUnreadIndicator) _buildShowUnreadBottom(),
+        if (widget.showUnreadIndicator && !_isThreadConversation)
+          Positioned(
+            top: 8,
+            child: UnreadIndicatorButton(
+              onDismissTap: _markMessagesAsRead,
+              onTap: scrollToUnreadDefaultTapAction,
+              unreadIndicatorBuilder: widget.unreadIndicatorBuilder,
+            ),
+          ),
       ],
     );
 
@@ -927,42 +936,26 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     // Scroll to the end of the list.
     if (_scrollController?.isAttached == true) {
-      _scrollController!.scrollTo(
-        index: max(
-            messages.toList().indexWhere((element) =>
-                element.id ==
-                streamChannel!
-                    .channel.state?.currentUserRead?.lastReadMessageId),
-            0),
+      return _scrollController!.scrollTo(
+        index: 0,
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOut,
       );
     }
   }
 
-  Future<void> scrollToUnreadDefaultTapAction(String lastReadMessageId) async {
-    // If the channel is not up to date, we need to reload it before scrolling
-    if (!_upToDate) {
-      // Reset the pagination variables.
-      initialIndex = 0;
-      initialAlignment = 0;
-      _bottomPaginationActive = false;
+  Future<void> scrollToUnreadDefaultTapAction(String? lastReadMessageId) async {
+    // Scroll to the first unread message in the list.
+    final firstUnreadMessageIndex = messages.indexWhere((it) {
+      return it.id == _firstUnreadMessage?.id;
+    });
 
-      // Reload the channel to get the latest messages.
-      await streamChannel!.reloadChannel();
+    if (firstUnreadMessageIndex == -1) return;
 
-      // Wait for the frame to be rendered with the updated channel state.
-      await WidgetsBinding.instance.endOfFrame;
-    }
-
-    // Scroll to the end of the list.
     if (_scrollController?.isAttached == true) {
-      _scrollController!.scrollTo(
-        index: max(
-            messages
-                .toList()
-                .indexWhere((element) => element.id == lastReadMessageId),
-            0),
+      return _scrollController!.scrollTo(
+        index: max(firstUnreadMessageIndex + 2, 0),
+        alignment: 0.5, // center the message in the viewport
         duration: const Duration(seconds: 1),
         curve: Curves.easeInOut,
       );
@@ -985,7 +978,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     _ => null,
   };
 
-  Future<void> dismissIndicatorDefaultTapAction() async {
+  Future<void> _markMessagesAsRead() async {
     // Mark regular messages as read.
     debouncedMarkRead?.call();
 
@@ -1177,74 +1170,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   ),
                 ),
             ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildShowUnreadBottom() {
-    return StreamBuilder<int>(
-      stream: streamChannel!.channel.state!.unreadCountStream,
-      builder: (_, snapshot) {
-        if (snapshot.hasError) {
-          return const Empty();
-        } else if (!snapshot.hasData) {
-          return const Empty();
-        }
-        final unreadCount = snapshot.data!;
-
-        if (widget.unreadIndicatorBuilder != null) {
-          return widget.unreadIndicatorBuilder!(
-            unreadCount,
-            scrollToUnreadDefaultTapAction,
-            dismissIndicatorDefaultTapAction,
-          );
-        }
-
-        final showUnread = unreadCount > 0 &&
-            streamChannel!.channel.state!.members.any((e) =>
-                e.userId ==
-                streamChannel!.channel.client.state.currentUser!.id);
-
-        if (!showUnread) return const Empty();
-
-        final lastReadMessageId =
-            streamChannel!.channel.state!.currentUserRead?.lastReadMessageId;
-
-        return Positioned(
-          top: 8,
-          child: GestureDetector(
-            onTap: lastReadMessageId != null
-                ? () => scrollToUnreadDefaultTapAction(lastReadMessageId)
-                : null,
-            child: Container(
-              // width: 120,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              height: 40,
-              decoration: BoxDecoration(
-                color: _streamTheme.colorTheme.textLowEmphasis,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(
-                    context.translations
-                        .unreadCountIndicatorLabel(unreadCount: unreadCount),
-                    style: TextStyle(color: _streamTheme.colorTheme.barsBg),
-                  ),
-                  const SizedBox(width: 16),
-                  GestureDetector(
-                    onTap: dismissIndicatorDefaultTapAction,
-                    child: Icon(
-                      Icons.close,
-                      color: _streamTheme.colorTheme.barsBg,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
         );
       },
@@ -1523,7 +1448,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     return child;
   }
 
-  Message? _lastFullyVisibleMessage;
   void _handleItemPositionsChanged() {
     final itemPositions = _itemPositionListener.itemPositions.value.toList();
     if (itemPositions.isEmpty) return;
@@ -1531,45 +1455,42 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final isLastItemFullyVisible = isElementAtIndexVisible(
       itemPositions,
       fullyVisible: true,
-      // Index of the last item in the list view when reversed is 2 as 1 is the
-      // progress indicator and 0 is the footer. Similarly, when not reversed,
-      // the index of the last item is messages.length - 1.
-      index: widget.reverse ? 2 : messages.length - 1,
+      // Index of the last item in the list view is 2 as 1 is the progress
+      // indicator and 0 is the footer.
+      index: 2,
     );
 
-    if (isLastItemFullyVisible) {
-      // We are using the first message as the last fully visible message
-      // because the messages are reversed in the list view.
-      final newLastFullyVisibleMessage = messages.firstOrNull;
-      final lastFullyVisibleMessageChanged = switch (_lastFullyVisibleMessage) {
-        final message? => message.id != newLastFullyVisibleMessage?.id,
-        null => true, // Allows setting the initial value.
-      };
+    if (mounted) _showScrollToBottom.value = !isLastItemFullyVisible;
+    if (isLastItemFullyVisible) return _handleLastItemFullyVisible();
+  }
 
-      // If the last fully visible message has changed, update the value and
-      // mark the messages as read.
-      if (lastFullyVisibleMessageChanged) {
-        _lastFullyVisibleMessage = newLastFullyVisibleMessage;
+  Message? _lastFullyVisibleMessage;
+  void _handleLastItemFullyVisible() {
+    // We are using the first message as the last fully visible message
+    // because the messages are reversed in the list view.
+    final newLastFullyVisibleMessage = messages.firstOrNull;
 
-        if (streamChannel?.channel case final channel?) {
-          final allowMarkRead = channel.config?.readEvents == true;
-          final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
+    final lastFullyVisibleMessageChanged = switch (_lastFullyVisibleMessage) {
+      final message? => message.id != newLastFullyVisibleMessage?.id,
+      null => true, // Allows setting the initial value.
+    };
 
-          // Only mark read if it is allowed and channel is upToDate.
-          if (_upToDate && allowMarkRead && canMarkReadAtBottom) {
-            // Mark regular message as read.
-            debouncedMarkRead?.call();
+    // If the channel is upToDate and the last fully visible message has
+    // been changed, we need to update the value and mark the messages as read.
+    if (_upToDate && lastFullyVisibleMessageChanged) {
+      _lastFullyVisibleMessage = newLastFullyVisibleMessage;
 
-            // Mark thread message as read.
-            if (widget.parentMessage case final parent?) {
-              debouncedMarkThreadRead?.call([parent.id]);
-            }
-          }
+      if (streamChannel?.channel case final channel?) {
+        final hasUnread = (channel.state?.unreadCount ?? 0) > 0;
+        final allowMarkRead = channel.config?.readEvents == true;
+        final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
+
+        // Mark messages as read if it's allowed.
+        if (hasUnread && allowMarkRead && canMarkReadAtBottom) {
+          return _markMessagesAsRead().ignore();
         }
       }
     }
-
-    if (mounted) _showScrollToBottom.value = !isLastItemFullyVisible;
   }
 
   void _getOnThreadTap() {

@@ -35,6 +35,9 @@ class Event {
     this.thread,
     this.unreadThreadMessages,
     this.unreadThreads,
+    this.lastReadAt,
+    this.unreadMessages,
+    this.lastReadMessageId,
     this.extraData = const {},
     this.isLocal = true,
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
@@ -131,26 +134,17 @@ class Event {
   /// The number of unread threads.
   final int? unreadThreads;
 
-  /// Map of custom channel extraData
-  final Map<String, Object?> extraData;
-
   /// Create date of the last read message (notification.mark_unread)
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  DateTime? get lastReadAt {
-    if (extraData.containsKey('last_read_at')) {
-      return DateTime.parse(extraData['last_read_at']! as String);
-    }
-
-    return null;
-  }
+  final DateTime? lastReadAt;
 
   /// The number of unread messages (notification.mark_unread)
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  int? get unreadMessages => extraData['unread_messages'] as int?;
+  final int? unreadMessages;
 
   /// The id of the last read message (notification.mark_read)
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get lastReadMessageId => extraData['last_read_message_id'] as String?;
+  final String? lastReadMessageId;
+
+  /// Map of custom channel extraData
+  final Map<String, Object?> extraData;
 
   /// Known top level fields.
   /// Useful for [Serializer] methods.
@@ -182,6 +176,9 @@ class Event {
     'thread',
     'unread_thread_messages',
     'unread_threads',
+    'last_read_at',
+    'unread_messages',
+    'last_read_message_id',
   ];
 
   /// Serialize to json
@@ -217,6 +214,9 @@ class Event {
     Thread? thread,
     int? unreadThreadMessages,
     int? unreadThreads,
+    DateTime? lastReadAt,
+    int? unreadMessages,
+    String? lastReadMessageId,
     Map<String, Object?>? extraData,
   }) =>
       Event(
@@ -246,6 +246,9 @@ class Event {
         thread: thread ?? this.thread,
         unreadThreadMessages: unreadThreadMessages ?? this.unreadThreadMessages,
         unreadThreads: unreadThreads ?? this.unreadThreads,
+        lastReadAt: lastReadAt ?? this.lastReadAt,
+        unreadMessages: unreadMessages ?? this.unreadMessages,
+        lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
         isLocal: isLocal,
         extraData: extraData ?? this.extraData,
       );
