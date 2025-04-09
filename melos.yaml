@@ -80,11 +80,11 @@ command:
       share_plus: ^10.0.2
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
-      stream_chat: ^9.6.0
-      stream_chat_flutter: ^9.6.0
-      stream_chat_flutter_core: ^9.6.0
-      stream_chat_localizations: ^9.6.0
-      stream_chat_persistence: ^9.6.0
+      stream_chat: ^9.7.0
+      stream_chat_flutter: ^9.7.0
+      stream_chat_flutter_core: ^9.7.0
+      stream_chat_localizations: ^9.7.0
+      stream_chat_persistence: ^9.7.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       synchronized: ^3.1.0+1
@@ -109,6 +109,10 @@ command:
       path_provider_platform_interface: ^2.0.0
       plugin_platform_interface: ^2.0.0
       test: ^1.24.6
+
+    hooks:
+      # Updates the version.dart file after bootstrapping with the current version from pubspec.yaml
+      post: melos run version:update
 
 scripts:
   postclean:
@@ -163,6 +167,10 @@ scripts:
   generate:flutter:
     run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
     description: Build all generated files for Flutter packages in this project.
+
+  version:update:
+    run: dart tools/generate_version.dart
+    description: Updates the version.dart file in stream_chat package based on pubspec.yaml version.
 
   test:all:
     run: melos run test:dart --no-select && melos run test:flutter --no-select

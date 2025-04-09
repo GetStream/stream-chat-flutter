@@ -1,4 +1,4 @@
-## Upcoming
+## 9.7.0
 
 ✅ Added
 
@@ -11,6 +11,11 @@
   ```
 
 - Added support for message moderation feature.
+
+- Improved user blocking functionality by updating client state when blocking/unblocking users:
+  - `client.blockUser` now updates `currentUser.blockedUserIds` list with newly blocked user IDs.
+  - `client.unblockUser` now removes the unblocked user ID from `currentUser.blockedUserIds` list.
+  - `client.queryBlockedUsers` now updates `currentUser.blockedUserIds` with the latest blocked users data.
 
 🐞 Fixed
 

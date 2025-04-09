@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/read.dart';
@@ -12,7 +13,7 @@ part 'channel_state.g.dart';
 
 /// The class that contains the information about a channel
 @JsonSerializable()
-class ChannelState {
+class ChannelState implements ComparableFieldProvider {
   /// Constructor used for json serialization
   ChannelState({
     this.channel,
@@ -78,40 +79,49 @@ class ChannelState {
         membership: membership ?? this.membership,
       );
 
-  static Comparator<ChannelState>? getComparator(
-    SortOption<ChannelState> sortOption,
-  ) {
-    Comparator<ChannelState> _compare(Function(ChannelState) getField) {
-      return (ChannelState channelStateA, ChannelState channelStateB) {
-        return ComparatorHelper.compareWithNull(
-          getField(channelStateA),
-          getField(channelStateB),
-          sortOption.direction,
-        );
-      };
-    }
-
-    return switch (sortOption.field) {
-      ChannelSortField.defaultSort => _compare(
-          (state) => state.channel?.lastMessageAt ?? state.channel?.createdAt,
-        ),
-      ChannelSortField.createdAt =>
-        _compare((state) => state.channel?.createdAt),
-      ChannelSortField.updatedAt =>
-        _compare((state) => state.channel?.updatedAt),
-      ChannelSortField.lastMessageAt =>
-        _compare((state) => state.channel?.lastMessageAt),
-      ChannelSortField.pinnedAt =>
-        _compare((state) => state.membership?.pinnedAt),
-      ChannelSortField.memberCount =>
-        _compare((state) => state.members?.length),
-      ChannelSortField.cid => _compare((state) => state.channel?.cid),
-      _ => null,
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      ChannelSortKey.lastUpdated => channel?.lastUpdatedAt,
+      ChannelSortKey.createdAt => channel?.createdAt,
+      ChannelSortKey.updatedAt => channel?.updatedAt,
+      ChannelSortKey.lastMessageAt => channel?.lastMessageAt,
+      ChannelSortKey.memberCount => channel?.memberCount,
+      // TODO: Support providing default value for hasUnread, unreadCount
+      ChannelSortKey.hasUnread => null,
+      ChannelSortKey.unreadCount => null,
+      _ => channel?.extraData[sortKey],
     };
+
+    return ComparableField.fromValue(value);
   }
 }
 
-extension ChannelStateSortOptionExtension on SortOption<ChannelState> {
-  Comparator<ChannelState>? get defaultComparator =>
-      ChannelState.getComparator(this);
+/// Extension type representing sortable fields for [ChannelState].
+///
+/// This type provides type-safe keys that can be used for sorting channels
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const ChannelSortKey(String key) implements String {
+  /// The default sorting is by the last message date or a channel created date
+  /// if no messages.
+  static const lastUpdated = ChannelSortKey('last_updated');
+
+  /// Sort channels by the date they were created.
+  static const createdAt = ChannelSortKey('created_at');
+
+  /// Sort channels by the date they were updated.
+  static const updatedAt = ChannelSortKey('updated_at');
+
+  /// Sort channels by the timestamp of the last message.
+  static const lastMessageAt = ChannelSortKey('last_message_at');
+
+  /// Sort channels by the number of members.
+  static const memberCount = ChannelSortKey('member_count');
+
+  /// Sort channels by whether they have unread messages.
+  /// Useful for grouping read and unread channels.
+  static const hasUnread = ChannelSortKey('has_unread');
+
+  /// Sort channels by the count of unread messages.
+  static const unreadCount = ChannelSortKey('unread_count');
 }

@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/api/stream_chat_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
@@ -16,6 +18,7 @@ import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
+import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
@@ -607,7 +610,7 @@ class StreamChatClient {
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
-    List<SortOption<ChannelState>>? channelStateSort,
+    SortOrder<ChannelState>? channelStateSort,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -632,37 +635,63 @@ class StreamChatClient {
       paginationParams,
     ]);
 
+    // Return results from cache if available
     if (_queryChannelsStreams.containsKey(hash)) {
-      yield await _queryChannelsStreams[hash]!;
-    } else {
-      final channels = await queryChannelsOffline(
+      try {
+        yield await _queryChannelsStreams[hash]!;
+        return;
+      } catch (e, stk) {
+        logger.severe('Error retrieving cached query results', e, stk);
+        // Cache is invalid, continue with fresh query
+        _queryChannelsStreams.remove(hash);
+      }
+    }
+
+    // Get offline results first
+    var offlineChannels = <Channel>[];
+    try {
+      offlineChannels = await queryChannelsOffline(
         filter: filter,
         channelStateSort: channelStateSort,
         paginationParams: paginationParams,
       );
-      if (channels.isNotEmpty) yield channels;
 
-      try {
-        final newQueryChannelsFuture = queryChannelsOnline(
-          filter: filter,
-          sort: channelStateSort,
-          state: state,
-          watch: watch,
-          presence: presence,
-          memberLimit: memberLimit,
-          messageLimit: messageLimit,
-          paginationParams: paginationParams,
-          waitForConnect: waitForConnect,
-        ).whenComplete(() {
-          _queryChannelsStreams.remove(hash);
-        });
+      if (offlineChannels.isNotEmpty) yield offlineChannels;
+    } catch (e, stk) {
+      logger.warning('Error querying channels offline', e, stk);
+      // Continue to online query even if offline fails
+    }
 
-        _queryChannelsStreams[hash] = newQueryChannelsFuture;
+    try {
+      final newQueryChannelsFuture = queryChannelsOnline(
+        filter: filter,
+        sort: channelStateSort,
+        state: state,
+        watch: watch,
+        presence: presence,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        paginationParams: paginationParams,
+        waitForConnect: waitForConnect,
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          logger.warning('Online channel query timed out');
+          throw TimeoutException('Channel query timed out');
+        },
+      ).whenComplete(() {
+        // Always clean up cache reference when done
+        _queryChannelsStreams.remove(hash);
+      });
 
-        yield await newQueryChannelsFuture;
-      } catch (_) {
-        if (channels.isEmpty) rethrow;
-      }
+      // Store the future in cache
+      _queryChannelsStreams[hash] = newQueryChannelsFuture;
+
+      yield await newQueryChannelsFuture;
+    } catch (e, stk) {
+      logger.severe('Error querying channels online', e, stk);
+      // Only rethrow if we have no channels to show the user
+      if (offlineChannels.isEmpty) rethrow;
     }
   }
 
@@ -690,7 +719,7 @@ class StreamChatClient {
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<ChannelState>? sort,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -764,7 +793,7 @@ class StreamChatClient {
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
     Filter? filter,
-    List<SortOption<ChannelState>>? channelStateSort,
+    SortOrder<ChannelState>? channelStateSort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final offlineChannels = (await chatPersistenceClient?.getChannelStates(
@@ -803,7 +832,7 @@ class StreamChatClient {
   Future<QueryUsersResponse> queryUsers({
     bool? presence,
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<User>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _chatApi.user.queryUsers(
@@ -819,7 +848,7 @@ class StreamChatClient {
   /// Query banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
     required Filter filter,
-    List<SortOption>? sort,
+    SortOrder<BannedUser>? sort,
     PaginationParams? pagination,
   }) =>
       _chatApi.moderation.queryBannedUsers(
@@ -832,7 +861,7 @@ class StreamChatClient {
   Future<SearchMessagesResponse> search(
     Filter filter, {
     String? query,
-    List<SortOption>? sort,
+    SortOrder? sort,
     PaginationParams? paginationParams,
     Filter? messageFilters,
   }) =>
@@ -1037,7 +1066,7 @@ class StreamChatClient {
     Filter? filter,
     String? channelId,
     List<Member>? members,
-    List<SortOption>? sort,
+    SortOrder<Member>? sort,
     PaginationParams? pagination,
   }) =>
       _chatApi.general.queryMembers(
@@ -1358,7 +1387,7 @@ class StreamChatClient {
   /// Queries Polls with the given [filter] and [sort] options.
   Future<QueryPollsResponse> queryPolls({
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<Poll>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) =>
       _chatApi.polls.queryPolls(
@@ -1372,7 +1401,7 @@ class StreamChatClient {
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<PollVote>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) =>
       _chatApi.polls.queryPollVotes(
@@ -1451,6 +1480,68 @@ class StreamChatClient {
         ...options,
       });
 
+  final _userBlockLock = Lock();
+
+  /// Blocks a user with the provided [userId].
+  Future<UserBlockResponse> blockUser(String userId) async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.blockUser(userId),
+      );
+
+      final blockedUserId = response.blockedUserId;
+      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
+      if (!currentBlockedUserIds.contains(blockedUserId)) {
+        // Add the new blocked user to the blocked user list.
+        state.blockedUserIds = [...currentBlockedUserIds, blockedUserId];
+      }
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error blocking user', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Unblocks a previously blocked user with the provided [userId].
+  Future<EmptyResponse> unblockUser(String userId) async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.unblockUser(userId),
+      );
+
+      final unblockedUserId = userId;
+      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
+      if (currentBlockedUserIds.contains(unblockedUserId)) {
+        // Remove the unblocked user from the blocked user list.
+        state.blockedUserIds = currentBlockedUserIds..remove(unblockedUserId);
+      }
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error unblocking user', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Retrieves a list of all users that the current user has blocked.
+  Future<BlockedUsersResponse> queryBlockedUsers() async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.queryBlockedUsers(),
+      );
+
+      // Update the blocked user IDs with the latest data.
+      final blockedUserIds = response.blocks.map((it) => it.blockedUserId);
+      state.blockedUserIds = [...blockedUserIds.nonNulls];
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error querying blocked users', e, stk);
+      rethrow;
+    }
+  }
+
   /// Mutes a user
   Future<EmptyResponse> muteUser(String userId) =>
       _chatApi.moderation.muteUser(userId);
@@ -1458,18 +1549,6 @@ class StreamChatClient {
   /// Unmutes a user
   Future<EmptyResponse> unmuteUser(String userId) =>
       _chatApi.moderation.unmuteUser(userId);
-
-  /// Blocks a user
-  Future<UserBlockResponse> blockUser(String userId) =>
-      _chatApi.user.blockUser(userId);
-
-  /// Unblocks a user
-  Future<EmptyResponse> unblockUser(String userId) =>
-      _chatApi.user.unblockUser(userId);
-
-  /// Requests users with a given query.
-  Future<BlockedUsersResponse> queryBlockedUsers() =>
-      _chatApi.user.queryBlockedUsers();
 
   /// Flag a message
   Future<EmptyResponse> flagMessage(String messageId) =>
@@ -2075,6 +2154,11 @@ class ClientState {
   /// Removes the channel from the cached list of [channels]
   void removeChannel(String channelCid) {
     channels = channels..remove(channelCid);
+  }
+
+  @visibleForTesting
+  set blockedUserIds(List<String> blockedUserIds) {
+    currentUser = currentUser?.copyWith(blockedUserIds: blockedUserIds);
   }
 
   /// Used internally for optimistic update of unread count

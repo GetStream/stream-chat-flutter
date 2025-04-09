@@ -248,20 +248,6 @@ void main() {
     });
 
     group('getChannelState', () {
-      test('should throw if sort is provided without comparator', () async {
-        final sort = [
-          const SortOption<ChannelState>(
-            'testField',
-            direction: SortOption.ASC,
-          ),
-        ];
-
-        expect(
-          () => client.getChannelStates(channelStateSort: sort),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
-
       test('should work fine', () async {
         const cid = 'testType:testId';
         final channels = List.generate(3, (index) => ChannelModel(cid: cid));

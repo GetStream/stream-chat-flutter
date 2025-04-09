@@ -6,60 +6,6 @@ import 'package:stream_chat/stream_chat.dart' show Channel;
 
 part 'requests.g.dart';
 
-/// Sorting options
-@JsonSerializable(includeIfNull: false)
-class SortOption<T> {
-  /// Creates a new SortOption instance
-  ///
-  /// For example:
-  /// ```dart
-  /// // Sort channels by the last message date:
-  /// final sorting = SortOption("last_message_at")
-  /// ```
-  const SortOption(
-    this.field, {
-    this.direction = SortOption.DESC,
-    this.comparator,
-  });
-
-  /// Create a new instance from a json
-  factory SortOption.fromJson(Map<String, dynamic> json) =>
-      _$SortOptionFromJson(json);
-
-  /// Ascending order
-  // ignore: constant_identifier_names
-  static const ASC = 1;
-
-  /// Descending order
-  // ignore: constant_identifier_names
-  static const DESC = -1;
-
-  /// A sorting field name
-  final String field;
-
-  /// A sorting direction
-  final int direction;
-
-  /// Sorting field Comparator required for offline sorting
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  final Comparator<T>? comparator;
-
-  /// Serialize model to json
-  Map<String, dynamic> toJson() => _$SortOptionToJson(this);
-}
-
-extension type const ChannelSortField(String field) implements String {
-  static const defaultSort = ChannelSortField('last_updated');
-  static const createdAt = ChannelSortField('created_at');
-  static const updatedAt = ChannelSortField('updated_at');
-  static const lastMessageAt = ChannelSortField('last_message_at');
-  static const pinnedAt = ChannelSortField('pinned_at');
-  static const memberCount = ChannelSortField('member_count');
-  static const cid = ChannelSortField('cid');
-  static const hasUnread = ChannelSortField('has_unread');
-  static const unreadCount = ChannelSortField('unread_count');
-}
-
 /// Pagination options.
 @JsonSerializable(includeIfNull: false)
 class PaginationParams extends Equatable {

@@ -86,7 +86,7 @@ void main() {
       'should throw if `pagination.offset` and `sort` both are provided',
       () async {
         final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-        const sort = [SortOption<ChannelModel>('test-field')];
+        const sort = [SortOption('test-field')];
         const pagination = PaginationParams(offset: 10);
         try {
           await generalApi.searchMessages(
@@ -103,7 +103,7 @@ void main() {
     test('should run successfully with `query`', () async {
       final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
       const query = 'test-query';
-      const sort = [SortOption<ChannelModel>('test-field')];
+      const sort = [SortOption('test-field')];
       const pagination = PaginationParams();
 
       const path = '/search';
@@ -142,7 +142,7 @@ void main() {
 
     test('should run successfully with `messageFilter`', () async {
       final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-      const sort = [SortOption<ChannelModel>('test-field')];
+      const sort = [SortOption('test-field')];
       final messageFilter = Filter.query('key', 'text');
       const pagination = PaginationParams();
 
@@ -187,7 +187,7 @@ void main() {
       const channelId = 'test-channel-id';
       final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
       const pagination = PaginationParams();
-      const sort = [SortOption('test-field')];
+      const sort = [SortOption<Member>('test-field')];
 
       const path = '/members';
 
@@ -234,7 +234,7 @@ void main() {
       const channelType = 'test-channel-type';
       final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
       const pagination = PaginationParams();
-      const sort = [SortOption('test-field')];
+      const sort = [SortOption<Member>('test-field')];
 
       const path = '/members';
 

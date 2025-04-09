@@ -64,22 +64,7 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
   }
 
   /// Get list of channels by filter, sort and paginationParams
-  Future<List<ChannelModel>> getChannels({
-    Filter? filter,
-    List<SortOption<ChannelModel>>? sort,
-    PaginationParams? paginationParams,
-  }) async {
-    assert(() {
-      if (sort != null &&
-          sort.any(
-              (it) => it.comparator == null)) {
-        throw ArgumentError(
-          'SortOption requires a comparator in order to sort',
-        );
-      }
-      return true;
-    }(), '');
-
+  Future<List<ChannelModel>> getChannels({Filter? filter}) async {
     final cachedChannelCids = await getCachedChannelCids(filter);
     final query = select(channels)..where((c) => c.cid.isIn(cachedChannelCids));
 
@@ -90,38 +75,6 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
       final channelEntity = row.readTable(channels);
       return channelEntity.toChannelModel(createdBy: createdByEntity?.toUser());
     }).get();
-
-    var chainedComparator = (ChannelModel a, ChannelModel b) {
-      final dateA = a.lastMessageAt ?? a.createdAt;
-      final dateB = b.lastMessageAt ?? b.createdAt;
-      return dateB.compareTo(dateA);
-    };
-
-    if (sort != null && sort.isNotEmpty) {
-      chainedComparator = (a, b) {
-        int result;
-        for (final comparator in sort.map((it) => it.comparator)) {
-          try {
-            result = comparator!(a, b);
-          } catch (e) {
-            result = 0;
-          }
-          if (result != 0) return result;
-        }
-        return 0;
-      };
-    }
-
-    cachedChannels.sort(chainedComparator);
-
-    final offset = paginationParams?.offset;
-    if (offset != null && offset > 0 && cachedChannels.isNotEmpty) {
-      cachedChannels.removeRange(0, offset);
-    }
-
-    if (paginationParams?.limit != null) {
-      return cachedChannels.take(paginationParams!.limit).toList();
-    }
 
     return cachedChannels;
   }

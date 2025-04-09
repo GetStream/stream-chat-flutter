@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -19,7 +20,7 @@ const _nullConst = _NullConst();
 
 /// The class that contains the information about a message.
 @JsonSerializable()
-class Message extends Equatable {
+class Message extends Equatable implements ComparableFieldProvider {
   /// Constructor used for json serialization.
   Message({
     String? id,
@@ -531,6 +532,35 @@ class Message extends Equatable {
         restrictedVisibility,
         moderation,
       ];
+
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      MessageSortKey.id => id,
+      MessageSortKey.createdAt => createdAt,
+      MessageSortKey.updatedAt => updatedAt,
+      _ => extraData[sortKey],
+    };
+
+    return ComparableField.fromValue(value);
+  }
+}
+
+/// Extension type representing sortable fields for [Message].
+///
+/// This type provides type-safe keys that can be used for sorting messages
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const MessageSortKey(String key) implements String {
+  /// Sort messages by their unique ID.
+  static const id = MessageSortKey('id');
+
+  /// Sort messages by their creation date.
+  ///
+  /// This is the default sort field (in descending order).
+  static const createdAt = MessageSortKey('created_at');
+
+  /// Sort messages by their last update date.
+  static const updatedAt = MessageSortKey('updated_at');
 }
 
 /// {@template messageType}
