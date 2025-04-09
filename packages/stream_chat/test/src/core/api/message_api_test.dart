@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
@@ -465,7 +467,7 @@ void main() {
 
     when(() => client.post(
           path,
-          data: {'message': draftMessage},
+          data: jsonEncode({'message': draftMessage}),
         )).thenAnswer((_) async => successResponse(
           path,
           data: {'draft': draft.toJson()},
