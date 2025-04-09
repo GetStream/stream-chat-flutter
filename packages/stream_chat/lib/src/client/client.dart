@@ -20,6 +20,8 @@ import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
@@ -1717,6 +1719,57 @@ class StreamChatClient {
       _chatApi.message.translateMessage(
         messageId,
         language,
+      );
+
+  /// Creates a draft message for the given [channelId] of type [channelType].
+  Future<CreateDraftMessageResponse> createDraftMessage(
+    DraftMessage draft,
+    String channelId,
+    String channelType,
+  ) =>
+      _chatApi.message.createDraftMessage(
+        channelId,
+        channelType,
+        draft,
+      );
+
+  /// Retrieves a draft message for the given [channelId] of type [channelType].
+  ///
+  /// Optionally, pass [parentId] to get the draft message for a thread.
+  Future<GetDraftMessageResponse> getDraftMessage(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) =>
+      _chatApi.message.getDraftMessage(
+        channelId,
+        channelType,
+        parentId: parentId,
+      );
+
+  /// Deletes a draft message for the given [channelId] of type [channelType].
+  ///
+  /// Optionally, pass [parentId] to delete the draft message for a thread.
+  Future<EmptyResponse> deleteDraftMessage(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) =>
+      _chatApi.message.deleteDraftMessage(
+        channelId,
+        channelType,
+        parentId: parentId,
+      );
+
+  /// Queries drafts for the current user.
+  Future<QueryDraftMessagesResponse> queryDraftMessages({
+    Filter? filter,
+    SortOrder<Draft>? sort,
+    PaginationParams? pagination,
+  }) =>
+      _chatApi.message.queryDraftMessages(
+        sort: sort,
+        pagination: pagination,
       );
 
   /// Enables slow mode

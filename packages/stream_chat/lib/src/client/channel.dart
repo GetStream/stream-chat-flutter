@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:synchronized/synchronized.dart';
@@ -1016,6 +1017,36 @@ class Channel {
           'pinned': false,
         },
       );
+
+  /// Creates or updates a new [draft] message for this channel.
+  Future<CreateDraftMessageResponse> createDraftMessage(
+    DraftMessage draft,
+  ) {
+    _checkInitialized();
+    return _client.createDraftMessage(draft, id!, type);
+  }
+
+  /// Retrieves the draft message for this channel.
+  ///
+  /// Optionally, provide a [parentId] to get the draft message for a
+  /// specific thread.
+  Future<GetDraftMessageResponse> getDraftMessage({
+    String? parentId,
+  }) {
+    _checkInitialized();
+    return _client.getDraftMessage(id!, type, parentId: parentId);
+  }
+
+  /// Deletes the draft message for this channel.
+  ///
+  /// Optionally, provide a [parentId] to delete the draft message for a
+  /// specific thread.
+  Future<EmptyResponse> deleteDraftMessage({
+    String? parentId,
+  }) {
+    _checkInitialized();
+    return _client.deleteDraftMessage(id!, type, parentId: parentId);
+  }
 
   /// Send a file to this channel.
   Future<SendFileResponse> sendFile(

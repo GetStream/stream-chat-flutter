@@ -37,6 +37,8 @@ export 'src/core/models/channel_mute.dart';
 export 'src/core/models/channel_state.dart';
 export 'src/core/models/command.dart';
 export 'src/core/models/device.dart';
+export 'src/core/models/draft.dart';
+export 'src/core/models/draft_message.dart';
 export 'src/core/models/event.dart';
 export 'src/core/models/filter.dart' show Filter;
 export 'src/core/models/member.dart';

@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
+import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 
 /// Defines the api dedicated to messages operations
@@ -27,6 +33,82 @@ class MessageApi {
       },
     );
     return SendMessageResponse.fromJson(response.data);
+  }
+
+  /// Creates a draft message for the given [channelId] of type [channelType].
+  ///
+  /// Returns a [CreateDraftMessageResponse] containing the draft message.
+  Future<CreateDraftMessageResponse> createDraftMessage(
+    String channelId,
+    String channelType,
+    DraftMessage message,
+  ) async {
+    final response = await _client.post(
+      '/channels/$channelType/$channelId/draft',
+      data: {'message': message},
+    );
+    return CreateDraftMessageResponse.fromJson(response.data);
+  }
+
+  /// Deletes the draft message for the given [channelId] of type [channelType].
+  ///
+  /// Optionally, you can provide a [parentId] if the draft is in a thread.
+  ///
+  /// Returns an [EmptyResponse] on success.
+  Future<EmptyResponse> deleteDraftMessage(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) async {
+    final response = await _client.delete(
+      '/channels/$channelType/$channelId/draft',
+      queryParameters: {
+        if (parentId != null) 'parent_id': parentId,
+      },
+    );
+    return EmptyResponse.fromJson(response.data);
+  }
+
+  /// Retrieves a draft message from the given [channelId] of type [channelType]
+  ///
+  /// Optionally, you can provide a [parentId] if the draft is in a thread.
+  ///
+  /// Returns a [GetDraftMessageResponse] containing the draft message.
+  Future<GetDraftMessageResponse> getDraftMessage(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) async {
+    final response = await _client.get(
+      '/channels/$channelType/$channelId/draft',
+      queryParameters: {
+        if (parentId != null) 'parent_id': parentId,
+      },
+    );
+    return GetDraftMessageResponse.fromJson(response.data);
+  }
+
+  /// Retrieves a list of draft messages from the given [channelId] of type
+  /// [channelType].
+  ///
+  /// Optionally, you can provide [pagination] parameters.
+  ///
+  /// Returns a [QueryDraftMessagesResponse] containing the list of draft
+  /// messages.
+  Future<QueryDraftMessagesResponse> queryDraftMessages({
+    Filter? filter,
+    SortOrder<Draft>? sort,
+    PaginationParams? pagination,
+  }) async {
+    final response = await _client.post(
+      '/drafts/query',
+      data: jsonEncode({
+        if (filter != null) 'filter': filter,
+        if (sort != null) 'sort': sort,
+        if (pagination != null) ...pagination.toJson(),
+      }),
+    );
+    return QueryDraftMessagesResponse.fromJson(response.data);
   }
 
   /// Retrieves a list of messages by [messageIDs]

@@ -1,11 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 part 'event.g.dart';
 
 /// The class that contains the information about an event
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Event {
   /// Constructor used for json serialization
   Event({
@@ -38,6 +39,7 @@ class Event {
     this.lastReadAt,
     this.unreadMessages,
     this.lastReadMessageId,
+    this.draft,
     this.extraData = const {},
     this.isLocal = true,
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
@@ -112,7 +114,6 @@ class Event {
   final bool isLocal;
 
   /// This is true if the message has been hard deleted
-  @JsonKey(includeIfNull: false)
   final bool? hardDelete;
 
   /// The current state of the AI assistant.
@@ -142,6 +143,9 @@ class Event {
 
   /// The id of the last read message (notification.mark_read)
   final String? lastReadMessageId;
+
+  /// The draft message sent with the event.
+  final DraftMessage? draft;
 
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
@@ -179,6 +183,7 @@ class Event {
     'last_read_at',
     'unread_messages',
     'last_read_message_id',
+    'draft',
   ];
 
   /// Serialize to json
@@ -217,6 +222,7 @@ class Event {
     DateTime? lastReadAt,
     int? unreadMessages,
     String? lastReadMessageId,
+    DraftMessage? draft,
     Map<String, Object?>? extraData,
   }) =>
       Event(
@@ -249,6 +255,7 @@ class Event {
         lastReadAt: lastReadAt ?? this.lastReadAt,
         unreadMessages: unreadMessages ?? this.unreadMessages,
         lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
+        draft: draft ?? this.draft,
         isLocal: isLocal,
         extraData: extraData ?? this.extraData,
       );

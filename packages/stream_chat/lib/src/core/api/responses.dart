@@ -7,6 +7,7 @@ import 'package:stream_chat/src/core/models/call_payload.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
@@ -713,4 +714,41 @@ class QueryThreadsResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryThreadsResponse fromJson(Map<String, dynamic> json) =>
       _$QueryThreadsResponseFromJson(json);
+}
+
+/// Base Model response for draft based api calls.
+class DraftResponse extends _BaseResponse {
+  /// Draft returned by the api call
+  late Draft draft;
+}
+
+/// Model response for [StreamChatClient.createDraftMessage] api call
+@JsonSerializable(createToJson: false)
+class CreateDraftMessageResponse extends DraftResponse {
+  /// Create a new instance from a json
+  static CreateDraftMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$CreateDraftMessageResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getDraftMessage] api call
+@JsonSerializable(createToJson: false)
+class GetDraftMessageResponse extends DraftResponse {
+  /// Create a new instance from a json
+  static GetDraftMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$GetDraftMessageResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryDraftMessages] api call
+@JsonSerializable(createToJson: false)
+class QueryDraftMessagesResponse extends _BaseResponse {
+  /// List of draft messages returned by the query
+  @JsonKey(defaultValue: [])
+  late List<Draft> drafts;
+
+  /// The next page token
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryDraftMessagesResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryDraftMessagesResponseFromJson(json);
 }
