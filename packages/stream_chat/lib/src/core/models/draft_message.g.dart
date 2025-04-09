@@ -37,14 +37,16 @@ DraftMessage _$DraftMessageFromJson(Map<String, dynamic> json) => DraftMessage(
 Map<String, dynamic> _$DraftMessageToJson(DraftMessage instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'text': instance.text,
+      if (instance.text case final value?) 'text': value,
       if (MessageType.toJson(instance.type) case final value?) 'type': value,
       'attachments': instance.attachments.map((e) => e.toJson()).toList(),
-      'parent_id': instance.parentId,
-      'show_in_channel': instance.showInChannel,
-      'mentioned_users': User.toIds(instance.mentionedUsers),
-      'quoted_message_id': instance.quotedMessageId,
+      if (instance.parentId case final value?) 'parent_id': value,
+      if (instance.showInChannel case final value?) 'show_in_channel': value,
+      if (User.toIds(instance.mentionedUsers) case final value?)
+        'mentioned_users': value,
+      if (instance.quotedMessageId case final value?)
+        'quoted_message_id': value,
       'silent': instance.silent,
-      'poll_id': instance.pollId,
+      if (instance.pollId case final value?) 'poll_id': value,
       'extra_data': instance.extraData,
     };

@@ -11,7 +11,7 @@ import 'package:uuid/uuid.dart';
 part 'draft_message.g.dart';
 
 /// The class that contains the information about a draft message.
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class DraftMessage extends Equatable {
   /// Creates a new draft message.
   DraftMessage({
