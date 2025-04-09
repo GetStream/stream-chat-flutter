@@ -45,7 +45,7 @@ class MessageApi {
   ) async {
     final response = await _client.post(
       '/channels/$channelType/$channelId/draft',
-      data: {'message': message},
+      data: jsonEncode({'message': message}),
     );
     return CreateDraftMessageResponse.fromJson(response.data);
   }
