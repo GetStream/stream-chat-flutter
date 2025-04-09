@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 /// A widget that renders nothing and takes up no space.
 ///
-/// This is a type-safe wrapper around [EmptyWidget()] that can be used
+/// This is a type-safe wrapper around [SizedBox.shrink] that can be used
 /// when a widget is required but no visible content should be rendered.
 ///
 /// Example:
@@ -13,7 +13,7 @@ import 'package:flutter/widgets.dart';
 /// ```
 ///
 /// See also:
-///  * [SizedBox.shrink], the underlying widget used by this extension type
+///  * [SizedBox.shrink], the underlying widget used by this widget
 class Empty extends StatelessWidget {
   /// Creates a widget that renders nothing and takes up no space.
   const Empty({super.key});
