@@ -10,7 +10,7 @@ void main() {
     final now = DateTime.now();
     const channelCid = 'messaging:123';
     final draftMessage = DraftMessage(text: 'Hello, world!');
-    
+
     final draft = Draft(
       channelCid: channelCid,
       createdAt: now,
@@ -32,7 +32,7 @@ void main() {
       const parentId = 'parent-123';
       final parentMessage = Message(id: parentId);
       final quotedMessage = Message(id: 'quote-123');
-      
+
       final fullDraft = Draft(
         channelCid: channelCid,
         createdAt: now,
@@ -42,7 +42,7 @@ void main() {
         parentMessage: parentMessage,
         quotedMessage: quotedMessage,
       );
-      
+
       expect(fullDraft.channelCid, equals(channelCid));
       expect(fullDraft.createdAt, equals(now));
       expect(fullDraft.message, equals(draftMessage));
@@ -54,7 +54,7 @@ void main() {
 
     test('should correctly serialize to JSON', () {
       final json = draft.toJson();
-      
+
       expect(json['channel_cid'], equals(channelCid));
       expect(json['created_at'], isA<String>());
       expect(json['message'], isA<Map<String, dynamic>>());
@@ -66,11 +66,11 @@ void main() {
         'created_at': now.toIso8601String(),
         'message': draftMessage.toJson(),
       };
-      
+
       final deserializedDraft = Draft.fromJson(json);
-      
+
       expect(deserializedDraft.channelCid, equals(channelCid));
-      expect(deserializedDraft.createdAt.toIso8601String(), equals(now.toIso8601String()));
+      expect(deserializedDraft.createdAt, equals(now));
       expect(deserializedDraft.message.id, equals(draftMessage.id));
       expect(deserializedDraft.message.text, equals(draftMessage.text));
     });
@@ -81,19 +81,19 @@ void main() {
         createdAt: now,
         message: draftMessage,
       );
-      
+
       final draft2 = Draft(
         channelCid: channelCid,
         createdAt: now,
         message: draftMessage,
       );
-      
+
       final draft3 = Draft(
         channelCid: 'different:123',
         createdAt: now,
         message: draftMessage,
       );
-      
+
       expect(draft1, equals(draft2));
       expect(draft1, isNot(equals(draft3)));
     });
@@ -101,16 +101,16 @@ void main() {
     test('should implement copyWith correctly', () {
       final newMessage = DraftMessage(text: 'Updated text');
       final newCreatedAt = DateTime.now().add(const Duration(days: 1));
-      
+
       final copiedDraft = draft.copyWith(
         message: newMessage,
         createdAt: newCreatedAt,
       );
-      
+
       expect(copiedDraft.channelCid, equals(draft.channelCid));
       expect(copiedDraft.createdAt, equals(newCreatedAt));
       expect(copiedDraft.message, equals(newMessage));
-      
+
       // Original should be unchanged
       expect(draft.message, equals(draftMessage));
       expect(draft.createdAt, equals(now));
@@ -121,7 +121,7 @@ void main() {
       final createdAtField = draft.getComparableField(DraftSortKey.createdAt);
       expect(createdAtField, isA<ComparableField>());
       expect(createdAtField?.value, equals(now));
-      
+
       // Test extraData field from message
       final draftWithExtraData = Draft(
         channelCid: channelCid,
@@ -131,11 +131,11 @@ void main() {
           extraData: const {'priority': 'high'},
         ),
       );
-      
+
       final priorityField = draftWithExtraData.getComparableField('priority');
       expect(priorityField, isA<ComparableField>());
       expect(priorityField?.value, equals('high'));
-      
+
       // Test non-existent field
       final nonExistentField = draft.getComparableField('non_existent');
       expect(nonExistentField?.value, isNull);
@@ -145,4 +145,4 @@ void main() {
       expect(DraftSortKey.createdAt, equals('created_at'));
     });
   });
-} 
+}
