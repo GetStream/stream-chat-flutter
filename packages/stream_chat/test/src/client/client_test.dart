@@ -827,6 +827,7 @@ void main() {
       // fallback values
       registerFallbackValue(FakeEvent());
       registerFallbackValue(FakeMessage());
+      registerFallbackValue(FakeDraftMessage());
       registerFallbackValue(FakePollVote());
       registerFallbackValue(const PaginationParams());
     });
@@ -2745,6 +2746,81 @@ void main() {
             channelType,
             any(that: isSameMessageAs(message)),
           )).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.createDraftMessage`', () async {
+      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      when(
+        () => api.message.createDraftMessage(
+          channelId,
+          channelType,
+          any(that: isSameDraftMessageAs(message)),
+        ),
+      ).thenAnswer(
+        (_) async => CreateDraftMessageResponse()
+          ..draft = Draft(
+            channelCid: '$channelType:$channelId',
+            createdAt: DateTime.now(),
+            message: message,
+          ),
+      );
+
+      final res = await client.createDraftMessage(
+        message,
+        channelId,
+        channelType,
+      );
+
+      expect(res, isNotNull);
+      expect(res.draft.message, isSameDraftMessageAs(message));
+
+      verify(() => api.message.createDraftMessage(
+            channelId,
+            channelType,
+            any(that: isSameDraftMessageAs(message)),
+          )).called(1);
+
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.deleteDraftMessage`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      when(() => api.message.deleteDraftMessage(channelId, channelType))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.deleteDraftMessage(channelId, channelType);
+      expect(res, isNotNull);
+
+      verify(() => api.message.deleteDraftMessage(channelId, channelType));
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.getDraftMessage`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+
+      when(() => api.message.getDraftMessage(channelId, channelType))
+          .thenAnswer((_) async => GetDraftMessageResponse()
+            ..draft = Draft(
+              channelCid: '$channelType:$channelId',
+              createdAt: DateTime.now(),
+              message: message,
+            ));
+
+      final res = await client.getDraftMessage(channelId, channelType);
+
+      expect(res, isNotNull);
+      expect(res.draft.message, isSameDraftMessageAs(message));
+
+      verify(() => api.message.getDraftMessage(channelId, channelType));
       verifyNoMoreInteractions(api.message);
     });
 

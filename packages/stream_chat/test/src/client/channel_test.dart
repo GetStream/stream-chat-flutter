@@ -464,6 +464,117 @@ void main() {
       });
     });
 
+    group('`.createDraftMessage`', () {
+      final draftMessage = DraftMessage(text: 'Draft message text');
+
+      setUp(() {
+        when(() => client.createDraftMessage(
+              draftMessage,
+              channelId,
+              channelType,
+            )).thenAnswer(
+          (_) async => CreateDraftMessageResponse()
+            ..draft = Draft(
+              channelCid: channelCid,
+              createdAt: DateTime.now(),
+              message: draftMessage,
+            ),
+        );
+      });
+
+      test('should call client.createDraftMessage', () async {
+        final res = await channel.createDraftMessage(draftMessage);
+
+        expect(res, isNotNull);
+        expect(res.draft.message, draftMessage);
+
+        verify(() => channel.client.createDraftMessage(
+              draftMessage,
+              channelId,
+              channelType,
+            )).called(1);
+      });
+    });
+
+    group('`.getDraftMessage`', () {
+      final draftMessage = DraftMessage(text: 'Draft message text');
+
+      setUp(() {
+        when(() => client.getDraftMessage(
+              channelId,
+              channelType,
+              parentId: any(named: 'parentId'),
+            )).thenAnswer(
+          (_) async => GetDraftMessageResponse()
+            ..draft = Draft(
+              channelCid: channelCid,
+              createdAt: DateTime.now(),
+              message: draftMessage,
+            ),
+        );
+      });
+
+      test('should call client.getDraftMessage', () async {
+        final res = await channel.getDraftMessage();
+
+        expect(res, isNotNull);
+        expect(res.draft.message, draftMessage);
+
+        verify(() => channel.client.getDraftMessage(
+              channelId,
+              channelType,
+            )).called(1);
+      });
+
+      test('with parentId should pass parentId to client', () async {
+        const parentId = 'parent-123';
+        final res = await channel.getDraftMessage(parentId: parentId);
+
+        expect(res, isNotNull);
+        expect(res.draft.message, draftMessage);
+
+        verify(() => channel.client.getDraftMessage(
+              channelId,
+              channelType,
+              parentId: parentId,
+            )).called(1);
+      });
+    });
+
+    group('`.deleteDraftMessage`', () {
+      setUp(() {
+        when(() => client.deleteDraftMessage(
+              channelId,
+              channelType,
+              parentId: any(named: 'parentId'),
+            )).thenAnswer((_) async => EmptyResponse());
+      });
+
+      test('should call client.deleteDraftMessage', () async {
+        final res = await channel.deleteDraftMessage();
+
+        expect(res, isNotNull);
+
+        verify(() => channel.client.deleteDraftMessage(
+              channelId,
+              channelType,
+            )).called(1);
+      });
+
+      test('with parentId should pass parentId to client', () async {
+        const parentId = 'parent-123';
+        final res = await channel.deleteDraftMessage(parentId: parentId);
+
+        expect(res, isNotNull);
+
+        verify(() => channel.client.deleteDraftMessage(
+              channelId,
+              channelType,
+              parentId: parentId,
+            )).called(1);
+      });
+    });
+
     group('`.updateMessage`', () {
       test('should work fine', () async {
         final message = Message(

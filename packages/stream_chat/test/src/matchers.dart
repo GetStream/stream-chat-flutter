@@ -3,6 +3,7 @@ import 'package:dio/dio.dart' show MultipartFile;
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -132,6 +133,65 @@ class _IsSameMessageAs extends Matcher {
     if (matchParentId) {
       matches &= message.parentId == targetMessage.parentId;
     }
+    return matches;
+  }
+}
+
+Matcher isSameDraftMessageAs(
+  DraftMessage targetMessage, {
+  bool matchText = false,
+  bool matchAttachments = false,
+  bool matchParentId = false,
+}) =>
+    _IsSameDraftMessageAs(
+      targetMessage: targetMessage,
+      matchText: matchText,
+      matchAttachments: matchAttachments,
+      matchParentId: matchParentId,
+    );
+
+class _IsSameDraftMessageAs extends Matcher {
+  const _IsSameDraftMessageAs({
+    required this.targetMessage,
+    this.matchText = false,
+    this.matchAttachments = false,
+    this.matchParentId = false,
+  });
+
+  final DraftMessage targetMessage;
+  final bool matchText;
+  final bool matchAttachments;
+  final bool matchParentId;
+
+  @override
+  Description describe(Description description) =>
+      description.add('is same draft message as $targetMessage');
+
+  @override
+  bool matches(covariant DraftMessage message, Map matchState) {
+    var matches = message.id == targetMessage.id;
+    if (matchText) matches &= message.text == targetMessage.text;
+    if (matchParentId) matches &= message.parentId == targetMessage.parentId;
+    if (matchAttachments) {
+      bool matchAttachments() {
+        final attachments = message.attachments;
+        final targetAttachments = targetMessage.attachments;
+        if (identical(attachments, targetAttachments)) return true;
+        final length = attachments.length;
+        if (length != targetAttachments.length) return false;
+        for (var i = 0; i < length; i++) {
+          if (!isSameAttachmentAs(
+            attachments[i],
+          ).matches(targetAttachments[i], matchState)) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      matches &= matchAttachments();
+    }
+
     return matches;
   }
 }
