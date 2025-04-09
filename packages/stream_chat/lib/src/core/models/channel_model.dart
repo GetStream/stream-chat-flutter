@@ -92,6 +92,10 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final DateTime createdAt;
 
+  /// The date at which the channel was last updated.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  DateTime? get lastUpdatedAt => lastMessageAt ?? createdAt;
+
   /// The date of the last channel update
   @JsonKey(includeToJson: false)
   final DateTime updatedAt;

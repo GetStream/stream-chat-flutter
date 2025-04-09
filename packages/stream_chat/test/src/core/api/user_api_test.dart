@@ -25,7 +25,7 @@ void main() {
   test('queryUsers', () async {
     const presence = true;
     final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-    const sort = [SortOption('test-field')];
+    const sort = [SortOption<User>('test-field')];
     const pagination = PaginationParams();
 
     const path = '/users';

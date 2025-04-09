@@ -68,7 +68,6 @@ linter:
     - missing_whitespace_between_adjacent_strings
     - non_constant_identifier_names
     - null_closures
-    - one_member_abstracts
     - only_throw_errors
     - package_prefixed_library_names
     - parameter_assignments

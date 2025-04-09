@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -32,7 +33,7 @@ enum VotingVisibility {
 /// A model class representing a poll.
 /// {@endtemplate}
 @JsonSerializable()
-class Poll extends Equatable {
+class Poll extends Equatable implements ComparableFieldProvider {
   /// {@macro streamPoll}
   Poll({
     String? id,
@@ -270,6 +271,45 @@ class Poll extends Equatable {
         createdAt,
         updatedAt,
       ];
+
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      PollSortKey.id => id,
+      PollSortKey.name => name,
+      PollSortKey.createdAt => createdAt,
+      PollSortKey.updatedAt => updatedAt,
+      PollSortKey.isClosed => isClosed,
+      _ => extraData[sortKey],
+    };
+
+    return ComparableField.fromValue(value);
+  }
+}
+
+/// Extension type representing sortable fields for [Poll].
+///
+/// This type provides type-safe keys that can be used for sorting polls
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const PollSortKey(String key) implements String {
+  /// Sort polls by their unique ID.
+  static const id = PollSortKey('id');
+
+  /// Sort polls by their name.
+  static const name = PollSortKey('name');
+
+  /// Sort polls by their creation date.
+  ///
+  /// This is the default sort field (in ascending order).
+  static const createdAt = PollSortKey('created_at');
+
+  /// Sort polls by their last update date.
+  static const updatedAt = PollSortKey('updated_at');
+
+  /// Sort polls by whether they are closed or not.
+  ///
+  /// Closed polls will appear first when sorting in ascending order.
+  static const isClosed = PollSortKey('is_closed');
 }
 
 /// Helper extension for [Poll] model.

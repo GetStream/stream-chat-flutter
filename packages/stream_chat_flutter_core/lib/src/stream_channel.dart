@@ -395,7 +395,7 @@ class StreamChannelState extends State<StreamChannel> {
   /// Query channel members.
   Future<List<Member>> queryMembers({
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<Member>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await channel.queryMembers(

@@ -22,6 +22,7 @@ export 'src/client/key_stroke_handler.dart';
 export 'src/core/api/attachment_file_uploader.dart';
 export 'src/core/api/requests.dart';
 export 'src/core/api/responses.dart';
+export 'src/core/api/sort_order.dart';
 export 'src/core/api/stream_chat_api.dart';
 export 'src/core/error/error.dart';
 export 'src/core/http/interceptor/logging_interceptor.dart';
