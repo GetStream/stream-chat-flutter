@@ -68,6 +68,134 @@ void main() {
         jsonFixture('message_to_json.json'),
       );
     });
+
+    group('ComparableFieldProvider', () {
+      test('should return ComparableField for message.id', () {
+        final message = createTestMessage(
+          id: 'test-message-id',
+          text: 'Hello world',
+        );
+
+        final field = message.getComparableField(MessageSortKey.id);
+        expect(field, isNotNull);
+        expect(field!.value, equals('test-message-id'));
+      });
+
+      test('should return ComparableField for message.createdAt', () {
+        final createdAt = DateTime(2023, 6, 15);
+        final message = createTestMessage(
+          id: 'test-message-id',
+          text: 'Hello world',
+          createdAt: createdAt,
+        );
+
+        final field = message.getComparableField(MessageSortKey.createdAt);
+        expect(field, isNotNull);
+        expect(field!.value, equals(createdAt));
+      });
+
+      test('should return ComparableField for message.updatedAt', () {
+        final updatedAt = DateTime(2023, 6, 20);
+        final message = createTestMessage(
+          id: 'test-message-id',
+          text: 'Hello world',
+          updatedAt: updatedAt,
+        );
+
+        final field = message.getComparableField(MessageSortKey.updatedAt);
+        expect(field, isNotNull);
+        expect(field!.value, equals(updatedAt));
+      });
+
+      test('should return ComparableField for message.extraData', () {
+        final message = createTestMessage(
+          id: 'test-message-id',
+          text: 'Hello world',
+          extraData: {'priority': 5},
+        );
+
+        final field = message.getComparableField('priority');
+        expect(field, isNotNull);
+        expect(field!.value, equals(5));
+      });
+
+      test('should return null for non-existent extraData keys', () {
+        final message = createTestMessage(
+          id: 'test-message-id',
+          text: 'Hello world',
+        );
+
+        final field = message.getComparableField('non_existent_key');
+        expect(field, isNull);
+      });
+
+      test('should compare two messages correctly using id', () {
+        final message1 = createTestMessage(
+          id: 'message-a',
+          text: 'Message A',
+        );
+
+        final message2 = createTestMessage(
+          id: 'message-b',
+          text: 'Message B',
+        );
+
+        final field1 = message1.getComparableField(MessageSortKey.id);
+        final field2 = message2.getComparableField(MessageSortKey.id);
+
+        // message-a < message-b
+        expect(field1!.compareTo(field2!), lessThan(0));
+        // message-b > message-a
+        expect(field2.compareTo(field1), greaterThan(0));
+      });
+
+      test('should compare two messages correctly using createdAt', () {
+        final newerMessage = createTestMessage(
+          id: 'newer',
+          text: 'Newer Message',
+          createdAt: DateTime(2023, 6, 15),
+        );
+
+        final olderMessage = createTestMessage(
+          id: 'older',
+          text: 'Older Message',
+          createdAt: DateTime(2023, 6, 10),
+        );
+
+        final field1 = newerMessage.getComparableField(
+          MessageSortKey.createdAt,
+        );
+
+        final field2 = olderMessage.getComparableField(
+          MessageSortKey.createdAt,
+        );
+
+        // More recent > Less recent
+        expect(field1!.compareTo(field2!), greaterThan(0));
+        // Less recent < More recent
+        expect(field2.compareTo(field1), lessThan(0));
+      });
+
+      test('should compare two messages correctly using extraData', () {
+        final highPriorityMessage = createTestMessage(
+          id: 'high',
+          text: 'High Priority Message',
+          extraData: {'priority': 10},
+        );
+
+        final lowPriorityMessage = createTestMessage(
+          id: 'low',
+          text: 'Low Priority Message',
+          extraData: {'priority': 1},
+        );
+
+        final field1 = highPriorityMessage.getComparableField('priority');
+        final field2 = lowPriorityMessage.getComparableField('priority');
+
+        expect(field1!.compareTo(field2!), greaterThan(0)); // 10 > 1
+        expect(field2.compareTo(field1), lessThan(0)); // 1 < 10
+      });
+    });
   });
 
   group('MessageVisibility Extension Tests', () {
@@ -300,4 +428,27 @@ void main() {
       expect(message.isFlagged, isTrue);
     });
   });
+}
+
+/// Helper function to create a Message for testing
+Message createTestMessage({
+  String? id,
+  required String text,
+  String type = 'regular',
+  DateTime? createdAt,
+  DateTime? updatedAt,
+  User? user,
+  Map<String, Object?>? extraData,
+  List<String>? restrictedVisibility,
+}) {
+  return Message(
+    id: id,
+    text: text,
+    type: type,
+    localCreatedAt: createdAt,
+    localUpdatedAt: updatedAt,
+    user: user,
+    extraData: extraData ?? {},
+    restrictedVisibility: restrictedVisibility,
+  );
 }
