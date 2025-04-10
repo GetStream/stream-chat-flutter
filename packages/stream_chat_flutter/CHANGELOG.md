@@ -11,6 +11,8 @@
   events in the Channel class.
 - [[#2150]](https://github.com/GetStream/stream-chat-flutter/issues/2150) Fixed Push notifications
   for mentions shows user ID instead of Username.
+- [[#2203]](https://github.com/GetStream/stream-chat-flutter/issues/2203) Fixed StreamMessageInput
+  shows Poll option even if polls are disabled in channel config.
 
 ## 9.7.0
 
