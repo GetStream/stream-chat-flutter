@@ -10,6 +10,12 @@ import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'thread.g.dart';
 
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
+
 /// {@template streamThread}
 /// A model class representing a thread. Threads are a way to group replies
 /// to a message in a channel.
@@ -124,7 +130,7 @@ class Thread extends Equatable {
     DateTime? lastMessageAt,
     List<Message>? latestReplies,
     List<Read>? read,
-    Draft? draft,
+    Object? draft = _nullConst,
     Map<String, Object?>? extraData,
   }) =>
       Thread(
@@ -146,7 +152,7 @@ class Thread extends Equatable {
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         latestReplies: latestReplies ?? this.latestReplies,
         read: read ?? this.read,
-        draft: draft ?? this.draft,
+        draft: draft == _nullConst ? this.draft : draft as Draft?,
         extraData: extraData ?? this.extraData,
       );
 

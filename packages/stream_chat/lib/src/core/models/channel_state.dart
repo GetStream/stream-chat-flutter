@@ -9,6 +9,12 @@ import 'package:stream_chat/src/core/models/user.dart';
 
 part 'channel_state.g.dart';
 
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
+
 /// The class that contains the information about a channel
 @JsonSerializable()
 class ChannelState implements ComparableFieldProvider {
@@ -69,7 +75,7 @@ class ChannelState implements ComparableFieldProvider {
     List<User>? watchers,
     List<Read>? read,
     Member? membership,
-    Draft? draft,
+    Object? draft = _nullConst,
   }) =>
       ChannelState(
         channel: channel ?? this.channel,
@@ -80,7 +86,7 @@ class ChannelState implements ComparableFieldProvider {
         watchers: watchers ?? this.watchers,
         read: read ?? this.read,
         membership: membership ?? this.membership,
-        draft: draft ?? this.draft,
+        draft: draft == _nullConst ? this.draft : draft as Draft?,
       );
 
   @override
