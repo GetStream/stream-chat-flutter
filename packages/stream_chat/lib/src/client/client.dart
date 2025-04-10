@@ -1863,7 +1863,7 @@ class StreamChatClient {
       channelId: channelId,
       channelType: channelType,
       userId: currentUser.id,
-      set: const MemberUpdatePayload(pinned: true),
+      set: const MemberUpdatePayload(pinned: true).toJson(),
     );
   }
 
@@ -1884,7 +1884,7 @@ class StreamChatClient {
       channelId: channelId,
       channelType: channelType,
       userId: currentUser.id,
-      unset: const [MemberUpdateType.pinned],
+      unset: [MemberUpdateType.pinned.name],
     );
   }
 
@@ -1905,7 +1905,7 @@ class StreamChatClient {
       channelId: channelId,
       channelType: channelType,
       userId: currentUser.id,
-      set: const MemberUpdatePayload(archived: true),
+      set: const MemberUpdatePayload(archived: true).toJson(),
     );
   }
 
@@ -1926,7 +1926,7 @@ class StreamChatClient {
       channelId: channelId,
       channelType: channelType,
       userId: currentUser.id,
-      unset: const [MemberUpdateType.archived],
+      unset: [MemberUpdateType.archived.name],
     );
   }
 

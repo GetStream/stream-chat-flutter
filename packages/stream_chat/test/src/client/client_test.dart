@@ -1614,7 +1614,7 @@ void main() {
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            set: const MemberUpdatePayload(pinned: true),
+            set: const MemberUpdatePayload(pinned: true).toJson(),
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
           ));
@@ -1630,7 +1630,7 @@ void main() {
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            set: const MemberUpdatePayload(pinned: true),
+            set: const MemberUpdatePayload(pinned: true).toJson(),
           )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
@@ -1643,7 +1643,7 @@ void main() {
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            unset: const [MemberUpdateType.pinned],
+            unset: [MemberUpdateType.pinned.name],
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
           ));
@@ -1659,7 +1659,7 @@ void main() {
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            unset: const [MemberUpdateType.pinned],
+            unset: [MemberUpdateType.pinned.name],
           )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
@@ -1672,7 +1672,7 @@ void main() {
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            set: const MemberUpdatePayload(archived: true),
+            set: const MemberUpdatePayload(archived: true).toJson(),
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, archivedAt: DateTime.now()),
           ));
@@ -1688,7 +1688,7 @@ void main() {
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            set: const MemberUpdatePayload(archived: true),
+            set: const MemberUpdatePayload(archived: true).toJson(),
           )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
@@ -1701,7 +1701,7 @@ void main() {
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            unset: const [MemberUpdateType.archived],
+            unset: [MemberUpdateType.archived.name],
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
           ));
@@ -1717,11 +1717,10 @@ void main() {
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            unset: const [MemberUpdateType.archived],
+            unset: [MemberUpdateType.archived.name],
           )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
-
 
     test('`.acceptChannelInvite`', () async {
       const channelType = 'test-channel-type';

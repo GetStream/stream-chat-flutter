@@ -381,14 +381,14 @@ class ChannelApi {
     required String channelId,
     required String channelType,
     required String userId,
-    MemberUpdatePayload? set,
-    List<MemberUpdateType>? unset,
+    Map<String, Object?>? set,
+    List<String>? unset,
   }) async {
     final response = await _client.patch(
       '${_getChannelUrl(channelId, channelType)}/member/$userId',
       data: {
-        if (set != null) 'set': set.toJson(),
-        if (unset != null) 'unset': unset.map((e) => e.name).toList(),
+        if (set != null) 'set': set,
+        if (unset != null) 'unset': unset,
       },
     );
     return PartialUpdateMemberResponse.fromJson(response.data);
