@@ -10,7 +10,7 @@ part 'draft.g.dart';
 /// A model class representing a draft message.
 ///
 /// This class is used to store the draft message and its metadata.
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class Draft extends Equatable implements ComparableFieldProvider {
   /// Creates a new instance of [Draft].
   const Draft({

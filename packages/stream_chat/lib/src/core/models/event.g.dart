@@ -63,7 +63,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       lastReadMessageId: json['last_read_message_id'] as String?,
       draft: json['draft'] == null
           ? null
-          : DraftMessage.fromJson(json['draft'] as Map<String, dynamic>),
+          : Draft.fromJson(json['draft'] as Map<String, dynamic>),
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       isLocal: json['is_local'] as bool? ?? false,
     );

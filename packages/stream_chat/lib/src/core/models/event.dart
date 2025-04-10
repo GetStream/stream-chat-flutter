@@ -143,8 +143,8 @@ class Event {
   /// The id of the last read message (notification.mark_read)
   final String? lastReadMessageId;
 
-  /// The draft message sent with the event.
-  final DraftMessage? draft;
+  /// The draft sent with the event.
+  final Draft? draft;
 
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
@@ -221,7 +221,7 @@ class Event {
     DateTime? lastReadAt,
     int? unreadMessages,
     String? lastReadMessageId,
-    DraftMessage? draft,
+    Draft? draft,
     Map<String, Object?>? extraData,
   }) =>
       Event(

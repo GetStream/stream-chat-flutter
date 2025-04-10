@@ -28,17 +28,21 @@ void main() {
       final draftJson = {
         ...jsonFixture('event.json'),
         'draft': {
-          'id': 'draft-123',
-          'text': 'Draft text',
-          'poll_id': 'poll-123',
+          'created_at': '2020-01-29T03:22:47.636130Z',
+          'channel_cid': 'messaging:123',
+          'message': {
+            'id': 'draft-123',
+            'text': 'Draft text',
+            'poll_id': 'poll-123',
+          },
         },
       };
 
       final eventWithDraft = Event.fromJson(draftJson);
       expect(eventWithDraft.draft, isNotNull);
-      expect(eventWithDraft.draft?.id, equals('draft-123'));
-      expect(eventWithDraft.draft?.text, equals('Draft text'));
-      expect(eventWithDraft.draft?.pollId, equals('poll-123'));
+      expect(eventWithDraft.draft?.message.id, equals('draft-123'));
+      expect(eventWithDraft.draft?.message.text, equals('Draft text'));
+      expect(eventWithDraft.draft?.message.pollId, equals('poll-123'));
     });
 
     test('should serialize to json correctly', () {
@@ -61,9 +65,13 @@ void main() {
         lastReadAt: DateTime.parse('2020-02-10T10:00:00.000Z'),
         unreadMessages: 5,
         lastReadMessageId: 'last-read-message-id',
-        draft: DraftMessage(
-          id: 'draft-id',
-          text: 'Draft message',
+        draft: Draft(
+          createdAt: DateTime.parse('2020-01-29T03:22:47.636130Z'),
+          channelCid: 'messaging:123',
+          message: DraftMessage(
+            id: 'draft-id',
+            text: 'Draft message',
+          ),
         ),
       );
 
@@ -91,21 +99,25 @@ void main() {
           'unread_messages': 5,
           'last_read_message_id': 'last-read-message-id',
           'draft': {
-            'id': 'draft-id',
-            'text': 'Draft message',
-            'type': 'regular',
-            'attachments': [],
-            'mentioned_users': [],
-            'silent': false,
-          },
+            'created_at': '2020-01-29T03:22:47.636130Z',
+            'channel_cid': 'messaging:123',
+            'message': {
+              'id': 'draft-id',
+              'text': 'Draft message',
+              'type': 'regular',
+              'attachments': [],
+              'mentioned_users': [],
+              'silent': false,
+            },
+          }
         },
       );
 
       // Test round-trip serialization/deserialization with draft
       final roundTripEvent = Event.fromJson(json);
       expect(roundTripEvent.draft, isNotNull);
-      expect(roundTripEvent.draft?.id, equals('draft-id'));
-      expect(roundTripEvent.draft?.text, equals('Draft message'));
+      expect(roundTripEvent.draft?.message.id, equals('draft-id'));
+      expect(roundTripEvent.draft?.message.text, equals('Draft message'));
     });
 
     test('copyWith', () {
@@ -126,9 +138,13 @@ void main() {
       expect(newEvent.lastReadMessageId, null);
       expect(newEvent.draft, null);
 
-      final draftMessage = DraftMessage(
-        id: 'draft-id',
-        text: 'Draft text',
+      final draft = Draft(
+        createdAt: DateTime.parse('2020-01-29T03:22:47.636130Z'),
+        channelCid: 'messaging:123',
+        message: DraftMessage(
+          id: 'draft-id',
+          text: 'Draft text',
+        ),
       );
 
       newEvent = event.copyWith(
@@ -146,7 +162,7 @@ void main() {
         lastReadAt: DateTime.parse('2020-02-10T10:00:00.000000Z'),
         unreadMessages: 5,
         lastReadMessageId: 'last-read-message-id',
-        draft: draftMessage,
+        draft: draft,
       );
 
       expect(newEvent.channelType, 'testtype');
@@ -170,24 +186,36 @@ void main() {
       expect(newEvent.unreadMessages, 5);
       expect(newEvent.lastReadMessageId, 'last-read-message-id');
       expect(newEvent.draft, isNotNull);
-      expect(newEvent.draft, equals(draftMessage));
-      expect(newEvent.draft?.id, equals('draft-id'));
-      expect(newEvent.draft?.text, equals('Draft text'));
+      expect(newEvent.draft, equals(draft));
+      expect(newEvent.draft?.message.id, equals('draft-id'));
+      expect(newEvent.draft?.message.text, equals('Draft text'));
 
       // Test updating draft with copyWith
-      final updatedDraftMessage = DraftMessage(
-        id: 'updated-draft-id',
-        text: 'Updated draft text',
+      final updatedDraft = Draft(
+        createdAt: DateTime.parse('2020-01-29T03:22:47.636130Z'),
+        channelCid: 'messaging:123',
+        message: DraftMessage(
+          id: 'updated-draft-id',
+          text: 'Updated draft text',
+        ),
       );
 
       final eventWithUpdatedDraft = newEvent.copyWith(
-        draft: updatedDraftMessage,
+        draft: updatedDraft,
       );
 
       expect(eventWithUpdatedDraft.draft, isNotNull);
-      expect(eventWithUpdatedDraft.draft, equals(updatedDraftMessage));
-      expect(eventWithUpdatedDraft.draft?.id, equals('updated-draft-id'));
-      expect(eventWithUpdatedDraft.draft?.text, equals('Updated draft text'));
+      expect(eventWithUpdatedDraft.draft, equals(updatedDraft));
+
+      expect(
+        eventWithUpdatedDraft.draft?.message.id,
+        equals('updated-draft-id'),
+      );
+
+      expect(
+        eventWithUpdatedDraft.draft?.message.text,
+        equals('Updated draft text'),
+      );
     });
   });
 }

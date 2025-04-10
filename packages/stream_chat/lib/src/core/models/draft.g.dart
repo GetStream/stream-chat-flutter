@@ -26,8 +26,10 @@ Map<String, dynamic> _$DraftToJson(Draft instance) => <String, dynamic>{
       'channel_cid': instance.channelCid,
       'created_at': instance.createdAt.toIso8601String(),
       'message': instance.message.toJson(),
-      'channel': instance.channel?.toJson(),
-      'parent_id': instance.parentId,
-      'parent_message': instance.parentMessage?.toJson(),
-      'quoted_message': instance.quotedMessage?.toJson(),
+      if (instance.channel?.toJson() case final value?) 'channel': value,
+      if (instance.parentId case final value?) 'parent_id': value,
+      if (instance.parentMessage?.toJson() case final value?)
+        'parent_message': value,
+      if (instance.quotedMessage?.toJson() case final value?)
+        'quoted_message': value,
     };
