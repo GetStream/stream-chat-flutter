@@ -462,16 +462,16 @@ void main() {
       });
     });
 
-    group('`.createDraftMessage`', () {
+    group('`.createDraft`', () {
       final draftMessage = DraftMessage(text: 'Draft message text');
 
       setUp(() {
-        when(() => client.createDraftMessage(
+        when(() => client.createDraft(
               draftMessage,
               channelId,
               channelType,
             )).thenAnswer(
-          (_) async => CreateDraftMessageResponse()
+          (_) async => CreateDraftResponse()
             ..draft = Draft(
               channelCid: channelCid,
               createdAt: DateTime.now(),
@@ -480,13 +480,13 @@ void main() {
         );
       });
 
-      test('should call client.createDraftMessage', () async {
-        final res = await channel.createDraftMessage(draftMessage);
+      test('should call client.createDraft', () async {
+        final res = await channel.createDraft(draftMessage);
 
         expect(res, isNotNull);
         expect(res.draft.message, draftMessage);
 
-        verify(() => channel.client.createDraftMessage(
+        verify(() => channel.client.createDraft(
               draftMessage,
               channelId,
               channelType,
@@ -494,16 +494,16 @@ void main() {
       });
     });
 
-    group('`.getDraftMessage`', () {
+    group('`.getDraft`', () {
       final draftMessage = DraftMessage(text: 'Draft message text');
 
       setUp(() {
-        when(() => client.getDraftMessage(
+        when(() => client.getDraft(
               channelId,
               channelType,
               parentId: any(named: 'parentId'),
             )).thenAnswer(
-          (_) async => GetDraftMessageResponse()
+          (_) async => GetDraftResponse()
             ..draft = Draft(
               channelCid: channelCid,
               createdAt: DateTime.now(),
@@ -512,13 +512,13 @@ void main() {
         );
       });
 
-      test('should call client.getDraftMessage', () async {
-        final res = await channel.getDraftMessage();
+      test('should call client.getDraft', () async {
+        final res = await channel.getDraft();
 
         expect(res, isNotNull);
         expect(res.draft.message, draftMessage);
 
-        verify(() => channel.client.getDraftMessage(
+        verify(() => channel.client.getDraft(
               channelId,
               channelType,
             )).called(1);
@@ -526,12 +526,12 @@ void main() {
 
       test('with parentId should pass parentId to client', () async {
         const parentId = 'parent-123';
-        final res = await channel.getDraftMessage(parentId: parentId);
+        final res = await channel.getDraft(parentId: parentId);
 
         expect(res, isNotNull);
         expect(res.draft.message, draftMessage);
 
-        verify(() => channel.client.getDraftMessage(
+        verify(() => channel.client.getDraft(
               channelId,
               channelType,
               parentId: parentId,
@@ -539,21 +539,21 @@ void main() {
       });
     });
 
-    group('`.deleteDraftMessage`', () {
+    group('`.deleteDraft`', () {
       setUp(() {
-        when(() => client.deleteDraftMessage(
+        when(() => client.deleteDraft(
               channelId,
               channelType,
               parentId: any(named: 'parentId'),
             )).thenAnswer((_) async => EmptyResponse());
       });
 
-      test('should call client.deleteDraftMessage', () async {
-        final res = await channel.deleteDraftMessage();
+      test('should call client.deleteDraft', () async {
+        final res = await channel.deleteDraft();
 
         expect(res, isNotNull);
 
-        verify(() => channel.client.deleteDraftMessage(
+        verify(() => channel.client.deleteDraft(
               channelId,
               channelType,
             )).called(1);
@@ -561,11 +561,11 @@ void main() {
 
       test('with parentId should pass parentId to client', () async {
         const parentId = 'parent-123';
-        final res = await channel.deleteDraftMessage(parentId: parentId);
+        final res = await channel.deleteDraft(parentId: parentId);
 
         expect(res, isNotNull);
 
-        verify(() => channel.client.deleteDraftMessage(
+        verify(() => channel.client.deleteDraft(
               channelId,
               channelType,
               parentId: parentId,

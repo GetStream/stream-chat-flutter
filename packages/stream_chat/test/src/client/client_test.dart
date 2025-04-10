@@ -2747,19 +2747,19 @@ void main() {
       verifyNoMoreInteractions(api.message);
     });
 
-    test('`.createDraftMessage`', () async {
+    test('`.createDraft`', () async {
       final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 
       when(
-        () => api.message.createDraftMessage(
+        () => api.message.createDraft(
           channelId,
           channelType,
           any(that: isSameDraftMessageAs(message)),
         ),
       ).thenAnswer(
-        (_) async => CreateDraftMessageResponse()
+        (_) async => CreateDraftResponse()
           ..draft = Draft(
             channelCid: '$channelType:$channelId',
             createdAt: DateTime.now(),
@@ -2767,7 +2767,7 @@ void main() {
           ),
       );
 
-      final res = await client.createDraftMessage(
+      final res = await client.createDraft(
         message,
         channelId,
         channelType,
@@ -2776,7 +2776,7 @@ void main() {
       expect(res, isNotNull);
       expect(res.draft.message, isSameDraftMessageAs(message));
 
-      verify(() => api.message.createDraftMessage(
+      verify(() => api.message.createDraft(
             channelId,
             channelType,
             any(that: isSameDraftMessageAs(message)),
@@ -2785,44 +2785,44 @@ void main() {
       verifyNoMoreInteractions(api.message);
     });
 
-    test('`.deleteDraftMessage`', () async {
+    test('`.deleteDraft`', () async {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 
-      when(() => api.message.deleteDraftMessage(channelId, channelType))
+      when(() => api.message.deleteDraft(channelId, channelType))
           .thenAnswer((_) async => EmptyResponse());
 
-      final res = await client.deleteDraftMessage(channelId, channelType);
+      final res = await client.deleteDraft(channelId, channelType);
       expect(res, isNotNull);
 
-      verify(() => api.message.deleteDraftMessage(channelId, channelType));
+      verify(() => api.message.deleteDraft(channelId, channelType));
       verifyNoMoreInteractions(api.message);
     });
 
-    test('`.getDraftMessage`', () async {
+    test('`.getDraft`', () async {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 
       final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
 
-      when(() => api.message.getDraftMessage(channelId, channelType))
-          .thenAnswer((_) async => GetDraftMessageResponse()
+      when(() => api.message.getDraft(channelId, channelType))
+          .thenAnswer((_) async => GetDraftResponse()
             ..draft = Draft(
               channelCid: '$channelType:$channelId',
               createdAt: DateTime.now(),
               message: message,
             ));
 
-      final res = await client.getDraftMessage(channelId, channelType);
+      final res = await client.getDraft(channelId, channelType);
 
       expect(res, isNotNull);
       expect(res.draft.message, isSameDraftMessageAs(message));
 
-      verify(() => api.message.getDraftMessage(channelId, channelType));
+      verify(() => api.message.getDraft(channelId, channelType));
       verifyNoMoreInteractions(api.message);
     });
 
-    test('`.queryDraftMessages`', () async {
+    test('`.queryDrafts`', () async {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 

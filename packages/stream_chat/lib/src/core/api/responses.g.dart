@@ -418,15 +418,13 @@ QueryThreadsResponse _$QueryThreadsResponseFromJson(
           []
       ..next = json['next'] as String?;
 
-CreateDraftMessageResponse _$CreateDraftMessageResponseFromJson(
-        Map<String, dynamic> json) =>
-    CreateDraftMessageResponse()
+CreateDraftResponse _$CreateDraftResponseFromJson(Map<String, dynamic> json) =>
+    CreateDraftResponse()
       ..duration = json['duration'] as String?
       ..draft = Draft.fromJson(json['draft'] as Map<String, dynamic>);
 
-GetDraftMessageResponse _$GetDraftMessageResponseFromJson(
-        Map<String, dynamic> json) =>
-    GetDraftMessageResponse()
+GetDraftResponse _$GetDraftResponseFromJson(Map<String, dynamic> json) =>
+    GetDraftResponse()
       ..duration = json['duration'] as String?
       ..draft = Draft.fromJson(json['draft'] as Map<String, dynamic>);
 

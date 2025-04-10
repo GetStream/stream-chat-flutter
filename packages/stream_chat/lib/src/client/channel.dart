@@ -1018,34 +1018,33 @@ class Channel {
         },
       );
 
-  /// Creates or updates a new [draft] message for this channel.
-  Future<CreateDraftMessageResponse> createDraftMessage(
+  /// Creates or updates a new [draft] for this channel.
+  Future<CreateDraftResponse> createDraft(
     DraftMessage draft,
   ) {
     _checkInitialized();
-    return _client.createDraftMessage(draft, id!, type);
+    return _client.createDraft(draft, id!, type);
   }
 
-  /// Retrieves the draft message for this channel.
+  /// Retrieves the draft for this channel.
   ///
-  /// Optionally, provide a [parentId] to get the draft message for a
-  /// specific thread.
-  Future<GetDraftMessageResponse> getDraftMessage({
+  /// Optionally, provide a [parentId] to get the draft for a specific thread.
+  Future<GetDraftResponse> getDraft({
     String? parentId,
   }) {
     _checkInitialized();
-    return _client.getDraftMessage(id!, type, parentId: parentId);
+    return _client.getDraft(id!, type, parentId: parentId);
   }
 
-  /// Deletes the draft message for this channel.
+  /// Deletes the draft for this channel.
   ///
-  /// Optionally, provide a [parentId] to delete the draft message for a
-  /// specific thread.
-  Future<EmptyResponse> deleteDraftMessage({
+  /// Optionally, provide a [parentId] to delete the draft for a specific
+  /// thread.
+  Future<EmptyResponse> deleteDraft({
     String? parentId,
   }) {
     _checkInitialized();
-    return _client.deleteDraftMessage(id!, type, parentId: parentId);
+    return _client.deleteDraft(id!, type, parentId: parentId);
   }
 
   /// Send a file to this channel.

@@ -35,10 +35,10 @@ class MessageApi {
     return SendMessageResponse.fromJson(response.data);
   }
 
-  /// Creates a draft message for the given [channelId] of type [channelType].
+  /// Creates a draft for the given [channelId] of type [channelType].
   ///
-  /// Returns a [CreateDraftMessageResponse] containing the draft message.
-  Future<CreateDraftMessageResponse> createDraftMessage(
+  /// Returns a [CreateDraftResponse] containing the draft.
+  Future<CreateDraftResponse> createDraft(
     String channelId,
     String channelType,
     DraftMessage message,
@@ -47,15 +47,15 @@ class MessageApi {
       '/channels/$channelType/$channelId/draft',
       data: jsonEncode({'message': message}),
     );
-    return CreateDraftMessageResponse.fromJson(response.data);
+    return CreateDraftResponse.fromJson(response.data);
   }
 
-  /// Deletes the draft message for the given [channelId] of type [channelType].
+  /// Deletes the draft for the given [channelId] of type [channelType].
   ///
   /// Optionally, you can provide a [parentId] if the draft is in a thread.
   ///
   /// Returns an [EmptyResponse] on success.
-  Future<EmptyResponse> deleteDraftMessage(
+  Future<EmptyResponse> deleteDraft(
     String channelId,
     String channelType, {
     String? parentId,
@@ -69,12 +69,12 @@ class MessageApi {
     return EmptyResponse.fromJson(response.data);
   }
 
-  /// Retrieves a draft message from the given [channelId] of type [channelType]
+  /// Retrieves a draft from the given [channelId] of type [channelType]
   ///
   /// Optionally, you can provide a [parentId] if the draft is in a thread.
   ///
-  /// Returns a [GetDraftMessageResponse] containing the draft message.
-  Future<GetDraftMessageResponse> getDraftMessage(
+  /// Returns a [GetDraftResponse] containing the draft message.
+  Future<GetDraftResponse> getDraft(
     String channelId,
     String channelType, {
     String? parentId,
@@ -85,16 +85,16 @@ class MessageApi {
         if (parentId != null) 'parent_id': parentId,
       },
     );
-    return GetDraftMessageResponse.fromJson(response.data);
+    return GetDraftResponse.fromJson(response.data);
   }
 
-  /// Retrieves a list of draft messages for the current user.
+  /// Retrieves a list of draft for the current user.
   ///
   /// Optionally, you can provide a [filter] to filter the drafts,
   /// a [sort] order to sort the drafts, and [pagination] parameters to paginate
   /// the results.
   ///
-  /// Returns a [QueryDraftsResponse] containing the list of draft messages.
+  /// Returns a [QueryDraftsResponse] containing the list of draft.
   Future<QueryDraftsResponse> queryDrafts({
     Filter? filter,
     SortOrder<Draft>? sort,

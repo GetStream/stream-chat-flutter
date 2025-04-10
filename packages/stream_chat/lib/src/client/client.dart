@@ -1721,41 +1721,41 @@ class StreamChatClient {
         language,
       );
 
-  /// Creates a draft message for the given [channelId] of type [channelType].
-  Future<CreateDraftMessageResponse> createDraftMessage(
+  /// Creates a draft for the given [channelId] of type [channelType].
+  Future<CreateDraftResponse> createDraft(
     DraftMessage draft,
     String channelId,
     String channelType,
   ) =>
-      _chatApi.message.createDraftMessage(
+      _chatApi.message.createDraft(
         channelId,
         channelType,
         draft,
       );
 
-  /// Retrieves a draft message for the given [channelId] of type [channelType].
+  /// Retrieves a draft for the given [channelId] of type [channelType].
   ///
-  /// Optionally, pass [parentId] to get the draft message for a thread.
-  Future<GetDraftMessageResponse> getDraftMessage(
+  /// Optionally, pass [parentId] to get the draft for a thread.
+  Future<GetDraftResponse> getDraft(
     String channelId,
     String channelType, {
     String? parentId,
   }) =>
-      _chatApi.message.getDraftMessage(
+      _chatApi.message.getDraft(
         channelId,
         channelType,
         parentId: parentId,
       );
 
-  /// Deletes a draft message for the given [channelId] of type [channelType].
+  /// Deletes a draft for the given [channelId] of type [channelType].
   ///
-  /// Optionally, pass [parentId] to delete the draft message for a thread.
-  Future<EmptyResponse> deleteDraftMessage(
+  /// Optionally, pass [parentId] to delete the draft for a thread.
+  Future<EmptyResponse> deleteDraft(
     String channelId,
     String channelType, {
     String? parentId,
   }) =>
-      _chatApi.message.deleteDraftMessage(
+      _chatApi.message.deleteDraft(
         channelId,
         channelType,
         parentId: parentId,

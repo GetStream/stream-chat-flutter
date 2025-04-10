@@ -722,20 +722,20 @@ class DraftResponse extends _BaseResponse {
   late Draft draft;
 }
 
-/// Model response for [StreamChatClient.createDraftMessage] api call
+/// Model response for [StreamChatClient.createDraft] api call
 @JsonSerializable(createToJson: false)
-class CreateDraftMessageResponse extends DraftResponse {
+class CreateDraftResponse extends DraftResponse {
   /// Create a new instance from a json
-  static CreateDraftMessageResponse fromJson(Map<String, dynamic> json) =>
-      _$CreateDraftMessageResponseFromJson(json);
+  static CreateDraftResponse fromJson(Map<String, dynamic> json) =>
+      _$CreateDraftResponseFromJson(json);
 }
 
-/// Model response for [StreamChatClient.getDraftMessage] api call
+/// Model response for [StreamChatClient.getDraft] api call
 @JsonSerializable(createToJson: false)
-class GetDraftMessageResponse extends DraftResponse {
+class GetDraftResponse extends DraftResponse {
   /// Create a new instance from a json
-  static GetDraftMessageResponse fromJson(Map<String, dynamic> json) =>
-      _$GetDraftMessageResponseFromJson(json);
+  static GetDraftResponse fromJson(Map<String, dynamic> json) =>
+      _$GetDraftResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.queryDrafts] api call

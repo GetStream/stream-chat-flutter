@@ -449,7 +449,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('createDraftMessage', () async {
+  test('createDraft', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     final draftMessage = DraftMessage(
@@ -473,7 +473,7 @@ void main() {
           data: {'draft': draft.toJson()},
         ));
 
-    final res = await messageApi.createDraftMessage(
+    final res = await messageApi.createDraft(
       channelId,
       channelType,
       draftMessage,
@@ -488,7 +488,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('deleteDraftMessage', () async {
+  test('deleteDraft', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
 
@@ -500,7 +500,7 @@ void main() {
               data: <String, dynamic>{},
             ));
 
-    final res = await messageApi.deleteDraftMessage(
+    final res = await messageApi.deleteDraft(
       channelId,
       channelType,
     );
@@ -511,7 +511,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('deleteDraftMessage with parentId', () async {
+  test('deleteDraft with parentId', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     const parentId = 'test-parent-id';
@@ -524,7 +524,7 @@ void main() {
               data: <String, dynamic>{},
             ));
 
-    final res = await messageApi.deleteDraftMessage(
+    final res = await messageApi.deleteDraft(
       channelId,
       channelType,
       parentId: parentId,
@@ -536,7 +536,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('getDraftMessage', () async {
+  test('getDraft', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     final draftMessage = DraftMessage(
@@ -557,7 +557,7 @@ void main() {
               'draft': draft.toJson(),
             }));
 
-    final res = await messageApi.getDraftMessage(
+    final res = await messageApi.getDraft(
       channelId,
       channelType,
     );
@@ -571,7 +571,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('getDraftMessage with parentId', () async {
+  test('getDraft with parentId', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     const parentId = 'test-parent-id';
@@ -597,7 +597,7 @@ void main() {
           'draft': draft.toJson(),
         }));
 
-    final res = await messageApi.getDraftMessage(
+    final res = await messageApi.getDraft(
       channelId,
       channelType,
       parentId: parentId,
