@@ -121,8 +121,11 @@ class DraftMessage extends Equatable {
     String? parentId,
     bool? showInChannel,
     List<User>? mentionedUsers,
+    Message? quotedMessage,
     String? quotedMessageId,
     bool? silent,
+    Poll? poll,
+    String? pollId,
     Map<String, Object?>? extraData,
   }) {
     return DraftMessage(
@@ -133,8 +136,11 @@ class DraftMessage extends Equatable {
       parentId: parentId ?? this.parentId,
       showInChannel: showInChannel ?? this.showInChannel,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
+      quotedMessage: quotedMessage ?? this.quotedMessage,
       quotedMessageId: quotedMessageId ?? this.quotedMessageId,
       silent: silent ?? this.silent,
+      poll: poll ?? this.poll,
+      pollId: pollId ?? this.pollId,
       extraData: extraData ?? this.extraData,
     );
   }
@@ -150,6 +156,7 @@ class DraftMessage extends Equatable {
         mentionedUsers,
         quotedMessageId,
         silent,
+        pollId,
         extraData,
       ];
 }
