@@ -1,5 +1,4 @@
-import 'package:stream_chat/stream_chat.dart'
-    show Channel, ChannelState, Event, Member, SortOption;
+import 'package:stream_chat/stream_chat.dart' show Event, Member;
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
@@ -21,7 +20,7 @@ mixin class StreamChannelListEventHandler {
         (it) => it.cid == (event.cid ?? event.channel?.cid),
       );
 
-    controller.channels = updatedChannels;
+    controller.setAndSortChannels(updatedChannels);
   }
 
   /// Function which gets called for the event
@@ -51,11 +50,17 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this updates the channel received in the event.
   void onChannelUpdated(Event event, StreamChannelListController controller) {
-    controller.channels = [...controller.currentItems];
+    controller.setAndSortChannels([...controller.currentItems]);
   }
 
+  /// Function which gets called for the event
+  /// [EventType.memberUpdated].
+  ///
+  /// This event is fired when a member is updated.
+  ///
+  /// By default, this sorts the channels.
   void onMemberUpdated(Event event, StreamChannelListController controller) {
-    controller.channels = [...controller.currentItems];
+    controller.setAndSortChannels([...controller.currentItems]);
   }
 
   /// Function which gets called for the event
@@ -85,7 +90,7 @@ mixin class StreamChannelListEventHandler {
       ...currentChannels..removeWhere((it) => it.cid == channel.cid),
     ];
 
-    controller.channels = updatedChannels;
+    controller.setAndSortChannels(updatedChannels);
   }
 
   /// Function which gets called for the event
@@ -124,7 +129,7 @@ mixin class StreamChannelListEventHandler {
     final channel = channels.removeAt(channelIndex);
     channels.insert(0, channel);
 
-    controller.channels = [...channels];
+    controller.setAndSortChannels(channels);
   }
 
   /// Function which gets called for the event
@@ -172,7 +177,7 @@ mixin class StreamChannelListEventHandler {
 
     if (!listChanged) return;
 
-    controller.channels = [...updatedChannels];
+    controller.setAndSortChannels([...updatedChannels]);
   }
 
   /// Function which gets called for the event
@@ -215,7 +220,6 @@ mixin class StreamChannelListEventHandler {
       return channel;
     });
 
-    controller.channels = [...updatedChannels];
+    controller.setAndSortChannels([...updatedChannels]);
   }
-
 }

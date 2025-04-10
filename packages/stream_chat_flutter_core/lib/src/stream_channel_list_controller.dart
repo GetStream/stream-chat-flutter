@@ -188,13 +188,18 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
 
   /// Replaces the previously loaded channels with the passed [channels].
   set channels(List<Channel> channels) {
-    _sortChannels(channels);
     if (value.isSuccess) {
       final currentValue = value.asSuccess;
       value = currentValue.copyWith(items: channels);
     } else {
       value = PagedValue(items: channels);
     }
+  }
+
+  /// Sorts the channels based on [channelStateSort] and sets the [channels].
+  void setAndSortChannels(List<Channel> channels) {
+    _sortChannels(channels);
+    this.channels = channels;
   }
 
   /// Returns/Creates a new Channel and starts watching it.
@@ -300,26 +305,15 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   }
 
   void _sortChannels(List<Channel> channels) {
-    channels.sort((a, b) {
-      final stateA = a.state?.channelState;
-      final stateB = b.state?.channelState;
-      if (stateA == null || stateB == null) return 0;
+    if (channelStateSort case final sortOrder?) {
+      channels.sort((a, b) {
+        final stateA = a.state?.channelState;
+        final stateB = b.state?.channelState;
+        if (stateA == null || stateB == null) return 0;
 
-      for (final sortOption
-          in channelStateSort ?? <SortOption<ChannelState>>[]) {
-        final comparator =
-            sortOption.comparator ?? ChannelState.getComparator(sortOption);
-        if (comparator != null) {
-          try {
-            final compared = comparator(stateA, stateB);
-            if (compared != 0) return compared;
-          } catch (e) {
-            print(e);
-          }
-        }
-      }
-      return 0;
-    });
+        return sortOrder.compare(stateA, stateB);
+      });
+    }
   }
 
   @override

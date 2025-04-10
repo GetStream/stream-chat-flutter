@@ -1,8 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/util/comparator_helper.dart';
-import 'package:stream_chat/stream_chat.dart' show Channel;
 
 part 'requests.g.dart';
 

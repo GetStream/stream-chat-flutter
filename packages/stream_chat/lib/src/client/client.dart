@@ -1846,6 +1846,7 @@ class StreamChatClient {
     return closeConnection();
   }
 
+  /// Pins the channel for the current user.
   Future<PartialUpdateMemberResponse> pinChannel({
     required String channelId,
     required String channelType,
@@ -1866,6 +1867,7 @@ class StreamChatClient {
     );
   }
 
+  /// Unpins the channel for the current user.
   Future<PartialUpdateMemberResponse> unpinChannel({
     required String channelId,
     required String channelType,
@@ -1886,6 +1888,7 @@ class StreamChatClient {
     );
   }
 
+  /// Archives the channel for the current user.
   Future<PartialUpdateMemberResponse> archiveChannel({
     required String channelId,
     required String channelType,
@@ -1906,6 +1909,7 @@ class StreamChatClient {
     );
   }
 
+  /// Unarchives the channel for the current user.
   Future<PartialUpdateMemberResponse> unarchiveChannel({
     required String channelId,
     required String channelType,

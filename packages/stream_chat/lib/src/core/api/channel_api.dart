@@ -376,6 +376,7 @@ class ChannelApi {
     return EmptyResponse.fromJson(response.data);
   }
 
+  /// Pins or unpins the channel for the specified user.
   Future<PartialUpdateMemberResponse> pinChannel({
     required String channelId,
     required String channelType,
@@ -391,6 +392,7 @@ class ChannelApi {
     );
   }
 
+  /// Archives or unarchives the channel for the specified user.
   Future<PartialUpdateMemberResponse> archiveChannel({
     required String channelId,
     required String channelType,

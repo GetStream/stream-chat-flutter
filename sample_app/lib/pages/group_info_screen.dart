@@ -492,7 +492,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             onTurnOn: channel.mute,
           ),
         _GroupInfoToggle(
-          title: 'Pin group',
+          title: AppLocalizations.of(context).pinGroup,
           icon: StreamSvgIcons.pin,
           channelStream: channel.isPinnedStream,
           localNotifier: isPinned,
@@ -500,7 +500,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           onTurnOn: channel.pin,
         ),
         _GroupInfoToggle(
-          title: 'Archive group',
+          title: AppLocalizations.of(context).archiveGroup,
           icon: StreamSvgIcons.save,
           channelStream: channel.isArchivedStream,
           localNotifier: isArchived,

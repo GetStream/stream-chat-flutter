@@ -2774,32 +2774,37 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
+      verify(() => client.unarchiveChannel(
+          channelId: channelId, channelType: channelType)).called(1);
     });
 
     // testing pinning
     test('`.pin`', () async {
-      when(() => client.pinChannel(channelId: channelId, channelType: channelType))
+      when(() =>
+              client.pinChannel(channelId: channelId, channelType: channelType))
           .thenAnswer((_) async => FakePartialUpdateMemberResponse());
 
       final res = await channel.pin();
 
       expect(res, isNotNull);
 
-      verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
+      verify(() =>
+              client.pinChannel(channelId: channelId, channelType: channelType))
+          .called(1);
     });
 
     test('`.unpin`', () async {
-      when(() => client.unpinChannel(channelId: channelId, channelType: channelType))
+      when(() => client.unpinChannel(
+              channelId: channelId, channelType: channelType))
           .thenAnswer((_) async => FakePartialUpdateMemberResponse());
 
       final res = await channel.unpin();
 
       expect(res, isNotNull);
 
-      verify(() => client.unpinChannel(channelId: channelId, channelType: channelType)).called(1);
+      verify(() => client.unpinChannel(
+          channelId: channelId, channelType: channelType)).called(1);
     });
-    
 
     test('`.on`', () async {
       const eventType = 'test.event';
@@ -3190,6 +3195,7 @@ void main() {
         () async {
           final currentUser = client.state.currentUser;
           final currentMember = Member(user: currentUser);
+          final now = DateTime.now();
 
           // Setup initial membership
           channel.state?.updateChannelState(
@@ -3203,11 +3209,15 @@ void main() {
           expect(channel.membership, isNotNull);
           expect(channel.membership?.channelRole, isNull);
           expect(channel.membership?.isModerator, false);
+          expect(channel.isPinned, isFalse);
+          expect(channel.isArchived, isFalse);
 
           // Create updated member with same userId but updated properties
           final updatedMember = currentMember.copyWith(
             channelRole: 'moderator',
             isModerator: true,
+            pinnedAt: now,
+            archivedAt: now,
           );
 
           // Create member updated event
@@ -3229,6 +3239,8 @@ void main() {
           expect(channel.membership?.userId, equals(currentUser?.id));
           expect(channel.membership?.channelRole, equals('moderator'));
           expect(channel.membership?.isModerator, isTrue);
+          expect(channel.isPinned, isTrue);
+          expect(channel.isArchived, isTrue);
         },
       );
 

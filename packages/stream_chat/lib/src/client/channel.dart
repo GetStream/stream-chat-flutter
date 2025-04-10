@@ -235,20 +235,28 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.hidden == true);
   }
 
+  /// Channel pinned status.
+  /// Status is specific to the current user.
   bool get isPinned {
     _checkInitialized();
     return membership?.pinnedAt != null;
   }
 
+  /// Channel pinned status as a stream.
+  /// Status is specific to the current user.
   Stream<bool> get isPinnedStream {
     return membershipStream.map((m) => m?.pinnedAt != null);
   }
 
+  /// Channel archived status.
+  /// Status is specific to the current user.
   bool get isArchived {
     _checkInitialized();
     return membership?.archivedAt != null;
   }
 
+  /// Channel archived status as a stream.
+  /// Status is specific to the current user.
   Stream<bool> get isArchivedStream {
     return membershipStream.map((m) => m?.archivedAt != null);
   }
@@ -1923,6 +1931,7 @@ class Channel {
     return _client.showChannel(id!, type);
   }
 
+  /// Pins the channel for the current user.
   Future<Member> pin() async {
     _checkInitialized();
 
@@ -1932,6 +1941,7 @@ class Channel {
     return response.channelMember;
   }
 
+  /// Unpins the channel.
   Future<Member?> unpin() async {
     _checkInitialized();
 
@@ -1940,6 +1950,7 @@ class Channel {
     return response.channelMember;
   }
 
+  /// Archives the channel.
   Future<Member?> archive() async {
     _checkInitialized();
 
@@ -1948,6 +1959,7 @@ class Channel {
     return response.channelMember;
   }
 
+  /// Unarchives the channel for the current user.
   Future<Member?> unarchive() async {
     _checkInitialized();
 

@@ -28,14 +28,8 @@ class _ChannelList extends State<ChannelList> {
     limit: 5,
     searchQuery: '',
     sort: [
-      const SortOption(
-        ChannelSortField.pinnedAt,
-        direction: SortOption.DESC,
-      ),
-      const SortOption(
-        'created_at',
-        direction: SortOption.ASC,
-      ),
+      const SortOption(ChannelSortKey.pinnedAt),
+      const SortOption(ChannelSortKey.createdAt, direction: SortOption.ASC),
     ],
   );
 
@@ -63,8 +57,8 @@ class _ChannelList extends State<ChannelList> {
     client: StreamChat.of(context).client,
     filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
     channelStateSort: [
-      const SortOption(ChannelSortField.pinnedAt),
-      const SortOption(ChannelSortField.lastMessageAt),
+      const SortOption(ChannelSortKey.pinnedAt),
+      const SortOption(ChannelSortKey.lastMessageAt),
     ],
     limit: 30,
   );

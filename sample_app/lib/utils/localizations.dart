@@ -9,6 +9,7 @@ class AppLocalizations {
       'add_group_members': 'Add Group Members',
       'advanced_options': 'Advanced Options',
       'api_key_error': 'Please enter the Chat API Key',
+      'archive_group': 'Archive group',
       'attachment': 'attachment',
       'attachments': 'attachments',
       'cancel': 'Cancel',
@@ -67,6 +68,7 @@ class AppLocalizations {
       'operation_could_not_be_completed':
           "The operation couldn't be completed.",
       'owner': 'Owner',
+      'pin_group': 'Pin group',
       'photos_and_videos': 'Photos & Videos',
       'photos_or_videos_will_appear_here':
           'Photos or videos sent in this chat will \nappear here',
@@ -100,6 +102,7 @@ class AppLocalizations {
       'add_group_members': 'Aggiungi un membro',
       'advanced_options': 'Opzioni Avanzate',
       'api_key_error': "Per favore inserisci l'API Key",
+      'archive_group': 'Archivia gruppo',
       'attachment': 'allegato',
       'attachments': 'allegati',
       'cancel': 'Annulla',
@@ -162,6 +165,7 @@ class AppLocalizations {
       'photos_or_videos_will_appear_here':
           'Foto or video inviati in questa chat \ncompariranno qui',
       'pinned_messages': 'Messaggi in evidenza',
+      'pin_group': 'Gruppo di evidenziazione',
       'pin_to_conversation': 'Metti in evidenza',
       'reconnecting': 'Riconnessione...',
       'remove': 'Rimuovi',
@@ -205,6 +209,10 @@ class AppLocalizations {
 
   String get apiKeyError {
     return _localizedValues[locale.languageCode]!['api_key_error']!;
+  }
+
+  String get archiveGroup {
+    return _localizedValues[locale.languageCode]!['archive_group']!;
   }
 
   String get attachment {
@@ -436,6 +444,10 @@ class AppLocalizations {
   String get photosOrVideosWillAppearHere {
     return _localizedValues[locale.languageCode]![
         'photos_or_videos_will_appear_here']!;
+  }
+
+  String get pinGroup {
+    return _localizedValues[locale.languageCode]!['pin_group']!;
   }
 
   String get pinnedMessages {

@@ -5,9 +5,6 @@ import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/util/comparator_helper.dart'
-    show ComparatorHelper;
-import 'package:stream_chat/stream_chat.dart' show ChannelSortField, SortOption;
 
 part 'channel_state.g.dart';
 
@@ -87,6 +84,7 @@ class ChannelState implements ComparableFieldProvider {
       ChannelSortKey.updatedAt => channel?.updatedAt,
       ChannelSortKey.lastMessageAt => channel?.lastMessageAt,
       ChannelSortKey.memberCount => channel?.memberCount,
+      ChannelSortKey.pinnedAt => membership?.pinnedAt,
       // TODO: Support providing default value for hasUnread, unreadCount
       ChannelSortKey.hasUnread => null,
       ChannelSortKey.unreadCount => null,
@@ -124,4 +122,7 @@ extension type const ChannelSortKey(String key) implements String {
 
   /// Sort channels by the count of unread messages.
   static const unreadCount = ChannelSortKey('unread_count');
+
+  /// Sort channels by the date they were pinned.
+  static const pinnedAt = ChannelSortKey('pinned_at');
 }
