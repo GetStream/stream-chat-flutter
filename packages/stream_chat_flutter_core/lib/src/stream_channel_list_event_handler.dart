@@ -20,7 +20,7 @@ mixin class StreamChannelListEventHandler {
         (it) => it.cid == (event.cid ?? event.channel?.cid),
       );
 
-    controller.setAndSortChannels(updatedChannels);
+    controller.channels = updatedChannels;
   }
 
   /// Function which gets called for the event
@@ -50,7 +50,7 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this updates the channel received in the event.
   void onChannelUpdated(Event event, StreamChannelListController controller) {
-    controller.setAndSortChannels([...controller.currentItems]);
+    controller.channels = [...controller.currentItems];
   }
 
   /// Function which gets called for the event
@@ -60,7 +60,7 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this sorts the channels.
   void onMemberUpdated(Event event, StreamChannelListController controller) {
-    controller.setAndSortChannels([...controller.currentItems]);
+    controller.channels = [...controller.currentItems];
   }
 
   /// Function which gets called for the event
@@ -90,7 +90,7 @@ mixin class StreamChannelListEventHandler {
       ...currentChannels..removeWhere((it) => it.cid == channel.cid),
     ];
 
-    controller.setAndSortChannels(updatedChannels);
+    controller.channels = updatedChannels;
   }
 
   /// Function which gets called for the event
@@ -129,7 +129,7 @@ mixin class StreamChannelListEventHandler {
     final channel = channels.removeAt(channelIndex);
     channels.insert(0, channel);
 
-    controller.setAndSortChannels(channels);
+    controller.channels = [...channels];
   }
 
   /// Function which gets called for the event
@@ -177,7 +177,7 @@ mixin class StreamChannelListEventHandler {
 
     if (!listChanged) return;
 
-    controller.setAndSortChannels([...updatedChannels]);
+    controller.channels = [...updatedChannels];
   }
 
   /// Function which gets called for the event
@@ -220,6 +220,6 @@ mixin class StreamChannelListEventHandler {
       return channel;
     });
 
-    controller.setAndSortChannels([...updatedChannels]);
+    controller.channels = [...updatedChannels];
   }
 }

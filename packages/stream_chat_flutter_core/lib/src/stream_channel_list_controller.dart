@@ -139,7 +139,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         presence: presence,
         paginationParams: PaginationParams(limit: limit),
       )) {
-        _sortChannels(channels);
         final nextKey = channels.length < limit ? null : channels.length;
         value = PagedValue(
           items: channels,
@@ -171,7 +170,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       )) {
         final previousItems = previousValue.items;
         final newItems = previousItems + channels;
-        _sortChannels(newItems);
         final nextKey = channels.length < limit ? null : newItems.length;
         value = PagedValue(
           items: newItems,
@@ -194,12 +192,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     } else {
       value = PagedValue(items: channels);
     }
-  }
-
-  /// Sorts the channels based on [channelStateSort] and sets the [channels].
-  void setAndSortChannels(List<Channel> channels) {
-    _sortChannels(channels);
-    this.channels = channels;
   }
 
   /// Returns/Creates a new Channel and starts watching it.
@@ -302,18 +294,6 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// Resumes all subscriptions added to this composite.
   void resumeEventsSubscription() {
     _channelEventSubscription?.resume();
-  }
-
-  void _sortChannels(List<Channel> channels) {
-    if (channelStateSort case final sortOrder?) {
-      channels.sort((a, b) {
-        final stateA = a.state?.channelState;
-        final stateB = b.state?.channelState;
-        if (stateA == null || stateB == null) return 0;
-
-        return sortOrder.compare(stateA, stateB);
-      });
-    }
   }
 
   @override
