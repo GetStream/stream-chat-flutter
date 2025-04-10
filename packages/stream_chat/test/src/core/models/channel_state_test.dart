@@ -67,6 +67,38 @@ void main() {
       );
     });
 
+    test('should handle draft field correctly', () {
+      final now = DateTime.now();
+      final draftMessage = DraftMessage(text: 'Draft message');
+      final draft = Draft(
+        channelCid: 'messaging:123',
+        createdAt: now,
+        message: draftMessage,
+      );
+
+      final channelState = createChannelState(
+        id: 'test-channel',
+        draft: draft,
+      );
+
+      expect(channelState.draft, equals(draft));
+
+      final updatedDraft = Draft(
+        channelCid: 'messaging:123',
+        createdAt: now,
+        message: DraftMessage(text: 'Updated draft'),
+      );
+
+      final updatedState = channelState.copyWith(draft: updatedDraft);
+      expect(updatedState.draft, equals(updatedDraft));
+      expect(updatedState.draft, isNot(equals(draft)));
+
+      final removedDraftState = channelState.copyWith(draft: null);
+      expect(removedDraftState.draft, isNull);
+
+      expect(channelState.draft, equals(draft));
+    });
+
     group('ComparableFieldProvider', () {
       test('should return ComparableField for channel.lastMessageAt', () {
         final channelState = createChannelState(
@@ -217,6 +249,7 @@ ChannelState createChannelState({
   DateTime? lastMessageAt,
   int? memberCount,
   Map<String, Object?>? extraData,
+  Draft? draft,
 }) {
   return ChannelState(
     channel: ChannelModel(
@@ -230,5 +263,6 @@ ChannelState createChannelState({
       extraData: extraData ?? {},
     ),
     membership: Member(userId: 'user1'),
+    draft: draft,
   );
 }

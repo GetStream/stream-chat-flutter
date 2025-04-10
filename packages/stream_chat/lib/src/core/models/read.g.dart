@@ -10,7 +10,7 @@ Read _$ReadFromJson(Map<String, dynamic> json) => Read(
       lastRead: DateTime.parse(json['last_read'] as String),
       user: User.fromJson(json['user'] as Map<String, dynamic>),
       lastReadMessageId: json['last_read_message_id'] as String?,
-      unreadMessages: (json['unread_messages'] as num?)?.toInt() ?? 0,
+      unreadMessages: (json['unread_messages'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$ReadToJson(Read instance) => <String, dynamic>{

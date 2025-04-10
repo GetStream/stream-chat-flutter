@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 /// Defines the api dedicated to moderation operations
