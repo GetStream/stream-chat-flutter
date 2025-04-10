@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Channel pinning and archiving
+
 🔄 Changed
 
 - Improved read event handling in the `Channel` class to properly update unread state information.
