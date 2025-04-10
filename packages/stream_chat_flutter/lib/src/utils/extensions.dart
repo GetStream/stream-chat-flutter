@@ -571,6 +571,7 @@ extension MessageListX on Iterable<Message> {
   ///
   /// The last unread message is the last message in the list that is not
   /// sent by the current user and is sent after the last read message.
+  @Deprecated("Use 'StreamChannel.getFirstUnreadMessage' instead.")
   Message? lastUnreadMessage(Read? userRead) {
     if (isEmpty || userRead == null) return null;
 

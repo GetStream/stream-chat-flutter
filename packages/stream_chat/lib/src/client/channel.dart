@@ -2097,8 +2097,6 @@ class ChannelClientState {
 
     _listenReadEvents();
 
-    _listenUnreadEvents();
-
     _listenChannelTruncated();
 
     _listenChannelUpdated();
@@ -2852,58 +2850,76 @@ class ChannelClientState {
     return updateMessage(message);
   }
 
-  void _listenUnreadEvents() {
-    if (_channelState.channel?.config.readEvents == false) {
-      return;
-    }
-
-    _subscriptions.add(
-        _channel.on(EventType.notificationMarkUnread).listen((Event event) {
-      if (event.user?.id != _channel._client.state.currentUser!.id) return;
-
-      final readList = <Read>[
-        ..._channelState.read?.where((r) => r.user.id != event.user!.id) ??
-            <Read>[],
-        if (event.lastReadAt != null)
-          Read(
-            user: event.user!,
-            lastRead: event.lastReadAt!,
-            unreadMessages: event.unreadMessages ?? 0,
-            lastReadMessageId: event.lastReadMessageId,
-          )
-      ];
-
-      _channelState = _channelState.copyWith(read: readList);
-    }));
-  }
-
   void _listenReadEvents() {
-    if (_channelState.channel?.config.readEvents == false) {
-      return;
-    }
+    if (_channelState.channel?.config.readEvents == false) return;
 
-    _subscriptions.add(
-      _channel.on(EventType.messageRead, EventType.notificationMarkRead).listen(
-        (event) {
-          final readList = List<Read>.from(_channelState.read ?? []);
-          final userReadIndex =
-              read.indexWhere((r) => r.user.id == event.user!.id);
+    _subscriptions
+      ..add(
+        _channel
+            .on(EventType.messageRead, EventType.notificationMarkRead)
+            .listen(
+          (event) {
+            final user = event.user;
+            if (user == null) return;
 
-          if (userReadIndex != -1) {
-            final userRead = readList.removeAt(userReadIndex);
-            if (userRead.user.id == _channel._client.state.currentUser!.id) {
-              unreadCount = 0;
+            final existingRead = [...?channelState.read];
+            // Return if the user does not have a existing read.
+            if (!existingRead.any((r) => r.user.id == user.id)) return;
+
+            Read? maybeUpdateRead(Read? existingRead) {
+              if (existingRead == null) return null;
+              if (existingRead.user.id == user.id) {
+                return Read(
+                  user: user,
+                  lastRead: event.createdAt,
+                  unreadMessages: event.unreadMessages,
+                  lastReadMessageId: event.lastReadMessageId,
+                );
+              }
+
+              return existingRead;
             }
-            readList.add(Read(
-              user: event.user!,
-              lastRead: event.createdAt,
-              lastReadMessageId: messages.lastOrNull?.id,
-            ));
-            _channelState = _channelState.copyWith(read: readList);
-          }
-        },
-      ),
-    );
+
+            updateChannelState(
+              channelState.copyWith(
+                read: [...existingRead.map(maybeUpdateRead).nonNulls],
+              ),
+            );
+          },
+        ),
+      )
+      ..add(
+        _channel.on(EventType.notificationMarkUnread).listen(
+          (Event event) {
+            final user = event.user;
+            if (user == null) return;
+
+            final existingRead = [...?channelState.read];
+            // Return if the user does not have a existing read.
+            if (!existingRead.any((r) => r.user.id == user.id)) return;
+
+            Read? maybeUpdateRead(Read? existingRead) {
+              if (existingRead == null) return null;
+              if (existingRead.user.id == user.id) {
+                return Read(
+                  user: user,
+                  lastRead: event.lastReadAt!,
+                  unreadMessages: event.unreadMessages,
+                  lastReadMessageId: event.lastReadMessageId,
+                );
+              }
+
+              return existingRead;
+            }
+
+            updateChannelState(
+              channelState.copyWith(
+                read: [...existingRead.map(maybeUpdateRead).nonNulls],
+              ),
+            );
+          },
+        ),
+      );
   }
 
   /// Channel message list.

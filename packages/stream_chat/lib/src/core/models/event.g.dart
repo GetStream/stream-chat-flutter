@@ -56,6 +56,11 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
           : Thread.fromJson(json['thread'] as Map<String, dynamic>),
       unreadThreadMessages: (json['unread_thread_messages'] as num?)?.toInt(),
       unreadThreads: (json['unread_threads'] as num?)?.toInt(),
+      lastReadAt: json['last_read_at'] == null
+          ? null
+          : DateTime.parse(json['last_read_at'] as String),
+      unreadMessages: (json['unread_messages'] as num?)?.toInt(),
+      lastReadMessageId: json['last_read_message_id'] as String?,
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       isLocal: json['is_local'] as bool? ?? false,
     );
@@ -89,6 +94,9 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'thread': instance.thread?.toJson(),
       'unread_thread_messages': instance.unreadThreadMessages,
       'unread_threads': instance.unreadThreads,
+      'last_read_at': instance.lastReadAt?.toIso8601String(),
+      'unread_messages': instance.unreadMessages,
+      'last_read_message_id': instance.lastReadMessageId,
       'extra_data': instance.extraData,
     };
 

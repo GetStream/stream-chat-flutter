@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Improved read event handling in the `Channel` class to properly update unread state information.
+
 ## 9.7.0
 
 ✅ Added
