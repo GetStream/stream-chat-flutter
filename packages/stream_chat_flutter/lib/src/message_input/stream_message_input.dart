@@ -969,7 +969,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         if (it != AttachmentPickerType.poll) return false;
         if (_effectiveController.message.parentId != null) return true;
         final channel = StreamChannel.of(context).channel;
-        if (channel.canSendPoll) return false;
+        if (channel.config?.polls == true && channel.canSendPoll) return false;
 
         return true;
       });
