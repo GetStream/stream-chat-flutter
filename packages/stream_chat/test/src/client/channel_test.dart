@@ -3539,6 +3539,243 @@ void main() {
         expect(updated?.any((r) => r.user.id == 'non-existing-user'), isFalse);
       });
     });
+
+    group('Draft events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('should handle draft.updated event for channel drafts', () async {
+        // Verify initial state
+        expect(channel.state?.draft, isNull);
+
+        // Create Draft
+        final draft = Draft(
+          channelCid: channel.cid!,
+          createdAt: DateTime.now(),
+          message: DraftMessage(text: 'test message'),
+        );
+
+        // Create draft.updated event
+        final draftUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.draftUpdated,
+          draft: draft,
+        );
+
+        // Dispatch event
+        client.addEvent(draftUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify channel draft was updated
+        expect(channel.state?.draft, isNotNull);
+        expect(channel.state?.draft?.message.text, 'test message');
+      });
+
+      test('should handle draft.updated event for thread drafts', () async {
+        const threadParentMessageId = 'thread-parent-id';
+
+        // Verify initial state
+        expect(channel.state?.threadDraft(threadParentMessageId), isNull);
+
+        // Create thread Draft
+        final draft = Draft(
+          channelCid: channel.cid!,
+          createdAt: DateTime.now(),
+          parentId: threadParentMessageId,
+          message: DraftMessage(text: 'thread reply'),
+        );
+
+        // Create draft.updated event
+        final draftUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.draftUpdated,
+          draft: draft,
+        );
+
+        // Dispatch event
+        client.addEvent(draftUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify thread draft was updated
+        final threadDraft = channel.state?.threadDraft(threadParentMessageId);
+        expect(threadDraft, isNotNull);
+        expect(threadDraft?.message.text, 'thread reply');
+      });
+
+      test('should handle draft.deleted event for channel drafts', () async {
+        // Setup initial state with a draft
+        channel.state?.updateChannelState(
+          channel.state!.channelState.copyWith(
+            draft: Draft(
+              channelCid: channel.cid!,
+              createdAt: DateTime.now(),
+              message: DraftMessage(text: 'test message'),
+            ),
+          ),
+        );
+
+        // Verify initial state
+        expect(channel.state?.draft, isNotNull);
+        expect(channel.state?.draft?.message.text, 'test message');
+
+        // Create draft.deleted event
+        final draftUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.draftDeleted,
+        );
+
+        // Dispatch event
+        client.addEvent(draftUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify channel draft was updated
+        expect(channel.state?.draft, isNull);
+      });
+
+      test('should handle draft.deleted event for thread drafts', () async {
+        const threadParentMessageId = 'thread-parent-id';
+
+        // Setup initial state with a thread draft
+        channel.state?.updateThreadDraft(
+          threadParentMessageId,
+          draft: Draft(
+            channelCid: channel.cid!,
+            createdAt: DateTime.now(),
+            parentId: threadParentMessageId,
+            message: DraftMessage(text: 'thread reply'),
+          ),
+        );
+
+        // Verify initial state
+        final threadDraft = channel.state?.threadDraft(threadParentMessageId);
+        expect(threadDraft, isNotNull);
+        expect(threadDraft?.message.text, 'thread reply');
+
+        // Create draft.deleted event
+        final draftDeletedEvent = Event(
+          cid: channel.cid,
+          type: EventType.draftDeleted,
+          parentId: threadParentMessageId,
+        );
+
+        // Dispatch event
+        client.addEvent(draftDeletedEvent);
+
+        // Allow event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify thread draft was removed
+        expect(channel.state?.threadDraft(threadParentMessageId), isNull);
+      });
+
+      test(
+        'should update current channel draft if draft.updated event is emitted',
+        () async {
+          // Setup initial state with a draft
+          final initialDraft = Draft(
+            channelCid: channel.cid!,
+            createdAt: DateTime.now(),
+            message: DraftMessage(text: 'test message'),
+          );
+
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              draft: initialDraft,
+            ),
+          );
+
+          // Verify initial state
+          expect(channel.state?.draft, isNotNull);
+          expect(channel.state?.draft?.message.text, 'test message');
+
+          // Create Draft
+          final updatedDraft = initialDraft.copyWith(
+            message: DraftMessage(text: 'updated message'),
+          );
+
+          // Create draft.updated event
+          final draftUpdatedEvent = Event(
+            cid: channel.cid,
+            type: EventType.draftUpdated,
+            draft: updatedDraft,
+          );
+
+          // Dispatch event
+          client.addEvent(draftUpdatedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify channel draft was updated
+          expect(channel.state?.draft, isNotNull);
+          expect(channel.state?.draft?.message.text, 'updated message');
+        },
+      );
+
+      test(
+        'should update current thread draft if draft.updated event is emitted',
+        () async {
+          const threadParentMessageId = 'thread-parent-id';
+
+          // Setup initial state with a thread draft
+          final initialDraft = Draft(
+            channelCid: channel.cid!,
+            createdAt: DateTime.now(),
+            parentId: threadParentMessageId,
+            message: DraftMessage(text: 'thread reply'),
+          );
+
+          channel.state?.updateThreadDraft(
+            threadParentMessageId,
+            draft: initialDraft,
+          );
+
+          // Verify initial state
+          final draft = channel.state?.threadDraft(threadParentMessageId);
+          expect(draft, isNotNull);
+          expect(draft?.message.text, 'thread reply');
+
+          // Create Draft
+          final updatedDraft = initialDraft.copyWith(
+            message: DraftMessage(text: 'updated thread reply'),
+          );
+
+          // Create draft.updated event
+          final draftUpdatedEvent = Event(
+            cid: channel.cid,
+            type: EventType.draftUpdated,
+            draft: updatedDraft,
+          );
+
+          // Dispatch event
+          client.addEvent(draftUpdatedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify thread draft was updated
+          final threadDraft = channel.state?.threadDraft(threadParentMessageId);
+          expect(threadDraft, isNotNull);
+          expect(threadDraft?.message.text, 'updated thread reply');
+        },
+      );
+    });
   });
 
   group('ChannelCapabilityCheck', () {
