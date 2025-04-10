@@ -626,11 +626,11 @@ void main() {
       }),
     );
 
-    final res = await channelApi.archiveChannel(
+    final res = await channelApi.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
       userId: userId,
-      archive: true,
+      set: const MemberUpdatePayload(archived: true),
     );
 
     expect(res, isNotNull);
@@ -657,11 +657,11 @@ void main() {
           data: <String, dynamic>{'channel_member': <String, dynamic>{}}),
     );
 
-    final res = await channelApi.archiveChannel(
+    final res = await channelApi.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
       userId: userId,
-      archive: false,
+      unset: const [MemberUpdateType.archived],
     );
 
     expect(res, isNotNull);
@@ -670,7 +670,6 @@ void main() {
     verify(() => client.patch(path, data: any(named: 'data'))).called(1);
     verifyNoMoreInteractions(client);
   });
-
 
   test('pinChannel', () async {
     const channelId = 'test-channel-id';
@@ -693,11 +692,11 @@ void main() {
       }),
     );
 
-    final res = await channelApi.pinChannel(
+    final res = await channelApi.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
       userId: userId,
-      pin: true,
+      set: const MemberUpdatePayload(pinned: true),
     );
 
     expect(res, isNotNull);
@@ -724,11 +723,11 @@ void main() {
           data: <String, dynamic>{'channel_member': <String, dynamic>{}}),
     );
 
-    final res = await channelApi.pinChannel(
+    final res = await channelApi.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
       userId: userId,
-      pin: false,
+      unset: const [MemberUpdateType.pinned],
     );
 
     expect(res, isNotNull);

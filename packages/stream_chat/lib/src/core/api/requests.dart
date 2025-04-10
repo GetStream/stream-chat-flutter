@@ -205,3 +205,31 @@ class ThreadOptions extends Equatable {
   @override
   List<Object?> get props => [watch, replyLimit, participantLimit, memberLimit];
 }
+
+/// Payload for updating a member.
+@JsonSerializable(createFactory: false, includeIfNull: false)
+class MemberUpdatePayload {
+  /// Creates a new MemberUpdatePayload instance.
+  const MemberUpdatePayload({
+    this.archived,
+    this.pinned,
+  });
+
+  /// Set to true to archive the channel for a user.
+  final bool? archived;
+
+  /// Set to true to pin the channel for a user.
+  final bool? pinned;
+
+  /// Serialize model to json
+  Map<String, dynamic> toJson() => _$MemberUpdatePayloadToJson(this);
+}
+
+/// Type of member update to unset.
+enum MemberUpdateType {
+  /// Unset the archived flag.
+  archived,
+
+  /// Unset the pinned flag.
+  pinned,
+}

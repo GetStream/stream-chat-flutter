@@ -1610,11 +1610,11 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.pinChannel(
+      when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            pin: true,
+            set: const MemberUpdatePayload(pinned: true),
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
           ));
@@ -1626,11 +1626,11 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.pinChannel(
+      verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            pin: true,
+            set: const MemberUpdatePayload(pinned: true),
           )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
@@ -1639,11 +1639,11 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.pinChannel(
+      when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            pin: false,
+            unset: const [MemberUpdateType.pinned],
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
           ));
@@ -1655,11 +1655,11 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.pinChannel(
+      verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            pin: false,
+            unset: const [MemberUpdateType.pinned],
           )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
@@ -1668,11 +1668,11 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.archiveChannel(
+      when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            archive: true,
+            set: const MemberUpdatePayload(archived: true),
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, archivedAt: DateTime.now()),
           ));
@@ -1684,11 +1684,11 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.archiveChannel(
+      verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            archive: true,
+            set: const MemberUpdatePayload(archived: true),
           )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
@@ -1697,11 +1697,11 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.archiveChannel(
+      when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            archive: false,
+            unset: const [MemberUpdateType.archived],
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
           ));
@@ -1713,11 +1713,11 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.archiveChannel(
+      verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
             userId: userId,
-            archive: false,
+            unset: const [MemberUpdateType.archived],
           )).called(1);
       verifyNoMoreInteractions(api.channel);
     });

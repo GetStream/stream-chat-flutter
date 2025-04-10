@@ -1859,11 +1859,11 @@ class StreamChatClient {
       );
     }
 
-    return _chatApi.channel.pinChannel(
+    return _chatApi.channel.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
       userId: currentUser.id,
-      pin: true,
+      set: const MemberUpdatePayload(pinned: true),
     );
   }
 
@@ -1880,11 +1880,11 @@ class StreamChatClient {
       );
     }
 
-    return _chatApi.channel.pinChannel(
+    return _chatApi.channel.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
       userId: currentUser.id,
-      pin: false,
+      unset: const [MemberUpdateType.pinned],
     );
   }
 
@@ -1901,11 +1901,11 @@ class StreamChatClient {
       );
     }
 
-    return _chatApi.channel.archiveChannel(
+    return _chatApi.channel.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
       userId: currentUser.id,
-      archive: true,
+      set: const MemberUpdatePayload(archived: true),
     );
   }
 
@@ -1922,11 +1922,11 @@ class StreamChatClient {
       );
     }
 
-    return _chatApi.channel.archiveChannel(
+    return _chatApi.channel.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
       userId: currentUser.id,
-      archive: false,
+      unset: const [MemberUpdateType.archived],
     );
   }
 
