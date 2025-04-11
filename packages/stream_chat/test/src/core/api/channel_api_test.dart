@@ -630,7 +630,7 @@ void main() {
       channelId: channelId,
       channelType: channelType,
       userId: userId,
-      set: const MemberUpdatePayload(archived: true),
+      set: const MemberUpdatePayload(archived: true).toJson(),
     );
 
     expect(res, isNotNull);
@@ -661,7 +661,7 @@ void main() {
       channelId: channelId,
       channelType: channelType,
       userId: userId,
-      unset: const [MemberUpdateType.archived],
+      unset: [MemberUpdateType.archived.name],
     );
 
     expect(res, isNotNull);
@@ -696,7 +696,7 @@ void main() {
       channelId: channelId,
       channelType: channelType,
       userId: userId,
-      set: const MemberUpdatePayload(pinned: true),
+      set: const MemberUpdatePayload(pinned: true).toJson(),
     );
 
     expect(res, isNotNull);
@@ -727,7 +727,7 @@ void main() {
       channelId: channelId,
       channelType: channelType,
       userId: userId,
-      unset: const [MemberUpdateType.pinned],
+      unset: [MemberUpdateType.pinned.name],
     );
 
     expect(res, isNotNull);

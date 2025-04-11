@@ -1824,28 +1824,6 @@ class StreamChatClient {
         unset: unset,
       );
 
-  /// Closes the [_ws] connection and resets the [state]
-  /// If [flushChatPersistence] is true the client deletes all offline
-  /// user's data.
-  Future<void> disconnectUser({bool flushChatPersistence = false}) async {
-    logger.info('Disconnecting user : ${state.currentUser?.id}');
-
-    // resetting state.
-    state.dispose();
-    state = ClientState(this);
-    _lastSyncedAt = null;
-
-    // resetting credentials.
-    _tokenManager.reset();
-    _connectionIdManager.reset();
-
-    // closing persistence connection.
-    await closePersistenceConnection(flush: flushChatPersistence);
-
-    // closing web-socket connection
-    return closeConnection();
-  }
-
   /// Pins the channel for the current user.
   Future<PartialUpdateMemberResponse> pinChannel({
     required String channelId,
@@ -1928,6 +1906,62 @@ class StreamChatClient {
       userId: currentUser.id,
       unset: [MemberUpdateType.archived.name],
     );
+  }
+
+  /// Partially updates the member of the given channel.
+  ///
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  /// When [userId] is not provided, the current user will be used.
+  Future<PartialUpdateMemberResponse> partialMemberUpdate({
+    required String channelId,
+    required String channelType,
+    String? userId,
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) {
+    assert(set != null || unset != null, 'Set or unset must be provided.');
+
+    if (userId == null) {
+      final currentUser = state.currentUser;
+      if (currentUser == null) {
+        throw const StreamChatError(
+          'User is not set on client and userId is not provided. '
+          'Use `connectUser` or `connectAnonymousUser` instead',
+        );
+      }
+      userId = currentUser.id;
+    }
+
+    return _chatApi.channel.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      userId: userId,
+      set: set,
+      unset: unset,
+    );
+  }
+
+  /// Closes the [_ws] connection and resets the [state]
+  /// If [flushChatPersistence] is true the client deletes all offline
+  /// user's data.
+  Future<void> disconnectUser({bool flushChatPersistence = false}) async {
+    logger.info('Disconnecting user : ${state.currentUser?.id}');
+
+    // resetting state.
+    state.dispose();
+    state = ClientState(this);
+    _lastSyncedAt = null;
+
+    // resetting credentials.
+    _tokenManager.reset();
+    _connectionIdManager.reset();
+
+    // closing persistence connection.
+    await closePersistenceConnection(flush: flushChatPersistence);
+
+    // closing web-socket connection
+    return closeConnection();
   }
 
   /// Call this function to dispose the client

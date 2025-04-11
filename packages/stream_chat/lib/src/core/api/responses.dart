@@ -99,7 +99,8 @@ class QueryMembersResponse extends _BaseResponse {
       _$QueryMembersResponseFromJson(json);
 }
 
-/// Model response for update member API calls, such as [StreamChatClient.updateMemberPartial]
+/// Model response for update member API calls, such as
+/// [StreamChatClient.updateMemberPartial]
 @JsonSerializable(createToJson: false)
 class PartialUpdateMemberResponse extends _BaseResponse {
   /// The updated member state
