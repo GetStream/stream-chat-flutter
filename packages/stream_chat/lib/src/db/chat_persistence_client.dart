@@ -91,7 +91,7 @@ abstract class ChatPersistenceClient {
       getMessagesByCid(cid, messagePagination: messagePagination),
       getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
     ]);
-    
+
     final members = data[0] as List<Member>?;
     final membership = userId == null
         ? null
