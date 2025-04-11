@@ -1,3 +1,7 @@
+## Upcoming
+
+- Added `pinnedAt` and `archivedAt` fields on `Member`.
+
 ## 9.7.0
 
 - Updated `stream_chat` dependency to [`9.7.0`](https://pub.dev/packages/stream_chat/changelog).

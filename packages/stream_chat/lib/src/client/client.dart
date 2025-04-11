@@ -1824,6 +1824,124 @@ class StreamChatClient {
         unset: unset,
       );
 
+  /// Pins the channel for the current user.
+  Future<PartialUpdateMemberResponse> pinChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    final currentUser = state.currentUser;
+    if (currentUser == null) {
+      throw const StreamChatError(
+        'User is not set on client, '
+        'use `connectUser` or `connectAnonymousUser` instead',
+      );
+    }
+
+    return _chatApi.channel.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      userId: currentUser.id,
+      set: const MemberUpdatePayload(pinned: true).toJson(),
+    );
+  }
+
+  /// Unpins the channel for the current user.
+  Future<PartialUpdateMemberResponse> unpinChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    final currentUser = state.currentUser;
+    if (currentUser == null) {
+      throw const StreamChatError(
+        'User is not set on client, '
+        'use `connectUser` or `connectAnonymousUser` instead',
+      );
+    }
+
+    return _chatApi.channel.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      userId: currentUser.id,
+      unset: [MemberUpdateType.pinned.name],
+    );
+  }
+
+  /// Archives the channel for the current user.
+  Future<PartialUpdateMemberResponse> archiveChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    final currentUser = state.currentUser;
+    if (currentUser == null) {
+      throw const StreamChatError(
+        'User is not set on client, '
+        'use `connectUser` or `connectAnonymousUser` instead',
+      );
+    }
+
+    return _chatApi.channel.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      userId: currentUser.id,
+      set: const MemberUpdatePayload(archived: true).toJson(),
+    );
+  }
+
+  /// Unarchives the channel for the current user.
+  Future<PartialUpdateMemberResponse> unarchiveChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    final currentUser = state.currentUser;
+    if (currentUser == null) {
+      throw const StreamChatError(
+        'User is not set on client, '
+        'use `connectUser` or `connectAnonymousUser` instead',
+      );
+    }
+
+    return _chatApi.channel.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      userId: currentUser.id,
+      unset: [MemberUpdateType.archived.name],
+    );
+  }
+
+  /// Partially updates the member of the given channel.
+  ///
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  /// When [userId] is not provided, the current user will be used.
+  Future<PartialUpdateMemberResponse> partialMemberUpdate({
+    required String channelId,
+    required String channelType,
+    String? userId,
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) {
+    assert(set != null || unset != null, 'Set or unset must be provided.');
+
+    if (userId == null) {
+      final currentUser = state.currentUser;
+      if (currentUser == null) {
+        throw const StreamChatError(
+          'User is not set on client and userId is not provided. '
+          'Use `connectUser` or `connectAnonymousUser` instead',
+        );
+      }
+      userId = currentUser.id;
+    }
+
+    return _chatApi.channel.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      userId: userId,
+      set: set,
+      unset: unset,
+    );
+  }
+
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline
   /// user's data.

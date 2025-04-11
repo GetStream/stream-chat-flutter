@@ -375,4 +375,22 @@ class ChannelApi {
     );
     return EmptyResponse.fromJson(response.data);
   }
+
+  /// Updates some of the member data
+  Future<PartialUpdateMemberResponse> updateMemberPartial({
+    required String channelId,
+    required String channelType,
+    required String userId,
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) async {
+    final response = await _client.patch(
+      '${_getChannelUrl(channelId, channelType)}/member/$userId',
+      data: {
+        if (set != null) 'set': set,
+        if (unset != null) 'unset': unset,
+      },
+    );
+    return PartialUpdateMemberResponse.fromJson(response.data);
+  }
 }

@@ -4,6 +4,9 @@ import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 
 class MockChatDatabase extends Mock implements DriftChatDatabase {
   @override
+  String get userId => 'test-user-id';
+
+  @override
   UserDao get userDao => _userDao ??= MockUserDao();
   UserDao? _userDao;
 

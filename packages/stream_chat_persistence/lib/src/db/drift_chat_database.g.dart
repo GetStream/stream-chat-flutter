@@ -6110,6 +6110,22 @@ class $MembersTable extends Members
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("shadow_banned" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _pinnedAtMeta =
+      const VerificationMeta('pinnedAt');
+  @override
+  late final GeneratedColumn<DateTime> pinnedAt = GeneratedColumn<DateTime>(
+      'pinned_at', aliasedName, true,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(null));
+  static const VerificationMeta _archivedAtMeta =
+      const VerificationMeta('archivedAt');
+  @override
+  late final GeneratedColumn<DateTime> archivedAt = GeneratedColumn<DateTime>(
+      'archived_at', aliasedName, true,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(null));
   static const VerificationMeta _isModeratorMeta =
       const VerificationMeta('isModerator');
   @override
@@ -6154,6 +6170,8 @@ class $MembersTable extends Members
         invited,
         banned,
         shadowBanned,
+        pinnedAt,
+        archivedAt,
         isModerator,
         extraData,
         createdAt,
@@ -6215,6 +6233,16 @@ class $MembersTable extends Members
           shadowBanned.isAcceptableOrUnknown(
               data['shadow_banned']!, _shadowBannedMeta));
     }
+    if (data.containsKey('pinned_at')) {
+      context.handle(_pinnedAtMeta,
+          pinnedAt.isAcceptableOrUnknown(data['pinned_at']!, _pinnedAtMeta));
+    }
+    if (data.containsKey('archived_at')) {
+      context.handle(
+          _archivedAtMeta,
+          archivedAt.isAcceptableOrUnknown(
+              data['archived_at']!, _archivedAtMeta));
+    }
     if (data.containsKey('is_moderator')) {
       context.handle(
           _isModeratorMeta,
@@ -6255,6 +6283,10 @@ class $MembersTable extends Members
           .read(DriftSqlType.bool, data['${effectivePrefix}banned'])!,
       shadowBanned: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}shadow_banned'])!,
+      pinnedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}pinned_at']),
+      archivedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}archived_at']),
       isModerator: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_moderator'])!,
       extraData: $MembersTable.$converterextraDatan.fromSql(attachedDatabase
@@ -6303,6 +6335,12 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   /// True if the member is shadow banned from the channel
   final bool shadowBanned;
 
+  /// The date at which the channel was pinned by the member
+  final DateTime? pinnedAt;
+
+  /// The date at which the channel was archived by the member
+  final DateTime? archivedAt;
+
   /// True if the user is a moderator of the channel
   final bool isModerator;
 
@@ -6323,6 +6361,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       required this.invited,
       required this.banned,
       required this.shadowBanned,
+      this.pinnedAt,
+      this.archivedAt,
       required this.isModerator,
       this.extraData,
       required this.createdAt,
@@ -6344,6 +6384,12 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     map['invited'] = Variable<bool>(invited);
     map['banned'] = Variable<bool>(banned);
     map['shadow_banned'] = Variable<bool>(shadowBanned);
+    if (!nullToAbsent || pinnedAt != null) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt);
+    }
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<DateTime>(archivedAt);
+    }
     map['is_moderator'] = Variable<bool>(isModerator);
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] =
@@ -6368,6 +6414,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       invited: serializer.fromJson<bool>(json['invited']),
       banned: serializer.fromJson<bool>(json['banned']),
       shadowBanned: serializer.fromJson<bool>(json['shadowBanned']),
+      pinnedAt: serializer.fromJson<DateTime?>(json['pinnedAt']),
+      archivedAt: serializer.fromJson<DateTime?>(json['archivedAt']),
       isModerator: serializer.fromJson<bool>(json['isModerator']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -6386,6 +6434,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       'invited': serializer.toJson<bool>(invited),
       'banned': serializer.toJson<bool>(banned),
       'shadowBanned': serializer.toJson<bool>(shadowBanned),
+      'pinnedAt': serializer.toJson<DateTime?>(pinnedAt),
+      'archivedAt': serializer.toJson<DateTime?>(archivedAt),
       'isModerator': serializer.toJson<bool>(isModerator),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -6402,6 +6452,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           bool? invited,
           bool? banned,
           bool? shadowBanned,
+          Value<DateTime?> pinnedAt = const Value.absent(),
+          Value<DateTime?> archivedAt = const Value.absent(),
           bool? isModerator,
           Value<Map<String, dynamic>?> extraData = const Value.absent(),
           DateTime? createdAt,
@@ -6419,6 +6471,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
         invited: invited ?? this.invited,
         banned: banned ?? this.banned,
         shadowBanned: shadowBanned ?? this.shadowBanned,
+        pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
+        archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
         isModerator: isModerator ?? this.isModerator,
         extraData: extraData.present ? extraData.value : this.extraData,
         createdAt: createdAt ?? this.createdAt,
@@ -6442,6 +6496,9 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       shadowBanned: data.shadowBanned.present
           ? data.shadowBanned.value
           : this.shadowBanned,
+      pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
+      archivedAt:
+          data.archivedAt.present ? data.archivedAt.value : this.archivedAt,
       isModerator:
           data.isModerator.present ? data.isModerator.value : this.isModerator,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
@@ -6461,6 +6518,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           ..write('invited: $invited, ')
           ..write('banned: $banned, ')
           ..write('shadowBanned: $shadowBanned, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('archivedAt: $archivedAt, ')
           ..write('isModerator: $isModerator, ')
           ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
@@ -6479,6 +6538,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       invited,
       banned,
       shadowBanned,
+      pinnedAt,
+      archivedAt,
       isModerator,
       extraData,
       createdAt,
@@ -6495,6 +6556,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           other.invited == this.invited &&
           other.banned == this.banned &&
           other.shadowBanned == this.shadowBanned &&
+          other.pinnedAt == this.pinnedAt &&
+          other.archivedAt == this.archivedAt &&
           other.isModerator == this.isModerator &&
           other.extraData == this.extraData &&
           other.createdAt == this.createdAt &&
@@ -6510,6 +6573,8 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   final Value<bool> invited;
   final Value<bool> banned;
   final Value<bool> shadowBanned;
+  final Value<DateTime?> pinnedAt;
+  final Value<DateTime?> archivedAt;
   final Value<bool> isModerator;
   final Value<Map<String, dynamic>?> extraData;
   final Value<DateTime> createdAt;
@@ -6524,6 +6589,8 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.invited = const Value.absent(),
     this.banned = const Value.absent(),
     this.shadowBanned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
     this.isModerator = const Value.absent(),
     this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -6539,6 +6606,8 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.invited = const Value.absent(),
     this.banned = const Value.absent(),
     this.shadowBanned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
     this.isModerator = const Value.absent(),
     this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -6555,6 +6624,8 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     Expression<bool>? invited,
     Expression<bool>? banned,
     Expression<bool>? shadowBanned,
+    Expression<DateTime>? pinnedAt,
+    Expression<DateTime>? archivedAt,
     Expression<bool>? isModerator,
     Expression<String>? extraData,
     Expression<DateTime>? createdAt,
@@ -6570,6 +6641,8 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       if (invited != null) 'invited': invited,
       if (banned != null) 'banned': banned,
       if (shadowBanned != null) 'shadow_banned': shadowBanned,
+      if (pinnedAt != null) 'pinned_at': pinnedAt,
+      if (archivedAt != null) 'archived_at': archivedAt,
       if (isModerator != null) 'is_moderator': isModerator,
       if (extraData != null) 'extra_data': extraData,
       if (createdAt != null) 'created_at': createdAt,
@@ -6587,6 +6660,8 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       Value<bool>? invited,
       Value<bool>? banned,
       Value<bool>? shadowBanned,
+      Value<DateTime?>? pinnedAt,
+      Value<DateTime?>? archivedAt,
       Value<bool>? isModerator,
       Value<Map<String, dynamic>?>? extraData,
       Value<DateTime>? createdAt,
@@ -6601,6 +6676,8 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       invited: invited ?? this.invited,
       banned: banned ?? this.banned,
       shadowBanned: shadowBanned ?? this.shadowBanned,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
+      archivedAt: archivedAt ?? this.archivedAt,
       isModerator: isModerator ?? this.isModerator,
       extraData: extraData ?? this.extraData,
       createdAt: createdAt ?? this.createdAt,
@@ -6636,6 +6713,12 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     if (shadowBanned.present) {
       map['shadow_banned'] = Variable<bool>(shadowBanned.value);
     }
+    if (pinnedAt.present) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<DateTime>(archivedAt.value);
+    }
     if (isModerator.present) {
       map['is_moderator'] = Variable<bool>(isModerator.value);
     }
@@ -6666,6 +6749,8 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
           ..write('invited: $invited, ')
           ..write('banned: $banned, ')
           ..write('shadowBanned: $shadowBanned, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('archivedAt: $archivedAt, ')
           ..write('isModerator: $isModerator, ')
           ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
@@ -7737,8 +7822,8 @@ final class $$ChannelsTableReferences
                   db.channels.cid, db.messages.channelCid));
 
   $$MessagesTableProcessedTableManager get messagesRefs {
-    final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$MessagesTableTableManager($_db, $_db.messages).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_messagesRefsTable($_db));
     return ProcessedTableManager(
@@ -7752,8 +7837,8 @@ final class $$ChannelsTableReferences
                   $_aliasNameGenerator(db.channels.cid, db.members.channelCid));
 
   $$MembersTableProcessedTableManager get membersRefs {
-    final manager = $$MembersTableTableManager($_db, $_db.members)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$MembersTableTableManager($_db, $_db.members).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_membersRefsTable($_db));
     return ProcessedTableManager(
@@ -7767,8 +7852,8 @@ final class $$ChannelsTableReferences
               $_aliasNameGenerator(db.channels.cid, db.reads.channelCid));
 
   $$ReadsTableProcessedTableManager get readsRefs {
-    final manager = $$ReadsTableTableManager($_db, $_db.reads)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$ReadsTableTableManager($_db, $_db.reads).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_readsRefsTable($_db));
     return ProcessedTableManager(
@@ -8297,8 +8382,10 @@ final class $$MessagesTableReferences
           $_aliasNameGenerator(db.messages.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -8313,7 +8400,7 @@ final class $$MessagesTableReferences
 
   $$ReactionsTableProcessedTableManager get reactionsRefs {
     final manager = $$ReactionsTableTableManager($_db, $_db.reactions)
-        .filter((f) => f.messageId.id($_item.id));
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_reactionsRefsTable($_db));
     return ProcessedTableManager(
@@ -9080,7 +9167,7 @@ final class $$PinnedMessagesTableReferences extends BaseReferences<
       get pinnedMessageReactionsRefs {
     final manager = $$PinnedMessageReactionsTableTableManager(
             $_db, $_db.pinnedMessageReactions)
-        .filter((f) => f.messageId.id($_item.id));
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache =
         $_typedResult.readTableOrNull(_pinnedMessageReactionsRefsTable($_db));
@@ -9747,7 +9834,7 @@ final class $$PollsTableReferences
 
   $$PollVotesTableProcessedTableManager get pollVotesRefs {
     final manager = $$PollVotesTableTableManager($_db, $_db.pollVotes)
-        .filter((f) => f.pollId.id($_item.id));
+        .filter((f) => f.pollId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_pollVotesRefsTable($_db));
     return ProcessedTableManager(
@@ -10174,9 +10261,10 @@ final class $$PollVotesTableReferences extends BaseReferences<
       .createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
 
   $$PollsTableProcessedTableManager? get pollId {
-    if ($_item.pollId == null) return null;
+    final $_column = $_itemColumn<String>('poll_id');
+    if ($_column == null) return null;
     final manager = $$PollsTableTableManager($_db, $_db.polls)
-        .filter((f) => f.id($_item.pollId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_pollIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10479,8 +10567,10 @@ final class $$PinnedMessageReactionsTableReferences extends BaseReferences<
           db.pinnedMessageReactions.messageId, db.pinnedMessages.id));
 
   $$PinnedMessagesTableProcessedTableManager get messageId {
+    final $_column = $_itemColumn<String>('message_id')!;
+
     final manager = $$PinnedMessagesTableTableManager($_db, $_db.pinnedMessages)
-        .filter((f) => f.id($_item.messageId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10775,8 +10865,10 @@ final class $$ReactionsTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.reactions.messageId, db.messages.id));
 
   $$MessagesTableProcessedTableManager get messageId {
+    final $_column = $_itemColumn<String>('message_id')!;
+
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.id($_item.messageId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -11275,6 +11367,8 @@ typedef $$MembersTableCreateCompanionBuilder = MembersCompanion Function({
   Value<bool> invited,
   Value<bool> banned,
   Value<bool> shadowBanned,
+  Value<DateTime?> pinnedAt,
+  Value<DateTime?> archivedAt,
   Value<bool> isModerator,
   Value<Map<String, dynamic>?> extraData,
   Value<DateTime> createdAt,
@@ -11290,6 +11384,8 @@ typedef $$MembersTableUpdateCompanionBuilder = MembersCompanion Function({
   Value<bool> invited,
   Value<bool> banned,
   Value<bool> shadowBanned,
+  Value<DateTime?> pinnedAt,
+  Value<DateTime?> archivedAt,
   Value<bool> isModerator,
   Value<Map<String, dynamic>?> extraData,
   Value<DateTime> createdAt,
@@ -11306,8 +11402,10 @@ final class $$MembersTableReferences
           $_aliasNameGenerator(db.members.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -11346,6 +11444,12 @@ class $$MembersTableFilterComposer
 
   ColumnFilters<bool> get shadowBanned => $composableBuilder(
       column: $table.shadowBanned, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get pinnedAt => $composableBuilder(
+      column: $table.pinnedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => ColumnFilters(column));
@@ -11416,6 +11520,12 @@ class $$MembersTableOrderingComposer
       column: $table.shadowBanned,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get pinnedAt => $composableBuilder(
+      column: $table.pinnedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => ColumnOrderings(column));
 
@@ -11478,6 +11588,12 @@ class $$MembersTableAnnotationComposer
 
   GeneratedColumn<bool> get shadowBanned => $composableBuilder(
       column: $table.shadowBanned, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get pinnedAt =>
+      $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => column);
 
   GeneratedColumn<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => column);
@@ -11544,6 +11660,8 @@ class $$MembersTableTableManager extends RootTableManager<
             Value<bool> invited = const Value.absent(),
             Value<bool> banned = const Value.absent(),
             Value<bool> shadowBanned = const Value.absent(),
+            Value<DateTime?> pinnedAt = const Value.absent(),
+            Value<DateTime?> archivedAt = const Value.absent(),
             Value<bool> isModerator = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -11559,6 +11677,8 @@ class $$MembersTableTableManager extends RootTableManager<
             invited: invited,
             banned: banned,
             shadowBanned: shadowBanned,
+            pinnedAt: pinnedAt,
+            archivedAt: archivedAt,
             isModerator: isModerator,
             extraData: extraData,
             createdAt: createdAt,
@@ -11574,6 +11694,8 @@ class $$MembersTableTableManager extends RootTableManager<
             Value<bool> invited = const Value.absent(),
             Value<bool> banned = const Value.absent(),
             Value<bool> shadowBanned = const Value.absent(),
+            Value<DateTime?> pinnedAt = const Value.absent(),
+            Value<DateTime?> archivedAt = const Value.absent(),
             Value<bool> isModerator = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -11589,6 +11711,8 @@ class $$MembersTableTableManager extends RootTableManager<
             invited: invited,
             banned: banned,
             shadowBanned: shadowBanned,
+            pinnedAt: pinnedAt,
+            archivedAt: archivedAt,
             isModerator: isModerator,
             extraData: extraData,
             createdAt: createdAt,
@@ -11674,8 +11798,10 @@ final class $$ReadsTableReferences
       .createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(

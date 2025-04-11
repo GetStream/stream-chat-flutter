@@ -272,6 +272,8 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       } else if (eventType == 'user.presence.changed' ||
           eventType == EventType.userUpdated) {
         _eventHandler.onUserPresenceChanged(event, this);
+      } else if (eventType == EventType.memberUpdated) {
+        _eventHandler.onMemberUpdated(event, this);
       }
     });
   }
