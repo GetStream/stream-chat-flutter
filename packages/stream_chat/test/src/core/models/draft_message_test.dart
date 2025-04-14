@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/message.dart';
@@ -151,6 +153,63 @@ void main() {
 
       expect(json['id'], equals(id));
       expect(json['poll_id'], equals(pollId));
+    });
+
+    test('should append command to text field in toJson when command exists',
+        () {
+      final draftWithCommand = DraftMessage(
+        id: id,
+        text: 'Hello world',
+        command: 'giphy',
+      );
+
+      final json = draftWithCommand.toJson();
+      expect(json['text'], equals('/giphy Hello world'));
+    });
+
+    test('should not modify text field when command is empty', () {
+      final draftWithEmptyCommand = DraftMessage(
+        id: id,
+        text: 'Hello world',
+        command: '',
+      );
+
+      final json = draftWithEmptyCommand.toJson();
+      expect(json['text'], equals('Hello world'));
+    });
+
+    test('should not modify text field when command is null', () {
+      final draftWithNullCommand = DraftMessage(
+        id: id,
+        text: 'Hello world',
+        command: null,
+      );
+
+      final json = draftWithNullCommand.toJson();
+      expect(json['text'], equals('Hello world'));
+    });
+
+    test('should remove mentioned users not found in text', () {
+      final user1 = User(id: 'user1', name: 'User One');
+      final user2 = User(id: 'user2', name: 'User Two');
+      final user3 = User(id: 'user3', name: 'User Three');
+
+      final draftWithMentions = DraftMessage(
+        id: id,
+        text: 'Hello @user1 and @User Two',
+        mentionedUsers: [user1, user2, user3],
+      );
+
+      final json = draftWithMentions.toJson();
+
+      // Decode the json to verify the mentions
+      //
+      // We should have only user1 and user2 in mentioned_users since user3 is
+      // not in the text
+      final mentionedUserIds = (json['mentioned_users'] as List).cast<String>();
+      expect(mentionedUserIds, containsAll(['user1', 'user2']));
+      expect(mentionedUserIds, isNot(contains('user3')));
+      expect(mentionedUserIds.length, equals(2));
     });
 
     test('should correctly deserialize from JSON', () {
