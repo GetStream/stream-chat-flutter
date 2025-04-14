@@ -299,5 +299,115 @@ void main() {
       expect(draftMessage.text, equals(text));
       expect(draftMessage.parentId, isNull);
     });
+
+    group('Message and DraftMessage conversion', () {
+      test('should convert Message to DraftMessage correctly', () {
+        final attachments = [
+          Attachment(type: 'image'),
+          Attachment(type: 'file'),
+        ];
+        final mentionedUsers = [
+          User(id: 'user1'),
+          User(id: 'user2'),
+        ];
+        const parentId = 'parent-123';
+        final quotedMessage = Message(id: 'quote-123');
+        const extraData = {'key1': 'value1', 'key2': 42};
+
+        final message = Message(
+          id: 'message-123',
+          text: 'Hello world',
+          type: MessageType.regular,
+          attachments: attachments,
+          parentId: parentId,
+          showInChannel: true,
+          mentionedUsers: mentionedUsers,
+          quotedMessage: quotedMessage,
+          silent: true,
+          command: 'giphy',
+          poll: Poll(
+            id: 'poll-123',
+            name: 'Test Poll',
+            options: const [
+              PollOption(id: 'option-1', text: 'Option 1'),
+              PollOption(id: 'option-2', text: 'Option 2'),
+            ],
+          ),
+          extraData: extraData,
+        );
+
+        final draftMessage = message.toDraftMessage();
+
+        // Verify all properties are correctly transferred
+        expect(draftMessage.id, equals(message.id));
+        expect(draftMessage.text, equals(message.text));
+        expect(draftMessage.type, equals(message.type));
+        expect(draftMessage.attachments, equals(message.attachments));
+        expect(draftMessage.parentId, equals(message.parentId));
+        expect(draftMessage.showInChannel, equals(message.showInChannel));
+        expect(draftMessage.mentionedUsers, equals(message.mentionedUsers));
+        expect(draftMessage.quotedMessage, equals(message.quotedMessage));
+        expect(draftMessage.quotedMessageId, equals(message.quotedMessageId));
+        expect(draftMessage.silent, equals(message.silent));
+        expect(draftMessage.command, equals(message.command));
+        expect(draftMessage.poll, equals(message.poll));
+        expect(draftMessage.pollId, equals(message.pollId));
+        expect(draftMessage.extraData, equals(message.extraData));
+      });
+
+      test('should convert DraftMessage to Message correctly', () {
+        final attachments = [
+          Attachment(type: 'image'),
+          Attachment(type: 'file'),
+        ];
+        final mentionedUsers = [
+          User(id: 'user1'),
+          User(id: 'user2'),
+        ];
+        const parentId = 'parent-123';
+        final quotedMessage = Message(id: 'quote-123');
+        const extraData = {'key1': 'value1', 'key2': 42};
+
+        final draftMessage = DraftMessage(
+          id: 'draft-123',
+          text: 'Hello world',
+          type: MessageType.regular,
+          attachments: attachments,
+          parentId: parentId,
+          showInChannel: true,
+          mentionedUsers: mentionedUsers,
+          quotedMessage: quotedMessage,
+          silent: true,
+          command: 'giphy',
+          poll: Poll(
+            id: 'poll-123',
+            name: 'Test Poll',
+            options: const [
+              PollOption(id: 'option-1', text: 'Option 1'),
+              PollOption(id: 'option-2', text: 'Option 2'),
+            ],
+          ),
+          extraData: extraData,
+        );
+
+        final message = draftMessage.toMessage();
+
+        // Verify all properties are correctly transferred
+        expect(message.id, equals(draftMessage.id));
+        expect(message.text, equals(draftMessage.text));
+        expect(message.type, equals(draftMessage.type));
+        expect(message.attachments, equals(draftMessage.attachments));
+        expect(message.parentId, equals(draftMessage.parentId));
+        expect(message.showInChannel, equals(draftMessage.showInChannel));
+        expect(message.mentionedUsers, equals(draftMessage.mentionedUsers));
+        expect(message.quotedMessage, equals(draftMessage.quotedMessage));
+        expect(message.quotedMessageId, equals(draftMessage.quotedMessageId));
+        expect(message.silent, equals(draftMessage.silent));
+        expect(message.command, equals(draftMessage.command));
+        expect(message.poll, equals(draftMessage.poll));
+        expect(message.pollId, equals(draftMessage.pollId));
+        expect(message.extraData, equals(draftMessage.extraData));
+      });
+    });
   });
 }
