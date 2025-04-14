@@ -24,6 +24,7 @@ class DraftMessage extends Equatable {
     this.quotedMessage,
     String? quotedMessageId,
     this.silent = false,
+    this.command,
     this.poll,
     String? pollId,
     this.extraData = const {},
@@ -79,6 +80,10 @@ class DraftMessage extends Equatable {
   /// If true the message is silent.
   final bool silent;
 
+  /// Optional command associated with the message.
+  @JsonKey(includeToJson: false)
+  final String? command;
+
   /// The poll associated with the message.
   @JsonKey(includeToJson: false)
   final Poll? poll;
@@ -103,14 +108,26 @@ class DraftMessage extends Equatable {
     'mentioned_users',
     'quoted_message_id',
     'silent',
+    'command',
     'poll_id',
     'extra_data',
   ];
 
   /// Serialize to json.
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$DraftMessageToJson(this),
-      );
+  Map<String, dynamic> toJson() {
+    final message = removeMentionsIfNotIncluded();
+    final json = Serializer.moveFromExtraDataToRoot(
+      _$DraftMessageToJson(message),
+    );
+
+    // If the message contains command we should append it to the text
+    // before sending it.
+    if (command case final command? when command.isNotEmpty) {
+      json.update('text', (text) => '/$command $text', ifAbsent: () => null);
+    }
+
+    return json;
+  }
 
   /// Create a copy of this message with the provided values.
   DraftMessage copyWith({
@@ -124,6 +141,7 @@ class DraftMessage extends Equatable {
     Message? quotedMessage,
     String? quotedMessageId,
     bool? silent,
+    String? command,
     Poll? poll,
     String? pollId,
     Map<String, Object?>? extraData,
@@ -139,6 +157,7 @@ class DraftMessage extends Equatable {
       quotedMessage: quotedMessage ?? this.quotedMessage,
       quotedMessageId: quotedMessageId ?? this.quotedMessageId,
       silent: silent ?? this.silent,
+      command: command ?? this.command,
       poll: poll ?? this.poll,
       pollId: pollId ?? this.pollId,
       extraData: extraData ?? this.extraData,
@@ -156,7 +175,86 @@ class DraftMessage extends Equatable {
         mentionedUsers,
         quotedMessageId,
         silent,
+        command,
         pollId,
         extraData,
       ];
+}
+
+/// Extension on [Message] to convert it to a [DraftMessage].
+extension MessageToDraftMessage on Message {
+  /// Converts this [DraftMessage] to a [Message].
+  ///
+  /// This is useful when you want to convert a message to a draft message
+  /// before sending it to the server.
+  DraftMessage toDraftMessage() {
+    return DraftMessage(
+      id: id,
+      text: text,
+      type: type,
+      attachments: attachments,
+      parentId: parentId,
+      showInChannel: showInChannel,
+      mentionedUsers: mentionedUsers,
+      quotedMessage: quotedMessage,
+      quotedMessageId: quotedMessageId,
+      silent: silent,
+      command: command,
+      poll: poll,
+      pollId: pollId,
+      extraData: extraData,
+    );
+  }
+}
+
+/// Extension on [DraftMessage] to convert it to a [Message].
+extension DraftMessageToMessage on DraftMessage {
+  /// Converts this [DraftMessage] to a [Message].
+  ///
+  /// This is useful when displaying a draft message in the UI as if it were a
+  /// regular message.
+  ///
+  /// Returns a [Message] object with all relevant properties copied from
+  /// this draft message.
+  Message toMessage() {
+    return Message(
+      id: id,
+      text: text,
+      type: type,
+      attachments: attachments,
+      parentId: parentId,
+      showInChannel: showInChannel,
+      mentionedUsers: mentionedUsers,
+      quotedMessage: quotedMessage,
+      quotedMessageId: quotedMessageId,
+      silent: silent,
+      command: command,
+      poll: poll,
+      pollId: pollId,
+      extraData: extraData,
+    );
+  }
+}
+
+extension on DraftMessage {
+  /// Removes mentions from the message if they are not included in the text.
+  ///
+  /// This is useful for cleaning up the list of mentioned users before
+  /// sending the message.
+  DraftMessage removeMentionsIfNotIncluded() {
+    if (mentionedUsers.isEmpty) return this;
+
+    final messageTextToSend = text;
+    if (messageTextToSend == null) return this;
+
+    final updatedMentionedUsers = [...mentionedUsers];
+    for (final user in mentionedUsers.toSet()) {
+      if (messageTextToSend.contains('@${user.id}')) continue;
+      if (messageTextToSend.contains('@${user.name}')) continue;
+
+      updatedMentionedUsers.remove(user);
+    }
+
+    return copyWith(mentionedUsers: updatedMentionedUsers);
+  }
 }

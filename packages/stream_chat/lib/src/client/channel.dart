@@ -2560,12 +2560,14 @@ class ChannelClientState {
         if (draft == null) return;
 
         if (draft.parentId case final parentId?) {
-          return updateThreadDraft(parentId, draft: draft);
+          for (final message in messages) {
+            if (message.id == parentId) {
+              return updateMessage(message.copyWith(draft: draft));
+            }
+          }
         }
 
-        updateChannelState(
-          channelState.copyWith(draft: draft),
-        );
+        updateChannelState(channelState.copyWith(draft: draft));
       }),
     );
   }
@@ -2573,8 +2575,17 @@ class ChannelClientState {
   void _listenDraftDeleted() {
     _subscriptions.add(
       _channel.on(EventType.draftDeleted).listen((event) {
-        if (event.parentId case final parentId?) {
-          return updateThreadDraft(parentId, draft: null);
+        final draft = event.draft;
+        if (draft == null) return;
+
+        if (draft.parentId case final parentId?) {
+          for (final message in messages) {
+            if (message.id == parentId) {
+              return updateMessage(
+                message.copyWith(draft: null),
+              );
+            }
+          }
         }
 
         updateChannelState(
@@ -2768,8 +2779,8 @@ class ChannelClientState {
     }
 
     // If the message is part of a thread, update thread information.
-    if (message.parentId != null) {
-      updateThreadInfo(message.parentId!, [message]);
+    if (message.parentId case final parentId?) {
+      updateThreadInfo(parentId, [message]);
     }
   }
 
@@ -2993,7 +3004,9 @@ class ChannelClientState {
   Draft? get draft => _channelState.draft;
 
   /// Channel draft as a stream.
-  Stream<Draft?> get draftStream => channelStateStream.map((cs) => cs.draft);
+  Stream<Draft?> get draftStream {
+    return channelStateStream.map((cs) => cs.draft).distinct();
+  }
 
   /// Channel member for the current user.
   Member? get currentUserMember => members.firstWhereOrNull(
@@ -3094,25 +3107,6 @@ class ChannelClientState {
     return count;
   }
 
-  /// Update threads with updated information about messages.
-  void updateThreadInfo(String parentId, List<Message> messages) {
-    final newThreads = Map<String, List<Message>>.from(threads);
-
-    if (newThreads[parentId] case final existingThreadMessages?) {
-      newThreads[parentId] = [
-        ...existingThreadMessages.merge(
-          messages,
-          key: (message) => message.id,
-          update: (original, updated) => updated.syncWith(original),
-        ),
-      ].sorted(_sortByCreatedAt);
-    } else {
-      newThreads[parentId] = messages;
-    }
-
-    _threads = newThreads;
-  }
-
   /// Delete all channel messages.
   void truncate() {
     _channelState = _channelState.copyWith(
@@ -3189,15 +3183,11 @@ class ChannelClientState {
   }
 
   /// The channel threads related to this channel.
-  Map<String, List<Message>> get threads =>
-      _threadsController.value.map(MapEntry.new);
+  Map<String, List<Message>> get threads => {..._threadsController.value};
 
   /// The channel threads related to this channel as a stream.
-  Stream<Map<String, List<Message>>> get threadsStream =>
-      _threadsController.stream;
-  final BehaviorSubject<Map<String, List<Message>>> _threadsController =
-      BehaviorSubject.seeded({});
-
+  Stream<Map<String, List<Message>>> get threadsStream => _threadsController;
+  final _threadsController = BehaviorSubject.seeded(<String, List<Message>>{});
   set _threads(Map<String, List<Message>> threads) {
     _threadsController.safeAdd(threads);
     _channel.client.chatPersistenceClient?.updateChannelThreads(
@@ -3206,26 +3196,37 @@ class ChannelClientState {
     );
   }
 
+  /// Update threads with updated information about messages.
+  void updateThreadInfo(String parentId, List<Message> messages) {
+    final newThreads = {...threads}..update(
+        parentId,
+        (original) => <Message>[
+          ...original.merge(
+            messages,
+            key: (message) => message.id,
+            update: (original, updated) => updated.syncWith(original),
+          ),
+        ].sorted(_sortByCreatedAt),
+        ifAbsent: () => messages.sorted(_sortByCreatedAt),
+      );
+
+    _threads = newThreads;
+  }
+
+  Draft? _getThreadDraft(String parentId, List<Message>? messages) {
+    return messages?.firstWhereOrNull((it) => it.id == parentId)?.draft;
+  }
+
   /// Draft for a specific thread identified by [parentId].
-  Draft? threadDraft(String parentId) => _threadDraftController.value[parentId];
+  Draft? threadDraft(String parentId) => _getThreadDraft(parentId, messages);
 
   /// Stream of draft for a specific thread identified by [parentId].
   ///
   /// This stream emits a new value whenever the draft associated with the
   /// specified thread is updated or removed.
-  Stream<Draft?> threadDraftStream(String parentId) {
-    return _threadDraftController.map((it) => it[parentId]);
-  }
-
-  final _threadDraftController = BehaviorSubject.seeded(<String, Draft?>{});
-
-  /// Updates the thread draft for a specific thread identified by [parentId].
-  void updateThreadDraft(String parentId, {Draft? draft}) {
-    final updatedDraft = {..._threadDraftController.value};
-    updatedDraft[parentId] = draft;
-
-    _threadDraftController.safeAdd(updatedDraft);
-  }
+  Stream<Draft?> threadDraftStream(String parentId) => channelStateStream
+      .map((cs) => _getThreadDraft(parentId, cs.messages))
+      .distinct();
 
   /// Channel related typing users stream.
   Stream<Map<User, Event>> get typingEventsStream =>

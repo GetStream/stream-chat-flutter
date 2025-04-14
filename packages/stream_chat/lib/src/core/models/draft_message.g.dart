@@ -27,6 +27,7 @@ DraftMessage _$DraftMessageFromJson(Map<String, dynamic> json) => DraftMessage(
           : Message.fromJson(json['quoted_message'] as Map<String, dynamic>),
       quotedMessageId: json['quoted_message_id'] as String?,
       silent: json['silent'] as bool? ?? false,
+      command: json['command'] as String?,
       poll: json['poll'] == null
           ? null
           : Poll.fromJson(json['poll'] as Map<String, dynamic>),

@@ -85,6 +85,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
           ? null
           : Moderation.fromJson(Message._moderationReadValue(json, 'moderation')
               as Map<String, dynamic>),
+      draft: json['draft'] == null
+          ? null
+          : Draft.fromJson(json['draft'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -102,5 +105,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'poll_id': instance.pollId,
       if (instance.restrictedVisibility case final value?)
         'restricted_visibility': value,
+      'draft': instance.draft?.toJson(),
       'extra_data': instance.extraData,
     };

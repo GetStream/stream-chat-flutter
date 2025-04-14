@@ -3586,6 +3586,14 @@ void main() {
       test('should handle draft.updated event for thread drafts', () async {
         const threadParentMessageId = 'thread-parent-id';
 
+        // Setup initial state with a regular message
+        channel.state?.updateMessage(
+          Message(
+            id: threadParentMessageId,
+            user: client.state.currentUser,
+          ),
+        );
+
         // Verify initial state
         expect(channel.state?.threadDraft(threadParentMessageId), isNull);
 
@@ -3629,13 +3637,15 @@ void main() {
         );
 
         // Verify initial state
-        expect(channel.state?.draft, isNotNull);
-        expect(channel.state?.draft?.message.text, 'test message');
+        final draft = channel.state?.draft;
+        expect(draft, isNotNull);
+        expect(draft?.message.text, 'test message');
 
         // Create draft.deleted event
         final draftUpdatedEvent = Event(
           cid: channel.cid,
           type: EventType.draftDeleted,
+          draft: draft,
         );
 
         // Dispatch event
@@ -3652,13 +3662,16 @@ void main() {
         const threadParentMessageId = 'thread-parent-id';
 
         // Setup initial state with a thread draft
-        channel.state?.updateThreadDraft(
-          threadParentMessageId,
-          draft: Draft(
-            channelCid: channel.cid!,
-            createdAt: DateTime.now(),
-            parentId: threadParentMessageId,
-            message: DraftMessage(text: 'thread reply'),
+        channel.state?.updateMessage(
+          Message(
+            id: threadParentMessageId,
+            user: client.state.currentUser,
+            draft: Draft(
+              channelCid: channel.cid!,
+              createdAt: DateTime.now(),
+              parentId: threadParentMessageId,
+              message: DraftMessage(text: 'thread reply'),
+            ),
           ),
         );
 
@@ -3671,7 +3684,7 @@ void main() {
         final draftDeletedEvent = Event(
           cid: channel.cid,
           type: EventType.draftDeleted,
-          parentId: threadParentMessageId,
+          draft: threadDraft,
         );
 
         // Dispatch event
@@ -3741,9 +3754,12 @@ void main() {
             message: DraftMessage(text: 'thread reply'),
           );
 
-          channel.state?.updateThreadDraft(
-            threadParentMessageId,
-            draft: initialDraft,
+          channel.state?.updateMessage(
+            Message(
+              id: threadParentMessageId,
+              user: client.state.currentUser,
+              draft: initialDraft,
+            ),
           );
 
           // Verify initial state
