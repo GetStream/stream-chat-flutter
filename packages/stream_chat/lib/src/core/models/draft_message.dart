@@ -107,6 +107,7 @@ class DraftMessage extends Equatable {
     'show_in_channel',
     'mentioned_users',
     'quoted_message_id',
+    'quoted_message',
     'silent',
     'command',
     'poll_id',
