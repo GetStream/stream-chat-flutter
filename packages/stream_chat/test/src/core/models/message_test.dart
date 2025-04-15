@@ -69,6 +69,65 @@ void main() {
       );
     });
 
+    test(
+      'should append command to text field in toJson when command exists',
+      () {
+        final message = Message(
+          id: 'message-id',
+          text: 'Hello world',
+          command: 'giphy',
+        );
+
+        final json = message.toJson();
+        expect(json['text'], equals('/giphy Hello world'));
+      },
+    );
+
+    test('should not modify text field when command is empty', () {
+      final message = Message(
+        id: 'message-id',
+        text: 'Hello world',
+        command: '',
+      );
+
+      final json = message.toJson();
+      expect(json['text'], equals('Hello world'));
+    });
+
+    test('should not modify text field when command is null', () {
+      final message = Message(
+        id: 'message-id',
+        text: 'Hello world',
+        command: null,
+      );
+
+      final json = message.toJson();
+      expect(json['text'], equals('Hello world'));
+    });
+
+    test('should remove mentioned users not found in text', () {
+      final user1 = User(id: 'user1', name: 'User One');
+      final user2 = User(id: 'user2', name: 'User Two');
+      final user3 = User(id: 'user3', name: 'User Three');
+
+      final message = Message(
+        id: 'message-id',
+        text: 'Hello @user1 and @User Two',
+        mentionedUsers: [user1, user2, user3],
+      );
+
+      final json = message.toJson();
+
+      // Decode the json to verify the mentions
+      //
+      // We should have only user1 and user2 in mentioned_users since user3 is
+      // not in the text
+      final mentionedUserIds = (json['mentioned_users'] as List).cast<String>();
+      expect(mentionedUserIds, containsAll(['user1', 'user2']));
+      expect(mentionedUserIds, isNot(contains('user3')));
+      expect(mentionedUserIds.length, equals(2));
+    });
+
     group('ComparableFieldProvider', () {
       test('should return ComparableField for message.id', () {
         final message = createTestMessage(

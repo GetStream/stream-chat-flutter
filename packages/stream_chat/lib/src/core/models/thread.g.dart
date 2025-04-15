@@ -49,6 +49,9 @@ Thread _$ThreadFromJson(Map<String, dynamic> json) => Thread(
               ?.map((e) => Read.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      draft: json['draft'] == null
+          ? null
+          : Draft.fromJson(json['draft'] as Map<String, dynamic>),
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
     );
 
@@ -71,5 +74,6 @@ Map<String, dynamic> _$ThreadToJson(Thread instance) => <String, dynamic>{
       'last_message_at': instance.lastMessageAt?.toIso8601String(),
       'latest_replies': instance.latestReplies.map((e) => e.toJson()).toList(),
       'read': instance.read?.map((e) => e.toJson()).toList(),
+      'draft': instance.draft?.toJson(),
       'extra_data': instance.extraData,
     };

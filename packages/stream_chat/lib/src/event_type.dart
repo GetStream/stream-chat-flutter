@@ -152,4 +152,10 @@ class EventType {
   /// Event sent when a new message is added to a thread.
   static const String notificationThreadMessageNew =
       'notification.thread_message_new';
+
+  /// Event sent when a draft message is either created or updated.
+  static const String draftUpdated = 'draft.updated';
+
+  /// Event sent when a draft message is deleted.
+  static const String draftDeleted = 'draft.deleted';
 }

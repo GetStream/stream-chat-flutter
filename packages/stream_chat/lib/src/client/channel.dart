@@ -1,10 +1,11 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
-import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:synchronized/synchronized.dart';
@@ -1042,6 +1043,35 @@ class Channel {
           'pinned': false,
         },
       );
+
+  /// Creates or updates a new [draft] for this channel.
+  Future<CreateDraftResponse> createDraft(
+    DraftMessage draft,
+  ) {
+    _checkInitialized();
+    return _client.createDraft(draft, id!, type);
+  }
+
+  /// Retrieves the draft for this channel.
+  ///
+  /// Optionally, provide a [parentId] to get the draft for a specific thread.
+  Future<GetDraftResponse> getDraft({
+    String? parentId,
+  }) {
+    _checkInitialized();
+    return _client.getDraft(id!, type, parentId: parentId);
+  }
+
+  /// Deletes the draft for this channel.
+  ///
+  /// Optionally, provide a [parentId] to delete the draft for a specific
+  /// thread.
+  Future<EmptyResponse> deleteDraft({
+    String? parentId,
+  }) {
+    _checkInitialized();
+    return _client.deleteDraft(id!, type, parentId: parentId);
+  }
 
   /// Send a file to this channel.
   Future<SendFileResponse> sendFile(
@@ -2084,6 +2114,14 @@ class ChannelClientState {
 
     _listenMessageUpdated();
 
+    /* Start of draft events */
+
+    _listenDraftUpdated();
+
+    _listenDraftDeleted();
+
+    /* End of draft events */
+
     _listenReactions();
 
     _listenReactionDeleted();
@@ -2589,6 +2627,48 @@ class ChannelClientState {
     }));
   }
 
+  void _listenDraftUpdated() {
+    _subscriptions.add(
+      _channel.on(EventType.draftUpdated).listen((event) {
+        final draft = event.draft;
+        if (draft == null) return;
+
+        if (draft.parentId case final parentId?) {
+          for (final message in messages) {
+            if (message.id == parentId) {
+              return updateMessage(message.copyWith(draft: draft));
+            }
+          }
+        }
+
+        updateChannelState(channelState.copyWith(draft: draft));
+      }),
+    );
+  }
+
+  void _listenDraftDeleted() {
+    _subscriptions.add(
+      _channel.on(EventType.draftDeleted).listen((event) {
+        final draft = event.draft;
+        if (draft == null) return;
+
+        if (draft.parentId case final parentId?) {
+          for (final message in messages) {
+            if (message.id == parentId) {
+              return updateMessage(
+                message.copyWith(draft: null),
+              );
+            }
+          }
+        }
+
+        updateChannelState(
+          channelState.copyWith(draft: null),
+        );
+      }),
+    );
+  }
+
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
       final oldMessage =
@@ -2773,8 +2853,8 @@ class ChannelClientState {
     }
 
     // If the message is part of a thread, update thread information.
-    if (message.parentId != null) {
-      updateThreadInfo(message.parentId!, [message]);
+    if (message.parentId case final parentId?) {
+      updateThreadInfo(parentId, [message]);
     }
   }
 
@@ -2994,6 +3074,14 @@ class ChannelClientState {
         (watchers, users) => [...?watchers?.map((e) => users[e.id] ?? e)],
       ).distinct(const ListEquality().equals);
 
+  /// Channel draft.
+  Draft? get draft => _channelState.draft;
+
+  /// Channel draft as a stream.
+  Stream<Draft?> get draftStream {
+    return channelStateStream.map((cs) => cs.draft).distinct();
+  }
+
   /// Channel member for the current user.
   Member? get currentUserMember => members.firstWhereOrNull(
         (m) => m.user?.id == _channel.client.state.currentUser?.id,
@@ -3093,24 +3181,6 @@ class ChannelClientState {
     return count;
   }
 
-  /// Update threads with updated information about messages.
-  void updateThreadInfo(String parentId, List<Message> messages) {
-    final newThreads = Map<String, List<Message>>.from(threads);
-
-    if (newThreads.containsKey(parentId)) {
-      newThreads[parentId] = [
-        ...messages,
-        ...newThreads[parentId]!.where(
-          (newMessage) => !messages.any((m) => m.id == newMessage.id),
-        ),
-      ].sorted(_sortByCreatedAt);
-    } else {
-      newThreads[parentId] = messages;
-    }
-
-    _threads = newThreads;
-  }
-
   /// Delete all channel messages.
   void truncate() {
     _channelState = _channelState.copyWith(
@@ -3161,6 +3231,7 @@ class ChannelClientState {
       members: newMembers,
       membership: updatedState.membership,
       read: newReads,
+      draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
     );
   }
@@ -3186,15 +3257,11 @@ class ChannelClientState {
   }
 
   /// The channel threads related to this channel.
-  Map<String, List<Message>> get threads =>
-      _threadsController.value.map(MapEntry.new);
+  Map<String, List<Message>> get threads => {..._threadsController.value};
 
   /// The channel threads related to this channel as a stream.
-  Stream<Map<String, List<Message>>> get threadsStream =>
-      _threadsController.stream;
-  final BehaviorSubject<Map<String, List<Message>>> _threadsController =
-      BehaviorSubject.seeded({});
-
+  Stream<Map<String, List<Message>>> get threadsStream => _threadsController;
+  final _threadsController = BehaviorSubject.seeded(<String, List<Message>>{});
   set _threads(Map<String, List<Message>> threads) {
     _threadsController.safeAdd(threads);
     _channel.client.chatPersistenceClient?.updateChannelThreads(
@@ -3202,6 +3269,38 @@ class ChannelClientState {
       threads,
     );
   }
+
+  /// Update threads with updated information about messages.
+  void updateThreadInfo(String parentId, List<Message> messages) {
+    final newThreads = {...threads}..update(
+        parentId,
+        (original) => <Message>[
+          ...original.merge(
+            messages,
+            key: (message) => message.id,
+            update: (original, updated) => updated.syncWith(original),
+          ),
+        ].sorted(_sortByCreatedAt),
+        ifAbsent: () => messages.sorted(_sortByCreatedAt),
+      );
+
+    _threads = newThreads;
+  }
+
+  Draft? _getThreadDraft(String parentId, List<Message>? messages) {
+    return messages?.firstWhereOrNull((it) => it.id == parentId)?.draft;
+  }
+
+  /// Draft for a specific thread identified by [parentId].
+  Draft? threadDraft(String parentId) => _getThreadDraft(parentId, messages);
+
+  /// Stream of draft for a specific thread identified by [parentId].
+  ///
+  /// This stream emits a new value whenever the draft associated with the
+  /// specified thread is updated or removed.
+  Stream<Draft?> threadDraftStream(String parentId) => channelStateStream
+      .map((cs) => _getThreadDraft(parentId, cs.messages))
+      .distinct();
 
   /// Channel related typing users stream.
   Stream<Map<User, Event>> get typingEventsStream =>
