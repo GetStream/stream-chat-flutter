@@ -380,12 +380,14 @@ class ChannelApi {
   Future<PartialUpdateMemberResponse> updateMemberPartial({
     required String channelId,
     required String channelType,
-    required String userId,
     Map<String, Object?>? set,
     List<String>? unset,
   }) async {
     final response = await _client.patch(
-      '${_getChannelUrl(channelId, channelType)}/member/$userId',
+      // Note: user_id is not required for client side Apis as it can be fetched
+      // directly from the user token but, for the api path is built with it
+      // so we need to pass it as a placeholder.
+      '${_getChannelUrl(channelId, channelType)}/member/{user_id}',
       data: {
         if (set != null) 'set': set,
         if (unset != null) 'unset': unset,

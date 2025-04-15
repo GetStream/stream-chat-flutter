@@ -1616,7 +1616,6 @@ void main() {
       when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: otherUserId,
             set: set,
             unset: unset,
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
@@ -1626,7 +1625,6 @@ void main() {
       final res = await client.partialMemberUpdate(
         channelId: channelId,
         channelType: channelType,
-        userId: otherUserId,
         set: set,
         unset: unset,
       );
@@ -1637,7 +1635,6 @@ void main() {
       verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: otherUserId,
             set: set,
             unset: unset,
           )).called(1);
@@ -1653,7 +1650,6 @@ void main() {
       when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             set: set,
             unset: unset,
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
@@ -1663,7 +1659,6 @@ void main() {
       final res = await client.partialMemberUpdate(
         channelId: channelId,
         channelType: channelType,
-        userId: userId,
         set: set,
         unset: unset,
       );
@@ -1673,7 +1668,6 @@ void main() {
       verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             set: set,
             unset: unset,
           )).called(1);
@@ -1687,7 +1681,6 @@ void main() {
       when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             set: const MemberUpdatePayload(pinned: true).toJson(),
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
@@ -1703,7 +1696,6 @@ void main() {
       verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             set: const MemberUpdatePayload(pinned: true).toJson(),
           )).called(1);
       verifyNoMoreInteractions(api.channel);
@@ -1716,7 +1708,6 @@ void main() {
       when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             unset: [MemberUpdateType.pinned.name],
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
@@ -1732,7 +1723,6 @@ void main() {
       verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             unset: [MemberUpdateType.pinned.name],
           )).called(1);
       verifyNoMoreInteractions(api.channel);
@@ -1745,7 +1735,6 @@ void main() {
       when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             set: const MemberUpdatePayload(archived: true).toJson(),
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, archivedAt: DateTime.now()),
@@ -1761,7 +1750,6 @@ void main() {
       verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             set: const MemberUpdatePayload(archived: true).toJson(),
           )).called(1);
       verifyNoMoreInteractions(api.channel);
@@ -1774,7 +1762,6 @@ void main() {
       when(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             unset: [MemberUpdateType.archived.name],
           )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
             channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
@@ -1790,7 +1777,6 @@ void main() {
       verify(() => api.channel.updateMemberPartial(
             channelId: channelId,
             channelType: channelType,
-            userId: userId,
             unset: [MemberUpdateType.archived.name],
           )).called(1);
       verifyNoMoreInteractions(api.channel);

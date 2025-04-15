@@ -1829,18 +1829,9 @@ class StreamChatClient {
     required String channelId,
     required String channelType,
   }) {
-    final currentUser = state.currentUser;
-    if (currentUser == null) {
-      throw const StreamChatError(
-        'User is not set on client, '
-        'use `connectUser` or `connectAnonymousUser` instead',
-      );
-    }
-
-    return _chatApi.channel.updateMemberPartial(
+    return partialMemberUpdate(
       channelId: channelId,
       channelType: channelType,
-      userId: currentUser.id,
       set: const MemberUpdatePayload(pinned: true).toJson(),
     );
   }
@@ -1850,18 +1841,9 @@ class StreamChatClient {
     required String channelId,
     required String channelType,
   }) {
-    final currentUser = state.currentUser;
-    if (currentUser == null) {
-      throw const StreamChatError(
-        'User is not set on client, '
-        'use `connectUser` or `connectAnonymousUser` instead',
-      );
-    }
-
-    return _chatApi.channel.updateMemberPartial(
+    return partialMemberUpdate(
       channelId: channelId,
       channelType: channelType,
-      userId: currentUser.id,
       unset: [MemberUpdateType.pinned.name],
     );
   }
@@ -1879,10 +1861,9 @@ class StreamChatClient {
       );
     }
 
-    return _chatApi.channel.updateMemberPartial(
+    return partialMemberUpdate(
       channelId: channelId,
       channelType: channelType,
-      userId: currentUser.id,
       set: const MemberUpdatePayload(archived: true).toJson(),
     );
   }
@@ -1892,18 +1873,9 @@ class StreamChatClient {
     required String channelId,
     required String channelType,
   }) {
-    final currentUser = state.currentUser;
-    if (currentUser == null) {
-      throw const StreamChatError(
-        'User is not set on client, '
-        'use `connectUser` or `connectAnonymousUser` instead',
-      );
-    }
-
-    return _chatApi.channel.updateMemberPartial(
+    return partialMemberUpdate(
       channelId: channelId,
       channelType: channelType,
-      userId: currentUser.id,
       unset: [MemberUpdateType.archived.name],
     );
   }
@@ -1916,27 +1888,14 @@ class StreamChatClient {
   Future<PartialUpdateMemberResponse> partialMemberUpdate({
     required String channelId,
     required String channelType,
-    String? userId,
     Map<String, Object?>? set,
     List<String>? unset,
   }) {
     assert(set != null || unset != null, 'Set or unset must be provided.');
 
-    if (userId == null) {
-      final currentUser = state.currentUser;
-      if (currentUser == null) {
-        throw const StreamChatError(
-          'User is not set on client and userId is not provided. '
-          'Use `connectUser` or `connectAnonymousUser` instead',
-        );
-      }
-      userId = currentUser.id;
-    }
-
     return _chatApi.channel.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      userId: userId,
       set: set,
       unset: unset,
     );

@@ -1935,8 +1935,10 @@ class Channel {
   Future<Member> pin() async {
     _checkInitialized();
 
-    final response =
-        await _client.pinChannel(channelId: id!, channelType: type);
+    final response = await _client.pinChannel(
+      channelId: id!,
+      channelType: type,
+    );
 
     return response.channelMember;
   }
@@ -1945,8 +1947,11 @@ class Channel {
   Future<Member?> unpin() async {
     _checkInitialized();
 
-    final response =
-        await _client.unpinChannel(channelId: id!, channelType: type);
+    final response = await _client.unpinChannel(
+      channelId: id!,
+      channelType: type,
+    );
+
     return response.channelMember;
   }
 
@@ -1954,8 +1959,11 @@ class Channel {
   Future<Member?> archive() async {
     _checkInitialized();
 
-    final response =
-        await _client.archiveChannel(channelId: id!, channelType: type);
+    final response = await _client.archiveChannel(
+      channelId: id!,
+      channelType: type,
+    );
+
     return response.channelMember;
   }
 
@@ -1963,8 +1971,11 @@ class Channel {
   Future<Member?> unarchive() async {
     _checkInitialized();
 
-    final response =
-        await _client.unarchiveChannel(channelId: id!, channelType: type);
+    final response = await _client.unarchiveChannel(
+      channelId: id!,
+      channelType: type,
+    );
+
     return response.channelMember;
   }
 

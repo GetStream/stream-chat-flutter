@@ -608,9 +608,8 @@ void main() {
   test('archiveChannel', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
-    const userId = 'test-user-id';
 
-    final path = '${_getChannelUrl(channelId, channelType)}/member/$userId';
+    final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
     const archivedAt = '2025-04-10 10:27:03.150349';
 
     when(() => client.patch(
@@ -629,7 +628,6 @@ void main() {
     final res = await channelApi.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      userId: userId,
       set: const MemberUpdatePayload(archived: true).toJson(),
     );
 
@@ -643,9 +641,8 @@ void main() {
   test('unarchiveChannel', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
-    const userId = 'test-user-id';
 
-    final path = '${_getChannelUrl(channelId, channelType)}/member/$userId';
+    final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
 
     when(() => client.patch(
           path,
@@ -660,7 +657,6 @@ void main() {
     final res = await channelApi.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      userId: userId,
       unset: [MemberUpdateType.archived.name],
     );
 
@@ -674,9 +670,8 @@ void main() {
   test('pinChannel', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
-    const userId = 'test-user-id';
 
-    final path = '${_getChannelUrl(channelId, channelType)}/member/$userId';
+    final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
     const pinnedAt = '2025-04-10 10:27:03.150349';
 
     when(() => client.patch(
@@ -695,7 +690,6 @@ void main() {
     final res = await channelApi.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      userId: userId,
       set: const MemberUpdatePayload(pinned: true).toJson(),
     );
 
@@ -709,9 +703,8 @@ void main() {
   test('unpinChannel', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
-    const userId = 'test-user-id';
 
-    final path = '${_getChannelUrl(channelId, channelType)}/member/$userId';
+    final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
 
     when(() => client.patch(
           path,
@@ -726,7 +719,6 @@ void main() {
     final res = await channelApi.updateMemberPartial(
       channelId: channelId,
       channelType: channelType,
-      userId: userId,
       unset: [MemberUpdateType.pinned.name],
     );
 
