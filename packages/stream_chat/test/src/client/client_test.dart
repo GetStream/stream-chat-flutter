@@ -813,10 +813,11 @@ void main() {
 
   group('Client with connected user without persistence', () {
     const apiKey = 'test-api-key';
+    const userId = 'test-user-id';
     late final api = FakeChatApi();
     late final ws = FakeWebSocket();
 
-    final user = User(id: 'test-user-id');
+    final user = User(id: userId);
     final token = Token.development(user.id).rawValue;
 
     late StreamChatClient client;
@@ -1602,6 +1603,182 @@ void main() {
 
       verify(() => api.moderation.unmuteChannel(channelCid)).called(1);
       verifyNoMoreInteractions(api.moderation);
+    });
+
+    test('`.partialMemberUpdate with userId`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      const otherUserId = 'test-other-user-id';
+      const set = {'pinned': true};
+      const unset = ['pinned'];
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: set,
+            unset: unset,
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: otherUserId),
+          ));
+
+      final res = await client.partialMemberUpdate(
+        channelId: channelId,
+        channelType: channelType,
+        set: set,
+        unset: unset,
+      );
+
+      expect(res, isNotNull);
+      expect(res.channelMember.userId, otherUserId);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: set,
+            unset: unset,
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.partialMemberUpdate with current user`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      const set = {'pinned': true};
+      const unset = ['pinned'];
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: set,
+            unset: unset,
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId),
+          ));
+
+      final res = await client.partialMemberUpdate(
+        channelId: channelId,
+        channelType: channelType,
+        set: set,
+        unset: unset,
+      );
+
+      expect(res, isNotNull);
+      expect(res.channelMember.userId, userId);
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: set,
+            unset: unset,
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.pinChannel`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: const MemberUpdatePayload(pinned: true).toJson(),
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+          ));
+
+      final res = await client.pinChannel(
+        channelId: channelId,
+        channelType: channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: const MemberUpdatePayload(pinned: true).toJson(),
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.unpinChannel`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            unset: [MemberUpdateType.pinned.name],
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+          ));
+
+      final res = await client.unpinChannel(
+        channelId: channelId,
+        channelType: channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            unset: [MemberUpdateType.pinned.name],
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.archiveChannel`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: const MemberUpdatePayload(archived: true).toJson(),
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId, archivedAt: DateTime.now()),
+          ));
+
+      final res = await client.archiveChannel(
+        channelId: channelId,
+        channelType: channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: const MemberUpdatePayload(archived: true).toJson(),
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.unarchiveChannel`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            unset: [MemberUpdateType.archived.name],
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+          ));
+
+      final res = await client.unarchiveChannel(
+        channelId: channelId,
+        channelType: channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            unset: [MemberUpdateType.archived.name],
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
     });
 
     test('`.acceptChannelInvite`', () async {

@@ -97,6 +97,7 @@ class ChannelState implements ComparableFieldProvider {
       ChannelSortKey.updatedAt => channel?.updatedAt,
       ChannelSortKey.lastMessageAt => channel?.lastMessageAt,
       ChannelSortKey.memberCount => channel?.memberCount,
+      ChannelSortKey.pinnedAt => membership?.pinnedAt,
       // TODO: Support providing default value for hasUnread, unreadCount
       ChannelSortKey.hasUnread => null,
       ChannelSortKey.unreadCount => null,
@@ -134,4 +135,7 @@ extension type const ChannelSortKey(String key) implements String {
 
   /// Sort channels by the count of unread messages.
   static const unreadCount = ChannelSortKey('unread_count');
+
+  /// Sort channels by the date they were pinned.
+  static const pinnedAt = ChannelSortKey('pinned_at');
 }

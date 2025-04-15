@@ -49,8 +49,19 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a channel is updated.
   ///
   /// By default, this updates the channel received in the event.
-  // ignore: no-empty-block
-  void onChannelUpdated(Event event, StreamChannelListController controller) {}
+  void onChannelUpdated(Event event, StreamChannelListController controller) {
+    controller.channels = [...controller.currentItems];
+  }
+
+  /// Function which gets called for the event
+  /// [EventType.memberUpdated].
+  ///
+  /// This event is fired when a member is updated.
+  ///
+  /// By default, this sorts the channels.
+  void onMemberUpdated(Event event, StreamChannelListController controller) {
+    controller.channels = [...controller.currentItems];
+  }
 
   /// Function which gets called for the event
   /// [EventType.channelVisible].

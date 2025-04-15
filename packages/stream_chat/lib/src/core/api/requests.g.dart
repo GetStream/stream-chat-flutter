@@ -76,3 +76,10 @@ Map<String, dynamic> _$ThreadOptionsToJson(ThreadOptions instance) =>
       'member_limit': instance.memberLimit,
       'props': instance.props,
     };
+
+Map<String, dynamic> _$MemberUpdatePayloadToJson(
+        MemberUpdatePayload instance) =>
+    <String, dynamic>{
+      if (instance.archived case final value?) 'archived': value,
+      if (instance.pinned case final value?) 'pinned': value,
+    };

@@ -24,6 +24,8 @@ class Member extends Equatable implements ComparableFieldProvider {
     this.banned = false,
     this.banExpires,
     this.shadowBanned = false,
+    this.pinnedAt,
+    this.archivedAt,
     this.extraData = const {},
   })  : userId = userId ?? user?.id,
         createdAt = createdAt ?? DateTime.now(),
@@ -50,6 +52,8 @@ class Member extends Equatable implements ComparableFieldProvider {
     'shadow_banned',
     'created_at',
     'updated_at',
+    'pinned_at',
+    'archived_at'
   ];
 
   /// The interested user
@@ -82,6 +86,12 @@ class Member extends Equatable implements ComparableFieldProvider {
   /// True if the member is shadow banned from the channel
   final bool shadowBanned;
 
+  /// The date at which the channel was pinned by the member
+  final DateTime? pinnedAt;
+
+  /// The date at which the channel was archived by the member
+  final DateTime? archivedAt;
+
   /// The date of creation
   final DateTime createdAt;
 
@@ -103,6 +113,8 @@ class Member extends Equatable implements ComparableFieldProvider {
     bool? isModerator,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? pinnedAt,
+    DateTime? archivedAt,
     bool? banned,
     DateTime? banExpires,
     bool? shadowBanned,
@@ -119,6 +131,8 @@ class Member extends Equatable implements ComparableFieldProvider {
         channelRole: channelRole ?? this.channelRole,
         userId: userId ?? this.userId,
         isModerator: isModerator ?? this.isModerator,
+        pinnedAt: pinnedAt ?? this.pinnedAt,
+        archivedAt: archivedAt ?? this.archivedAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         extraData: extraData ?? this.extraData,
@@ -141,6 +155,8 @@ class Member extends Equatable implements ComparableFieldProvider {
         banned,
         banExpires,
         shadowBanned,
+        pinnedAt,
+        archivedAt,
         createdAt,
         updatedAt,
         extraData,

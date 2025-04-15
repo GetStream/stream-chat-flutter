@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added `StreamChannelState.getFirstUnreadMessage` to get the first unread message in the channel.
+- Channel pinning and archiving.
 
 ## 9.7.0
 

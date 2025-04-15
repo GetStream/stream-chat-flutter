@@ -204,3 +204,14 @@ class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
 }
 
 class FakeChannelState extends Fake implements ChannelState {}
+
+class FakePartialUpdateMemberResponse extends Fake
+    implements PartialUpdateMemberResponse {
+  FakePartialUpdateMemberResponse({
+    Member? channelMember,
+  }) : _channelMember = channelMember ?? Member();
+
+  final Member _channelMember;
+  @override
+  Member get channelMember => _channelMember;
+}

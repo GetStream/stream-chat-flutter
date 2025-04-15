@@ -605,6 +605,130 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('archiveChannel', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
+    const archivedAt = '2025-04-10 10:27:03.150349';
+
+    when(() => client.patch(
+          path,
+          data: {
+            'set': {'archived': true},
+          },
+        )).thenAnswer(
+      (_) async => successResponse(path, data: <String, dynamic>{
+        'channel_member': <String, dynamic>{
+          'archived_at': archivedAt,
+        }
+      }),
+    );
+
+    final res = await channelApi.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      set: const MemberUpdatePayload(archived: true).toJson(),
+    );
+
+    expect(res, isNotNull);
+    expect(res.channelMember.archivedAt, DateTime.parse(archivedAt));
+
+    verify(() => client.patch(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('unarchiveChannel', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
+
+    when(() => client.patch(
+          path,
+          data: {
+            'unset': ['archived'],
+          },
+        )).thenAnswer(
+      (_) async => successResponse(path,
+          data: <String, dynamic>{'channel_member': <String, dynamic>{}}),
+    );
+
+    final res = await channelApi.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      unset: [MemberUpdateType.archived.name],
+    );
+
+    expect(res, isNotNull);
+    expect(res.channelMember.archivedAt, null);
+
+    verify(() => client.patch(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('pinChannel', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
+    const pinnedAt = '2025-04-10 10:27:03.150349';
+
+    when(() => client.patch(
+          path,
+          data: {
+            'set': {'pinned': true},
+          },
+        )).thenAnswer(
+      (_) async => successResponse(path, data: <String, dynamic>{
+        'channel_member': <String, dynamic>{
+          'pinned_at': pinnedAt,
+        }
+      }),
+    );
+
+    final res = await channelApi.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      set: const MemberUpdatePayload(pinned: true).toJson(),
+    );
+
+    expect(res, isNotNull);
+    expect(res.channelMember.pinnedAt, DateTime.parse(pinnedAt));
+
+    verify(() => client.patch(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('unpinChannel', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
+
+    when(() => client.patch(
+          path,
+          data: {
+            'unset': ['pinned'],
+          },
+        )).thenAnswer(
+      (_) async => successResponse(path,
+          data: <String, dynamic>{'channel_member': <String, dynamic>{}}),
+    );
+
+    final res = await channelApi.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      unset: [MemberUpdateType.pinned.name],
+    );
+
+    expect(res, isNotNull);
+    expect(res.channelMember.pinnedAt, null);
+
+    verify(() => client.patch(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
   test('stopWatching', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';

@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added support for Channel pinning and archiving.
 - Added support for 'DraftMessage' feature, which allows users to save draft messages in channels.
   Several methods have been added to the `Client` and `Channel` class to manage draft messages:
     - `channel.createDraft`: Saves a draft message for a specific channel.
