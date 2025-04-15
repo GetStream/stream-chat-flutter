@@ -111,7 +111,9 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     FileType type = FileType.any,
     List<String>? allowedExtensions,
     Function(FilePickerStatus)? onFileLoading,
+    @Deprecated('Has no effect, Use compressionQuality instead.')
     bool allowCompression = true,
+    int compressionQuality = 0,
     bool withData = true,
     bool withReadStream = false,
     bool lockParentWindow = true,
@@ -122,7 +124,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
       type: type,
       allowedExtensions: allowedExtensions,
       onFileLoading: onFileLoading,
-      allowCompression: allowCompression,
+      compressionQuality: compressionQuality,
       withData: withData,
       withReadStream: withReadStream,
       lockParentWindow: lockParentWindow,
