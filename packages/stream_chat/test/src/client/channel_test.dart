@@ -3509,6 +3509,39 @@ void main() {
         expect(updatedRead?.lastRead.isAtSameMomentAs(DateTime(2022)), isTrue);
       });
 
+      test(
+        'should add a new read state if not exist on notification mark read',
+        () async {
+          // Create the current read state
+          final currentUser = User(id: 'test-user');
+
+          // Verify initial state
+          final read = channel.state?.read;
+          expect(read, isEmpty);
+
+          // Create mark read notification event
+          final markReadEvent = Event(
+            cid: channel.cid,
+            type: EventType.notificationMarkRead,
+            user: currentUser,
+            createdAt: DateTime(2022),
+            unreadMessages: 0,
+            lastReadMessageId: 'message-123',
+          );
+
+          // Dispatch event
+          client.addEvent(markReadEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify read list has not changed
+          final updated = channel.state?.read;
+          expect(updated?.length, 1);
+          expect(updated?.any((r) => r.user.id == currentUser.id), isTrue);
+        },
+      );
+
       test('should update read state on notification mark unread event',
           () async {
         // Create the current read state
@@ -3557,51 +3590,35 @@ void main() {
         expect(updatedRead?.lastRead.isAtSameMomentAs(DateTime(2019)), isTrue);
       });
 
-      test('should not update read state if user does not exist in read list',
-          () async {
-        // Create the current read state
-        final currentUser = User(id: 'test-user');
-        final currentRead = Read(
-          user: currentUser,
-          lastRead: DateTime(2020),
-          unreadMessages: 10,
-        );
+      test(
+        'should add a new read state if not exist on notification mark unread',
+        () async {
+          // Verify initial state
+          final read = channel.state?.read;
+          expect(read, isEmpty);
 
-        // Setup initial read state
-        channel.state?.updateChannelState(
-          channel.state!.channelState.copyWith(
-            read: [currentRead],
-          ),
-        );
+          // Create event for non-existing user
+          final markUnreadEvent = Event(
+            cid: channel.cid,
+            type: EventType.notificationMarkUnread,
+            user: User(id: 'non-existing-user'),
+            lastReadAt: DateTime(2019),
+            unreadMessages: 15,
+            lastReadMessageId: 'message-100',
+          );
 
-        // Verify initial state
-        final read = channel.state?.read;
-        expect(read?.length, 1);
-        expect(read?.any((r) => r.user.id == 'test-user'), isTrue);
-        expect(read?.any((r) => r.user.id == 'non-existing-user'), isFalse);
+          // Dispatch event
+          client.addEvent(markUnreadEvent);
 
-        // Create event for non-existing user
-        final markUnreadEvent = Event(
-          cid: channel.cid,
-          type: EventType.notificationMarkUnread,
-          user: User(id: 'non-existing-user'),
-          lastReadAt: DateTime(2019),
-          unreadMessages: 15,
-          lastReadMessageId: 'message-100',
-        );
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
 
-        // Dispatch event
-        client.addEvent(markUnreadEvent);
-
-        // Wait for event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Verify read list has not changed
-        final updated = channel.state?.read;
-        expect(updated?.length, 1);
-        expect(updated?.any((r) => r.user.id == 'test-user'), isTrue);
-        expect(updated?.any((r) => r.user.id == 'non-existing-user'), isFalse);
-      });
+          // Verify read list has not changed
+          final updated = channel.state?.read;
+          expect(updated?.length, 1);
+          expect(updated?.any((r) => r.user.id == 'non-existing-user'), isTrue);
+        },
+      );
     });
 
     group('Draft events', () {
