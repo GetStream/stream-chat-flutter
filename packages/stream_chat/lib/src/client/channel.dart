@@ -3103,15 +3103,16 @@ class ChannelClientState {
   }
 
   bool _countMessageAsUnread(Message message) {
-    // Don't count if the message is silent or shadowed.
-    if (message.silent) return false;
-    if (message.shadowed) return false;
+    // Don't count if the channel doesn't allow read events.
+    if (!_channel.canReceiveReadEvents) return false;
 
     // Don't count if the channel is muted.
     if (_channel.isMuted) return false;
 
-    // Don't count if the channel doesn't allow read events.
-    if (!_channel.canReceiveReadEvents) return false;
+    // Don't count if the message is silent or shadowed or ephemeral.
+    if (message.silent) return false;
+    if (message.shadowed) return false;
+    if (message.isEphemeral) return false;
 
     // Don't count thread replies which are not shown in the channel as unread.
     if (message.parentId != null && message.showInChannel == false) {

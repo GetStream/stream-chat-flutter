@@ -3361,6 +3361,28 @@ void main() {
           );
 
           test(
+            'when the message type is ephemeral',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                type: MessageType.ephemeral,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
             'when the message is a thread reply',
             () async {
               expect(channel.state?.unreadCount, equals(0));
