@@ -20,6 +20,8 @@ import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
@@ -1717,6 +1719,57 @@ class StreamChatClient {
       _chatApi.message.translateMessage(
         messageId,
         language,
+      );
+
+  /// Creates a draft for the given [channelId] of type [channelType].
+  Future<CreateDraftResponse> createDraft(
+    DraftMessage draft,
+    String channelId,
+    String channelType,
+  ) =>
+      _chatApi.message.createDraft(
+        channelId,
+        channelType,
+        draft,
+      );
+
+  /// Retrieves a draft for the given [channelId] of type [channelType].
+  ///
+  /// Optionally, pass [parentId] to get the draft for a thread.
+  Future<GetDraftResponse> getDraft(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) =>
+      _chatApi.message.getDraft(
+        channelId,
+        channelType,
+        parentId: parentId,
+      );
+
+  /// Deletes a draft for the given [channelId] of type [channelType].
+  ///
+  /// Optionally, pass [parentId] to delete the draft for a thread.
+  Future<EmptyResponse> deleteDraft(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) =>
+      _chatApi.message.deleteDraft(
+        channelId,
+        channelType,
+        parentId: parentId,
+      );
+
+  /// Queries drafts for the current user.
+  Future<QueryDraftsResponse> queryDrafts({
+    Filter? filter,
+    SortOrder<Draft>? sort,
+    PaginationParams? pagination,
+  }) =>
+      _chatApi.message.queryDrafts(
+        sort: sort,
+        pagination: pagination,
       );
 
   /// Enables slow mode

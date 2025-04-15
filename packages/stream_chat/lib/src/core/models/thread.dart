@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/thread_participant.dart';
@@ -8,6 +9,12 @@ import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'thread.g.dart';
+
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
 
 /// {@template streamThread}
 /// A model class representing a thread. Threads are a way to group replies
@@ -34,6 +41,7 @@ class Thread extends Equatable {
     this.title,
     this.latestReplies = const [],
     this.read = const [],
+    this.draft,
     this.extraData = const {},
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
@@ -93,6 +101,9 @@ class Thread extends Equatable {
   /// The list of reads in the thread.
   final List<Read>? read;
 
+  /// The draft message in the thread.
+  final Draft? draft;
+
   /// Map of custom thread extraData
   final Map<String, Object?> extraData;
 
@@ -119,6 +130,7 @@ class Thread extends Equatable {
     DateTime? lastMessageAt,
     List<Message>? latestReplies,
     List<Read>? read,
+    Object? draft = _nullConst,
     Map<String, Object?>? extraData,
   }) =>
       Thread(
@@ -140,6 +152,7 @@ class Thread extends Equatable {
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         latestReplies: latestReplies ?? this.latestReplies,
         read: read ?? this.read,
+        draft: draft == _nullConst ? this.draft : draft as Draft?,
         extraData: extraData ?? this.extraData,
       );
 
@@ -164,6 +177,7 @@ class Thread extends Equatable {
       lastMessageAt: other.lastMessageAt,
       latestReplies: other.latestReplies,
       read: other.read,
+      draft: other.draft,
       extraData: other.extraData,
     );
   }
@@ -189,6 +203,7 @@ class Thread extends Equatable {
     'last_message_at',
     'latest_replies',
     'read',
+    'draft',
   ];
 
   @override
@@ -210,5 +225,6 @@ class Thread extends Equatable {
         lastMessageAt,
         latestReplies,
         read,
+        draft,
       ];
 }

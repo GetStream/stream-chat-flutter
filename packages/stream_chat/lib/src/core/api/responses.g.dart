@@ -417,3 +417,22 @@ QueryThreadsResponse _$QueryThreadsResponseFromJson(
               .toList() ??
           []
       ..next = json['next'] as String?;
+
+CreateDraftResponse _$CreateDraftResponseFromJson(Map<String, dynamic> json) =>
+    CreateDraftResponse()
+      ..duration = json['duration'] as String?
+      ..draft = Draft.fromJson(json['draft'] as Map<String, dynamic>);
+
+GetDraftResponse _$GetDraftResponseFromJson(Map<String, dynamic> json) =>
+    GetDraftResponse()
+      ..duration = json['duration'] as String?
+      ..draft = Draft.fromJson(json['draft'] as Map<String, dynamic>);
+
+QueryDraftsResponse _$QueryDraftsResponseFromJson(Map<String, dynamic> json) =>
+    QueryDraftsResponse()
+      ..duration = json['duration'] as String?
+      ..drafts = (json['drafts'] as List<dynamic>?)
+              ?.map((e) => Draft.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          []
+      ..next = json['next'] as String?;

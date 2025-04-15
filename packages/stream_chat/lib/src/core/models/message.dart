@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -60,6 +61,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.i18n,
     this.restrictedVisibility,
     this.moderation,
+    this.draft,
   })  : id = id ?? const Uuid().v4(),
         type = MessageType(type),
         pinExpires = pinExpires?.toUtc(),
@@ -257,6 +259,11 @@ class Message extends Equatable implements ComparableFieldProvider {
   @JsonKey(includeToJson: false, readValue: _moderationReadValue)
   final Moderation? moderation;
 
+  /// Optional draft message linked to this message.
+  ///
+  /// This is present when the message is a thread i.e. contains replies.
+  final Draft? draft;
+
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
@@ -302,12 +309,24 @@ class Message extends Equatable implements ComparableFieldProvider {
     'restricted_visibility',
     'moderation',
     'moderation_details',
+    'draft',
   ];
 
   /// Serialize to json.
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$MessageToJson(this),
-      );
+  Map<String, dynamic> toJson() {
+    final message = removeMentionsIfNotIncluded();
+    final json = Serializer.moveFromExtraDataToRoot(
+      _$MessageToJson(message),
+    );
+
+    // If the message contains command we should append it to the text
+    // before sending it.
+    if (command case final command? when command.isNotEmpty) {
+      json.update('text', (text) => '/$command $text', ifAbsent: () => null);
+    }
+
+    return json;
+  }
 
   /// Creates a copy of [Message] with specified attributes overridden.
   Message copyWith({
@@ -348,6 +367,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     Map<String, String>? i18n,
     List<String>? restrictedVisibility,
     Moderation? moderation,
+    Object? draft = _nullConst,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -423,6 +443,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       i18n: i18n ?? this.i18n,
       restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
       moderation: moderation ?? this.moderation,
+      draft: draft == _nullConst ? this.draft : draft as Draft?,
     );
   }
 
@@ -467,6 +488,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       i18n: other.i18n,
       restrictedVisibility: other.restrictedVisibility,
       moderation: other.moderation,
+      draft: other.draft,
     );
   }
 
@@ -531,6 +553,7 @@ class Message extends Equatable implements ComparableFieldProvider {
         i18n,
         restrictedVisibility,
         moderation,
+        draft,
       ];
 
   @override
@@ -700,4 +723,27 @@ extension MessageModerationHelper on Message {
 
   /// True if the message is bounced with an error by the moderation system.
   bool get isBouncedWithError => isBounced && isError;
+}
+
+extension on Message {
+  /// Removes mentions from the message if they are not included in the text.
+  ///
+  /// This is useful for cleaning up the list of mentioned users before
+  /// sending the message.
+  Message removeMentionsIfNotIncluded() {
+    if (mentionedUsers.isEmpty) return this;
+
+    final messageTextToSend = text;
+    if (messageTextToSend == null) return this;
+
+    final updatedMentionedUsers = [...mentionedUsers];
+    for (final user in mentionedUsers.toSet()) {
+      if (messageTextToSend.contains('@${user.id}')) continue;
+      if (messageTextToSend.contains('@${user.name}')) continue;
+
+      updatedMentionedUsers.remove(user);
+    }
+
+    return copyWith(mentionedUsers: updatedMentionedUsers);
+  }
 }

@@ -106,6 +106,8 @@ class FakeClientState extends Fake implements ClientState {
 
 class FakeMessage extends Fake implements Message {}
 
+class FakeDraftMessage extends Fake implements DraftMessage {}
+
 class FakeAttachmentFile extends Fake implements AttachmentFile {}
 
 class FakeEvent extends Fake implements Event {}

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:stream_chat/src/core/models/call_payload.dart';
-import 'package:stream_chat/src/core/models/user_block.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 

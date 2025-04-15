@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
@@ -444,6 +446,202 @@ void main() {
     verify(
       () => client.get(path, queryParameters: any(named: 'queryParameters')),
     ).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('createDraft', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    final draftMessage = DraftMessage(
+      id: 'test-draft-id',
+      text: 'draft message text',
+    );
+
+    const path = '/channels/$channelType/$channelId/draft';
+
+    final draft = Draft(
+      channelCid: '$channelType:$channelId',
+      createdAt: DateTime.now(),
+      message: draftMessage,
+    );
+
+    when(() => client.post(
+          path,
+          data: jsonEncode({'message': draftMessage}),
+        )).thenAnswer((_) async => successResponse(
+          path,
+          data: {'draft': draft.toJson()},
+        ));
+
+    final res = await messageApi.createDraft(
+      channelId,
+      channelType,
+      draftMessage,
+    );
+
+    expect(res, isNotNull);
+    expect(res.draft.channelCid, draft.channelCid);
+    expect(res.draft.message.id, draftMessage.id);
+    expect(res.draft.message.text, draftMessage.text);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('deleteDraft', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    const path = '/channels/$channelType/$channelId/draft';
+
+    when(() => client.delete(path, queryParameters: <String, dynamic>{}))
+        .thenAnswer((_) async => successResponse(
+              path,
+              data: <String, dynamic>{},
+            ));
+
+    final res = await messageApi.deleteDraft(
+      channelId,
+      channelType,
+    );
+
+    expect(res, isNotNull);
+
+    verify(() => client.delete(path, queryParameters: <String, dynamic>{}));
+    verifyNoMoreInteractions(client);
+  });
+
+  test('deleteDraft with parentId', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    const parentId = 'test-parent-id';
+
+    const path = '/channels/$channelType/$channelId/draft';
+
+    when(() => client.delete(path, queryParameters: {'parent_id': parentId}))
+        .thenAnswer((_) async => successResponse(
+              path,
+              data: <String, dynamic>{},
+            ));
+
+    final res = await messageApi.deleteDraft(
+      channelId,
+      channelType,
+      parentId: parentId,
+    );
+
+    expect(res, isNotNull);
+
+    verify(() => client.delete(path, queryParameters: {'parent_id': parentId}));
+    verifyNoMoreInteractions(client);
+  });
+
+  test('getDraft', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    final draftMessage = DraftMessage(
+      id: 'test-draft-id',
+      text: 'draft message text',
+    );
+
+    const path = '/channels/$channelType/$channelId/draft';
+
+    final draft = Draft(
+      channelCid: '$channelType:$channelId',
+      createdAt: DateTime.now(),
+      message: draftMessage,
+    );
+
+    when(() => client.get(path, queryParameters: <String, dynamic>{}))
+        .thenAnswer((_) async => successResponse(path, data: {
+              'draft': draft.toJson(),
+            }));
+
+    final res = await messageApi.getDraft(
+      channelId,
+      channelType,
+    );
+
+    expect(res, isNotNull);
+    expect(res.draft.channelCid, draft.channelCid);
+    expect(res.draft.message.id, draftMessage.id);
+    expect(res.draft.message.text, draftMessage.text);
+
+    verify(() => client.get(path, queryParameters: <String, dynamic>{}));
+    verifyNoMoreInteractions(client);
+  });
+
+  test('getDraft with parentId', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    const parentId = 'test-parent-id';
+    final draftMessage = DraftMessage(
+      id: 'test-draft-id',
+      text: 'draft message text',
+      parentId: parentId,
+    );
+
+    const path = '/channels/$channelType/$channelId/draft';
+
+    final draft = Draft(
+      channelCid: '$channelType:$channelId',
+      createdAt: DateTime.now(),
+      message: draftMessage,
+      parentId: parentId,
+    );
+
+    when(() => client.get(
+          path,
+          queryParameters: {'parent_id': parentId},
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'draft': draft.toJson(),
+        }));
+
+    final res = await messageApi.getDraft(
+      channelId,
+      channelType,
+      parentId: parentId,
+    );
+
+    expect(res, isNotNull);
+    expect(res.draft.channelCid, draft.channelCid);
+    expect(res.draft.message.id, draftMessage.id);
+    expect(res.draft.message.text, draftMessage.text);
+    expect(res.draft.parentId, parentId);
+
+    verify(() => client.get(path, queryParameters: {'parent_id': parentId}));
+    verifyNoMoreInteractions(client);
+  });
+
+  test('queryDrafts', () async {
+    const path = '/drafts/query';
+
+    final draftMessages = List.generate(
+      3,
+      (index) => Draft(
+        channelCid: 'messaging:channel-$index',
+        createdAt: DateTime.now(),
+        message: DraftMessage(id: 'draft-$index', text: 'Draft message $index'),
+      ),
+    );
+
+    when(() => client.post(
+          path,
+          data: any(named: 'data'),
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'drafts': [...draftMessages.map((it) => it.toJson())],
+        }));
+
+    final res = await messageApi.queryDrafts();
+
+    expect(res, isNotNull);
+    expect(res.drafts.length, draftMessages.length);
+
+    verify(() => client.post(
+          path,
+          data: any(named: 'data'),
+        )).called(1);
+
     verifyNoMoreInteractions(client);
   });
 }

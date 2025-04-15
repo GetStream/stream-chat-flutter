@@ -1,7 +1,5 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
-import 'package:stream_chat/src/core/models/banned_user.dart';
-import 'package:stream_chat/src/core/models/user_block.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -827,6 +825,7 @@ void main() {
       // fallback values
       registerFallbackValue(FakeEvent());
       registerFallbackValue(FakeMessage());
+      registerFallbackValue(FakeDraftMessage());
       registerFallbackValue(FakePollVote());
       registerFallbackValue(const PaginationParams());
     });
@@ -2745,6 +2744,105 @@ void main() {
             channelType,
             any(that: isSameMessageAs(message)),
           )).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.createDraft`', () async {
+      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      when(
+        () => api.message.createDraft(
+          channelId,
+          channelType,
+          any(that: isSameDraftMessageAs(message)),
+        ),
+      ).thenAnswer(
+        (_) async => CreateDraftResponse()
+          ..draft = Draft(
+            channelCid: '$channelType:$channelId',
+            createdAt: DateTime.now(),
+            message: message,
+          ),
+      );
+
+      final res = await client.createDraft(
+        message,
+        channelId,
+        channelType,
+      );
+
+      expect(res, isNotNull);
+      expect(res.draft.message, isSameDraftMessageAs(message));
+
+      verify(() => api.message.createDraft(
+            channelId,
+            channelType,
+            any(that: isSameDraftMessageAs(message)),
+          )).called(1);
+
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.deleteDraft`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      when(() => api.message.deleteDraft(channelId, channelType))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.deleteDraft(channelId, channelType);
+      expect(res, isNotNull);
+
+      verify(() => api.message.deleteDraft(channelId, channelType));
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.getDraft`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+
+      when(() => api.message.getDraft(channelId, channelType))
+          .thenAnswer((_) async => GetDraftResponse()
+            ..draft = Draft(
+              channelCid: '$channelType:$channelId',
+              createdAt: DateTime.now(),
+              message: message,
+            ));
+
+      final res = await client.getDraft(channelId, channelType);
+
+      expect(res, isNotNull);
+      expect(res.draft.message, isSameDraftMessageAs(message));
+
+      verify(() => api.message.getDraft(channelId, channelType));
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.queryDrafts`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      final drafts = [
+        Draft(
+          channelCid: '$channelType:$channelId',
+          createdAt: DateTime.now(),
+          message: DraftMessage(id: 'test-message-id', text: 'Hello!'),
+        )
+      ];
+
+      when(() => api.message.queryDrafts())
+          .thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
+
+      final res = await client.queryDrafts();
+
+      expect(res, isNotNull);
+      expect(res.drafts.length, drafts.length);
+
+      verify(() => api.message.queryDrafts()).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
