@@ -3129,6 +3129,9 @@ class ChannelClientState {
     // Don't count user's own messages as unread.
     if (messageUser.id == currentUser.id) return false;
 
+    // Don't count restricted messages as unread.
+    if (message.isNotVisibleTo(currentUser.id)) return false;
+
     // Don't count messages from muted users as unread.
     final isMuted = currentUser.mutes.any((it) => it.user.id == messageUser.id);
     if (isMuted) return false;
