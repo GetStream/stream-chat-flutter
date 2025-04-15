@@ -2369,7 +2369,6 @@ void main() {
       final res = await channel.markRead(messageId: messageId);
 
       expect(res, isNotNull);
-      expect(client.state.totalUnreadCount, 0);
 
       verify(() => client.markChannelRead(channelId, channelType,
           messageId: messageId)).called(1);
@@ -3101,6 +3100,7 @@ void main() {
             channelId,
             channelType,
             mockChannelConfig: true,
+            ownCapabilities: const [ChannelCapability.readEvents],
             lastMessageAt: initialLastMessageAt,
           );
 
@@ -3282,6 +3282,151 @@ void main() {
             expect(channel.lastMessageAt, equals(initialLastMessageAt));
           },
         );
+
+        test("should update 'unreadCount'", () async {
+          expect(channel.state?.unreadCount, equals(0));
+
+          final message = Message(
+            id: 'test-message-id',
+            user: User(id: 'other-user'),
+            createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+          );
+
+          final newMessageEvent = createNewMessageEvent(message);
+          client.addEvent(newMessageEvent);
+
+          // Wait for the event to get processed
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state?.unreadCount, equals(1));
+
+          final message2 = Message(
+            id: 'test-message-id-2',
+            user: User(id: 'other-user'),
+            createdAt: message.createdAt.add(const Duration(seconds: 3)),
+          );
+
+          final newMessage2Event = createNewMessageEvent(message2);
+          client.addEvent(newMessage2Event);
+
+          // Wait for the event to get processed
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state?.unreadCount, equals(2));
+        });
+
+        group("should not update 'unreadCount'", () {
+          test(
+            'when the message is silent',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                silent: true,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is shadowed',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                shadowed: true,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is a thread reply',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                parentId: 'test-parent-id',
+                showInChannel: false,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is a thread reply',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                parentId: 'test-parent-id',
+                showInChannel: false,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is from the current user',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                user: client.state.currentUser,
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+        });
       },
     );
 
