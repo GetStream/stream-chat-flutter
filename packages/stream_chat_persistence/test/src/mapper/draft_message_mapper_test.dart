@@ -31,7 +31,7 @@ void main() {
           assetUrl: 'testAssetUrl',
         ),
       );
-      
+
       final createdAt = DateTime.now();
       final entity = DraftMessageEntity(
         id: 'testDraftId',
@@ -49,13 +49,13 @@ void main() {
         createdAt: createdAt,
         extraData: {'extra_test_field': 'extraTestData'},
       );
-      
+
       final draft = entity.toDraft(
         parentMessage: parentMessage,
         quotedMessage: quotedMessage,
         poll: poll,
       );
-      
+
       expect(draft, isA<Draft>());
       expect(draft.channelCid, entity.channelCid);
       expect(draft.message.id, entity.id);
@@ -76,7 +76,7 @@ void main() {
       expect(draft.message.mentionedUsers.length, 1);
       expect(draft.message.mentionedUsers.first.id, user.id);
       expect(draft.message.attachments.length, entity.attachments.length);
-      
+
       for (var i = 0; i < draft.message.attachments.length; i++) {
         final draftAttachment = draft.message.attachments[i];
         final entityAttachmentData = jsonDecode(entity.attachments[i]);
@@ -86,7 +86,7 @@ void main() {
         expect(draftAttachment.assetUrl, entityAttachment.assetUrl);
       }
     });
-    
+
     test('toEntity should map Draft into DraftMessageEntity', () {
       const cid = 'testCid';
       final user = User(id: 'testUserId');
@@ -110,7 +110,7 @@ void main() {
           assetUrl: 'testAssetUrl',
         ),
       );
-      
+
       final createdAt = DateTime.now();
       final draftMessage = DraftMessage(
         id: 'testDraftId',
@@ -126,7 +126,7 @@ void main() {
         pollId: poll.id,
         extraData: const {'extra_test_field': 'extraTestData'},
       );
-      
+
       final draft = Draft(
         channelCid: cid,
         createdAt: createdAt,
@@ -135,9 +135,9 @@ void main() {
         parentMessage: parentMessage,
         quotedMessage: quotedMessage,
       );
-      
+
       final entity = draft.toEntity();
-      
+
       expect(entity, isA<DraftMessageEntity>());
       expect(entity.id, draft.message.id);
       expect(entity.channelCid, cid);
@@ -152,12 +152,12 @@ void main() {
       expect(entity.pollId, draft.message.pollId);
       expect(entity.createdAt, isSameDateAs(draft.createdAt));
       expect(entity.mentionedUsers.length, 1);
-      
+
       final mentionedUser = User.fromJson(
         jsonDecode(entity.mentionedUsers.first),
       );
       expect(mentionedUser.id, user.id);
-      
+
       expect(entity.attachments.length, draft.message.attachments.length);
       for (var i = 0; i < entity.attachments.length; i++) {
         final entityAttachmentData = jsonDecode(entity.attachments[i]);
