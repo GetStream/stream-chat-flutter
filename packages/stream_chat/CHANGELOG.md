@@ -10,6 +10,10 @@
     - `channel.deleteDraft`: Deletes a draft message for a specific channel.
     - `client.queryDrafts`: Queries draft messages created by the current user.
 
+🐞 Fixed
+
+- Fixed `channelState.unreadCount` not updating if the user is not part of the read list.
+
 🔄 Changed
 
 - Improved read event handling in the `Channel` class to properly update unread state information.

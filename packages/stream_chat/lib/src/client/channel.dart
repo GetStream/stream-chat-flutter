@@ -1611,9 +1611,6 @@ class Channel {
   /// read from a particular message onwards.
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
-    client.state.totalUnreadCount =
-        max(0, (client.state.totalUnreadCount) - (state!.unreadCount));
-    state!.unreadCount = 0;
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
@@ -1623,29 +1620,7 @@ class Channel {
   /// to be marked as unread.
   Future<EmptyResponse> markUnread(String messageId) async {
     _checkInitialized();
-
-    final response = await _client.markChannelUnread(id!, type, messageId);
-
-    final lastReadDate = state!.currentUserRead?.lastRead;
-    final currentUnread = state!.currentUserRead?.unreadMessages ?? 0;
-
-    final messagesFromMarked = state!.messages
-        .where((message) => message.user?.id != client.state.currentUser?.id)
-        .skipWhile((message) => message.id != messageId)
-        .toList();
-    final channelUnreadCount = max(currentUnread, messagesFromMarked.length);
-    final additionalTotalUnreadCount = currentUnread > 0
-        ? messagesFromMarked
-            .takeWhile((message) =>
-                lastReadDate == null ||
-                message.createdAt.isBefore(lastReadDate))
-            .length
-        : messagesFromMarked.length;
-
-    client.state.totalUnreadCount += additionalTotalUnreadCount;
-    state!.unreadCount = channelUnreadCount;
-
-    return response;
+    return _client.markChannelUnread(id!, type, messageId);
   }
 
   /// Mark the thread with [threadId] in the channel as read.
@@ -2750,16 +2725,21 @@ class ChannelClientState {
       EventType.notificationMessageNew,
     )
         .listen((event) {
-      final message = event.message!;
-      final showInChannel =
-          message.parentId != null && message.showInChannel != true;
-      if (isUpToDate || showInChannel) {
+      final message = event.message;
+      if (message == null) return;
+
+      final isThreadMessage = message.parentId != null;
+      final isShownInChannel = message.showInChannel == true;
+      final isThreadOnlyMessage = isThreadMessage && !isShownInChannel;
+
+      // Only add the message if the channel is upToDate or if the message is
+      // a thread-only message.
+      if (isUpToDate || isThreadOnlyMessage) {
         updateMessage(message);
       }
 
-      if (_countMessageAsUnread(message)) {
-        unreadCount += 1;
-      }
+      // Otherwise, check if we can count the message as unread.
+      if (_countMessageAsUnread(message)) unreadCount += 1;
     }));
   }
 
@@ -2781,6 +2761,24 @@ class ChannelClientState {
     }
 
     return true;
+  }
+
+  /// Updates the [read] in the state if it exists. Adds it otherwise.
+  void updateRead([Iterable<Read>? read]) {
+    final existingReads = <Read>[...?channelState.read];
+    final updatedReads = <Read>[
+      ...existingReads.merge(
+        read,
+        key: (read) => read.user.id,
+        update: (original, updated) => updated,
+      ),
+    ];
+
+    updateChannelState(
+      channelState.copyWith(
+        read: updatedReads,
+      ),
+    );
   }
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
@@ -2947,35 +2945,23 @@ class ChannelClientState {
     _subscriptions
       ..add(
         _channel
-            .on(EventType.messageRead, EventType.notificationMarkRead)
+            .on(
+          EventType.messageRead,
+          EventType.notificationMarkRead,
+        )
             .listen(
           (event) {
             final user = event.user;
             if (user == null) return;
 
-            final existingRead = [...?channelState.read];
-            // Return if the user does not have a existing read.
-            if (!existingRead.any((r) => r.user.id == user.id)) return;
-
-            Read? maybeUpdateRead(Read? existingRead) {
-              if (existingRead == null) return null;
-              if (existingRead.user.id == user.id) {
-                return Read(
-                  user: user,
-                  lastRead: event.createdAt,
-                  unreadMessages: event.unreadMessages,
-                  lastReadMessageId: event.lastReadMessageId,
-                );
-              }
-
-              return existingRead;
-            }
-
-            updateChannelState(
-              channelState.copyWith(
-                read: [...existingRead.map(maybeUpdateRead).nonNulls],
-              ),
+            final updatedRead = Read(
+              user: user,
+              lastRead: event.createdAt,
+              unreadMessages: event.unreadMessages,
+              lastReadMessageId: event.lastReadMessageId,
             );
+
+            return updateRead([updatedRead]);
           },
         ),
       )
@@ -2985,29 +2971,14 @@ class ChannelClientState {
             final user = event.user;
             if (user == null) return;
 
-            final existingRead = [...?channelState.read];
-            // Return if the user does not have a existing read.
-            if (!existingRead.any((r) => r.user.id == user.id)) return;
-
-            Read? maybeUpdateRead(Read? existingRead) {
-              if (existingRead == null) return null;
-              if (existingRead.user.id == user.id) {
-                return Read(
-                  user: user,
-                  lastRead: event.lastReadAt!,
-                  unreadMessages: event.unreadMessages,
-                  lastReadMessageId: event.lastReadMessageId,
-                );
-              }
-
-              return existingRead;
-            }
-
-            updateChannelState(
-              channelState.copyWith(
-                read: [...existingRead.map(maybeUpdateRead).nonNulls],
-              ),
+            final updatedRead = Read(
+              user: user,
+              lastRead: event.lastReadAt!,
+              unreadMessages: event.unreadMessages,
+              lastReadMessageId: event.lastReadMessageId,
             );
+
+            return updateRead([updatedRead]);
           },
         ),
       );
@@ -3116,26 +3087,32 @@ class ChannelClientState {
 
   /// Setter for unread count.
   set unreadCount(int count) {
-    final reads = [...read];
-    final currentUserReadIndex = reads.indexWhere(_isCurrentUserRead);
+    final currentUser = _channel.client.state.currentUser;
+    if (currentUser == null) return;
 
-    if (currentUserReadIndex < 0) return;
+    var existingUserRead = currentUserRead;
+    if (existingUserRead == null) {
+      final lastMessageAt = _channelState.channel?.lastMessageAt;
+      existingUserRead = Read(
+        user: currentUser,
+        lastRead: lastMessageAt ?? DateTime.now(),
+      );
+    }
 
-    reads[currentUserReadIndex] =
-        reads[currentUserReadIndex].copyWith(unreadMessages: count);
-    _channelState = _channelState.copyWith(read: reads);
+    return updateRead([existingUserRead.copyWith(unreadMessages: count)]);
   }
 
   bool _countMessageAsUnread(Message message) {
-    // Don't count if the message is silent or shadowed.
-    if (message.silent) return false;
-    if (message.shadowed) return false;
+    // Don't count if the channel doesn't allow read events.
+    if (!_channel.canReceiveReadEvents) return false;
 
     // Don't count if the channel is muted.
     if (_channel.isMuted) return false;
 
-    // Don't count if the channel doesn't allow read events.
-    if (!_channel.canReceiveReadEvents) return false;
+    // Don't count if the message is silent or shadowed or ephemeral.
+    if (message.silent) return false;
+    if (message.shadowed) return false;
+    if (message.isEphemeral) return false;
 
     // Don't count thread replies which are not shown in the channel as unread.
     if (message.parentId != null && message.showInChannel == false) {
@@ -3152,6 +3129,9 @@ class ChannelClientState {
 
     // Don't count user's own messages as unread.
     if (messageUser.id == currentUser.id) return false;
+
+    // Don't count restricted messages as unread.
+    if (message.isNotVisibleTo(currentUser.id)) return false;
 
     // Don't count messages from muted users as unread.
     final isMuted = currentUser.mutes.any((it) => it.user.id == messageUser.id);

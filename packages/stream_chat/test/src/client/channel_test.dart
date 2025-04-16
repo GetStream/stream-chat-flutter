@@ -2369,7 +2369,6 @@ void main() {
       final res = await channel.markRead(messageId: messageId);
 
       expect(res, isNotNull);
-      expect(client.state.totalUnreadCount, 0);
 
       verify(() => client.markChannelRead(channelId, channelType,
           messageId: messageId)).called(1);
@@ -3101,6 +3100,7 @@ void main() {
             channelId,
             channelType,
             mockChannelConfig: true,
+            ownCapabilities: const [ChannelCapability.readEvents],
             lastMessageAt: initialLastMessageAt,
           );
 
@@ -3282,6 +3282,195 @@ void main() {
             expect(channel.lastMessageAt, equals(initialLastMessageAt));
           },
         );
+
+        test("should update 'unreadCount'", () async {
+          expect(channel.state?.unreadCount, equals(0));
+
+          final message = Message(
+            id: 'test-message-id',
+            user: User(id: 'other-user'),
+            createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+          );
+
+          final newMessageEvent = createNewMessageEvent(message);
+          client.addEvent(newMessageEvent);
+
+          // Wait for the event to get processed
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state?.unreadCount, equals(1));
+
+          final message2 = Message(
+            id: 'test-message-id-2',
+            user: User(id: 'other-user'),
+            createdAt: message.createdAt.add(const Duration(seconds: 3)),
+          );
+
+          final newMessage2Event = createNewMessageEvent(message2);
+          client.addEvent(newMessage2Event);
+
+          // Wait for the event to get processed
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state?.unreadCount, equals(2));
+        });
+
+        group("should not update 'unreadCount'", () {
+          test(
+            'when the message is silent',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                silent: true,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is shadowed',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                shadowed: true,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message type is ephemeral',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                type: MessageType.ephemeral,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is a thread reply',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                parentId: 'test-parent-id',
+                showInChannel: false,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is a thread reply',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                parentId: 'test-parent-id',
+                showInChannel: false,
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is from the current user',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                user: client.state.currentUser,
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+
+          test(
+            'when the message is not restricted for the current user',
+            () async {
+              expect(channel.state?.unreadCount, equals(0));
+
+              final message = Message(
+                id: 'test-message-id',
+                user: User(id: 'other-user'),
+                createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+                restrictedVisibility: const ['other-user-2'],
+              );
+
+              final newMessageEvent = createNewMessageEvent(message);
+              client.addEvent(newMessageEvent);
+
+              // Wait for the event to get processed
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state?.unreadCount, equals(0));
+            },
+          );
+        });
       },
     );
 
@@ -3509,6 +3698,39 @@ void main() {
         expect(updatedRead?.lastRead.isAtSameMomentAs(DateTime(2022)), isTrue);
       });
 
+      test(
+        'should add a new read state if not exist on notification mark read',
+        () async {
+          // Create the current read state
+          final currentUser = User(id: 'test-user');
+
+          // Verify initial state
+          final read = channel.state?.read;
+          expect(read, isEmpty);
+
+          // Create mark read notification event
+          final markReadEvent = Event(
+            cid: channel.cid,
+            type: EventType.notificationMarkRead,
+            user: currentUser,
+            createdAt: DateTime(2022),
+            unreadMessages: 0,
+            lastReadMessageId: 'message-123',
+          );
+
+          // Dispatch event
+          client.addEvent(markReadEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify read list has not changed
+          final updated = channel.state?.read;
+          expect(updated?.length, 1);
+          expect(updated?.any((r) => r.user.id == currentUser.id), isTrue);
+        },
+      );
+
       test('should update read state on notification mark unread event',
           () async {
         // Create the current read state
@@ -3557,51 +3779,35 @@ void main() {
         expect(updatedRead?.lastRead.isAtSameMomentAs(DateTime(2019)), isTrue);
       });
 
-      test('should not update read state if user does not exist in read list',
-          () async {
-        // Create the current read state
-        final currentUser = User(id: 'test-user');
-        final currentRead = Read(
-          user: currentUser,
-          lastRead: DateTime(2020),
-          unreadMessages: 10,
-        );
+      test(
+        'should add a new read state if not exist on notification mark unread',
+        () async {
+          // Verify initial state
+          final read = channel.state?.read;
+          expect(read, isEmpty);
 
-        // Setup initial read state
-        channel.state?.updateChannelState(
-          channel.state!.channelState.copyWith(
-            read: [currentRead],
-          ),
-        );
+          // Create event for non-existing user
+          final markUnreadEvent = Event(
+            cid: channel.cid,
+            type: EventType.notificationMarkUnread,
+            user: User(id: 'non-existing-user'),
+            lastReadAt: DateTime(2019),
+            unreadMessages: 15,
+            lastReadMessageId: 'message-100',
+          );
 
-        // Verify initial state
-        final read = channel.state?.read;
-        expect(read?.length, 1);
-        expect(read?.any((r) => r.user.id == 'test-user'), isTrue);
-        expect(read?.any((r) => r.user.id == 'non-existing-user'), isFalse);
+          // Dispatch event
+          client.addEvent(markUnreadEvent);
 
-        // Create event for non-existing user
-        final markUnreadEvent = Event(
-          cid: channel.cid,
-          type: EventType.notificationMarkUnread,
-          user: User(id: 'non-existing-user'),
-          lastReadAt: DateTime(2019),
-          unreadMessages: 15,
-          lastReadMessageId: 'message-100',
-        );
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
 
-        // Dispatch event
-        client.addEvent(markUnreadEvent);
-
-        // Wait for event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Verify read list has not changed
-        final updated = channel.state?.read;
-        expect(updated?.length, 1);
-        expect(updated?.any((r) => r.user.id == 'test-user'), isTrue);
-        expect(updated?.any((r) => r.user.id == 'non-existing-user'), isFalse);
-      });
+          // Verify read list has not changed
+          final updated = channel.state?.read;
+          expect(updated?.length, 1);
+          expect(updated?.any((r) => r.user.id == 'non-existing-user'), isTrue);
+        },
+      );
     });
 
     group('Draft events', () {
