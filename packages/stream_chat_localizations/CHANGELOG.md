@@ -1,3 +1,7 @@
+## 9.8.0
+
+- Updated `stream_chat_flutter` dependency to [`9.8.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.7.0
 
 - Added translations for new `sendAnywayLabel` label.

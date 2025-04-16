@@ -1,4 +1,4 @@
-## Upcoming
+## 9.8.0
 
 - Added `pinnedAt` and `archivedAt` fields on `Member`.
 
