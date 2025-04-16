@@ -130,6 +130,9 @@ class Messages extends Table {
   TextColumn get restrictedVisibility =>
       text().nullable().map(ListConverter<String>())();
 
+  /// Id of the draft message if this message is a parent message.
+  TextColumn get draftMessageId => text().nullable()();
+
   /// Message custom extraData
   TextColumn get extraData => text().nullable().map(MapConverter())();
 

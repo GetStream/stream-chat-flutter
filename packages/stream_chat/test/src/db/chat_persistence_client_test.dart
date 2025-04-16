@@ -2,6 +2,8 @@ import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
@@ -56,6 +58,10 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> deletePollVotesByPollIds(List<String> pollIds) => Future.value();
 
   @override
+  Future<void> deleteDraftMessagesByIds(List<String> messageIds) =>
+      Future.value();
+
+  @override
   Future<void> disconnect({bool flush = false}) => throw UnimplementedError();
 
   @override
@@ -97,6 +103,21 @@ class TestPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<List<Read>> getReadsByCid(String cid) async => [];
+
+  @override
+  Future<Draft?> getDraftMessageByCid(String cid) async => Draft(
+        channelCid: cid,
+        createdAt: DateTime.now(),
+        message: DraftMessage(id: 'message-id', text: 'message-text'),
+      );
+
+  @override
+  Future<Draft?> getDraftMessageByParentId(String parentId) async => Draft(
+        channelCid: 'test:cid',
+        createdAt: DateTime.now(),
+        parentId: parentId,
+        message: DraftMessage(id: 'message-id', text: 'message-text'),
+      );
 
   @override
   Future<List<Message>> getReplies(String parentId,
@@ -152,6 +173,9 @@ class TestPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<void> updatePolls(List<Poll> polls) => Future.value();
+
+  @override
+  Future<void> updateDraftMessages(List<Draft> draftMessages) => Future.value();
 }
 
 void main() {
@@ -192,6 +216,20 @@ void main() {
     test('updatePolls', () async {
       final poll = Poll(id: 'poll-id', name: 'poll-name', options: const []);
       persistenceClient.updatePolls([poll]);
+    });
+
+    test('deleteDraftMessagesByIds', () {
+      const messageIds = ['message-id'];
+      persistenceClient.deleteDraftMessagesByIds(messageIds);
+    });
+
+    test('updateDraftMessages', () async {
+      final draft = Draft(
+        channelCid: 'test:cid',
+        createdAt: DateTime.now(),
+        message: DraftMessage(id: 'message-id', text: 'message-text'),
+      );
+      persistenceClient.updateDraftMessages([draft]);
     });
 
     test('updateChannelThreads', () async {

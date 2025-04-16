@@ -36,7 +36,10 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<void> deleteMessageByCids(List<String> cids) async =>
       (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
-  Future<Message> _messageFromJoinRow(TypedResult rows) async {
+  Future<Message> _messageFromJoinRow(
+    TypedResult rows, {
+    bool fetchDraft = true,
+  }) async {
     final userEntity = rows.readTableOrNull(_users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
     final msgEntity = rows.readTable(messages);
@@ -45,16 +48,22 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       msgEntity.id,
       _db.userId,
     );
-    Message? quotedMessage;
-    final quotedMessageId = msgEntity.quotedMessageId;
-    if (quotedMessageId != null) {
-      quotedMessage = await getMessageById(quotedMessageId);
-    }
-    Poll? poll;
-    final pollId = msgEntity.pollId;
-    if (pollId != null) {
-      poll = await _db.pollDao.getPollById(pollId);
-    }
+
+    final quotedMessage = await switch (msgEntity.quotedMessageId) {
+      final id? => getMessageById(id),
+      _ => null,
+    };
+
+    final poll = await switch (msgEntity.pollId) {
+      final id? => _db.pollDao.getPollById(id),
+      _ => null,
+    };
+
+    final draft = await switch ((fetchDraft, msgEntity.draftMessageId)) {
+      (true, final id?) => _db.draftMessageDao.getDraftMessageById(id),
+      _ => null,
+    };
+
     return msgEntity.toMessage(
       user: userEntity?.toUser(),
       pinnedBy: pinnedByEntity?.toUser(),
@@ -62,21 +71,30 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       ownReactions: ownReactions,
       quotedMessage: quotedMessage,
       poll: poll,
+      draft: draft,
     );
   }
 
-  /// Returns a single message by matching the [Messages.id] with [id]
-  Future<Message?> getMessageById(String id) async =>
-      await (select(messages).join([
-        leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-        leftOuterJoin(
-          _pinnedByUsers,
-          messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-        ),
-      ])
-            ..where(messages.id.equals(id)))
-          .map(_messageFromJoinRow)
-          .getSingleOrNull();
+  /// Returns a single message by matching the [Messages.id] with [id].
+  ///
+  /// If [fetchDraft] is true, it will also fetch the draft message for the
+  /// message.
+  Future<Message?> getMessageById(
+    String id, {
+    bool fetchDraft = true,
+  }) async =>
+      await (select(messages).join(
+        [
+          leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+          leftOuterJoin(
+            _pinnedByUsers,
+            messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+          ),
+        ],
+      )..where(messages.id.equals(id)))
+          .map((row) {
+        return _messageFromJoinRow(row, fetchDraft: fetchDraft);
+      }).getSingleOrNull();
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.channelCid] with [cid]
