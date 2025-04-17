@@ -1,6 +1,7 @@
 ## 9.8.0
 
 - Added `pinnedAt` and `archivedAt` fields on `Member`.
+- Added support for DraftMessages.
 
 ## 9.7.0
 
