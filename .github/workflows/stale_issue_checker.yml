@@ -31,6 +31,6 @@ jobs:
           # Ping the author if the last comment was by someone other than a team member or bot after 7 days has passed.
           days-before-issue-stale: 7
           stale-issue-message: "Hey, you can help us out by closing this issue if the problem no longer exists, or adding more information."
-          # Close issues that are marked a 'waiting for customer response' label and were last interacted with by a contributor or bot, after 3 days has passed.
+          # Close issues that are marked a 'waiting for user response' label and were last interacted with by a contributor or bot, after 3 days has passed.
           days-before-issue-close: 3
           close-issue-message: "This issue has been closed automatically because it needs more information and has not had recent activity. If the issue still persists, please reopen with the information requested. Thanks."
