@@ -26,6 +26,7 @@ jobs:
           stale-issue-label: "stale"
           any-of-issue-labels: "waiting for user response"
           labels-to-add-when-unstale: "user responded"
+          labels-to-remove-when-stale: "user responded"
           labels-to-remove-when-unstale: "waiting for user response"
           # Ping the author if the last comment was by someonne other than a team member or bot after 3 days has passed.
           days-before-issue-stale: 7
