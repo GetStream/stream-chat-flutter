@@ -566,9 +566,11 @@ class Channel {
         // update or remove attachment from message.
         final List<Attachment> newAttachments;
         if (remove) {
-          newAttachments = [...message!.attachments]..removeAt(index);
+          newAttachments = <Attachment>[...message!.attachments]
+            ..removeAt(index);
         } else {
-          newAttachments = [...message!.attachments]..[index] = attachment;
+          newAttachments = <Attachment>[...message!.attachments]..[index] =
+              attachment;
         }
 
         final updatedMessage = message!.copyWith(attachments: newAttachments);
@@ -1307,7 +1309,9 @@ class Channel {
     final now = DateTime.now();
     final user = _client.state.currentUser;
 
-    var latestReactions = [...message.latestReactions ?? <Reaction>[]];
+    var latestReactions = <Reaction>[
+      ...message.latestReactions ?? <Reaction>[]
+    ];
     if (enforceUnique) {
       latestReactions.removeWhere((it) => it.userId == user!.id);
     }
@@ -1382,15 +1386,17 @@ class Channel {
       reactionScores.update(type, (value) => value - 1);
     }
 
-    final latestReactions = [...?message.latestReactions]..removeWhere((r) =>
-        r.userId == reaction.userId &&
-        r.type == reaction.type &&
-        r.messageId == reaction.messageId);
+    final latestReactions = <Reaction>[...?message.latestReactions]
+      ..removeWhere((r) =>
+          r.userId == reaction.userId &&
+          r.type == reaction.type &&
+          r.messageId == reaction.messageId);
 
-    final ownReactions = [...?message.ownReactions]..removeWhere((r) =>
-        r.userId == reaction.userId &&
-        r.type == reaction.type &&
-        r.messageId == reaction.messageId);
+    final ownReactions = <Reaction>[...?message.ownReactions]..removeWhere(
+        (r) =>
+            r.userId == reaction.userId &&
+            r.type == reaction.type &&
+            r.messageId == reaction.messageId);
 
     final newMessage = message.copyWith(
       reactionCounts: reactionCounts..removeWhere((_, value) => value == 0),
@@ -2235,7 +2241,7 @@ class ChannelClientState {
           final user = event.user;
           if (user == null) return;
 
-          final existingMembers = [...?channelState.members];
+          final existingMembers = <Member>[...?channelState.members];
           final existingMembership = channelState.membership;
 
           // Return if the user is not a existing member of the channel.
@@ -2371,7 +2377,7 @@ class ChannelClientState {
   }
 
   void _updateMember(Member member) {
-    final currentMembers = [...members];
+    final currentMembers = <Member>[...members];
     final memberIndex = currentMembers.indexWhere(
       (m) => m.userId == member.userId,
     );
@@ -2405,8 +2411,10 @@ class ChannelClientState {
 
   /// Retry failed message.
   Future<void> retryFailedMessages() async {
-    final failedMessages = [...messages, ...threads.values.expand((v) => v)]
-        .where((it) => it.state.isFailed);
+    final failedMessages = <Message>[
+      ...messages,
+      ...threads.values.expand((v) => v)
+    ].where((it) => it.state.isFailed);
     _retryQueue.add(failedMessages);
   }
 
@@ -2787,7 +2795,7 @@ class ChannelClientState {
     if (message.parentId == null || message.showInChannel == true) {
       // Create a new list of messages to avoid modifying the original
       // list directly.
-      var newMessages = [...messages];
+      var newMessages = <Message>[...messages];
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
 
       if (oldIndex != -1) {
@@ -2869,7 +2877,7 @@ class ChannelClientState {
   /// Updates the list of pinned messages based on the current message's
   /// pinned status.
   List<Message> _updatePinnedMessages(Message message) {
-    final newPinnedMessages = [...pinnedMessages];
+    final newPinnedMessages = <Message>[...pinnedMessages];
     final oldPinnedIndex =
         newPinnedMessages.indexWhere((m) => m.id == message.id);
 
@@ -2914,10 +2922,11 @@ class ChannelClientState {
     }
 
     // Remove regular message, thread message shown in channel
-    var updatedMessages = [...messages]..removeWhere((e) => e.id == message.id);
+    var updatedMessages = <Message>[...messages]
+      ..removeWhere((e) => e.id == message.id);
 
     // Remove quoted message reference from every message if available.
-    updatedMessages = [...updatedMessages].map((it) {
+    updatedMessages = <Message>[...updatedMessages].map((it) {
       // Early return if the message doesn't have a quoted message.
       if (it.quotedMessageId != message.id) return it;
 
