@@ -8,6 +8,7 @@ import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:flutter/foundation.dart';
 
 /// Defines the api dedicated to channel operations
 class ChannelApi {
@@ -79,7 +80,13 @@ class ChannelApi {
         }),
       },
     );
-    return QueryChannelsResponse.fromJson(response.data);
+
+    try {
+      return QueryChannelsResponse.fromJson(response.data);
+    } catch (e) {
+      debugPrint('queryChannels error: $e');
+      return QueryChannelsResponse.fromJson({});
+    }
   }
 
   /// Mark all channels for this user as read
