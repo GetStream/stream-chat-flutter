@@ -552,27 +552,30 @@ class StreamMessageInputState extends State<StreamMessageInput>
       _onChangedDebounced.call();
 
       final channel = StreamChannel.of(context).channel;
+      final config = StreamChatConfiguration.of(context);
 
       // Resumes the cooldown if the channel has currently an active cooldown.
       if (!_isEditing) {
         _effectiveController.startCooldown(channel.getRemainingCooldown());
       }
 
-      // Starts listening to the draft stream for the current channel/thread.
-      final draftStream = switch (_effectiveController.message.parentId) {
-        final parentId? => channel.state?.threadDraftStream(parentId),
-        _ => channel.state?.draftStream,
-      };
+      if (config.draftMessagesEnabled) {
+        // Starts listening to the draft stream for the current channel/thread.
+        final draftStream = switch (_effectiveController.message.parentId) {
+          final parentId? => channel.state?.threadDraftStream(parentId),
+          _ => channel.state?.draftStream,
+        };
 
-      _draftStreamSubscription = draftStream?.distinct().listen((draft) {
-        // If the draft is removed, reset the controller.
-        if (draft == null) return _effectiveController.reset();
+        _draftStreamSubscription = draftStream?.distinct().listen((draft) {
+          // If the draft is removed, reset the controller.
+          if (draft == null) return _effectiveController.reset();
 
-        // Otherwise, update the controller with the draft message.
-        if (draft.message case final draftMessage) {
-          _effectiveController.message = draftMessage.toMessage();
-        }
-      });
+          // Otherwise, update the controller with the draft message.
+          if (draft.message case final draftMessage) {
+            _effectiveController.message = draftMessage.toMessage();
+          }
+        });
+      }
     });
   }
 
@@ -1590,7 +1593,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   void deactivate() {
-    _maybeUpdateOrDeleteDraftMessage();
+    final config = StreamChatConfiguration.of(context);
+    if (config.draftMessagesEnabled) {
+      _maybeUpdateOrDeleteDraftMessage();
+    }
+
     super.deactivate();
   }
 

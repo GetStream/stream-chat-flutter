@@ -114,6 +114,7 @@ class StreamChatConfigurationData {
     Widget Function(BuildContext, User)? placeholderUserImage,
     List<StreamReactionIcon>? reactionIcons,
     bool? enforceUniqueReactions,
+    bool draftMessagesEnabled = false,
   }) {
     return StreamChatConfigurationData._(
       loadingIndicator: loadingIndicator,
@@ -121,6 +122,7 @@ class StreamChatConfigurationData {
       placeholderUserImage: placeholderUserImage,
       reactionIcons: reactionIcons ?? _defaultReactionIcons,
       enforceUniqueReactions: enforceUniqueReactions ?? true,
+      draftMessagesEnabled: draftMessagesEnabled,
     );
   }
 
@@ -130,6 +132,7 @@ class StreamChatConfigurationData {
     required this.placeholderUserImage,
     required this.reactionIcons,
     required this.enforceUniqueReactions,
+    required this.draftMessagesEnabled,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
@@ -140,6 +143,7 @@ class StreamChatConfigurationData {
     Widget Function(BuildContext, User)? placeholderUserImage,
     List<StreamReactionIcon>? reactionIcons,
     bool? enforceUniqueReactions,
+    bool? draftMessagesEnabled,
   }) {
     return StreamChatConfigurationData(
       reactionIcons: reactionIcons ?? this.reactionIcons,
@@ -148,8 +152,14 @@ class StreamChatConfigurationData {
       loadingIndicator: loadingIndicator ?? this.loadingIndicator,
       enforceUniqueReactions:
           enforceUniqueReactions ?? this.enforceUniqueReactions,
+      draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
     );
   }
+
+  /// If True, the user will be able to send draft messages.
+  ///
+  /// Defaults to False.
+  final bool draftMessagesEnabled;
 
   /// The widget that will be shown to indicate loading.
   final Widget loadingIndicator;
