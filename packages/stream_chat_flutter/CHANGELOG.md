@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added support for Draft messages preview.
+- Added a new `StreamDraftListView` for displaying draft messages.
+
 ## 9.8.0
 
 🐞 Fixed
