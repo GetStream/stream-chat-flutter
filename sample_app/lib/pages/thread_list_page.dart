@@ -49,6 +49,7 @@ class _ThreadListPageState extends State<ThreadListPage> {
                   builder: (context) {
                     return StreamChannel(
                       channel: channel,
+                      initialMessageId: thread.draft?.parentId,
                       child: ThreadPage(parent: thread.parentMessage!),
                     );
                   },
