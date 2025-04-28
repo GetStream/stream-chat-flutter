@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/channel/stream_draft_message_preview_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-
 void main() {
   // Helper to pump the draft message preview widget
   Future<void> pumpDraftMessagePreview(
