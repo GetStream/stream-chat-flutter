@@ -165,8 +165,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Vennligst gi tillatelse til dine bilder'
-      '\nog videoer så du kan dele de med dine venner.';
+      'Vennligst gi tillatelse til dine bilder og videoer så du kan dele de med dine venner.';
 
   @override
   String get allowGalleryAccessMessage => 'Tillat tilgang til galleri';
@@ -176,8 +175,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Ønsker du å sende en kopi av denne meldingen til en'
-      '\nmoderator for videre undersøkelser';
+      'Ønsker du å sende en kopi av denne meldingen til en moderator for videre undersøkelser';
 
   @override
   String get flagLabel => 'RAPPORTER';
@@ -437,7 +435,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get enableFileAccessMessage =>
-      'Aktiver tilgang til filer slik' '\nat du kan dele dem med venner.';
+      'Aktiver tilgang til filer slik at du kan dele dem med venner.';
 
   @override
   String get allowFileAccessMessage => 'Gi tilgang til filer';

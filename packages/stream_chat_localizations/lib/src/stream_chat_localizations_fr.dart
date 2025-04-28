@@ -172,8 +172,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      "Veuillez autoriser l'accès à vos photos"
-      '\net vidéos afin de pouvoir les partager avec vos amis.';
+      "Veuillez autoriser l'accès à vos photos et vidéos afin de pouvoir les partager avec vos amis.";
 
   @override
   String get allowGalleryAccessMessage => "Autoriser l'accès à votre galerie";
@@ -183,8 +182,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Voulez-vous envoyer une copie de ce message à un'
-      '\nmodérateur pour une enquête plus approfondie ?';
+      'Voulez-vous envoyer une copie de ce message à un modérateur pour une enquête plus approfondie ?';
 
   @override
   String get flagLabel => 'SIGNALER';
@@ -207,7 +205,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      'Êtes-vous sûr de vouloir supprimer définitivement ce\nmessage ?';
+      'Êtes-vous sûr de vouloir supprimer définitivement ce message ?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -451,8 +449,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get enableFileAccessMessage =>
-      "Veuillez autoriser l'accès aux fichiers"
-      '\nafin de pouvoir les partager avec des amis.';
+      "Veuillez autoriser l'accès aux fichiers afin de pouvoir les partager avec des amis.";
 
   @override
   String get allowFileAccessMessage => "Autoriser l'accès aux fichiers";

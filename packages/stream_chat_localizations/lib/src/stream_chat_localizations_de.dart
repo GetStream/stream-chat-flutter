@@ -162,8 +162,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Bitte aktivieren Sie den Zugriff auf Ihre Fotos'
-      '\nund Videos, damit Sie sie mit Freunden teilen können.';
+      'Bitte aktivieren Sie den Zugriff auf Ihre Fotos und Videos, damit Sie sie mit Freunden teilen können.';
 
   @override
   String get allowGalleryAccessMessage => 'Zugang zu Ihrer Galerie gewähren';
@@ -173,8 +172,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Möchten Sie eine Kopie dieser Nachricht an einen'
-      '\nModerator für weitere Untersuchungen senden?';
+      'Möchten Sie eine Kopie dieser Nachricht an einen Moderator für weitere Untersuchungen senden?';
 
   @override
   String get flagLabel => 'MELDEN';
@@ -443,8 +441,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get enableFileAccessMessage =>
-      'Bitte aktivieren Sie den Zugriff auf Dateien,'
-      '\ndamit Sie sie mit Freunden teilen können.';
+      'Bitte aktivieren Sie den Zugriff auf Dateien, damit Sie sie mit Freunden teilen können.';
 
   @override
   String get allowFileAccessMessage => 'Zugriff auf Dateien zulassen';

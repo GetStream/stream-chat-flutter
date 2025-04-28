@@ -727,8 +727,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get flagMessageQuestion =>
-      'Do you want to send a copy of this message to a'
-      '\nmoderator for further investigation?';
+      'Do you want to send a copy of this message to a moderator for further investigation?';
 
   @override
   String get flagLabel => 'FLAG';
@@ -751,7 +750,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this\nmessage?';
+      'Are you sure you want to permanently delete this message?';
 
   @override
   String get operationCouldNotBeCompletedText =>
