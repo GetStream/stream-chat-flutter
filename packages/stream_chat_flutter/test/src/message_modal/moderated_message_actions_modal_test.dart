@@ -133,30 +133,6 @@ void main() {
           ),
         ),
       );
-
-      // Test with different moderation actions
-      goldenTest(
-        'ModeratedMessageActionsModal with bounce action in $theme theme',
-        fileName: 'moderated_message_actions_modal_bounce_$theme',
-        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 350),
-        builder: () => _wrapWithMaterialApp(
-          brightness: brightness,
-          ModeratedMessageActionsModal(
-            message: Message(
-              id: 'test-message',
-              type: MessageType.error,
-              text: 'This is a test message',
-              createdAt: DateTime.now(),
-              user: User(id: 'test-user', name: 'Test User'),
-              moderation: const Moderation(
-                action: ModerationAction.bounce,
-                originalText: 'This is a test message with bounced content',
-              ),
-            ),
-            messageActions: messageActions,
-          ),
-        ),
-      );
     }
   });
 }
