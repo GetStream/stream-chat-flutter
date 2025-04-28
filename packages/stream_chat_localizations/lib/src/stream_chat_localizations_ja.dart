@@ -635,8 +635,11 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String pollSomeoneVotedText(String username) => '$usernameが投票しました';
 
   @override
-  String get pollYouCreatedText => '作成しました';
+  String get pollYouCreatedText => 'あなたが作成しました';
 
   @override
   String pollSomeoneCreatedText(String username) => '$usernameが作成しました';
+
+  @override
+  String get draftLabel => '下書き';
 }

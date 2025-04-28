@@ -111,6 +111,9 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     _textFieldController.text = text;
   }
 
+  /// Returns true if the slow mode is currently active.
+  bool get isSlowModeActive => _cooldownTimeOut > 0;
+
   /// The current [cooldownTimeOut] of the slow mode.
   ///
   /// Defaults to 0, which means slow mode is not active.

@@ -532,6 +532,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       ..addListener(_onChangedDebounced);
   }
 
+  StreamSubscription<Draft?>? _draftStreamSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -549,11 +551,28 @@ class StreamMessageInputState extends State<StreamMessageInput>
       // correctly in the UI.
       _onChangedDebounced.call();
 
+      final channel = StreamChannel.of(context).channel;
+
       // Resumes the cooldown if the channel has currently an active cooldown.
       if (!_isEditing) {
-        final channel = StreamChannel.of(context).channel;
         _effectiveController.startCooldown(channel.getRemainingCooldown());
       }
+
+      // Starts listening to the draft stream for the current channel/thread.
+      final draftStream = switch (_effectiveController.message.parentId) {
+        final parentId? => channel.state?.threadDraftStream(parentId),
+        _ => channel.state?.draftStream,
+      };
+
+      _draftStreamSubscription = draftStream?.distinct().listen((draft) {
+        // If the draft is removed, reset the controller.
+        if (draft == null) return _effectiveController.reset();
+
+        // Otherwise, update the controller with the draft message.
+        if (draft.message case final draftMessage) {
+          _effectiveController.message = draftMessage.toMessage();
+        }
+      });
     });
   }
 
@@ -1220,7 +1239,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       hintType = HintType.searchGif;
     } else if (_effectiveController.attachments.isNotEmpty) {
       hintType = HintType.addACommentOrSend;
-    } else if (_effectiveController.cooldownTimeOut > 0) {
+    } else if (_effectiveController.isSlowModeActive) {
       hintType = HintType.slowModeOn;
     } else {
       hintType = HintType.writeAMessage;
@@ -1431,11 +1450,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   /// Sends the current message
   Future<void> sendMessage() async {
-    if (_effectiveController.cooldownTimeOut > 0 ||
-        (_effectiveController.text.trim().isEmpty &&
-            _effectiveController.attachments.isEmpty)) {
-      return;
-    }
+    if (_effectiveController.isSlowModeActive) return;
+    if (!widget.validator(_effectiveController.message)) return;
 
     final streamChannel = StreamChannel.of(context);
     final channel = streamChannel.channel;
@@ -1451,29 +1467,19 @@ class StreamMessageInputState extends State<StreamMessageInput>
           color: StreamChatTheme.of(context).colorTheme.accentError,
           size: 24,
         ),
-        title: 'Links are disabled',
-        details: 'Sending links is not allowed in this conversation.',
+        title: context.translations.linkDisabledError,
+        details: context.translations.linkDisabledDetails,
         okText: context.translations.okLabel,
       );
       return;
     }
 
-    final containsCommand = message.command != null;
-    // If the message contains command we should append it to the text
-    // before sending it.
-    if (containsCommand) {
-      message = message.copyWith(text: '/${message.command} ${message.text}');
-    }
-
-    var shouldKeepFocus = widget.shouldKeepFocusAfterMessage;
-    shouldKeepFocus ??= !_commandEnabled;
-
+    _maybeDeleteDraftMessage(message);
     widget.onQuotedMessageCleared?.call();
-
     _effectiveController.reset();
 
-    if (widget.preMessageSending != null) {
-      message = await widget.preMessageSending!(message);
+    if (widget.preMessageSending case final onPreMessageSending?) {
+      message = await onPreMessageSending.call(message);
     }
 
     // If the channel is not up to date, we should reload it before sending
@@ -1489,7 +1495,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     await _sendOrUpdateMessage(message: message);
 
     if (mounted) {
-      if (shouldKeepFocus) {
+      if (widget.shouldKeepFocusAfterMessage ?? !_commandEnabled) {
         FocusScope.of(context).requestFocus(_effectiveFocusNode);
       } else {
         FocusScope.of(context).unfocus();
@@ -1542,6 +1548,52 @@ class StreamMessageInputState extends State<StreamMessageInput>
     );
   }
 
+  void _maybeUpdateOrDeleteDraftMessage() {
+    final message = _effectiveController.message;
+    final isMessageValid = widget.validator.call(message);
+
+    // If the message is valid, we need to create or update it as a draft
+    // message for the channel or thread.
+    if (isMessageValid) return _maybeUpdateDraftMessage(message);
+
+    // Otherwise, we need to delete the draft message.
+    return _maybeDeleteDraftMessage(message);
+  }
+
+  void _maybeUpdateDraftMessage(Message message) {
+    final channel = StreamChannel.of(context).channel;
+    final draft = switch (message.parentId) {
+      final parentId? => channel.state?.threadDraft(parentId),
+      null => channel.state?.draft,
+    };
+
+    final draftMessage = message.toDraftMessage();
+
+    // If the draft message didn't change, we don't need to update it.
+    if (draft?.message == draftMessage) return;
+
+    return channel.createDraft(draftMessage).ignore();
+  }
+
+  void _maybeDeleteDraftMessage(Message message) {
+    final channel = StreamChannel.of(context).channel;
+    final draft = switch (message.parentId) {
+      final parentId? => channel.state?.threadDraft(parentId),
+      null => channel.state?.draft,
+    };
+
+    // If there is no draft message, we don't need to delete it.
+    if (draft == null) return;
+
+    return channel.deleteDraft(parentId: message.parentId).ignore();
+  }
+
+  @override
+  void deactivate() {
+    _maybeUpdateOrDeleteDraftMessage();
+    super.deactivate();
+  }
+
   @override
   void dispose() {
     _effectiveController.removeListener(_onChangedDebounced);
@@ -1550,6 +1602,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _focusNode?.dispose();
     _onChangedDebounced.cancel();
     _audioRecorderController.dispose();
+    _draftStreamSubscription?.cancel();
     super.dispose();
   }
 }

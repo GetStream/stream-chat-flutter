@@ -450,6 +450,25 @@ extension MessageX on Message {
 
     return copyWith(text: messageTextToSend);
   }
+
+  /// Removes the mentioned users from the message if they are not included
+  /// in the message text.
+  Message removeMentionsIfNotIncluded() {
+    if (mentionedUsers.isEmpty) return this;
+
+    final messageTextToSend = text;
+    if (messageTextToSend == null) return this;
+
+    final updatedMentionedUsers = [...mentionedUsers];
+    for (final user in mentionedUsers.toSet()) {
+      if (messageTextToSend.contains('@${user.id}')) continue;
+      if (messageTextToSend.contains('@${user.name}')) continue;
+
+      updatedMentionedUsers.remove(user);
+    }
+
+    return copyWith(mentionedUsers: updatedMentionedUsers);
+  }
 }
 
 /// Extensions on [Uri]

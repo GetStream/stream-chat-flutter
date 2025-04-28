@@ -1,5 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat_flutter/src/channel/stream_draft_message_preview_text.dart';
 import 'package:stream_chat_flutter/src/message_widget/sending_indicator_builder.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
@@ -380,10 +382,28 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
 
   @override
   Widget build(BuildContext context) {
-    return BetterStreamBuilder<List<Message>>(
-      stream: widget.channel.state!.messagesStream,
-      initialData: widget.channel.state!.messages,
-      builder: (context, messages) {
+    final channelState = widget.channel.state;
+    if (channelState == null) return const Empty();
+
+    return BetterStreamBuilder<(Draft?, List<Message>)>(
+      stream: CombineLatestStream.combine2(
+        channelState.draftStream,
+        channelState.messagesStream,
+        (draft, messages) => (draft, messages),
+      ),
+      initialData: (channelState.draft, channelState.messages),
+      builder: (context, data) {
+        final (draft, messages) = data;
+
+        // Prioritize the draft message if it exists.
+        if (draft?.message case final draftMessage?) {
+          return StreamDraftMessagePreviewText(
+            draftMessage: draftMessage,
+            textStyle: widget.textStyle,
+          );
+        }
+
+        // Otherwise, show the channel last message if it exists.
         final message = messages.lastWhereOrNull(widget.lastMessagePredicate);
         final latestLastMessage = [message, _currentLastMessage].latest;
 
@@ -399,7 +419,7 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
         return StreamMessagePreviewText(
           message: latestLastMessage,
           textStyle: widget.textStyle,
-          channel: widget.channel.state?.channelState.channel,
+          channel: channelState.channelState.channel,
         );
       },
     );

@@ -1,3 +1,7 @@
+## Upcoming
+
+- Added translations for new `draftLabel` label.
+
 ## 9.8.0
 
 - Updated `stream_chat_flutter` dependency to [`9.8.0`](https://pub.dev/packages/stream_chat/changelog).

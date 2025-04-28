@@ -68,6 +68,7 @@ class StreamChatThemeData {
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
+    StreamDraftListTileThemeData? draftListTileTheme,
     StreamAudioWaveformThemeData? audioWaveformTheme,
     StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
@@ -104,6 +105,7 @@ class StreamChatThemeData {
       pollCommentsDialogTheme: pollCommentsDialogTheme,
       pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
       threadListTileTheme: threadListTileTheme,
+      draftListTileTheme: draftListTileTheme,
       audioWaveformTheme: audioWaveformTheme,
       audioWaveformSliderTheme: audioWaveformSliderTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
@@ -142,6 +144,7 @@ class StreamChatThemeData {
     required this.pollCommentsDialogTheme,
     required this.pollOptionVotesDialogTheme,
     required this.threadListTileTheme,
+    required this.draftListTileTheme,
     required this.audioWaveformTheme,
     required this.audioWaveformSliderTheme,
     required this.voiceRecordingAttachmentTheme,
@@ -535,6 +538,19 @@ class StreamChatThemeData {
           color: colorTheme.textLowEmphasis,
         ),
       ),
+      draftListTileTheme: StreamDraftListTileThemeData(
+        backgroundColor: colorTheme.barsBg,
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        draftChannelNameStyle: textTheme.bodyBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        draftMessageStyle: textTheme.footnote.copyWith(
+          color: colorTheme.textLowEmphasis,
+        ),
+        draftTimestampStyle: textTheme.footnote.copyWith(
+          color: colorTheme.textLowEmphasis,
+        ),
+      ),
       audioWaveformTheme: audioWaveformTheme,
       audioWaveformSliderTheme: audioWaveformSliderTheme,
       voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
@@ -654,6 +670,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
   final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
 
+  /// Theme configuration for the [StreamDraftListTile] widget.
+  final StreamDraftListTileThemeData draftListTileTheme;
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -682,6 +701,7 @@ class StreamChatThemeData {
     StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
+    StreamDraftListTileThemeData? draftListTileTheme,
     StreamAudioWaveformThemeData? audioWaveformTheme,
     StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
@@ -713,6 +733,7 @@ class StreamChatThemeData {
         pollOptionVotesDialogTheme:
             pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
         threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
+        draftListTileTheme: draftListTileTheme ?? this.draftListTileTheme,
         audioWaveformTheme: audioWaveformTheme ?? this.audioWaveformTheme,
         audioWaveformSliderTheme:
             audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
@@ -750,6 +771,7 @@ class StreamChatThemeData {
       pollOptionVotesDialogTheme:
           pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
+      draftListTileTheme: draftListTileTheme.merge(other.draftListTileTheme),
       audioWaveformTheme: audioWaveformTheme.merge(other.audioWaveformTheme),
       audioWaveformSliderTheme:
           audioWaveformSliderTheme.merge(other.audioWaveformSliderTheme),

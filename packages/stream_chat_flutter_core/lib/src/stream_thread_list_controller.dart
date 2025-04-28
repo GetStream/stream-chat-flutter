@@ -44,7 +44,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   /// The Stream client used to perform the queries.
   final StreamChatClient client;
 
-  /// The channel event handlers to use for the channels list.
+  /// The thread event handlers to use for the thread list.
   final StreamThreadListEventHandler _eventHandler;
 
   /// The limit to apply to the thread list.
@@ -290,6 +290,8 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
         EventType.reactionNew => _eventHandler.onReactionNew,
         EventType.reactionUpdated => _eventHandler.onReactionUpdated,
         EventType.reactionDeleted => _eventHandler.onReactionDeleted,
+        EventType.draftUpdated => _eventHandler.onDraftUpdated,
+        EventType.draftDeleted => _eventHandler.onDraftDeleted,
         _ => null,
       };
 

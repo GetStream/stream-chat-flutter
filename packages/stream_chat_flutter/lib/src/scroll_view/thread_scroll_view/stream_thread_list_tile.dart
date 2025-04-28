@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/channel/stream_draft_message_preview_text.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -42,41 +43,44 @@ class StreamThreadListTile extends StatelessWidget {
         ?.firstWhereOrNull((read) => read.user.id == currentUser?.id)
         ?.unreadMessages;
 
-    return InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Container(
-        padding: theme.padding,
-        color: theme.backgroundColor,
-        child: Column(
-          spacing: 6,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            if (thread.channel case final channel?)
-              ThreadTitle(
-                channelName: channel.formatName(currentUser: currentUser),
-              ),
-            Row(
-              children: [
-                if (thread.parentMessage case final parentMessage?)
-                  Expanded(
-                    child: ThreadReplyToContent(
-                      language: language,
-                      prefix: context.translations.repliedToLabel,
-                      parentMessage: parentMessage,
+    return Material(
+      color: theme.backgroundColor,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Container(
+          padding: theme.padding,
+          child: Column(
+            spacing: 6,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              if (thread.channel case final channel?)
+                ThreadTitle(
+                  channelName: channel.formatName(currentUser: currentUser),
+                ),
+              Row(
+                children: [
+                  if (thread.parentMessage case final parentMessage?)
+                    Expanded(
+                      child: ThreadReplyToContent(
+                        language: language,
+                        prefix: context.translations.repliedToLabel,
+                        parentMessage: parentMessage,
+                      ),
                     ),
-                  ),
-                if (unreadMessageCount case final count? when count > 0)
-                  ThreadUnreadCount(unreadCount: count),
-              ],
-            ),
-            if (thread.latestReplies.lastOrNull case final latestReply?)
-              ThreadLatestReply(
-                language: language,
-                latestReply: latestReply,
+                  if (unreadMessageCount case final count? when count > 0)
+                    ThreadUnreadCount(unreadCount: count),
+                ],
               ),
-          ],
+              if (thread.latestReplies.lastOrNull case final latestReply?)
+                ThreadLatestReply(
+                  language: language,
+                  latestReply: latestReply,
+                  draftMessage: thread.draft?.message,
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -203,11 +207,15 @@ class ThreadLatestReply extends StatelessWidget {
   const ThreadLatestReply({
     super.key,
     this.language,
+    this.draftMessage,
     required this.latestReply,
   });
 
   /// The language of the message.
   final String? language;
+
+  /// The draft message in the thread.
+  final DraftMessage? draftMessage;
 
   /// The latest reply in the thread.
   final Message latestReply;
@@ -232,10 +240,21 @@ class ThreadLatestReply extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: StreamMessagePreviewText(
-                      language: language,
-                      message: latestReply,
-                      textStyle: theme.threadLatestReplyMessageStyle,
+                    child: Builder(
+                      builder: (context) {
+                        if (draftMessage case final draftMessage?) {
+                          return StreamDraftMessagePreviewText(
+                            draftMessage: draftMessage,
+                            textStyle: theme.threadLatestReplyMessageStyle,
+                          );
+                        }
+
+                        return StreamMessagePreviewText(
+                          language: language,
+                          message: latestReply,
+                          textStyle: theme.threadLatestReplyMessageStyle,
+                        );
+                      },
                     ),
                   ),
                   StreamTimestamp(

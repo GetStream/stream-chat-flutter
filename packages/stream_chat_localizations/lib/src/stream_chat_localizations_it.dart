@@ -669,4 +669,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String pollSomeoneCreatedText(String username) => '$username ha creato';
+
+  @override
+  String get draftLabel => 'Bozza';
 }

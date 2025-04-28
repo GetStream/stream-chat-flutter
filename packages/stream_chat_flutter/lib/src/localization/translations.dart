@@ -535,6 +535,9 @@ abstract class Translations {
 
   /// The text for poll when someone created
   String pollSomeoneCreatedText(String username);
+
+  /// The label for draft message
+  String get draftLabel;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1198,4 +1201,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String pollSomeoneCreatedText(String username) => '$username created';
+
+  @override
+  String get draftLabel => 'Draft';
 }

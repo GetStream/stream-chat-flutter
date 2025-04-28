@@ -640,4 +640,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String pollSomeoneCreatedText(String username) => '$username님이 생성했습니다';
+
+  @override
+  String get draftLabel => '임시글';
 }

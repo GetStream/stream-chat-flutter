@@ -682,6 +682,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String pollSomeoneCreatedText(String username) => '$username created';
+
+  @override
+  String get draftLabel => 'Draft';
 }
 
 void main() async {

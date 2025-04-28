@@ -664,4 +664,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String pollSomeoneCreatedText(String username) => '$username ha creat';
+
+  @override
+  String get draftLabel => 'Esborrany';
 }
