@@ -172,13 +172,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<void> deleteDraftMessagesByIds(List<String> messageIds) {
-    assert(_debugIsConnected, '');
-    _logger.info('deleteDraftMessagesByIds');
-    return db!.draftMessageDao.deleteDraftMessagesByIds(messageIds);
-  }
-
-  @override
   Future<List<Member>> getMembersByCid(String cid) {
     assert(_debugIsConnected, '');
     _logger.info('getMembersByCid');
@@ -219,17 +212,16 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<Draft?> getDraftMessageByCid(String cid) {
+  Future<Draft?> getDraftMessageByCid(
+    String cid, {
+    String? parentId,
+  }) {
     assert(_debugIsConnected, '');
     _logger.info('getDraftMessageByCid');
-    return db!.draftMessageDao.getDraftMessageByCid(cid);
-  }
-
-  @override
-  Future<Draft?> getDraftMessageByParentId(String parentId) {
-    assert(_debugIsConnected, '');
-    _logger.info('getDraftMessageByParentId');
-    return db!.draftMessageDao.getDraftMessageByParentId(parentId);
+    return db!.draftMessageDao.getDraftMessageByCid(
+      cid,
+      parentId: parentId,
+    );
   }
 
   @override
@@ -428,6 +420,19 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     assert(_debugIsConnected, '');
     _logger.info('deleteMembersByCids');
     return db!.memberDao.deleteMemberByCids(cids);
+  }
+
+  @override
+  Future<void> deleteDraftMessageByCid(
+    String cid, {
+    String? parentId,
+  }) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteDraftMessageByCid');
+    return db!.draftMessageDao.deleteDraftMessageByCid(
+      cid,
+      parentId: parentId,
+    );
   }
 
   @override
