@@ -6,12 +6,12 @@ void main() {
   group('StreamMessageAction', () {
     test('equality is based on type', () {
       const action1 = StreamMessageAction(
-        type: StreamMessageActionType.reply,
+        type: StreamMessageActionType.quotedReply,
         title: Text('Reply'),
       );
 
       const action2 = StreamMessageAction(
-        type: StreamMessageActionType.reply,
+        type: StreamMessageActionType.quotedReply,
         title: Text('Reply (Different Text)'),
       );
 
@@ -28,13 +28,13 @@ void main() {
 
     test('creates with required parameters', () {
       const action = StreamMessageAction(
-        type: StreamMessageActionType.reply,
+        type: StreamMessageActionType.quotedReply,
         title: Text('Reply'),
         isDestructive: true,
         leading: Icon(Icons.reply),
       );
 
-      expect(action.type, StreamMessageActionType.reply);
+      expect(action.type, StreamMessageActionType.quotedReply);
       expect(action.title, isA<Text>());
       expect(action.isDestructive, isTrue);
       expect(action.leading, isA<Icon>());
@@ -44,28 +44,27 @@ void main() {
   group('StreamMessageActionType', () {
     test('has expected string values', () {
       expect(StreamMessageActionType.selectReaction, 'selectReaction');
-      expect(StreamMessageActionType.banUser, 'banUser');
-      expect(StreamMessageActionType.blockUser, 'blockUser');
       expect(StreamMessageActionType.copyMessage, 'copyMessage');
       expect(StreamMessageActionType.deleteMessage, 'deleteMessage');
+      expect(StreamMessageActionType.hardDeleteMessage, 'hardDeleteMessage');
       expect(StreamMessageActionType.editMessage, 'editMessage');
       expect(StreamMessageActionType.flagMessage, 'flagMessage');
       expect(StreamMessageActionType.markUnread, 'markUnread');
       expect(StreamMessageActionType.muteUser, 'muteUser');
+      expect(StreamMessageActionType.unmuteUser, 'unmuteUser');
       expect(StreamMessageActionType.pinMessage, 'pinMessage');
       expect(StreamMessageActionType.unpinMessage, 'unpinMessage');
-      expect(StreamMessageActionType.reply, 'reply');
-      expect(StreamMessageActionType.retry, 'retry');
+      expect(StreamMessageActionType.resendMessage, 'resendMessage');
       expect(StreamMessageActionType.quotedReply, 'quotedReply');
       expect(StreamMessageActionType.threadReply, 'threadReply');
     });
 
     test('is a String', () {
-      const type = StreamMessageActionType.reply;
+      const type = StreamMessageActionType.quotedReply;
       expect(type, isA<String>());
 
       const String stringValue = type;
-      expect(stringValue, 'reply');
+      expect(stringValue, 'quotedReply');
     });
   });
 }

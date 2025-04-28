@@ -16,7 +16,7 @@ Message createTestMessage({
   bool pinned = false,
   String? parentId,
   Poll? poll,
-  bool isDeleted = false,
+  MessageType type = MessageType.regular,
   int? replyCount,
 }) {
   return Message(
@@ -26,9 +26,16 @@ Message createTestMessage({
     pinned: pinned,
     parentId: parentId,
     poll: poll,
-    type: isDeleted ? MessageType.deleted : MessageType.regular,
-    deletedAt: isDeleted ? DateTime.now() : null,
+    type: type,
+    deletedAt: type == MessageType.deleted ? DateTime.now() : null,
     replyCount: replyCount,
+    moderation: switch (type) {
+      MessageType.error => const Moderation(
+          action: ModerationAction.bounce,
+          originalText: 'Original message text that violated policy',
+        ),
+      _ => null,
+    },
   );
 }
 
@@ -130,7 +137,7 @@ void main() {
 
   testWidgets('returns empty set for deleted messages', (tester) async {
     final context = await _getContext(tester);
-    final deletedMessage = createTestMessage(isDeleted: true);
+    final deletedMessage = createTestMessage(type: MessageType.deleted);
 
     final channel = _getChannelWithCapabilities(allChannelCapabilities);
     final actions = StreamMessageActionsBuilder.buildActions(
@@ -541,6 +548,94 @@ void main() {
         reason: 'Mark unread unavailable without read events capability',
       );
     });
+  });
+
+  group('buildBouncedErrorActions', () {
+    testWidgets('returns empty set for non-bounced messages', (tester) async {
+      final context = await _getContext(tester);
+      final regularMessage = createTestMessage();
+
+      final actions = StreamMessageActionsBuilder.buildBouncedErrorActions(
+        context: context,
+        message: regularMessage,
+      );
+
+      expect(actions.isEmpty, isTrue, reason: 'No actions for regular message');
+    });
+
+    testWidgets(
+      'builds actions for bounced messages with error',
+      (tester) async {
+        final context = await _getContext(tester);
+        final bouncedMessage = createTestMessage(type: MessageType.error);
+
+        final actions = StreamMessageActionsBuilder.buildBouncedErrorActions(
+          context: context,
+          message: bouncedMessage,
+        );
+
+        // Verify the specific actions for bounced messages
+        actions.expects(
+          StreamMessageActionType.resendMessage,
+          reason: 'Send Anyway action should be included',
+        );
+        actions.expects(
+          StreamMessageActionType.editMessage,
+          reason: 'Edit Message action should be included',
+        );
+        actions.expects(
+          StreamMessageActionType.hardDeleteMessage,
+          reason: 'Delete Message action should be included',
+        );
+
+        // Verify the count is correct
+        expect(actions.length, 3, reason: 'Should have exactly 3 actions');
+      },
+    );
+
+    testWidgets(
+      'handles onActionTap callback for bounced message actions',
+      (tester) async {
+        final context = await _getContext(tester);
+        final bouncedMessage = createTestMessage(type: MessageType.error);
+
+        StreamMessageActionType? tappedActionType;
+        Message? tappedMessage;
+
+        final actions = StreamMessageActionsBuilder.buildBouncedErrorActions(
+          context: context,
+          message: bouncedMessage,
+          onActionTap: (msg, actionType) {
+            tappedMessage = msg;
+            tappedActionType = actionType;
+          },
+        );
+
+        // Test retry action callback
+        final retryAction = actions.firstWhere(
+          (action) => action.type == StreamMessageActionType.resendMessage,
+        );
+        retryAction.onTap?.call(bouncedMessage);
+        expect(tappedActionType, StreamMessageActionType.resendMessage);
+        expect(tappedMessage, bouncedMessage);
+
+        // Test edit action callback
+        final editAction = actions.firstWhere(
+          (action) => action.type == StreamMessageActionType.editMessage,
+        );
+        editAction.onTap?.call(bouncedMessage);
+        expect(tappedActionType, StreamMessageActionType.editMessage);
+        expect(tappedMessage, bouncedMessage);
+
+        // Test delete action callback
+        final deleteAction = actions.firstWhere(
+          (action) => action.type == StreamMessageActionType.hardDeleteMessage,
+        );
+        deleteAction.onTap?.call(bouncedMessage);
+        expect(tappedActionType, StreamMessageActionType.hardDeleteMessage);
+        expect(tappedMessage, bouncedMessage);
+      },
+    );
   });
 }
 

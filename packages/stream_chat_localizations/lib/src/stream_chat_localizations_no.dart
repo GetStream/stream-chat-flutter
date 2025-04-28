@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Norwegian (`no`).
@@ -421,7 +423,6 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   @override
   String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
     if (isMuted) {
-      // ignore: lines_longer_than_80_chars
       return 'Er du sikker på at du vil oppheve ignoreringen av denne brukeren?';
     }
     return 'Er du sikker på at du vil ignorere denne brukeren?';

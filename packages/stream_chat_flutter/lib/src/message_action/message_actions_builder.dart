@@ -22,6 +22,57 @@ class StreamMessageActionsBuilder {
   /// Private constructor to prevent instantiation
   StreamMessageActionsBuilder._();
 
+  /// Returns a set of message actions for the "bounced with error" state.
+  ///
+  /// This method builds a set of [StreamMessageAction]s that are applicable to
+  /// the given [message] when it is in the "bounced with error" state.
+  ///
+  /// The actions include options to retry sending the message, edit or delete
+  /// the message.
+  static Set<StreamMessageAction> buildBouncedErrorActions({
+    required BuildContext context,
+    required Message message,
+    OnMessageActionTap? onActionTap,
+  }) {
+    // If the message is not bounced with an error, we don't show any actions.
+    if (!message.isBouncedWithError) return {};
+
+    return <StreamMessageAction>{
+      StreamMessageAction(
+        type: StreamMessageActionType.resendMessage,
+        iconColor: StreamChatTheme.of(context).colorTheme.accentPrimary,
+        title: Text(context.translations.sendAnywayLabel),
+        leading: const StreamSvgIcon(icon: StreamSvgIcons.circleUp),
+        onTap: switch (onActionTap) {
+          final onTap? => (message) =>
+              onTap(message, StreamMessageActionType.resendMessage),
+          _ => null,
+        },
+      ),
+      StreamMessageAction(
+        type: StreamMessageActionType.editMessage,
+        title: Text(context.translations.editMessageLabel),
+        leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
+        onTap: switch (onActionTap) {
+          final onTap? => (message) =>
+              onTap(message, StreamMessageActionType.editMessage),
+          _ => null,
+        },
+      ),
+      StreamMessageAction(
+        isDestructive: true,
+        type: StreamMessageActionType.hardDeleteMessage,
+        title: Text(context.translations.deleteMessageLabel),
+        leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+        onTap: switch (onActionTap) {
+          final onTap? => (message) =>
+              onTap(message, StreamMessageActionType.hardDeleteMessage),
+          _ => null,
+        },
+      ),
+    };
+  }
+
   /// Returns a set of message actions based on the provided message and channel
   /// capabilities.
   ///
@@ -41,7 +92,7 @@ class StreamMessageActionsBuilder {
 
     final messageState = message.state;
     if (messageState.isFailed) {
-      const actionType = StreamMessageActionType.quotedReply;
+      const actionType = StreamMessageActionType.resendMessage;
 
       final retryMessage = switch (onActionTap) {
         final onTap? => (Message message) => onTap(message, actionType),
@@ -190,7 +241,6 @@ class StreamMessageActionsBuilder {
       }
     }
 
-    // TODO: Add check for bounced messages.
     // Pinning a private message is not allowed, simply because pinning a
     // message is meant to bring attention to that message, that is not possible
     // with a message that is only visible to a subset of users.
@@ -250,11 +300,14 @@ class StreamMessageActionsBuilder {
     }
 
     if (channel.config?.mutes == true && !isSentByCurrentUser) {
-      final currentMutedUsers = currentUser?.mutes.map((mute) => mute.user.id);
-      final isMuted = currentMutedUsers?.contains(message.user?.id) ?? false;
-
-      const actionType = StreamMessageActionType.muteUser;
+      final mutedUsers = currentUser?.mutes.map((mute) => mute.target.id);
+      final isMuted = mutedUsers?.contains(message.user?.id) ?? false;
       final label = context.translations.toggleMuteUnmuteUserText;
+
+      final actionType = switch (isMuted) {
+        true => StreamMessageActionType.unmuteUser,
+        false => StreamMessageActionType.muteUser,
+      };
 
       messageActions.add(
         StreamMessageAction(

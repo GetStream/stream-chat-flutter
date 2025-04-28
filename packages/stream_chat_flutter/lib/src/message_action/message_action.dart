@@ -96,17 +96,14 @@ extension type const StreamMessageActionType(String type) implements String {
   /// Shows reaction selector for adding reactions to a message
   static const selectReaction = StreamMessageActionType('selectReaction');
 
-  /// Bans a user from the channel (requires moderator permissions)
-  static const banUser = StreamMessageActionType('banUser');
-
-  /// Blocks a user from sending direct messages to the current user
-  static const blockUser = StreamMessageActionType('blockUser');
-
   /// Copies message content to clipboard
   static const copyMessage = StreamMessageActionType('copyMessage');
 
   /// Deletes a message from the conversation
   static const deleteMessage = StreamMessageActionType('deleteMessage');
+
+  /// Permanently deletes a message from the conversation
+  static const hardDeleteMessage = StreamMessageActionType('hardDeleteMessage');
 
   /// Modifies content of an existing message
   static const editMessage = StreamMessageActionType('editMessage');
@@ -120,17 +117,17 @@ extension type const StreamMessageActionType(String type) implements String {
   /// Mutes a user to prevent notifications from their messages
   static const muteUser = StreamMessageActionType('muteUser');
 
+  /// Unmutes a user to receive notifications from their messages
+  static const unmuteUser = StreamMessageActionType('unmuteUser');
+
   /// Pins a message to make it prominently visible in the channel
   static const pinMessage = StreamMessageActionType('pinMessage');
 
   /// Removes a previously pinned message
   static const unpinMessage = StreamMessageActionType('unpinMessage');
 
-  /// Creates a standard reply to a message
-  static const reply = StreamMessageActionType('reply');
-
   /// Attempts to resend a message that failed to send
-  static const retry = StreamMessageActionType('retry');
+  static const resendMessage = StreamMessageActionType('resendMessage');
 
   /// Creates a reply with quoted original message content
   static const quotedReply = StreamMessageActionType('quotedReply');

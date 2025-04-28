@@ -17,7 +17,7 @@ void main() {
         StreamMessageActionItem(
           message: message,
           action: const StreamMessageAction(
-            type: StreamMessageActionType.reply,
+            type: StreamMessageActionType.quotedReply,
             title: Text('Reply'),
             leading: Icon(Icons.reply),
           ),
@@ -33,7 +33,7 @@ void main() {
     Message? tappedMessage;
 
     final actionWithTap = StreamMessageAction(
-      type: StreamMessageActionType.reply,
+      type: StreamMessageActionType.quotedReply,
       title: const Text('Reply'),
       leading: const Icon(Icons.reply),
       onTap: (msg) {
