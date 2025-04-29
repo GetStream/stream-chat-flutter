@@ -2,7 +2,7 @@ import 'dart:async' show Timer;
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'package:stream_chat_flutter_core/src/message_text_field_controller.dart';
@@ -156,7 +156,7 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   TextSelection get selection => _textFieldController.selection;
 
   set selection(TextSelection newSelection) {
-    _textFieldController.selection = selection;
+    _textFieldController.selection = newSelection;
   }
 
   /// Returns the textEditingValue associated with this controller.
