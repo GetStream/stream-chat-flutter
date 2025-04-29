@@ -4,6 +4,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/stream_message_input_controller.dart';
 
+class ValueNotifierListenerMock extends Mock {
+  void call();
+}
+
 void main() {
   group('StreamMessageInputController Tests', () {
     late StreamMessageInputController controller;
@@ -66,6 +70,17 @@ void main() {
         controller.textEditingValue = newValue;
         expect(controller.text, 'New text');
         expect(controller.selection.baseOffset, 4);
+      });
+      
+      test('selection setter updates text field controller selection', () {
+        final newSelection = TextSelection.collapsed(offset: 3);
+        
+        // Note: There's a typo in the controller's setter that might cause this to fail
+        // as it assigns to self instead of _textFieldController.selection
+        controller.selection = newSelection;
+        
+        // Check through getting the selection if it was properly set
+        expect(controller.selection.baseOffset, newSelection.baseOffset);
       });
     });
 
@@ -324,6 +339,21 @@ void main() {
         controller.startCooldown(0);
         expect(controller.cooldownTimeOut, 0);
       });
+      
+      test('cooldown timer triggers notifications on changes', () {
+        // Setup a mock listener to track notifications
+        final listener = ValueNotifierListenerMock();
+        controller.addListener(listener.call);
+        
+        // Start cooldown
+        controller.startCooldown(2);
+        
+        // Verify the listener was called when cooldown was set
+        verify(() => listener.call()).called(1);
+        
+        // Clean up
+        controller.removeListener(listener.call);
+      });
     });
     
     group('Reset and Clear', () {
@@ -360,6 +390,36 @@ void main() {
         
         expect(initialController.message.id, 'message-id');
         initialController.dispose();
+      });
+    });
+
+    group('Listener Notifications', () {
+      test('modifying message triggers value notifier', () {
+        final listener = ValueNotifierListenerMock();
+        controller.addListener(listener.call);
+        
+        // Changing the message should trigger the listener
+        controller.message = Message(text: 'New message');
+        
+        verify(() => listener.call()).called(1);
+        
+        controller.removeListener(listener.call);
+      });
+      
+      test('setting various properties triggers listeners', () {
+        final listener = ValueNotifierListenerMock();
+        controller.addListener(listener.call);
+        
+        // Test various setters
+        controller.text = 'New text';
+        controller.quotedMessage = Message(id: 'quoted');
+        controller.showInChannel = true;
+        controller.poll = Poll(id: 'poll-1');
+        
+        // Verify listener was called multiple times
+        verify(() => listener.call()).called(4);
+        
+        controller.removeListener(listener.call);
       });
     });
 
@@ -408,6 +468,33 @@ void main() {
         expect(json, isA<String>());
         expect(json.contains('Test'), isTrue);
         
+        restorable.dispose();
+      });
+      
+      test('fromPrimitives deserializes message correctly', () {
+        final message = Message(
+          id: 'test-id',
+          text: 'Test message',
+          attachments: [Attachment(type: 'image')],
+          mentionedUsers: [User(id: 'user-1')],
+        );
+        final restorable = StreamRestorableMessageInputController(message: message);
+        
+        // Convert to primitives
+        final json = restorable.toPrimitives();
+        
+        // Restore from primitives
+        final controller = restorable.fromPrimitives(json);
+        
+        // Verify all properties were restored
+        expect(controller.text, 'Test message');
+        expect(controller.message.id, 'test-id');
+        expect(controller.attachments.length, 1);
+        expect(controller.attachments.first.type, 'image');
+        expect(controller.mentionedUsers.length, 1);
+        expect(controller.mentionedUsers.first.id, 'user-1');
+        
+        controller.dispose();
         restorable.dispose();
       });
     });
