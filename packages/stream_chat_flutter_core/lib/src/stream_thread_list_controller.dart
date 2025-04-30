@@ -57,12 +57,11 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
 
   /// The query filters to use.
   ///
-  /// You can query on any of the custom fields you've defined on the
-  /// [PollVote].
+  /// You can query on any of the custom fields you've defined on the [Thread].
   final Filter? filter;
   Filter? _activeFilter;
 
-  /// The sorting used for the poll votes matching the filters.
+  /// The sorting used for the threads matching the filters.
   ///
   /// Sorting is based on field and direction, multiple sorting options
   /// can be provided.
