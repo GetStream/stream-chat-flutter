@@ -81,13 +81,13 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   final ThreadOptions options;
   ThreadOptions _activeOptions;
 
-  /// Allows for the change of filters used for poll vote queries.
+  /// Allows for the change of filters used for thread queries.
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
   set filter(Filter? value) => _activeFilter = value;
 
-  /// Allows for the change of the query sort used for poll vote queries.
+  /// Allows for the change of the query sort used for thread queries.
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
