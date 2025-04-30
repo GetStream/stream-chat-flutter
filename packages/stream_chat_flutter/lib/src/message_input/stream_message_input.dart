@@ -545,38 +545,42 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _effectiveFocusNode.addListener(_focusNodeListener);
 
     WidgetsBinding.instance.endOfFrame.then((_) {
-      if (!mounted) return;
-
-      // Call the listener once to make sure the initial state is reflected
-      // correctly in the UI.
-      _onChangedDebounced.call();
-
-      final channel = StreamChannel.of(context).channel;
-      final config = StreamChatConfiguration.of(context);
-
-      // Resumes the cooldown if the channel has currently an active cooldown.
-      if (!_isEditing) {
-        _effectiveController.startCooldown(channel.getRemainingCooldown());
-      }
-
-      if (config.draftMessagesEnabled) {
-        // Starts listening to the draft stream for the current channel/thread.
-        final draftStream = switch (_effectiveController.message.parentId) {
-          final parentId? => channel.state?.threadDraftStream(parentId),
-          _ => channel.state?.draftStream,
-        };
-
-        _draftStreamSubscription = draftStream?.distinct().listen((draft) {
-          // If the draft is removed, reset the controller.
-          if (draft == null) return _effectiveController.reset();
-
-          // Otherwise, update the controller with the draft message.
-          if (draft.message case final draftMessage) {
-            _effectiveController.message = draftMessage.toMessage();
-          }
-        });
-      }
+      if (mounted) return _initializeState();
     });
+  }
+
+  void _initializeState() {
+    // Call the listener once to make sure the initial state is reflected
+    // correctly in the UI.
+    _onChangedDebounced.call();
+
+    final channel = StreamChannel.of(context).channel;
+    final config = StreamChatConfiguration.of(context);
+
+    // Resumes the cooldown if the channel has currently an active cooldown.
+    if (!_isEditing) {
+      _effectiveController.startCooldown(channel.getRemainingCooldown());
+    }
+
+    // Starts listening to the draft stream for the current channel/thread.
+    if (config.draftMessagesEnabled) {
+      final draftStream = switch (_effectiveController.message.parentId) {
+        final parentId? => channel.state?.threadDraftStream(parentId),
+        _ => channel.state?.draftStream,
+      };
+
+      _draftStreamSubscription = draftStream?.distinct().listen(_onDraftUpdate);
+    }
+  }
+
+  void _onDraftUpdate(Draft? draft) {
+    // If the draft is removed, reset the controller.
+    if (draft == null) return _effectiveController.reset();
+
+    // Otherwise, update the controller with the draft message.
+    if (draft.message case final draftMessage) {
+      _effectiveController.message = draftMessage.toMessage();
+    }
   }
 
   @override
