@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added teams role support for users.
+- Added support for Filtering and Sorting in the `client.queryThreads` method.
 
 ## 9.8.0
 
