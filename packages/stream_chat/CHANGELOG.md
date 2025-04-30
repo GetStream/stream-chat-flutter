@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added teams role support for users.
+
 ## 9.8.0
 
 ✅ Added

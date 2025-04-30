@@ -28,10 +28,14 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
           (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const [],
       language: json['language'] as String?,
+      teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ),
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'id': instance.id,
       if (instance.language case final value?) 'language': value,
+      if (instance.teamsRole case final value?) 'teams_role': value,
       'extra_data': instance.extraData,
     };

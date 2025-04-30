@@ -47,4 +47,7 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
           (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const [],
       language: json['language'] as String?,
+      teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ),
     );
