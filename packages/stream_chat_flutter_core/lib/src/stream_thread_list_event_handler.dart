@@ -218,6 +218,48 @@ mixin class StreamThreadListEventHandler {
     return _markThreadAsUnread(thread, user, createdAt, controller);
   }
 
+  /// Function which gets called for the event [EventType.draftUpdated].
+  ///
+  /// This event is fired when a draft is either created or updated.
+  ///
+  /// By default, this updates the draft in the thread.
+  void onDraftUpdated(
+    Event event,
+    StreamThreadListController controller,
+  ) {
+    final draft = event.draft;
+    if (draft == null) return;
+
+    final parentMessageId = draft.parentId;
+    final thread = controller.getThread(parentMessageId: parentMessageId);
+    if (thread == null) return;
+
+    final updatedThread = thread.copyWith(draft: draft);
+
+    controller.updateThread(updatedThread);
+  }
+
+  /// Function which gets called for the event [EventType.draftDeleted].
+  ///
+  /// This event is fired when a draft is deleted.
+  ///
+  /// By default, this deletes the draft in the thread.
+  void onDraftDeleted(
+    Event event,
+    StreamThreadListController controller,
+  ) {
+    final draft = event.draft;
+    if (draft == null) return;
+
+    final parentMessageId = draft.parentId;
+    final thread = controller.getThread(parentMessageId: parentMessageId);
+    if (thread == null) return;
+
+    final updatedThread = thread.copyWith(draft: null);
+
+    controller.updateThread(updatedThread);
+  }
+
   void _markThreadAsRead(
     Thread threadInfo,
     User user,

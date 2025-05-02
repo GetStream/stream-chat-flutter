@@ -631,11 +631,12 @@ void main() {
       verify(() => mockDatabase.memberDao.deleteMemberByCids(cids)).called(1);
     });
 
-    // Draft message tests
     test('getDraftMessageByCid', () async {
       const cid = 'testCid';
+      const parentId = 'testParentId';
       final draft = Draft(
         channelCid: cid,
+        parentId: parentId,
         createdAt: DateTime.now(),
         message: DraftMessage(
           id: 'testDraftId',
@@ -652,33 +653,6 @@ void main() {
       expect(fetchedDraft.message.id, draft.message.id);
       expect(fetchedDraft.message.text, draft.message.text);
       verify(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
-          .called(1);
-    });
-
-    test('getDraftMessageByParentId', () async {
-      const parentId = 'testParentId';
-      final draft = Draft(
-        channelCid: 'testCid',
-        createdAt: DateTime.now(),
-        parentId: parentId,
-        message: DraftMessage(
-          id: 'testDraftId',
-          text: 'Test thread draft message',
-          parentId: parentId,
-        ),
-      );
-
-      when(() =>
-              mockDatabase.draftMessageDao.getDraftMessageByParentId(parentId))
-          .thenAnswer((_) async => draft);
-
-      final fetchedDraft = await client.getDraftMessageByParentId(parentId);
-      expect(fetchedDraft, isNotNull);
-      expect(fetchedDraft!.parentId, parentId);
-      expect(fetchedDraft.message.id, draft.message.id);
-      expect(fetchedDraft.message.text, draft.message.text);
-      verify(() =>
-              mockDatabase.draftMessageDao.getDraftMessageByParentId(parentId))
           .called(1);
     });
 
@@ -703,19 +677,17 @@ void main() {
           .called(1);
     });
 
-    test('deleteDraftMessagesByIds', () async {
-      final messageIds = ['testDraftId1', 'testDraftId2', 'testDraftId3'];
+    test('deleteDraftMessageByCid', () async {
+      const cid = 'testCid';
+      const parentId = 'testParentId';
 
-      when(() =>
-              mockDatabase.draftMessageDao.deleteDraftMessagesByIds(messageIds))
-          .thenAnswer((_) async {});
+      when(() => mockDatabase.draftMessageDao.deleteDraftMessageByCid(cid,
+          parentId: parentId)).thenAnswer((_) async {});
 
-      await client.deleteDraftMessagesByIds(messageIds);
-      verify(() =>
-              mockDatabase.draftMessageDao.deleteDraftMessagesByIds(messageIds))
-          .called(1);
+      await client.deleteDraftMessageByCid(cid, parentId: parentId);
+      verify(() => mockDatabase.draftMessageDao
+          .deleteDraftMessageByCid(cid, parentId: parentId)).called(1);
     });
-    // End of draft message tests
 
     tearDown(() async {
       await client.disconnect(flush: true);

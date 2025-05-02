@@ -58,7 +58,7 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> deletePollVotesByPollIds(List<String> pollIds) => Future.value();
 
   @override
-  Future<void> deleteDraftMessagesByIds(List<String> messageIds) =>
+  Future<void> deleteDraftMessageByCid(String cid, {String? parentId}) =>
       Future.value();
 
   @override
@@ -105,17 +105,14 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<List<Read>> getReadsByCid(String cid) async => [];
 
   @override
-  Future<Draft?> getDraftMessageByCid(String cid) async => Draft(
+  Future<Draft?> getDraftMessageByCid(
+    String cid, {
+    String? parentId,
+  }) async =>
+      Draft(
         channelCid: cid,
-        createdAt: DateTime.now(),
-        message: DraftMessage(id: 'message-id', text: 'message-text'),
-      );
-
-  @override
-  Future<Draft?> getDraftMessageByParentId(String parentId) async => Draft(
-        channelCid: 'test:cid',
-        createdAt: DateTime.now(),
         parentId: parentId,
+        createdAt: DateTime.now(),
         message: DraftMessage(id: 'message-id', text: 'message-text'),
       );
 
@@ -218,9 +215,10 @@ void main() {
       persistenceClient.updatePolls([poll]);
     });
 
-    test('deleteDraftMessagesByIds', () {
-      const messageIds = ['message-id'];
-      persistenceClient.deleteDraftMessagesByIds(messageIds);
+    test('deleteDraftMessageByCid', () {
+      const cid = 'test:cid';
+      const parentId = 'parent-id';
+      persistenceClient.deleteDraftMessageByCid(cid, parentId: parentId);
     });
 
     test('updateDraftMessages', () async {

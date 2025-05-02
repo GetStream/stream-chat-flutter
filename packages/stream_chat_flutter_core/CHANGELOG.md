@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamDraftListController` to manage the list of draft messages.
+
 ## 9.8.0
 
 ✅ Added

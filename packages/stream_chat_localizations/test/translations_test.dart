@@ -19,6 +19,7 @@ void main() {
       expect(localizations.userLastOnlineText, isNotNull);
       expect(localizations.userOnlineText, isNotNull);
       expect(localizations.userOnlineText, isNotNull);
+      expect(localizations.draftLabel, isNotNull);
       // no users
       expect(localizations.userTypingText([]), isNotNull);
       // single user

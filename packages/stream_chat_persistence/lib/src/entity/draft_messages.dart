@@ -54,5 +54,5 @@ class DraftMessages extends Table {
   TextColumn get extraData => text().nullable().map(MapConverter())();
 
   @override
-  Set<Column<Object>>? get primaryKey => {id};
+  Set<Column> get primaryKey => {id};
 }

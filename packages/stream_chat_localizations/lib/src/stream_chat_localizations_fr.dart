@@ -669,4 +669,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String pollSomeoneCreatedText(String username) => '$username a créé';
+
+  @override
+  String get draftLabel => 'Brouillon';
 }

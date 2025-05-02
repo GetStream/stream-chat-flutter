@@ -79,11 +79,9 @@ abstract class ChatPersistenceClient {
     PaginationParams? messagePagination,
   });
 
-  /// Get stored [Draft] message by providing channel [cid].
-  Future<Draft?> getDraftMessageByCid(String cid);
-
-  /// Get stored [Draft] message by providing parent message [id].
-  Future<Draft?> getDraftMessageByParentId(String parentId);
+  /// Get stored [Draft] message by providing channel [cid] and a optional
+  /// [parentId] for thread messages.
+  Future<Draft?> getDraftMessageByCid(String cid, {String? parentId});
 
   /// Get [ChannelState] data by providing channel [cid]
   Future<ChannelState> getChannelStateByCid(
@@ -166,8 +164,9 @@ abstract class ChatPersistenceClient {
   /// Remove a channel by [channelId]
   Future<void> deleteChannels(List<String> cids);
 
-  /// Removes all the draft messages by draft [messageIds]
-  Future<void> deleteDraftMessagesByIds(List<String> messageIds);
+  /// Removes the draft message by matching [DraftMessages.channelCid] and
+  /// [DraftMessages.parentId].
+  Future<void> deleteDraftMessageByCid(String cid, {String? parentId});
 
   /// Updates the message data of a particular channel [cid] with
   /// the new [messages] data
@@ -278,6 +277,7 @@ abstract class ChatPersistenceClient {
     final channelWithPinnedMessages = <String, List<Message>?>{};
     final channelWithReads = <String, List<Read>?>{};
     final channelWithMembers = <String, List<Member>?>{};
+    final drafts = <Draft>[];
 
     final users = <User>[];
     final reactions = <Reaction>[];
@@ -286,9 +286,6 @@ abstract class ChatPersistenceClient {
     final polls = <Poll>[];
     final pollVotes = <PollVote>[];
     final pollVotesToDelete = <String>[];
-
-    final drafts = <Draft>[];
-    final draftsToDelete = <String>[];
 
     for (final state in channelStates) {
       final channel = state.channel;
@@ -339,8 +336,6 @@ abstract class ChatPersistenceClient {
         ...?pinnedMessages?.map((it) => it.draft),
       ].nonNulls);
 
-      draftsToDelete.addAll(drafts.map((it) => it.message.id));
-
       users.addAll([
         channel.createdBy,
         ...?messages?.map((it) => it.user),
@@ -361,7 +356,6 @@ abstract class ChatPersistenceClient {
       deleteReactionsByMessageId(reactionsToDelete),
       deletePinnedMessageReactionsByMessageId(pinnedReactionsToDelete),
       deletePollVotesByPollIds(pollVotesToDelete),
-      deleteDraftMessagesByIds(draftsToDelete),
     ]);
 
     // Updating first as does not depend on any other table.

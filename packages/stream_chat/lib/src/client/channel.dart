@@ -2608,15 +2608,7 @@ class ChannelClientState {
         final draft = event.draft;
         if (draft == null) return;
 
-        if (draft.parentId case final parentId?) {
-          for (final message in messages) {
-            if (message.id == parentId) {
-              return updateMessage(message.copyWith(draft: draft));
-            }
-          }
-        }
-
-        updateChannelState(channelState.copyWith(draft: draft));
+        return updateDraft(draft);
       }),
     );
   }
@@ -2627,19 +2619,7 @@ class ChannelClientState {
         final draft = event.draft;
         if (draft == null) return;
 
-        if (draft.parentId case final parentId?) {
-          for (final message in messages) {
-            if (message.id == parentId) {
-              return updateMessage(
-                message.copyWith(draft: null),
-              );
-            }
-          }
-        }
-
-        updateChannelState(
-          channelState.copyWith(draft: null),
-        );
+        return deleteDraft(draft);
       }),
     );
   }
@@ -2777,6 +2757,48 @@ class ChannelClientState {
     updateChannelState(
       channelState.copyWith(
         read: updatedReads,
+      ),
+    );
+  }
+
+  /// Updates the [draft] in the channel state or the message if it exists.
+  void updateDraft(Draft draft) {
+    if (draft.parentId case final parentId?) {
+      for (final message in messages) {
+        if (message.id == parentId) {
+          return updateMessage(message.copyWith(draft: draft));
+        }
+      }
+    }
+
+    updateChannelState(
+      channelState.copyWith(
+        draft: draft,
+      ),
+    );
+  }
+
+  /// Deletes the [draft] from the state if it exists.
+  void deleteDraft(Draft draft) async {
+    // Delete the draft from the persistence client.
+    await _channel._client.chatPersistenceClient?.deleteDraftMessageByCid(
+      draft.channelCid,
+      parentId: draft.parentId,
+    );
+
+    if (draft.parentId case final parentId?) {
+      for (final message in messages) {
+        if (message.id == parentId) {
+          return updateMessage(
+            message.copyWith(draft: null),
+          );
+        }
+      }
+    }
+
+    updateChannelState(
+      channelState.copyWith(
+        draft: null,
       ),
     );
   }

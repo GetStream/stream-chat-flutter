@@ -1,3 +1,5 @@
+// ignore_for_file: join_return_with_assignment
+
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
@@ -43,33 +45,20 @@ class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase>
     );
   }
 
-  /// Returns the draft message by matching [DraftMessages.id] with [id]
-  Future<Draft?> getDraftMessageById(String id) async {
-    final query = select(draftMessages)..where((tbl) => tbl.id.equals(id));
-
-    final result = await query.getSingleOrNull();
-    if (result == null) return null;
-
-    return _draftFromEntity(result);
-  }
-
   /// Returns the draft message by matching [DraftMessages.channelCid].
   ///
   /// Note: This will skip the thread draft messages.
-  Future<Draft?> getDraftMessageByCid(String cid) async {
+  Future<Draft?> getDraftMessageByCid(
+    String cid, {
+    String? parentId,
+  }) async {
     final query = select(draftMessages)
-      ..where((tbl) => tbl.channelCid.equals(cid) & tbl.parentId.isNull());
+      ..where((tbl) {
+        var filter = tbl.channelCid.equals(cid);
+        filter &= tbl.parentId.equalsNullable(parentId);
 
-    final result = await query.getSingleOrNull();
-    if (result == null) return null;
-
-    return _draftFromEntity(result);
-  }
-
-  /// Returns the draft message by matching [DraftMessages.parentId].
-  Future<Draft?> getDraftMessageByParentId(String parentId) async {
-    final query = select(draftMessages)
-      ..where((tbl) => tbl.parentId.equals(parentId));
+        return filter;
+      });
 
     final result = await query.getSingleOrNull();
     if (result == null) return null;
@@ -86,24 +75,31 @@ class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase>
 
         // Find and delete existing drafts with the same channelCid
         // and parentId (if any).
-        final deleteQuery = delete(draftMessages)
-          ..where((tbl) {
-            var filter = tbl.channelCid.equals(entity.channelCid);
-            if (entity.parentId case final parentId?) {
-              filter &= tbl.parentId.equals(parentId);
-            }
+        await deleteDraftMessageByCid(
+          entity.channelCid,
+          parentId: entity.parentId,
+        );
 
-            return filter;
-          });
-
-        await deleteQuery.go();
+        // Insert the new draft message.
         await into(draftMessages).insertOnConflictUpdate(entity);
       }
     });
   }
 
-  /// Deletes all the draft messages whose [DraftMessages.id] is present in
-  /// [messageIds].
-  Future<void> deleteDraftMessagesByIds(List<String> messageIds) =>
-      (delete(draftMessages)..where((tbl) => tbl.id.isIn(messageIds))).go();
+  /// Deletes the draft message by matching [DraftMessages.channelCid] and
+  /// [DraftMessages.parentId].
+  Future<void> deleteDraftMessageByCid(
+    String cid, {
+    String? parentId,
+  }) {
+    final query = delete(draftMessages)
+      ..where((tbl) {
+        var filter = tbl.channelCid.equals(cid);
+        filter &= tbl.parentId.equalsNullable(parentId);
+
+        return filter;
+      });
+
+    return query.go();
+  }
 }

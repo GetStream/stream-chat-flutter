@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sample_app/app.dart';
+import 'package:sample_app/pages/draft_list_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/pages/user_mentions_page.dart';
 import 'package:sample_app/routes/routes.dart';
@@ -82,6 +83,15 @@ class _ChannelListPageState extends State<ChannelListPage> {
         ),
         label: 'Threads',
       ),
+      BottomNavigationBarItem(
+        icon: Icon(
+          Icons.edit_note_rounded,
+          color: _isSelected(3)
+              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
+              : Colors.grey,
+        ),
+        label: 'Drafts',
+      ),
     ];
   }
 
@@ -125,6 +135,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           ChannelList(),
           UserMentionsPage(),
           ThreadListPage(),
+          DraftListPage(),
         ],
       ),
     );

@@ -650,4 +650,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String pollSomeoneCreatedText(String username) => '$username opprettet';
+
+  @override
+  String get draftLabel => 'Utkast';
 }

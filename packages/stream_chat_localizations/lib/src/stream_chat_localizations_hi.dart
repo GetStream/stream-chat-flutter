@@ -660,4 +660,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String pollSomeoneCreatedText(String username) => '$username ने बनाया';
+
+  @override
+  String get draftLabel => 'ड्राफ्ट';
 }

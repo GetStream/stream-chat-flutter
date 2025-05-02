@@ -663,4 +663,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String pollSomeoneCreatedText(String username) => '$username criou';
+
+  @override
+  String get draftLabel => 'Rascunho';
 }

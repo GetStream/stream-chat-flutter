@@ -59,8 +59,11 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       _ => null,
     };
 
-    final draft = await switch ((fetchDraft, msgEntity.draftMessageId)) {
-      (true, final id?) => _db.draftMessageDao.getDraftMessageById(id),
+    final draft = await switch (fetchDraft) {
+      true => _db.draftMessageDao.getDraftMessageByCid(
+          msgEntity.channelCid,
+          parentId: msgEntity.parentId,
+        ),
       _ => null,
     };
 

@@ -657,4 +657,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String pollSomeoneCreatedText(String username) => '$username hat erstellt';
+
+  @override
+  String get draftLabel => 'Entwurf';
 }

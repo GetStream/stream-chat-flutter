@@ -506,6 +506,9 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                     ],
                     builder: (context, child) => StreamChat(
                       client: _initNotifier.initData!.client,
+                      streamChatConfigData: StreamChatConfigurationData(
+                        draftMessagesEnabled: true,
+                      ),
                       child: child,
                     ),
                     routerConfig: _setupRouter(),
