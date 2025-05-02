@@ -1,3 +1,7 @@
+## Upcoming
+
+- Added support for `User.teamsRole` field.
+
 ## 9.8.0
 
 - Added `pinnedAt` and `archivedAt` fields on `Member`.

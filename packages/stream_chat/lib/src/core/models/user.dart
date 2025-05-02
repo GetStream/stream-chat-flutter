@@ -45,6 +45,7 @@ class User extends Equatable implements ComparableFieldProvider {
     this.banExpires,
     this.teams = const [],
     this.language,
+    this.teamsRole,
   }) :
         // For backwards compatibility, set 'name', 'image' in [extraData].
         extraData = {
@@ -71,6 +72,7 @@ class User extends Equatable implements ComparableFieldProvider {
     'ban_expires',
     'teams',
     'language',
+    'teams_role',
   ];
 
   /// User id.
@@ -130,6 +132,12 @@ class User extends Equatable implements ComparableFieldProvider {
   @JsonKey(includeIfNull: false)
   final String? language;
 
+  /// The roles for the user in the teams.
+  ///
+  /// eg: `{'teamId': 'role', 'teamId2': 'role2'}`
+  @JsonKey(includeIfNull: false)
+  final Map< /*Team*/ String, /*Role*/ String>? teamsRole;
+
   /// Map of custom user extraData.
   final Map<String, Object?> extraData;
 
@@ -157,6 +165,7 @@ class User extends Equatable implements ComparableFieldProvider {
     DateTime? banExpires,
     List<String>? teams,
     String? language,
+    Map<String, String>? teamsRole,
   }) =>
       User(
         id: id ?? this.id,
@@ -175,6 +184,7 @@ class User extends Equatable implements ComparableFieldProvider {
         banExpires: banExpires ?? this.banExpires,
         teams: teams ?? this.teams,
         language: language ?? this.language,
+        teamsRole: teamsRole ?? this.teamsRole,
       );
 
   @override
@@ -188,6 +198,7 @@ class User extends Equatable implements ComparableFieldProvider {
         banExpires,
         teams,
         language,
+        teamsRole,
       ];
 
   @override

@@ -14,6 +14,7 @@ extension UserEntityX on UserEntity {
         extraData: extraData,
         banned: banned,
         createdAt: createdAt,
+        teamsRole: teamsRole,
       );
 }
 
@@ -29,6 +30,7 @@ extension UserX on User {
         lastActive: lastActive,
         online: online,
         banned: banned,
+        teamsRole: teamsRole,
         extraData: extraData,
       );
 }
