@@ -85,18 +85,27 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new filter.
   set filter(Filter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for thread queries.
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder<Thread>? value) => _activeSort = value;
 
   /// Allows for the change of the [options] at runtime.
   ///
   /// Use this if you need to support runtime option changes,
   /// through custom filters UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new option.
   set options(ThreadOptions options) => _activeOptions = options;
 
   /// The ids of the threads that have unseen messages.
