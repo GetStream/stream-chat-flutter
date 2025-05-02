@@ -112,24 +112,36 @@ class StreamMessageSearchListController
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new filter.
   set filter(Filter value) => _activeFilter = value;
 
   /// Allows for the change of message filters used for user queries.
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new filter.
   set messageFilter(Filter? value) => _activeMessageFilter = value;
 
   /// Allows for the change of filters used for user queries.
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new filter.
   set searchQuery(String? value) => _activeSearchQuery = value;
 
   /// Allows for the change of the query sort used for user queries.
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder? value) => _activeSort = value;
 
   @override

@@ -30,6 +30,7 @@ import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
@@ -1841,11 +1842,17 @@ class StreamChatClient {
       _chatApi.general.enrichUrl(url);
 
   /// Queries threads with the given [options] and [pagination] params.
+  ///
+  /// Optionally, pass [filter] and [sort] to filter and sort the threads.
   Future<QueryThreadsResponse> queryThreads({
+    Filter? filter,
+    SortOrder<Thread>? sort,
     ThreadOptions options = const ThreadOptions(),
     PaginationParams pagination = const PaginationParams(),
   }) =>
       _chatApi.threads.queryThreads(
+        filter: filter,
+        sort: sort,
         options: options,
         pagination: pagination,
       );
