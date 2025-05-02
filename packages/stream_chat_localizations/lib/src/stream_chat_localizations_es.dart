@@ -557,10 +557,17 @@ No es posible añadir más de $limit archivos adjuntos
   String get updateYourCommentLabel => 'Actualizar tu comentario';
 
   @override
-  String get enterYourCommentLabel => 'Ingresar tu comentario';
+  String get enterYourCommentLabel => 'Ingresa tu comentario';
+
+  @override
+  String get endVoteConfirmationText =>
+      '¿Estás seguro de que quieres finalizar la votación?';
 
   @override
   String get createLabel => 'Crear';
+
+  @override
+  String get endLabel => 'Finalizar';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {

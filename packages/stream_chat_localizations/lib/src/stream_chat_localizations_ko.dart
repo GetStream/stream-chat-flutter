@@ -538,7 +538,13 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => '댓글 입력';
 
   @override
+  String get endVoteConfirmationText => '투표를 종료하시겠습니까?';
+
+  @override
   String get createLabel => '생성';
+
+  @override
+  String get endLabel => '종료';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {

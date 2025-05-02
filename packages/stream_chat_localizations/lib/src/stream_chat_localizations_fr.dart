@@ -559,10 +559,17 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get updateYourCommentLabel => 'Mettre à jour votre commentaire';
 
   @override
-  String get enterYourCommentLabel => 'Saisir votre commentaire';
+  String get enterYourCommentLabel => 'Entrez votre commentaire';
+
+  @override
+  String get endVoteConfirmationText =>
+      'Êtes-vous sûr de vouloir terminer le vote?';
 
   @override
   String get createLabel => 'Créer';
+
+  @override
+  String get endLabel => 'Terminer';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {

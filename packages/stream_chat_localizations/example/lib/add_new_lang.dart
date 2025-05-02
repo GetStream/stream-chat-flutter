@@ -578,7 +578,14 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
+  String get endVoteConfirmationText =>
+      'Are you sure you want to end the poll?';
+
+  @override
   String get createLabel => 'Create';
+
+  @override
+  String get endLabel => 'End';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {

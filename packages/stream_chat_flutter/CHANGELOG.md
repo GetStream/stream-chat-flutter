@@ -4,6 +4,7 @@
 
 - Added support for Draft messages preview.
 - Added a new `StreamDraftListView` for displaying draft messages.
+- Added a confirmation dialog for end vote in Polls. [[#2211]](https://github.com/GetStream/stream-chat-flutter/issues/2211)
 
 ## 9.8.0
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_add_comment_dialog.dart';
+import 'package:stream_chat_flutter/src/poll/interactor/poll_end_vote_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_suggest_option_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/stream_poll_interactor.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_comments_dialog.dart';
@@ -67,6 +68,13 @@ class _PollMessageState extends State<PollMessage> {
 
         final channel = StreamChannel.of(context).channel;
 
+        Future<void> onEndVote() async {
+          final confirm = await showPollEndVoteDialog(context: context);
+          if (confirm == null || !confirm) return;
+
+          channel.closePoll(poll).ignore();
+        }
+
         Future<void> onAddComment() async {
           final commentText = await showPollAddCommentDialog(
             context: context,
@@ -94,7 +102,7 @@ class _PollMessageState extends State<PollMessage> {
             poll: poll,
             currentUser: currentUser,
             visibleOptionCount: _maxVisibleOptionCount,
-            onEndVote: () => channel.closePoll(poll),
+            onEndVote: onEndVote,
             onCastVote: (option) => channel.castPollVote(message, poll, option),
             onRemoveVote: (vote) => channel.removePollVote(message, poll, vote),
             onAddComment: onAddComment,

@@ -251,7 +251,9 @@ void main() {
       expect(localizations.anonymousPollLabel, isNotNull);
       expect(localizations.suggestAnOptionLabel, isNotNull);
       expect(localizations.addACommentLabel, isNotNull);
+      expect(localizations.endVoteConfirmationText, isNotNull);
       expect(localizations.createLabel, isNotNull);
+      expect(localizations.endLabel, isNotNull);
       expect(localizations.endVoteLabel, isNotNull);
       expect(localizations.enterANewOptionLabel, isNotNull);
       expect(localizations.enterYourCommentLabel, isNotNull);

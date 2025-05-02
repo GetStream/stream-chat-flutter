@@ -443,8 +443,14 @@ abstract class Translations {
   /// The label for "Enter your comment".
   String get enterYourCommentLabel;
 
+  /// The confirmation text shown when the user tries to end a poll.
+  String get endVoteConfirmationText;
+
   /// The label for "Create".
   String get createLabel;
+
+  /// The label for "End".
+  String get endLabel;
 
   /// The label for Poll voting mode.
   ///
@@ -1097,7 +1103,14 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
+  String get endVoteConfirmationText =>
+      'Are you sure you want to end the vote?';
+
+  @override
   String get createLabel => 'Create';
+
+  @override
+  String get endLabel => 'End';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {

@@ -537,7 +537,13 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'コメントを入力';
 
   @override
+  String get endVoteConfirmationText => '投票を終了してもよろしいですか？';
+
+  @override
   String get createLabel => '作成';
+
+  @override
+  String get endLabel => '終了';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {

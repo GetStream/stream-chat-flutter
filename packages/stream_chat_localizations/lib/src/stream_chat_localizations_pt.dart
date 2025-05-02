@@ -558,7 +558,14 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get enterYourCommentLabel => 'Inserir seu comentário';
 
   @override
+  String get endVoteConfirmationText =>
+      'Tem certeza de que deseja encerrar a votação?';
+
+  @override
   String get createLabel => 'Criar';
+
+  @override
+  String get endLabel => 'Encerrar';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {

@@ -1,6 +1,8 @@
 ## Upcoming
 
 - Added translations for new `draftLabel` label.
+- Added translations for new `endLabel` label.
+- Added translations for new `endVoteConfirmationText` text.
 
 ## 9.8.0
 
