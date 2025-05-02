@@ -5,6 +5,10 @@
 - Added support for Draft messages preview.
 - Added a new `StreamDraftListView` for displaying draft messages.
 
+🔄 Changed
+
+- Exported `StreamQuotedMessageWidget` to allow customization of quoted messages using `StreamMessageWidget.quotedMessageBuilder`.
+
 ## 9.8.0
 
 🐞 Fixed
