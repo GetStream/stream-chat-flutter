@@ -4,10 +4,6 @@
 <dict>
     <key>method</key>
     <string>development</string>
-    <key>teamID</key>
-    <string>EHV7XZLAHA</string>
-    <key>compileBitcode</key>
-    <false/>
     <key>provisioningProfiles</key>
     <dict>
         <key>io.getstream.flutter</key>

@@ -31,13 +31,20 @@ platform :ios do
     # Fetch dependencies
     fetch_dependencies
 
+    export_files = {
+      "ad-hoc" => "#{root_path}/ios/fastlane/export_options_firebase.plist",
+      "app-store" => "#{root_path}/ios/fastlane/export_options_testflight.plist",
+      "development" => "#{root_path}/ios/fastlane/export_options_testing.plist"
+    }
+
     build_name = options[:build_name]
     build_number = options[:build_number]
     no_codesign = options[:no_codesign] || false
     export_method = options[:export_method] || "app-store"
+    export_options_plist = export_files[export_method]
 
     # Generate the full command
-    command = "flutter build ipa --suppress-analytics --export-method=#{export_method}"
+    command = "flutter build ipa --suppress-analytics --export-method=#{export_method} --export-options-plist=#{export_options_plist}"
     command += " --build-name=#{build_name}" if build_name.to_s != ""
     command += " --build-number=#{build_number}" if build_number.to_s != ""
     command += " --no-codesign" if no_codesign
