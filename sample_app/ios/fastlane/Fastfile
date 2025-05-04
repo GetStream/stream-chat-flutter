@@ -43,7 +43,7 @@ platform :ios do
     export_method = options[:export_method] || "app-store"
     export_options_plist = export_files[export_method]
 
-    ENV["FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER"] = export_options_plist
+#     ENV["FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER"] = export_options_plist
 
     # Generate the full command
     command = "flutter build ipa --export-method=#{export_method} --suppress-analytics"
