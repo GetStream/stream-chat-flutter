@@ -97,20 +97,7 @@ jobs:
         with:
           bundler-cache: true
           working-directory: sample_app/ios
-          
-      - name: Check and Prepare App Store API Key
-        working-directory: sample_app/ios
-        id: appstore_key
-        run: |
-          if [ -z "${{ secrets.APPSTORE_API_KEY }}" ]; then
-            echo "Warning: APPSTORE_API_KEY is empty or not set."
-            echo "has_key=false" >> $GITHUB_OUTPUT
-          else
-            echo "${{ secrets.APPSTORE_API_KEY }}" | base64 --decode > appstore_api_key.p8
-            echo "has_key=true" >> $GITHUB_OUTPUT
-            echo "key_path=$(pwd)/appstore_api_key.p8" >> $GITHUB_OUTPUT
-          fi
-      
+
       - name: Setup Firebase Service Account
         working-directory: sample_app/ios
         run: echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" | base64 --decode | jq > ./firebase-service-account.json
@@ -119,5 +106,5 @@ jobs:
         working-directory: sample_app/ios
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          APPSTORE_API_KEY_PATH: ${{ steps.appstore_key.outputs.key_path }}
+          APPSTORE_API_KEY_PATH: ${{ secrets.APPSTORE_API_KEY }}
         run: bundle exec fastlane distribute_to_firebase

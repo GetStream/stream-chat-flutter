@@ -98,7 +98,6 @@ platform :ios do
       key_id: 'MT3PRT8TB7',
       issuer_id: '69a6de96-0738-47e3-e053-5b8c7c11a4d1',
       key_content: ENV.fetch('APPSTORE_API_KEY', nil),
-      is_key_content_base64: true,
       in_house: false,
     )
   end
