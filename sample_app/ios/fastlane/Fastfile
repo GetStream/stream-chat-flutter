@@ -44,7 +44,7 @@ platform :ios do
     export_options_plist = export_files[export_method]
 
     # Generate the full command
-    command = "flutter build ipa --suppress-analytics --export-method=#{export_method} --export-options-plist=#{export_options_plist}"
+    command = "flutter build ipa --suppress-analytics --export-options-plist=#{export_options_plist}"
     command += " --build-name=#{build_name}" if build_name.to_s != ""
     command += " --build-number=#{build_number}" if build_number.to_s != ""
     command += " --no-codesign" if no_codesign
