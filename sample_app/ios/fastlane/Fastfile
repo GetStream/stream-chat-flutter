@@ -47,7 +47,6 @@ platform :ios do
     build_number = options[:build_number]
     no_codesign = options[:no_codesign] || false
     export_method = options[:export_method] || "app-store"
-    export_options_plist = export_files[export_method]
 
     # Note: This is a workaround for the issue with the flutter build ipa command
     # issue: https://github.com/flutter/flutter/issues/113977
