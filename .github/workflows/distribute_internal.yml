@@ -106,5 +106,5 @@ jobs:
         working-directory: sample_app/ios
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          APPSTORE_API_KEY_PATH: ${{ secrets.APPSTORE_API_KEY }}
+          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
         run: bundle exec fastlane distribute_to_firebase
