@@ -140,7 +140,7 @@ jobs:
           min_coverage: 44
 
   build:
-    name: (${{ matrix.platform }})
+    name: build (${{ matrix.platform }})
     runs-on: ${{ matrix.os }}
     if: github.event.pull_request.draft == false
     timeout-minutes: 30
@@ -151,11 +151,11 @@ jobs:
           - platform: android
             os: ubuntu-latest
             working-directory: sample_app/android
-            build-command: build_aab
+            build-command: bundle exec fastlane build_aab
           - platform: ios
             os: macos-latest
             working-directory: sample_app/ios
-            build-command: build_ipa
+            build-command: bundle exec fastlane build_ipa no_codesign:true
 
     steps:
       - name: "Git Checkout"
@@ -180,7 +180,7 @@ jobs:
           bundler-cache: true
       - name: "Build ${{ matrix.platform }} App"
         working-directory: ${{ matrix.working-directory }}
-        run: bundle exec fastlane ${{ matrix.build-command }}
+        run: ${{ matrix.build-command }}
 
   draft-build:
     runs-on: ubuntu-latest
