@@ -4,19 +4,17 @@ default_platform(:android)
 
 before_all do
   if is_ci
-    setup_ci
     setup_git_config
   end
 end
 
 platform :android do
   app_id = "1:674907137625:android:f4033353c54985b0d7f348" # The Firebase app ID
-  package_name = "io.getstream.chat.android.flutter.sample" # The package name of your app
 
   ### Build lanes
 
   desc "Build IPA file with specified parameters"
-  # Usage: bundle exec fastlane android build_ipa build_number:123 build_name:"1.0.0" no_codesign:true
+  # Usage: bundle exec fastlane android build_ipa build_number:123 build_name:"1.0.0"
   lane :build_aab do |options|
     # Fetch dependencies
     fetch_dependencies
@@ -38,7 +36,7 @@ platform :android do
   lane :distribute_to_firebase do
     latest_release = firebase_app_distribution_get_latest_release(
       app: app_id,
-      service_credentials_file: "./firebase-service-account.json"
+      service_credentials_file: "#{root_path}/android/firebase-service-account.json"
     )
 
     build_number = latest_release[:buildVersion].to_i + 1
@@ -50,7 +48,17 @@ platform :android do
       android_artifact_path: "#{root_path}/build/app/outputs/bundle/release/app-release.aab",
       groups: "stream-testers, ios-stream-testers",
       release_notes: "Lots of amazing new features to test out!",
-      service_credentials_file: "./firebase-service-account.json"
+      service_credentials_file: "#{root_path}/android/firebase-service-account.json"
+    )
+  end
+
+  private_lane :appstore_api_key do
+    @appstore_api_key ||= app_store_connect_api_key(
+      key_id: 'MT3PRT8TB7',
+      issuer_id: '69a6de96-0738-47e3-e053-5b8c7c11a4d1',
+      key_content: ENV.fetch('APPSTORE_API_KEY', nil),
+      is_key_content_base64: true,
+      in_house: false,
     )
   end
 end

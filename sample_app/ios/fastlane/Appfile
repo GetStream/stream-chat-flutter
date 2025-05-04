@@ -1,4 +1,2 @@
-apple_id("xdsahil@gmail.com") # Your Apple Developer Portal username
-
-itc_team_id("118902954") # App Store Connect Team ID
+app_identifier("io.getstream.flutter") # The bundle identifier of your app
 team_id("EHV7XZLAHA") # Developer Portal Team ID

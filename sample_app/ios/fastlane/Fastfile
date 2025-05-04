@@ -54,6 +54,7 @@ platform :ios do
 
     latest_release = firebase_app_distribution_get_latest_release(
       app: app_id,
+      service_credentials_file: "#{root_path}/ios/firebase-service-account.json"
     )
 
     build_number = latest_release[:buildVersion].to_i + 1
@@ -64,6 +65,7 @@ platform :ios do
       ipa_path: "#{root_path}/build/ios/ipa/ChatSample.ipa",
       groups: "stream-testers, ios-stream-testers",
       release_notes: "Lots of amazing new features to test out!",
+      service_credentials_file: "#{root_path}/ios/firebase-service-account.json"
     )
   end
 

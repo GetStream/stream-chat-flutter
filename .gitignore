@@ -125,6 +125,12 @@ gradle-wrapper.jar
 **/test/**/failures/**/*.*
 !**/test/**/goldens/ci/*.*
 
+# Fastlane related
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
 # Exceptions to the above rules
 !/pubspec.lock
 !**/example/web/sql-wasm.js
