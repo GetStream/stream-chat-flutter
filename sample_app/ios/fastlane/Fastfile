@@ -5,7 +5,6 @@ default_platform(:ios)
 before_all do
   if is_ci
     setup_ci
-    setup_git_config
   end
 end
 
