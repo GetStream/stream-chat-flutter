@@ -1,0 +1,56 @@
+skip_docs
+import '../../Fastfile'
+default_platform(:android)
+
+before_all do
+  if is_ci
+    setup_ci
+    setup_git_config
+  end
+end
+
+platform :android do
+  app_id = "1:674907137625:android:f4033353c54985b0d7f348" # The Firebase app ID
+  package_name = "io.getstream.chat.android.flutter.sample" # The package name of your app
+
+  ### Build lanes
+
+  desc "Build IPA file with specified parameters"
+  # Usage: bundle exec fastlane android build_ipa build_number:123 build_name:"1.0.0" no_codesign:true
+  lane :build_aab do |options|
+    # Fetch dependencies
+    fetch_dependencies
+
+    build_name = options[:build_name]
+    build_number = options[:build_number]
+
+    # Generate the full command
+    command = "flutter build aab --suppress-analytics"
+    command += " --build-name=#{build_name}" if build_name.to_s != ""
+    command += " --build-number=#{build_number}" if build_number.to_s != ""
+
+    # Build the app
+    sh_on_root(command: command)
+  end
+
+  desc "Build and distribute app to Firebase App Distribution with auto-incrementing build number"
+  # Usage: bundle exec fastlane android distribute_to_firebase
+  lane :distribute_to_firebase do
+    latest_release = firebase_app_distribution_get_latest_release(
+      app: app_id,
+      service_credentials_file: "./firebase-service-account.json"
+    )
+
+    build_number = latest_release[:buildVersion].to_i + 1
+    build_aab(build_number: build_number)
+
+    firebase_app_distribution(
+      app: app_id,
+      android_artifact_type: "AAB",
+      android_artifact_path: "#{root_path}/build/app/outputs/bundle/release/app-release.aab",
+      groups: "stream-testers, ios-stream-testers",
+      release_notes: "Lots of amazing new features to test out!",
+      service_credentials_file: "./firebase-service-account.json"
+    )
+  end
+end
