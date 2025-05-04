@@ -39,7 +39,7 @@ platform :android do
       service_credentials_file: "#{root_path}/android/firebase-service-account.json"
     )
 
-    build_number = latest_release[:buildVersion].to_i + 1
+    build_number = (latest_release&.dig(:buildVersion) || 0).to_i + 1
     build_aab(build_number: build_number)
 
     firebase_app_distribution(

@@ -73,7 +73,7 @@ platform :ios do
       service_credentials_file: "#{root_path}/ios/firebase-service-account.json"
     )
 
-    build_number = latest_release[:buildVersion].to_i + 1
+    build_number = (latest_release&.dig(:buildVersion) || 0).to_i + 1
     build_ipa(export_method: "ad-hoc", build_number: build_number)
 
     firebase_app_distribution(
@@ -95,7 +95,7 @@ platform :ios do
       app_identifier: app_identifier
     )
 
-    build_number = current_build_number.to_i + 1
+    build_number = (current_build_number || 0).to_i + 1
     build_ipa(export_method: "app-store", build_number: build_number)
 
     upload_to_testflight(
