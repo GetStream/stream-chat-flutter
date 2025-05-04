@@ -180,8 +180,6 @@ jobs:
           bundler-cache: true
       - name: "Build ${{ matrix.platform }} App"
         working-directory: ${{ matrix.working-directory }}
-        env:
-          FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER: 'match Development io.getstream.flutter'
         run: ${{ matrix.build-command }}
 
   draft-build:
