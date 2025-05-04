@@ -31,10 +31,10 @@ platform :ios do
     # Fetch dependencies
     fetch_dependencies
 
-    export_files = {
-      "ad-hoc" => "#{root_path}/ios/fastlane/export_options_firebase.plist",
-      "app-store" => "#{root_path}/ios/fastlane/export_options_testflight.plist",
-      "development" => "#{root_path}/ios/fastlane/export_options_testing.plist"
+    codesign_identity = {
+      "ad-hoc" => "Apple Distribution",
+      "app-store" => "Apple Distribution",
+      "development" => "Apple Development"
     }
 
     profile = {
@@ -51,6 +51,7 @@ platform :ios do
 
     # Note: This is a workaround for the issue with the flutter build ipa command
     # issue: https://github.com/flutter/flutter/issues/113977
+    ENV["FLUTTER_XCODE_CODE_SIGN_IDENTITY"] = codesign_identity[export_method]
     ENV["FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER"] = profile[export_method]
 
     # Generate the full command
