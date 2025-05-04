@@ -139,8 +139,8 @@ jobs:
           path: packages/stream_chat_flutter/coverage/lcov.info
           min_coverage: 44
 
-  build-sample-app:
-    name: Build Sample App (${{ matrix.platform }})
+  build:
+    name: (${{ matrix.platform }})
     runs-on: ${{ matrix.os }}
     if: github.event.pull_request.draft == false
     timeout-minutes: 30
@@ -176,7 +176,7 @@ jobs:
       - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
         with:
-          working-directory: ${ matrix.working-directory }
+          working-directory: ${{ matrix.working-directory }}
           bundler-cache: true
       - name: "Build ${{ matrix.platform }} App"
         working-directory: ${{ matrix.working-directory }}
