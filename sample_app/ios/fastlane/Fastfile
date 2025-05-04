@@ -32,9 +32,9 @@ platform :ios do
     fetch_dependencies
 
     export_files = {
-      "ad-hoc" => "#{root_path}/ios/fastlane/export_options_firebase.plist",
-      "app-store" => "#{root_path}/ios/fastlane/export_options_testflight.plist",
-      "development" => "#{root_path}/ios/fastlane/export_options_testing.plist"
+      "ad-hoc" => "match AdHoc io.getstream.flutter",
+      "app-store" => "match AppStore io.getstream.flutter",
+      "development" => "match Development io.getstream.flutter"
     }
 
     build_name = options[:build_name]
@@ -43,8 +43,10 @@ platform :ios do
     export_method = options[:export_method] || "app-store"
     export_options_plist = export_files[export_method]
 
+    ENV["FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER"] = export_options_plist
+
     # Generate the full command
-    command = "flutter build ipa --suppress-analytics --export-options-plist=#{export_options_plist}"
+    command = "flutter build ipa --export-method=#{export_method} --suppress-analytics"
     command += " --build-name=#{build_name}" if build_name.to_s != ""
     command += " --build-number=#{build_number}" if build_number.to_s != ""
     command += " --no-codesign" if no_codesign
