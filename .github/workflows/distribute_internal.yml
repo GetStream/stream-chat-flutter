@@ -30,16 +30,24 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: "Git Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Flutter
+      - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -65,10 +73,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: "Git Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         
-      - name: Setup Flutter
+      - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -76,19 +86,38 @@ jobs:
           cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
           
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+      
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
+        
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
           working-directory: sample_app/ios
           
+      - name: Check and Prepare App Store API Key
+        working-directory: sample_app/ios
+        id: appstore_key
+        run: |
+          if [ -z "${{ secrets.APPSTORE_API_KEY }}" ]; then
+            echo "Warning: APPSTORE_API_KEY is empty or not set."
+            echo "has_key=false" >> $GITHUB_OUTPUT
+          else
+            echo "${{ secrets.APPSTORE_API_KEY }}" | base64 --decode > appstore_api_key.p8
+            echo "has_key=true" >> $GITHUB_OUTPUT
+            echo "key_path=$(pwd)/appstore_api_key.p8" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Setup Firebase Service Account
         working-directory: sample_app/ios
         run: echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" | base64 --decode | jq > ./firebase-service-account.json
-          
+
       - name: Distribute to Firebase
         working-directory: sample_app/ios
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+          APPSTORE_API_KEY_PATH: ${{ steps.appstore_key.outputs.key_path }}
         run: bundle exec fastlane distribute_to_firebase
