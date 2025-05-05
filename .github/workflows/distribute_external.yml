@@ -1,9 +1,9 @@
-name: distribute_internal
+name: distribute_external
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*' # Matches semantic versioning tags like 1.0.0
   workflow_dispatch:
     inputs:
       platform:
@@ -20,8 +20,37 @@ env:
   FLUTTER_VERSION: '3.x'
 
 jobs:
+  determine_platforms:
+    runs-on: ubuntu-latest
+    outputs:
+      run_ios: ${{ steps.set_matrix.outputs.run_ios }}
+      run_android: ${{ steps.set_matrix.outputs.run_android }}
+    steps:
+      - name: Determine platforms to build
+        id: set_matrix
+        run: |
+          # Is this a tag push?
+          is_tag_push="${{ github.event_name == 'push' }}"
+          
+          # If it's a tag push, build both platforms
+          if [[ "$is_tag_push" == "true" ]]; then
+            echo "Building all platforms due to tag push"
+            echo "run_ios=true" >> $GITHUB_OUTPUT
+            echo "run_android=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # For manual workflow dispatch, store platform in a variable
+          platform="${{ github.event.inputs.platform }}"
+          echo "Selected platform: $platform"
+          
+          # Set outputs only if they should be true
+          [[ "$platform" == "ios" || "$platform" == "both" ]] && echo "run_ios=true" >> $GITHUB_OUTPUT
+          [[ "$platform" == "android" || "$platform" == "both" ]] && echo "run_android=true" >> $GITHUB_OUTPUT
+
   android:
-    if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both' }}
+    needs: determine_platforms
+    if: ${{ needs.determine_platforms.outputs.run_android == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Connect Bot
@@ -63,7 +92,8 @@ jobs:
         run: bundle exec fastlane distribute_to_firebase
 
   ios:
-    if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
+    needs: determine_platforms
+    if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
     runs-on: macos-latest
     steps:
       - name: Connect Bot
@@ -96,13 +126,9 @@ jobs:
           bundler-cache: true
           working-directory: sample_app/ios
 
-      - name: Setup Firebase Service Account
-        working-directory: sample_app/ios
-        run: echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" | base64 --decode | jq > ./firebase-service-account.json
-
-      - name: Distribute to Firebase
+      - name: Distribute to TestFlight
         working-directory: sample_app/ios
         env:
           MATCH_PASSWORD: "LOaTEnTiNSeS"
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
-        run: bundle exec fastlane distribute_to_firebase
+        run: bundle exec fastlane distribute_to_testflight
