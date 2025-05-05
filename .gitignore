@@ -46,6 +46,7 @@ GeneratedPluginRegistrant.*
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/app/.cxx
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -124,9 +125,16 @@ gradle-wrapper.jar
 **/test/**/failures/**/*.*
 !**/test/**/goldens/ci/*.*
 
+# Fastlane related
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
 # Exceptions to the above rules
 !/pubspec.lock
 !**/example/web/sql-wasm.js
 !**/example/web/sql-wasm.wasm
 !/sample_app/web/sql-wasm.js
 !/sample_app/web/sql-wasm.wasm
+!/sample_app/android/app/google-services.json

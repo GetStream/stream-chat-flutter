@@ -16,6 +16,9 @@ subprojects {
             def packageName = manifest.@package.text()
             android.namespace= packageName
         }
+        if (project.hasProperty('android')) {
+            project.android { compileSdkVersion 35 }
+        }
     }
 
 }
