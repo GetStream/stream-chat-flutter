@@ -151,7 +151,7 @@ jobs:
           - platform: android
             os: ubuntu-latest
             working-directory: sample_app/android
-            build-command: bundle exec fastlane build_aab
+            build-command: bundle exec fastlane build_apk
           - platform: ios
             os: macos-latest
             working-directory: sample_app/ios

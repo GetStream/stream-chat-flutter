@@ -13,9 +13,9 @@ platform :android do
 
   ### Build lanes
 
-  desc "Build IPA file with specified parameters"
-  # Usage: bundle exec fastlane android build_ipa build_number:123 build_name:"1.0.0"
-  lane :build_aab do |options|
+  desc "Build APK file with specified parameters"
+  # Usage: bundle exec fastlane android build_apk build_number:123 build_name:"1.0.0"
+  lane :build_apk do |options|
     # Fetch dependencies
     fetch_dependencies
 
@@ -23,7 +23,7 @@ platform :android do
     build_number = options[:build_number]
 
     # Generate the full command
-    command = "flutter build aab --suppress-analytics"
+    command = "flutter build apk --suppress-analytics"
     command += " --build-name=#{build_name}" if build_name.to_s != ""
     command += " --build-number=#{build_number}" if build_number.to_s != ""
 
@@ -40,12 +40,12 @@ platform :android do
     )
 
     build_number = (latest_release&.dig(:buildVersion) || 0).to_i + 1
-    build_aab(build_number: build_number)
+    build_apk(build_number: build_number)
 
     firebase_app_distribution(
       app: app_id,
-      android_artifact_type: "AAB",
-      android_artifact_path: "#{root_path}/build/app/outputs/bundle/release/app-release.aab",
+      android_artifact_type: "APK",
+      android_artifact_path: "#{root_path}/build/app/outputs/flutter-apk/app-release.apk",
       groups: "stream-testers, ios-stream-testers",
       release_notes: "Lots of amazing new features to test out!",
       service_credentials_file: "#{root_path}/android/firebase-service-account.json"
