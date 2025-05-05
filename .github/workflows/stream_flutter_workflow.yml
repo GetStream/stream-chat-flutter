@@ -153,9 +153,9 @@ jobs:
             working-directory: sample_app/android
             build-command: bundle exec fastlane build_apk
           - platform: ios
-            os: macos-15
+            os: macos-latest
             working-directory: sample_app/ios
-            build-command: bundle exec fastlane build_ipa no_codesign:true
+            build-command: bundle exec fastlane build_ipa export_method:development
 
     steps:
       - name: "Git Checkout"

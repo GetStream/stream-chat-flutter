@@ -28,6 +28,8 @@ platform :ios do
   desc "Build IPA file with specified parameters"
   # Usage: bundle exec fastlane ios build_ipa build_number:123 build_name:"1.0.0" export_method:"app-store" no_codesign:true
   lane :build_ipa do |options|
+    match_me
+
     # Fetch dependencies
     fetch_dependencies
 

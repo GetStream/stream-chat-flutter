@@ -97,7 +97,7 @@ jobs:
   ios:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
-    runs-on: macos-15
+    runs-on: macos-latest
     steps:
       - name: Connect Bot
         uses: webfactory/ssh-agent@v0.9.0
@@ -132,6 +132,6 @@ jobs:
       - name: Distribute to TestFlight
         working-directory: sample_app/ios
         env:
-          MATCH_PASSWORD: "LOaTEnTiNSeS"
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
         run: bundle exec fastlane distribute_to_testflight
