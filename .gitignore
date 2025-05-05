@@ -135,6 +135,6 @@ gradle-wrapper.jar
 !/pubspec.lock
 !**/example/web/sql-wasm.js
 !**/example/web/sql-wasm.wasm
-!/sample_app/android/app/google-services.json
 !/sample_app/web/sql-wasm.js
 !/sample_app/web/sql-wasm.wasm
+!/sample_app/android/app/google-services.json
