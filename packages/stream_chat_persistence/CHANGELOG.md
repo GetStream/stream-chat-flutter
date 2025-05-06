@@ -1,4 +1,4 @@
-## Upcoming
+## 9.9.0
 
 - Added support for `User.teamsRole` field.
 

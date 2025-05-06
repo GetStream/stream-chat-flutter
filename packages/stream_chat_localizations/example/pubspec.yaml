@@ -24,8 +24,8 @@ dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-  stream_chat_flutter: ^9.8.0
-  stream_chat_localizations: ^9.8.0
+  stream_chat_flutter: ^9.9.0
+  stream_chat_localizations: ^9.9.0
 
 flutter:
   uses-material-design: true
