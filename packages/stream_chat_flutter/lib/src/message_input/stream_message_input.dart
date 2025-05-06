@@ -7,13 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
-import 'package:stream_chat_flutter/src/message_input/dm_checkbox.dart';
+import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
-import 'package:stream_chat_flutter/src/message_input/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/gradient_box_border.dart';
+import 'package:stream_chat_flutter/src/misc/simple_safe_area.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kCommandTrigger = '/';
@@ -562,7 +562,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     // Starts listening to the draft stream for the current channel/thread.
-    if (config.draftMessagesEnabled) {
+    if (!_isEditing && config.draftMessagesEnabled) {
       final draftStream = switch (_effectiveController.message.parentId) {
         final parentId? => channel.state?.threadDraftStream(parentId),
         _ => channel.state?.draftStream,
@@ -625,171 +625,173 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   @override
   Widget build(BuildContext context) {
+    bool canSendOrUpdateMessage(List<ChannelCapability> capabilities) {
+      var result = capabilities.contains(ChannelCapability.sendMessage);
+      if (_isEditing) {
+        result |= capabilities.contains(ChannelCapability.updateOwnMessage);
+        result |= capabilities.contains(ChannelCapability.updateAnyMessage);
+      }
+
+      return result;
+    }
+
     final channel = StreamChannel.of(context).channel;
-    if (channel.state != null && !channel.canSendMessage) {
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 15,
+    final messageInput = BetterStreamBuilder(
+      stream: channel.ownCapabilitiesStream.map(canSendOrUpdateMessage),
+      initialData: canSendOrUpdateMessage(channel.ownCapabilities),
+      builder: (context, enabled) {
+        // Allow the user to send messages if the user has the permission to
+        // send messages or if the user is editing a message.
+        if (enabled) {
+          return _buildAutocompleteMessageInput(context);
+        }
+
+        // Otherwise, show the no permission message.
+        return _buildNoPermissionMessage(context);
+      },
+    );
+
+    final shadow = widget.shadow ?? _messageInputTheme.shadow;
+    final elevation = widget.elevation ?? _messageInputTheme.elevation;
+    return Material(
+      elevation: elevation ?? 8,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: _messageInputTheme.inputBackgroundColor,
+          boxShadow: [if (shadow != null) shadow],
+        ),
+        child: SimpleSafeArea(
+          enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
+          child: Center(child: messageInput),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAutocompleteMessageInput(BuildContext context) {
+    return StreamAutocomplete(
+      focusNode: _effectiveFocusNode,
+      messageEditingController: _effectiveController,
+      fieldViewBuilder: _buildMessageInput,
+      autocompleteTriggers: [
+        ...widget.customAutocompleteTriggers,
+        StreamAutocompleteTrigger(
+          trigger: _kCommandTrigger,
+          triggerOnlyAtStart: true,
+          optionsViewBuilder: (
+            context,
+            autocompleteQuery,
+            messageEditingController,
+          ) {
+            final query = autocompleteQuery.query;
+            return StreamCommandAutocompleteOptions(
+              query: query,
+              channel: StreamChannel.of(context).channel,
+              onCommandSelected: (command) {
+                _effectiveController.command = command.name;
+                // removing the overlay after the command is selected
+                StreamAutocomplete.of(context).closeSuggestions();
+              },
+            );
+          },
+        ),
+        if (widget.enableMentionsOverlay)
+          StreamAutocompleteTrigger(
+            trigger: _kMentionTrigger,
+            optionsViewBuilder: (
+              context,
+              autocompleteQuery,
+              messageEditingController,
+            ) {
+              final query = autocompleteQuery.query;
+              return StreamMentionAutocompleteOptions(
+                query: query,
+                channel: StreamChannel.of(context).channel,
+                mentionAllAppUsers: widget.mentionAllAppUsers,
+                mentionsTileBuilder: widget.userMentionsTileBuilder,
+                onMentionUserTap: (user) {
+                  // adding the mentioned user to the controller.
+                  _effectiveController.addMentionedUser(user);
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context)
+                      .acceptAutocompleteOption(user.name);
+                },
+              );
+            },
           ),
-          child: Text(
-            context.translations.sendMessagePermissionError,
-            style: _messageInputTheme.inputTextStyle,
-          ),
+      ],
+    );
+  }
+
+  Widget _buildMessageInput(
+    BuildContext context,
+    StreamMessageEditingController controller,
+    FocusNode focusNode,
+  ) {
+    return StreamMessageValueListenableBuilder(
+      valueListenable: controller,
+      builder: (context, value, _) => Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          spacing: 8,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget?>[
+            _buildTopMessageArea(context),
+            _buildTextField(context),
+            _buildDmCheckbox(context),
+          ].nonNulls.toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget? _buildTopMessageArea(BuildContext context) {
+    if (_hasQuotedMessage && !_isEditing) {
+      // Ensure this doesn't show on web & desktop
+      return PlatformWidgetBuilder(
+        mobile: (context, child) => child,
+        child: QuotingMessageTopArea(
+          hasQuotedMessage: _hasQuotedMessage,
+          onQuotedMessageCleared: widget.onQuotedMessageCleared,
         ),
       );
     }
 
-    return StreamMessageValueListenableBuilder(
-      valueListenable: _effectiveController,
-      builder: (context, value, _) {
-        Widget child = DecoratedBox(
-          decoration: BoxDecoration(
-            color: _messageInputTheme.inputBackgroundColor,
-            boxShadow: widget.shadow == null
-                ? (_streamChatTheme.messageInputTheme.shadow == null
-                    ? []
-                    : [_streamChatTheme.messageInputTheme.shadow!])
-                : [widget.shadow!],
-          ),
-          child: SimpleSafeArea(
-            enabled: widget.enableSafeArea ??
-                _streamChatTheme.messageInputTheme.enableSafeArea ??
-                true,
-            child: GestureDetector(
-              onPanUpdate: (details) {
-                if (details.delta.dy > 0) {
-                  _effectiveFocusNode.unfocus();
-                }
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_hasQuotedMessage && !_isEditing)
-                    // Ensure this doesn't show on web & desktop
-                    PlatformWidgetBuilder(
-                      mobile: (context, child) => child,
-                      child: QuotingMessageTopArea(
-                        hasQuotedMessage: _hasQuotedMessage,
-                        onQuotedMessageCleared: widget.onQuotedMessageCleared,
-                      ),
-                    )
-                  else if (_effectiveController.ogAttachment != null)
-                    OGAttachmentPreview(
-                      attachment: _effectiveController.ogAttachment!,
-                      onDismissPreviewPressed: () {
-                        _effectiveController.clearOGAttachment();
-                        _effectiveFocusNode.unfocus();
-                      },
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: _buildTextField(context),
-                  ),
-                  if (_effectiveController.message.parentId != null &&
-                      !widget.hideSendAsDm)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        right: 16,
-                        left: 16,
-                        bottom: 12,
-                      ),
-                      child: DmCheckbox(
-                        foregroundDecoration: BoxDecoration(
-                          border: _effectiveController.showInChannel
-                              ? null
-                              : Border.all(
-                                  color: _streamChatTheme
-                                      .colorTheme.textHighEmphasis
-                                      // ignore: deprecated_member_use
-                                      .withOpacity(0.5),
-                                  width: 2,
-                                ),
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        color: _effectiveController.showInChannel
-                            ? _streamChatTheme.colorTheme.accentPrimary
-                            : _streamChatTheme.colorTheme.barsBg,
-                        onTap: () {
-                          _effectiveController.showInChannel =
-                              !_effectiveController.showInChannel;
-                        },
-                        crossFadeState: _effectiveController.showInChannel
-                            ? CrossFadeState.showFirst
-                            : CrossFadeState.showSecond,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        );
-        if (!_isEditing) {
-          child = Material(
-            elevation: widget.elevation ??
-                _streamChatTheme.messageInputTheme.elevation ??
-                8,
-            color: _messageInputTheme.inputBackgroundColor,
-            child: child,
-          );
-        }
+    if (_effectiveController.ogAttachment != null) {
+      return OGAttachmentPreview(
+        attachment: _effectiveController.ogAttachment!,
+        onDismissPreviewPressed: () {
+          _effectiveController.clearOGAttachment();
+          _effectiveFocusNode.unfocus();
+        },
+      );
+    }
 
-        return StreamAutocomplete(
-          focusNode: _effectiveFocusNode,
-          messageEditingController: _effectiveController,
-          fieldViewBuilder: (_, __, ___) => child,
-          autocompleteTriggers: [
-            ...widget.customAutocompleteTriggers,
-            StreamAutocompleteTrigger(
-              trigger: _kCommandTrigger,
-              triggerOnlyAtStart: true,
-              optionsViewBuilder: (
-                context,
-                autocompleteQuery,
-                messageEditingController,
-              ) {
-                final query = autocompleteQuery.query;
-                return StreamCommandAutocompleteOptions(
-                  query: query,
-                  channel: StreamChannel.of(context).channel,
-                  onCommandSelected: (command) {
-                    _effectiveController.command = command.name;
-                    // removing the overlay after the command is selected
-                    StreamAutocomplete.of(context).closeSuggestions();
-                  },
-                );
-              },
-            ),
-            if (widget.enableMentionsOverlay)
-              StreamAutocompleteTrigger(
-                trigger: _kMentionTrigger,
-                optionsViewBuilder: (
-                  context,
-                  autocompleteQuery,
-                  messageEditingController,
-                ) {
-                  final query = autocompleteQuery.query;
-                  return StreamMentionAutocompleteOptions(
-                    query: query,
-                    channel: StreamChannel.of(context).channel,
-                    mentionAllAppUsers: widget.mentionAllAppUsers,
-                    mentionsTileBuilder: widget.userMentionsTileBuilder,
-                    onMentionUserTap: (user) {
-                      // adding the mentioned user to the controller.
-                      _effectiveController.addMentionedUser(user);
+    return null;
+  }
 
-                      // accepting the autocomplete option.
-                      StreamAutocomplete.of(context)
-                          .acceptAutocompleteOption(user.name);
-                    },
-                  );
-                },
-              ),
-          ],
-        );
-      },
+  Widget? _buildDmCheckbox(BuildContext context) {
+    if (widget.hideSendAsDm) return null;
+
+    final insideThread = _effectiveController.message.parentId != null;
+    if (!insideThread) return null;
+
+    return DmCheckboxListTile(
+      value: _effectiveController.showInChannel,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      onChanged: (value) => _effectiveController.showInChannel = value,
+    );
+  }
+
+  Widget _buildNoPermissionMessage(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+      child: Text(
+        context.translations.sendMessagePermissionError,
+        style: _messageInputTheme.inputTextStyle,
+      ),
     );
   }
 
@@ -1597,7 +1599,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   void deactivate() {
     final config = StreamChatConfiguration.of(context);
-    if (config.draftMessagesEnabled) {
+    if (!_isEditing && config.draftMessagesEnabled) {
       _maybeUpdateOrDeleteDraftMessage();
     }
 

@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template dmCheckbox}
 /// Prompts the user to send a reply to a message thread as a DM.
 /// {@endtemplate}
+@Deprecated("Use 'DmCheckboxListTile' instead.")
 class DmCheckbox extends StatelessWidget {
   /// {@macro dmCheckbox}
   const DmCheckbox({

@@ -39,6 +39,11 @@ class MockChannel extends Mock implements Channel {
   final List<ChannelCapability> ownCapabilities;
 
   @override
+  Stream<List<ChannelCapability>> get ownCapabilitiesStream {
+    return Stream.value(ownCapabilities);
+  }
+
+  @override
   Future<bool> get initialized async => true;
 
   @override

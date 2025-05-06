@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
@@ -358,6 +359,167 @@ void main() {
 
         // Verify that the onQuotedMessageCleared callback was not called
         expect(onQuotedMessageClearedCalled, isFalse);
+      },
+    );
+  });
+
+  group('DmCheckboxListTile integration in MessageInput', () {
+    final client = MockClient();
+    final clientState = MockClientState();
+    final channel = MockChannel();
+    final channelState = MockChannelState();
+
+    setUp(() {
+      registerFallbackValue(Message());
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUserStream).thenAnswer(
+        (_) => Stream.value(OwnUser(id: 'user-id')),
+      );
+
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(channel.getRemainingCooldown).thenReturn(0);
+      when(() => channelState.isUpToDate).thenReturn(true);
+      when(() => channelState.messages).thenReturn([
+        Message(
+          text: 'hello',
+          user: User(id: 'other-user'),
+        )
+      ]);
+      when(() => channelState.messagesStream).thenAnswer(
+        (i) => Stream.value([
+          Message(
+            text: 'hello',
+            user: User(id: 'other-user'),
+          )
+        ]),
+      );
+    });
+
+    testWidgets(
+      'should not show DmCheckboxListTile when hideSendAsDm is true',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              child: StreamChannel(
+                channel: channel,
+                child: const Scaffold(
+                  bottomNavigationBar: StreamMessageInput(
+                    hideSendAsDm: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.byType(DmCheckboxListTile), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'should not show DmCheckboxListTile when not in a thread',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              child: StreamChannel(
+                channel: channel,
+                child: const Scaffold(
+                  bottomNavigationBar: StreamMessageInput(),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.byType(DmCheckboxListTile), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'should show DmCheckboxListTile when in a thread and hideSendAsDm is false',
+      (tester) async {
+        // Set up a message controller with a parent message ID (thread)
+        final messageInputController = StreamMessageInputController(
+          message: Message(parentId: 'parent-message-id'),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              child: StreamChannel(
+                channel: channel,
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageInput(
+                    messageInputController: messageInputController,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.byType(DmCheckboxListTile), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'should toggle showInChannel value when DmCheckboxListTile is tapped',
+      (tester) async {
+        // Set up a message controller with a parent message ID (thread)
+        final messageInputController = StreamMessageInputController(
+          message: Message(parentId: 'parent-message-id'),
+        );
+
+        addTearDown(messageInputController.dispose);
+
+        // Initial value should be false
+        expect(messageInputController.showInChannel, false);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              child: StreamChannel(
+                channel: channel,
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageInput(
+                    messageInputController: messageInputController,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Find and tap the checkbox
+        await tester.tap(find.byType(DmCheckboxListTile));
+        await tester.pumpAndSettle();
+
+        // Value should now be true
+        expect(messageInputController.showInChannel, true);
+
+        // Tap again to toggle it back to false
+        await tester.tap(find.byType(DmCheckboxListTile));
+        await tester.pumpAndSettle();
+
+        // Value should now be false again
+        expect(messageInputController.showInChannel, false);
       },
     );
   });

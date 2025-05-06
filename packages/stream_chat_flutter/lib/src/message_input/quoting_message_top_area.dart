@@ -30,7 +30,7 @@ class QuotingMessageTopArea extends StatelessWidget {
     final _streamChatTheme = StreamChatTheme.of(context);
     if (hasQuotedMessage) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

@@ -113,6 +113,7 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                 widget.editMessageInputBuilder!(context, widget.message)
               else
                 StreamMessageInput(
+                  elevation: 0,
                   messageInputController: controller,
                   // Disallow editing poll for now as it's not supported.
                   allowedAttachmentPickerTypes: [
