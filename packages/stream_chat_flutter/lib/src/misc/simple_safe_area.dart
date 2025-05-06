@@ -10,17 +10,19 @@ class SimpleSafeArea extends StatelessWidget {
   });
 
   /// Wrap [child] with [SafeArea]
-  final bool enabled;
+  final bool? enabled;
 
   /// Child widget to wrap
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-        left: enabled,
-        top: enabled,
-        right: enabled,
-        bottom: enabled,
-        child: child,
-      );
+  Widget build(BuildContext context) {
+    return SafeArea(
+      left: enabled ?? true,
+      top: enabled ?? true,
+      right: enabled ?? true,
+      bottom: enabled ?? true,
+      child: child,
+    );
+  }
 }

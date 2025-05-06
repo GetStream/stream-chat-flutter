@@ -201,8 +201,9 @@ class _ChannelListDefault extends StatelessWidget {
                 ],
               ),
               child: ColoredBox(
-                color:
-                    channel.isPinned ? Colors.amberAccent : Colors.transparent,
+                color: channel.isPinned
+                    ? chatTheme.colorTheme.highlight
+                    : Colors.transparent,
                 child: defaultWidget,
               ),
             );

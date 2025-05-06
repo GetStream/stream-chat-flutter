@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../material_app_wrapper.dart';
 
+@Deprecated('')
 void main() {
   testWidgets('DmCheckbox onTap works', (tester) async {
     var count = 0;
