@@ -59,7 +59,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Connect Bot
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
@@ -103,7 +103,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Connect Bot
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
