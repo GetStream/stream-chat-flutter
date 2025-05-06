@@ -1,4 +1,4 @@
-## Upcoming
+## 9.9.0
 
 - Added translations for new `draftLabel` label.
 - Added translations for new `endLabel` label.
