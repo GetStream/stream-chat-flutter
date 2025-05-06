@@ -5,6 +5,10 @@
 - Added support for Draft messages preview.
 - Added a new `StreamDraftListView` for displaying draft messages.
 
+🐞 Fixed
+
+- [[#2182]](https://github.com/GetStream/stream-chat-flutter/issues/2182) Fixes StreamMessageInput not listening to channel capabilities.
+
 🔄 Changed
 
 - Exported `StreamQuotedMessageWidget` to allow customization of quoted messages using `StreamMessageWidget.quotedMessageBuilder`.
