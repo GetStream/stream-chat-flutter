@@ -74,12 +74,6 @@ jobs:
           cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
-      - name: "Install Tools"
-        run: flutter pub global activate melos
-
-      - name: "Bootstrap Workspace"
-        run: melos bootstrap
-
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -116,13 +110,7 @@ jobs:
           channel: stable
           cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
-          
-      - name: "Install Tools"
-        run: flutter pub global activate melos
-      
-      - name: "Bootstrap Workspace"
-        run: melos bootstrap
-        
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
