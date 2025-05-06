@@ -60,6 +60,7 @@ export 'src/message_input/audio_recorder/audio_recorder_state.dart';
 export 'src/message_input/audio_recorder/stream_audio_recorder.dart';
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/enums.dart';
+export 'src/message_input/quoted_message_widget.dart';
 export 'src/message_input/stream_message_input.dart';
 export 'src/message_input/stream_message_input_attachment_list.dart';
 export 'src/message_input/stream_message_send_button.dart';
