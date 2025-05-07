@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Updated `freezed_annotation` dependency to `">=2.4.1 <4.0.0"`.
+
 ## 9.9.0
 
 ✅ Added

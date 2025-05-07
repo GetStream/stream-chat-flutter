@@ -1,3 +1,11 @@
+## Upcoming
+
+🔄 Changed
+
+- Updated `just_audio` dependency to `">=0.9.38 <0.11.0"`.
+- Updated `share_plus` dependency to `^11.0.0`.
+- Updated `desktop_drop` dependency to `">=0.5.0 <0.7.0"`.
+
 ## 9.9.0
 
 ✅ Added
