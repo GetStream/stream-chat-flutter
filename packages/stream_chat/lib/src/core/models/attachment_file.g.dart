@@ -20,47 +20,41 @@ Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) =>
       'size': instance.size,
     };
 
-_$PreparingImpl _$$PreparingImplFromJson(Map<String, dynamic> json) =>
-    _$PreparingImpl(
+Preparing _$PreparingFromJson(Map<String, dynamic> json) => Preparing(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$PreparingImplToJson(_$PreparingImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$PreparingToJson(Preparing instance) => <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$InProgressImpl _$$InProgressImplFromJson(Map<String, dynamic> json) =>
-    _$InProgressImpl(
+InProgress _$InProgressFromJson(Map<String, dynamic> json) => InProgress(
       uploaded: (json['uploaded'] as num).toInt(),
       total: (json['total'] as num).toInt(),
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$InProgressImplToJson(_$InProgressImpl instance) =>
+Map<String, dynamic> _$InProgressToJson(InProgress instance) =>
     <String, dynamic>{
       'uploaded': instance.uploaded,
       'total': instance.total,
       'runtimeType': instance.$type,
     };
 
-_$SuccessImpl _$$SuccessImplFromJson(Map<String, dynamic> json) =>
-    _$SuccessImpl(
+Success _$SuccessFromJson(Map<String, dynamic> json) => Success(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$SuccessImplToJson(_$SuccessImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$SuccessToJson(Success instance) => <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$FailedImpl _$$FailedImplFromJson(Map<String, dynamic> json) => _$FailedImpl(
+Failed _$FailedFromJson(Map<String, dynamic> json) => Failed(
       error: json['error'] as String,
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$FailedImplToJson(_$FailedImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$FailedToJson(Failed instance) => <String, dynamic>{
       'error': instance.error,
       'runtimeType': instance.$type,
     };

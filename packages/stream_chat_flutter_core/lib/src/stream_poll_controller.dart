@@ -282,3 +282,137 @@ sealed class PollValidationError with _$PollValidationError {
     required Range<int> range,
   }) = _PollValidationErrorMaxVotesAllowed;
 }
+
+// coverage:ignore-start
+
+/// @nodoc
+extension PollValidationErrorPatternMatching on PollValidationError {
+  /// @nodoc
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(List<PollOption> options) duplicateOptions,
+    required TResult Function(String name, Range<int> range) nameRange,
+    required TResult Function(List<PollOption> options, Range<int> range)
+        optionsRange,
+    required TResult Function(int maxVotesAllowed, Range<int> range)
+        maxVotesAllowed,
+  }) {
+    final error = this;
+    return switch (error) {
+      _PollValidationErrorDuplicateOptions() => duplicateOptions(error.options),
+      _PollValidationErrorNameRange() => nameRange(error.name, error.range),
+      _PollValidationErrorOptionsRange() =>
+        optionsRange(error.options, error.range),
+      _PollValidationErrorMaxVotesAllowed() =>
+        maxVotesAllowed(error.maxVotesAllowed, error.range),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(List<PollOption> options)? duplicateOptions,
+    TResult? Function(String name, Range<int> range)? nameRange,
+    TResult? Function(List<PollOption> options, Range<int> range)? optionsRange,
+    TResult? Function(int maxVotesAllowed, Range<int> range)? maxVotesAllowed,
+  }) {
+    final error = this;
+    return switch (error) {
+      _PollValidationErrorDuplicateOptions() =>
+        duplicateOptions?.call(error.options),
+      _PollValidationErrorNameRange() =>
+        nameRange?.call(error.name, error.range),
+      _PollValidationErrorOptionsRange() =>
+        optionsRange?.call(error.options, error.range),
+      _PollValidationErrorMaxVotesAllowed() =>
+        maxVotesAllowed?.call(error.maxVotesAllowed, error.range),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(List<PollOption> options)? duplicateOptions,
+    TResult Function(String name, Range<int> range)? nameRange,
+    TResult Function(List<PollOption> options, Range<int> range)? optionsRange,
+    TResult Function(int maxVotesAllowed, Range<int> range)? maxVotesAllowed,
+    required TResult orElse(),
+  }) {
+    final error = this;
+    final result = switch (error) {
+      _PollValidationErrorDuplicateOptions() =>
+        duplicateOptions?.call(error.options),
+      _PollValidationErrorNameRange() =>
+        nameRange?.call(error.name, error.range),
+      _PollValidationErrorOptionsRange() =>
+        optionsRange?.call(error.options, error.range),
+      _PollValidationErrorMaxVotesAllowed() =>
+        maxVotesAllowed?.call(error.maxVotesAllowed, error.range),
+    };
+
+    return result ?? orElse();
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_PollValidationErrorDuplicateOptions value)
+        duplicateOptions,
+    required TResult Function(_PollValidationErrorNameRange value) nameRange,
+    required TResult Function(_PollValidationErrorOptionsRange value)
+        optionsRange,
+    required TResult Function(_PollValidationErrorMaxVotesAllowed value)
+        maxVotesAllowed,
+  }) {
+    final error = this;
+    return switch (error) {
+      _PollValidationErrorDuplicateOptions() => duplicateOptions(error),
+      _PollValidationErrorNameRange() => nameRange(error),
+      _PollValidationErrorOptionsRange() => optionsRange(error),
+      _PollValidationErrorMaxVotesAllowed() => maxVotesAllowed(error),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_PollValidationErrorDuplicateOptions value)?
+        duplicateOptions,
+    TResult? Function(_PollValidationErrorNameRange value)? nameRange,
+    TResult? Function(_PollValidationErrorOptionsRange value)? optionsRange,
+    TResult? Function(_PollValidationErrorMaxVotesAllowed value)?
+        maxVotesAllowed,
+  }) {
+    final error = this;
+    return switch (error) {
+      _PollValidationErrorDuplicateOptions() => duplicateOptions?.call(error),
+      _PollValidationErrorNameRange() => nameRange?.call(error),
+      _PollValidationErrorOptionsRange() => optionsRange?.call(error),
+      _PollValidationErrorMaxVotesAllowed() => maxVotesAllowed?.call(error),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_PollValidationErrorDuplicateOptions value)?
+        duplicateOptions,
+    TResult Function(_PollValidationErrorNameRange value)? nameRange,
+    TResult Function(_PollValidationErrorOptionsRange value)? optionsRange,
+    TResult Function(_PollValidationErrorMaxVotesAllowed value)?
+        maxVotesAllowed,
+    required TResult orElse(),
+  }) {
+    final error = this;
+    final result = switch (error) {
+      _PollValidationErrorDuplicateOptions() => duplicateOptions?.call(error),
+      _PollValidationErrorNameRange() => nameRange?.call(error),
+      _PollValidationErrorOptionsRange() => optionsRange?.call(error),
+      _PollValidationErrorMaxVotesAllowed() => maxVotesAllowed?.call(error),
+    };
+
+    return result ?? orElse();
+  }
+}
+
+// coverage:ignore-start
