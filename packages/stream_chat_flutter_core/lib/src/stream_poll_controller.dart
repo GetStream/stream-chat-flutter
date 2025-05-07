@@ -415,4 +415,4 @@ extension PollValidationErrorPatternMatching on PollValidationError {
   }
 }
 
-// coverage:ignore-start
+// coverage:ignore-end

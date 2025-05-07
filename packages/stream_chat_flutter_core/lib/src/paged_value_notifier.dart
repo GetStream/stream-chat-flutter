@@ -263,4 +263,4 @@ extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
   }
 }
 
-// coverage:ignore-start
+// coverage:ignore-end
