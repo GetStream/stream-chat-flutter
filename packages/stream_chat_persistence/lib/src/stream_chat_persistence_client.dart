@@ -281,13 +281,15 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       channelStates.sort(channelStateSort.compare);
     }
 
-    final offset = paginationParams?.offset;
-    if (offset != null && offset > 0 && channelStates.isNotEmpty) {
-      channelStates.removeRange(0, offset);
+    // Apply offset
+    if (paginationParams?.offset case final paginationOffset?) {
+      final clampedOffset = paginationOffset.clamp(0, channelStates.length);
+      channelStates.removeRange(0, clampedOffset);
     }
 
-    if (paginationParams?.limit != null) {
-      return channelStates.take(paginationParams!.limit).toList();
+    // Apply limit
+    if (paginationParams?.limit case final paginationLimit?) {
+      return channelStates.take(paginationLimit).toList();
     }
 
     return channelStates;

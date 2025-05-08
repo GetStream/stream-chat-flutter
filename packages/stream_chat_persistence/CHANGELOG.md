@@ -1,3 +1,8 @@
+## Upcoming
+
+- Fixed an issue in the `getChannelStates` method where `paginationParams.offset` greater than the
+  available channel count would cause an exception. The method now properly handles this edge case.
+
 ## 9.9.0
 
 - Added support for `User.teamsRole` field.
