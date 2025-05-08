@@ -26,7 +26,7 @@ dependencies:
   chewie: ^1.8.1
   collection: ^1.17.2
   contextmenu: ^3.0.0
-  desktop_drop: ^0.5.0
+  desktop_drop: ">=0.5.0 <0.7.0"
   diacritic: ^0.1.5
   dio: ^5.4.3+1
   ezanimation: ^0.6.0
@@ -54,7 +54,7 @@ dependencies:
   rate_limiter: ^1.0.0
   record: ">=5.2.0 <7.0.0"
   rxdart: ^0.28.0
-  share_plus: ^10.0.2
+  share_plus: ^11.0.0
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^9.9.0
   svg_icon_widget: ^0.0.1

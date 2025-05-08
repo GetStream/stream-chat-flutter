@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_positional_boolean_parameters
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'message_state.freezed.dart';
@@ -297,3 +299,415 @@ sealed class FailedState with _$FailedState {
   factory FailedState.fromJson(Map<String, dynamic> json) =>
       _$FailedStateFromJson(json);
 }
+
+// coverage:ignore-start
+
+/// @nodoc
+extension MessageStatePatternMatching on MessageState {
+  /// @nodoc
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function(OutgoingState state) outgoing,
+    required TResult Function(CompletedState state) completed,
+    required TResult Function(FailedState state, Object? reason) failed,
+  }) {
+    final messageState = this;
+    return switch (messageState) {
+      MessageInitial() => initial(),
+      MessageOutgoing() => outgoing(messageState.state),
+      MessageCompleted() => completed(messageState.state),
+      MessageFailed() => failed(messageState.state, messageState.reason),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function(OutgoingState state)? outgoing,
+    TResult? Function(CompletedState state)? completed,
+    TResult? Function(FailedState state, Object? reason)? failed,
+  }) {
+    final messageState = this;
+    return switch (messageState) {
+      MessageInitial() => initial?.call(),
+      MessageOutgoing() => outgoing?.call(messageState.state),
+      MessageCompleted() => completed?.call(messageState.state),
+      MessageFailed() => failed?.call(messageState.state, messageState.reason),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function(OutgoingState state)? outgoing,
+    TResult Function(CompletedState state)? completed,
+    TResult Function(FailedState state, Object? reason)? failed,
+    required TResult orElse(),
+  }) {
+    final messageState = this;
+    final result = switch (messageState) {
+      MessageInitial() => initial?.call(),
+      MessageOutgoing() => outgoing?.call(messageState.state),
+      MessageCompleted() => completed?.call(messageState.state),
+      MessageFailed() => failed?.call(messageState.state, messageState.reason),
+    };
+
+    return result ?? orElse();
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(MessageInitial value) initial,
+    required TResult Function(MessageOutgoing value) outgoing,
+    required TResult Function(MessageCompleted value) completed,
+    required TResult Function(MessageFailed value) failed,
+  }) {
+    final messageState = this;
+    return switch (messageState) {
+      MessageInitial() => initial(messageState),
+      MessageOutgoing() => outgoing(messageState),
+      MessageCompleted() => completed(messageState),
+      MessageFailed() => failed(messageState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(MessageInitial value)? initial,
+    TResult? Function(MessageOutgoing value)? outgoing,
+    TResult? Function(MessageCompleted value)? completed,
+    TResult? Function(MessageFailed value)? failed,
+  }) {
+    final messageState = this;
+    return switch (messageState) {
+      MessageInitial() => initial?.call(messageState),
+      MessageOutgoing() => outgoing?.call(messageState),
+      MessageCompleted() => completed?.call(messageState),
+      MessageFailed() => failed?.call(messageState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(MessageInitial value)? initial,
+    TResult Function(MessageOutgoing value)? outgoing,
+    TResult Function(MessageCompleted value)? completed,
+    TResult Function(MessageFailed value)? failed,
+    required TResult orElse(),
+  }) {
+    final messageState = this;
+    final result = switch (messageState) {
+      MessageInitial() => initial?.call(messageState),
+      MessageOutgoing() => outgoing?.call(messageState),
+      MessageCompleted() => completed?.call(messageState),
+      MessageFailed() => failed?.call(messageState),
+    };
+
+    return result ?? orElse();
+  }
+}
+
+/// @nodoc
+extension OutgoingStatePatternMatching on OutgoingState {
+  /// @nodoc
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() sending,
+    required TResult Function() updating,
+    required TResult Function(bool hard) deleting,
+  }) {
+    final outgoingState = this;
+    return switch (outgoingState) {
+      Sending() => sending(),
+      Updating() => updating(),
+      Deleting() => deleting(outgoingState.hard),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? sending,
+    TResult? Function()? updating,
+    TResult? Function(bool hard)? deleting,
+  }) {
+    final outgoingState = this;
+    return switch (outgoingState) {
+      Sending() => sending?.call(),
+      Updating() => updating?.call(),
+      Deleting() => deleting?.call(outgoingState.hard),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? sending,
+    TResult Function()? updating,
+    TResult Function(bool hard)? deleting,
+    required TResult orElse(),
+  }) {
+    final outgoingState = this;
+    final result = switch (outgoingState) {
+      Sending() => sending?.call(),
+      Updating() => updating?.call(),
+      Deleting() => deleting?.call(outgoingState.hard),
+    };
+
+    return result ?? orElse();
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(Sending value) sending,
+    required TResult Function(Updating value) updating,
+    required TResult Function(Deleting value) deleting,
+  }) {
+    final outgoingState = this;
+    return switch (outgoingState) {
+      Sending() => sending(outgoingState),
+      Updating() => updating(outgoingState),
+      Deleting() => deleting(outgoingState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(Sending value)? sending,
+    TResult? Function(Updating value)? updating,
+    TResult? Function(Deleting value)? deleting,
+  }) {
+    final outgoingState = this;
+    return switch (outgoingState) {
+      Sending() => sending?.call(outgoingState),
+      Updating() => updating?.call(outgoingState),
+      Deleting() => deleting?.call(outgoingState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Sending value)? sending,
+    TResult Function(Updating value)? updating,
+    TResult Function(Deleting value)? deleting,
+    required TResult orElse(),
+  }) {
+    final outgoingState = this;
+    final result = switch (outgoingState) {
+      Sending() => sending?.call(outgoingState),
+      Updating() => updating?.call(outgoingState),
+      Deleting() => deleting?.call(outgoingState),
+    };
+
+    return result ?? orElse();
+  }
+}
+
+/// @nodoc
+extension CompletedStatePatternMatching on CompletedState {
+  /// @nodoc
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() sent,
+    required TResult Function() updated,
+    required TResult Function(bool hard) deleted,
+  }) {
+    final completedState = this;
+    return switch (completedState) {
+      Sent() => sent(),
+      Updated() => updated(),
+      Deleted() => deleted(completedState.hard),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? sent,
+    TResult? Function()? updated,
+    TResult? Function(bool hard)? deleted,
+  }) {
+    final completedState = this;
+    return switch (completedState) {
+      Sent() => sent?.call(),
+      Updated() => updated?.call(),
+      Deleted() => deleted?.call(completedState.hard),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? sent,
+    TResult Function()? updated,
+    TResult Function(bool hard)? deleted,
+    required TResult orElse(),
+  }) {
+    final completedState = this;
+    final result = switch (completedState) {
+      Sent() => sent?.call(),
+      Updated() => updated?.call(),
+      Deleted() => deleted?.call(completedState.hard),
+    };
+
+    return result ?? orElse();
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(Sent value) sent,
+    required TResult Function(Updated value) updated,
+    required TResult Function(Deleted value) deleted,
+  }) {
+    final completedState = this;
+    return switch (completedState) {
+      Sent() => sent(completedState),
+      Updated() => updated(completedState),
+      Deleted() => deleted(completedState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(Sent value)? sent,
+    TResult? Function(Updated value)? updated,
+    TResult? Function(Deleted value)? deleted,
+  }) {
+    final completedState = this;
+    return switch (completedState) {
+      Sent() => sent?.call(completedState),
+      Updated() => updated?.call(completedState),
+      Deleted() => deleted?.call(completedState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Sent value)? sent,
+    TResult Function(Updated value)? updated,
+    TResult Function(Deleted value)? deleted,
+    required TResult orElse(),
+  }) {
+    final completedState = this;
+    final result = switch (completedState) {
+      Sent() => sent?.call(completedState),
+      Updated() => updated?.call(completedState),
+      Deleted() => deleted?.call(completedState),
+    };
+
+    return result ?? orElse();
+  }
+}
+
+/// @nodoc
+extension FailedStatePatternMatching on FailedState {
+  /// @nodoc
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() sendingFailed,
+    required TResult Function() updatingFailed,
+    required TResult Function(bool hard) deletingFailed,
+  }) {
+    final failedState = this;
+    return switch (failedState) {
+      SendingFailed() => sendingFailed(),
+      UpdatingFailed() => updatingFailed(),
+      DeletingFailed() => deletingFailed(failedState.hard),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? sendingFailed,
+    TResult? Function()? updatingFailed,
+    TResult? Function(bool hard)? deletingFailed,
+  }) {
+    final failedState = this;
+    return switch (failedState) {
+      SendingFailed() => sendingFailed?.call(),
+      UpdatingFailed() => updatingFailed?.call(),
+      DeletingFailed() => deletingFailed?.call(failedState.hard),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? sendingFailed,
+    TResult Function()? updatingFailed,
+    TResult Function(bool hard)? deletingFailed,
+    required TResult orElse(),
+  }) {
+    final failedState = this;
+    final result = switch (failedState) {
+      SendingFailed() => sendingFailed?.call(),
+      UpdatingFailed() => updatingFailed?.call(),
+      DeletingFailed() => deletingFailed?.call(failedState.hard),
+    };
+
+    return result ?? orElse();
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(SendingFailed value) sendingFailed,
+    required TResult Function(UpdatingFailed value) updatingFailed,
+    required TResult Function(DeletingFailed value) deletingFailed,
+  }) {
+    final failedState = this;
+    return switch (failedState) {
+      SendingFailed() => sendingFailed(failedState),
+      UpdatingFailed() => updatingFailed(failedState),
+      DeletingFailed() => deletingFailed(failedState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(SendingFailed value)? sendingFailed,
+    TResult? Function(UpdatingFailed value)? updatingFailed,
+    TResult? Function(DeletingFailed value)? deletingFailed,
+  }) {
+    final failedState = this;
+    return switch (failedState) {
+      SendingFailed() => sendingFailed?.call(failedState),
+      UpdatingFailed() => updatingFailed?.call(failedState),
+      DeletingFailed() => deletingFailed?.call(failedState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(SendingFailed value)? sendingFailed,
+    TResult Function(UpdatingFailed value)? updatingFailed,
+    TResult Function(DeletingFailed value)? deletingFailed,
+    required TResult orElse(),
+  }) {
+    final failedState = this;
+    final result = switch (failedState) {
+      SendingFailed() => sendingFailed?.call(failedState),
+      UpdatingFailed() => updatingFailed?.call(failedState),
+      DeletingFailed() => deletingFailed?.call(failedState),
+    };
+
+    return result ?? orElse();
+  }
+}
+
+// coverage:ignore-end

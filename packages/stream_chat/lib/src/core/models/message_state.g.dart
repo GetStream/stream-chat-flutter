@@ -6,151 +6,133 @@ part of 'message_state.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MessageInitialImpl _$$MessageInitialImplFromJson(Map<String, dynamic> json) =>
-    _$MessageInitialImpl(
+MessageInitial _$MessageInitialFromJson(Map<String, dynamic> json) =>
+    MessageInitial(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$MessageInitialImplToJson(
-        _$MessageInitialImpl instance) =>
+Map<String, dynamic> _$MessageInitialToJson(MessageInitial instance) =>
     <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$MessageOutgoingImpl _$$MessageOutgoingImplFromJson(
-        Map<String, dynamic> json) =>
-    _$MessageOutgoingImpl(
+MessageOutgoing _$MessageOutgoingFromJson(Map<String, dynamic> json) =>
+    MessageOutgoing(
       state: OutgoingState.fromJson(json['state'] as Map<String, dynamic>),
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$MessageOutgoingImplToJson(
-        _$MessageOutgoingImpl instance) =>
+Map<String, dynamic> _$MessageOutgoingToJson(MessageOutgoing instance) =>
     <String, dynamic>{
       'state': instance.state.toJson(),
       'runtimeType': instance.$type,
     };
 
-_$MessageCompletedImpl _$$MessageCompletedImplFromJson(
-        Map<String, dynamic> json) =>
-    _$MessageCompletedImpl(
+MessageCompleted _$MessageCompletedFromJson(Map<String, dynamic> json) =>
+    MessageCompleted(
       state: CompletedState.fromJson(json['state'] as Map<String, dynamic>),
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$MessageCompletedImplToJson(
-        _$MessageCompletedImpl instance) =>
+Map<String, dynamic> _$MessageCompletedToJson(MessageCompleted instance) =>
     <String, dynamic>{
       'state': instance.state.toJson(),
       'runtimeType': instance.$type,
     };
 
-_$MessageFailedImpl _$$MessageFailedImplFromJson(Map<String, dynamic> json) =>
-    _$MessageFailedImpl(
+MessageFailed _$MessageFailedFromJson(Map<String, dynamic> json) =>
+    MessageFailed(
       state: FailedState.fromJson(json['state'] as Map<String, dynamic>),
       reason: json['reason'],
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$MessageFailedImplToJson(_$MessageFailedImpl instance) =>
+Map<String, dynamic> _$MessageFailedToJson(MessageFailed instance) =>
     <String, dynamic>{
       'state': instance.state.toJson(),
       'reason': instance.reason,
       'runtimeType': instance.$type,
     };
 
-_$SendingImpl _$$SendingImplFromJson(Map<String, dynamic> json) =>
-    _$SendingImpl(
+Sending _$SendingFromJson(Map<String, dynamic> json) => Sending(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$SendingImplToJson(_$SendingImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$SendingToJson(Sending instance) => <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$UpdatingImpl _$$UpdatingImplFromJson(Map<String, dynamic> json) =>
-    _$UpdatingImpl(
+Updating _$UpdatingFromJson(Map<String, dynamic> json) => Updating(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$UpdatingImplToJson(_$UpdatingImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$UpdatingToJson(Updating instance) => <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$DeletingImpl _$$DeletingImplFromJson(Map<String, dynamic> json) =>
-    _$DeletingImpl(
+Deleting _$DeletingFromJson(Map<String, dynamic> json) => Deleting(
       hard: json['hard'] as bool? ?? false,
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$DeletingImplToJson(_$DeletingImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$DeletingToJson(Deleting instance) => <String, dynamic>{
       'hard': instance.hard,
       'runtimeType': instance.$type,
     };
 
-_$SentImpl _$$SentImplFromJson(Map<String, dynamic> json) => _$SentImpl(
+Sent _$SentFromJson(Map<String, dynamic> json) => Sent(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$SentImplToJson(_$SentImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$SentToJson(Sent instance) => <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$UpdatedImpl _$$UpdatedImplFromJson(Map<String, dynamic> json) =>
-    _$UpdatedImpl(
+Updated _$UpdatedFromJson(Map<String, dynamic> json) => Updated(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$UpdatedImplToJson(_$UpdatedImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$UpdatedToJson(Updated instance) => <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$DeletedImpl _$$DeletedImplFromJson(Map<String, dynamic> json) =>
-    _$DeletedImpl(
+Deleted _$DeletedFromJson(Map<String, dynamic> json) => Deleted(
       hard: json['hard'] as bool? ?? false,
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$DeletedImplToJson(_$DeletedImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$DeletedToJson(Deleted instance) => <String, dynamic>{
       'hard': instance.hard,
       'runtimeType': instance.$type,
     };
 
-_$SendingFailedImpl _$$SendingFailedImplFromJson(Map<String, dynamic> json) =>
-    _$SendingFailedImpl(
+SendingFailed _$SendingFailedFromJson(Map<String, dynamic> json) =>
+    SendingFailed(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$SendingFailedImplToJson(_$SendingFailedImpl instance) =>
+Map<String, dynamic> _$SendingFailedToJson(SendingFailed instance) =>
     <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$UpdatingFailedImpl _$$UpdatingFailedImplFromJson(Map<String, dynamic> json) =>
-    _$UpdatingFailedImpl(
+UpdatingFailed _$UpdatingFailedFromJson(Map<String, dynamic> json) =>
+    UpdatingFailed(
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$UpdatingFailedImplToJson(
-        _$UpdatingFailedImpl instance) =>
+Map<String, dynamic> _$UpdatingFailedToJson(UpdatingFailed instance) =>
     <String, dynamic>{
       'runtimeType': instance.$type,
     };
 
-_$DeletingFailedImpl _$$DeletingFailedImplFromJson(Map<String, dynamic> json) =>
-    _$DeletingFailedImpl(
+DeletingFailed _$DeletingFailedFromJson(Map<String, dynamic> json) =>
+    DeletingFailed(
       hard: json['hard'] as bool? ?? false,
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$DeletingFailedImplToJson(
-        _$DeletingFailedImpl instance) =>
+Map<String, dynamic> _$DeletingFailedToJson(DeletingFailed instance) =>
     <String, dynamic>{
       'hard': instance.hard,
       'runtimeType': instance.$type,

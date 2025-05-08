@@ -139,3 +139,118 @@ sealed class UploadState with _$UploadState {
   /// Returns true if state is [Failed]
   bool get isFailed => this is Failed;
 }
+
+// coverage:ignore-start
+
+/// @nodoc
+extension UploadStatePatternMatching on UploadState {
+  /// @nodoc
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() preparing,
+    required TResult Function(int uploaded, int total) inProgress,
+    required TResult Function() success,
+    required TResult Function(String error) failed,
+  }) {
+    final uploadState = this;
+    return switch (uploadState) {
+      Preparing() => preparing(),
+      InProgress() => inProgress(uploadState.uploaded, uploadState.total),
+      Success() => success(),
+      Failed() => failed(uploadState.error),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? preparing,
+    TResult? Function(int uploaded, int total)? inProgress,
+    TResult? Function()? success,
+    TResult? Function(String error)? failed,
+  }) {
+    final uploadState = this;
+    return switch (uploadState) {
+      Preparing() => preparing?.call(),
+      InProgress() => inProgress?.call(uploadState.uploaded, uploadState.total),
+      Success() => success?.call(),
+      Failed() => failed?.call(uploadState.error),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+    required TResult orElse(),
+  }) {
+    final uploadState = this;
+    final result = switch (uploadState) {
+      Preparing() => preparing?.call(),
+      InProgress() => inProgress?.call(uploadState.uploaded, uploadState.total),
+      Success() => success?.call(),
+      Failed() => failed?.call(uploadState.error),
+    };
+
+    return result ?? orElse();
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(Preparing value) preparing,
+    required TResult Function(InProgress value) inProgress,
+    required TResult Function(Success value) success,
+    required TResult Function(Failed value) failed,
+  }) {
+    final uploadState = this;
+    return switch (uploadState) {
+      Preparing() => preparing(uploadState),
+      InProgress() => inProgress(uploadState),
+      Success() => success(uploadState),
+      Failed() => failed(uploadState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(Preparing value)? preparing,
+    TResult? Function(InProgress value)? inProgress,
+    TResult? Function(Success value)? success,
+    TResult? Function(Failed value)? failed,
+  }) {
+    final uploadState = this;
+    return switch (uploadState) {
+      Preparing() => preparing?.call(uploadState),
+      InProgress() => inProgress?.call(uploadState),
+      Success() => success?.call(uploadState),
+      Failed() => failed?.call(uploadState),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+    required TResult orElse(),
+  }) {
+    final uploadState = this;
+    final result = switch (uploadState) {
+      Preparing() => preparing?.call(uploadState),
+      InProgress() => inProgress?.call(uploadState),
+      Success() => success?.call(uploadState),
+      Failed() => failed?.call(uploadState),
+    };
+
+    return result ?? orElse();
+  }
+}
+
+// coverage:ignore-end

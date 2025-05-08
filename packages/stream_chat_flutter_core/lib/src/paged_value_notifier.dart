@@ -137,3 +137,130 @@ sealed class PagedValue<Key, Value> with _$PagedValue<Key, Value> {
     return count;
   }
 }
+
+// coverage:ignore-start
+
+/// @nodoc
+extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
+  /// @nodoc
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+      List<Value> items,
+      Key? nextPageKey,
+      StreamChatError? error,
+    ) success, {
+    required TResult Function() loading,
+    required TResult Function(StreamChatError error) error,
+  }) {
+    final pagedValue = this;
+    return switch (pagedValue) {
+      Success<Key, Value>() => success(
+          pagedValue.items,
+          pagedValue.nextPageKey,
+          pagedValue.error,
+        ),
+      Loading<Key, Value>() => loading(),
+      Error<Key, Value>() => error(pagedValue.error),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult Function(
+      List<Value> items,
+      Key? nextPageKey,
+      StreamChatError? error,
+    )? success, {
+    TResult? Function()? loading,
+    TResult? Function(StreamChatError error)? error,
+  }) {
+    final pagedValue = this;
+    return switch (pagedValue) {
+      Success<Key, Value>() => success?.call(
+          pagedValue.items,
+          pagedValue.nextPageKey,
+          pagedValue.error,
+        ),
+      Loading<Key, Value>() => loading?.call(),
+      Error<Key, Value>() => error?.call(pagedValue.error),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+      List<Value> items,
+      Key? nextPageKey,
+      StreamChatError? error,
+    )? success, {
+    TResult Function()? loading,
+    TResult Function(StreamChatError error)? error,
+    required TResult orElse(),
+  }) {
+    final pagedValue = this;
+    final result = switch (pagedValue) {
+      Success<Key, Value>() => success?.call(
+          pagedValue.items,
+          pagedValue.nextPageKey,
+          pagedValue.error,
+        ),
+      Loading<Key, Value>() => loading?.call(),
+      Error<Key, Value>() => error?.call(pagedValue.error),
+    };
+
+    return result ?? orElse();
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(Success<Key, Value> value) success, {
+    required TResult Function(Loading<Key, Value> value) loading,
+    required TResult Function(Error<Key, Value> value) error,
+  }) {
+    final pagedValue = this;
+    return switch (pagedValue) {
+      Success<Key, Value>() => success(pagedValue),
+      Loading<Key, Value>() => loading(pagedValue),
+      Error<Key, Value>() => error(pagedValue),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult Function(Success<Key, Value> value)? success, {
+    TResult? Function(Loading<Key, Value> value)? loading,
+    TResult? Function(Error<Key, Value> value)? error,
+  }) {
+    final pagedValue = this;
+    return switch (pagedValue) {
+      Success<Key, Value>() => success?.call(pagedValue),
+      Loading<Key, Value>() => loading?.call(pagedValue),
+      Error<Key, Value>() => error?.call(pagedValue),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(Success<Key, Value> value)? success, {
+    TResult Function(Loading<Key, Value> value)? loading,
+    TResult Function(Error<Key, Value> value)? error,
+    required TResult orElse(),
+  }) {
+    final pagedValue = this;
+    final result = switch (pagedValue) {
+      Success<Key, Value>() => success?.call(pagedValue),
+      Loading<Key, Value>() => loading?.call(pagedValue),
+      Error<Key, Value>() => error?.call(pagedValue),
+    };
+
+    return result ?? orElse();
+  }
+}
+
+// coverage:ignore-end
