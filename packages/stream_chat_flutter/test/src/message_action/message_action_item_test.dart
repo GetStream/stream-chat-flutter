@@ -15,11 +15,10 @@ void main() {
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         StreamMessageActionItem(
-          message: message,
-          action: const StreamMessageAction(
-            type: StreamMessageActionType.quotedReply,
-            title: Text('Reply'),
-            leading: Icon(Icons.reply),
+          action: StreamMessageAction(
+            title: const Text('Reply'),
+            leading: const Icon(Icons.reply),
+            action: QuotedReply(message: message),
           ),
         ),
       ),
@@ -32,20 +31,15 @@ void main() {
   testWidgets('calls onTap when tapped', (tester) async {
     Message? tappedMessage;
 
-    final actionWithTap = StreamMessageAction(
-      type: StreamMessageActionType.quotedReply,
-      title: const Text('Reply'),
-      leading: const Icon(Icons.reply),
-      onTap: (msg) {
-        tappedMessage = msg;
-      },
-    );
-
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         StreamMessageActionItem(
-          message: message,
-          action: actionWithTap,
+          onTap: (action) => tappedMessage = action.message,
+          action: StreamMessageAction(
+            title: const Text('Reply'),
+            leading: const Icon(Icons.reply),
+            action: QuotedReply(message: message),
+          ),
         ),
       ),
     );
@@ -56,37 +50,18 @@ void main() {
     expect(tappedMessage, message);
   });
 
-  testWidgets('renders custom child when provided', (tester) async {
-    await tester.pumpWidget(
-      _wrapWithMaterialApp(
-        StreamMessageActionItem.custom(
-          message: message,
-          action: const StreamMessageAction(
-            type: StreamMessageActionType('custom-child'),
-          ),
-          child: const Text('Custom Child'),
-        ),
-      ),
-    );
-
-    expect(find.text('Custom Child'), findsOneWidget);
-  });
-
   testWidgets(
     'applies destructive styling when isDestructive is true',
     (tester) async {
-      const destructiveAction = StreamMessageAction(
-        type: StreamMessageActionType.deleteMessage,
-        title: Text('Delete'),
-        leading: Icon(Icons.delete),
-        isDestructive: true,
-      );
-
       await tester.pumpWidget(
         _wrapWithMaterialApp(
           StreamMessageActionItem(
-            message: message,
-            action: destructiveAction,
+            action: StreamMessageAction(
+              isDestructive: true,
+              title: const Text('Delete'),
+              leading: const Icon(Icons.delete),
+              action: DeleteMessage(message: message),
+            ),
           ),
         ),
       );
@@ -114,11 +89,10 @@ void main() {
         builder: () => _wrapWithMaterialApp(
           brightness: brightness,
           StreamMessageActionItem(
-            message: message,
-            action: const StreamMessageAction(
-              type: StreamMessageActionType.quotedReply,
-              title: Text('Reply'),
-              leading: Icon(Icons.reply),
+            action: StreamMessageAction(
+              title: const Text('Reply'),
+              leading: const Icon(Icons.reply),
+              action: QuotedReply(message: message),
             ),
           ),
         ),
@@ -132,12 +106,11 @@ void main() {
         builder: () => _wrapWithMaterialApp(
           brightness: brightness,
           StreamMessageActionItem(
-            message: message,
-            action: const StreamMessageAction(
-              type: StreamMessageActionType.deleteMessage,
-              title: Text('Delete Message'),
+            action: StreamMessageAction(
               isDestructive: true,
-              leading: Icon(Icons.delete),
+              title: const Text('Delete Message'),
+              leading: const Icon(Icons.delete),
+              action: DeleteMessage(message: message),
             ),
           ),
         ),
@@ -151,9 +124,7 @@ void main() {
         builder: () => _wrapWithMaterialApp(
           brightness: brightness,
           StreamMessageActionItem(
-            message: message,
             action: StreamMessageAction(
-              type: const StreamMessageActionType('styled'),
               title: const Text('Styled Action'),
               titleTextStyle: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -163,32 +134,7 @@ void main() {
               leading: const Icon(Icons.favorite),
               iconColor: Colors.pink[400],
               backgroundColor: Colors.amber[100],
-            ),
-          ),
-        ),
-      );
-
-      // Test custom child action item
-      goldenTest(
-        'StreamMessageActionItem.custom in $theme theme',
-        fileName: 'stream_message_action_item_custom_child_$theme',
-        constraints: const BoxConstraints(maxWidth: 300, maxHeight: 60),
-        builder: () => _wrapWithMaterialApp(
-          brightness: brightness,
-          StreamMessageActionItem.custom(
-            message: message,
-            action: const StreamMessageAction(
-              type: StreamMessageActionType('custom-child'),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.emoji_emotions, color: Colors.amber[600]),
-                const SizedBox(width: 16),
-                const Expanded(child: Text('Custom Child')),
-                const SizedBox(width: 8),
-                const Badge(label: Text('New')),
-              ],
+              action: CustomMessageAction(message: message),
             ),
           ),
         ),

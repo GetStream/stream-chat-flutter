@@ -19,24 +19,24 @@ void main() {
     ),
   );
 
-  final messageActions = <StreamMessageAction>{
-    const StreamMessageAction(
-      type: StreamMessageActionType.resendMessage,
-      title: Text('Send Anyway'),
-      leading: StreamSvgIcon(icon: StreamSvgIcons.send),
+  final messageActions = <StreamMessageAction>[
+    StreamMessageAction(
+      title: const Text('Send Anyway'),
+      leading: const StreamSvgIcon(icon: StreamSvgIcons.send),
+      action: ResendMessage(message: message),
     ),
-    const StreamMessageAction(
-      type: StreamMessageActionType.editMessage,
-      title: Text('Edit Message'),
-      leading: StreamSvgIcon(icon: StreamSvgIcons.edit),
+    StreamMessageAction(
+      title: const Text('Edit Message'),
+      leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
+      action: EditMessage(message: message),
     ),
-    const StreamMessageAction(
+    StreamMessageAction(
       isDestructive: true,
-      type: StreamMessageActionType.hardDeleteMessage,
-      title: Text('Delete Message'),
-      leading: StreamSvgIcon(icon: StreamSvgIcons.delete),
+      title: const Text('Delete Message'),
+      leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+      action: HardDeleteMessage(message: message),
     ),
-  };
+  ];
 
   group('ModeratedMessageActionsModal', () {
     testWidgets('renders title, content and actions correctly', (tester) async {
@@ -63,37 +63,14 @@ void main() {
     });
 
     testWidgets('action buttons call the correct callbacks', (tester) async {
-      var sendAnywayTapped = false;
-      var editMessageTapped = false;
-      var deleteMessageTapped = false;
-
-      final callbackActions = <StreamMessageAction>{
-        StreamMessageAction(
-          type: StreamMessageActionType.resendMessage,
-          title: const Text('Send Anyway'),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.send),
-          onTap: (_) => sendAnywayTapped = true,
-        ),
-        StreamMessageAction(
-          type: StreamMessageActionType.editMessage,
-          title: const Text('Edit Message'),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
-          onTap: (_) => editMessageTapped = true,
-        ),
-        StreamMessageAction(
-          isDestructive: true,
-          type: StreamMessageActionType.hardDeleteMessage,
-          title: const Text('Delete Message'),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-          onTap: (_) => deleteMessageTapped = true,
-        ),
-      };
+      MessageAction? messageAction;
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
           ModeratedMessageActionsModal(
             message: message,
-            messageActions: callbackActions,
+            messageActions: messageActions,
+            onActionTap: (action) => messageAction = action,
           ),
         ),
       );
@@ -103,17 +80,17 @@ void main() {
       // Tap on Send Anyway button
       await tester.tap(find.text('Send Anyway'));
       await tester.pumpAndSettle();
-      expect(sendAnywayTapped, isTrue);
+      expect(messageAction, isA<ResendMessage>());
 
       // Tap on Edit Message button
       await tester.tap(find.text('Edit Message'));
       await tester.pumpAndSettle();
-      expect(editMessageTapped, isTrue);
+      expect(messageAction, isA<EditMessage>());
 
       // Tap on Delete Message button
       await tester.tap(find.text('Delete Message'));
       await tester.pumpAndSettle();
-      expect(deleteMessageTapped, isTrue);
+      expect(messageAction, isA<HardDeleteMessage>());
     });
   });
 

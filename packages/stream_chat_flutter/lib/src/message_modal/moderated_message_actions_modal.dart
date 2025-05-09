@@ -24,6 +24,7 @@ class ModeratedMessageActionsModal extends StatelessWidget {
     super.key,
     required this.message,
     required this.messageActions,
+    this.onActionTap,
   });
 
   /// The message object that actions will be performed on.
@@ -35,7 +36,12 @@ class ModeratedMessageActionsModal extends StatelessWidget {
   ///
   /// Each action is represented by a [StreamMessageAction] object which defines
   /// the action's appearance and behavior.
-  final Set<StreamMessageAction> messageActions;
+  final List<StreamMessageAction> messageActions;
+
+  /// Callback triggered when a moderated message action is tapped.
+  ///
+  /// Provides the tapped [MessageAction] object to the callback.
+  final OnMessageActionTap? onActionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +52,8 @@ class ModeratedMessageActionsModal extends StatelessWidget {
     final actions = <Widget>[
       ...messageActions.map(
         (action) => AdaptiveDialogAction(
-          onPressed: switch (action.onTap) {
-            final onTap? => () => onTap.call(message),
+          onPressed: switch (onActionTap) {
+            final onTap? => () => onTap.call(action.action),
             _ => null,
           },
           isDestructiveAction: action.isDestructive,

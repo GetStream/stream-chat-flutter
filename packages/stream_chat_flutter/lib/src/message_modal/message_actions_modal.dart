@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_action/message_action_item.dart';
 import 'package:stream_chat_flutter/src/message_modal/message_modal.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/my_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -24,7 +23,7 @@ class StreamMessageActionsModal extends StatelessWidget {
     required this.messageWidget,
     this.reverse = false,
     this.showReactionPicker = false,
-    this.onReactionPicked,
+    this.onActionTap,
   });
 
   /// The message object that actions will be performed on.
@@ -36,7 +35,7 @@ class StreamMessageActionsModal extends StatelessWidget {
   ///
   /// Each action is represented by a [StreamMessageAction] object which defines
   /// the action's appearance and behavior.
-  final Set<StreamMessageAction> messageActions;
+  final List<StreamMessageAction> messageActions;
 
   /// The widget representing the message being acted upon.
   ///
@@ -61,10 +60,10 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// Defaults to `false`.
   final bool showReactionPicker;
 
-  /// Callback triggered when a user adds or toggles a reaction.
+  /// Callback triggered when a message action is tapped.
   ///
-  /// Provides the selected [Reaction] object to the callback.
-  final OnReactionPicked? onReactionPicked;
+  /// Provides the tapped [MessageAction] object to the callback.
+  final OnMessageActionTap? onActionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +88,14 @@ class StreamMessageActionsModal extends StatelessWidget {
               alignment: alignment,
               child: StreamReactionPicker(
                 message: message,
-                onReactionPicked: onReactionPicked,
+                onReactionPicked: switch (onActionTap) {
+                  final onActionTap? => (reaction) {
+                      return onActionTap.call(
+                        SelectReaction(message: message, reaction: reaction),
+                      );
+                    },
+                  _ => null,
+                },
               ),
             );
           },
@@ -120,7 +126,7 @@ class StreamMessageActionsModal extends StatelessWidget {
             ...messageActions.map(
               (action) => StreamMessageActionItem(
                 action: action,
-                message: message,
+                onTap: onActionTap,
               ),
             ),
           }.insertBetween(Divider(height: 1, color: theme.colorTheme.borders)),

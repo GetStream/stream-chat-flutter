@@ -57,7 +57,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(Message());
-    registerFallbackValue(const StreamMessageActionType('any'));
+    // registerFallbackValue(const StreamMessageActionType('any'));
   });
 
   MockChannel _getChannelWithCapabilities(
@@ -96,43 +96,15 @@ void main() {
     );
 
     // Verify default actions
-    actions.expects(StreamMessageActionType.quotedReply);
-    actions.expects(StreamMessageActionType.threadReply);
-    actions.expects(StreamMessageActionType.markUnread);
-    actions.expects(StreamMessageActionType.copyMessage);
-    actions.expects(StreamMessageActionType.editMessage);
-    actions.expects(StreamMessageActionType.pinMessage);
-    actions.expects(StreamMessageActionType.deleteMessage);
-    actions.expects(StreamMessageActionType.flagMessage);
-    actions.expects(StreamMessageActionType.muteUser);
-  });
-
-  testWidgets('handles onActionTap callback for actions', (tester) async {
-    final context = await _getContext(tester);
-    StreamMessageActionType? tappedActionType;
-    Message? tappedMessage;
-
-    final channel = _getChannelWithCapabilities(allChannelCapabilities);
-    final actions = StreamMessageActionsBuilder.buildActions(
-      context: context,
-      message: message,
-      channel: channel,
-      currentUser: currentUser,
-      onActionTap: (msg, actionType) {
-        tappedMessage = msg;
-        tappedActionType = actionType;
-      },
-    );
-
-    actions.expects(StreamMessageActionType.quotedReply);
-    final quotedReplyAction = actions.firstWhere(
-      (action) => action.type == StreamMessageActionType.quotedReply,
-    );
-
-    quotedReplyAction.onTap?.call(message);
-
-    expect(tappedActionType, StreamMessageActionType.quotedReply);
-    expect(tappedMessage, message);
+    actions.expects<QuotedReply>();
+    actions.expects<ThreadReply>();
+    actions.expects<MarkUnread>();
+    actions.expects<CopyMessage>();
+    actions.expects<EditMessage>();
+    actions.expects<PinMessage>();
+    actions.expects<DeleteMessage>();
+    actions.expects<FlagMessage>();
+    actions.expects<MuteUser>();
   });
 
   testWidgets('returns empty set for deleted messages', (tester) async {
@@ -152,10 +124,13 @@ void main() {
 
   testWidgets('includes custom actions', (tester) async {
     final context = await _getContext(tester);
-    const customAction = StreamMessageAction(
-      type: StreamMessageActionType('custom-action'),
-      title: Text('Custom'),
-      leading: Icon(Icons.star),
+    final customAction = StreamMessageAction(
+      title: const Text('Custom'),
+      leading: const Icon(Icons.star),
+      action: CustomMessageAction(
+        message: message,
+        extraData: {'customKey': 'customValue'},
+      ),
     );
 
     final channel = _getChannelWithCapabilities(allChannelCapabilities);
@@ -167,8 +142,7 @@ void main() {
       customActions: [customAction],
     );
 
-    actions.expects(
-      const StreamMessageActionType('custom-action'),
+    actions.expects<CustomMessageAction>(
       reason: 'Custom action should be included',
     );
   });
@@ -189,8 +163,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        ownActions.expects(
-          StreamMessageActionType.editMessage,
+        ownActions.expects<EditMessage>(
           reason: 'Edit action should be available for own messages',
         );
 
@@ -202,8 +175,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        otherUserActions.expects(
-          StreamMessageActionType.editMessage,
+        otherUserActions.expects<EditMessage>(
           reason: 'Edit action should be available for others messages',
         );
       },
@@ -234,8 +206,7 @@ void main() {
         currentUser: currentUser,
       );
 
-      actions.notExpects(
-        StreamMessageActionType.editMessage,
+      actions.notExpects<EditMessage>(
         reason: 'Edit action should not be available for poll messages',
       );
     });
@@ -260,8 +231,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsWithPerm.expects(
-          StreamMessageActionType.deleteMessage,
+        actionsWithPerm.expects<DeleteMessage>(
           reason: 'Delete action should be available with permission',
         );
 
@@ -278,8 +248,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsWithoutPerm.notExpects(
-          StreamMessageActionType.deleteMessage,
+        actionsWithoutPerm.notExpects<DeleteMessage>(
           reason: 'Delete action should not be available without permission',
         );
       },
@@ -304,8 +273,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsWithPerm.expects(
-          StreamMessageActionType.pinMessage,
+        actionsWithPerm.expects<PinMessage>(
           reason: 'Pin action should be available with pin permission',
         );
 
@@ -322,8 +290,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsWithoutPerm.notExpects(
-          StreamMessageActionType.pinMessage,
+        actionsWithoutPerm.notExpects<PinMessage>(
           reason: 'Pin action should not be available without permission',
         );
       },
@@ -341,8 +308,7 @@ void main() {
         currentUser: currentUser,
       );
 
-      actions.expects(
-        StreamMessageActionType.unpinMessage,
+      actions.expects<UnpinMessage>(
         reason: 'Unpin action should be available for pinned messages',
       );
     });
@@ -361,8 +327,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsOtherUser.expects(
-          StreamMessageActionType.flagMessage,
+        actionsOtherUser.expects<FlagMessage>(
           reason: "Flag action should be available for others' messages",
         );
 
@@ -375,8 +340,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsOwnMessage.notExpects(
-          StreamMessageActionType.flagMessage,
+        actionsOwnMessage.notExpects<FlagMessage>(
           reason: 'Flag action should not be available for own messages',
         );
       },
@@ -397,8 +361,7 @@ void main() {
           currentUser: userWithNoMutes,
         );
 
-        actionsForNoMutes.expects(
-          StreamMessageActionType.muteUser,
+        actionsForNoMutes.expects<MuteUser>(
           reason: 'Mute action should be available for users with no mutes',
         );
 
@@ -422,9 +385,8 @@ void main() {
           currentUser: userWithMutes,
         );
 
-        actionsForMutedUser.expects(
-          StreamMessageActionType.muteUser,
-          reason: 'Mute action should be available for already muted users',
+        actionsForMutedUser.expects<UnmuteUser>(
+          reason: 'Unmute action should be available for already muted users',
         );
 
         // Own message
@@ -436,8 +398,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsForOwnMessage.notExpects(
-          StreamMessageActionType.muteUser,
+        actionsForOwnMessage.notExpects<MuteUser>(
           reason: 'Mute action should not be available for own messages',
         );
 
@@ -454,8 +415,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        muteDisabledActions.notExpects(
-          StreamMessageActionType.muteUser,
+        muteDisabledActions.notExpects<MuteUser>(
           reason: 'Mute action unavailable when channel mutes are disabled',
         );
       },
@@ -477,8 +437,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsForThreadMessage.notExpects(
-          StreamMessageActionType.threadReply,
+        actionsForThreadMessage.notExpects<ThreadReply>(
           reason: 'Thread reply unavailable for thread messages',
         );
 
@@ -495,8 +454,7 @@ void main() {
           currentUser: currentUser,
         );
 
-        actionsWithoutQuote.notExpects(
-          StreamMessageActionType.quotedReply,
+        actionsWithoutQuote.notExpects<QuotedReply>(
           reason: 'Quote reply unavailable without quote permission',
         );
       },
@@ -525,8 +483,7 @@ void main() {
         currentUser: currentUser,
       );
 
-      actionsWithReadEvents.expects(
-        StreamMessageActionType.markUnread,
+      actionsWithReadEvents.expects<MarkUnread>(
         reason: 'Mark unread available with read events capability',
       );
 
@@ -543,8 +500,7 @@ void main() {
         currentUser: currentUser,
       );
 
-      actionsWithoutReadEvents.notExpects(
-        StreamMessageActionType.markUnread,
+      actionsWithoutReadEvents.notExpects<MarkUnread>(
         reason: 'Mark unread unavailable without read events capability',
       );
     });
@@ -575,16 +531,13 @@ void main() {
         );
 
         // Verify the specific actions for bounced messages
-        actions.expects(
-          StreamMessageActionType.resendMessage,
+        actions.expects<ResendMessage>(
           reason: 'Send Anyway action should be included',
         );
-        actions.expects(
-          StreamMessageActionType.editMessage,
+        actions.expects<EditMessage>(
           reason: 'Edit Message action should be included',
         );
-        actions.expects(
-          StreamMessageActionType.hardDeleteMessage,
+        actions.expects<HardDeleteMessage>(
           reason: 'Delete Message action should be included',
         );
 
@@ -592,62 +545,18 @@ void main() {
         expect(actions.length, 3, reason: 'Should have exactly 3 actions');
       },
     );
-
-    testWidgets(
-      'handles onActionTap callback for bounced message actions',
-      (tester) async {
-        final context = await _getContext(tester);
-        final bouncedMessage = createTestMessage(type: MessageType.error);
-
-        StreamMessageActionType? tappedActionType;
-        Message? tappedMessage;
-
-        final actions = StreamMessageActionsBuilder.buildBouncedErrorActions(
-          context: context,
-          message: bouncedMessage,
-          onActionTap: (msg, actionType) {
-            tappedMessage = msg;
-            tappedActionType = actionType;
-          },
-        );
-
-        // Test retry action callback
-        final retryAction = actions.firstWhere(
-          (action) => action.type == StreamMessageActionType.resendMessage,
-        );
-        retryAction.onTap?.call(bouncedMessage);
-        expect(tappedActionType, StreamMessageActionType.resendMessage);
-        expect(tappedMessage, bouncedMessage);
-
-        // Test edit action callback
-        final editAction = actions.firstWhere(
-          (action) => action.type == StreamMessageActionType.editMessage,
-        );
-        editAction.onTap?.call(bouncedMessage);
-        expect(tappedActionType, StreamMessageActionType.editMessage);
-        expect(tappedMessage, bouncedMessage);
-
-        // Test delete action callback
-        final deleteAction = actions.firstWhere(
-          (action) => action.type == StreamMessageActionType.hardDeleteMessage,
-        );
-        deleteAction.onTap?.call(bouncedMessage);
-        expect(tappedActionType, StreamMessageActionType.hardDeleteMessage);
-        expect(tappedMessage, bouncedMessage);
-      },
-    );
   });
 }
 
 /// Extension on Set<StreamMessageAction> to simplify action type checks.
-extension StreamMessageActionSetExtension on Set<StreamMessageAction> {
-  void expects(StreamMessageActionType type, {String? reason}) {
-    final containsActionType = where((it) => it.type == type).isNotEmpty;
+extension StreamMessageActionSetExtension on List<StreamMessageAction> {
+  void expects<T extends MessageAction>({String? reason}) {
+    final containsActionType = this.any((it) => it.action is T);
     return expect(containsActionType, isTrue, reason: reason);
   }
 
-  void notExpects(StreamMessageActionType type, {String? reason}) {
-    final containsActionType = where((it) => it.type == type).isNotEmpty;
+  void notExpects<T extends MessageAction>({String? reason}) {
+    final containsActionType = this.any((it) => it.action is T);
     return expect(containsActionType, isFalse, reason: reason);
   }
 }

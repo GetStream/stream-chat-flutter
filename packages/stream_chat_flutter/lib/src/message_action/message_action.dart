@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+part 'message_action_type.dart';
+
 /// {@template streamMessageAction}
 /// A class that represents an action that can be performed on a message.
 ///
@@ -8,10 +10,10 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// or option lists, providing a consistent structure for message-related
 /// actions including their visual representation and behavior.
 /// {@endtemplate}
-class StreamMessageAction {
+class StreamMessageAction<T extends MessageAction> {
   /// {@macro streamMessageAction}
   const StreamMessageAction({
-    this.type,
+    required this.action,
     this.isDestructive = false,
     this.leading,
     this.iconColor,
@@ -19,13 +21,10 @@ class StreamMessageAction {
     this.titleTextColor,
     this.titleTextStyle,
     this.backgroundColor,
-    this.onTap,
   });
 
-  /// Type of the action performed.
-  ///
-  /// {@macro streamMessageActionType}
-  final StreamMessageActionType? type;
+  /// The [MessageAction] that this item represents.
+  final T action;
 
   /// Whether the action is destructive.
   ///
@@ -68,70 +67,4 @@ class StreamMessageAction {
 
   /// Defines the background color of the action item.
   final Color? backgroundColor;
-
-  /// Called when the user taps this action item.
-  ///
-  /// This callback provides the tap handling for the action item, and is
-  /// typically used to execute the associated action or dismiss menus.
-  final ValueSetter<Message>? onTap;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is StreamMessageAction && other.type == type;
-  }
-
-  @override
-  int get hashCode => type.hashCode;
-}
-
-/// {@template streamMessageActionType}
-/// A type that represents the various actions that can be performed on a
-/// message.
-///
-/// This extension type provides strongly typed constants for message actions,
-/// Each constant represents a specific action that can be taken on a message.
-/// {@endtemplate}
-extension type const StreamMessageActionType(String type) implements String {
-  /// Shows reaction selector for adding reactions to a message
-  static const selectReaction = StreamMessageActionType('selectReaction');
-
-  /// Copies message content to clipboard
-  static const copyMessage = StreamMessageActionType('copyMessage');
-
-  /// Deletes a message from the conversation
-  static const deleteMessage = StreamMessageActionType('deleteMessage');
-
-  /// Permanently deletes a message from the conversation
-  static const hardDeleteMessage = StreamMessageActionType('hardDeleteMessage');
-
-  /// Modifies content of an existing message
-  static const editMessage = StreamMessageActionType('editMessage');
-
-  /// Flags a message for moderator review
-  static const flagMessage = StreamMessageActionType('flagMessage');
-
-  /// Marks a message as unread for later viewing
-  static const markUnread = StreamMessageActionType('markUnread');
-
-  /// Mutes a user to prevent notifications from their messages
-  static const muteUser = StreamMessageActionType('muteUser');
-
-  /// Unmutes a user to receive notifications from their messages
-  static const unmuteUser = StreamMessageActionType('unmuteUser');
-
-  /// Pins a message to make it prominently visible in the channel
-  static const pinMessage = StreamMessageActionType('pinMessage');
-
-  /// Removes a previously pinned message
-  static const unpinMessage = StreamMessageActionType('unpinMessage');
-
-  /// Attempts to resend a message that failed to send
-  static const resendMessage = StreamMessageActionType('resendMessage');
-
-  /// Creates a reply with quoted original message content
-  static const quotedReply = StreamMessageActionType('quotedReply');
-
-  /// Starts a threaded conversation from a message
-  static const threadReply = StreamMessageActionType('threadReply');
 }

@@ -27,14 +27,8 @@ void main() {
         user: User(id: 'user-2', name: 'User 2'),
         createdAt: DateTime.now(),
       ),
-      Reaction(
-        type: 'wow',
-        messageId: 'test-message',
-        user: User(id: 'user-3', name: 'User 3'),
-        createdAt: DateTime.now(),
-      ),
     ],
-    reactionCounts: const {'love': 1, 'like': 1, 'wow': 1},
+    reactionCounts: const {'love': 1, 'like': 1},
   );
 
   late MockClient mockClient;
@@ -103,7 +97,7 @@ void main() {
         );
 
         // Verify the avatar is rendered
-        expect(avatar, findsNWidgets(3));
+        expect(avatar, findsNWidgets(2));
 
         // Tap on the first avatar directly
         await tester.tap(avatar.first);
@@ -115,19 +109,27 @@ void main() {
     );
 
     testWidgets(
-      'calls onReactionPicked when reaction is selected',
+      'calls onReactionPicked with SelectReaction when reaction is selected',
       (tester) async {
-        String? selectedReactionType;
+        MessageAction? messageAction;
 
         // Define custom reaction icons for testing
         final testReactionIcons = [
           StreamReactionIcon(
             type: 'like',
-            builder: (_, __, ___) => const Icon(Icons.thumb_up),
+            builder: (context, isActive, size) => const Icon(Icons.thumb_up),
           ),
           StreamReactionIcon(
             type: 'love',
-            builder: (_, __, ___) => const Icon(Icons.favorite),
+            builder: (context, isActive, size) => const Icon(Icons.favorite),
+          ),
+          StreamReactionIcon(
+            type: 'camera',
+            builder: (context, isActive, size) => const Icon(Icons.camera),
+          ),
+          StreamReactionIcon(
+            type: 'call',
+            builder: (context, isActive, size) => const Icon(Icons.call),
           ),
         ];
 
@@ -138,9 +140,7 @@ void main() {
             StreamMessageReactionsModal(
               message: message,
               messageWidget: const Text('Message Widget'),
-              onReactionPicked: (reaction) {
-                selectedReactionType = reaction.type;
-              },
+              onReactionPicked: (action) => messageAction = action,
             ),
           ),
         );
@@ -151,33 +151,25 @@ void main() {
         // Verify reaction picker is shown
         expect(find.byType(StreamReactionPicker), findsOneWidget);
 
-        Finder reactionPickerIconFinder(IconData icon) {
-          return find.descendant(
-            of: find.byType(StreamReactionPicker),
-            matching: find.byIcon(icon),
-          );
-        }
-
-        // Find and tap the first reaction (like)
-        final likeIconFinder = reactionPickerIconFinder(Icons.thumb_up);
-        expect(likeIconFinder, findsOneWidget);
-        await tester.tap(likeIconFinder);
+        // Find and tap the camera reaction (camera)
+        final reactionIconFinder = find.byIcon(Icons.camera);
+        expect(reactionIconFinder, findsOneWidget);
+        await tester.tap(reactionIconFinder);
         await tester.pumpAndSettle();
 
+        expect(messageAction, isA<SelectReaction>());
         // Verify callback was called with correct reaction type
-        expect(selectedReactionType, 'like');
+        expect((messageAction! as SelectReaction).reaction.type, 'camera');
 
-        // Reset selected reaction
-        selectedReactionType = null;
-
-        // Find and tap the second reaction (love)
-        final loveIconFinder = reactionPickerIconFinder(Icons.favorite);
+        // Find and tap the call reaction (call)
+        final loveIconFinder = find.byIcon(Icons.call);
         expect(loveIconFinder, findsOneWidget);
         await tester.tap(loveIconFinder);
         await tester.pumpAndSettle();
 
+        expect(messageAction, isA<SelectReaction>());
         // Verify callback was called with correct reaction type
-        expect(selectedReactionType, 'love');
+        expect((messageAction! as SelectReaction).reaction.type, 'call');
       },
     );
   });

@@ -401,23 +401,31 @@ class DownloadMenuItem extends StatelessWidget {
 
   /// The attachment package containing the message and attachment to download.
   final StreamAttachmentPackage mediaAttachment;
+  static const String _attachmentKey = 'attachment';
 
   @override
   Widget build(BuildContext context) {
     return StreamMessageActionItem(
-      message: mediaAttachment.message,
       action: StreamMessageAction(
         leading: const StreamSvgIcon(icon: StreamSvgIcons.download),
         title: Text(context.translations.downloadLabel),
-        onTap: (_) async {
-          final popped = await Navigator.of(context).maybePop();
-          if (popped) {
-            StreamAttachmentHandler.instance.downloadAttachment(
-              mediaAttachment.attachment,
-            );
-          }
-        },
+        action: CustomMessageAction(
+          message: mediaAttachment.message,
+          extraData: {_attachmentKey: mediaAttachment.attachment},
+        ),
       ),
+      // TODO: Use a callback to handle the action instead of onTap.
+      onTap: (action) async {
+        if (action is! CustomMessageAction) return;
+        final attachment = action.extraData[_attachmentKey] as Attachment?;
+        if (attachment == null) return;
+
+        final popped = await Navigator.of(context).maybePop();
+        if (popped) {
+          final handler = StreamAttachmentHandler.instance;
+          return handler.downloadAttachment(attachment).ignore();
+        }
+      },
     );
   }
 }

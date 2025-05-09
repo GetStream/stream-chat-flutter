@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_modal/message_modal.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/my_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_card.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
@@ -54,7 +53,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
   /// Callback triggered when a user adds or toggles a reaction.
   ///
   /// Provides the selected [Reaction] object to the callback.
-  final OnReactionPicked? onReactionPicked;
+  final OnMessageActionTap<SelectReaction>? onReactionPicked;
 
   /// Callback triggered when a user avatar is tapped in the reactions list.
   ///
@@ -84,7 +83,14 @@ class StreamMessageReactionsModal extends StatelessWidget {
               alignment: alignment,
               child: StreamReactionPicker(
                 message: message,
-                onReactionPicked: onReactionPicked,
+                onReactionPicked: switch (onReactionPicked) {
+                  final onReactionPicked? => (reaction) {
+                      return onReactionPicked.call(
+                        SelectReaction(message: message, reaction: reaction),
+                      );
+                    },
+                  _ => null,
+                },
               ),
             );
           },

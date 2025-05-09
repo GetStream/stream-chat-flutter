@@ -14,29 +14,29 @@ void main() {
     user: User(id: 'test-user', name: 'Test User'),
   );
 
-  final messageActions = <StreamMessageAction>{
-    const StreamMessageAction(
-      type: StreamMessageActionType.quotedReply,
-      title: Text('Reply'),
-      leading: StreamSvgIcon(icon: StreamSvgIcons.reply),
+  final messageActions = <StreamMessageAction>[
+    StreamMessageAction(
+      title: const Text('Reply'),
+      leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
+      action: QuotedReply(message: message),
     ),
-    const StreamMessageAction(
-      type: StreamMessageActionType.threadReply,
-      title: Text('Thread Reply'),
-      leading: StreamSvgIcon(icon: StreamSvgIcons.threadReply),
+    StreamMessageAction(
+      title: const Text('Thread Reply'),
+      leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
+      action: ThreadReply(message: message),
     ),
-    const StreamMessageAction(
-      type: StreamMessageActionType.copyMessage,
-      title: Text('Copy Message'),
-      leading: StreamSvgIcon(icon: StreamSvgIcons.copy),
+    StreamMessageAction(
+      title: const Text('Copy Message'),
+      leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
+      action: CopyMessage(message: message),
     ),
-    const StreamMessageAction(
+    StreamMessageAction(
       isDestructive: true,
-      type: StreamMessageActionType.deleteMessage,
-      title: Text('Delete Message'),
-      leading: StreamSvgIcon(icon: StreamSvgIcons.delete),
+      title: const Text('Delete Message'),
+      leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+      action: DeleteMessage(message: message),
     ),
-  };
+  ];
 
   group('StreamMessageActionsModal', () {
     testWidgets('renders message widget and actions correctly', (tester) async {
@@ -77,9 +77,9 @@ void main() {
     });
 
     testWidgets(
-      'calls onReactionPicked when reaction is selected',
+      'calls onActionTap with SelectReaction when reaction is selected',
       (tester) async {
-        String? selectedReactionType;
+        MessageAction? messageAction;
 
         // Define custom reaction icons for testing
         final testReactionIcons = [
@@ -100,9 +100,7 @@ void main() {
               messageActions: messageActions,
               messageWidget: const Text('Message Widget'),
               showReactionPicker: true,
-              onReactionPicked: (reaction) {
-                selectedReactionType = reaction.type;
-              },
+              onActionTap: (action) => messageAction = action,
             ),
             reactionIcons: testReactionIcons,
           ),
@@ -120,11 +118,9 @@ void main() {
         await tester.tap(reactionIconFinder);
         await tester.pumpAndSettle();
 
+        expect(messageAction, isA<SelectReaction>());
         // Verify callback was called with correct reaction type
-        expect(selectedReactionType, 'like');
-
-        // Reset selected reaction
-        selectedReactionType = null;
+        expect((messageAction! as SelectReaction).reaction.type, 'like');
 
         // Find and tap the second reaction (love)
         final loveIconFinder = find.byIcon(Icons.favorite);
@@ -132,8 +128,9 @@ void main() {
         await tester.tap(loveIconFinder);
         await tester.pumpAndSettle();
 
+        expect(messageAction, isA<SelectReaction>());
         // Verify callback was called with correct reaction type
-        expect(selectedReactionType, 'love');
+        expect((messageAction! as SelectReaction).reaction.type, 'love');
       },
     );
   });

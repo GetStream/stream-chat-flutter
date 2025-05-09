@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/my_reaction_picker.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-
 void main() {
   final reactionIcons = [
     StreamReactionIcon(
