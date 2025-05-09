@@ -673,6 +673,15 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamDraftListTile] widget.
   final StreamDraftListTileThemeData draftListTileTheme;
 
+  /// Returns the theme for the message based on the [reverse] parameter.
+  ///
+  /// If [reverse] is true, it returns the [otherMessageTheme], otherwise it
+  /// returns the [ownMessageTheme].
+  StreamMessageThemeData getMessageTheme({bool reverse = false}) {
+    if (reverse) return otherMessageTheme;
+    return ownMessageTheme;
+  }
+
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({

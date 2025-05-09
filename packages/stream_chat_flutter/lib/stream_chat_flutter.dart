@@ -52,7 +52,7 @@ export 'src/indicators/upload_progress_indicator.dart';
 export 'src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
-export 'src/message_actions_modal/message_action.dart';
+export 'src/message_action/message_action.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_bottom_sheet.dart';
 export 'src/message_input/audio_recorder/audio_recorder_controller.dart';
