@@ -25,6 +25,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
     required this.messageWidget,
     this.reverse = false,
     this.showReactionPicker = true,
+    this.reactionPickerBuilder = StreamReactionPicker.builder,
     this.onReactionPicked,
     this.onUserAvatarTap,
   });
@@ -49,6 +50,9 @@ class StreamMessageReactionsModal extends StatelessWidget {
   /// When `true`, users can add reactions directly from the modal.
   /// When `false`, the reaction picker is hidden.
   final bool showReactionPicker;
+
+  /// {@macro reactionPickerBuilder}
+  final ReactionPickerBuilder reactionPickerBuilder;
 
   /// Callback triggered when a user adds or toggles a reaction.
   ///
@@ -79,19 +83,18 @@ class StreamMessageReactionsModal extends StatelessWidget {
               reverse: reverse,
             );
 
+            final onReactionPicked = switch (this.onReactionPicked) {
+              null => null,
+              final onPicked => (reaction) {
+                  return onPicked.call(
+                    SelectReaction(message: message, reaction: reaction),
+                  );
+                },
+            };
+
             return Align(
               alignment: alignment,
-              child: StreamReactionPicker(
-                message: message,
-                onReactionPicked: switch (onReactionPicked) {
-                  final onReactionPicked? => (reaction) {
-                      return onReactionPicked.call(
-                        SelectReaction(message: message, reaction: reaction),
-                      );
-                    },
-                  _ => null,
-                },
-              ),
+              child: reactionPickerBuilder(context, message, onReactionPicked),
             );
           },
         ),

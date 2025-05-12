@@ -1474,31 +1474,39 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   void _getOnThreadTap() {
-    if (widget.onThreadTap != null) {
-      _onThreadTap = (Message message) {
-        final threadBuilder = widget.threadBuilder;
-        widget.onThreadTap!(
-          message,
-          threadBuilder != null ? threadBuilder(context, message) : null,
-        );
-      };
-    } else if (widget.threadBuilder != null) {
-      _onThreadTap = (Message message) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => BetterStreamBuilder<Message>(
-              stream: streamChannel!.channel.state!.messagesStream.map(
-                (messages) => messages.firstWhere((m) => m.id == message.id),
-              ),
-              initialData: message,
-              builder: (_, data) => StreamChannel(
-                channel: streamChannel!.channel,
-                child: widget.threadBuilder!(context, data),
+    _onThreadTap = switch ((widget.onThreadTap, widget.threadBuilder)) {
+      // Case 1: widget.onThreadTap is provided.
+      // The created callback will use widget.onThreadTap, passing the result
+      // of widget.threadBuilder (if provided) as the second argument.
+      (final onThreadTap?, final threadBuilder) => (Message message) {
+          onThreadTap(
+            message,
+            threadBuilder?.call(context, message),
+          );
+        },
+      // Case 2: widget.onThreadTap is null, but widget.threadBuilder is provided.
+      // The created callback will perform the default navigation action,
+      // using widget.threadBuilder to build the thread page.
+      (null, final threadBuilder?) => (Message message) {
+          final threadPage = StreamChatConfiguration(
+            data: StreamChatConfiguration.of(context),
+            child: StreamChannel(
+              channel: streamChannel!.channel,
+              child: BetterStreamBuilder<Message>(
+                initialData: message,
+                stream: streamChannel!.channel.state?.messagesStream.map(
+                  (it) => it.firstWhere((m) => m.id == message.id),
+                ),
+                builder: (_, data) => threadBuilder(context, data),
               ),
             ),
-          ),
-        );
-      };
-    }
+          );
+
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => threadPage),
+          );
+        },
+      _ => null,
+    };
   }
 }

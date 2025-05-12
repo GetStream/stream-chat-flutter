@@ -4,7 +4,6 @@ import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_action/message_action_item.dart';
 import 'package:stream_chat_flutter/src/message_action/message_actions_builder.dart';
@@ -14,7 +13,6 @@ import 'package:stream_chat_flutter/src/message_modal/message_modal.dart';
 import 'package:stream_chat_flutter/src/message_modal/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/message_modal/moderated_message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/my_reaction_picker.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The display behaviour of a widget
@@ -108,6 +106,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
     this.attachmentActionsModalBuilder,
+    this.reactionPickerBuilder = StreamReactionPicker.builder,
   });
 
   /// {@template onMentionTap}
@@ -392,6 +391,9 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
+  /// {@macro reactionPickerBuilder}
+  final ReactionPickerBuilder reactionPickerBuilder;
+
   /// Size of the image attachment thumbnail.
   final Size imageAttachmentThumbnailSize;
 
@@ -474,6 +476,7 @@ class StreamMessageWidget extends StatefulWidget {
     String? imageAttachmentThumbnailResizeType,
     String? imageAttachmentThumbnailCropType,
     AttachmentActionsBuilder? attachmentActionsModalBuilder,
+    ReactionPickerBuilder? reactionPickerBuilder,
   }) {
     return StreamMessageWidget(
       key: key ?? this.key,
@@ -547,6 +550,8 @@ class StreamMessageWidget extends StatefulWidget {
           this.imageAttachmentThumbnailCropType,
       attachmentActionsModalBuilder:
           attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
+      reactionPickerBuilder:
+          reactionPickerBuilder ?? this.reactionPickerBuilder,
     );
   }
 
@@ -667,118 +672,115 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     final bottomRowPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
-    return ConditionalParentBuilder(
-      builder: (context, child) {
-        final message = widget.message;
-
-        // If the message is deleted or not yet sent, we don't want to show any
-        // context menu actions.
-        if (message.state.isDeleted || message.state.isOutgoing) return child;
-
-        return ContextMenuArea(
-          verticalPadding: 0,
-          builder: (_) => _buildDesktopOrWebActions(context, message),
-          child: child,
-        );
-      },
+    return Portal(
       child: Material(
         color: switch (isPinned && widget.showPinHighlight) {
           true => theme.colorTheme.highlight,
           false => Colors.transparent,
         },
-        child: Portal(
-          child: PlatformWidgetBuilder(
-            mobile: (context, child) {
-              final message = widget.message;
-              return InkWell(
-                onTap: switch (widget.onMessageTap) {
-                  final onTap? => () => onTap(message),
-                  _ => null,
-                },
-                onLongPress: switch (widget.onMessageLongPress) {
-                  final onLongPress? => () => onLongPress(message),
-                  // If the message is not yet sent or deleted, we don't want
-                  // to handle long press events by default.
-                  _ when message.state.isDeleted => null,
-                  _ when message.state.isOutgoing => null,
-                  _ => () => _onMessageLongPressed(context, message),
-                },
-                child: child,
-              );
-            },
-            desktop: (_, child) => MouseRegion(child: child),
-            web: (_, child) => MouseRegion(child: child),
-            child: Padding(
-              padding: widget.padding ?? const EdgeInsets.all(8),
-              child: FractionallySizedBox(
-                alignment: switch (widget.reverse) {
-                  true => Alignment.centerRight,
-                  false => Alignment.centerLeft,
-                },
-                widthFactor: widget.widthFactor,
-                child: Builder(builder: (context) {
-                  return MessageWidgetContent(
-                    streamChatTheme: theme,
-                    showUsername: showUsername,
-                    showTimeStamp: showTimeStamp,
-                    showEditedLabel: showEditedLabel,
-                    showThreadReplyIndicator: showThreadReplyIndicator,
-                    showSendingIndicator: showSendingIndicator,
-                    showInChannel: showInChannel,
-                    isGiphy: isGiphy,
-                    isOnlyEmoji: isOnlyEmoji,
-                    hasUrlAttachments: hasUrlAttachments,
-                    messageTheme: widget.messageTheme,
-                    reverse: widget.reverse,
-                    message: widget.message,
-                    hasNonUrlAttachments: hasNonUrlAttachments,
-                    hasPoll: hasPoll,
-                    hasQuotedMessage: hasQuotedMessage,
-                    textPadding: widget.textPadding,
-                    attachmentBuilders: widget.attachmentBuilders,
-                    attachmentPadding: widget.attachmentPadding,
-                    attachmentShape: widget.attachmentShape,
-                    onAttachmentTap: widget.onAttachmentTap,
-                    onReplyTap: widget.onReplyTap,
-                    onThreadTap: widget.onThreadTap,
-                    onShowMessage: widget.onShowMessage,
-                    attachmentActionsModalBuilder:
-                        widget.attachmentActionsModalBuilder,
-                    avatarWidth: avatarWidth,
-                    bottomRowPadding: bottomRowPadding,
-                    isFailedState: isFailedState,
-                    isPinned: isPinned,
-                    messageWidget: widget,
-                    showBottomRow: showBottomRow,
-                    showPinHighlight: widget.showPinHighlight,
-                    showReactionPickerTail: widget.showReactionTail == true,
-                    showReactions: shouldShowReactions,
-                    onReactionsTap: () {
-                      final message = widget.message;
-                      return switch (widget.onReactionsTap) {
-                        final onReactionsTap? => onReactionsTap(message),
-                        _ => _showMessageReactionsModal(context, message),
-                      };
-                    },
-                    onReactionsHover: widget.onReactionsHover,
-                    showUserAvatar: widget.showUserAvatar,
-                    streamChat: streamChat,
-                    translateUserAvatar: widget.translateUserAvatar,
-                    shape: widget.shape,
-                    borderSide: widget.borderSide,
-                    borderRadiusGeometry: widget.borderRadiusGeometry,
-                    textBuilder: widget.textBuilder,
-                    quotedMessageBuilder: widget.quotedMessageBuilder,
-                    onLinkTap: widget.onLinkTap,
-                    onMentionTap: widget.onMentionTap,
-                    onQuotedMessageTap: widget.onQuotedMessageTap,
-                    bottomRowBuilderWithDefaultWidget:
-                        widget.bottomRowBuilderWithDefaultWidget,
-                    onUserAvatarTap: widget.onUserAvatarTap,
-                    userAvatarBuilder: widget.userAvatarBuilder,
-                  );
-                }),
-              ),
+        child: PlatformWidgetBuilder(
+          mobile: (context, child) {
+            final message = widget.message;
+            return InkWell(
+              onTap: switch (widget.onMessageTap) {
+                final onTap? => () => onTap(message),
+                _ => null,
+              },
+              onLongPress: switch (widget.onMessageLongPress) {
+                final onLongPress? => () => onLongPress(message),
+                // If the message is not yet sent or deleted, we don't want
+                // to handle long press events by default.
+                _ when message.state.isDeleted => null,
+                _ when message.state.isOutgoing => null,
+                _ => () => _onMessageLongPressed(context, message),
+              },
+              child: child,
+            );
+          },
+          desktopOrWeb: (context, child) {
+            final message = widget.message;
+            final messageState = message.state;
+
+            // If the message is deleted or not yet sent, we don't want to
+            // show any context menu actions.
+            if (messageState.isDeleted || messageState.isOutgoing) return child;
+
+            return ContextMenuArea(
+              verticalPadding: 0,
+              builder: (_) => _buildDesktopOrWebActions(context, message),
+              child: MouseRegion(child: child),
+            );
+          },
+          child: Padding(
+            padding: widget.padding ?? const EdgeInsets.all(8),
+            child: FractionallySizedBox(
+              alignment: switch (widget.reverse) {
+                true => Alignment.centerRight,
+                false => Alignment.centerLeft,
+              },
+              widthFactor: widget.widthFactor,
+              child: Builder(builder: (context) {
+                return MessageWidgetContent(
+                  streamChatTheme: theme,
+                  showUsername: showUsername,
+                  showTimeStamp: showTimeStamp,
+                  showEditedLabel: showEditedLabel,
+                  showThreadReplyIndicator: showThreadReplyIndicator,
+                  showSendingIndicator: showSendingIndicator,
+                  showInChannel: showInChannel,
+                  isGiphy: isGiphy,
+                  isOnlyEmoji: isOnlyEmoji,
+                  hasUrlAttachments: hasUrlAttachments,
+                  messageTheme: widget.messageTheme,
+                  reverse: widget.reverse,
+                  message: widget.message,
+                  hasNonUrlAttachments: hasNonUrlAttachments,
+                  hasPoll: hasPoll,
+                  hasQuotedMessage: hasQuotedMessage,
+                  textPadding: widget.textPadding,
+                  attachmentBuilders: widget.attachmentBuilders,
+                  attachmentPadding: widget.attachmentPadding,
+                  attachmentShape: widget.attachmentShape,
+                  onAttachmentTap: widget.onAttachmentTap,
+                  onReplyTap: widget.onReplyTap,
+                  onThreadTap: widget.onThreadTap,
+                  onShowMessage: widget.onShowMessage,
+                  attachmentActionsModalBuilder:
+                      widget.attachmentActionsModalBuilder,
+                  avatarWidth: avatarWidth,
+                  bottomRowPadding: bottomRowPadding,
+                  isFailedState: isFailedState,
+                  isPinned: isPinned,
+                  messageWidget: widget,
+                  showBottomRow: showBottomRow,
+                  showPinHighlight: widget.showPinHighlight,
+                  showReactionPickerTail: widget.showReactionTail == true,
+                  showReactions: shouldShowReactions,
+                  onReactionsTap: () {
+                    final message = widget.message;
+                    return switch (widget.onReactionsTap) {
+                      final onReactionsTap? => onReactionsTap(message),
+                      _ => _showMessageReactionsModal(context, message),
+                    };
+                  },
+                  onReactionsHover: widget.onReactionsHover,
+                  showUserAvatar: widget.showUserAvatar,
+                  streamChat: streamChat,
+                  translateUserAvatar: widget.translateUserAvatar,
+                  shape: widget.shape,
+                  borderSide: widget.borderSide,
+                  borderRadiusGeometry: widget.borderRadiusGeometry,
+                  textBuilder: widget.textBuilder,
+                  quotedMessageBuilder: widget.quotedMessageBuilder,
+                  onLinkTap: widget.onLinkTap,
+                  onMentionTap: widget.onMentionTap,
+                  onQuotedMessageTap: widget.onQuotedMessageTap,
+                  bottomRowBuilderWithDefaultWidget:
+                      widget.bottomRowBuilderWithDefaultWidget,
+                  onUserAvatarTap: widget.onUserAvatarTap,
+                  userAvatarBuilder: widget.userAvatarBuilder,
+                );
+              }),
             ),
           ),
         ),
@@ -887,10 +889,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
     return [
       if (showPicker)
-        ReactionPickerIconList(
-          message: message,
-          reactionIcons: StreamChatConfiguration.of(context).reactionIcons,
-          onReactionPicked: (reaction) => onActionTap(
+        widget.reactionPickerBuilder(
+          context,
+          message,
+          (reaction) => onActionTap(
             SelectReaction(message: message, reaction: reaction),
           ),
         ),
@@ -910,35 +912,43 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     final channel = StreamChannel.of(context).channel;
     final showPicker = widget.showReactionPicker && channel.canSendReaction;
 
+    void onReactionPicked(SelectReaction action) async {
+      final popped = await Navigator.of(context).maybePop();
+      if (popped) return _onActionTap(context, channel, action).ignore();
+    }
+
     return showStreamMessageModal(
       context: context,
       useRootNavigator: false,
-      builder: (context) => StreamMessageReactionsModal(
-        message: message,
-        reverse: widget.reverse,
-        onUserAvatarTap: widget.onUserAvatarTap,
-        showReactionPicker: showPicker,
-        onReactionPicked: (action) async {
-          final popped = await Navigator.of(context).maybePop();
-          if (popped) return _onActionTap(context, channel, action).ignore();
-        },
-        messageWidget: StreamChannel(
-          channel: channel,
-          child: widget.copyWith(
-            key: const Key('MessageWidget'),
-            message: message.trimmed,
-            showReactions: false,
-            showUsername: false,
-            showTimestamp: false,
-            translateUserAvatar: false,
-            showSendingIndicator: false,
-            padding: EdgeInsets.zero,
-            showPinHighlight: false,
-            showReactionTail: showPicker,
-            showUserAvatar: switch (widget.reverse) {
-              true => DisplayWidget.gone,
-              false => DisplayWidget.show,
-            },
+      builder: (_) => StreamChatConfiguration(
+        // This is needed to provide the nearest reaction icons to the
+        // StreamMessageReactionsModal.
+        data: StreamChatConfiguration.of(context),
+        child: StreamMessageReactionsModal(
+          message: message,
+          reverse: widget.reverse,
+          onUserAvatarTap: widget.onUserAvatarTap,
+          showReactionPicker: showPicker,
+          reactionPickerBuilder: widget.reactionPickerBuilder,
+          onReactionPicked: onReactionPicked,
+          messageWidget: StreamChannel(
+            channel: channel,
+            child: widget.copyWith(
+              key: const Key('MessageWidget'),
+              message: message.trimmed,
+              showReactions: false,
+              showUsername: false,
+              showTimestamp: false,
+              translateUserAvatar: false,
+              showSendingIndicator: false,
+              padding: EdgeInsets.zero,
+              showPinHighlight: false,
+              showReactionTail: showPicker,
+              showUserAvatar: switch (widget.reverse) {
+                true => DisplayWidget.gone,
+                false => DisplayWidget.show,
+              },
+            ),
           ),
         ),
       ),
@@ -1029,29 +1039,35 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return showStreamMessageModal(
       context: context,
       useRootNavigator: false,
-      builder: (context) => StreamMessageActionsModal(
-        message: message,
-        reverse: widget.reverse,
-        messageActions: actions,
-        showReactionPicker: showPicker,
-        onActionTap: onActionTap,
-        messageWidget: StreamChannel(
-          channel: channel,
-          child: widget.copyWith(
-            key: const Key('MessageWidget'),
-            message: message.trimmed,
-            showReactions: false,
-            showUsername: false,
-            showTimestamp: false,
-            translateUserAvatar: false,
-            showSendingIndicator: false,
-            padding: EdgeInsets.zero,
-            showPinHighlight: false,
-            showReactionTail: showPicker,
-            showUserAvatar: switch (widget.reverse) {
-              true => DisplayWidget.gone,
-              false => DisplayWidget.show,
-            },
+      builder: (_) => StreamChatConfiguration(
+        // This is needed to provide the nearest reaction icons to the
+        // StreamMessageActionsModal.
+        data: StreamChatConfiguration.of(context),
+        child: StreamMessageActionsModal(
+          message: message,
+          reverse: widget.reverse,
+          messageActions: actions,
+          showReactionPicker: showPicker,
+          reactionPickerBuilder: widget.reactionPickerBuilder,
+          onActionTap: onActionTap,
+          messageWidget: StreamChannel(
+            channel: channel,
+            child: widget.copyWith(
+              key: const Key('MessageWidget'),
+              message: message.trimmed,
+              showReactions: false,
+              showUsername: false,
+              showTimestamp: false,
+              translateUserAvatar: false,
+              showSendingIndicator: false,
+              padding: EdgeInsets.zero,
+              showPinHighlight: false,
+              showReactionTail: showPicker,
+              showUserAvatar: switch (widget.reverse) {
+                true => DisplayWidget.gone,
+                false => DisplayWidget.show,
+              },
+            ),
           ),
         ),
       ),

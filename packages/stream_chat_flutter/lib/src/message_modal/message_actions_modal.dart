@@ -23,6 +23,7 @@ class StreamMessageActionsModal extends StatelessWidget {
     required this.messageWidget,
     this.reverse = false,
     this.showReactionPicker = false,
+    this.reactionPickerBuilder = StreamReactionPicker.builder,
     this.onActionTap,
   });
 
@@ -60,6 +61,9 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// Defaults to `false`.
   final bool showReactionPicker;
 
+  /// {@macro reactionPickerBuilder}
+  final ReactionPickerBuilder reactionPickerBuilder;
+
   /// Callback triggered when a message action is tapped.
   ///
   /// Provides the tapped [MessageAction] object to the callback.
@@ -84,19 +88,18 @@ class StreamMessageActionsModal extends StatelessWidget {
               reverse: reverse,
             );
 
+            final onReactionPicked = switch (onActionTap) {
+              null => null,
+              final onActionTap => (reaction) {
+                  return onActionTap.call(
+                    SelectReaction(message: message, reaction: reaction),
+                  );
+                },
+            };
+
             return Align(
               alignment: alignment,
-              child: StreamReactionPicker(
-                message: message,
-                onReactionPicked: switch (onActionTap) {
-                  final onActionTap? => (reaction) {
-                      return onActionTap.call(
-                        SelectReaction(message: message, reaction: reaction),
-                      );
-                    },
-                  _ => null,
-                },
-              ),
+              child: reactionPickerBuilder(context, message, onReactionPicked),
             );
           },
         ),

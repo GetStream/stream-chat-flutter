@@ -72,7 +72,10 @@ final class MarkUnread extends MessageAction {
 /// Action to mute a user to prevent notifications from their messages
 final class MuteUser extends MessageAction {
   /// Create a new mute user action
-  const MuteUser({required super.message, required this.user});
+  const MuteUser({
+    required super.message,
+    required this.user,
+  });
 
   /// The user to be muted.
   final User user;
@@ -81,7 +84,10 @@ final class MuteUser extends MessageAction {
 /// Action to unmute a user to receive notifications from their messages
 final class UnmuteUser extends MessageAction {
   /// Create a new unmute user action
-  const UnmuteUser({required super.message, required this.user});
+  const UnmuteUser({
+    required super.message,
+    required this.user,
+  });
 
   /// The user to be unmuted.
   final User user;

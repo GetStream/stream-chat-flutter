@@ -1,6 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/my_reaction_picker.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_picker_icon_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+/// {@template reactionPickerBuilder}
+/// Function signature for building a custom reaction picker widget.
+///
+/// Use this to provide a custom reaction picker in [StreamMessageActionsModal]
+/// or [StreamMessageReactionsModal].
+///
+/// Parameters:
+/// - [context]: The build context.
+/// - [message]: The message to show reactions for.
+/// - [onReactionPicked]: Callback when a reaction is picked.
+/// {@endtemplate}
+typedef ReactionPickerBuilder = Widget Function(
+  BuildContext context,
+  Message message,
+  OnReactionPicked? onReactionPicked,
+);
 
 /// {@template streamReactionPicker}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker.png)
@@ -16,35 +33,95 @@ class StreamReactionPicker extends StatelessWidget {
   const StreamReactionPicker({
     super.key,
     required this.message,
+    required this.reactionIcons,
     this.onReactionPicked,
+    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    this.scrollable = true,
+    this.borderRadius = const BorderRadius.all(Radius.circular(24)),
   });
 
-  /// Message to attach the reaction to
-  final Message message;
+  /// Creates a [StreamReactionPicker] using the default reaction icons
+  /// provided by the [StreamChatConfiguration].
+  ///
+  /// This is the recommended way to create a reaction picker
+  /// as it ensures that the icons are consistent with the rest of the app.
+  ///
+  /// The [onReactionPicked] callback is optional and can be used to handle
+  /// the reaction selection.
+  factory StreamReactionPicker.builder(
+    BuildContext context,
+    Message message,
+    OnReactionPicked? onReactionPicked,
+  ) {
+    final config = StreamChatConfiguration.of(context);
+    final reactionIcons = config.reactionIcons;
 
-  /// {@macro onReactionPressed}
-  final OnReactionPicked? onReactionPicked;
-
-  @override
-  Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    final reactionIcons = StreamChatConfiguration.of(context).reactionIcons;
-
-    final child = DecoratedBox(
-      decoration: BoxDecoration(
-        color: chatThemeData.colorTheme.barsBg,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: ReactionPickerIconList(
+    final platform = Theme.of(context).platform;
+    return switch (platform) {
+      TargetPlatform.iOS || TargetPlatform.android => StreamReactionPicker(
           message: message,
           reactionIcons: reactionIcons,
           onReactionPicked: onReactionPicked,
         ),
-      ),
+      _ => StreamReactionPicker(
+          message: message,
+          scrollable: false,
+          borderRadius: BorderRadius.zero,
+          reactionIcons: reactionIcons,
+          onReactionPicked: onReactionPicked,
+        ),
+    };
+  }
+
+  /// Message to attach the reaction to.
+  final Message message;
+
+  /// List of reaction icons to display.
+  final List<StreamReactionIcon> reactionIcons;
+
+  /// {@macro onReactionPressed}
+  final OnReactionPicked? onReactionPicked;
+
+  /// Padding around the reaction picker.
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 8, vertical: 4)`.
+  final EdgeInsets padding;
+
+  /// Whether the reaction picker should be scrollable.
+  ///
+  /// Defaults to `true`.
+  final bool scrollable;
+
+  /// Border radius for the reaction picker.
+  ///
+  /// Defaults to a circular border with a radius of 24.
+  final BorderRadius? borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = StreamChatTheme.of(context);
+
+    final reactionPicker = ReactionPickerIconList(
+      message: message,
+      reactionIcons: reactionIcons,
+      onReactionPicked: onReactionPicked,
     );
 
-    return child;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorTheme.barsBg,
+        borderRadius: borderRadius,
+      ),
+      child: Padding(
+        padding: padding,
+        child: switch (scrollable) {
+          false => reactionPicker,
+          true => SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: reactionPicker,
+            ),
+        },
+      ),
+    );
   }
 }

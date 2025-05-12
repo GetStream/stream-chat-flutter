@@ -1,7 +1,7 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/my_reaction_picker.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_picker_icon_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
@@ -59,9 +59,9 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          reactionIcons: reactionIcons,
           StreamReactionPicker(
             message: message,
+            reactionIcons: reactionIcons,
             onReactionPicked: (_) {},
           ),
         ),
@@ -91,9 +91,9 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          reactionIcons: reactionIcons,
           StreamReactionPicker(
             message: message,
+            reactionIcons: reactionIcons,
             onReactionPicked: (reaction) {
               pickedReaction = reaction;
             },
@@ -132,9 +132,9 @@ void main() {
 
           return _wrapWithMaterialApp(
             brightness: brightness,
-            reactionIcons: reactionIcons,
             StreamReactionPicker(
               message: message,
+              reactionIcons: reactionIcons,
               onReactionPicked: (_) {},
             ),
           );
@@ -161,9 +161,9 @@ void main() {
 
           return _wrapWithMaterialApp(
             brightness: brightness,
-            reactionIcons: reactionIcons,
             StreamReactionPicker(
               message: message,
+              reactionIcons: reactionIcons,
               onReactionPicked: (_) {},
             ),
           );
@@ -176,27 +176,23 @@ void main() {
 Widget _wrapWithMaterialApp(
   Widget child, {
   Brightness? brightness,
-  List<StreamReactionIcon>? reactionIcons,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: StreamChatConfiguration(
-      data: StreamChatConfigurationData(reactionIcons: reactionIcons),
-      child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
-        child: Builder(builder: (context) {
-          final theme = StreamChatTheme.of(context);
-          return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: child,
-              ),
+    home: StreamChatTheme(
+      data: StreamChatThemeData(brightness: brightness),
+      child: Builder(builder: (context) {
+        final theme = StreamChatTheme.of(context);
+        return Scaffold(
+          backgroundColor: theme.colorTheme.appBg,
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: child,
             ),
-          );
-        }),
-      ),
+          ),
+        );
+      }),
     ),
   );
 }
