@@ -39,17 +39,97 @@ final appRoutes = [
                 .firstWhereOrNull((it) => it.id == parentId);
           }
 
-          return StreamChannel(
-            channel: channel!,
-            initialMessageId: messageId,
-            child: Builder(
-              builder: (context) {
-                return (parentMessage != null)
-                    ? ThreadPage(parent: parentMessage)
-                    : ChannelPage(
-                        highlightInitialMessage: messageId != null,
-                      );
-              },
+          return StreamChatConfiguration(
+            data: StreamChatConfiguration.of(context).copyWith(
+              reactionIcons: [
+                StreamReactionIcon(
+                  type: 'love',
+                  builder: (context, highlighted, size) {
+                    final theme = StreamChatTheme.of(context);
+                    final iconColor = switch (highlighted) {
+                      true => theme.colorTheme.accentPrimary,
+                      false => theme.primaryIconTheme.color,
+                    };
+
+                    return StreamSvgIcon(
+                      icon: StreamSvgIcons.message,
+                      color: iconColor,
+                      size: size,
+                    );
+                  },
+                ),
+                StreamReactionIcon(
+                  type: 'haha',
+                  builder: (context, highlighted, size) {
+                    final theme = StreamChatTheme.of(context);
+                    final iconColor = switch (highlighted) {
+                      true => theme.colorTheme.accentPrimary,
+                      false => theme.primaryIconTheme.color,
+                    };
+
+                    return StreamSvgIcon(
+                      icon: StreamSvgIcons.camera,
+                      color: iconColor,
+                      size: size,
+                    );
+                  },
+                ),
+                StreamReactionIcon(
+                  type: 'wow',
+                  builder: (context, highlighted, size) {
+                    final theme = StreamChatTheme.of(context);
+                    final iconColor = switch (highlighted) {
+                      true => theme.colorTheme.accentPrimary,
+                      false => theme.primaryIconTheme.color,
+                    };
+
+                    return StreamSvgIcon(
+                      icon: StreamSvgIcons.download,
+                      color: iconColor,
+                      size: size,
+                    );
+                  },
+                ),
+                StreamReactionIcon(
+                  type: 'clock',
+                  builder: (context, highlighted, size) {
+                    final theme = StreamChatTheme.of(context);
+                    final iconColor = switch (highlighted) {
+                      true => theme.colorTheme.accentPrimary,
+                      false => theme.primaryIconTheme.color,
+                    };
+
+                    return Icon(
+                      Icons.lock_clock,
+                      color: iconColor,
+                      size: size,
+                    );
+
+                    // return Container(
+                    //   color: iconColor,
+                    //   decoration: BoxDecoration(
+                    //     border:
+                    //   ),
+                    //   child: SizedBox.square(
+                    //     dimension: size,
+                    //   ),
+                    // );
+                  },
+                ),
+              ],
+            ),
+            child: StreamChannel(
+              channel: channel!,
+              initialMessageId: messageId,
+              child: Builder(
+                builder: (context) {
+                  return (parentMessage != null)
+                      ? ThreadPage(parent: parentMessage)
+                      : ChannelPage(
+                          highlightInitialMessage: messageId != null,
+                        );
+                },
+              ),
             ),
           );
         },
