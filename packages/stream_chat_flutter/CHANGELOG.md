@@ -1,3 +1,29 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `StreamReactionPicker` now requires reactions to be explicitly handled via `onReactionPicked`. *(Automatic handling is no longer supported.)*
+- `StreamMessageAction` is now generic `(StreamMessageAction<T>)`, enhancing type safety. Individual onTap callbacks have been removed; actions are now handled centrally by widgets like `StreamMessageWidget.onCustomActionTap` or modals using action types.
+- `StreamMessageReactionsModal` no longer requires the `messageTheme` parameter. The theme now automatically derives from the `reverse` property.
+
+✅ Added
+
+- Added new `StreamMessageActionsBuilder` which provides a list of actions to be displayed in the message actions modal.
+- Added new `StreamMessageActionConfirmationModal` for confirming destructive actions like delete or flag.
+- Added new `StreamMessageModal` and `showStreamMessageModal` for consistent message-related modals with improved transitions and backdrop effects.
+  ```dart
+  showStreamMessageModal(
+    context: context,
+    ...other parameters,
+    builder: (context) => StreamMessageModal(
+      ...other parameters,
+      headerBuilder: (context) => YourCustomHeader(),
+      contentBuilder: (context) => YourCustomContent(),
+    ),
+  );
+  ```
+- Exported `StreamMessageActionsModal` and `StreamModeratedMessageActionsModal` which are now based on `StreamMessageModal` for consistent styling and behavior.
+
 ## Upcoming
 
 🔄 Changed
@@ -11,15 +37,18 @@
 
 - Added support for Draft messages preview.
 - Added a new `StreamDraftListView` for displaying draft messages.
-- Added a confirmation dialog for end vote in Polls. [[#2211]](https://github.com/GetStream/stream-chat-flutter/issues/2211)
+- Added a confirmation dialog for end vote in
+  Polls. [[#2211]](https://github.com/GetStream/stream-chat-flutter/issues/2211)
 
 🐞 Fixed
 
-- [[#2182]](https://github.com/GetStream/stream-chat-flutter/issues/2182) Fixes StreamMessageInput not listening to channel capabilities.
+- [[#2182]](https://github.com/GetStream/stream-chat-flutter/issues/2182) Fixes StreamMessageInput
+  not listening to channel capabilities.
 
 🔄 Changed
 
-- Exported `StreamQuotedMessageWidget` to allow customization of quoted messages using `StreamMessageWidget.quotedMessageBuilder`.
+- Exported `StreamQuotedMessageWidget` to allow customization of quoted messages using
+  `StreamMessageWidget.quotedMessageBuilder`.
 
 ## 9.8.0
 
@@ -44,7 +73,8 @@
 - [[#2118]](https://github.com/GetStream/stream-chat-flutter/issues/2118) Fixed invalid assertions
   applied on message input command and attachment button.
 - [[#2042]](https://github.com/GetStream/stream-chat-flutter/issues/2042) Fixed `StreamMessageInput`
-  send message predicate to properly handle shift+enter for new lines and improve message text validation.
+  send message predicate to properly handle shift+enter for new lines and improve message text
+  validation.
 
 ✅ Added
 
@@ -56,7 +86,8 @@
 
 - [[#2137]](https://github.com/GetStream/stream-chat-flutter/issues/2137) Fixed message input
   buttons not being able to customized.
-- [[#1775]](https://github.com/GetStream/stream-chat-flutter/issues/1775) Fix incorrect message order.
+- [[#1775]](https://github.com/GetStream/stream-chat-flutter/issues/1775) Fix incorrect message
+  order.
 
 ## 9.5.0
 
@@ -73,14 +104,16 @@
 🔄 Changed
 
 - Updated the message list view to prevent pinning messages that have restricted visibility.
-- Deprecated `StreamMessageInput.useNativeAttachmentPickerOnMobile` in favor of `StreamMessageInput.useSystemAttachmentPicker`.
+- Deprecated `StreamMessageInput.useNativeAttachmentPickerOnMobile` in favor of
+  `StreamMessageInput.useSystemAttachmentPicker`.
 
 ## 9.4.0
 
 🔄 Changed
 
 - Updated minimum Flutter version to 3.27.4 for the SDK.
-- Replaced [image_gallery_saver_plus](https://pub.dev/packages/image_gallery_saver_plus) with [gal](https://pub.dev/packages/gal)
+- Replaced [image_gallery_saver_plus](https://pub.dev/packages/image_gallery_saver_plus)
+  with [gal](https://pub.dev/packages/gal)
 
 ## 9.3.0
 
@@ -95,7 +128,8 @@
 - Deprecated `StreamVoiceRecordingLoading` as it is no longer used.
 - Deprecated `StreamVoiceRecordingPlayer` in favor of `StreamVoiceRecordingAttachment`.
 - Deprecated `StreamVoiceRecordingSlider` in favor of `StreamAudioWaveformSlider`.
-- Deprecated `VoiceRecordingAttachmentBuilder` in favor of `VoiceRecordingAttachmentPlaylistBuilder`.
+- Deprecated `VoiceRecordingAttachmentBuilder` in favor of
+  `VoiceRecordingAttachmentPlaylistBuilder`.
 - Deprecated `StreamVoiceRecordingTheme` in favor of `StreamVoiceRecordingAttachmentTheme`.
 
 ## 9.2.0+1
