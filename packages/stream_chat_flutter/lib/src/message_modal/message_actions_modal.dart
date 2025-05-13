@@ -84,18 +84,24 @@ class StreamMessageActionsModal extends StatelessWidget {
               reverse: reverse,
             );
 
+            final onReactionPicked = switch (onActionTap) {
+              null => null,
+              final onActionTap => (reaction) {
+                  return onActionTap.call(
+                    SelectReaction(message: message, reaction: reaction),
+                  );
+                },
+            };
+
+            final config = StreamChatConfiguration.of(context);
+            final reactionIcons = config.reactionIcons;
+
             return Align(
               alignment: alignment,
               child: StreamReactionPicker(
                 message: message,
-                onReactionPicked: switch (onActionTap) {
-                  final onActionTap? => (reaction) {
-                      return onActionTap.call(
-                        SelectReaction(message: message, reaction: reaction),
-                      );
-                    },
-                  _ => null,
-                },
+                reactionIcons: reactionIcons,
+                onReactionPicked: onReactionPicked,
               ),
             );
           },

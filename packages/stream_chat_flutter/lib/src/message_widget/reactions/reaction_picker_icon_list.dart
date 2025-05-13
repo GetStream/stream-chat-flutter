@@ -46,7 +46,7 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
 
   void triggerAnimations() async {
     for (final animation in iconAnimations) {
-      animation.start();
+      if (mounted) animation.start();
       // Add a small delay between the start of each animation.
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -112,42 +112,42 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
 
   @override
   Widget build(BuildContext context) {
-    final child = SingleChildScrollView(
-      child: Row(
-        spacing: 8,
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          ...widget.reactionIcons.mapIndexed((index, icon) {
-            bool reactionCheck(Reaction reaction) => reaction.type == icon.type;
+    final child = Wrap(
+      spacing: 4,
+      runSpacing: 4,
+      runAlignment: WrapAlignment.center,
+      alignment: WrapAlignment.spaceAround,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        ...widget.reactionIcons.mapIndexed((index, icon) {
+          bool reactionCheck(Reaction reaction) => reaction.type == icon.type;
 
-            final ownReactions = [...?widget.message.ownReactions];
-            final reaction = ownReactions.firstWhereOrNull(reactionCheck);
+          final ownReactions = [...?widget.message.ownReactions];
+          final reaction = ownReactions.firstWhereOrNull(reactionCheck);
 
-            final animation = iconAnimations[index];
-            return AnimatedBuilder(
-              animation: animation,
-              builder: (context, child) => Transform.scale(
-                scale: animation.value,
-                child: child,
-              ),
-              child: ReactionIconButton(
-                icon: icon,
-                // If the reaction is present, it is selected.
-                isSelected: reaction != null,
-                onPressed: switch (widget.onReactionPicked) {
-                  final onPicked? => () {
-                      final type = icon.type;
-                      final pickedReaction = reaction ?? Reaction(type: type);
-                      return onPicked(pickedReaction);
-                    },
-                  _ => null,
-                },
-              ),
-            );
-          }),
-        ],
-      ),
+          final animation = iconAnimations[index];
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) => Transform.scale(
+              scale: animation.value,
+              child: child,
+            ),
+            child: ReactionIconButton(
+              icon: icon,
+              // If the reaction is present, it is selected.
+              isSelected: reaction != null,
+              onPressed: switch (widget.onReactionPicked) {
+                final onPicked? => () {
+                    final type = icon.type;
+                    final pickedReaction = reaction ?? Reaction(type: type);
+                    return onPicked(pickedReaction);
+                  },
+                _ => null,
+              },
+            ),
+          );
+        }),
+      ],
     );
 
     return TweenAnimationBuilder<double>(

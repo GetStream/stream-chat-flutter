@@ -14,7 +14,6 @@ import 'package:stream_chat_flutter/src/message_modal/message_modal.dart';
 import 'package:stream_chat_flutter/src/message_modal/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/message_modal/moderated_message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/my_reaction_picker.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The display behaviour of a widget
@@ -887,8 +886,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
     return [
       if (showPicker)
-        ReactionPickerIconList(
+        StreamReactionPicker(
           message: message,
+          scrollable: false,
+          borderRadius: BorderRadius.zero,
           reactionIcons: StreamChatConfiguration.of(context).reactionIcons,
           onReactionPicked: (reaction) => onActionTap(
             SelectReaction(message: message, reaction: reaction),
