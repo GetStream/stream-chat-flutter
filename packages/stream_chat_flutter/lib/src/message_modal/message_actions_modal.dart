@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_action/message_action_item.dart';
-import 'package:stream_chat_flutter/src/message_modal/message_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
