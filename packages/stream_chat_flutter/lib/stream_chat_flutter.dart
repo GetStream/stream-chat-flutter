@@ -54,6 +54,7 @@ export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
 export 'src/message_action/message_action.dart';
 export 'src/message_action/message_action_item.dart';
+export 'src/message_action/message_actions_builder.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_bottom_sheet.dart';
 export 'src/message_input/audio_recorder/audio_recorder_controller.dart';
