@@ -6,13 +6,10 @@ jobs:
   update_goldens:
     runs-on: ubuntu-latest
     steps:
-      - name: Connect Bot
-        uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
-
       - name: 📚 Checkout branch
         uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
