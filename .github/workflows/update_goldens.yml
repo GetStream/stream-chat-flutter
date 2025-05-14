@@ -6,6 +6,11 @@ jobs:
   update_goldens:
     runs-on: ubuntu-latest
     steps:
+      - name: Connect Bot
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
       - name: 📚 Checkout branch
         uses: actions/checkout@v4
 
@@ -32,5 +37,3 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: Update Goldens"
-          commit_user_name: github-actions[bot]
-          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
