@@ -34,3 +34,5 @@ jobs:
         with:
           commit_message: "chore: Update Goldens"
           file_pattern: "**/test/**/goldens/*.png"
+          commit_user_name: "Stream SDK Bot"
+          commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"
