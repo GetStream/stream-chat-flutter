@@ -33,8 +33,16 @@ jobs:
         run: melos run update:goldens
 
       - name: 📤 Commit Changes
-        id: commit_changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: Update Goldens"
-          file_pattern: "**/test/**/goldens/*.png"
+        run: |
+          git config user.name "stream-bot"
+          git config user.email "bot@getstream.io"
+
+          git add **/test/**/goldens/*.png
+
+          # Only commit if there are actual changes
+          if git diff --cached --quiet; then
+            echo "No golden file changes to commit."
+          else
+            git commit -m "chore: Update Goldens"
+            git push
+          fi
