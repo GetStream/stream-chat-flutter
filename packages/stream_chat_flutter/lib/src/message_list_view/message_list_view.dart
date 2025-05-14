@@ -1489,6 +1489,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // using widget.threadBuilder to build the thread page.
       (null, final threadBuilder?) => (Message message) {
           final threadPage = StreamChatConfiguration(
+            // This is needed to provide the nearest reaction icons to the
+            // StreamMessageReactionsModal.
             data: StreamChatConfiguration.of(context),
             child: StreamChannel(
               channel: streamChannel!.channel,
