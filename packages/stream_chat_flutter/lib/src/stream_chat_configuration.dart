@@ -120,13 +120,13 @@ class StreamChatConfigurationData {
       loadingIndicator: loadingIndicator,
       defaultUserImage: defaultUserImage ?? _defaultUserImage,
       placeholderUserImage: placeholderUserImage,
-      reactionIcons: reactionIcons ?? _defaultReactionIcons,
+      reactionIcons: reactionIcons ?? StreamReactionIcon.defaultReactions,
       enforceUniqueReactions: enforceUniqueReactions ?? true,
       draftMessagesEnabled: draftMessagesEnabled,
     );
   }
 
-  StreamChatConfigurationData._({
+  const StreamChatConfigurationData._({
     required this.loadingIndicator,
     required this.defaultUserImage,
     required this.placeholderUserImage,
@@ -176,78 +176,15 @@ class StreamChatConfigurationData {
   /// Whether a new reaction should replace the existing one.
   final bool enforceUniqueReactions;
 
-  static final _defaultReactionIcons = [
-    StreamReactionIcon(
-      type: 'love',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.loveReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-    StreamReactionIcon(
-      type: 'like',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.thumbsUpReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-    StreamReactionIcon(
-      type: 'sad',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.thumbsDownReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-    StreamReactionIcon(
-      type: 'haha',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.lolReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-    StreamReactionIcon(
-      type: 'wow',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.wutReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-  ];
-
-  static Widget _defaultUserImage(BuildContext context, User user) => Center(
-        child: StreamGradientAvatar(
-          name: user.name,
-          userId: user.id,
-        ),
-      );
+  static Widget _defaultUserImage(
+    BuildContext context,
+    User user,
+  ) {
+    return Center(
+      child: StreamGradientAvatar(
+        name: user.name,
+        userId: user.id,
+      ),
+    );
+  }
 }
