@@ -4,6 +4,11 @@
 
 - [[#2013]](https://github.com/GetStream/stream-chat-flutter/issues/2013) Fix pinned message get duplicated.
 
+✅ Added
+
+- Added a new `reactionGroups` field to the `Message` model. This field is a list of
+  `ReactionGroup` objects, which represent the reactions metadata grouped by their type.
+
 🔄 Changed
 
 - Updated `freezed_annotation` dependency to `">=2.4.1 <4.0.0"`.
