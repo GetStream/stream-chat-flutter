@@ -1,9 +1,10 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
 
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
@@ -254,6 +255,87 @@ void main() {
         expect(field1!.compareTo(field2!), greaterThan(0)); // 10 > 1
         expect(field2.compareTo(field1), lessThan(0)); // 1 < 10
       });
+    });
+
+    group('reactionGroups', () {
+      final reactionGroupLike = ReactionGroup(
+        count: 1,
+        sumScores: 1,
+        firstReactionAt: DateTime.now(),
+        lastReactionAt: DateTime.now(),
+      );
+
+      final reactionGroupLove = ReactionGroup(
+        count: 2,
+        sumScores: 5,
+        firstReactionAt: DateTime.now(),
+        lastReactionAt: DateTime.now(),
+      );
+
+      test('is populated directly if provided in constructor', () {
+        final message = Message(
+          reactionGroups: {
+            'like': reactionGroupLike,
+            'love': reactionGroupLove,
+          },
+        );
+
+        expect(message.reactionGroups, isNotNull);
+        expect(message.reactionGroups!['like'], reactionGroupLike);
+        expect(message.reactionGroups!['love'], reactionGroupLove);
+      });
+
+      test(
+        'is derived from reactionCounts and reactionScores if not provided directly in constructor',
+        () {
+          final message = Message(
+            reactionCounts: const {'like': 1, 'love': 2},
+            reactionScores: const {'like': 1, 'love': 5},
+          );
+
+          expect(message.reactionGroups, isNotNull);
+          expect(message.reactionGroups!.length, 2);
+          expect(message.reactionGroups!['like']!.count, 1);
+          expect(message.reactionGroups!['like']!.sumScores, 1);
+          expect(message.reactionGroups!['love']!.count, 2);
+          expect(message.reactionGroups!['love']!.sumScores, 5);
+        },
+      );
+
+      test(
+        'is null if direct reactionGroups not provided and reactionCounts is null in constructor',
+        () {
+          final message = Message(
+            reactionScores: const {'like': 1},
+          );
+
+          expect(message.reactionGroups, isNull);
+        },
+      );
+
+      test(
+        'is null if direct reactionGroups not provided and reactionScores is null in constructor',
+        () {
+          final message = Message(
+            reactionCounts: const {'like': 1},
+          );
+
+          expect(message.reactionGroups, isNull);
+        },
+      );
+
+      test(
+        'is empty map if direct reactionGroups not provided and reactionCounts and reactionScores are empty maps in constructor',
+        () {
+          final message = Message(
+            reactionCounts: const {},
+            reactionScores: const {},
+          );
+
+          expect(message.reactionGroups, isNotNull);
+          expect(message.reactionGroups, isEmpty);
+        },
+      );
     });
   });
 

@@ -7,6 +7,7 @@ import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
@@ -33,6 +34,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.shadowed = false,
     this.reactionCounts,
     this.reactionScores,
+    Map<String, ReactionGroup>? reactionGroups,
     this.latestReactions,
     this.ownReactions,
     this.parentId,
@@ -68,6 +70,11 @@ class Message extends Equatable implements ComparableFieldProvider {
         remoteCreatedAt = createdAt,
         remoteUpdatedAt = updatedAt,
         remoteDeletedAt = deletedAt,
+        reactionGroups = _maybeGetReactionGroups(
+          reactionGroups: reactionGroups,
+          reactionCounts: reactionCounts,
+          reactionScores: reactionScores,
+        ),
         _quotedMessageId = quotedMessageId,
         _pollId = pollId;
 
@@ -122,6 +129,30 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// A map describing the count of score of every reaction.
   @JsonKey(includeToJson: false)
   final Map<String, int>? reactionScores;
+
+  static Map<String, ReactionGroup>? _maybeGetReactionGroups({
+    Map<String, ReactionGroup>? reactionGroups,
+    Map<String, int>? reactionCounts,
+    Map<String, int>? reactionScores,
+  }) {
+    if (reactionGroups != null) return reactionGroups;
+    if (reactionCounts == null || reactionScores == null) return null;
+
+    final groups = <String, ReactionGroup>{};
+    final reactionTypes = {...reactionCounts.keys, ...reactionScores.keys};
+
+    for (final type in reactionTypes) {
+      final count = reactionCounts[type] ?? 0;
+      final score = reactionScores[type] ?? 0;
+      groups[type] = ReactionGroup(count: count, sumScores: score);
+    }
+
+    return groups;
+  }
+
+  /// A map of reaction types and their corresponding reaction groups.
+  @JsonKey(includeToJson: false)
+  final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.
   @JsonKey(includeToJson: false)
@@ -286,6 +317,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     'mentioned_users',
     'reaction_counts',
     'reaction_scores',
+    'reaction_groups',
     'silent',
     'parent_id',
     'quoted_message',
@@ -339,6 +371,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     bool? shadowed,
     Map<String, int>? reactionCounts,
     Map<String, int>? reactionScores,
+    Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
     String? parentId,
@@ -410,6 +443,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       shadowed: shadowed ?? this.shadowed,
       reactionCounts: reactionCounts ?? this.reactionCounts,
       reactionScores: reactionScores ?? this.reactionScores,
+      reactionGroups: reactionGroups ?? this.reactionGroups,
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
@@ -460,6 +494,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       shadowed: other.shadowed,
       reactionCounts: other.reactionCounts,
       reactionScores: other.reactionScores,
+      reactionGroups: other.reactionGroups,
       latestReactions: other.latestReactions,
       ownReactions: other.ownReactions,
       parentId: other.parentId,
@@ -523,6 +558,7 @@ class Message extends Equatable implements ComparableFieldProvider {
         mentionedUsers,
         reactionCounts,
         reactionScores,
+        reactionGroups,
         latestReactions,
         ownReactions,
         parentId,
