@@ -2676,16 +2676,6 @@ class ChannelClientState {
         ownReactions: oldMessage?.ownReactions,
       );
       updateMessage(message);
-
-      if (message.pinned) {
-        final _existingPinnedMessages = _channelState.pinnedMessages ?? [];
-        _channelState = _channelState.copyWith(
-          pinnedMessages: [
-            ..._existingPinnedMessages,
-            message,
-          ],
-        );
-      }
     }));
   }
 

@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+- [[#2013]](https://github.com/GetStream/stream-chat-flutter/issues/2013) Fix pinned message get duplicated
+
 🔄 Changed
 
 - Updated `freezed_annotation` dependency to `">=2.4.1 <4.0.0"`.
