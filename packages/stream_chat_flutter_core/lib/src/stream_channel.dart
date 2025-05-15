@@ -508,7 +508,16 @@ class StreamChannelState extends State<StreamChannel> {
 
       // Load the channel at the last read message if available.
       if (currentUserRead.lastReadMessageId case final lastReadMessageId?) {
-        return loadChannelAtMessage(lastReadMessageId);
+        try {
+          return await loadChannelAtMessage(lastReadMessageId);
+        } catch (e) {
+          // If the loadChannelAtMessage for any reason fails, we fallback to
+          // loading the channel at the last read date.
+          //
+          // One example of this is when the channel becomes too large and
+          // exceeds a certain threshold (I believe it's a 1000 members) it
+          // can't update the readstate anymore for each individual member.
+        }
       }
 
       // Otherwise, load the channel at the last read date.

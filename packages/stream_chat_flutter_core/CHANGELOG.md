@@ -1,5 +1,11 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Fixed an issue with `StreamChannel` where loading channel at `lastReadMessageId` might fail
+  if the channel exceeds the member threshold. This is now handled gracefully by falling back to loading
+  the channel at the `lastRead` date.
+
 🔄 Changed
 
 - Updated `freezed_annotation` dependency to `">=2.4.1 <4.0.0"`.
