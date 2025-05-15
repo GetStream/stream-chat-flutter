@@ -1,8 +1,8 @@
-## Upcoming
+## 9.10.0
 
 🐞 Fixed
 
-- [[#2013]](https://github.com/GetStream/stream-chat-flutter/issues/2013) Fix pinned message get duplicated
+- [[#2013]](https://github.com/GetStream/stream-chat-flutter/issues/2013) Fix pinned message get duplicated.
 
 🔄 Changed
 
