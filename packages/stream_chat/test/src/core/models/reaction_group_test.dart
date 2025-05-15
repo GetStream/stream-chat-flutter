@@ -9,14 +9,6 @@ void main() {
     const count = 10;
     const sumScores = 50;
 
-    test('constructor sets default values', () {
-      const reactionGroup = ReactionGroup();
-      expect(reactionGroup.count, 0);
-      expect(reactionGroup.sumScores, 0);
-      expect(reactionGroup.firstReactionAt, null);
-      expect(reactionGroup.lastReactionAt, null);
-    });
-
     test('constructor sets provided values', () {
       final reactionGroup = ReactionGroup(
         count: count,
@@ -42,20 +34,6 @@ void main() {
       expect(reactionGroup.sumScores, sumScores);
       expect(reactionGroup.firstReactionAt, firstReactionAtDate);
       expect(reactionGroup.lastReactionAt, lastReactionAtDate);
-    });
-
-    test('toJson creates correct map', () {
-      final reactionGroup = ReactionGroup(
-        count: count,
-        sumScores: sumScores,
-        firstReactionAt: firstReactionAtDate,
-        lastReactionAt: lastReactionAtDate,
-      );
-      final json = reactionGroup.toJson();
-      expect(json['count'], count);
-      expect(json['sum_scores'], sumScores);
-      expect(json['first_reaction_at'], firstReactionAtDate.toIso8601String());
-      expect(json['last_reaction_at'], lastReactionAtDate.toIso8601String());
     });
 
     test('copyWith creates a new object with updated values', () {
@@ -138,7 +116,7 @@ void main() {
         firstReactionAt: firstReactionAtDate,
         lastReactionAt: lastReactionAtDate,
       );
-      const reactionGroup4 = ReactionGroup();
+      final reactionGroup4 = ReactionGroup();
 
       expect(reactionGroup1 == reactionGroup2, isTrue);
       expect(reactionGroup1 == reactionGroup3, isFalse);

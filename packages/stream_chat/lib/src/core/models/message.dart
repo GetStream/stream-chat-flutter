@@ -32,8 +32,10 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.mentionedUsers = const [],
     this.silent = false,
     this.shadowed = false,
-    this.reactionCounts,
-    this.reactionScores,
+    @Deprecated("Use 'reactionGroups' instead")
+    Map<String, int>? reactionCounts,
+    @Deprecated("Use 'reactionGroups' instead")
+    Map<String, int>? reactionScores,
     Map<String, ReactionGroup>? reactionGroups,
     this.latestReactions,
     this.ownReactions,
@@ -124,11 +126,17 @@ class Message extends Equatable implements ComparableFieldProvider {
 
   /// A map describing the count of number of every reaction.
   @JsonKey(includeToJson: false)
-  final Map<String, int>? reactionCounts;
+  @Deprecated("Use 'reactionGroups' instead")
+  Map<String, int>? get reactionCounts {
+    return reactionGroups?.map((type, it) => MapEntry(type, it.count));
+  }
 
   /// A map describing the count of score of every reaction.
   @JsonKey(includeToJson: false)
-  final Map<String, int>? reactionScores;
+  @Deprecated("Use 'reactionGroups' instead")
+  Map<String, int>? get reactionScores {
+    return reactionGroups?.map((type, it) => MapEntry(type, it.sumScores));
+  }
 
   static Map<String, ReactionGroup>? _maybeGetReactionGroups({
     Map<String, ReactionGroup>? reactionGroups,
@@ -136,15 +144,18 @@ class Message extends Equatable implements ComparableFieldProvider {
     Map<String, int>? reactionScores,
   }) {
     if (reactionGroups != null) return reactionGroups;
-    if (reactionCounts == null || reactionScores == null) return null;
+    if (reactionCounts == null && reactionScores == null) return null;
+
+    final reactionTypes = {...?reactionCounts?.keys, ...?reactionScores?.keys};
+    if (reactionTypes.isEmpty) return null;
 
     final groups = <String, ReactionGroup>{};
-    final reactionTypes = {...reactionCounts.keys, ...reactionScores.keys};
-
     for (final type in reactionTypes) {
-      final count = reactionCounts[type] ?? 0;
-      final score = reactionScores[type] ?? 0;
-      groups[type] = ReactionGroup(count: count, sumScores: score);
+      final count = reactionCounts?[type] ?? 0;
+      final sumScores = reactionScores?[type] ?? 0;
+
+      if (count == 0 || sumScores == 0) continue;
+      groups[type] = ReactionGroup(count: count, sumScores: sumScores);
     }
 
     return groups;
@@ -369,7 +380,9 @@ class Message extends Equatable implements ComparableFieldProvider {
     List<User>? mentionedUsers,
     bool? silent,
     bool? shadowed,
+    @Deprecated("Use 'reactionGroups' instead")
     Map<String, int>? reactionCounts,
+    @Deprecated("Use 'reactionGroups' instead")
     Map<String, int>? reactionScores,
     Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
@@ -441,9 +454,12 @@ class Message extends Equatable implements ComparableFieldProvider {
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       silent: silent ?? this.silent,
       shadowed: shadowed ?? this.shadowed,
-      reactionCounts: reactionCounts ?? this.reactionCounts,
-      reactionScores: reactionScores ?? this.reactionScores,
-      reactionGroups: reactionGroups ?? this.reactionGroups,
+      reactionGroups: _maybeGetReactionGroups(
+            reactionGroups: reactionGroups,
+            reactionCounts: reactionCounts,
+            reactionScores: reactionScores,
+          ) ??
+          this.reactionGroups,
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
@@ -492,8 +508,6 @@ class Message extends Equatable implements ComparableFieldProvider {
       mentionedUsers: other.mentionedUsers,
       silent: other.silent,
       shadowed: other.shadowed,
-      reactionCounts: other.reactionCounts,
-      reactionScores: other.reactionScores,
       reactionGroups: other.reactionGroups,
       latestReactions: other.latestReactions,
       ownReactions: other.ownReactions,
@@ -556,8 +570,6 @@ class Message extends Equatable implements ComparableFieldProvider {
         type,
         attachments,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
         reactionGroups,
         latestReactions,
         ownReactions,

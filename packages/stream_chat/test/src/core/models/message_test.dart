@@ -25,6 +25,7 @@ void main() {
       expect(message.ownReactions, isA<List<Reaction>>());
       expect(message.reactionCounts, {'love': 1});
       expect(message.reactionScores, {'love': 1});
+      expect(message.reactionGroups, isA<Map<String, ReactionGroup>>());
       expect(message.createdAt, DateTime.parse('2020-01-28T22:17:31.107978Z'));
       expect(message.updatedAt, DateTime.parse('2020-01-28T22:17:31.130506Z'));
       expect(message.mentionedUsers, isA<List<User>>());
@@ -299,41 +300,6 @@ void main() {
           expect(message.reactionGroups!['like']!.sumScores, 1);
           expect(message.reactionGroups!['love']!.count, 2);
           expect(message.reactionGroups!['love']!.sumScores, 5);
-        },
-      );
-
-      test(
-        'is null if direct reactionGroups not provided and reactionCounts is null in constructor',
-        () {
-          final message = Message(
-            reactionScores: const {'like': 1},
-          );
-
-          expect(message.reactionGroups, isNull);
-        },
-      );
-
-      test(
-        'is null if direct reactionGroups not provided and reactionScores is null in constructor',
-        () {
-          final message = Message(
-            reactionCounts: const {'like': 1},
-          );
-
-          expect(message.reactionGroups, isNull);
-        },
-      );
-
-      test(
-        'is empty map if direct reactionGroups not provided and reactionCounts and reactionScores are empty maps in constructor',
-        () {
-          final message = Message(
-            reactionCounts: const {},
-            reactionScores: const {},
-          );
-
-          expect(message.reactionGroups, isNotNull);
-          expect(message.reactionGroups, isEmpty);
         },
       );
     });

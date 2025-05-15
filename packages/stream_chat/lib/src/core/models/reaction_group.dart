@@ -4,15 +4,16 @@ import 'package:json_annotation/json_annotation.dart';
 part 'reaction_group.g.dart';
 
 /// A model class representing a reaction group.
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class ReactionGroup extends Equatable {
   /// Create a new instance of [ReactionGroup].
-  const ReactionGroup({
+  ReactionGroup({
     this.count = 0,
     this.sumScores = 0,
-    this.firstReactionAt,
-    this.lastReactionAt,
-  });
+    DateTime? firstReactionAt,
+    DateTime? lastReactionAt,
+  })  : firstReactionAt = firstReactionAt ?? DateTime.timestamp(),
+        lastReactionAt = lastReactionAt ?? DateTime.timestamp();
 
   /// Create a new instance from a json
   factory ReactionGroup.fromJson(Map<String, dynamic> json) =>
@@ -25,13 +26,10 @@ class ReactionGroup extends Equatable {
   final int sumScores;
 
   /// The date of the first reaction in this group.
-  final DateTime? firstReactionAt;
+  final DateTime firstReactionAt;
 
   /// The date of the last reaction in this group.
-  final DateTime? lastReactionAt;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$ReactionGroupToJson(this);
+  final DateTime lastReactionAt;
 
   /// Creates a copy of [Reaction] with specified attributes overridden.
   ReactionGroup copyWith({

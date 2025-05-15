@@ -1,11 +1,12 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
+import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:synchronized/synchronized.dart';
@@ -303,7 +304,7 @@ class Channel {
     final currentTime = DateTime.timestamp();
     final elapsedTime = currentTime.difference(userLastMessageAt).inSeconds;
 
-    return max(0, cooldownDuration - elapsedTime);
+    return math.max(0, cooldownDuration - elapsedTime);
   }
 
   /// Stores time at which cooldown was started
@@ -1303,59 +1304,37 @@ class Channel {
     bool enforceUnique = false,
   }) async {
     _checkInitialized();
-    final messageId = message.id;
-    final now = DateTime.now();
-    final user = _client.state.currentUser;
-
-    var latestReactions = [...message.latestReactions ?? <Reaction>[]];
-    if (enforceUnique) {
-      latestReactions.removeWhere((it) => it.userId == user!.id);
+    final currentUser = _client.state.currentUser;
+    if (currentUser == null) {
+      throw StateError(
+        'Cannot send reaction: current user is not available. '
+        'Ensure the client is connected and a user is set.',
+      );
     }
 
-    final newReaction = Reaction(
-      messageId: messageId,
-      createdAt: now,
+    final messageId = message.id;
+    final reaction = Reaction(
       type: type,
-      user: user,
+      messageId: messageId,
+      user: currentUser,
       score: score,
+      createdAt: DateTime.timestamp(),
       extraData: extraData,
     );
 
-    latestReactions = (latestReactions
-          // Inserting at the 0th index as it's the latest reaction
-          ..insert(0, newReaction))
-        .take(10)
-        .toList();
-    final ownReactions = enforceUnique
-        ? <Reaction>[newReaction]
-        : <Reaction>[
-            ...message.ownReactions ?? [],
-            newReaction,
-          ];
-
-    final newMessage = message.copyWith(
-      reactionCounts: {...message.reactionCounts ?? <String, int>{}}
-        ..update(type, (value) {
-          if (enforceUnique) return value;
-          return value + 1;
-        }, ifAbsent: () => 1), // ignore: prefer-trailing-comma
-      reactionScores: {...message.reactionScores ?? <String, int>{}}
-        ..update(type, (value) {
-          if (enforceUnique) return value;
-          return value + 1;
-        }, ifAbsent: () => 1), // ignore: prefer-trailing-comma
-      latestReactions: latestReactions,
-      ownReactions: ownReactions,
+    final updatedMessage = message.addReaction(
+      reaction,
+      enforceUnique: enforceUnique,
     );
 
-    state?.updateMessage(newMessage);
+    state?.updateMessage(updatedMessage);
 
     try {
       final reactionResp = await _client.sendReaction(
         messageId,
-        type,
-        score: score,
-        extraData: extraData,
+        reaction.type,
+        score: reaction.score,
+        extraData: reaction.extraData,
         enforceUnique: enforceUnique,
       );
       return reactionResp;
@@ -1371,35 +1350,11 @@ class Channel {
     Message message,
     Reaction reaction,
   ) async {
-    final type = reaction.type;
-
-    final reactionCounts = {...?message.reactionCounts};
-    if (reactionCounts.containsKey(type)) {
-      reactionCounts.update(type, (value) => value - 1);
-    }
-    final reactionScores = {...?message.reactionScores};
-    if (reactionScores.containsKey(type)) {
-      reactionScores.update(type, (value) => value - 1);
-    }
-
-    final latestReactions = [...?message.latestReactions]..removeWhere((r) =>
-        r.userId == reaction.userId &&
-        r.type == reaction.type &&
-        r.messageId == reaction.messageId);
-
-    final ownReactions = [...?message.ownReactions]..removeWhere((r) =>
-        r.userId == reaction.userId &&
-        r.type == reaction.type &&
-        r.messageId == reaction.messageId);
-
-    final newMessage = message.copyWith(
-      reactionCounts: reactionCounts..removeWhere((_, value) => value == 0),
-      reactionScores: reactionScores..removeWhere((_, value) => value == 0),
-      latestReactions: latestReactions,
-      ownReactions: ownReactions,
+    final updatedMessage = message.deleteReaction(
+      reactionType: reaction.type,
     );
 
-    state?.updateMessage(newMessage);
+    state?.updateMessage(updatedMessage);
 
     try {
       final deleteResponse = await _client.deleteReaction(
@@ -3591,5 +3546,105 @@ extension ChannelCapabilityCheck on Channel {
   /// True, if the current user can query poll votes.
   bool get canQueryPollVotes {
     return ownCapabilities.contains(ChannelCapability.queryPollVotes);
+  }
+}
+
+extension on Message {
+  /// Adds a new reaction to the message.
+  ///
+  /// If [enforceUnique] is set to true, it will remove the existing current
+  /// user's reaction before adding the new one.
+  Message addReaction(
+    Reaction reaction, {
+    bool enforceUnique = false,
+  }) {
+    var updatedMessage = this;
+
+    // If we are enforcing unique reactions, we need to delete the existing
+    // reaction before adding the new one.
+    if (enforceUnique) updatedMessage = updatedMessage.deleteReaction();
+
+    final ownReactions = <Reaction>[...?updatedMessage.ownReactions];
+    final latestReactions = <Reaction>[...?updatedMessage.latestReactions];
+    final reactionGroups = <String, ReactionGroup>{
+      ...?updatedMessage.reactionGroups,
+    };
+
+    // Add the new reaction to the own reactions and latest reactions.
+    ownReactions.insert(0, reaction);
+    latestReactions.insert(0, reaction);
+
+    // Update the reaction groups.
+    reactionGroups.update(
+      reaction.type,
+      (it) => it.copyWith(
+        count: it.count + 1,
+        sumScores: it.sumScores + reaction.score,
+        firstReactionAt: [it.firstReactionAt, reaction.createdAt].minOrNull,
+        lastReactionAt: [it.lastReactionAt, reaction.createdAt].maxOrNull,
+      ),
+      ifAbsent: () => ReactionGroup(
+        count: 1,
+        sumScores: reaction.score,
+        firstReactionAt: reaction.createdAt,
+        lastReactionAt: reaction.createdAt,
+      ),
+    );
+
+    return updatedMessage.copyWith(
+      ownReactions: ownReactions,
+      latestReactions: latestReactions,
+      reactionGroups: reactionGroups,
+    );
+  }
+
+  /// Deletes all the current user's reactions from the message.
+  ///
+  /// Optionally, you can specify a [reactionType] to delete only that specific
+  /// current user's reaction.
+  Message deleteReaction({
+    String? reactionType,
+  }) {
+    final reactionsToDelete = this.ownReactions?.where((it) {
+      if (reactionType != null) return it.type == reactionType;
+      return true;
+    });
+
+    // If there are no reactions to delete, we can return the message as is.
+    if (reactionsToDelete == null || reactionsToDelete.isEmpty) return this;
+
+    final ownReactions = <Reaction>[...?this.ownReactions];
+    final latestReactions = <Reaction>[...?this.latestReactions];
+    final reactionGroups = <String, ReactionGroup>{...?this.reactionGroups};
+
+    for (final reaction in reactionsToDelete) {
+      final type = reaction.type;
+
+      bool match(Reaction r) => r.type == type && r.userId == reaction.userId;
+
+      // Remove from own reactions and latest reactions.
+      ownReactions.removeWhere(match);
+      latestReactions.removeWhere(match);
+
+      final group = reactionGroups.remove(type);
+      if (group == null) continue;
+
+      // Update the reaction group.
+      final updatedCount = group.count - 1;
+      final updatedSumScores = group.sumScores - reaction.score;
+
+      if (updatedCount > 0 && updatedSumScores > 0) {
+        reactionGroups[type] = group.copyWith(
+          count: updatedCount,
+          sumScores: updatedSumScores,
+        );
+      }
+    }
+
+    return copyWith(
+      ownReactions: ownReactions,
+      latestReactions: latestReactions,
+      reactionGroups: reactionGroups,
+    );
   }
 }
