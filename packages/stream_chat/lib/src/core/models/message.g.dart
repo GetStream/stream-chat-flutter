@@ -28,6 +28,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       reactionScores: (json['reaction_scores'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, (e as num).toInt()),
       ),
+      reactionGroups: (json['reaction_groups'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, ReactionGroup.fromJson(e as Map<String, dynamic>)),
+      ),
       latestReactions: (json['latest_reactions'] as List<dynamic>?)
           ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
           .toList(),

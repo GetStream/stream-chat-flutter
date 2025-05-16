@@ -1,4 +1,3 @@
-// dart format width=80
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
@@ -10,129 +9,347 @@ part of 'poll_voting_mode.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$PollVotingMode {
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is PollVotingMode);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'PollVotingMode()';
-  }
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() disabled,
+    required TResult Function() unique,
+    required TResult Function(int count) limited,
+    required TResult Function() all,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? disabled,
+    TResult? Function()? unique,
+    TResult? Function(int count)? limited,
+    TResult? Function()? all,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? disabled,
+    TResult Function()? unique,
+    TResult Function(int count)? limited,
+    TResult Function()? all,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(VotingDisabled value) disabled,
+    required TResult Function(VotingUnique value) unique,
+    required TResult Function(VotingLimited value) limited,
+    required TResult Function(VotingAll value) all,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(VotingDisabled value)? disabled,
+    TResult? Function(VotingUnique value)? unique,
+    TResult? Function(VotingLimited value)? limited,
+    TResult? Function(VotingAll value)? all,
+  }) =>
+      throw _privateConstructorUsedError;
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(VotingDisabled value)? disabled,
+    TResult Function(VotingUnique value)? unique,
+    TResult Function(VotingLimited value)? limited,
+    TResult Function(VotingAll value)? all,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-class $PollVotingModeCopyWith<$Res> {
-  $PollVotingModeCopyWith(PollVotingMode _, $Res Function(PollVotingMode) __);
+abstract class $PollVotingModeCopyWith<$Res> {
+  factory $PollVotingModeCopyWith(
+          PollVotingMode value, $Res Function(PollVotingMode) then) =
+      _$PollVotingModeCopyWithImpl<$Res, PollVotingMode>;
+}
+
+/// @nodoc
+class _$PollVotingModeCopyWithImpl<$Res, $Val extends PollVotingMode>
+    implements $PollVotingModeCopyWith<$Res> {
+  _$PollVotingModeCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of PollVotingMode
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+abstract class _$$VotingDisabledImplCopyWith<$Res> {
+  factory _$$VotingDisabledImplCopyWith(_$VotingDisabledImpl value,
+          $Res Function(_$VotingDisabledImpl) then) =
+      __$$VotingDisabledImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$VotingDisabledImplCopyWithImpl<$Res>
+    extends _$PollVotingModeCopyWithImpl<$Res, _$VotingDisabledImpl>
+    implements _$$VotingDisabledImplCopyWith<$Res> {
+  __$$VotingDisabledImplCopyWithImpl(
+      _$VotingDisabledImpl _value, $Res Function(_$VotingDisabledImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of PollVotingMode
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 
-class VotingDisabled implements PollVotingMode {
-  const VotingDisabled();
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is VotingDisabled);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
+class _$VotingDisabledImpl implements VotingDisabled {
+  const _$VotingDisabledImpl();
 
   @override
   String toString() {
     return 'PollVotingMode.disabled()';
   }
-}
-
-/// @nodoc
-
-class VotingUnique implements PollVotingMode {
-  const VotingUnique();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is VotingUnique);
+        (other.runtimeType == runtimeType && other is _$VotingDisabledImpl);
   }
 
   @override
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() {
-    return 'PollVotingMode.unique()';
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() disabled,
+    required TResult Function() unique,
+    required TResult Function(int count) limited,
+    required TResult Function() all,
+  }) {
+    return disabled();
   }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? disabled,
+    TResult? Function()? unique,
+    TResult? Function(int count)? limited,
+    TResult? Function()? all,
+  }) {
+    return disabled?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? disabled,
+    TResult Function()? unique,
+    TResult Function(int count)? limited,
+    TResult Function()? all,
+    required TResult orElse(),
+  }) {
+    if (disabled != null) {
+      return disabled();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(VotingDisabled value) disabled,
+    required TResult Function(VotingUnique value) unique,
+    required TResult Function(VotingLimited value) limited,
+    required TResult Function(VotingAll value) all,
+  }) {
+    return disabled(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(VotingDisabled value)? disabled,
+    TResult? Function(VotingUnique value)? unique,
+    TResult? Function(VotingLimited value)? limited,
+    TResult? Function(VotingAll value)? all,
+  }) {
+    return disabled?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(VotingDisabled value)? disabled,
+    TResult Function(VotingUnique value)? unique,
+    TResult Function(VotingLimited value)? limited,
+    TResult Function(VotingAll value)? all,
+    required TResult orElse(),
+  }) {
+    if (disabled != null) {
+      return disabled(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class VotingDisabled implements PollVotingMode {
+  const factory VotingDisabled() = _$VotingDisabledImpl;
+}
+
+/// @nodoc
+abstract class _$$VotingUniqueImplCopyWith<$Res> {
+  factory _$$VotingUniqueImplCopyWith(
+          _$VotingUniqueImpl value, $Res Function(_$VotingUniqueImpl) then) =
+      __$$VotingUniqueImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$VotingUniqueImplCopyWithImpl<$Res>
+    extends _$PollVotingModeCopyWithImpl<$Res, _$VotingUniqueImpl>
+    implements _$$VotingUniqueImplCopyWith<$Res> {
+  __$$VotingUniqueImplCopyWithImpl(
+      _$VotingUniqueImpl _value, $Res Function(_$VotingUniqueImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of PollVotingMode
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 
-class VotingLimited implements PollVotingMode {
-  const VotingLimited({required this.count});
+class _$VotingUniqueImpl implements VotingUnique {
+  const _$VotingUniqueImpl();
 
-  final int count;
-
-  /// Create a copy of PollVotingMode
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $VotingLimitedCopyWith<VotingLimited> get copyWith =>
-      _$VotingLimitedCopyWithImpl<VotingLimited>(this, _$identity);
+  @override
+  String toString() {
+    return 'PollVotingMode.unique()';
+  }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is VotingLimited &&
-            (identical(other.count, count) || other.count == count));
+        (other.runtimeType == runtimeType && other is _$VotingUniqueImpl);
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, count);
+  int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() {
-    return 'PollVotingMode.limited(count: $count)';
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() disabled,
+    required TResult Function() unique,
+    required TResult Function(int count) limited,
+    required TResult Function() all,
+  }) {
+    return unique();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? disabled,
+    TResult? Function()? unique,
+    TResult? Function(int count)? limited,
+    TResult? Function()? all,
+  }) {
+    return unique?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? disabled,
+    TResult Function()? unique,
+    TResult Function(int count)? limited,
+    TResult Function()? all,
+    required TResult orElse(),
+  }) {
+    if (unique != null) {
+      return unique();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(VotingDisabled value) disabled,
+    required TResult Function(VotingUnique value) unique,
+    required TResult Function(VotingLimited value) limited,
+    required TResult Function(VotingAll value) all,
+  }) {
+    return unique(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(VotingDisabled value)? disabled,
+    TResult? Function(VotingUnique value)? unique,
+    TResult? Function(VotingLimited value)? limited,
+    TResult? Function(VotingAll value)? all,
+  }) {
+    return unique?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(VotingDisabled value)? disabled,
+    TResult Function(VotingUnique value)? unique,
+    TResult Function(VotingLimited value)? limited,
+    TResult Function(VotingAll value)? all,
+    required TResult orElse(),
+  }) {
+    if (unique != null) {
+      return unique(this);
+    }
+    return orElse();
   }
 }
 
+abstract class VotingUnique implements PollVotingMode {
+  const factory VotingUnique() = _$VotingUniqueImpl;
+}
+
 /// @nodoc
-abstract mixin class $VotingLimitedCopyWith<$Res>
-    implements $PollVotingModeCopyWith<$Res> {
-  factory $VotingLimitedCopyWith(
-          VotingLimited value, $Res Function(VotingLimited) _then) =
-      _$VotingLimitedCopyWithImpl;
+abstract class _$$VotingLimitedImplCopyWith<$Res> {
+  factory _$$VotingLimitedImplCopyWith(
+          _$VotingLimitedImpl value, $Res Function(_$VotingLimitedImpl) then) =
+      __$$VotingLimitedImplCopyWithImpl<$Res>;
   @useResult
   $Res call({int count});
 }
 
 /// @nodoc
-class _$VotingLimitedCopyWithImpl<$Res>
-    implements $VotingLimitedCopyWith<$Res> {
-  _$VotingLimitedCopyWithImpl(this._self, this._then);
-
-  final VotingLimited _self;
-  final $Res Function(VotingLimited) _then;
+class __$$VotingLimitedImplCopyWithImpl<$Res>
+    extends _$PollVotingModeCopyWithImpl<$Res, _$VotingLimitedImpl>
+    implements _$$VotingLimitedImplCopyWith<$Res> {
+  __$$VotingLimitedImplCopyWithImpl(
+      _$VotingLimitedImpl _value, $Res Function(_$VotingLimitedImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of PollVotingMode
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
+  @override
   $Res call({
     Object? count = null,
   }) {
-    return _then(VotingLimited(
+    return _then(_$VotingLimitedImpl(
       count: null == count
-          ? _self.count
+          ? _value.count
           : count // ignore: cast_nullable_to_non_nullable
               as int,
     ));
@@ -141,22 +358,236 @@ class _$VotingLimitedCopyWithImpl<$Res>
 
 /// @nodoc
 
-class VotingAll implements PollVotingMode {
-  const VotingAll();
+class _$VotingLimitedImpl implements VotingLimited {
+  const _$VotingLimitedImpl({required this.count});
+
+  @override
+  final int count;
+
+  @override
+  String toString() {
+    return 'PollVotingMode.limited(count: $count)';
+  }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is VotingAll);
+        (other.runtimeType == runtimeType &&
+            other is _$VotingLimitedImpl &&
+            (identical(other.count, count) || other.count == count));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, count);
+
+  /// Create a copy of PollVotingMode
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$VotingLimitedImplCopyWith<_$VotingLimitedImpl> get copyWith =>
+      __$$VotingLimitedImplCopyWithImpl<_$VotingLimitedImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() disabled,
+    required TResult Function() unique,
+    required TResult Function(int count) limited,
+    required TResult Function() all,
+  }) {
+    return limited(count);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? disabled,
+    TResult? Function()? unique,
+    TResult? Function(int count)? limited,
+    TResult? Function()? all,
+  }) {
+    return limited?.call(count);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? disabled,
+    TResult Function()? unique,
+    TResult Function(int count)? limited,
+    TResult Function()? all,
+    required TResult orElse(),
+  }) {
+    if (limited != null) {
+      return limited(count);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(VotingDisabled value) disabled,
+    required TResult Function(VotingUnique value) unique,
+    required TResult Function(VotingLimited value) limited,
+    required TResult Function(VotingAll value) all,
+  }) {
+    return limited(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(VotingDisabled value)? disabled,
+    TResult? Function(VotingUnique value)? unique,
+    TResult? Function(VotingLimited value)? limited,
+    TResult? Function(VotingAll value)? all,
+  }) {
+    return limited?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(VotingDisabled value)? disabled,
+    TResult Function(VotingUnique value)? unique,
+    TResult Function(VotingLimited value)? limited,
+    TResult Function(VotingAll value)? all,
+    required TResult orElse(),
+  }) {
+    if (limited != null) {
+      return limited(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class VotingLimited implements PollVotingMode {
+  const factory VotingLimited({required final int count}) = _$VotingLimitedImpl;
+
+  int get count;
+
+  /// Create a copy of PollVotingMode
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$VotingLimitedImplCopyWith<_$VotingLimitedImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$VotingAllImplCopyWith<$Res> {
+  factory _$$VotingAllImplCopyWith(
+          _$VotingAllImpl value, $Res Function(_$VotingAllImpl) then) =
+      __$$VotingAllImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$VotingAllImplCopyWithImpl<$Res>
+    extends _$PollVotingModeCopyWithImpl<$Res, _$VotingAllImpl>
+    implements _$$VotingAllImplCopyWith<$Res> {
+  __$$VotingAllImplCopyWithImpl(
+      _$VotingAllImpl _value, $Res Function(_$VotingAllImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of PollVotingMode
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$VotingAllImpl implements VotingAll {
+  const _$VotingAllImpl();
+
+  @override
+  String toString() {
+    return 'PollVotingMode.all()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$VotingAllImpl);
   }
 
   @override
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString() {
-    return 'PollVotingMode.all()';
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() disabled,
+    required TResult Function() unique,
+    required TResult Function(int count) limited,
+    required TResult Function() all,
+  }) {
+    return all();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? disabled,
+    TResult? Function()? unique,
+    TResult? Function(int count)? limited,
+    TResult? Function()? all,
+  }) {
+    return all?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? disabled,
+    TResult Function()? unique,
+    TResult Function(int count)? limited,
+    TResult Function()? all,
+    required TResult orElse(),
+  }) {
+    if (all != null) {
+      return all();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(VotingDisabled value) disabled,
+    required TResult Function(VotingUnique value) unique,
+    required TResult Function(VotingLimited value) limited,
+    required TResult Function(VotingAll value) all,
+  }) {
+    return all(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(VotingDisabled value)? disabled,
+    TResult? Function(VotingUnique value)? unique,
+    TResult? Function(VotingLimited value)? limited,
+    TResult? Function(VotingAll value)? all,
+  }) {
+    return all?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(VotingDisabled value)? disabled,
+    TResult Function(VotingUnique value)? unique,
+    TResult Function(VotingLimited value)? limited,
+    TResult Function(VotingAll value)? all,
+    required TResult orElse(),
+  }) {
+    if (all != null) {
+      return all(this);
+    }
+    return orElse();
   }
 }
 
-// dart format on
+abstract class VotingAll implements PollVotingMode {
+  const factory VotingAll() = _$VotingAllImpl;
+}

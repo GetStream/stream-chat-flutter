@@ -2,6 +2,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/list_converter.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
+import 'package:stream_chat_persistence/src/converter/reaction_groups_converter.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Messages] table in [MoorChatDatabase].
@@ -26,11 +27,9 @@ class Messages extends Table {
   /// The list of user mentioned in the message
   TextColumn get mentionedUsers => text().map(ListConverter<String>())();
 
-  /// A map describing the count of number of every reaction
-  TextColumn get reactionCounts => text().nullable().map(MapConverter<int>())();
-
-  /// A map describing the count of score of every reaction
-  TextColumn get reactionScores => text().nullable().map(MapConverter<int>())();
+  /// A map describing the reaction group for every reaction
+  TextColumn get reactionGroups =>
+      text().map(ReactionGroupsConverter()).nullable()();
 
   /// The ID of the parent message, if the message is a thread reply.
   TextColumn get parentId => text().nullable()();

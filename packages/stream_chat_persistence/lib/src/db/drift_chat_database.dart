@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:stream_chat/stream_chat.dart' show VotingVisibility;
+import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/converter/converter.dart';
 import 'package:stream_chat_persistence/src/dao/dao.dart';
 import 'package:stream_chat_persistence/src/entity/entity.dart';
@@ -55,20 +55,19 @@ class DriftChatDatabase extends _$DriftChatDatabase {
 
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },
-        onUpgrade: (openingDetails, before, after) async {
-          if (before != after) {
-            final m = createMigrator();
+        onUpgrade: (migrator, from, to) async {
+          if (from != to) {
             for (final table in allTables) {
-              await m.deleteTable(table.actualTableName);
-              await m.createTable(table);
+              await migrator.deleteTable(table.actualTableName);
             }
+            await migrator.createAll();
           }
         },
       );

@@ -40,6 +40,10 @@ void main() {
         pinned: math.Random().nextBool(),
         pinnedAt: DateTime.now(),
         pinnedBy: User(id: 'testUserId$index'),
+        reactionGroups: {
+          'testType': ReactionGroup(count: 3, sumScores: 10),
+          'testType2': ReactionGroup(count: 5, sumScores: 20),
+        },
       ),
     );
     final quotedMessages = List.generate(
