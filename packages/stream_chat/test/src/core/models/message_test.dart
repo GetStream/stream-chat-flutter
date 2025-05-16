@@ -23,7 +23,9 @@ void main() {
       expect(message.attachments, isA<List<Attachment>>());
       expect(message.latestReactions, isA<List<Reaction>>());
       expect(message.ownReactions, isA<List<Reaction>>());
+      // ignore: deprecated_member_use_from_same_package
       expect(message.reactionCounts, {'love': 1});
+      // ignore: deprecated_member_use_from_same_package
       expect(message.reactionScores, {'love': 1});
       expect(message.reactionGroups, isA<Map<String, ReactionGroup>>());
       expect(message.createdAt, DateTime.parse('2020-01-28T22:17:31.107978Z'));
@@ -290,7 +292,9 @@ void main() {
         'is derived from reactionCounts and reactionScores if not provided directly in constructor',
         () {
           final message = Message(
+            // ignore: deprecated_member_use_from_same_package
             reactionCounts: const {'like': 1, 'love': 2},
+            // ignore: deprecated_member_use_from_same_package
             reactionScores: const {'like': 1, 'love': 5},
           );
 

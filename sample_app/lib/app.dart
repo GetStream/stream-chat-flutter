@@ -508,6 +508,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                       client: _initNotifier.initData!.client,
                       streamChatConfigData: StreamChatConfigurationData(
                         draftMessagesEnabled: true,
+                        enforceUniqueReactions: false,
                       ),
                       child: child,
                     ),

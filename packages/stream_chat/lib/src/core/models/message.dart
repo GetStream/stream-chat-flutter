@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
@@ -793,5 +794,109 @@ extension on Message {
     }
 
     return copyWith(mentionedUsers: updatedMentionedUsers);
+  }
+}
+
+/// Extension that adds reaction manipulation functionality to Message objects.
+///
+/// This extension provides methods to add and delete reactions to/from messages,
+/// with proper handling of reaction counts, scores, and timestamps.
+extension MessageReactionHelper on Message {
+  /// Adds a new reaction to the message.
+  ///
+  /// If [enforceUnique] is set to true, it will remove the existing current
+  /// user's reaction before adding the new one.
+  Message addMyReaction(
+    Reaction reaction, {
+    bool enforceUnique = false,
+  }) {
+    var updatedMessage = this;
+
+    // If we are enforcing unique reactions, we need to delete the existing
+    // reaction before adding the new one.
+    if (enforceUnique) updatedMessage = updatedMessage.deleteMyReaction();
+
+    final ownReactions = <Reaction>[...?updatedMessage.ownReactions];
+    final latestReactions = <Reaction>[...?updatedMessage.latestReactions];
+    final reactionGroups = <String, ReactionGroup>{
+      ...?updatedMessage.reactionGroups,
+    };
+
+    // Add the new reaction to the own reactions and latest reactions.
+    ownReactions.insert(0, reaction);
+    latestReactions.insert(0, reaction);
+
+    // Update the reaction groups.
+    reactionGroups.update(
+      reaction.type,
+      (it) => it.copyWith(
+        count: it.count + 1,
+        sumScores: it.sumScores + reaction.score,
+        firstReactionAt: [it.firstReactionAt, reaction.createdAt].minOrNull,
+        lastReactionAt: [it.lastReactionAt, reaction.createdAt].maxOrNull,
+      ),
+      ifAbsent: () => ReactionGroup(
+        count: 1,
+        sumScores: reaction.score,
+        firstReactionAt: reaction.createdAt,
+        lastReactionAt: reaction.createdAt,
+      ),
+    );
+
+    return updatedMessage.copyWith(
+      ownReactions: ownReactions,
+      latestReactions: latestReactions,
+      reactionGroups: reactionGroups,
+    );
+  }
+
+  /// Deletes all the current user's reactions from the message.
+  ///
+  /// Optionally, you can specify a [reactionType] to delete only that specific
+  /// current user's reaction.
+  Message deleteMyReaction({
+    String? reactionType,
+  }) {
+    final reactionsToDelete = this.ownReactions?.where((it) {
+      if (reactionType != null) return it.type == reactionType;
+      return true;
+    });
+
+    // If there are no reactions to delete, we can return the message as is.
+    if (reactionsToDelete == null || reactionsToDelete.isEmpty) return this;
+
+    final ownReactions = <Reaction>[...?this.ownReactions];
+    final latestReactions = <Reaction>[...?this.latestReactions];
+    final reactionGroups = <String, ReactionGroup>{...?this.reactionGroups};
+
+    for (final reaction in reactionsToDelete) {
+      final type = reaction.type;
+
+      bool match(Reaction r) => r.type == type && r.userId == reaction.userId;
+
+      // Remove from own reactions and latest reactions.
+      ownReactions.removeWhere(match);
+      latestReactions.removeWhere(match);
+
+      final group = reactionGroups.remove(type);
+      if (group == null) continue;
+
+      // Update the reaction group.
+      final updatedCount = group.count - 1;
+      final updatedSumScores = group.sumScores - reaction.score;
+
+      if (updatedCount > 0 && updatedSumScores > 0) {
+        reactionGroups[type] = group.copyWith(
+          count: updatedCount,
+          sumScores: updatedSumScores,
+        );
+      }
+    }
+
+    return copyWith(
+      ownReactions: ownReactions,
+      latestReactions: latestReactions,
+      reactionGroups: reactionGroups,
+    );
   }
 }
