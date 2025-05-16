@@ -697,19 +697,12 @@ class $MessagesTable extends Messages
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($MessagesTable.$convertermentionedUsers);
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      reactionCounts = GeneratedColumn<String>(
-              'reaction_counts', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<Map<String, int>?>(
-              $MessagesTable.$converterreactionCountsn);
-  @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      reactionScores = GeneratedColumn<String>(
-              'reaction_scores', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<Map<String, int>?>(
-              $MessagesTable.$converterreactionScoresn);
+  late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?,
+      String> reactionGroups = GeneratedColumn<String>(
+          'reaction_groups', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false)
+      .withConverter<Map<String, ReactionGroup>?>(
+          $MessagesTable.$converterreactionGroupsn);
   static const VerificationMeta _parentIdMeta =
       const VerificationMeta('parentId');
   @override
@@ -873,8 +866,7 @@ class $MessagesTable extends Messages
         state,
         type,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         parentId,
         quotedMessageId,
         pollId,
@@ -1068,12 +1060,9 @@ class $MessagesTable extends Messages
       mentionedUsers: $MessagesTable.$convertermentionedUsers.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}mentioned_users'])!),
-      reactionCounts: $MessagesTable.$converterreactionCountsn.fromSql(
+      reactionGroups: $MessagesTable.$converterreactionGroupsn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $MessagesTable.$converterreactionScoresn.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}reaction_scores'])),
+              DriftSqlType.string, data['${effectivePrefix}reaction_groups'])),
       parentId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
       quotedMessageId: attachedDatabase.typeMapping.read(
@@ -1137,14 +1126,11 @@ class $MessagesTable extends Messages
       ListConverter<String>();
   static TypeConverter<List<String>, String> $convertermentionedUsers =
       ListConverter<String>();
-  static TypeConverter<Map<String, int>, String> $converterreactionCounts =
-      MapConverter<int>();
-  static TypeConverter<Map<String, int>?, String?> $converterreactionCountsn =
-      NullAwareTypeConverter.wrap($converterreactionCounts);
-  static TypeConverter<Map<String, int>, String> $converterreactionScores =
-      MapConverter<int>();
-  static TypeConverter<Map<String, int>?, String?> $converterreactionScoresn =
-      NullAwareTypeConverter.wrap($converterreactionScores);
+  static TypeConverter<Map<String, ReactionGroup>, String>
+      $converterreactionGroups = ReactionGroupsConverter();
+  static TypeConverter<Map<String, ReactionGroup>?, String?>
+      $converterreactionGroupsn =
+      NullAwareTypeConverter.wrap($converterreactionGroups);
   static TypeConverter<Map<String, String>?, String?> $converteri18n =
       NullableMapConverter<String>();
   static TypeConverter<List<String>, String> $converterrestrictedVisibility =
@@ -1177,11 +1163,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   /// The list of user mentioned in the message
   final List<String> mentionedUsers;
 
-  /// A map describing the count of number of every reaction
-  final Map<String, int>? reactionCounts;
-
-  /// A map describing the count of score of every reaction
-  final Map<String, int>? reactionScores;
+  /// A map describing the reaction group for every reaction
+  final Map<String, ReactionGroup>? reactionGroups;
 
   /// The ID of the parent message, if the message is a thread reply.
   final String? parentId;
@@ -1261,8 +1244,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       required this.state,
       required this.type,
       required this.mentionedUsers,
-      this.reactionCounts,
-      this.reactionScores,
+      this.reactionGroups,
       this.parentId,
       this.quotedMessageId,
       this.pollId,
@@ -1304,13 +1286,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       map['mentioned_users'] = Variable<String>(
           $MessagesTable.$convertermentionedUsers.toSql(mentionedUsers));
     }
-    if (!nullToAbsent || reactionCounts != null) {
-      map['reaction_counts'] = Variable<String>(
-          $MessagesTable.$converterreactionCountsn.toSql(reactionCounts));
-    }
-    if (!nullToAbsent || reactionScores != null) {
-      map['reaction_scores'] = Variable<String>(
-          $MessagesTable.$converterreactionScoresn.toSql(reactionScores));
+    if (!nullToAbsent || reactionGroups != null) {
+      map['reaction_groups'] = Variable<String>(
+          $MessagesTable.$converterreactionGroupsn.toSql(reactionGroups));
     }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
@@ -1394,10 +1372,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       state: serializer.fromJson<String>(json['state']),
       type: serializer.fromJson<String>(json['type']),
       mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
-      reactionCounts:
-          serializer.fromJson<Map<String, int>?>(json['reactionCounts']),
-      reactionScores:
-          serializer.fromJson<Map<String, int>?>(json['reactionScores']),
+      reactionGroups: serializer
+          .fromJson<Map<String, ReactionGroup>?>(json['reactionGroups']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       quotedMessageId: serializer.fromJson<String?>(json['quotedMessageId']),
       pollId: serializer.fromJson<String?>(json['pollId']),
@@ -1436,8 +1412,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'state': serializer.toJson<String>(state),
       'type': serializer.toJson<String>(type),
       'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
-      'reactionCounts': serializer.toJson<Map<String, int>?>(reactionCounts),
-      'reactionScores': serializer.toJson<Map<String, int>?>(reactionScores),
+      'reactionGroups':
+          serializer.toJson<Map<String, ReactionGroup>?>(reactionGroups),
       'parentId': serializer.toJson<String?>(parentId),
       'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
       'pollId': serializer.toJson<String?>(pollId),
@@ -1474,8 +1450,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           String? state,
           String? type,
           List<String>? mentionedUsers,
-          Value<Map<String, int>?> reactionCounts = const Value.absent(),
-          Value<Map<String, int>?> reactionScores = const Value.absent(),
+          Value<Map<String, ReactionGroup>?> reactionGroups =
+              const Value.absent(),
           Value<String?> parentId = const Value.absent(),
           Value<String?> quotedMessageId = const Value.absent(),
           Value<String?> pollId = const Value.absent(),
@@ -1507,10 +1483,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         state: state ?? this.state,
         type: type ?? this.type,
         mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-        reactionCounts:
-            reactionCounts.present ? reactionCounts.value : this.reactionCounts,
-        reactionScores:
-            reactionScores.present ? reactionScores.value : this.reactionScores,
+        reactionGroups:
+            reactionGroups.present ? reactionGroups.value : this.reactionGroups,
         parentId: parentId.present ? parentId.value : this.parentId,
         quotedMessageId: quotedMessageId.present
             ? quotedMessageId.value
@@ -1566,12 +1540,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       mentionedUsers: data.mentionedUsers.present
           ? data.mentionedUsers.value
           : this.mentionedUsers,
-      reactionCounts: data.reactionCounts.present
-          ? data.reactionCounts.value
-          : this.reactionCounts,
-      reactionScores: data.reactionScores.present
-          ? data.reactionScores.value
-          : this.reactionScores,
+      reactionGroups: data.reactionGroups.present
+          ? data.reactionGroups.value
+          : this.reactionGroups,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       quotedMessageId: data.quotedMessageId.present
           ? data.quotedMessageId.value
@@ -1635,8 +1606,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
-          ..write('reactionCounts: $reactionCounts, ')
-          ..write('reactionScores: $reactionScores, ')
+          ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
           ..write('pollId: $pollId, ')
@@ -1673,8 +1643,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         state,
         type,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         parentId,
         quotedMessageId,
         pollId,
@@ -1710,8 +1679,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.state == this.state &&
           other.type == this.type &&
           other.mentionedUsers == this.mentionedUsers &&
-          other.reactionCounts == this.reactionCounts &&
-          other.reactionScores == this.reactionScores &&
+          other.reactionGroups == this.reactionGroups &&
           other.parentId == this.parentId &&
           other.quotedMessageId == this.quotedMessageId &&
           other.pollId == this.pollId &&
@@ -1745,8 +1713,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<String> state;
   final Value<String> type;
   final Value<List<String>> mentionedUsers;
-  final Value<Map<String, int>?> reactionCounts;
-  final Value<Map<String, int>?> reactionScores;
+  final Value<Map<String, ReactionGroup>?> reactionGroups;
   final Value<String?> parentId;
   final Value<String?> quotedMessageId;
   final Value<String?> pollId;
@@ -1779,8 +1746,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.state = const Value.absent(),
     this.type = const Value.absent(),
     this.mentionedUsers = const Value.absent(),
-    this.reactionCounts = const Value.absent(),
-    this.reactionScores = const Value.absent(),
+    this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
     this.pollId = const Value.absent(),
@@ -1814,8 +1780,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     required String state,
     this.type = const Value.absent(),
     required List<String> mentionedUsers,
-    this.reactionCounts = const Value.absent(),
-    this.reactionScores = const Value.absent(),
+    this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
     this.pollId = const Value.absent(),
@@ -1853,8 +1818,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<String>? state,
     Expression<String>? type,
     Expression<String>? mentionedUsers,
-    Expression<String>? reactionCounts,
-    Expression<String>? reactionScores,
+    Expression<String>? reactionGroups,
     Expression<String>? parentId,
     Expression<String>? quotedMessageId,
     Expression<String>? pollId,
@@ -1888,8 +1852,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (state != null) 'state': state,
       if (type != null) 'type': type,
       if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
-      if (reactionCounts != null) 'reaction_counts': reactionCounts,
-      if (reactionScores != null) 'reaction_scores': reactionScores,
+      if (reactionGroups != null) 'reaction_groups': reactionGroups,
       if (parentId != null) 'parent_id': parentId,
       if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
       if (pollId != null) 'poll_id': pollId,
@@ -1927,8 +1890,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<String>? state,
       Value<String>? type,
       Value<List<String>>? mentionedUsers,
-      Value<Map<String, int>?>? reactionCounts,
-      Value<Map<String, int>?>? reactionScores,
+      Value<Map<String, ReactionGroup>?>? reactionGroups,
       Value<String?>? parentId,
       Value<String?>? quotedMessageId,
       Value<String?>? pollId,
@@ -1961,8 +1923,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       state: state ?? this.state,
       type: type ?? this.type,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-      reactionCounts: reactionCounts ?? this.reactionCounts,
-      reactionScores: reactionScores ?? this.reactionScores,
+      reactionGroups: reactionGroups ?? this.reactionGroups,
       parentId: parentId ?? this.parentId,
       quotedMessageId: quotedMessageId ?? this.quotedMessageId,
       pollId: pollId ?? this.pollId,
@@ -2014,13 +1975,9 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       map['mentioned_users'] = Variable<String>(
           $MessagesTable.$convertermentionedUsers.toSql(mentionedUsers.value));
     }
-    if (reactionCounts.present) {
-      map['reaction_counts'] = Variable<String>(
-          $MessagesTable.$converterreactionCountsn.toSql(reactionCounts.value));
-    }
-    if (reactionScores.present) {
-      map['reaction_scores'] = Variable<String>(
-          $MessagesTable.$converterreactionScoresn.toSql(reactionScores.value));
+    if (reactionGroups.present) {
+      map['reaction_groups'] = Variable<String>(
+          $MessagesTable.$converterreactionGroupsn.toSql(reactionGroups.value));
     }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
@@ -2114,8 +2071,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
-          ..write('reactionCounts: $reactionCounts, ')
-          ..write('reactionScores: $reactionScores, ')
+          ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
           ..write('pollId: $pollId, ')
@@ -2895,19 +2851,12 @@ class $PinnedMessagesTable extends PinnedMessages
           .withConverter<List<String>>(
               $PinnedMessagesTable.$convertermentionedUsers);
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      reactionCounts = GeneratedColumn<String>(
-              'reaction_counts', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<Map<String, int>?>(
-              $PinnedMessagesTable.$converterreactionCountsn);
-  @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      reactionScores = GeneratedColumn<String>(
-              'reaction_scores', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<Map<String, int>?>(
-              $PinnedMessagesTable.$converterreactionScoresn);
+  late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?,
+      String> reactionGroups = GeneratedColumn<String>(
+          'reaction_groups', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false)
+      .withConverter<Map<String, ReactionGroup>?>(
+          $PinnedMessagesTable.$converterreactionGroupsn);
   static const VerificationMeta _parentIdMeta =
       const VerificationMeta('parentId');
   @override
@@ -3069,8 +3018,7 @@ class $PinnedMessagesTable extends PinnedMessages
         state,
         type,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         parentId,
         quotedMessageId,
         pollId,
@@ -3265,12 +3213,9 @@ class $PinnedMessagesTable extends PinnedMessages
       mentionedUsers: $PinnedMessagesTable.$convertermentionedUsers.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}mentioned_users'])!),
-      reactionCounts: $PinnedMessagesTable.$converterreactionCountsn.fromSql(
+      reactionGroups: $PinnedMessagesTable.$converterreactionGroupsn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $PinnedMessagesTable.$converterreactionScoresn.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}reaction_scores'])),
+              DriftSqlType.string, data['${effectivePrefix}reaction_groups'])),
       parentId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
       quotedMessageId: attachedDatabase.typeMapping.read(
@@ -3335,14 +3280,11 @@ class $PinnedMessagesTable extends PinnedMessages
       ListConverter<String>();
   static TypeConverter<List<String>, String> $convertermentionedUsers =
       ListConverter<String>();
-  static TypeConverter<Map<String, int>, String> $converterreactionCounts =
-      MapConverter<int>();
-  static TypeConverter<Map<String, int>?, String?> $converterreactionCountsn =
-      NullAwareTypeConverter.wrap($converterreactionCounts);
-  static TypeConverter<Map<String, int>, String> $converterreactionScores =
-      MapConverter<int>();
-  static TypeConverter<Map<String, int>?, String?> $converterreactionScoresn =
-      NullAwareTypeConverter.wrap($converterreactionScores);
+  static TypeConverter<Map<String, ReactionGroup>, String>
+      $converterreactionGroups = ReactionGroupsConverter();
+  static TypeConverter<Map<String, ReactionGroup>?, String?>
+      $converterreactionGroupsn =
+      NullAwareTypeConverter.wrap($converterreactionGroups);
   static TypeConverter<Map<String, String>?, String?> $converteri18n =
       NullableMapConverter<String>();
   static TypeConverter<List<String>, String> $converterrestrictedVisibility =
@@ -3376,11 +3318,8 @@ class PinnedMessageEntity extends DataClass
   /// The list of user mentioned in the message
   final List<String> mentionedUsers;
 
-  /// A map describing the count of number of every reaction
-  final Map<String, int>? reactionCounts;
-
-  /// A map describing the count of score of every reaction
-  final Map<String, int>? reactionScores;
+  /// A map describing the reaction group for every reaction
+  final Map<String, ReactionGroup>? reactionGroups;
 
   /// The ID of the parent message, if the message is a thread reply.
   final String? parentId;
@@ -3460,8 +3399,7 @@ class PinnedMessageEntity extends DataClass
       required this.state,
       required this.type,
       required this.mentionedUsers,
-      this.reactionCounts,
-      this.reactionScores,
+      this.reactionGroups,
       this.parentId,
       this.quotedMessageId,
       this.pollId,
@@ -3503,13 +3441,9 @@ class PinnedMessageEntity extends DataClass
       map['mentioned_users'] = Variable<String>(
           $PinnedMessagesTable.$convertermentionedUsers.toSql(mentionedUsers));
     }
-    if (!nullToAbsent || reactionCounts != null) {
-      map['reaction_counts'] = Variable<String>(
-          $PinnedMessagesTable.$converterreactionCountsn.toSql(reactionCounts));
-    }
-    if (!nullToAbsent || reactionScores != null) {
-      map['reaction_scores'] = Variable<String>(
-          $PinnedMessagesTable.$converterreactionScoresn.toSql(reactionScores));
+    if (!nullToAbsent || reactionGroups != null) {
+      map['reaction_groups'] = Variable<String>(
+          $PinnedMessagesTable.$converterreactionGroupsn.toSql(reactionGroups));
     }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
@@ -3594,10 +3528,8 @@ class PinnedMessageEntity extends DataClass
       state: serializer.fromJson<String>(json['state']),
       type: serializer.fromJson<String>(json['type']),
       mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
-      reactionCounts:
-          serializer.fromJson<Map<String, int>?>(json['reactionCounts']),
-      reactionScores:
-          serializer.fromJson<Map<String, int>?>(json['reactionScores']),
+      reactionGroups: serializer
+          .fromJson<Map<String, ReactionGroup>?>(json['reactionGroups']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       quotedMessageId: serializer.fromJson<String?>(json['quotedMessageId']),
       pollId: serializer.fromJson<String?>(json['pollId']),
@@ -3636,8 +3568,8 @@ class PinnedMessageEntity extends DataClass
       'state': serializer.toJson<String>(state),
       'type': serializer.toJson<String>(type),
       'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
-      'reactionCounts': serializer.toJson<Map<String, int>?>(reactionCounts),
-      'reactionScores': serializer.toJson<Map<String, int>?>(reactionScores),
+      'reactionGroups':
+          serializer.toJson<Map<String, ReactionGroup>?>(reactionGroups),
       'parentId': serializer.toJson<String?>(parentId),
       'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
       'pollId': serializer.toJson<String?>(pollId),
@@ -3674,8 +3606,8 @@ class PinnedMessageEntity extends DataClass
           String? state,
           String? type,
           List<String>? mentionedUsers,
-          Value<Map<String, int>?> reactionCounts = const Value.absent(),
-          Value<Map<String, int>?> reactionScores = const Value.absent(),
+          Value<Map<String, ReactionGroup>?> reactionGroups =
+              const Value.absent(),
           Value<String?> parentId = const Value.absent(),
           Value<String?> quotedMessageId = const Value.absent(),
           Value<String?> pollId = const Value.absent(),
@@ -3707,10 +3639,8 @@ class PinnedMessageEntity extends DataClass
         state: state ?? this.state,
         type: type ?? this.type,
         mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-        reactionCounts:
-            reactionCounts.present ? reactionCounts.value : this.reactionCounts,
-        reactionScores:
-            reactionScores.present ? reactionScores.value : this.reactionScores,
+        reactionGroups:
+            reactionGroups.present ? reactionGroups.value : this.reactionGroups,
         parentId: parentId.present ? parentId.value : this.parentId,
         quotedMessageId: quotedMessageId.present
             ? quotedMessageId.value
@@ -3766,12 +3696,9 @@ class PinnedMessageEntity extends DataClass
       mentionedUsers: data.mentionedUsers.present
           ? data.mentionedUsers.value
           : this.mentionedUsers,
-      reactionCounts: data.reactionCounts.present
-          ? data.reactionCounts.value
-          : this.reactionCounts,
-      reactionScores: data.reactionScores.present
-          ? data.reactionScores.value
-          : this.reactionScores,
+      reactionGroups: data.reactionGroups.present
+          ? data.reactionGroups.value
+          : this.reactionGroups,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       quotedMessageId: data.quotedMessageId.present
           ? data.quotedMessageId.value
@@ -3835,8 +3762,7 @@ class PinnedMessageEntity extends DataClass
           ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
-          ..write('reactionCounts: $reactionCounts, ')
-          ..write('reactionScores: $reactionScores, ')
+          ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
           ..write('pollId: $pollId, ')
@@ -3873,8 +3799,7 @@ class PinnedMessageEntity extends DataClass
         state,
         type,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         parentId,
         quotedMessageId,
         pollId,
@@ -3910,8 +3835,7 @@ class PinnedMessageEntity extends DataClass
           other.state == this.state &&
           other.type == this.type &&
           other.mentionedUsers == this.mentionedUsers &&
-          other.reactionCounts == this.reactionCounts &&
-          other.reactionScores == this.reactionScores &&
+          other.reactionGroups == this.reactionGroups &&
           other.parentId == this.parentId &&
           other.quotedMessageId == this.quotedMessageId &&
           other.pollId == this.pollId &&
@@ -3945,8 +3869,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<String> state;
   final Value<String> type;
   final Value<List<String>> mentionedUsers;
-  final Value<Map<String, int>?> reactionCounts;
-  final Value<Map<String, int>?> reactionScores;
+  final Value<Map<String, ReactionGroup>?> reactionGroups;
   final Value<String?> parentId;
   final Value<String?> quotedMessageId;
   final Value<String?> pollId;
@@ -3979,8 +3902,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.state = const Value.absent(),
     this.type = const Value.absent(),
     this.mentionedUsers = const Value.absent(),
-    this.reactionCounts = const Value.absent(),
-    this.reactionScores = const Value.absent(),
+    this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
     this.pollId = const Value.absent(),
@@ -4014,8 +3936,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     required String state,
     this.type = const Value.absent(),
     required List<String> mentionedUsers,
-    this.reactionCounts = const Value.absent(),
-    this.reactionScores = const Value.absent(),
+    this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
     this.pollId = const Value.absent(),
@@ -4053,8 +3974,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Expression<String>? state,
     Expression<String>? type,
     Expression<String>? mentionedUsers,
-    Expression<String>? reactionCounts,
-    Expression<String>? reactionScores,
+    Expression<String>? reactionGroups,
     Expression<String>? parentId,
     Expression<String>? quotedMessageId,
     Expression<String>? pollId,
@@ -4088,8 +4008,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (state != null) 'state': state,
       if (type != null) 'type': type,
       if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
-      if (reactionCounts != null) 'reaction_counts': reactionCounts,
-      if (reactionScores != null) 'reaction_scores': reactionScores,
+      if (reactionGroups != null) 'reaction_groups': reactionGroups,
       if (parentId != null) 'parent_id': parentId,
       if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
       if (pollId != null) 'poll_id': pollId,
@@ -4127,8 +4046,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       Value<String>? state,
       Value<String>? type,
       Value<List<String>>? mentionedUsers,
-      Value<Map<String, int>?>? reactionCounts,
-      Value<Map<String, int>?>? reactionScores,
+      Value<Map<String, ReactionGroup>?>? reactionGroups,
       Value<String?>? parentId,
       Value<String?>? quotedMessageId,
       Value<String?>? pollId,
@@ -4161,8 +4079,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       state: state ?? this.state,
       type: type ?? this.type,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-      reactionCounts: reactionCounts ?? this.reactionCounts,
-      reactionScores: reactionScores ?? this.reactionScores,
+      reactionGroups: reactionGroups ?? this.reactionGroups,
       parentId: parentId ?? this.parentId,
       quotedMessageId: quotedMessageId ?? this.quotedMessageId,
       pollId: pollId ?? this.pollId,
@@ -4215,15 +4132,10 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           .$convertermentionedUsers
           .toSql(mentionedUsers.value));
     }
-    if (reactionCounts.present) {
-      map['reaction_counts'] = Variable<String>($PinnedMessagesTable
-          .$converterreactionCountsn
-          .toSql(reactionCounts.value));
-    }
-    if (reactionScores.present) {
-      map['reaction_scores'] = Variable<String>($PinnedMessagesTable
-          .$converterreactionScoresn
-          .toSql(reactionScores.value));
+    if (reactionGroups.present) {
+      map['reaction_groups'] = Variable<String>($PinnedMessagesTable
+          .$converterreactionGroupsn
+          .toSql(reactionGroups.value));
     }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
@@ -4317,8 +4229,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
-          ..write('reactionCounts: $reactionCounts, ')
-          ..write('reactionScores: $reactionScores, ')
+          ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
           ..write('pollId: $pollId, ')
@@ -9173,8 +9084,7 @@ typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   required String state,
   Value<String> type,
   required List<String> mentionedUsers,
-  Value<Map<String, int>?> reactionCounts,
-  Value<Map<String, int>?> reactionScores,
+  Value<Map<String, ReactionGroup>?> reactionGroups,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
   Value<String?> pollId,
@@ -9208,8 +9118,7 @@ typedef $$MessagesTableUpdateCompanionBuilder = MessagesCompanion Function({
   Value<String> state,
   Value<String> type,
   Value<List<String>> mentionedUsers,
-  Value<Map<String, int>?> reactionCounts,
-  Value<Map<String, int>?> reactionScores,
+  Value<Map<String, ReactionGroup>?> reactionGroups,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
   Value<String?> pollId,
@@ -9318,14 +9227,10 @@ class $$MessagesTableFilterComposer
           column: $table.mentionedUsers,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<Map<String, int>?, Map<String, int>, String>
-      get reactionCounts => $composableBuilder(
-          column: $table.reactionCounts,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-
-  ColumnWithTypeConverterFilters<Map<String, int>?, Map<String, int>, String>
-      get reactionScores => $composableBuilder(
-          column: $table.reactionScores,
+  ColumnWithTypeConverterFilters<Map<String, ReactionGroup>?,
+          Map<String, ReactionGroup>, String>
+      get reactionGroups => $composableBuilder(
+          column: $table.reactionGroups,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<String> get parentId => $composableBuilder(
@@ -9506,12 +9411,8 @@ class $$MessagesTableOrderingComposer
       column: $table.mentionedUsers,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get reactionCounts => $composableBuilder(
-      column: $table.reactionCounts,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get reactionScores => $composableBuilder(
-      column: $table.reactionScores,
+  ColumnOrderings<String> get reactionGroups => $composableBuilder(
+      column: $table.reactionGroups,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get parentId => $composableBuilder(
@@ -9645,13 +9546,9 @@ class $$MessagesTableAnnotationComposer
       $composableBuilder(
           column: $table.mentionedUsers, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      get reactionCounts => $composableBuilder(
-          column: $table.reactionCounts, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      get reactionScores => $composableBuilder(
-          column: $table.reactionScores, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String>
+      get reactionGroups => $composableBuilder(
+          column: $table.reactionGroups, builder: (column) => column);
 
   GeneratedColumn<String> get parentId =>
       $composableBuilder(column: $table.parentId, builder: (column) => column);
@@ -9817,8 +9714,8 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<String> state = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<List<String>> mentionedUsers = const Value.absent(),
-            Value<Map<String, int>?> reactionCounts = const Value.absent(),
-            Value<Map<String, int>?> reactionScores = const Value.absent(),
+            Value<Map<String, ReactionGroup>?> reactionGroups =
+                const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
             Value<String?> pollId = const Value.absent(),
@@ -9852,8 +9749,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             state: state,
             type: type,
             mentionedUsers: mentionedUsers,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
+            reactionGroups: reactionGroups,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
             pollId: pollId,
@@ -9887,8 +9783,8 @@ class $$MessagesTableTableManager extends RootTableManager<
             required String state,
             Value<String> type = const Value.absent(),
             required List<String> mentionedUsers,
-            Value<Map<String, int>?> reactionCounts = const Value.absent(),
-            Value<Map<String, int>?> reactionScores = const Value.absent(),
+            Value<Map<String, ReactionGroup>?> reactionGroups =
+                const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
             Value<String?> pollId = const Value.absent(),
@@ -9922,8 +9818,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             state: state,
             type: type,
             mentionedUsers: mentionedUsers,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
+            reactionGroups: reactionGroups,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
             pollId: pollId,
@@ -10548,8 +10443,7 @@ typedef $$PinnedMessagesTableCreateCompanionBuilder = PinnedMessagesCompanion
   required String state,
   Value<String> type,
   required List<String> mentionedUsers,
-  Value<Map<String, int>?> reactionCounts,
-  Value<Map<String, int>?> reactionScores,
+  Value<Map<String, ReactionGroup>?> reactionGroups,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
   Value<String?> pollId,
@@ -10584,8 +10478,7 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder = PinnedMessagesCompanion
   Value<String> state,
   Value<String> type,
   Value<List<String>> mentionedUsers,
-  Value<Map<String, int>?> reactionCounts,
-  Value<Map<String, int>?> reactionScores,
+  Value<Map<String, ReactionGroup>?> reactionGroups,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
   Value<String?> pollId,
@@ -10669,14 +10562,10 @@ class $$PinnedMessagesTableFilterComposer
           column: $table.mentionedUsers,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<Map<String, int>?, Map<String, int>, String>
-      get reactionCounts => $composableBuilder(
-          column: $table.reactionCounts,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-
-  ColumnWithTypeConverterFilters<Map<String, int>?, Map<String, int>, String>
-      get reactionScores => $composableBuilder(
-          column: $table.reactionScores,
+  ColumnWithTypeConverterFilters<Map<String, ReactionGroup>?,
+          Map<String, ReactionGroup>, String>
+      get reactionGroups => $composableBuilder(
+          column: $table.reactionGroups,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<String> get parentId => $composableBuilder(
@@ -10821,12 +10710,8 @@ class $$PinnedMessagesTableOrderingComposer
       column: $table.mentionedUsers,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get reactionCounts => $composableBuilder(
-      column: $table.reactionCounts,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get reactionScores => $composableBuilder(
-      column: $table.reactionScores,
+  ColumnOrderings<String> get reactionGroups => $composableBuilder(
+      column: $table.reactionGroups,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get parentId => $composableBuilder(
@@ -10943,13 +10828,9 @@ class $$PinnedMessagesTableAnnotationComposer
       $composableBuilder(
           column: $table.mentionedUsers, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      get reactionCounts => $composableBuilder(
-          column: $table.reactionCounts, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      get reactionScores => $composableBuilder(
-          column: $table.reactionScores, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String>
+      get reactionGroups => $composableBuilder(
+          column: $table.reactionGroups, builder: (column) => column);
 
   GeneratedColumn<String> get parentId =>
       $composableBuilder(column: $table.parentId, builder: (column) => column);
@@ -11079,8 +10960,8 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<String> state = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<List<String>> mentionedUsers = const Value.absent(),
-            Value<Map<String, int>?> reactionCounts = const Value.absent(),
-            Value<Map<String, int>?> reactionScores = const Value.absent(),
+            Value<Map<String, ReactionGroup>?> reactionGroups =
+                const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
             Value<String?> pollId = const Value.absent(),
@@ -11114,8 +10995,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             state: state,
             type: type,
             mentionedUsers: mentionedUsers,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
+            reactionGroups: reactionGroups,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
             pollId: pollId,
@@ -11149,8 +11029,8 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             required String state,
             Value<String> type = const Value.absent(),
             required List<String> mentionedUsers,
-            Value<Map<String, int>?> reactionCounts = const Value.absent(),
-            Value<Map<String, int>?> reactionScores = const Value.absent(),
+            Value<Map<String, ReactionGroup>?> reactionGroups =
+                const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
             Value<String?> pollId = const Value.absent(),
@@ -11184,8 +11064,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             state: state,
             type: type,
             mentionedUsers: mentionedUsers,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
+            reactionGroups: reactionGroups,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
             pollId: pollId,
