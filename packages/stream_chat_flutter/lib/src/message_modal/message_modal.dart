@@ -65,7 +65,7 @@ Future<T?> showStreamMessageModal<T>({
 }
 
 /// {@template streamMessageModal}
-/// A customized modal widget for displaying message-related content.
+/// A customizable modal widget for displaying message-related content.
 ///
 /// This widget provides a consistent container for message actions and other
 /// message-related modal content. It handles layout, animation, and keyboard
