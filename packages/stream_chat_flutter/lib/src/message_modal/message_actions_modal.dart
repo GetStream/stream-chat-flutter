@@ -108,8 +108,8 @@ class StreamMessageActionsModal extends StatelessWidget {
 
     return StreamMessageModal(
       alignment: switch (reverse) {
-        true => Alignment.centerRight,
-        false => Alignment.centerLeft,
+        true => AlignmentDirectional.centerEnd,
+        false => AlignmentDirectional.centerStart,
       },
       headerBuilder: (context) {
         return Column(

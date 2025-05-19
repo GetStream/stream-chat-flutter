@@ -174,14 +174,23 @@ extension ColumnAlignmentExtension on AlignmentGeometry {
       Alignment.topCenter => CrossAxisAlignment.start,
       Alignment.center => CrossAxisAlignment.center,
       Alignment.bottomCenter => CrossAxisAlignment.center,
+      AlignmentDirectional.topCenter => CrossAxisAlignment.start,
+      AlignmentDirectional.center => CrossAxisAlignment.center,
+      AlignmentDirectional.bottomCenter => CrossAxisAlignment.center,
       // Left alignments
       Alignment.topLeft => CrossAxisAlignment.start,
       Alignment.centerLeft => CrossAxisAlignment.start,
       Alignment.bottomLeft => CrossAxisAlignment.end,
+      AlignmentDirectional.topStart => CrossAxisAlignment.start,
+      AlignmentDirectional.centerStart => CrossAxisAlignment.start,
+      AlignmentDirectional.bottomStart => CrossAxisAlignment.end,
       // Right alignments
       Alignment.topRight => CrossAxisAlignment.start,
       Alignment.centerRight => CrossAxisAlignment.end,
       Alignment.bottomRight => CrossAxisAlignment.end,
+      AlignmentDirectional.topEnd => CrossAxisAlignment.start,
+      AlignmentDirectional.centerEnd => CrossAxisAlignment.end,
+      AlignmentDirectional.bottomEnd => CrossAxisAlignment.end,
       // Fallback
       _ => CrossAxisAlignment.center,
     };
