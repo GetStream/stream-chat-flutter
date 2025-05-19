@@ -42,24 +42,24 @@ class ReactionPickerIconList extends StatefulWidget {
 }
 
 class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
-  List<EzAnimation> iconAnimations = [];
+  List<EzAnimation> _iconAnimations = [];
 
-  void triggerAnimations() async {
-    for (final animation in iconAnimations) {
+  void _triggerAnimations() async {
+    for (final animation in _iconAnimations) {
       if (mounted) animation.start();
       // Add a small delay between the start of each animation.
       await Future.delayed(const Duration(milliseconds: 100));
     }
   }
 
-  void dismissAnimations() {
-    for (final animation in iconAnimations) {
+  void _dismissAnimations() {
+    for (final animation in _iconAnimations) {
       animation.stop();
     }
   }
 
-  void disposeAnimations() {
-    for (final animation in iconAnimations) {
+  void _disposeAnimations() {
+    for (final animation in _iconAnimations) {
       animation.dispose();
     }
   }
@@ -67,7 +67,7 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
   @override
   void initState() {
     super.initState();
-    iconAnimations = List.generate(
+    _iconAnimations = List.generate(
       widget.reactionIcons.length,
       (index) => EzAnimation.tween(
         Tween(begin: 0.0, end: 1.0),
@@ -77,7 +77,7 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
     );
 
     // Trigger animations at the end of the frame to avoid jank.
-    WidgetsBinding.instance.endOfFrame.then((_) => triggerAnimations());
+    WidgetsBinding.instance.endOfFrame.then((_) => _triggerAnimations());
   }
 
   @override
@@ -85,11 +85,11 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.reactionIcons.length != widget.reactionIcons.length) {
       // Dismiss and dispose old animations.
-      dismissAnimations();
-      disposeAnimations();
+      _dismissAnimations();
+      _disposeAnimations();
 
       // Initialize new animations.
-      iconAnimations = List.generate(
+      _iconAnimations = List.generate(
         widget.reactionIcons.length,
         (index) => EzAnimation.tween(
           Tween(begin: 0.0, end: 1.0),
@@ -99,14 +99,14 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
       );
 
       // Trigger animations at the end of the frame to avoid jank.
-      WidgetsBinding.instance.endOfFrame.then((_) => triggerAnimations());
+      WidgetsBinding.instance.endOfFrame.then((_) => _triggerAnimations());
     }
   }
 
   @override
   void dispose() {
-    dismissAnimations();
-    disposeAnimations();
+    _dismissAnimations();
+    _disposeAnimations();
     super.dispose();
   }
 
@@ -125,7 +125,7 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
           final ownReactions = [...?widget.message.ownReactions];
           final reaction = ownReactions.firstWhereOrNull(reactionCheck);
 
-          final animation = iconAnimations[index];
+          final animation = _iconAnimations[index];
           return AnimatedBuilder(
             animation: animation,
             builder: (context, child) => Transform.scale(
