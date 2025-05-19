@@ -394,7 +394,6 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
 class _DownloadMenuItem extends StatelessWidget {
   /// {@macro streamDownloadMenuItem}
   const _DownloadMenuItem({
-    super.key,
     required this.mediaAttachment,
   });
 
