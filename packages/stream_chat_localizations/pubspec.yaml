@@ -28,10 +28,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   stream_chat_flutter:
-    git:
-      url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
-      path: packages/stream_chat_flutter
+    path: ../stream_chat_flutter
 
 dev_dependencies:
   flutter_test:

@@ -25,15 +25,9 @@ dependencies:
   flutter:
     sdk: flutter
   stream_chat_flutter:
-    git:
-      url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
-      path: packages/stream_chat_flutter
+    path: ../stream_chat_flutter
   stream_chat_localizations:
-    git:
-      url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
-      path: packages/stream_chat_flutter_localizations
+    path: ../stream_chat_localizations
 
 flutter:
   uses-material-design: true

@@ -31,10 +31,7 @@ dependencies:
   meta: ^1.9.1
   rxdart: ^0.28.0
   stream_chat:
-    git:
-      url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
-      path: packages/stream_chat
+    path: ../stream_chat
 
 dev_dependencies:
   build_runner: ^2.4.9
