@@ -137,7 +137,7 @@ class StreamMessageModal extends StatelessWidget {
           child: Column(
             spacing: spacing,
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: alignment.toCrossAxisAlignment(),
+            crossAxisAlignment: alignment.toCrossAxisAlignment(context),
             children: [
               if (headerBuilder case final builder?) builder(context),
               contentBuilder(context),
@@ -168,31 +168,14 @@ class StreamMessageModal extends StatelessWidget {
 extension ColumnAlignmentExtension on AlignmentGeometry {
   /// Converts an [AlignmentGeometry] to the most appropriate
   /// [CrossAxisAlignment] value.
-  CrossAxisAlignment toCrossAxisAlignment() {
-    return switch (this) {
-      // Center alignments
-      Alignment.topCenter => CrossAxisAlignment.start,
-      Alignment.center => CrossAxisAlignment.center,
-      Alignment.bottomCenter => CrossAxisAlignment.center,
-      AlignmentDirectional.topCenter => CrossAxisAlignment.start,
-      AlignmentDirectional.center => CrossAxisAlignment.center,
-      AlignmentDirectional.bottomCenter => CrossAxisAlignment.center,
-      // Left alignments
-      Alignment.topLeft => CrossAxisAlignment.start,
-      Alignment.centerLeft => CrossAxisAlignment.start,
-      Alignment.bottomLeft => CrossAxisAlignment.end,
-      AlignmentDirectional.topStart => CrossAxisAlignment.start,
-      AlignmentDirectional.centerStart => CrossAxisAlignment.start,
-      AlignmentDirectional.bottomStart => CrossAxisAlignment.end,
-      // Right alignments
-      Alignment.topRight => CrossAxisAlignment.start,
-      Alignment.centerRight => CrossAxisAlignment.end,
-      Alignment.bottomRight => CrossAxisAlignment.end,
-      AlignmentDirectional.topEnd => CrossAxisAlignment.start,
-      AlignmentDirectional.centerEnd => CrossAxisAlignment.end,
-      AlignmentDirectional.bottomEnd => CrossAxisAlignment.end,
-      // Fallback
-      _ => CrossAxisAlignment.center,
+  CrossAxisAlignment toCrossAxisAlignment(BuildContext context) {
+    final resolved = resolve(Directionality.of(context));
+
+    return switch (resolved.x) {
+      0.0 => CrossAxisAlignment.center,
+      < 0 => CrossAxisAlignment.start,
+      > 0 => CrossAxisAlignment.end,
+      _ => CrossAxisAlignment.center, // fallback (in case of NaN etc)
     };
   }
 }
