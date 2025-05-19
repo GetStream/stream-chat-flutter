@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Updated `just_audio` dependency to `">=0.9.38 <0.11.0"`.
+
 ## 9.10.0
 
 🔄 Changed

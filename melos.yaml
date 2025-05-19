@@ -59,7 +59,7 @@ command:
       jiffy: ^6.2.1
       jose: ^0.3.4
       json_annotation: ^4.9.0
-      just_audio: ^0.9.38
+      just_audio: ">=0.9.38 <0.11.0"
       logging: ^1.2.0
       lottie: ^3.1.2
       media_kit: ^1.1.10+1
