@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Fixed `StreamMessageInput` throwing exception when a non-initialized `Channel` is used.
+
 🔄 Changed
 
 - Updated `just_audio` dependency to `">=0.9.38 <0.11.0"`.
