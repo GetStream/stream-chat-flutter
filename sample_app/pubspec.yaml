@@ -35,20 +35,11 @@ dependencies:
   provider: ^6.0.5
   sentry_flutter: ^8.3.0
   stream_chat_flutter:
-    git:
-      url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
-      path: packages/stream_chat_flutter
+    path: ../stream_chat_flutter
   stream_chat_localizations:
-    git:
-      url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
-      path: packages/stream_chat_flutter_localizations
+    path: ../stream_chat_localizations
   stream_chat_persistence:
-    git:
-      url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
-      path: packages/stream_chat_flutter_persistence
+    path: ../stream_chat_persistence
   streaming_shared_preferences: ^2.0.0
   uuid: ^4.4.0
   video_player: ^2.8.7

@@ -39,7 +39,7 @@ command:
       ezanimation: ^0.6.0
       firebase_core: ^3.0.0
       firebase_messaging: ^15.0.0
-      file_picker: ^8.0.5
+      file_picker: ^10.0.0
       file_selector: ^1.0.3
       flutter_app_badger: ^1.5.0
       flutter_local_notifications: ^18.0.1
@@ -79,30 +79,15 @@ command:
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
       stream_chat:
-        git:
-          url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: master
-          path: packages/stream_chat
+        path: ../stream_chat
       stream_chat_flutter:
-        git:
-          url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: master
-          path: packages/stream_chat_flutter
+        path: ../stream_chat_flutter
       stream_chat_flutter_core:
-        git:
-          url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: master
-          path: packages/stream_chat_flutter_core
+        path: ../stream_chat_flutter_core
       stream_chat_localizations:
-        git:
-          url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: master
-          path: packages/stream_chat_flutter_localizations
+        path: ../stream_chat_localizations
       stream_chat_persistence:
-        git:
-          url: https://github.com/qdhayana/stream-chat-flutter.git
-          ref: master
-          path: packages/stream_chat_flutter_persistence
+        path: ../stream_chat_persistence
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       synchronized: ^3.1.0+1

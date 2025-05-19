@@ -31,7 +31,7 @@ dependencies:
   diacritic: ^0.1.5
   dio: ^5.4.3+1
   ezanimation: ^0.6.0
-  file_picker: ^8.0.5
+  file_picker: ^10.0.0
   file_selector: ^1.0.3
   flutter:
     sdk: flutter
@@ -58,10 +58,7 @@ dependencies:
   share_plus: ^10.0.2
   shimmer: ^3.0.0
   stream_chat_flutter_core:
-    git:
-      url: https://github.com/qdhayana/stream-chat-flutter.git
-      ref: master
-      path: packages/stream_chat_flutter_core
+    path: ../stream_chat_flutter_core
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
   thumblr: ^0.0.4
