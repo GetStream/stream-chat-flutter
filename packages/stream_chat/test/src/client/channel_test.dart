@@ -1319,8 +1319,7 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.sent,
-                  reactionCounts: {type: 1},
-                  reactionScores: {type: 1},
+                  reactionGroups: {type: ReactionGroup(count: 1, sumScores: 1)},
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
@@ -1372,8 +1371,12 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.sent,
-                  reactionCounts: {type: 1},
-                  reactionScores: {type: score},
+                  reactionGroups: {
+                    type: ReactionGroup(
+                      count: 1,
+                      sumScores: score,
+                    )
+                  },
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
@@ -1440,8 +1443,12 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.sent,
-                  reactionCounts: {type: 1},
-                  reactionScores: {type: extraDataScore},
+                  reactionGroups: {
+                    type: ReactionGroup(
+                      count: 1,
+                      sumScores: extraDataScore,
+                    )
+                  },
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
@@ -1497,8 +1504,12 @@ void main() {
                 isSameMessageAs(
                   message.copyWith(
                     state: MessageState.sent,
-                    reactionCounts: {type: 1},
-                    reactionScores: {type: 1},
+                    reactionGroups: {
+                      type: ReactionGroup(
+                        count: 1,
+                        sumScores: 1,
+                      )
+                    },
                     latestReactions: [reaction],
                     ownReactions: [reaction],
                   ),
@@ -1541,8 +1552,12 @@ void main() {
             id: messageId,
             ownReactions: [prevReaction],
             latestReactions: [prevReaction],
-            reactionScores: const {prevType: 1},
-            reactionCounts: const {prevType: 1},
+            reactionGroups: {
+              prevType: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              )
+            },
             state: MessageState.sent,
           );
 
@@ -1629,8 +1644,12 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.sent,
-                  reactionCounts: {type: 1},
-                  reactionScores: {type: 1},
+                  reactionGroups: {
+                    type: ReactionGroup(
+                      count: 1,
+                      sumScores: 1,
+                    )
+                  },
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
@@ -1676,8 +1695,12 @@ void main() {
                 isSameMessageAs(
                   message.copyWith(
                     state: MessageState.sent,
-                    reactionCounts: {type: 1},
-                    reactionScores: {type: 1},
+                    reactionGroups: {
+                      type: ReactionGroup(
+                        count: 1,
+                        sumScores: 1,
+                      )
+                    },
                     latestReactions: [reaction],
                     ownReactions: [reaction],
                   ),
@@ -1724,8 +1747,12 @@ void main() {
             parentId: parentId,
             ownReactions: [prevReaction],
             latestReactions: [prevReaction],
-            reactionScores: const {prevType: 1},
-            reactionCounts: const {prevType: 1},
+            reactionGroups: {
+              prevType: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              )
+            },
             state: MessageState.sent,
           );
 
@@ -1802,8 +1829,12 @@ void main() {
           id: messageId,
           ownReactions: [reaction],
           latestReactions: [reaction],
-          reactionScores: const {type: 1},
-          reactionCounts: const {type: 1},
+          reactionGroups: {
+            type: ReactionGroup(
+              count: 1,
+              sumScores: 1,
+            )
+          },
           state: MessageState.sent,
         );
 
@@ -1850,8 +1881,12 @@ void main() {
             id: messageId,
             ownReactions: [reaction],
             latestReactions: [reaction],
-            reactionScores: const {type: 1},
-            reactionCounts: const {type: 1},
+            reactionGroups: {
+              type: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              )
+            },
             state: MessageState.sent,
           );
 
@@ -1911,8 +1946,12 @@ void main() {
           // is thread
           ownReactions: [reaction],
           latestReactions: [reaction],
-          reactionScores: const {type: 1},
-          reactionCounts: const {type: 1},
+          reactionGroups: {
+            type: ReactionGroup(
+              count: 1,
+              sumScores: 1,
+            )
+          },
           state: MessageState.sent,
         );
 
@@ -1964,8 +2003,12 @@ void main() {
             parentId: parentId,
             ownReactions: [reaction],
             latestReactions: [reaction],
-            reactionScores: const {type: 1},
-            reactionCounts: const {type: 1},
+            reactionGroups: {
+              type: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              )
+            },
             state: MessageState.sent,
           );
 

@@ -1,3 +1,16 @@
+## Upcoming
+
+✅ Added
+
+- Added `reactionGroups` to the `Message` model. This field is a map of reaction types to their
+  respective counts and scores and additional metadata such as the first and last reaction
+  timestamps.
+
+🔄 Changed
+
+- Deprecated `message.reactionCounts`, `message.reactionScores` in favor of
+  `message.reactionGroups`.
+
 ## 9.10.0
 
 🐞 Fixed
