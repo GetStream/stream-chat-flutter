@@ -11,6 +11,9 @@
 - Deprecated `message.reactionCounts`, `message.reactionScores` in favor of
   `message.reactionGroups`.
 
+🐞 Fixed
+- `Null check operator used on a null value` in Websocket connect.
+
 ## 9.10.0
 
 🐞 Fixed
