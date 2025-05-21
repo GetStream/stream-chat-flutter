@@ -180,7 +180,7 @@ class StreamChatThemeData {
       color: colorTheme.barsBg,
       titleStyle: textTheme.headlineBold,
       subtitleStyle: textTheme.footnote.copyWith(
-        color: const Color(0xff7A7A7A),
+        color: colorTheme.textLowEmphasis,
       ),
     );
     final channelPreviewTheme = StreamChannelPreviewThemeData(
@@ -245,7 +245,7 @@ class StreamChatThemeData {
         createdAtStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
-        messageBackgroundColor: colorTheme.borders,
+        messageBackgroundColor: colorTheme.inputBg,
         messageBorderColor: colorTheme.borders,
         reactionsBackgroundColor: colorTheme.barsBg,
         reactionsBorderColor: colorTheme.borders,
@@ -309,14 +309,14 @@ class StreamChatThemeData {
         linkHighlightColor: colorTheme.accentPrimary,
         idleBorderGradient: LinearGradient(
           colors: [
-            colorTheme.disabled,
-            colorTheme.disabled,
+            colorTheme.borders,
+            colorTheme.borders,
           ],
         ),
         activeBorderGradient: LinearGradient(
           colors: [
-            colorTheme.disabled,
-            colorTheme.disabled,
+            colorTheme.borders,
+            colorTheme.borders,
           ],
         ),
         useSystemAttachmentPicker: false,
@@ -340,7 +340,7 @@ class StreamChatThemeData {
         bottomSheetCloseIconColor: colorTheme.textHighEmphasis,
       ),
       messageListViewTheme: StreamMessageListViewThemeData(
-        backgroundColor: colorTheme.barsBg,
+        backgroundColor: colorTheme.appBg,
       ),
       pollCreatorTheme: StreamPollCreatorThemeData(
         backgroundColor: colorTheme.appBg,

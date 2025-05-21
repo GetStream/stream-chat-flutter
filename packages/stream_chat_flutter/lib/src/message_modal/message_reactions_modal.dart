@@ -126,6 +126,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
         return FractionallySizedBox(
           widthFactor: 0.78,
           child: ReactionsCard(
+            elevation: 0,
             message: message,
             currentUser: currentUser,
             messageTheme: messageTheme,

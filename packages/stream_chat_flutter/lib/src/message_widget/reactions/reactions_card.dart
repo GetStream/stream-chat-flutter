@@ -15,11 +15,15 @@ class ReactionsCard extends StatelessWidget {
   /// {@macro reactionsCard}
   const ReactionsCard({
     super.key,
+    this.elevation,
     required this.currentUser,
     required this.message,
     required this.messageTheme,
     this.onUserAvatarTap,
   });
+
+  /// The elevation of the card.
+  final double? elevation;
 
   /// Current logged in user.
   final User currentUser;
@@ -37,6 +41,7 @@ class ReactionsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     return Card(
+      elevation: elevation,
       color: chatThemeData.colorTheme.barsBg,
       clipBehavior: Clip.hardEdge,
       shape: RoundedRectangleBorder(

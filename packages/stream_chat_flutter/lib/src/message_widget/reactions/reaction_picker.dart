@@ -107,11 +107,10 @@ class StreamReactionPicker extends StatelessWidget {
       onReactionPicked: onReactionPicked,
     );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorTheme.barsBg,
-        borderRadius: borderRadius,
-      ),
+    return Material(
+      borderRadius: borderRadius,
+      clipBehavior: Clip.antiAlias,
+      color: theme.colorTheme.barsBg,
       child: Padding(
         padding: padding,
         child: switch (scrollable) {

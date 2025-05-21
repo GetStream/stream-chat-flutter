@@ -23,6 +23,11 @@ class StreamReactionIcon {
     required this.builder,
   });
 
+  /// Creates a reaction icon with a default unknown icon.
+  const StreamReactionIcon.unknown()
+      : type = 'unknown',
+        builder = _unknownReactionBuilder;
+
   /// Type of reaction
   final String type;
 
@@ -133,6 +138,24 @@ class StreamReactionIcon {
 
     return StreamSvgIcon(
       icon: StreamSvgIcons.wutReaction,
+      color: iconColor,
+      size: size,
+    );
+  }
+
+  static Widget _unknownReactionBuilder(
+    BuildContext context,
+    bool highlighted,
+    double size,
+  ) {
+    final theme = StreamChatTheme.of(context);
+    final iconColor = switch (highlighted) {
+      true => theme.colorTheme.accentPrimary,
+      false => theme.primaryIconTheme.color,
+    };
+
+    return Icon(
+      Icons.help_outline_rounded,
       color: iconColor,
       size: size,
     );

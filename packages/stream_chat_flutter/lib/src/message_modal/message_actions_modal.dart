@@ -136,7 +136,6 @@ class StreamMessageActionsModal extends StatelessWidget {
         return FractionallySizedBox(
           widthFactor: 0.78,
           child: Material(
-            type: MaterialType.transparency,
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),

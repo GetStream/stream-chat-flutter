@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -35,38 +36,37 @@ class ReactionIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reactionsMap = <String, Reaction>{};
-    message.latestReactions?.forEach((element) {
-      if (!reactionsMap.containsKey(element.type) ||
-          element.user!.id == ownId) {
-        reactionsMap[element.type] = element;
-      }
-    });
-    final reactionsList = reactionsMap.values.toList()
-      ..sort((a, b) => a.user!.id == ownId ? 1 : -1);
+    for (final reaction in [...?message.latestReactions]) {
+      final reactionType = reaction.type;
+      final userId = reaction.user?.id;
 
-    return Transform(
-      transform: Matrix4.translationValues(reverse ? 12 : -12, 0, 0),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: 22 * 6.0,
-        ),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: GestureDetector(
-            onTap: onTap,
-            child: StreamReactionBubble(
-              key: ValueKey('${message.id}.reactions'),
-              reverse: reverse,
-              flipTail: reverse,
-              backgroundColor:
-                  messageTheme.reactionsBackgroundColor ?? Colors.transparent,
-              borderColor:
-                  messageTheme.reactionsBorderColor ?? Colors.transparent,
-              maskColor: messageTheme.reactionsMaskColor ?? Colors.transparent,
-              reactions: reactionsList,
-            ),
-          ),
-        ),
+      if (reactionsMap.containsKey(reactionType) && userId != ownId) continue;
+      reactionsMap[reactionType] = reaction;
+    }
+
+    final reactionsList = reactionsMap.values.sorted((prev, curr) {
+      final prevUserId = prev.user?.id;
+      final currUserId = curr.user?.id;
+
+      if (prevUserId == null && currUserId == null) return 0;
+      if (prevUserId == null) return 1;
+      if (currUserId == null) return -1;
+
+      if (prevUserId == ownId) return 1;
+      return -1;
+    });
+
+    return GestureDetector(
+      onTap: onTap,
+      child: StreamReactionBubble(
+        key: ValueKey('${message.id}.reactions'),
+        reverse: reverse,
+        flipTail: reverse,
+        backgroundColor:
+            messageTheme.reactionsBackgroundColor ?? Colors.transparent,
+        borderColor: messageTheme.reactionsBorderColor ?? Colors.transparent,
+        maskColor: messageTheme.reactionsMaskColor ?? Colors.transparent,
+        reactions: reactionsList,
       ),
     );
   }
