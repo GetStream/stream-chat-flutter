@@ -7,6 +7,19 @@ import 'package:flutter/material.dart';
 /// - `StreamColorTheme.light`: for light mode
 /// - `StreamColorTheme.dark`: for dark mode
 class StreamColorTheme {
+  /// Creates a [StreamColorTheme] instance based on the provided [brightness].
+  ///
+  /// Returns a light theme when [brightness] is [Brightness.light] and
+  /// a dark theme when [brightness] is [Brightness.dark].
+  factory StreamColorTheme({
+    Brightness brightness = Brightness.light,
+  }) {
+    return switch (brightness) {
+      Brightness.light => const StreamColorTheme.light(),
+      Brightness.dark => const StreamColorTheme.dark(),
+    };
+  }
+
   /// Creates a light mode [StreamColorTheme] using design system values.
   const StreamColorTheme.light({
     this.textHighEmphasis = const Color(0xff000000),

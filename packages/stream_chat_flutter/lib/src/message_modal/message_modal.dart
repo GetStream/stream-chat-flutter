@@ -163,28 +163,3 @@ class StreamMessageModal extends StatelessWidget {
     );
   }
 }
-
-/// Extension to convert [AlignmentGeometry] to the corresponding
-/// [CrossAxisAlignment].
-extension ColumnAlignmentExtension on AlignmentGeometry {
-  /// Converts an [AlignmentGeometry] to the most appropriate
-  /// [CrossAxisAlignment] value.
-  CrossAxisAlignment toCrossAxisAlignment() {
-    return switch (this) {
-      // Center alignments
-      Alignment.topCenter => CrossAxisAlignment.start,
-      Alignment.center => CrossAxisAlignment.center,
-      Alignment.bottomCenter => CrossAxisAlignment.center,
-      // Left alignments
-      Alignment.topLeft => CrossAxisAlignment.start,
-      Alignment.centerLeft => CrossAxisAlignment.start,
-      Alignment.bottomLeft => CrossAxisAlignment.end,
-      // Right alignments
-      Alignment.topRight => CrossAxisAlignment.start,
-      Alignment.centerRight => CrossAxisAlignment.end,
-      Alignment.bottomRight => CrossAxisAlignment.end,
-      // Fallback
-      _ => CrossAxisAlignment.center,
-    };
-  }
-}

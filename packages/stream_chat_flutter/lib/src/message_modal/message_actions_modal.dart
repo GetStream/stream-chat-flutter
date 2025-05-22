@@ -95,9 +95,6 @@ class StreamMessageActionsModal extends StatelessWidget {
                 },
             };
 
-            final config = StreamChatConfiguration.of(context);
-            final reactionIcons = config.reactionIcons;
-
             return Align(
               alignment: alignment,
               child: reactionPickerBuilder(context, message, onReactionPicked),

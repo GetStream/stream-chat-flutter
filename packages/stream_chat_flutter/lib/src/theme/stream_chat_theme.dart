@@ -74,9 +74,8 @@ class StreamChatThemeData {
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
-    final isDark = brightness == Brightness.dark;
-    textTheme ??= isDark ? StreamTextTheme.dark() : StreamTextTheme.light();
-    colorTheme ??= isDark ? StreamColorTheme.dark() : StreamColorTheme.light();
+    textTheme ??= StreamTextTheme(brightness: brightness);
+    colorTheme ??= StreamColorTheme(brightness: brightness);
 
     final defaultData = StreamChatThemeData.fromColorAndTextTheme(
       colorTheme,
