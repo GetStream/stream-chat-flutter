@@ -701,9 +701,16 @@ extension ColumnAlignmentExtension on AlignmentGeometry {
   /// Converts an [AlignmentGeometry] to the most appropriate
   /// [CrossAxisAlignment] value.
   CrossAxisAlignment toColumnCrossAxisAlignment(BuildContext context) {
-    final resolved = resolve(Directionality.of(context));
+    final x = switch (this) {
+      Alignment(x: final x) => x,
+      AlignmentDirectional(start: final start) => start,
+      _ => null,
+    };
 
-    return switch (resolved.x) {
+    // If the alignment is unknown, fallback to the center alignment.
+    if (x == null) return CrossAxisAlignment.center;
+
+    return switch (x) {
       0.0 => CrossAxisAlignment.center,
       < 0 => CrossAxisAlignment.start,
       > 0 => CrossAxisAlignment.end,
