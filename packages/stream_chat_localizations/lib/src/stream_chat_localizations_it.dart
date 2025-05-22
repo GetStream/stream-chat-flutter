@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Italian (`it`).
@@ -176,8 +178,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      "Per favore attiva l'accesso alle foto"
-      '\ne ai video cosí potrai condividerli con i tuoi amici.';
+      "Per favore attiva l'accesso alle foto e ai video cosí potrai condividerli con i tuoi amici.";
 
   @override
   String get allowGalleryAccessMessage => "Permetti l'accesso alla galleria";
@@ -186,8 +187,8 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get flagMessageLabel => 'Segnala messaggio';
 
   @override
-  String get flagMessageQuestion => 'Vuoi mandare una copia di questo messaggio'
-      '\nad un moderatore?';
+  String get flagMessageQuestion =>
+      'Vuoi mandare una copia di questo messaggio ad un moderatore?';
 
   @override
   String get flagLabel => 'SEGNALA';
@@ -210,7 +211,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
   String get deleteMessageQuestion =>
-      'Sei sicuro di voler definitivamente cancellare questo\nmessaggio?';
+      'Sei sicuro di voler definitivamente cancellare questo messaggio?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -453,8 +454,8 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String unreadMessagesSeparatorText() => 'Nouveaux messages';
 
   @override
-  String get enableFileAccessMessage => "Per favore attiva l'accesso ai file"
-      '\ncosí potrai condividerli con i tuoi amici.';
+  String get enableFileAccessMessage =>
+      "Per favore attiva l'accesso ai file cosí potrai condividerli con i tuoi amici.";
 
   @override
   String get allowFileAccessMessage => "Consenti l'accesso ai file";

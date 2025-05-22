@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Portuguese (`pt`).
@@ -168,8 +170,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Por favor, permita o acesso às suas fotos'
-      '\ne vídeos para que possa compartilhar com sua rede.';
+      'Por favor, permita o acesso às suas fotos e vídeos para que possa compartilhar com sua rede.';
 
   @override
   String get allowGalleryAccessMessage => 'Permitir acesso à sua galeria';
@@ -178,8 +179,8 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get flagMessageLabel => 'Denunciar mensagem';
 
   @override
-  String get flagMessageQuestion => 'Gostaria de enviar esta mensagem ao'
-      '\nmoderador para maior investigação?';
+  String get flagMessageQuestion =>
+      'Gostaria de enviar esta mensagem ao moderador para maior investigação?';
 
   @override
   String get flagLabel => 'DENUNCIAR';
@@ -202,7 +203,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      'Você tem certeza que deseja apagar essa\nmensagem permanentemente?';
+      'Você tem certeza que deseja apagar essa mensagem permanentemente?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -450,7 +451,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get enableFileAccessMessage =>
-      'Ative o acesso aos arquivos' '\npara poder compartilhá-los com amigos.';
+      'Ative o acesso aos arquivos para poder compartilhá-los com amigos.';
 
   @override
   String get allowFileAccessMessage => 'Permitir acesso aos arquivos';

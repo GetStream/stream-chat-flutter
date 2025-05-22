@@ -163,8 +163,8 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get addMoreFilesLabel => 'ファイルの追加';
 
   @override
-  String get enablePhotoAndVideoAccessMessage => 'お友達と共有できるように、写真'
-      '\nやビデオへのアクセスを有効にしてください。';
+  String get enablePhotoAndVideoAccessMessage =>
+      'お友達と共有できるように、写真やビデオへのアクセスを有効にしてください。';
   @override
   String get allowGalleryAccessMessage => 'ギャラリーへのアクセスを許可する';
 
@@ -172,8 +172,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get flagMessageLabel => 'メッセージをフラグする';
 
   @override
-  String get flagMessageQuestion => 'このメッセージのコピーを'
-      '\nモデレーターに送って、さらに調査してもらいますか？';
+  String get flagMessageQuestion => 'このメッセージのコピーをモデレーターに送って、さらに調査してもらいますか？';
 
   @override
   String get flagLabel => 'フラグする';
@@ -194,8 +193,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get deleteMessageLabel => 'メッセージを削除する';
 
   @override
-  String get deleteMessageQuestion => 'このメッセージ'
-      '\nを完全に削除してもよろしいですか？';
+  String get deleteMessageQuestion => 'このメッセージを完全に削除してもよろしいですか？';
 
   @override
   String get operationCouldNotBeCompletedText => '操作を完了できませんでした。';
@@ -429,8 +427,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => '新しいメッセージ。';
 
   @override
-  String get enableFileAccessMessage =>
-      '友達と共有できるように、' '\nファイルへのアクセスを有効にしてください。';
+  String get enableFileAccessMessage => '友達と共有できるように、ファイルへのアクセスを有効にしてください。';
 
   @override
   String get allowFileAccessMessage => 'ファイルへのアクセスを許可する';

@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Hindi (`hi`).
@@ -167,8 +169,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'कृपया अपने फ़ोटो और वीडियो तक पहुंच सक्षम करें'
-      '\nताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
+      'कृपया अपने फ़ोटो और वीडियो तक पहुंच सक्षम करे ताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
 
   @override
   String get allowGalleryAccessMessage => 'अपनी गैलरी तक पहुंच की अनुमति दें';
@@ -177,8 +178,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get flagMessageLabel => 'फ्लैग संदेश';
 
   @override
-  String get flagMessageQuestion => 'क्या आप आगे की जांच के लिए इस संदेश की'
-      '\nएक प्रति मॉडरेटर को भेजना चाहते हैं?';
+  String get flagMessageQuestion =>
+      'क्या आप आगे की जांच के लिए इस संदेश की एक प्रति मॉडरेटर को भेजना चाहते हैं?';
 
   @override
   String get flagLabel => 'फ्लैग';
@@ -201,7 +202,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      'क्या आप वाकई इस संदेश को स्थायी रूप से\nहटाना चाहते हैं?';
+      'क्या आप वाकई इस संदेश को स्थायी रूप से हटाना चाहते हैं?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -444,8 +445,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'नए संदेश।';
 
   @override
-  String get enableFileAccessMessage => 'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि'
-      '\nआप उन्हें मित्रों के साथ साझा कर सकें।';
+  String get enableFileAccessMessage =>
+      'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
 
   @override
   String get allowFileAccessMessage => 'फाइलों तक पहुंच की अनुमति दें';
