@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
 /// Shows a modal dialog with customized transitions and backdrop effects.
 ///
@@ -137,7 +138,7 @@ class StreamMessageModal extends StatelessWidget {
           child: Column(
             spacing: spacing,
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: alignment.toCrossAxisAlignment(context),
+            crossAxisAlignment: alignment.toColumnCrossAxisAlignment(context),
             children: [
               if (headerBuilder case final builder?) builder(context),
               contentBuilder(context),
@@ -160,22 +161,5 @@ class StreamMessageModal extends StatelessWidget {
         child: child,
       ),
     );
-  }
-}
-
-/// Extension to convert [AlignmentGeometry] to the corresponding
-/// [CrossAxisAlignment].
-extension ColumnAlignmentExtension on AlignmentGeometry {
-  /// Converts an [AlignmentGeometry] to the most appropriate
-  /// [CrossAxisAlignment] value.
-  CrossAxisAlignment toCrossAxisAlignment(BuildContext context) {
-    final resolved = resolve(Directionality.of(context));
-
-    return switch (resolved.x) {
-      0.0 => CrossAxisAlignment.center,
-      < 0 => CrossAxisAlignment.start,
-      > 0 => CrossAxisAlignment.end,
-      _ => CrossAxisAlignment.center, // fallback (in case of NaN etc)
-    };
   }
 }

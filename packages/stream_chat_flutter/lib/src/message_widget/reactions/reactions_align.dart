@@ -59,6 +59,6 @@ extension ReactionPickerAlignment on Message {
     //
     // This happens if divFactor is really big. When this happens, we can simply
     // move the model all the way to the end of screen.
-    return Alignment(result.clamp(-1, 1), 0);
+    return AlignmentDirectional(result.clamp(-1, 1), 0);
   }
 }
