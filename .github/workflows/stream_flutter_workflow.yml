@@ -95,9 +95,6 @@ jobs:
           channel: stable
           cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
-      # This step is needed due to https://github.com/actions/runner-images/issues/11279
-      - name: Install SQLite3
-        run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
       - name: "Install Tools"
         run: |
           flutter pub global activate melos

@@ -10,6 +10,7 @@
 
 - Deprecated `message.reactionCounts`, `message.reactionScores` in favor of
   `message.reactionGroups`.
+- Updated minimum Flutter version to `3.29.3` for the SDK.
 
 🐞 Fixed
 - `Null check operator used on a null value` in Websocket connect.

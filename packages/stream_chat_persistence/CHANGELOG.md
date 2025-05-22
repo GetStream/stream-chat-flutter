@@ -1,6 +1,7 @@
 ## Upcoming
 
 - Added support for `Message.reactionGroups` field.
+- Updated minimum Flutter version to `3.29.3` for the SDK.
 
 ## 9.10.0
 

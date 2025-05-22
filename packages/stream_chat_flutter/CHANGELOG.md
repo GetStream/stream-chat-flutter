@@ -7,6 +7,7 @@
 🔄 Changed
 
 - Updated `just_audio` dependency to `">=0.9.38 <0.11.0"`.
+- Updated minimum Flutter version to `3.29.3` for the SDK.
 
 ## 9.10.0
 
