@@ -363,9 +363,9 @@ class MessageWidgetContent extends StatelessWidget {
                               ),
                               // TODO: Make tail part of the Reaction Picker.
                               if (showReactionPickerTail)
-                                Positioned(
-                                  right: reverse ? null : 4,
-                                  left: reverse ? 4 : null,
+                                PositionedDirectional(
+                                  end: reverse ? null : 4,
+                                  start: reverse ? 4 : null,
                                   top: -8,
                                   child: CustomPaint(
                                     painter: ReactionBubblePainter(

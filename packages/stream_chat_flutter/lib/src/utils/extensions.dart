@@ -694,3 +694,27 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
     ];
   }
 }
+
+/// Extension to convert [AlignmentGeometry] to the corresponding
+/// [CrossAxisAlignment].
+extension ColumnAlignmentExtension on AlignmentGeometry {
+  /// Converts an [AlignmentGeometry] to the most appropriate
+  /// [CrossAxisAlignment] value.
+  CrossAxisAlignment toColumnCrossAxisAlignment() {
+    final x = switch (this) {
+      Alignment(x: final x) => x,
+      AlignmentDirectional(start: final start) => start,
+      _ => null,
+    };
+
+    // If the alignment is unknown, fallback to the center alignment.
+    if (x == null) return CrossAxisAlignment.center;
+
+    return switch (x) {
+      0.0 => CrossAxisAlignment.center,
+      < 0 => CrossAxisAlignment.start,
+      > 0 => CrossAxisAlignment.end,
+      _ => CrossAxisAlignment.center, // fallback (in case of NaN etc)
+    };
+  }
+}

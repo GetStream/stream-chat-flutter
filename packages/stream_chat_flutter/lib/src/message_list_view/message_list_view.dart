@@ -1005,10 +1005,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final isMyMessage =
         message.user!.id == StreamChat.of(context).currentUser!.id;
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
-    final currentUser = StreamChat.of(context).currentUser;
-    final members = StreamChannel.of(context).channel.state?.members ?? [];
-    final currentUserMember =
-        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
     final hasFileAttachment =
         message.attachments.any((it) => it.type == AttachmentType.file);
@@ -1025,6 +1021,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final borderSide = isOnlyEmoji ? BorderSide.none : null;
 
     final defaultMessageWidget = StreamMessageWidget(
+      message: message,
+      reverse: isMyMessage,
+      showUsername: !isMyMessage,
+      showReactions: !message.isDeleted && !message.state.isDeletingFailed,
+      showReactionPicker: !message.isDeleted && !message.state.isDeletingFailed,
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,
@@ -1032,9 +1033,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showDeleteMessage: false,
       showEditMessage: false,
       showMarkUnreadMessage: false,
-      message: message,
-      reverse: isMyMessage,
-      showUsername: !isMyMessage,
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
       attachmentPadding: EdgeInsets.all(
@@ -1077,13 +1075,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           : _streamTheme.otherMessageTheme,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
-      showPinButton: currentUserMember != null &&
-          streamChannel?.channel.canPinMessage == true &&
-          // Pinning a restricted visibility message is not allowed, simply
-          // because pinning a message is meant to bring attention to that
-          // message, that is not possible with a message that is only visible
-          // to a subset of users.
-          !message.hasRestrictedVisibility,
     );
 
     if (widget.parentMessageBuilder != null) {
@@ -1286,15 +1277,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final borderSide = isOnlyEmoji ? BorderSide.none : null;
 
-    final currentUser = StreamChat.of(context).currentUser;
-    final members = StreamChannel.of(context).channel.state?.members ?? [];
-    final currentUserMember =
-        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
-
     Widget messageWidget = StreamMessageWidget(
       message: message,
       reverse: isMyMessage,
-      showReactions: !message.isDeleted,
+      showReactions: !message.isDeleted && !message.state.isDeletingFailed,
+      showReactionPicker: !message.isDeleted && !message.state.isDeletingFailed,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       showInChannelIndicator: showInChannelIndicator,
       showThreadReplyIndicator: showThreadReplyIndicator,
@@ -1396,13 +1383,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           : _streamTheme.otherMessageTheme,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
-      showPinButton: currentUserMember != null &&
-          streamChannel?.channel.canPinMessage == true &&
-          // Pinning a restricted visibility message is not allowed, simply
-          // because pinning a message is meant to bring attention to that
-          // message, that is not possible with a message that is only visible
-          // to a subset of users.
-          !message.hasRestrictedVisibility,
     );
 
     if (widget.messageBuilder != null) {

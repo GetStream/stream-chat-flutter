@@ -1,170 +1,112 @@
-import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_picker_icon_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamReactionPicker}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker_paint.png)
 ///
-/// Allows the user to select reactions to a message on mobile.
+/// A widget that displays a horizontal list of reaction icons that users can
+/// select to react to a message.
 ///
-/// It is not recommended to use this widget directly as it's one of the
-/// default widgets used by [StreamMessageWidget.onMessageActions].
+/// The reaction picker can be configured with custom reaction icons, padding,
+/// border radius, and can be made scrollable or static depending on the
+/// specific needs.
 /// {@endtemplate}
-class StreamReactionPicker extends StatefulWidget {
+class StreamReactionPicker extends StatelessWidget {
   /// {@macro streamReactionPicker}
   const StreamReactionPicker({
     super.key,
     required this.message,
+    required this.reactionIcons,
+    this.onReactionPicked,
+    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    this.scrollable = true,
+    this.borderRadius = const BorderRadius.all(Radius.circular(24)),
   });
 
-  /// Message to attach the reaction to
+  /// Creates a [StreamReactionPicker] using the default reaction icons
+  /// provided by the [StreamChatConfiguration].
+  ///
+  /// This is the recommended way to create a reaction picker
+  /// as it ensures that the icons are consistent with the rest of the app.
+  ///
+  /// The [onReactionPicked] callback is optional and can be used to handle
+  /// the reaction selection.
+  factory StreamReactionPicker.builder(
+    BuildContext context,
+    Message message,
+    OnReactionPicked? onReactionPicked,
+  ) {
+    final config = StreamChatConfiguration.of(context);
+    final reactionIcons = config.reactionIcons;
+
+    final platform = Theme.of(context).platform;
+    return switch (platform) {
+      TargetPlatform.iOS || TargetPlatform.android => StreamReactionPicker(
+          message: message,
+          reactionIcons: reactionIcons,
+          onReactionPicked: onReactionPicked,
+        ),
+      _ => StreamReactionPicker(
+          message: message,
+          scrollable: false,
+          borderRadius: BorderRadius.zero,
+          reactionIcons: reactionIcons,
+          onReactionPicked: onReactionPicked,
+        ),
+    };
+  }
+
+  /// Message to attach the reaction to.
   final Message message;
 
-  @override
-  _StreamReactionPickerState createState() => _StreamReactionPickerState();
-}
+  /// List of reaction icons to display.
+  final List<StreamReactionIcon> reactionIcons;
 
-class _StreamReactionPickerState extends State<StreamReactionPicker>
-    with TickerProviderStateMixin {
-  List<EzAnimation> animations = [];
+  /// {@macro onReactionPressed}
+  final OnReactionPicked? onReactionPicked;
+
+  /// Padding around the reaction picker.
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 8, vertical: 4)`.
+  final EdgeInsets padding;
+
+  /// Whether the reaction picker should be scrollable.
+  ///
+  /// Defaults to `true`.
+  final bool scrollable;
+
+  /// Border radius for the reaction picker.
+  ///
+  /// Defaults to a circular border with a radius of 24.
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    final reactionIcons = StreamChatConfiguration.of(context).reactionIcons;
+    final theme = StreamChatTheme.of(context);
 
-    if (animations.isEmpty && reactionIcons.isNotEmpty) {
-      reactionIcons.forEach((element) {
-        animations.add(
-          EzAnimation.tween(
-            Tween(begin: 0.0, end: 1.0),
-            const Duration(milliseconds: 500),
-            curve: Curves.easeInOutBack,
-          ),
-        );
-      });
+    final reactionPicker = ReactionPickerIconList(
+      message: message,
+      reactionIcons: reactionIcons,
+      onReactionPicked: onReactionPicked,
+    );
 
-      triggerAnimations();
-    }
-
-    final child = Material(
-      borderRadius: BorderRadius.circular(24),
-      color: chatThemeData.colorTheme.barsBg,
-      clipBehavior: Clip.hardEdge,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorTheme.barsBg,
+        borderRadius: borderRadius,
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
-        child: Row(
-          spacing: 16,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: reactionIcons.map<Widget>((reactionIcon) {
-            final ownReactionIndex = widget.message.ownReactions?.indexWhere(
-                  (reaction) => reaction.type == reactionIcon.type,
-                ) ??
-                -1;
-            final index = reactionIcons.indexOf(reactionIcon);
-
-            final child = reactionIcon.builder(
-              context,
-              ownReactionIndex != -1,
-              24,
-            );
-
-            return ConstrainedBox(
-              constraints: const BoxConstraints.tightFor(
-                height: 24,
-                width: 24,
-              ),
-              child: RawMaterialButton(
-                elevation: 0,
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                constraints: const BoxConstraints.tightFor(
-                  height: 24,
-                  width: 24,
-                ),
-                onPressed: () {
-                  if (ownReactionIndex != -1) {
-                    removeReaction(
-                      context,
-                      widget.message.ownReactions![ownReactionIndex],
-                    );
-                  } else {
-                    sendReaction(
-                      context,
-                      reactionIcon.type,
-                    );
-                  }
-                },
-                child: AnimatedBuilder(
-                  animation: animations[index],
-                  builder: (context, child) => Transform.scale(
-                    scale: animations[index].value,
-                    child: child,
-                  ),
-                  child: child,
-                ),
-              ),
-            );
-          }).toList(),
-        ),
+        padding: padding,
+        child: switch (scrollable) {
+          false => reactionPicker,
+          true => SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: reactionPicker,
+            ),
+        },
       ),
     );
-
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      curve: Curves.easeInOutBack,
-      duration: const Duration(milliseconds: 500),
-      builder: (context, val, widget) => Transform.scale(
-        scale: val,
-        child: widget,
-      ),
-      child: child,
-    );
-  }
-
-  Future<void> triggerAnimations() async {
-    for (final a in animations) {
-      a.start();
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-  }
-
-  Future<void> pop() async {
-    for (final a in animations) {
-      a.stop();
-    }
-    Navigator.of(context).pop();
-  }
-
-  /// Add a reaction to the message
-  void sendReaction(BuildContext context, String reactionType) {
-    StreamChannel.of(context).channel.sendReaction(
-          widget.message,
-          reactionType,
-          enforceUnique:
-              StreamChatConfiguration.of(context).enforceUniqueReactions,
-        );
-    pop();
-  }
-
-  /// Remove a reaction from the message
-  void removeReaction(BuildContext context, Reaction reaction) {
-    StreamChannel.of(context).channel.deleteReaction(widget.message, reaction);
-    pop();
-  }
-
-  @override
-  void dispose() {
-    for (final a in animations) {
-      a.dispose();
-    }
-    super.dispose();
   }
 }

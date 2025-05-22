@@ -1,3 +1,31 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `StreamReactionPicker` now requires reactions to be explicitly handled via `onReactionPicked`. *(Automatic handling is no longer supported.)*
+- `StreamMessageAction` is now generic `(StreamMessageAction<T>)`, enhancing type safety. Individual onTap callbacks have been removed; actions are now handled centrally by widgets like `StreamMessageWidget.onCustomActionTap` or modals using action types.
+- `StreamMessageReactionsModal` no longer requires the `messageTheme` parameter. The theme now automatically derives from the `reverse` property.
+
+For more details, please refer to the [migration guide](Unpublished).
+
+✅ Added
+
+- Added new `StreamMessageActionsBuilder` which provides a list of actions to be displayed in the message actions modal.
+- Added new `StreamMessageActionConfirmationModal` for confirming destructive actions like delete or flag.
+- Added new `StreamMessageModal` and `showStreamMessageModal` for consistent message-related modals with improved transitions and backdrop effects.
+  ```dart
+  showStreamMessageModal(
+    context: context,
+    ...other parameters,
+    builder: (context) => StreamMessageModal(
+      ...other parameters,
+      headerBuilder: (context) => YourCustomHeader(),
+      contentBuilder: (context) => YourCustomContent(),
+    ),
+  );
+  ```
+- Exported `StreamMessageActionsModal` and `StreamModeratedMessageActionsModal` which are now based on `StreamMessageModal` for consistent styling and behavior.
+
 ## Upcoming
 
 🐞 Fixed
