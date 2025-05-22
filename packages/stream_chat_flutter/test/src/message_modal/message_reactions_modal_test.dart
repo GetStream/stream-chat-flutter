@@ -27,7 +27,10 @@ void main() {
         createdAt: DateTime.now(),
       ),
     ],
-    reactionCounts: const {'love': 1, 'like': 1},
+    reactionGroups: {
+      'love': ReactionGroup(count: 1, sumScores: 1),
+      'like': ReactionGroup(count: 1, sumScores: 1),
+    },
   );
 
   late MockClient mockClient;
