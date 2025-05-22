@@ -636,20 +636,21 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     final channel = StreamChannel.of(context).channel;
-    final messageInput = BetterStreamBuilder(
-      stream: channel.ownCapabilitiesStream.map(canSendOrUpdateMessage),
-      initialData: canSendOrUpdateMessage(channel.ownCapabilities),
-      builder: (context, enabled) {
-        // Allow the user to send messages if the user has the permission to
-        // send messages or if the user is editing a message.
-        if (enabled) {
-          return _buildAutocompleteMessageInput(context);
-        }
+    final messageInput = switch (_buildAutocompleteMessageInput(context)) {
+      final messageInput when channel.state != null => BetterStreamBuilder(
+          stream: channel.ownCapabilitiesStream.map(canSendOrUpdateMessage),
+          initialData: canSendOrUpdateMessage(channel.ownCapabilities),
+          builder: (context, enabled) {
+            // Allow the user to send messages if the user has the permission to
+            // send messages or if the user is editing a message.
+            if (enabled) return messageInput;
 
-        // Otherwise, show the no permission message.
-        return _buildNoPermissionMessage(context);
-      },
-    );
+            // Otherwise, show the no permission message.
+            return _buildNoPermissionMessage(context);
+          },
+        ),
+      final messageInput => messageInput,
+    };
 
     final shadow = widget.shadow ?? _messageInputTheme.shadow;
     final elevation = widget.elevation ?? _messageInputTheme.elevation;

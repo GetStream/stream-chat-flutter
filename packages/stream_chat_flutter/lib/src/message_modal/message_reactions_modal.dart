@@ -99,16 +99,18 @@ class StreamMessageReactionsModal extends StatelessWidget {
         ),
     };
 
+    final alignment = switch (reverse) {
+      true => AlignmentDirectional.centerEnd,
+      false => AlignmentDirectional.centerStart,
+    };
+
     return StreamMessageModal(
-      alignment: switch (reverse) {
-        true => Alignment.centerRight,
-        false => Alignment.centerLeft,
-      },
+      alignment: alignment,
       headerBuilder: (context) {
         return Column(
           spacing: 10,
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: alignment.toColumnCrossAxisAlignment(),
           children: <Widget?>[
             reactionPicker,
             IgnorePointer(child: messageWidget),

@@ -1,5 +1,9 @@
 ## Upcoming
 
+- Added support for `Message.reactionGroups` field.
+
+## 9.10.0
+
 - Fixed an issue in the `getChannelStates` method where `paginationParams.offset` greater than the
   available channel count would cause an exception. The method now properly handles this edge case.
 

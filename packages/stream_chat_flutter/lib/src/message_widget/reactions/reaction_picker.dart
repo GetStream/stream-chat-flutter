@@ -23,10 +23,12 @@ typedef ReactionPickerBuilder = Widget Function(
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker_paint.png)
 ///
-/// Allows the user to select reactions to a message on mobile.
+/// A widget that displays a horizontal list of reaction icons that users can
+/// select to react to a message.
 ///
-/// It is not recommended to use this widget directly as it's one of the
-/// default widgets used by [StreamMessageWidget.onMessageActions].
+/// The reaction picker can be configured with custom reaction icons, padding,
+/// border radius, and can be made scrollable or static depending on the
+/// specific needs.
 /// {@endtemplate}
 class StreamReactionPicker extends StatelessWidget {
   /// {@macro streamReactionPicker}

@@ -28,6 +28,16 @@ For more details, please refer to the [migration guide](Unpublished).
 
 ## Upcoming
 
+🐞 Fixed
+
+- Fixed `StreamMessageInput` throwing exception when a non-initialized `Channel` is used.
+
+🔄 Changed
+
+- Updated `just_audio` dependency to `">=0.9.38 <0.11.0"`.
+
+## 9.10.0
+
 🔄 Changed
 
 - Updated `share_plus` dependency to `^11.0.0`.

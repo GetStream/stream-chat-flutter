@@ -95,6 +95,9 @@ class StreamMessageActionsModal extends StatelessWidget {
                 },
             };
 
+            final config = StreamChatConfiguration.of(context);
+            final reactionIcons = config.reactionIcons;
+
             return Align(
               alignment: alignment,
               child: reactionPickerBuilder(context, message, onReactionPicked),
@@ -103,16 +106,18 @@ class StreamMessageActionsModal extends StatelessWidget {
         ),
     };
 
+    final alignment = switch (reverse) {
+      true => AlignmentDirectional.centerEnd,
+      false => AlignmentDirectional.centerStart,
+    };
+
     return StreamMessageModal(
-      alignment: switch (reverse) {
-        true => Alignment.centerRight,
-        false => Alignment.centerLeft,
-      },
+      alignment: alignment,
       headerBuilder: (context) {
         return Column(
           spacing: 10,
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: alignment.toColumnCrossAxisAlignment(),
           children: <Widget?>[
             reactionPicker,
             IgnorePointer(child: messageWidget),
@@ -136,6 +141,7 @@ class StreamMessageActionsModal extends StatelessWidget {
         return FractionallySizedBox(
           widthFactor: 0.78,
           child: Material(
+            type: MaterialType.transparency,
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),

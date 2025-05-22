@@ -125,7 +125,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
           builder: (context) {
             final index = _currentPage.value;
             final mediaAttachment = widget.mediaAttachmentPackages[index];
-            return [DownloadMenuItem(mediaAttachment: mediaAttachment)];
+            return [_DownloadMenuItem(mediaAttachment: mediaAttachment)];
           },
           child: _PlaylistPlayer(
             packages: videoPackages.values.toList(),
@@ -357,7 +357,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                             child: ContextMenuArea(
                               verticalPadding: 0,
                               builder: (_) => [
-                                DownloadMenuItem(
+                                _DownloadMenuItem(
                                   mediaAttachment: currentAttachmentPackage,
                                 ),
                               ],
@@ -391,10 +391,9 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
 /// It uses [StreamMessageActionItem] and [StreamMessageAction] to create a
 /// consistent UI with other message actions.
 /// {@endtemplate}
-class DownloadMenuItem extends StatelessWidget {
+class _DownloadMenuItem extends StatelessWidget {
   /// {@macro streamDownloadMenuItem}
-  const DownloadMenuItem({
-    super.key,
+  const _DownloadMenuItem({
     required this.mediaAttachment,
   });
 

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
 /// Shows a modal dialog with customized transitions and backdrop effects.
 ///
@@ -65,7 +66,7 @@ Future<T?> showStreamMessageModal<T>({
 }
 
 /// {@template streamMessageModal}
-/// A customized modal widget for displaying message-related content.
+/// A customizable modal widget for displaying message-related content.
 ///
 /// This widget provides a consistent container for message actions and other
 /// message-related modal content. It handles layout, animation, and keyboard
@@ -137,7 +138,7 @@ class StreamMessageModal extends StatelessWidget {
           child: Column(
             spacing: spacing,
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: alignment.toCrossAxisAlignment(),
+            crossAxisAlignment: alignment.toColumnCrossAxisAlignment(),
             children: [
               if (headerBuilder case final builder?) builder(context),
               contentBuilder(context),

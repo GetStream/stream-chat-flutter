@@ -1319,8 +1319,7 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.sent,
-                  reactionCounts: {type: 1},
-                  reactionScores: {type: 1},
+                  reactionGroups: {type: ReactionGroup(count: 1, sumScores: 1)},
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
@@ -1372,8 +1371,12 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.sent,
-                  reactionCounts: {type: 1},
-                  reactionScores: {type: score},
+                  reactionGroups: {
+                    type: ReactionGroup(
+                      count: 1,
+                      sumScores: score,
+                    )
+                  },
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
@@ -1440,8 +1443,12 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.sent,
-                  reactionCounts: {type: 1},
-                  reactionScores: {type: extraDataScore},
+                  reactionGroups: {
+                    type: ReactionGroup(
+                      count: 1,
+                      sumScores: extraDataScore,
+                    )
+                  },
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
@@ -1497,8 +1504,12 @@ void main() {
                 isSameMessageAs(
                   message.copyWith(
                     state: MessageState.sent,
-                    reactionCounts: {type: 1},
-                    reactionScores: {type: 1},
+                    reactionGroups: {
+                      type: ReactionGroup(
+                        count: 1,
+                        sumScores: 1,
+                      )
+                    },
                     latestReactions: [reaction],
                     ownReactions: [reaction],
                   ),
@@ -1541,8 +1552,12 @@ void main() {
             id: messageId,
             ownReactions: [prevReaction],
             latestReactions: [prevReaction],
-            reactionScores: const {prevType: 1},
-            reactionCounts: const {prevType: 1},
+            reactionGroups: {
+              prevType: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              )
+            },
             state: MessageState.sent,
           );
 
@@ -1629,8 +1644,12 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.sent,
-                  reactionCounts: {type: 1},
-                  reactionScores: {type: 1},
+                  reactionGroups: {
+                    type: ReactionGroup(
+                      count: 1,
+                      sumScores: 1,
+                    )
+                  },
                   latestReactions: [reaction],
                   ownReactions: [reaction],
                 ),
@@ -1676,8 +1695,12 @@ void main() {
                 isSameMessageAs(
                   message.copyWith(
                     state: MessageState.sent,
-                    reactionCounts: {type: 1},
-                    reactionScores: {type: 1},
+                    reactionGroups: {
+                      type: ReactionGroup(
+                        count: 1,
+                        sumScores: 1,
+                      )
+                    },
                     latestReactions: [reaction],
                     ownReactions: [reaction],
                   ),
@@ -1724,8 +1747,12 @@ void main() {
             parentId: parentId,
             ownReactions: [prevReaction],
             latestReactions: [prevReaction],
-            reactionScores: const {prevType: 1},
-            reactionCounts: const {prevType: 1},
+            reactionGroups: {
+              prevType: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              )
+            },
             state: MessageState.sent,
           );
 
@@ -1802,8 +1829,12 @@ void main() {
           id: messageId,
           ownReactions: [reaction],
           latestReactions: [reaction],
-          reactionScores: const {type: 1},
-          reactionCounts: const {type: 1},
+          reactionGroups: {
+            type: ReactionGroup(
+              count: 1,
+              sumScores: 1,
+            )
+          },
           state: MessageState.sent,
         );
 
@@ -1850,8 +1881,12 @@ void main() {
             id: messageId,
             ownReactions: [reaction],
             latestReactions: [reaction],
-            reactionScores: const {type: 1},
-            reactionCounts: const {type: 1},
+            reactionGroups: {
+              type: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              )
+            },
             state: MessageState.sent,
           );
 
@@ -1911,8 +1946,12 @@ void main() {
           // is thread
           ownReactions: [reaction],
           latestReactions: [reaction],
-          reactionScores: const {type: 1},
-          reactionCounts: const {type: 1},
+          reactionGroups: {
+            type: ReactionGroup(
+              count: 1,
+              sumScores: 1,
+            )
+          },
           state: MessageState.sent,
         );
 
@@ -1964,8 +2003,12 @@ void main() {
             parentId: parentId,
             ownReactions: [reaction],
             latestReactions: [reaction],
-            reactionScores: const {type: 1},
-            reactionCounts: const {type: 1},
+            reactionGroups: {
+              type: ReactionGroup(
+                count: 1,
+                sumScores: 1,
+              )
+            },
             state: MessageState.sent,
           );
 
@@ -3471,6 +3514,166 @@ void main() {
             },
           );
         });
+      },
+    );
+
+    group(
+      EventType.messageUpdated,
+      () {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        late Channel channel;
+
+        setUp(() {
+          final channelState = _generateChannelState(
+            channelId,
+            channelType,
+            mockChannelConfig: true,
+            ownCapabilities: const [ChannelCapability.readEvents],
+          );
+
+          channel = Channel.fromState(client, channelState);
+        });
+
+        tearDown(() => channel.dispose());
+
+        Event createUpdateMessageEvent(Message message) {
+          return Event(
+            cid: channel.cid,
+            type: EventType.messageUpdated,
+            message: message,
+          );
+        }
+
+        test(
+          "should update 'channel.state.pinnedMessages' and should add message to pinned messages only once if updatedMessage.pinned is true",
+          () async {
+            const messageId = 'test-message-id';
+            final message = Message(
+              id: messageId,
+              user: client.state.currentUser,
+              pinned: true,
+            );
+
+            final newMessageEvent = createUpdateMessageEvent(message);
+            client.addEvent(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.pinnedMessages.length, equals(1));
+            expect(channel.state?.pinnedMessages.first.id, equals(messageId));
+          },
+        );
+
+        test(
+          'should update pinned message itself if updatedMessage.pinned is true and message is already pinned',
+          () async {
+            const messageId = 'test-message-id';
+            const oldText = 'Old text';
+            const newText = 'New text';
+            final message = Message(
+              id: messageId,
+              user: client.state.currentUser,
+              text: oldText,
+              pinned: true,
+            );
+
+            final firstUpdateEvent = createUpdateMessageEvent(message);
+            client.addEvent(firstUpdateEvent);
+
+            // Wait for the first event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.pinnedMessages.length, equals(1));
+            expect(channel.state?.pinnedMessages.first.id, equals(messageId));
+            expect(channel.state?.pinnedMessages.first.text, equals(oldText));
+
+            final updatedMessage = message.copyWith(text: newText);
+            final secondUpdateEvent = createUpdateMessageEvent(updatedMessage);
+            client.addEvent(secondUpdateEvent);
+
+            // Wait for the second event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.pinnedMessages.length, equals(1));
+            expect(channel.state?.pinnedMessages.first.id, equals(messageId));
+            expect(channel.state?.pinnedMessages.first.text, equals(newText));
+          },
+        );
+
+        test(
+          "should update 'channel.state.pinnedMessages' and should add message to pinned messages "
+          'and not unpin previous pinned message if updatedMessage.pinned is true and there is already another pinned message',
+          () async {
+            const firstMessageId = 'first-test-message-id';
+            const secondMessageId = 'second-test-message-id';
+            final firstMessage = Message(
+              id: firstMessageId,
+              user: client.state.currentUser,
+              pinned: true,
+            );
+            final secondMessage = firstMessage.copyWith(id: secondMessageId);
+
+            final firstUpdateEvent = createUpdateMessageEvent(firstMessage);
+            client.addEvent(firstUpdateEvent);
+
+            // Wait for the first event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.pinnedMessages.length, equals(1));
+            expect(
+              channel.state?.pinnedMessages.first.id,
+              equals(firstMessageId),
+            );
+
+            final secondUpdateEvent = createUpdateMessageEvent(secondMessage);
+            client.addEvent(secondUpdateEvent);
+
+            // Wait for the second event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.pinnedMessages.length, equals(2));
+            expect(
+              channel.state?.pinnedMessages.first.id,
+              equals(firstMessageId),
+            );
+            expect(
+              channel.state?.pinnedMessages[1].id,
+              equals(secondMessageId),
+            );
+          },
+        );
+
+        test(
+          "should update 'channel.state.pinnedMessages' and should remove message from pinned messages if updatedMessage.pinned is false",
+          () async {
+            const messageId = 'test-message-id';
+            final pinnedMessage = Message(
+              id: messageId,
+              user: client.state.currentUser,
+              pinned: true,
+            );
+
+            final pinEvent = createUpdateMessageEvent(pinnedMessage);
+            client.addEvent(pinEvent);
+
+            // Wait for the pin event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.pinnedMessages.length, equals(1));
+            expect(channel.state?.pinnedMessages.first.id, equals(messageId));
+
+            final unpinnedMessage = pinnedMessage.copyWith(pinned: false);
+            final unpinEvent = createUpdateMessageEvent(unpinnedMessage);
+            client.addEvent(unpinEvent);
+
+            // Wait for the unpin event to get processed
+            await Future.delayed(Duration.zero);
+
+            expect(channel.state?.pinnedMessages, isEmpty);
+          },
+        );
       },
     );
 

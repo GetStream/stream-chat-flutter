@@ -648,7 +648,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// {@endtemplate}
   bool get shouldShowReactions =>
       widget.showReactions &&
-      (widget.message.reactionCounts?.isNotEmpty == true) &&
+      (widget.message.latestReactions?.isNotEmpty == true) &&
       !widget.message.isDeleted;
 
   @override

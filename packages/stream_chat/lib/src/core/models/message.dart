@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
@@ -7,6 +8,7 @@ import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
@@ -31,8 +33,11 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.mentionedUsers = const [],
     this.silent = false,
     this.shadowed = false,
-    this.reactionCounts,
-    this.reactionScores,
+    @Deprecated("Use 'reactionGroups' instead")
+    Map<String, int>? reactionCounts,
+    @Deprecated("Use 'reactionGroups' instead")
+    Map<String, int>? reactionScores,
+    Map<String, ReactionGroup>? reactionGroups,
     this.latestReactions,
     this.ownReactions,
     this.parentId,
@@ -68,6 +73,11 @@ class Message extends Equatable implements ComparableFieldProvider {
         remoteCreatedAt = createdAt,
         remoteUpdatedAt = updatedAt,
         remoteDeletedAt = deletedAt,
+        reactionGroups = _maybeGetReactionGroups(
+          reactionGroups: reactionGroups,
+          reactionCounts: reactionCounts,
+          reactionScores: reactionScores,
+        ),
         _quotedMessageId = quotedMessageId,
         _pollId = pollId;
 
@@ -117,11 +127,44 @@ class Message extends Equatable implements ComparableFieldProvider {
 
   /// A map describing the count of number of every reaction.
   @JsonKey(includeToJson: false)
-  final Map<String, int>? reactionCounts;
+  @Deprecated("Use 'reactionGroups' instead")
+  Map<String, int>? get reactionCounts {
+    return reactionGroups?.map((type, it) => MapEntry(type, it.count));
+  }
 
   /// A map describing the count of score of every reaction.
   @JsonKey(includeToJson: false)
-  final Map<String, int>? reactionScores;
+  @Deprecated("Use 'reactionGroups' instead")
+  Map<String, int>? get reactionScores {
+    return reactionGroups?.map((type, it) => MapEntry(type, it.sumScores));
+  }
+
+  static Map<String, ReactionGroup>? _maybeGetReactionGroups({
+    Map<String, ReactionGroup>? reactionGroups,
+    Map<String, int>? reactionCounts,
+    Map<String, int>? reactionScores,
+  }) {
+    if (reactionGroups != null) return reactionGroups;
+    if (reactionCounts == null && reactionScores == null) return null;
+
+    final reactionTypes = {...?reactionCounts?.keys, ...?reactionScores?.keys};
+    if (reactionTypes.isEmpty) return null;
+
+    final groups = <String, ReactionGroup>{};
+    for (final type in reactionTypes) {
+      final count = reactionCounts?[type] ?? 0;
+      final sumScores = reactionScores?[type] ?? 0;
+
+      if (count == 0 || sumScores == 0) continue;
+      groups[type] = ReactionGroup(count: count, sumScores: sumScores);
+    }
+
+    return groups;
+  }
+
+  /// A map of reaction types and their corresponding reaction groups.
+  @JsonKey(includeToJson: false)
+  final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.
   @JsonKey(includeToJson: false)
@@ -286,6 +329,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     'mentioned_users',
     'reaction_counts',
     'reaction_scores',
+    'reaction_groups',
     'silent',
     'parent_id',
     'quoted_message',
@@ -337,8 +381,11 @@ class Message extends Equatable implements ComparableFieldProvider {
     List<User>? mentionedUsers,
     bool? silent,
     bool? shadowed,
+    @Deprecated("Use 'reactionGroups' instead")
     Map<String, int>? reactionCounts,
+    @Deprecated("Use 'reactionGroups' instead")
     Map<String, int>? reactionScores,
+    Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
     String? parentId,
@@ -408,8 +455,12 @@ class Message extends Equatable implements ComparableFieldProvider {
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       silent: silent ?? this.silent,
       shadowed: shadowed ?? this.shadowed,
-      reactionCounts: reactionCounts ?? this.reactionCounts,
-      reactionScores: reactionScores ?? this.reactionScores,
+      reactionGroups: _maybeGetReactionGroups(
+            reactionGroups: reactionGroups,
+            reactionCounts: reactionCounts,
+            reactionScores: reactionScores,
+          ) ??
+          this.reactionGroups,
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
@@ -458,8 +509,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       mentionedUsers: other.mentionedUsers,
       silent: other.silent,
       shadowed: other.shadowed,
-      reactionCounts: other.reactionCounts,
-      reactionScores: other.reactionScores,
+      reactionGroups: other.reactionGroups,
       latestReactions: other.latestReactions,
       ownReactions: other.ownReactions,
       parentId: other.parentId,
@@ -521,8 +571,7 @@ class Message extends Equatable implements ComparableFieldProvider {
         type,
         attachments,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         latestReactions,
         ownReactions,
         parentId,
@@ -745,5 +794,109 @@ extension on Message {
     }
 
     return copyWith(mentionedUsers: updatedMentionedUsers);
+  }
+}
+
+/// Extension that adds reaction manipulation functionality to Message objects.
+///
+/// This extension provides methods to add and delete reactions to/from messages,
+/// with proper handling of reaction counts, scores, and timestamps.
+extension MessageReactionHelper on Message {
+  /// Adds a new reaction to the message.
+  ///
+  /// If [enforceUnique] is set to true, it will remove the existing current
+  /// user's reaction before adding the new one.
+  Message addMyReaction(
+    Reaction reaction, {
+    bool enforceUnique = false,
+  }) {
+    var updatedMessage = this;
+
+    // If we are enforcing unique reactions, we need to delete the existing
+    // reaction before adding the new one.
+    if (enforceUnique) updatedMessage = updatedMessage.deleteMyReaction();
+
+    final ownReactions = <Reaction>[...?updatedMessage.ownReactions];
+    final latestReactions = <Reaction>[...?updatedMessage.latestReactions];
+    final reactionGroups = <String, ReactionGroup>{
+      ...?updatedMessage.reactionGroups,
+    };
+
+    // Add the new reaction to the own reactions and latest reactions.
+    ownReactions.insert(0, reaction);
+    latestReactions.insert(0, reaction);
+
+    // Update the reaction groups.
+    reactionGroups.update(
+      reaction.type,
+      (it) => it.copyWith(
+        count: it.count + 1,
+        sumScores: it.sumScores + reaction.score,
+        firstReactionAt: [it.firstReactionAt, reaction.createdAt].minOrNull,
+        lastReactionAt: [it.lastReactionAt, reaction.createdAt].maxOrNull,
+      ),
+      ifAbsent: () => ReactionGroup(
+        count: 1,
+        sumScores: reaction.score,
+        firstReactionAt: reaction.createdAt,
+        lastReactionAt: reaction.createdAt,
+      ),
+    );
+
+    return updatedMessage.copyWith(
+      ownReactions: ownReactions,
+      latestReactions: latestReactions,
+      reactionGroups: reactionGroups,
+    );
+  }
+
+  /// Deletes all the current user's reactions from the message.
+  ///
+  /// Optionally, you can specify a [reactionType] to delete only that specific
+  /// current user's reaction.
+  Message deleteMyReaction({
+    String? reactionType,
+  }) {
+    final reactionsToDelete = this.ownReactions?.where((it) {
+      if (reactionType != null) return it.type == reactionType;
+      return true;
+    });
+
+    // If there are no reactions to delete, we can return the message as is.
+    if (reactionsToDelete == null || reactionsToDelete.isEmpty) return this;
+
+    final ownReactions = <Reaction>[...?this.ownReactions];
+    final latestReactions = <Reaction>[...?this.latestReactions];
+    final reactionGroups = <String, ReactionGroup>{...?this.reactionGroups};
+
+    for (final reaction in reactionsToDelete) {
+      final type = reaction.type;
+
+      bool match(Reaction r) => r.type == type && r.userId == reaction.userId;
+
+      // Remove from own reactions and latest reactions.
+      ownReactions.removeWhere(match);
+      latestReactions.removeWhere(match);
+
+      final group = reactionGroups.remove(type);
+      if (group == null) continue;
+
+      // Update the reaction group.
+      final updatedCount = group.count - 1;
+      final updatedSumScores = group.sumScores - reaction.score;
+
+      if (updatedCount > 0 && updatedSumScores > 0) {
+        reactionGroups[type] = group.copyWith(
+          count: updatedCount,
+          sumScores: updatedSumScores,
+        );
+      }
+    }
+
+    return copyWith(
+      ownReactions: ownReactions,
+      latestReactions: latestReactions,
+      reactionGroups: reactionGroups,
+    );
   }
 }
