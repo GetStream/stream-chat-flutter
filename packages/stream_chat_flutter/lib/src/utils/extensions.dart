@@ -700,7 +700,7 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
 extension ColumnAlignmentExtension on AlignmentGeometry {
   /// Converts an [AlignmentGeometry] to the most appropriate
   /// [CrossAxisAlignment] value.
-  CrossAxisAlignment toColumnCrossAxisAlignment(BuildContext context) {
+  CrossAxisAlignment toColumnCrossAxisAlignment() {
     final x = switch (this) {
       Alignment(x: final x) => x,
       AlignmentDirectional(start: final start) => start,

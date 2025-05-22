@@ -138,7 +138,7 @@ class StreamMessageModal extends StatelessWidget {
           child: Column(
             spacing: spacing,
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: alignment.toColumnCrossAxisAlignment(context),
+            crossAxisAlignment: alignment.toColumnCrossAxisAlignment(),
             children: [
               if (headerBuilder case final builder?) builder(context),
               contentBuilder(context),

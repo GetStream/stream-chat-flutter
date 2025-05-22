@@ -113,7 +113,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
         return Column(
           spacing: 10,
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: alignment.toColumnCrossAxisAlignment(context),
+          crossAxisAlignment: alignment.toColumnCrossAxisAlignment(),
           children: <Widget?>[
             reactionPicker,
             IgnorePointer(child: messageWidget),
