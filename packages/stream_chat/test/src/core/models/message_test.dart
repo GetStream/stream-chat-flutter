@@ -1,9 +1,10 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
 
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
@@ -22,8 +23,11 @@ void main() {
       expect(message.attachments, isA<List<Attachment>>());
       expect(message.latestReactions, isA<List<Reaction>>());
       expect(message.ownReactions, isA<List<Reaction>>());
+      // ignore: deprecated_member_use_from_same_package
       expect(message.reactionCounts, {'love': 1});
+      // ignore: deprecated_member_use_from_same_package
       expect(message.reactionScores, {'love': 1});
+      expect(message.reactionGroups, isA<Map<String, ReactionGroup>>());
       expect(message.createdAt, DateTime.parse('2020-01-28T22:17:31.107978Z'));
       expect(message.updatedAt, DateTime.parse('2020-01-28T22:17:31.130506Z'));
       expect(message.mentionedUsers, isA<List<User>>());
@@ -254,6 +258,54 @@ void main() {
         expect(field1!.compareTo(field2!), greaterThan(0)); // 10 > 1
         expect(field2.compareTo(field1), lessThan(0)); // 1 < 10
       });
+    });
+
+    group('reactionGroups', () {
+      final reactionGroupLike = ReactionGroup(
+        count: 1,
+        sumScores: 1,
+        firstReactionAt: DateTime.now(),
+        lastReactionAt: DateTime.now(),
+      );
+
+      final reactionGroupLove = ReactionGroup(
+        count: 2,
+        sumScores: 5,
+        firstReactionAt: DateTime.now(),
+        lastReactionAt: DateTime.now(),
+      );
+
+      test('is populated directly if provided in constructor', () {
+        final message = Message(
+          reactionGroups: {
+            'like': reactionGroupLike,
+            'love': reactionGroupLove,
+          },
+        );
+
+        expect(message.reactionGroups, isNotNull);
+        expect(message.reactionGroups!['like'], reactionGroupLike);
+        expect(message.reactionGroups!['love'], reactionGroupLove);
+      });
+
+      test(
+        'is derived from reactionCounts and reactionScores if not provided directly in constructor',
+        () {
+          final message = Message(
+            // ignore: deprecated_member_use_from_same_package
+            reactionCounts: const {'like': 1, 'love': 2},
+            // ignore: deprecated_member_use_from_same_package
+            reactionScores: const {'like': 1, 'love': 5},
+          );
+
+          expect(message.reactionGroups, isNotNull);
+          expect(message.reactionGroups!.length, 2);
+          expect(message.reactionGroups!['like']!.count, 1);
+          expect(message.reactionGroups!['like']!.sumScores, 1);
+          expect(message.reactionGroups!['love']!.count, 2);
+          expect(message.reactionGroups!['love']!.sumScores, 5);
+        },
+      );
     });
   });
 

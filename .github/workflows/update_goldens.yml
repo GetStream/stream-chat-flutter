@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: 📚 Checkout branch
         uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
@@ -28,9 +30,9 @@ jobs:
         run: melos run update:goldens
 
       - name: 📤 Commit Changes
-        id: commit_changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: Update Goldens"
-          commit_user_name: github-actions[bot]
-          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          file_pattern: "**/test/**/goldens/*.png"
+          commit_user_name: "Stream SDK Bot"
+          commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"

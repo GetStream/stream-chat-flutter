@@ -1,5 +1,25 @@
 ## Upcoming
 
+✅ Added
+
+- Added `reactionGroups` to the `Message` model. This field is a map of reaction types to their
+  respective counts and scores and additional metadata such as the first and last reaction
+  timestamps.
+
+🔄 Changed
+
+- Deprecated `message.reactionCounts`, `message.reactionScores` in favor of
+  `message.reactionGroups`.
+
+🐞 Fixed
+- `Null check operator used on a null value` in Websocket connect.
+
+## 9.10.0
+
+🐞 Fixed
+
+- [[#2013]](https://github.com/GetStream/stream-chat-flutter/issues/2013) Fix pinned message get duplicated.
+
 🔄 Changed
 
 - Updated `freezed_annotation` dependency to `">=2.4.1 <4.0.0"`.

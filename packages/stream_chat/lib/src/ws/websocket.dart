@@ -210,7 +210,7 @@ class WebSocket with TimerHelper {
   Future<Event> connect(
     User user, {
     bool includeUserDetails = false,
-  }) async {
+  }) {
     if (_connectRequestInProgress) {
       throw const StreamWebSocketError('''
         You've called connect twice,
@@ -222,8 +222,17 @@ class WebSocket with TimerHelper {
 
     _user = user;
     _connectionStatus = ConnectionStatus.connecting;
+
     connectionCompleter = Completer<Event>();
 
+    _setupConnection(includeUserDetails: includeUserDetails);
+
+    return connectionCompleter!.future;
+  }
+
+  Future<void> _setupConnection({
+    required bool includeUserDetails,
+  }) async {
     try {
       final uri = await _buildUri(
         includeUserDetails: includeUserDetails,
@@ -233,8 +242,6 @@ class WebSocket with TimerHelper {
     } catch (e, stk) {
       _onConnectionError(e, stk);
     }
-
-    return connectionCompleter!.future;
   }
 
   int _reconnectAttempt = 0;

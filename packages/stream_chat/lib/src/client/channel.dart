@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
@@ -303,7 +303,7 @@ class Channel {
     final currentTime = DateTime.timestamp();
     final elapsedTime = currentTime.difference(userLastMessageAt).inSeconds;
 
-    return max(0, cooldownDuration - elapsedTime);
+    return math.max(0, cooldownDuration - elapsedTime);
   }
 
   /// Stores time at which cooldown was started
@@ -1318,59 +1318,37 @@ class Channel {
     bool enforceUnique = false,
   }) async {
     _checkInitialized();
-    final messageId = message.id;
-    final now = DateTime.now();
-    final user = _client.state.currentUser;
-
-    var latestReactions = [...message.latestReactions ?? <Reaction>[]];
-    if (enforceUnique) {
-      latestReactions.removeWhere((it) => it.userId == user!.id);
+    final currentUser = _client.state.currentUser;
+    if (currentUser == null) {
+      throw StateError(
+        'Cannot send reaction: current user is not available. '
+        'Ensure the client is connected and a user is set.',
+      );
     }
 
-    final newReaction = Reaction(
-      messageId: messageId,
-      createdAt: now,
+    final messageId = message.id;
+    final reaction = Reaction(
       type: type,
-      user: user,
+      messageId: messageId,
+      user: currentUser,
       score: score,
+      createdAt: DateTime.timestamp(),
       extraData: extraData,
     );
 
-    latestReactions = (latestReactions
-          // Inserting at the 0th index as it's the latest reaction
-          ..insert(0, newReaction))
-        .take(10)
-        .toList();
-    final ownReactions = enforceUnique
-        ? <Reaction>[newReaction]
-        : <Reaction>[
-            ...message.ownReactions ?? [],
-            newReaction,
-          ];
-
-    final newMessage = message.copyWith(
-      reactionCounts: {...message.reactionCounts ?? <String, int>{}}
-        ..update(type, (value) {
-          if (enforceUnique) return value;
-          return value + 1;
-        }, ifAbsent: () => 1), // ignore: prefer-trailing-comma
-      reactionScores: {...message.reactionScores ?? <String, int>{}}
-        ..update(type, (value) {
-          if (enforceUnique) return value;
-          return value + 1;
-        }, ifAbsent: () => 1), // ignore: prefer-trailing-comma
-      latestReactions: latestReactions,
-      ownReactions: ownReactions,
+    final updatedMessage = message.addMyReaction(
+      reaction,
+      enforceUnique: enforceUnique,
     );
 
-    state?.updateMessage(newMessage);
+    state?.updateMessage(updatedMessage);
 
     try {
       final reactionResp = await _client.sendReaction(
         messageId,
-        type,
-        score: score,
-        extraData: extraData,
+        reaction.type,
+        score: reaction.score,
+        extraData: reaction.extraData,
         enforceUnique: enforceUnique,
       );
       return reactionResp;
@@ -1386,35 +1364,11 @@ class Channel {
     Message message,
     Reaction reaction,
   ) async {
-    final type = reaction.type;
-
-    final reactionCounts = {...?message.reactionCounts};
-    if (reactionCounts.containsKey(type)) {
-      reactionCounts.update(type, (value) => value - 1);
-    }
-    final reactionScores = {...?message.reactionScores};
-    if (reactionScores.containsKey(type)) {
-      reactionScores.update(type, (value) => value - 1);
-    }
-
-    final latestReactions = [...?message.latestReactions]..removeWhere((r) =>
-        r.userId == reaction.userId &&
-        r.type == reaction.type &&
-        r.messageId == reaction.messageId);
-
-    final ownReactions = [...?message.ownReactions]..removeWhere((r) =>
-        r.userId == reaction.userId &&
-        r.type == reaction.type &&
-        r.messageId == reaction.messageId);
-
-    final newMessage = message.copyWith(
-      reactionCounts: reactionCounts..removeWhere((_, value) => value == 0),
-      reactionScores: reactionScores..removeWhere((_, value) => value == 0),
-      latestReactions: latestReactions,
-      ownReactions: ownReactions,
+    final updatedMessage = message.deleteMyReaction(
+      reactionType: reaction.type,
     );
 
-    state?.updateMessage(newMessage);
+    state?.updateMessage(updatedMessage);
 
     try {
       final deleteResponse = await _client.deleteReaction(
@@ -2691,16 +2645,6 @@ class ChannelClientState {
         ownReactions: oldMessage?.ownReactions,
       );
       updateMessage(message);
-
-      if (message.pinned) {
-        final _existingPinnedMessages = _channelState.pinnedMessages ?? [];
-        _channelState = _channelState.copyWith(
-          pinnedMessages: [
-            ..._existingPinnedMessages,
-            message,
-          ],
-        );
-      }
     }));
   }
 
