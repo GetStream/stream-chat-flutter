@@ -96,7 +96,7 @@ command:
 
     # List of all the dev_dependencies used in the project.
     dev_dependencies:
-      alchemist: ^0.11.0
+      alchemist: ">=0.11.0 <0.13.0"
       build_runner: ^2.4.9
       drift_dev: ^2.22.1
       fake_async: ^1.3.1
