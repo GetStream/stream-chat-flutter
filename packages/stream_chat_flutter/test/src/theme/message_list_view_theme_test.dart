@@ -142,7 +142,7 @@ void main() {
 }
 
 final _messageListViewThemeDataControl = StreamMessageListViewThemeData(
-  backgroundColor: const StreamColorTheme.light().barsBg,
+  backgroundColor: const StreamColorTheme.light().appBg,
 );
 
 const _messageListViewThemeDataControlHalfLerp = StreamMessageListViewThemeData(
@@ -150,7 +150,7 @@ const _messageListViewThemeDataControlHalfLerp = StreamMessageListViewThemeData(
 );
 
 final _messageListViewThemeDataControlDark = StreamMessageListViewThemeData(
-  backgroundColor: const StreamColorTheme.dark().barsBg,
+  backgroundColor: const StreamColorTheme.dark().appBg,
 );
 
 const _messageListViewThemeDataImage = StreamMessageListViewThemeData(
