@@ -1,7 +1,6 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_picker_icon_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
@@ -55,9 +54,12 @@ void main() {
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             ReactionIconButton(
-              icon: reactionIcons.first,
-              isSelected: true,
-              onPressed: () {},
+              icon: ReactionPickerIcon(
+                isSelected: true,
+                type: reactionIcons.first.type,
+                builder: reactionIcons.first.builder,
+              ),
+              onPressed: (type) {},
             ),
           ),
         );
@@ -75,9 +77,11 @@ void main() {
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             ReactionIconButton(
-              icon: reactionIcons.first,
-              isSelected: false,
-              onPressed: () {
+              icon: ReactionPickerIcon(
+                type: reactionIcons.first.type,
+                builder: reactionIcons.first.builder,
+              ),
+              onPressed: (type) {
                 callbackTriggered = true;
               },
             ),
@@ -102,9 +106,11 @@ void main() {
           builder: () => _wrapWithMaterialApp(
             brightness: brightness,
             ReactionIconButton(
-              icon: reactionIcons.first,
-              isSelected: false,
-              onPressed: () {},
+              icon: ReactionPickerIcon(
+                type: reactionIcons.first.type,
+                builder: reactionIcons.first.builder,
+              ),
+              onPressed: (type) {},
             ),
           ),
         );
@@ -116,9 +122,12 @@ void main() {
           builder: () => _wrapWithMaterialApp(
             brightness: brightness,
             ReactionIconButton(
-              icon: reactionIcons.first,
-              isSelected: true,
-              onPressed: () {},
+              icon: ReactionPickerIcon(
+                isSelected: true,
+                type: reactionIcons.first.type,
+                builder: reactionIcons.first.builder,
+              ),
+              onPressed: (type) {},
             ),
           ),
         );
@@ -373,7 +382,7 @@ Widget _wrapWithMaterialApp(
       child: Builder(builder: (context) {
         final theme = StreamChatTheme.of(context);
         return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
+          backgroundColor: theme.colorTheme.overlay,
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(8),

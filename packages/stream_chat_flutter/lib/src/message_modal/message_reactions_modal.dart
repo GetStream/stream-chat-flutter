@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_card.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/reactions/reactions_align.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamMessageReactionsModal}
@@ -24,6 +23,7 @@ class StreamMessageReactionsModal extends StatelessWidget {
     required this.messageWidget,
     this.reverse = false,
     this.showReactionPicker = true,
+    this.reactionPickerBuilder = StreamReactionPicker.builder,
     this.onReactionPicked,
     this.onUserAvatarTap,
   });
@@ -48,6 +48,9 @@ class StreamMessageReactionsModal extends StatelessWidget {
   /// When `true`, users can add reactions directly from the modal.
   /// When `false`, the reaction picker is hidden.
   final bool showReactionPicker;
+
+  /// {@macro reactionPickerBuilder}
+  final ReactionPickerBuilder reactionPickerBuilder;
 
   /// Callback triggered when a user adds or toggles a reaction.
   ///
@@ -87,16 +90,9 @@ class StreamMessageReactionsModal extends StatelessWidget {
                 },
             };
 
-            final config = StreamChatConfiguration.of(context);
-            final reactionIcons = config.reactionIcons;
-
             return Align(
               alignment: alignment,
-              child: StreamReactionPicker(
-                message: message,
-                reactionIcons: reactionIcons,
-                onReactionPicked: onReactionPicked,
-              ),
+              child: reactionPickerBuilder(context, message, onReactionPicked),
             );
           },
         ),
@@ -121,19 +117,14 @@ class StreamMessageReactionsModal extends StatelessWidget {
         );
       },
       contentBuilder: (context) {
-        final currentUser = StreamChat.of(context).currentUser;
-        if (currentUser == null) return const Empty();
-
         final reactions = message.latestReactions;
         final hasReactions = reactions != null && reactions.isNotEmpty;
         if (!hasReactions) return const Empty();
 
         return FractionallySizedBox(
           widthFactor: 0.78,
-          child: ReactionsCard(
+          child: StreamUserReactions(
             message: message,
-            currentUser: currentUser,
-            messageTheme: messageTheme,
             onUserAvatarTap: onUserAvatarTap,
           ),
         );

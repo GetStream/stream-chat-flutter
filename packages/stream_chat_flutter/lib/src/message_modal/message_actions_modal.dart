@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
+import 'package:stream_chat_flutter/src/reactions/reactions_align.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -21,6 +21,7 @@ class StreamMessageActionsModal extends StatelessWidget {
     required this.messageWidget,
     this.reverse = false,
     this.showReactionPicker = false,
+    this.reactionPickerBuilder = StreamReactionPicker.builder,
     this.onActionTap,
   });
 
@@ -58,6 +59,9 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// Defaults to `false`.
   final bool showReactionPicker;
 
+  /// {@macro reactionPickerBuilder}
+  final ReactionPickerBuilder reactionPickerBuilder;
+
   /// Callback triggered when a message action is tapped.
   ///
   /// Provides the tapped [MessageAction] object to the callback.
@@ -91,16 +95,9 @@ class StreamMessageActionsModal extends StatelessWidget {
                 },
             };
 
-            final config = StreamChatConfiguration.of(context);
-            final reactionIcons = config.reactionIcons;
-
             return Align(
               alignment: alignment,
-              child: StreamReactionPicker(
-                message: message,
-                reactionIcons: reactionIcons,
-                onReactionPicked: onReactionPicked,
-              ),
+              child: reactionPickerBuilder(context, message, onReactionPicked),
             );
           },
         ),
