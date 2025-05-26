@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
+import 'package:stream_chat_flutter/src/reactions/reactions_align.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

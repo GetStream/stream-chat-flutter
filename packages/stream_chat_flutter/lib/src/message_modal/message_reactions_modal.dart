@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_align.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_card.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/reactions/reactions_align.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamMessageReactionsModal}
@@ -118,20 +117,14 @@ class StreamMessageReactionsModal extends StatelessWidget {
         );
       },
       contentBuilder: (context) {
-        final currentUser = StreamChat.of(context).currentUser;
-        if (currentUser == null) return const Empty();
-
         final reactions = message.latestReactions;
         final hasReactions = reactions != null && reactions.isNotEmpty;
         if (!hasReactions) return const Empty();
 
         return FractionallySizedBox(
           widthFactor: 0.78,
-          child: ReactionsCard(
-            elevation: 0,
+          child: StreamUserReactions(
             message: message,
-            currentUser: currentUser,
-            messageTheme: messageTheme,
             onUserAvatarTap: onUserAvatarTap,
           ),
         );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_picker_icon_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template reactionPickerBuilder}

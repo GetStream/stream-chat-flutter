@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
+import 'package:stream_chat_flutter/src/reactions/desktop_reactions_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Signature for the builder function that will be called when the message

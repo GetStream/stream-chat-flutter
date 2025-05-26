@@ -111,7 +111,7 @@ class StreamReactionBubble extends StatelessWidget {
     );
 
     final currentUser = StreamChat.of(context).currentUser;
-    final isMyReaction = reaction.user?.id == currentUser?.id;
+    final isMyReaction = reaction.userId == currentUser?.id;
     final isHighlighted = highlightOwnReactions && isMyReaction;
 
     return reactionIcon.builder(context, isHighlighted, 16);

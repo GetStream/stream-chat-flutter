@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_card.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template desktopReactionsBuilder}
@@ -101,11 +100,7 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
             maxWidth: 336,
             maxHeight: 342,
           ),
-          child: ReactionsCard(
-            currentUser: currentUser,
-            message: widget.message,
-            messageTheme: widget.messageTheme,
-          ),
+          child: StreamUserReactions(message: widget.message),
         ),
       ),
       child: MouseRegion(

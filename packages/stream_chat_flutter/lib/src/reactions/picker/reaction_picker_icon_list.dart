@@ -9,6 +9,28 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// {@endtemplate}
 typedef OnReactionPicked = void Function(Reaction reaction);
 
+/// {@template onReactionPickerIconPressed}
+/// Callback called when a reaction picker icon is pressed.
+/// {@endtemplate}
+typedef OnReactionPickerIconPressed = ValueSetter<String>;
+
+/// {@template reactionPickerIconBuilder}
+/// Function signature for building a custom reaction icon widget.
+///
+/// This is used to customize how each reaction icon is displayed in the
+/// [ReactionPickerIconList].
+///
+/// Parameters:
+/// - [context]: The build context.
+/// - [icon]: The reaction icon data containing type and selection state.
+/// - [onPressed]: Callback when the reaction icon is pressed.
+/// {@endtemplate}
+typedef ReactionPickerIconBuilder = Widget Function(
+  BuildContext context,
+  ReactionPickerIcon icon,
+  OnReactionPickerIconPressed? onPressed,
+);
+
 /// {@template reactionPickerIconList}
 /// A widget that displays a list of reactionIcons that can be picked by a user.
 ///
@@ -18,6 +40,10 @@ typedef OnReactionPicked = void Function(Reaction reaction);
 ///
 /// The reactions displayed are configured via [reactionIcons] and the widget
 /// tracks which reactions the current user has already added to the [message].
+///
+/// also see:
+/// - [StreamReactionPicker], which is a higher-level widget that uses this
+///   widget to display a reaction picker in a modal or inline.
 /// {@endtemplate}
 class ReactionPickerIconList extends StatefulWidget {
   /// {@macro reactionPickerIconList}
@@ -25,17 +51,32 @@ class ReactionPickerIconList extends StatefulWidget {
     super.key,
     required this.message,
     required this.reactionIcons,
+    this.iconBuilder = _defaultIconBuilder,
     this.onReactionPicked,
   });
 
   /// The message to display reactions for.
   final Message message;
 
-  /// The list of available reaction icons.
+  /// The list of available reaction picker icons.
   final List<StreamReactionIcon> reactionIcons;
+
+  /// The builder used to create the reaction picker icons.
+  final ReactionPickerIconBuilder iconBuilder;
 
   /// {@macro onReactionPressed}
   final OnReactionPicked? onReactionPicked;
+
+  static Widget _defaultIconBuilder(
+    BuildContext context,
+    ReactionPickerIcon icon,
+    OnReactionPickerIconPressed? onPressed,
+  ) {
+    return ReactionIconButton(
+      icon: icon,
+      onPressed: onPressed,
+    );
+  }
 
   @override
   State<ReactionPickerIconList> createState() => _ReactionPickerIconListState();
@@ -132,17 +173,24 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
               scale: animation.value,
               child: child,
             ),
-            child: ReactionIconButton(
-              icon: icon,
-              // If the reaction is present, it is selected.
-              isSelected: reaction != null,
-              onPressed: switch (widget.onReactionPicked) {
-                final onPicked? => () {
-                    final type = icon.type;
-                    final pickedReaction = reaction ?? Reaction(type: type);
-                    return onPicked(pickedReaction);
-                  },
-                _ => null,
+            child: Builder(
+              builder: (context) {
+                final pickerIcon = ReactionPickerIcon(
+                  type: icon.type,
+                  builder: icon.builder,
+                  // If the reaction is present in ownReactions, it is selected.
+                  isSelected: reaction != null,
+                );
+
+                final onPressed = switch (widget.onReactionPicked) {
+                  final onPicked? => (type) {
+                      final picked = reaction ?? Reaction(type: type);
+                      return onPicked(picked);
+                    },
+                  _ => null,
+                };
+
+                return widget.iconBuilder(context, pickerIcon, onPressed);
               },
             ),
           );
@@ -162,6 +210,33 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
   }
 }
 
+/// {@template reactionPickerIcon}
+/// A data class that represents a reaction icon within the reaction picker.
+///
+/// This class holds information about a specific reaction, such as its type,
+/// whether it's currently selected by the user, and a builder function
+/// to construct its visual representation.
+/// {@endtemplate}
+class ReactionPickerIcon {
+  /// {@macro reactionPickerIcon}
+  const ReactionPickerIcon({
+    required this.type,
+    this.isSelected = false,
+    required this.builder,
+  });
+
+  /// The unique identifier for the reaction type (e.g., "like", "love").
+  final String type;
+
+  /// A boolean indicating whether this reaction is currently selected by the
+  /// user.
+  final bool isSelected;
+
+  /// A builder function responsible for creating the widget that visually
+  /// represents this reaction icon.
+  final ReactionIconBuilder builder;
+}
+
 /// {@template reactionIconButton}
 /// A button that displays a reaction icon.
 ///
@@ -173,30 +248,32 @@ class ReactionIconButton extends StatelessWidget {
   const ReactionIconButton({
     super.key,
     required this.icon,
-    required this.isSelected,
     this.onPressed,
   });
 
-  /// Whether this reaction is currently selected by the user.
-  final bool isSelected;
-
   /// The reaction icon to display.
-  final StreamReactionIcon icon;
+  final ReactionPickerIcon icon;
 
-  /// Callback triggered when the reaction icon is pressed.
-  final VoidCallback? onPressed;
+  /// Callback triggered when the reaction picker icon is pressed.
+  final OnReactionPickerIconPressed? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
       iconSize: 24,
-      icon: icon.builder(context, isSelected, 24),
+      icon: icon.builder(context, icon.isSelected, 24),
       padding: const EdgeInsets.all(4),
       style: IconButton.styleFrom(
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         minimumSize: const Size.square(24),
       ),
-      onPressed: onPressed,
+      onPressed: switch (onPressed) {
+        final onPressed? => () {
+            final type = icon.type;
+            return onPressed(type);
+          },
+        _ => null,
+      },
     );
   }
 }
