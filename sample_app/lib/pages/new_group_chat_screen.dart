@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
@@ -8,33 +7,6 @@ import 'package:sample_app/state/new_group_chat_state.dart';
 import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-class CustomStreamUserListController extends StreamUserListController {
-  CustomStreamUserListController({
-    required super.client,
-    super.filter,
-    super.sort = defaultUserListSort,
-    super.presence = true,
-    super.limit = defaultUserPagedLimit,
-  });
-
-  @override
-  set value(PagedValue<int, User> newValue) {
-    super.value = newValue.maybeMap(
-      orElse: () => newValue,
-      (success) {
-        final currentUser = client.state.currentUser;
-        if (currentUser == null) return success;
-
-        return success.copyWith(
-          items: success.items.whereNot((it) {
-            return it.id == currentUser.id;
-          }).toList(),
-        );
-      },
-    );
-  }
-}
 
 class NewGroupChatScreen extends StatefulWidget {
   const NewGroupChatScreen({super.key});
@@ -55,7 +27,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   Timer? _debounce;
 
-  late final userListController = CustomStreamUserListController(
+  late final userListController = StreamUserListController(
     client: StreamChat.of(context).client,
     sort: [
       const SortOption(
@@ -64,21 +36,24 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
       ),
     ],
     limit: 25,
+    filter: Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+    ]),
   );
 
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
-      final userNameQuery = _controller.text;
-      if (userNameQuery.isEmpty || userNameQuery == _userNameQuery) return;
-
       if (mounted) {
         setState(() {
-          _userNameQuery = userNameQuery;
-          _isSearchActive = userNameQuery.isNotEmpty;
+          _userNameQuery = _controller.text;
+          _isSearchActive = _userNameQuery.isNotEmpty;
         });
-
-        userListController.filter = Filter.autoComplete('name', _userNameQuery);
+        userListController.filter = Filter.and([
+          if (_userNameQuery.isNotEmpty)
+            Filter.autoComplete('name', _userNameQuery),
+          Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+        ]);
         userListController.doInitialLoad();
       }
     });
