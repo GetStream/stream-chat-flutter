@@ -13,6 +13,7 @@
 
 🐞 Fixed
 - `Null check operator used on a null value` in Websocket connect.
+- Ensure query cache is cleared when refreshing channel queries.
 
 ## 9.10.0
 
