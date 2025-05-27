@@ -74,19 +74,27 @@ jobs:
           cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Build
+        run: flutter build apk
+        working-directory: sample_app
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          bundler-cache: true
-          working-directory: sample_app/android
+          name: android-stream-chat-v1
+          path: sample_app/build/app/outputs/apk/release/app-release.apk
 
-      - name: Setup Firebase Service Account'
-        working-directory: sample_app/android
-        run: echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" | base64 --decode | jq > ./firebase-service-account.json
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      - name: Distribute to Firebase
-        working-directory: sample_app/android
-        run: bundle exec fastlane distribute_to_firebase
+      - name: Upload to S3
+        run: |
+          cp sample_app/build/app/outputs/apk/release/app-release.apk flutter-sample-app.apk
+          aws s3 cp flutter-sample-app.apk s3://${{ secrets.AWS_S3_BUCKET }} --sse AES256
 
   ios:
     needs: determine_platforms
