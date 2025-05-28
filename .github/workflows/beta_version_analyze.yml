@@ -36,7 +36,7 @@ jobs:
       - uses: 8398a7/action-slack@v3
         with:
           status: failure
-          text: "<@U08BMRSM8G5> The beta build for Flutter Chat failed. Please check the logs."
+          text: "<@U08BMRSM8G5> & <@U01EYU51M89>: The beta build for Flutter Chat failed. Please check the logs."
           job_name: "${{ github.workflow }}: ${{ github.job }}"
           fields: repo,commit,author,workflow
         env:
