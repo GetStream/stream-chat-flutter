@@ -31,7 +31,7 @@ jobs:
     name: Slack Report
     runs-on: ubuntu-latest
     needs: [analyze_beta_versions]
-    if: failure() && github.event_name == 'schedule'
+    if: failure()
     steps:
       - uses: 8398a7/action-slack@v3
         with:
