@@ -26,6 +26,7 @@ import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
@@ -1914,14 +1915,6 @@ class StreamChatClient {
     required String channelId,
     required String channelType,
   }) {
-    final currentUser = state.currentUser;
-    if (currentUser == null) {
-      throw const StreamChatError(
-        'User is not set on client, '
-        'use `connectUser` or `connectAnonymousUser` instead',
-      );
-    }
-
     return partialMemberUpdate(
       channelId: channelId,
       channelType: channelType,
@@ -1960,6 +1953,53 @@ class StreamChatClient {
       set: set,
       unset: unset,
     );
+  }
+
+  /// Queries reminders for the current user.
+  ///
+  /// Optionally, pass [filter], [sort] and [pagination] to filter, sort and
+  /// paginate the reminders.
+  Future<QueryRemindersResponse> queryReminders({
+    Filter? filter,
+    SortOrder<MessageReminder>? sort,
+    PaginationParams pagination = const PaginationParams(),
+  }) {
+    return _chatApi.reminders.queryReminders(
+      filter: filter,
+      sort: sort,
+      pagination: pagination,
+    );
+  }
+
+  /// Creates a reminder for the given [messageId].
+  ///
+  /// Optionally, pass [remindAt] to set the reminder time.
+  Future<CreateReminderResponse> createReminder(
+    String messageId, {
+    DateTime? remindAt,
+  }) {
+    return _chatApi.reminders.createReminder(
+      messageId,
+      remindAt: remindAt,
+    );
+  }
+
+  /// Updates a reminder for the given [messageId].
+  ///
+  /// Optionally, pass [remindAt] to set the new reminder time.
+  Future<UpdateReminderResponse> updateReminder(
+    String messageId, {
+    DateTime? remindAt,
+  }) {
+    return _chatApi.reminders.updateReminder(
+      messageId,
+      remindAt: remindAt,
+    );
+  }
+
+  /// Deletes a reminder for the given [messageId].
+  Future<EmptyResponse> deleteReminder(String messageId) {
+    return _chatApi.reminders.deleteReminder(messageId);
   }
 
   /// Closes the [_ws] connection and resets the [state]
