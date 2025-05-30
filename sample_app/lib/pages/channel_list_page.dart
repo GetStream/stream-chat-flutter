@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sample_app/app.dart';
 import 'package:sample_app/pages/draft_list_page.dart';
+import 'package:sample_app/pages/reminders_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/pages/user_mentions_page.dart';
 import 'package:sample_app/routes/routes.dart';
@@ -92,6 +93,15 @@ class _ChannelListPageState extends State<ChannelListPage> {
         ),
         label: 'Drafts',
       ),
+      BottomNavigationBarItem(
+        icon: Icon(
+          Icons.bookmark_border_rounded,
+          color: _isSelected(4)
+              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
+              : Colors.grey,
+        ),
+        label: 'Reminders',
+      ),
     ];
   }
 
@@ -136,6 +146,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           UserMentionsPage(),
           ThreadListPage(),
           DraftListPage(),
+          RemindersPage(),
         ],
       ),
     );

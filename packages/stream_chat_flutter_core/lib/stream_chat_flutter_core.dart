@@ -22,6 +22,8 @@ export 'src/stream_draft_list_controller.dart';
 export 'src/stream_draft_list_event_handler.dart';
 export 'src/stream_member_list_controller.dart';
 export 'src/stream_message_input_controller.dart';
+export 'src/stream_message_reminder_list_controller.dart';
+export 'src/stream_message_reminder_list_event_handler.dart';
 export 'src/stream_message_search_list_controller.dart';
 export 'src/stream_poll_controller.dart';
 export 'src/stream_poll_vote_list_controller.dart';

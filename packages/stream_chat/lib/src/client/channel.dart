@@ -1292,6 +1292,44 @@ class Channel {
     );
   }
 
+  /// Create a reminder for the given [messageId].
+  ///
+  /// Optionally, provide a [remindAt] date to set when the reminder should
+  /// be triggered. If not provided, the reminder will be created as a
+  /// bookmark type instead.
+  Future<CreateReminderResponse> createReminder(
+    String messageId, {
+    required DateTime remindAt,
+  }) {
+    _checkInitialized();
+    return _client.createReminder(
+      messageId,
+      remindAt: remindAt,
+    );
+  }
+
+  /// Update an existing reminder with the given [reminderId].
+  ///
+  /// Optionally, provide a [remindAt] date to set when the reminder should
+  /// be triggered. If not provided, the reminder will be updated as a
+  /// bookmark type instead.
+  Future<UpdateReminderResponse> updateReminder(
+    String messageId, {
+    DateTime? remindAt,
+  }) {
+    _checkInitialized();
+    return _client.updateReminder(
+      messageId,
+      remindAt: remindAt,
+    );
+  }
+
+  /// Remove the reminder for the given [messageId].
+  Future<EmptyResponse> deleteReminder(String messageId) {
+    _checkInitialized();
+    return _client.deleteReminder(messageId);
+  }
+
   /// Send a reaction to this channel.
   ///
   /// Set [enforceUnique] to true to remove the existing user reaction.
@@ -2093,6 +2131,16 @@ class ChannelClientState {
 
     _listenUserStopWatching();
 
+    /* Start of reminder events */
+
+    _listenReminderCreated();
+
+    _listenReminderUpdated();
+
+    _listenReminderDeleted();
+
+    /* End of reminder events */
+
     _startCleaningStaleTypingEvents();
 
     _startCleaningStalePinnedMessages();
@@ -2576,6 +2624,65 @@ class ChannelClientState {
         return deleteDraft(draft);
       }),
     );
+  }
+
+  void _listenReminderCreated() {
+    _subscriptions.add(
+      _channel.on(EventType.reminderCreated).listen((event) {
+        final reminder = event.reminder;
+        if (reminder == null) return;
+
+        updateReminder(reminder);
+      }),
+    );
+  }
+
+  void _listenReminderUpdated() {
+    _subscriptions.add(
+      _channel.on(EventType.reminderUpdated).listen((event) {
+        final reminder = event.reminder;
+        if (reminder == null) return;
+
+        updateReminder(reminder);
+      }),
+    );
+  }
+
+  void _listenReminderDeleted() {
+    _subscriptions.add(
+      _channel.on(EventType.reminderDeleted).listen((event) {
+        final reminder = event.reminder;
+        if (reminder == null) return;
+
+        deleteReminder(reminder);
+      }),
+    );
+  }
+
+  /// Updates the [reminder] of the message if it exists.
+  void updateReminder(MessageReminder reminder) {
+    final messageId = reminder.messageId;
+    for (final message in messages) {
+      if (message.id == messageId) {
+        return updateMessage(
+          message.copyWith(reminder: reminder),
+        );
+      }
+    }
+  }
+
+  /// Deletes the [reminder] of the message if it exists.
+  void deleteReminder(MessageReminder reminder) {
+    // TODO: Delete the reminder from the persistence client.
+
+    final messageId = reminder.messageId;
+    for (final message in messages) {
+      if (message.id == messageId) {
+        return updateMessage(
+          message.copyWith(reminder: null),
+        );
+      }
+    }
   }
 
   void _listenReactionDeleted() {

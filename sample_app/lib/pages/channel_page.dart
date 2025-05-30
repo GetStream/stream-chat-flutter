@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChannelPage extends StatefulWidget {
@@ -48,8 +49,12 @@ class _ChannelPageState extends State<ChannelPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamChatTheme.of(context);
+    final textTheme = theme.textTheme;
+    final colorTheme = theme.colorTheme;
+
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
+      backgroundColor: colorTheme.appBg,
       appBar: StreamChannelHeader(
         showTypingIndicator: false,
         onBackPressed: () => GoRouter.of(context).pop(),
@@ -88,40 +93,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   highlightInitialMessage: widget.highlightInitialMessage,
                   //onMessageSwiped: _reply,
                   messageFilter: defaultFilter,
-                  messageBuilder: (context, details, messages, defaultMessage) {
-                    final router = GoRouter.of(context);
-                    return defaultMessage.copyWith(
-                      onReplyTap: _reply,
-                      onShowMessage: (m, c) async {
-                        final client = StreamChat.of(context).client;
-                        final message = m;
-                        final channel = client.channel(
-                          c.type,
-                          id: c.id,
-                        );
-                        if (channel.state == null) {
-                          await channel.watch();
-                        }
-                        router.goNamed(
-                          Routes.CHANNEL_PAGE.name,
-                          pathParameters: Routes.CHANNEL_PAGE.params(channel),
-                          queryParameters:
-                              Routes.CHANNEL_PAGE.queryParams(message),
-                        );
-                      },
-                      bottomRowBuilderWithDefaultWidget: (
-                        context,
-                        message,
-                        defaultWidget,
-                      ) {
-                        return defaultWidget.copyWith(
-                          deletedBottomRowBuilder: (context, message) {
-                            return const StreamVisibleFootnote();
-                          },
-                        );
-                      },
-                    );
-                  },
+                  messageBuilder: customMessageBuilder,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(parent: parentMessage!);
                   },
@@ -132,22 +104,15 @@ class _ChannelPageState extends State<ChannelPage> {
                   right: 0,
                   child: Container(
                     alignment: Alignment.centerLeft,
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .appBg
-                        .withOpacity(.9),
+                    color: colorTheme.appBg.withOpacity(.9),
                     child: StreamTypingIndicator(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
                       ),
-                      style: StreamChatTheme.of(context)
-                          .textTheme
-                          .footnote
-                          .copyWith(
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .textLowEmphasis),
+                      style: textTheme.footnote.copyWith(
+                        color: colorTheme.textLowEmphasis,
+                      ),
                     ),
                   ),
                 ),
@@ -159,6 +124,160 @@ class _ChannelPageState extends State<ChannelPage> {
             messageInputController: _messageInputController,
             onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget customMessageBuilder(
+    BuildContext context,
+    MessageDetails details,
+    List<Message> messages,
+    StreamMessageWidget defaultMessageWidget,
+  ) {
+    final theme = StreamChatTheme.of(context);
+    final textTheme = theme.textTheme;
+    final colorTheme = theme.colorTheme;
+
+    final message = details.message;
+    final reminder = message.reminder;
+    final channelConfig = StreamChannel.of(context).channel.config;
+
+    final customOptions = <StreamMessageAction>[
+      if (channelConfig?.userMessageReminders == true) ...[
+        if (reminder != null) ...[
+          StreamMessageAction(
+            leading: StreamSvgIcon(
+              icon: StreamSvgIcons.time,
+              color: colorTheme.textLowEmphasis,
+            ),
+            title: const Text('Edit Reminder'),
+            onTap: (message) async {
+              Navigator.of(context).pop();
+
+              final option = await showDialog<ReminderOption>(
+                context: context,
+                builder: (_) => EditReminderDialog(
+                  isBookmarkReminder: reminder.remindAt == null,
+                ),
+              );
+
+              if (option == null) return;
+              final client = StreamChat.of(context).client;
+              final messageId = message.id;
+              final remindAt = option.remindAt;
+
+              client.updateReminder(messageId, remindAt: remindAt).ignore();
+            },
+          ),
+          StreamMessageAction(
+            leading: StreamSvgIcon(
+              icon: StreamSvgIcons.checkAll,
+              color: colorTheme.textLowEmphasis,
+            ),
+            title: const Text('Remove from later'),
+            onTap: (message) {
+              Navigator.of(context).pop();
+
+              final client = StreamChat.of(context).client;
+              final messageId = message.id;
+
+              client.deleteReminder(messageId).ignore();
+            },
+          ),
+        ] else ...[
+          StreamMessageAction(
+            leading: StreamSvgIcon(
+              icon: StreamSvgIcons.time,
+              color: colorTheme.textLowEmphasis,
+            ),
+            title: const Text('Remind me'),
+            onTap: (message) async {
+              Navigator.of(context).pop();
+
+              final reminder = await showDialog<ScheduledReminder>(
+                context: context,
+                builder: (_) => const CreateReminderDialog(),
+              );
+
+              if (reminder == null) return;
+              final client = StreamChat.of(context).client;
+              final messageId = message.id;
+              final remindAt = reminder.remindAt;
+
+              client.createReminder(messageId, remindAt: remindAt).ignore();
+            },
+          ),
+          StreamMessageAction(
+            leading: Icon(
+              Icons.bookmark_border,
+              color: colorTheme.textLowEmphasis,
+            ),
+            title: const Text('Save for later'),
+            onTap: (message) {
+              Navigator.of(context).pop();
+
+              final client = StreamChat.of(context).client;
+              final messageId = message.id;
+
+              client.createReminder(messageId).ignore();
+            },
+          ),
+        ],
+      ]
+    ];
+
+    return Container(
+      color: reminder != null ? colorTheme.accentPrimary.withOpacity(.1) : null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (reminder != null)
+            Align(
+              alignment: switch (defaultMessageWidget.reverse) {
+                true => AlignmentDirectional.centerEnd,
+                false => AlignmentDirectional.centerStart,
+              },
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 8),
+                child: Row(
+                  spacing: 4,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      size: 16,
+                      Icons.bookmark_rounded,
+                      color: colorTheme.accentPrimary,
+                    ),
+                    Text(
+                      'Saved for later',
+                      style: textTheme.footnote.copyWith(
+                        color: colorTheme.accentPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          defaultMessageWidget.copyWith(
+            onReplyTap: _reply,
+            customActions: customOptions,
+            onShowMessage: (message, channel) => GoRouter.of(context).goNamed(
+              Routes.CHANNEL_PAGE.name,
+              pathParameters: Routes.CHANNEL_PAGE.params(channel),
+              queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
+            ),
+            bottomRowBuilderWithDefaultWidget: (_, __, defaultWidget) {
+              return defaultWidget.copyWith(
+                deletedBottomRowBuilder: (context, message) {
+                  return const StreamVisibleFootnote();
+                },
+              );
+            },
+          ),
+          // If the message has a reminder, add some space below it.
+          if (reminder != null) const SizedBox(height: 4),
         ],
       ),
     );
