@@ -7,12 +7,12 @@ on:
 jobs:
   release:
     # Only run this job for commits that indicate a release
-    if: startsWith(github.event.head_commit.message, 'chore(repo): release')
+    if: {{ startsWith(github.event.head_commit.message, 'chore(repo): release') }}
     runs-on: ubuntu-latest
 
     steps:
       - name: 📚 Checkout branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🏷️ Extract Version Tag
         id: extract_tag
