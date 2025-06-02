@@ -149,12 +149,8 @@ scripts:
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
   lint:pub:
-    run: |
-      melos exec -c 5 --no-private --ignore="*example*" -- \
-            flutter pub publish --dry-run
-    description: |
-      Run `pub publish --dry-run` in all packages.
-       - Note: you can also rely on your IDEs Dart Analysis / Issues window.
+    run: melos exec -c1 --no-published --no-private --order-dependents -- "flutter pub publish -n"
+    description: Dry run `pub publish` in all packages.
 
   generate:all:
     run: melos run generate:dart && melos run generate:flutter
@@ -206,3 +202,7 @@ scripts:
     description: Removes all the ignored files from the coverage report.
     packageFilters:
       dirExists: coverage
+
+  release:pub:
+    run: melos exec -c1 --no-published --no-private --order-dependents -- "flutter pub publish -f"
+    description: Publish all packages to pub.dev.

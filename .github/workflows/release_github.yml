@@ -1,0 +1,51 @@
+name: release_github
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  release:
+    # Only run this job for commits that indicate a release
+    if: startsWith(github.event.head_commit.message, 'chore(repo): release')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📚 Checkout branch
+        uses: actions/checkout@v3
+
+      - name: 🏷️ Extract Version Tag
+        id: extract_tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          commit_msg="${{ github.event.head_commit.message }}"
+          echo "📦 Commit message: $commit_msg"
+
+          # Match vX.Y.Z or vX.Y.Z-suffix (case-insensitive)
+          version_regex='[vV][0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.\-]+)?'
+
+          if [[ "$commit_msg" =~ $version_regex ]]; then
+            version="${BASH_REMATCH[0]}"
+            is_prerelease=$([[ $version == *-* ]] && echo true || echo false)
+
+            echo "✅ Found version tag: $version"
+            echo "ℹ️ Pre-release: $is_prerelease"
+
+            echo "tag=$version" >> "$GITHUB_OUTPUT"
+            echo "prerelease=$is_prerelease" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error ::❌ No SemVer tag found in commit message."
+            echo "::error ::Expected something like: 'chore(repo): release v1.2.3[-beta]'"
+            exit 1
+          fi
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          make_latest: true
+          generate_release_notes: true
+          tag_name: ${{ steps.extract_tag.outputs.tag }}
+          prerelease: ${{ steps.extract_tag.outputs.prerelease }}
+          token: ${{ secrets.BOT_PERSONAL_ACCESS_TOKEN }}
