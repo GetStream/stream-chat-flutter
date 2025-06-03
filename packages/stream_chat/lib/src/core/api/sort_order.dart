@@ -13,6 +13,15 @@ part 'sort_order.g.dart';
 /// Example: `Sort<ChannelState>([pinnedAtSort, lastMessageAtSort])`
 typedef SortOrder<T extends ComparableFieldProvider> = List<SortOption<T>>;
 
+/// Defines how null values should be ordered in a sort operation.
+enum NullOrdering {
+  /// Null values are treated as less than any non-null value.
+  nullsFirst,
+
+  /// Null values are treated as greater than any non-null value.
+  nullsLast,
+}
+
 /// A sort specification for objects that implement [ComparableFieldProvider].
 ///
 /// Defines a field to sort by and a direction (ascending or descending).
@@ -33,6 +42,7 @@ class SortOption<T extends ComparableFieldProvider> {
   const SortOption(
     this.field, {
     this.direction = SortOption.DESC,
+    this.nullOrdering = NullOrdering.nullsFirst,
     Comparator<T>? comparator,
   }) : _comparator = comparator;
 
@@ -47,6 +57,7 @@ class SortOption<T extends ComparableFieldProvider> {
     this.field, {
     Comparator<T>? comparator,
   })  : direction = SortOption.DESC,
+        nullOrdering = NullOrdering.nullsFirst,
         _comparator = comparator;
 
   /// Creates a SortOption for ascending order sorting by the specified field.
@@ -60,6 +71,7 @@ class SortOption<T extends ComparableFieldProvider> {
     this.field, {
     Comparator<T>? comparator,
   })  : direction = SortOption.ASC,
+        nullOrdering = NullOrdering.nullsLast,
         _comparator = comparator;
 
   /// Create a new instance from JSON.
@@ -77,6 +89,13 @@ class SortOption<T extends ComparableFieldProvider> {
 
   /// The sort direction (ASC or DESC)
   final int direction;
+
+  /// The null ordering strategy to use when comparing null values.
+  ///
+  /// Defaults to `NullOrdering.nullsFirst`, which treats null values as less
+  /// than any non-null value.
+  @JsonKey(includeToJson: false)
+  final NullOrdering nullOrdering;
 
   /// Compares two objects of type T using the specified field and direction.
   ///
@@ -102,16 +121,19 @@ class SortOption<T extends ComparableFieldProvider> {
       final aValue = a.getComparableField(field);
       final bValue = b.getComparableField(field);
 
-      // Handle null values
-      if (aValue == null && bValue == null) return 0;
-      if (aValue == null) return -1;
-      if (bValue == null) return 1;
-
-      return aValue.compareTo(bValue);
+      return _compareNullableFields(aValue, bValue);
     };
   }
 
   final Comparator<T>? _comparator;
+
+  int _compareNullableFields(ComparableField? a, ComparableField? b) {
+    if (a == null && b == null) return 0;
+    if (a == null) return nullOrdering == NullOrdering.nullsFirst ? -1 : 1;
+    if (b == null) return nullOrdering == NullOrdering.nullsFirst ? 1 : -1;
+
+    return a.compareTo(b);
+  }
 
   /// Converts this option to JSON.
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
