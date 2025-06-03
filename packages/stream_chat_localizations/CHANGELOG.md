@@ -4,7 +4,7 @@
 
 ## 9.10.0
 
-- Updated `stream_chat_flutter` dependency to [`9.10.0`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat_flutter` dependency to [`9.10.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.9.0
 
