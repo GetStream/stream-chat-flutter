@@ -4,15 +4,21 @@ on:
   push:
     branches: [master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release:
     # Only run this job for commits that indicate a release
-    if: {{ startsWith(github.event.head_commit.message, 'chore(repo): release') }}
+    if: "${{ startsWith(github.event.head_commit.message, 'chore(repo): release') }}"
     runs-on: ubuntu-latest
 
     steps:
       - name: 📚 Checkout branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 🏷️ Extract Version Tag
         id: extract_tag
@@ -44,8 +50,7 @@ jobs:
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          make_latest: true
           generate_release_notes: true
           tag_name: ${{ steps.extract_tag.outputs.tag }}
           prerelease: ${{ steps.extract_tag.outputs.prerelease }}
-          token: ${{ secrets.BOT_PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
