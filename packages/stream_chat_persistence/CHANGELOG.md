@@ -1,4 +1,4 @@
-## Upcoming
+## 9.11.0
 
 - Added support for `Message.reactionGroups` field.
 
