@@ -1299,7 +1299,7 @@ class Channel {
   /// bookmark type instead.
   Future<CreateReminderResponse> createReminder(
     String messageId, {
-    required DateTime remindAt,
+    DateTime? remindAt,
   }) {
     _checkInitialized();
     return _client.createReminder(

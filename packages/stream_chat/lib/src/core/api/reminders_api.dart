@@ -38,7 +38,7 @@ class RemindersApi {
     return QueryRemindersResponse.fromJson(response.data);
   }
 
-  /// Creates a new reminder for the specified [messageId.
+  /// Creates a new reminder for the specified [messageId].
   ///
   /// You can specify the time to remind using the [remindAt] parameter.
   ///
