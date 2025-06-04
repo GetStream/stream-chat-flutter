@@ -57,7 +57,7 @@ jobs:
           echo "prerelease=$is_prerelease" >> "$GITHUB_OUTPUT"
 
       - name: 🚀 Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           tag_name: ${{ steps.extract_version.outputs.tag }}
