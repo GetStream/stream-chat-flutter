@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  create_tag:
+  release:
     # Only run this job for commits that indicate a release
     if: "${{ startsWith(github.event.head_commit.message, 'chore(repo): release') }}"
     runs-on: ubuntu-latest

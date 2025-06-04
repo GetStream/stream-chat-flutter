@@ -3,7 +3,9 @@ name: release_publish
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+' # tag-pattern on pub.dev: 'v{{version}}'
+      - 'v[0-9]+.[0-9]+.[0-9]+' # tag-pattern for regular releases
+      - 'v[0-9]+.[0-9]+.[0-9]+-*' # tag-pattern for pre-releases
+  workflow_dispatch: # Allow manual triggering of the workflow
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
