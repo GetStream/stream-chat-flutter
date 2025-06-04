@@ -12,6 +12,7 @@ concurrency:
 jobs:
   release:
     permissions:
+      contents: write  # Required to creating release
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
     steps:
