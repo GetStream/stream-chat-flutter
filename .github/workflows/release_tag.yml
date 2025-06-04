@@ -1,4 +1,4 @@
-name: release_github
+name: release_tag
 
 on:
   push:
@@ -9,16 +9,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release:
+  create_tag:
     # Only run this job for commits that indicate a release
     if: "${{ startsWith(github.event.head_commit.message, 'chore(repo): release') }}"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create and push tags
 
     steps:
       - name: 📚 Checkout branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
 
       - name: 🏷️ Extract Version Tag
         id: extract_tag
@@ -34,23 +37,20 @@ jobs:
 
           if [[ "$commit_msg" =~ $version_regex ]]; then
             version="${BASH_REMATCH[0]}"
-            is_prerelease=$([[ $version == *-* ]] && echo true || echo false)
-
             echo "✅ Found version tag: $version"
-            echo "ℹ️ Pre-release: $is_prerelease"
-
             echo "tag=$version" >> "$GITHUB_OUTPUT"
-            echo "prerelease=$is_prerelease" >> "$GITHUB_OUTPUT"
           else
             echo "::error ::❌ No SemVer tag found in commit message."
             echo "::error ::Expected something like: 'chore(repo): release v1.2.3[-beta]'"
             exit 1
           fi
 
-      - name: 🚀 Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          generate_release_notes: true
-          tag_name: ${{ steps.extract_tag.outputs.tag }}
-          prerelease: ${{ steps.extract_tag.outputs.prerelease }}
-          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+      - name: 🚀 Create and Push Tag
+        shell: bash
+        run: |
+          git config user.name "Stream SDK Bot"
+          git config user.email "60655709+Stream-SDK-Bot@users.noreply.github.com"
+          
+          echo "Creating and pushing tag: ${{ steps.extract_tag.outputs.tag }}"
+          git tag ${{ steps.extract_tag.outputs.tag }}
+          git push origin ${{ steps.extract_tag.outputs.tag }}
