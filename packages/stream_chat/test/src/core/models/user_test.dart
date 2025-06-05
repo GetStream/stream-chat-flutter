@@ -424,7 +424,7 @@ void main() {
     test('.image should return null if extraData value is not String', () {
       final user = User(
         id: 'test-user',
-        extraData: const {'image': bool},
+        extraData: const {'image': true},
       );
 
       expect(user.image, isNull);
