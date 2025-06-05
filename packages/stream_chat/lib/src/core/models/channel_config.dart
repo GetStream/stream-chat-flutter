@@ -25,6 +25,7 @@ class ChannelConfig {
     this.uploads = false,
     this.urlEnrichment = false,
     this.skipLastMsgUpdateForSystemMsgs = false,
+    this.userMessageReminders = false,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -86,6 +87,9 @@ class ChannelConfig {
   /// This is useful for scenarios where you want to track the last time a user
   /// message was added to the channel.
   final bool skipLastMsgUpdateForSystemMsgs;
+
+  /// True if the user can set reminders for messages in this channel.
+  final bool userMessageReminders;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);
