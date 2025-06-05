@@ -118,18 +118,31 @@ class ChannelModel {
 
   /// True if the channel is disabled
   @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get disabled => extraData['disabled'] as bool?;
+  bool? get disabled {
+    final disabled = extraData['disabled'];
+    if (disabled is bool) return disabled;
+
+    return null;
+  }
 
   /// True if the channel is hidden
   @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get hidden => extraData['hidden'] as bool?;
+  bool? get hidden {
+    final hidden = extraData['hidden'];
+    if (hidden is bool) return hidden;
+
+    return null;
+  }
 
   /// The date of the last time channel got truncated
   @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime? get truncatedAt {
-    final truncatedAt = extraData['truncated_at'] as String?;
-    if (truncatedAt == null) return null;
-    return DateTime.parse(truncatedAt);
+    final truncatedAt = extraData['truncated_at'];
+    if (truncatedAt is String && truncatedAt.isNotEmpty) {
+      return DateTime.parse(truncatedAt);
+    }
+
+    return null;
   }
 
   /// Map of custom channel extraData
@@ -138,6 +151,14 @@ class ChannelModel {
   /// The team the channel belongs to
   @JsonKey(includeToJson: false)
   final String? team;
+
+  /// Shortcut for channel name
+  String? get name {
+    final name = extraData['name'];
+    if (name is String && name.isNotEmpty) return name;
+
+    return null;
+  }
 
   /// Known top level fields.
   /// Useful for [Serializer] methods.
@@ -158,9 +179,6 @@ class ChannelModel {
     'team',
     'cooldown',
   ];
-
-  /// Shortcut for channel name
-  String? get name => extraData['name'] as String?;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(

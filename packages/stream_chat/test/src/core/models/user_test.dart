@@ -366,6 +366,78 @@ void main() {
         expect(field!.value, equals('without-name')); // Fallback to user id
       });
     });
+
+    test('.name should fetch from extraData if available', () {
+      final user = User(
+        id: 'test-user',
+        extraData: const {'name': 'Test User'},
+      );
+
+      expect(user.name, 'Test User');
+    });
+
+    test('.name should return id if extraData value is empty', () {
+      final user = User(
+        id: 'test-user',
+        extraData: const {'name': ''},
+      );
+
+      expect(user.name, 'test-user');
+    });
+
+    test('.name should return id if not available in extraData', () {
+      final user = User(
+        id: 'test-user',
+        extraData: const {},
+      );
+
+      expect(user.name, 'test-user');
+    });
+
+    test('.name should return id if extraData value is not String', () {
+      final user = User(
+        id: 'test-user',
+        extraData: const {'name': true},
+      );
+
+      expect(user.name, 'test-user');
+    });
+
+    test('.image should fetch from extraData if available', () {
+      final user = User(
+        id: 'test-user',
+        extraData: const {'image': 'https://example.com/image.png'},
+      );
+
+      expect(user.image, 'https://example.com/image.png');
+    });
+
+    test('.image should return null if not available in extraData', () {
+      final user = User(
+        id: 'test-user',
+        extraData: const {},
+      );
+
+      expect(user.image, isNull);
+    });
+
+    test('.image should return null if extraData value is not String', () {
+      final user = User(
+        id: 'test-user',
+        extraData: const {'image': bool},
+      );
+
+      expect(user.image, isNull);
+    });
+
+    test('.image should return null if extraData value is empty', () {
+      final user = User(
+        id: 'test-user',
+        extraData: const {'image': ''},
+      );
+
+      expect(user.image, isNull);
+    });
   });
 }
 

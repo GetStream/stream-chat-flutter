@@ -83,10 +83,9 @@ class User extends Equatable implements ComparableFieldProvider {
   /// {@macro name}
   @JsonKey(includeToJson: false, includeFromJson: false)
   String get name {
-    if (extraData.containsKey('name') && extraData['name'] != null) {
-      final name = extraData['name']! as String;
-      if (name.isNotEmpty) return name;
-    }
+    final name = extraData['name'];
+    if (name is String && name.isNotEmpty) return name;
+
     return id;
   }
 
@@ -94,7 +93,12 @@ class User extends Equatable implements ComparableFieldProvider {
   ///
   /// {@macro image}
   @JsonKey(includeToJson: false, includeFromJson: false)
-  String? get image => extraData['image'] as String?;
+  String? get image {
+    final image = extraData['image'];
+    if (image is String && image.isNotEmpty) return image;
+
+    return null;
+  }
 
   /// User role.
   @JsonKey(includeToJson: false)
