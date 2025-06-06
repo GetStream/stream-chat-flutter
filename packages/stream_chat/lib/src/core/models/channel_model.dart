@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'channel_model.g.dart';
@@ -94,7 +95,7 @@ class ChannelModel {
 
   /// The date at which the channel was last updated.
   @JsonKey(includeToJson: false, includeFromJson: false)
-  DateTime? get lastUpdatedAt => lastMessageAt ?? createdAt;
+  DateTime get lastUpdatedAt => lastMessageAt ?? createdAt;
 
   /// The date of the last channel update
   @JsonKey(includeToJson: false)
@@ -118,27 +119,17 @@ class ChannelModel {
 
   /// True if the channel is disabled
   @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get disabled {
-    final disabled = extraData['disabled'];
-    if (disabled is bool) return disabled;
-
-    return null;
-  }
+  bool? get disabled => extraData['disabled'].safeCast<bool>();
 
   /// True if the channel is hidden
   @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get hidden {
-    final hidden = extraData['hidden'];
-    if (hidden is bool) return hidden;
-
-    return null;
-  }
+  bool? get hidden => extraData['hidden'].safeCast<bool>();
 
   /// The date of the last time channel got truncated
   @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime? get truncatedAt {
-    final truncatedAt = extraData['truncated_at'];
-    if (truncatedAt is String && truncatedAt.isNotEmpty) {
+    final truncatedAt = extraData['truncated_at'].safeCast<String>();
+    if (truncatedAt != null && truncatedAt.isNotEmpty) {
       return DateTime.parse(truncatedAt);
     }
 
@@ -154,8 +145,8 @@ class ChannelModel {
 
   /// Shortcut for channel name
   String? get name {
-    final name = extraData['name'];
-    if (name is String && name.isNotEmpty) return name;
+    final name = extraData['name'].safeCast<String>();
+    if (name != null && name.isNotEmpty) return name;
 
     return null;
   }

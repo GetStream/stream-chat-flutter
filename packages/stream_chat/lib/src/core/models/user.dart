@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'user.g.dart';
@@ -83,8 +84,8 @@ class User extends Equatable implements ComparableFieldProvider {
   /// {@macro name}
   @JsonKey(includeToJson: false, includeFromJson: false)
   String get name {
-    final name = extraData['name'];
-    if (name is String && name.isNotEmpty) return name;
+    final name = extraData['name'].safeCast<String>();
+    if (name != null && name.isNotEmpty) return name;
 
     return id;
   }
@@ -94,8 +95,8 @@ class User extends Equatable implements ComparableFieldProvider {
   /// {@macro image}
   @JsonKey(includeToJson: false, includeFromJson: false)
   String? get image {
-    final image = extraData['image'];
-    if (image is String && image.isNotEmpty) return image;
+    final image = extraData['image'].safeCast<String>();
+    if (image != null && image.isNotEmpty) return image;
 
     return null;
   }
