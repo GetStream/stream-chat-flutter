@@ -164,9 +164,9 @@ class _MessageCardState extends State<MessageCard> {
 
     return Container(
       constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
-      margin: EdgeInsets.symmetric(
-        horizontal: (widget.isFailedState ? 12.0 : 0.0) +
-            (widget.showUserAvatar == DisplayWidget.gone ? 0 : 4.0),
+      margin: EdgeInsetsDirectional.only(
+        end: widget.reverse && widget.isFailedState ? 12.0 : 0.0,
+        start: !widget.reverse && widget.isFailedState ? 12.0 : 0.0,
       ),
       clipBehavior: Clip.hardEdge,
       decoration: ShapeDecoration(

@@ -677,8 +677,8 @@ class StreamChatThemeData {
   /// If [reverse] is true, it returns the [otherMessageTheme], otherwise it
   /// returns the [ownMessageTheme].
   StreamMessageThemeData getMessageTheme({bool reverse = false}) {
-    if (reverse) return otherMessageTheme;
-    return ownMessageTheme;
+    if (reverse) return ownMessageTheme;
+    return otherMessageTheme;
   }
 
   /// Creates a copy of [StreamChatThemeData] with specified attributes

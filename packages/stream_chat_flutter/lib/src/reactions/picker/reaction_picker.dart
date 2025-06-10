@@ -36,7 +36,7 @@ class StreamReactionPicker extends StatelessWidget {
     required this.message,
     required this.reactionIcons,
     this.onReactionPicked,
-    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    this.padding = const EdgeInsets.all(4),
     this.scrollable = true,
     this.borderRadius = const BorderRadius.all(Radius.circular(24)),
   });
@@ -85,7 +85,7 @@ class StreamReactionPicker extends StatelessWidget {
 
   /// Padding around the reaction picker.
   ///
-  /// Defaults to `EdgeInsets.symmetric(horizontal: 8, vertical: 4)`.
+  /// Defaults to `EdgeInsets.all(4)`.
   final EdgeInsets padding;
 
   /// Whether the reaction picker should be scrollable.
@@ -108,12 +108,18 @@ class StreamReactionPicker extends StatelessWidget {
       onReactionPicked: onReactionPicked,
     );
 
+    final isSinglePickerIcon = reactionIcons.length == 1;
+    final extraPadding = switch (isSinglePickerIcon) {
+      true => EdgeInsets.zero,
+      false => const EdgeInsets.symmetric(horizontal: 4),
+    };
+
     return Material(
       borderRadius: borderRadius,
       clipBehavior: Clip.antiAlias,
       color: theme.colorTheme.barsBg,
       child: Padding(
-        padding: padding,
+        padding: padding.add(extraPadding),
         child: switch (scrollable) {
           false => reactionPicker,
           true => SingleChildScrollView(

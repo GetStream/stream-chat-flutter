@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/reactions/reactions_align.dart';
+import 'package:stream_chat_flutter/src/reactions/picker/reaction_picker_bubble_overlay.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -71,56 +71,29 @@ class StreamMessageActionsModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
-    final Widget? reactionPicker = switch (showReactionPicker) {
-      false => null,
-      true => LayoutBuilder(
-          builder: (context, constraints) {
-            final orientation = MediaQuery.of(context).orientation;
-            final messageTheme = theme.getMessageTheme(reverse: reverse);
-            final messageFontSize = messageTheme.messageTextStyle?.fontSize;
-
-            final alignment = message.calculateReactionPickerAlignment(
-              constraints: constraints,
-              fontSize: messageFontSize,
-              orientation: orientation,
-              reverse: reverse,
-            );
-
-            final onReactionPicked = switch (onActionTap) {
-              null => null,
-              final onActionTap => (reaction) {
-                  return onActionTap.call(
-                    SelectReaction(message: message, reaction: reaction),
-                  );
-                },
-            };
-
-            return Align(
-              alignment: alignment,
-              child: reactionPickerBuilder(context, message, onReactionPicked),
-            );
-          },
-        ),
-    };
-
     final alignment = switch (reverse) {
       true => AlignmentDirectional.centerEnd,
       false => AlignmentDirectional.centerStart,
     };
 
+    final onReactionPicked = switch (onActionTap) {
+      null => null,
+      final onActionTap => (reaction) => onActionTap(
+            SelectReaction(message: message, reaction: reaction),
+          ),
+    };
+
     return StreamMessageModal(
+      spacing: 4,
       alignment: alignment,
-      headerBuilder: (context) {
-        return Column(
-          spacing: 10,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: alignment.toColumnCrossAxisAlignment(),
-          children: <Widget?>[
-            reactionPicker,
-            IgnorePointer(child: messageWidget),
-          ].nonNulls.toList(growable: false),
-        );
-      },
+      headerBuilder: (context) => ReactionPickerBubbleOverlay(
+        message: message,
+        reverse: reverse,
+        anchorOffset: const Offset(0, -8),
+        onReactionPicked: onReactionPicked,
+        reactionPickerBuilder: reactionPickerBuilder,
+        child: IgnorePointer(child: messageWidget),
+      ),
       contentBuilder: (context) {
         final actions = Column(
           mainAxisSize: MainAxisSize.min,

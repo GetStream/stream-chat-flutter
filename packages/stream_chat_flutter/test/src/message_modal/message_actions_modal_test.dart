@@ -2,6 +2,7 @@
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -141,21 +142,18 @@ void main() {
           final theme = StreamChatTheme.of(context);
           final messageTheme = theme.getMessageTheme(reverse: reverse);
 
-          return Align(
-            alignment: reverse ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 8,
-                horizontal: 16,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: messageTheme.messageBackgroundColor,
-              ),
-              child: Text(
-                message.text ?? '',
-                style: messageTheme.messageTextStyle,
-              ),
+          return Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 8,
+              horizontal: 16,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: messageTheme.messageBackgroundColor,
+            ),
+            child: Text(
+              message.text ?? '',
+              style: messageTheme.messageTextStyle,
             ),
           );
         },
@@ -233,25 +231,27 @@ Widget _wrapWithMaterialApp(
   Brightness? brightness,
   List<StreamReactionIcon>? reactionIcons,
 }) {
-  return MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: StreamChatConfiguration(
-      data: StreamChatConfigurationData(reactionIcons: reactionIcons),
-      child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
-        child: Builder(builder: (context) {
-          final theme = StreamChatTheme.of(context);
-          return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
-            body: ColoredBox(
-              color: theme.colorTheme.overlay,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: child,
+  return Portal(
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: StreamChatConfiguration(
+        data: StreamChatConfigurationData(reactionIcons: reactionIcons),
+        child: StreamChatTheme(
+          data: StreamChatThemeData(brightness: brightness),
+          child: Builder(builder: (context) {
+            final theme = StreamChatTheme.of(context);
+            return Scaffold(
+              backgroundColor: theme.colorTheme.appBg,
+              body: ColoredBox(
+                color: theme.colorTheme.overlay,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: child,
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     ),
   );
