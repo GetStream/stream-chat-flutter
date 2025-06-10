@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
+import 'package:stream_chat_flutter/src/reactions/desktop_reactions_builder.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Signature for the builder function that will be called when the message
@@ -285,31 +285,25 @@ class MessageWidgetContent extends StatelessWidget {
                       Flexible(
                         child: PortalTarget(
                           visible: isMobileDevice && showReactions,
-                          portalFollower: isMobileDevice && showReactions
-                              ? ReactionIndicator(
-                                  message: message,
-                                  messageTheme: messageTheme,
-                                  ownId: streamChat.currentUser!.id,
-                                  reverse: reverse,
-                                  onTap: onReactionsTap,
-                                )
-                              : null,
+                          portalFollower: ReactionIndicator(
+                            message: message,
+                            messageTheme: messageTheme,
+                            ownId: streamChat.currentUser!.id,
+                            reverse: reverse,
+                            onTap: onReactionsTap,
+                          ),
                           anchor: Aligned(
-                            follower: Alignment(
-                              reverse ? 1 : -1,
-                              -1,
-                            ),
-                            target: Alignment(
-                              reverse ? -1 : 1,
-                              -1,
-                            ),
+                            target: Alignment(reverse ? -1 : 1, -1),
+                            follower: Alignment(reverse ? 1 : -1, 1),
+                            offset: Offset(reverse ? 12 : -12, 42),
+                            shiftToWithinBound: const AxisFlag(x: true),
                           ),
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
                               Padding(
                                 padding: showReactions
-                                    ? const EdgeInsets.only(top: 18)
+                                    ? const EdgeInsets.only(top: 28)
                                     : EdgeInsets.zero,
                                 child: (message.isDeleted && !isFailedState)
                                     ? Container(

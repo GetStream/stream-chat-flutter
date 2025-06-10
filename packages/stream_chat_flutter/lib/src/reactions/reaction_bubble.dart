@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -60,44 +59,33 @@ class StreamReactionBubble extends StatelessWidget {
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               color: maskColor,
-              borderRadius: const BorderRadius.all(Radius.circular(16)),
+              borderRadius: const BorderRadius.all(Radius.circular(26)),
             ),
             child: Container(
               padding: EdgeInsets.symmetric(
-                vertical: 4,
-                horizontal: totalReactions > 1 ? 4.0 : 0,
+                vertical: 8,
+                horizontal: totalReactions > 1 ? 12.0 : 8.0,
               ),
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: borderColor,
-                ),
                 color: backgroundColor,
-                borderRadius: const BorderRadius.all(Radius.circular(14)),
+                border: Border.all(color: borderColor),
+                borderRadius: const BorderRadius.all(Radius.circular(24)),
               ),
-              child: LayoutBuilder(
-                builder: (context, constraints) => Flex(
-                  direction: Axis.horizontal,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (constraints.maxWidth < double.infinity)
-                      ...reactions
-                          .take((constraints.maxWidth) ~/ 24)
-                          .map((reaction) => _buildReaction(
-                                reactionIcons,
-                                reaction,
-                                context,
-                              ))
-                          .toList(),
-                    if (constraints.maxWidth == double.infinity)
-                      ...reactions
-                          .map((reaction) => _buildReaction(
-                                reactionIcons,
-                                reaction,
-                                context,
-                              ))
-                          .toList(),
-                  ],
-                ),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                runAlignment: WrapAlignment.center,
+                alignment: WrapAlignment.spaceAround,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  ...reactions.map(
+                    (reaction) => _buildReaction(
+                      context,
+                      reaction,
+                      reactionIcons,
+                    ),
+                  )
+                ],
               ),
             ),
           ),
@@ -113,35 +101,20 @@ class StreamReactionBubble extends StatelessWidget {
   }
 
   Widget _buildReaction(
-    List<StreamReactionIcon> reactionIcons,
-    Reaction reaction,
     BuildContext context,
+    Reaction reaction,
+    List<StreamReactionIcon> reactionIcons,
   ) {
-    final reactionIcon = reactionIcons.firstWhereOrNull(
-      (r) => r.type == reaction.type,
+    final reactionIcon = reactionIcons.firstWhere(
+      (it) => it.type == reaction.type,
+      orElse: () => const StreamReactionIcon.unknown(),
     );
 
-    final chatThemeData = StreamChatTheme.of(context);
-    final userId = StreamChat.of(context).currentUser?.id;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: reactionIcon != null
-          ? ConstrainedBox(
-              constraints: BoxConstraints.tight(const Size.square(14)),
-              child: reactionIcon.builder(
-                context,
-                highlightOwnReactions && reaction.user?.id == userId,
-                16,
-              ),
-            )
-          : Icon(
-              Icons.help_outline_rounded,
-              size: 14,
-              color: (highlightOwnReactions && reaction.user?.id == userId)
-                  ? chatThemeData.colorTheme.accentPrimary
-                  : chatThemeData.colorTheme.textLowEmphasis,
-            ),
-    );
+    final currentUser = StreamChat.of(context).currentUser;
+    final isMyReaction = reaction.userId == currentUser?.id;
+    final isHighlighted = highlightOwnReactions && isMyReaction;
+
+    return reactionIcon.builder(context, isHighlighted, 16);
   }
 
   Widget _buildReactionsTail(BuildContext context) {

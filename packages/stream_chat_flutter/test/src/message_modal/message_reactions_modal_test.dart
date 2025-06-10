@@ -2,7 +2,6 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reactions_card.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
@@ -68,7 +67,7 @@ void main() {
         // Check for reaction picker
         expect(find.byType(StreamReactionPicker), findsOneWidget);
         // Check for reaction details
-        expect(find.byType(ReactionsCard), findsOneWidget);
+        expect(find.byType(StreamUserReactions), findsOneWidget);
       },
     );
 
@@ -94,7 +93,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final avatar = find.descendant(
-          of: find.byType(ReactionsCard),
+          of: find.byType(StreamUserReactions),
           matching: find.byType(StreamUserAvatar),
         );
 

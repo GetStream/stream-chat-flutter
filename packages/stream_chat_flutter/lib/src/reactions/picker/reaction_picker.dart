@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/reaction_picker_icon_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+/// {@template reactionPickerBuilder}
+/// Function signature for building a custom reaction picker widget.
+///
+/// Use this to provide a custom reaction picker in [StreamMessageActionsModal]
+/// or [StreamMessageReactionsModal].
+///
+/// Parameters:
+/// - [context]: The build context.
+/// - [message]: The message to show reactions for.
+/// - [onReactionPicked]: Callback when a reaction is picked.
+/// {@endtemplate}
+typedef ReactionPickerBuilder = Widget Function(
+  BuildContext context,
+  Message message,
+  OnReactionPicked? onReactionPicked,
+);
 
 /// {@template streamReactionPicker}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker.png)
@@ -92,11 +108,10 @@ class StreamReactionPicker extends StatelessWidget {
       onReactionPicked: onReactionPicked,
     );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorTheme.barsBg,
-        borderRadius: borderRadius,
-      ),
+    return Material(
+      borderRadius: borderRadius,
+      clipBehavior: Clip.antiAlias,
+      color: theme.colorTheme.barsBg,
       child: Padding(
         padding: padding,
         child: switch (scrollable) {
