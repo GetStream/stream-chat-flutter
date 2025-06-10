@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/avatars/user_avatar.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/reactions/reaction_bubble.dart';
+import 'package:stream_chat_flutter/src/misc/reaction_icon.dart';
+import 'package:stream_chat_flutter/src/reactions/indicator/reaction_indicator_icon_list.dart';
+import 'package:stream_chat_flutter/src/reactions/reaction_bubble_overlay.dart';
+import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -95,7 +98,15 @@ class _UserReactionItem extends StatelessWidget {
     final isCurrentUserReaction = reactionUser.id == currentUser?.id;
 
     final theme = StreamChatTheme.of(context);
-    final messageTheme = theme.getMessageTheme(reverse: !isCurrentUserReaction);
+    final messageTheme = theme.getMessageTheme(reverse: isCurrentUserReaction);
+
+    final config = StreamChatConfiguration.of(context);
+    final reactionIcons = config.reactionIcons;
+
+    final reactionIcon = reactionIcons.firstWhere(
+      (it) => it.type == reaction.type,
+      orElse: () => const StreamReactionIcon.unknown(),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -112,21 +123,33 @@ class _UserReactionItem extends StatelessWidget {
               constraints: const BoxConstraints.tightFor(height: 64, width: 64),
             ),
             PositionedDirectional(
-              bottom: 0,
+              bottom: 8,
               start: isCurrentUserReaction ? 0 : null,
               end: isCurrentUserReaction ? null : 0,
               child: IgnorePointer(
-                child: StreamReactionBubble(
-                  reactions: [reaction],
-                  reverse: isCurrentUserReaction,
-                  flipTail: isCurrentUserReaction,
-                  backgroundColor: messageTheme.reactionsBackgroundColor ??
-                      Colors.transparent,
-                  borderColor:
-                      messageTheme.reactionsBorderColor ?? Colors.transparent,
-                  maskColor:
-                      messageTheme.reactionsMaskColor ?? Colors.transparent,
-                  tailCirclesSpacing: 1,
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: ReactionBubblePainter(
+                      config: ReactionBubbleConfig(
+                        flipTail: isCurrentUserReaction,
+                        fillColor: messageTheme.reactionsBackgroundColor,
+                        borderColor: messageTheme.reactionsBorderColor,
+                        maskColor: messageTheme.reactionsMaskColor,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: ReactionIndicatorIconList(
+                        indicatorIcons: [
+                          ReactionIndicatorIcon(
+                            type: reactionIcon.type,
+                            isSelected: isCurrentUserReaction,
+                            builder: reactionIcon.builder,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

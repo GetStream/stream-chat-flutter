@@ -59,7 +59,7 @@ void main() {
                 type: reactionIcons.first.type,
                 builder: reactionIcons.first.builder,
               ),
-              onPressed: (type) {},
+              onPressed: () {},
             ),
           ),
         );
@@ -81,7 +81,7 @@ void main() {
                 type: reactionIcons.first.type,
                 builder: reactionIcons.first.builder,
               ),
-              onPressed: (type) {
+              onPressed: () {
                 callbackTriggered = true;
               },
             ),
@@ -110,7 +110,7 @@ void main() {
                 type: reactionIcons.first.type,
                 builder: reactionIcons.first.builder,
               ),
-              onPressed: (type) {},
+              onPressed: () {},
             ),
           ),
         );
@@ -127,7 +127,7 @@ void main() {
                 type: reactionIcons.first.type,
                 builder: reactionIcons.first.builder,
               ),
-              onPressed: (type) {},
+              onPressed: () {},
             ),
           ),
         );

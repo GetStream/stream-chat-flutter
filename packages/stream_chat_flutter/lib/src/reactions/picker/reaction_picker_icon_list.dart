@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// {@template onReactionPressed}
 /// Callback called when a reaction icon is pressed.
 /// {@endtemplate}
-typedef OnReactionPicked = void Function(Reaction reaction);
+typedef OnReactionPicked = ValueSetter<Reaction>;
 
 /// {@template onReactionPickerIconPressed}
 /// Callback called when a reaction picker icon is pressed.
@@ -28,7 +28,7 @@ typedef OnReactionPickerIconPressed = ValueSetter<String>;
 typedef ReactionPickerIconBuilder = Widget Function(
   BuildContext context,
   ReactionPickerIcon icon,
-  OnReactionPickerIconPressed? onPressed,
+  VoidCallback? onPressed,
 );
 
 /// {@template reactionPickerIconList}
@@ -70,7 +70,7 @@ class ReactionPickerIconList extends StatefulWidget {
   static Widget _defaultIconBuilder(
     BuildContext context,
     ReactionPickerIcon icon,
-    OnReactionPickerIconPressed? onPressed,
+    VoidCallback? onPressed,
   ) {
     return ReactionIconButton(
       icon: icon,
@@ -183,8 +183,8 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
                 );
 
                 final onPressed = switch (widget.onReactionPicked) {
-                  final onPicked? => (type) {
-                      final picked = reaction ?? Reaction(type: type);
+                  final onPicked? => () {
+                      final picked = reaction ?? Reaction(type: icon.type);
                       return onPicked(picked);
                     },
                   _ => null,
@@ -222,8 +222,9 @@ class ReactionPickerIcon {
   const ReactionPickerIcon({
     required this.type,
     this.isSelected = false,
-    required this.builder,
-  });
+    this.iconSize = 24,
+    required ReactionIconBuilder builder,
+  }) : _builder = builder;
 
   /// The unique identifier for the reaction type (e.g., "like", "love").
   final String type;
@@ -232,9 +233,13 @@ class ReactionPickerIcon {
   /// user.
   final bool isSelected;
 
-  /// A builder function responsible for creating the widget that visually
-  /// represents this reaction icon.
-  final ReactionIconBuilder builder;
+  /// The size of the reaction icon.
+  final double iconSize;
+
+  /// Builds the actual widget for this reaction icon using the provided
+  /// [context], selection state, and icon size.
+  Widget build(BuildContext context) => _builder(context, isSelected, iconSize);
+  final ReactionIconBuilder _builder;
 }
 
 /// {@template reactionIconButton}
@@ -255,25 +260,20 @@ class ReactionIconButton extends StatelessWidget {
   final ReactionPickerIcon icon;
 
   /// Callback triggered when the reaction picker icon is pressed.
-  final OnReactionPickerIconPressed? onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      iconSize: 24,
-      icon: icon.builder(context, icon.isSelected, 24),
+      key: Key(icon.type),
+      iconSize: icon.iconSize,
+      onPressed: onPressed,
+      icon: icon.build(context),
       padding: const EdgeInsets.all(4),
       style: IconButton.styleFrom(
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        minimumSize: const Size.square(24),
+        minimumSize: Size.square(icon.iconSize),
       ),
-      onPressed: switch (onPressed) {
-        final onPressed? => () {
-            final type = icon.type;
-            return onPressed(type);
-          },
-        _ => null,
-      },
     );
   }
 }

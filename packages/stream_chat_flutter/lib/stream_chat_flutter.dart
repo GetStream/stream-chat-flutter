@@ -106,7 +106,6 @@ export 'src/poll/stream_poll_text_field.dart';
 export 'src/reactions/picker/reaction_picker.dart';
 export 'src/reactions/picker/reaction_picker_icon_list.dart';
 export 'src/reactions/reaction_bubble.dart';
-export 'src/reactions/reaction_indicator.dart';
 export 'src/reactions/user_reactions.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_grid_tile.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_grid_view.dart';

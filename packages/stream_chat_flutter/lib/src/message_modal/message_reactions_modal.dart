@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/reactions/reactions_align.dart';
+import 'package:stream_chat_flutter/src/reactions/reaction_bubble_overlay.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamMessageReactionsModal}
@@ -65,57 +65,42 @@ class StreamMessageReactionsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    final messageTheme = theme.getMessageTheme(reverse: reverse);
-
-    final Widget? reactionPicker = switch (showReactionPicker) {
-      false => null,
-      true => LayoutBuilder(
-          builder: (context, constraints) {
-            final orientation = MediaQuery.of(context).orientation;
-            final messageFontSize = messageTheme.messageTextStyle?.fontSize;
-
-            final alignment = message.calculateReactionPickerAlignment(
-              constraints: constraints,
-              fontSize: messageFontSize,
-              orientation: orientation,
-              reverse: reverse,
-            );
-
-            final onReactionPicked = switch (this.onReactionPicked) {
-              null => null,
-              final onPicked => (reaction) {
-                  return onPicked.call(
-                    SelectReaction(message: message, reaction: reaction),
-                  );
-                },
-            };
-
-            return Align(
-              alignment: alignment,
-              child: reactionPickerBuilder(context, message, onReactionPicked),
-            );
-          },
-        ),
-    };
 
     final alignment = switch (reverse) {
       true => AlignmentDirectional.centerEnd,
       false => AlignmentDirectional.centerStart,
     };
 
+    final onReactionPicked = switch (this.onReactionPicked) {
+      null => null,
+      final onPicked => (reaction) {
+          return onPicked.call(
+            SelectReaction(message: message, reaction: reaction),
+          );
+        },
+    };
+
     return StreamMessageModal(
+      spacing: 4,
       alignment: alignment,
-      headerBuilder: (context) {
-        return Column(
-          spacing: 10,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: alignment.toColumnCrossAxisAlignment(),
-          children: <Widget?>[
-            reactionPicker,
-            IgnorePointer(child: messageWidget),
-          ].nonNulls.toList(growable: false),
-        );
-      },
+      headerBuilder: (context) => ReactionBubbleOverlay(
+        config: ReactionBubbleConfig(
+          maskWidth: 0,
+          borderWidth: 0,
+          fillColor: theme.colorTheme.barsBg,
+        ),
+        anchor: ReactionBubbleAnchor(
+          offset: const Offset(0, -8),
+          follower: AlignmentDirectional.bottomCenter,
+          target: AlignmentDirectional(reverse ? -1 : 1, -1),
+        ),
+        reaction: reactionPickerBuilder.call(
+          context,
+          message,
+          onReactionPicked,
+        ),
+        child: IgnorePointer(child: messageWidget),
+      ),
       contentBuilder: (context) {
         final reactions = message.latestReactions;
         final hasReactions = reactions != null && reactions.isNotEmpty;
