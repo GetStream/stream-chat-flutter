@@ -2662,7 +2662,8 @@ class ChannelClientState {
   /// Updates the [reminder] of the message if it exists.
   void updateReminder(MessageReminder reminder) {
     final messageId = reminder.messageId;
-    for (final message in messages) {
+    // TODO: Improve once we have support for parentId in reminders.
+    for (final message in [...messages, ...threads.values.flattened]) {
       if (message.id == messageId) {
         return updateMessage(
           message.copyWith(reminder: reminder),
@@ -2673,10 +2674,9 @@ class ChannelClientState {
 
   /// Deletes the [reminder] of the message if it exists.
   void deleteReminder(MessageReminder reminder) {
-    // TODO: Delete the reminder from the persistence client.
-
     final messageId = reminder.messageId;
-    for (final message in messages) {
+    // TODO: Improve once we have support for parentId in reminders.
+    for (final message in [...messages, ...threads.values.flattened]) {
       if (message.id == messageId) {
         return updateMessage(
           message.copyWith(reminder: null),
