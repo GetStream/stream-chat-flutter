@@ -573,6 +573,112 @@ void main() {
       });
     });
 
+    group('`.createReminder`', () {
+      const messageId = 'test-message-id';
+
+      setUp(() {
+        when(() => client.createReminder(
+              messageId,
+              remindAt: any(named: 'remindAt'),
+            )).thenAnswer(
+          (_) async => CreateReminderResponse()
+            ..reminder = MessageReminder(
+              messageId: messageId,
+              channelCid: channelCid,
+              userId: 'test-user-id',
+              remindAt: DateTime(2024, 6, 15, 14, 30),
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+        );
+      });
+
+      test('should call client.createReminder', () async {
+        final res = await channel.createReminder(messageId);
+
+        expect(res, isNotNull);
+        expect(res.reminder.messageId, messageId);
+
+        verify(() => channel.client.createReminder(messageId)).called(1);
+      });
+
+      test('with remindAt should pass remindAt to client', () async {
+        final remindAt = DateTime(2024, 6, 15, 14, 30);
+        final res = await channel.createReminder(messageId, remindAt: remindAt);
+
+        expect(res, isNotNull);
+        expect(res.reminder.messageId, messageId);
+        expect(res.reminder.remindAt, remindAt);
+
+        verify(() => channel.client.createReminder(
+              messageId,
+              remindAt: remindAt,
+            )).called(1);
+      });
+    });
+
+    group('`.updateReminder`', () {
+      const messageId = 'test-message-id';
+
+      setUp(() {
+        when(() => client.updateReminder(
+              messageId,
+              remindAt: any(named: 'remindAt'),
+            )).thenAnswer(
+          (_) async => UpdateReminderResponse()
+            ..reminder = MessageReminder(
+              messageId: messageId,
+              channelCid: channelCid,
+              userId: 'test-user-id',
+              remindAt: DateTime(2024, 8, 20, 16, 45),
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+        );
+      });
+
+      test('should call client.updateReminder', () async {
+        final res = await channel.updateReminder(messageId);
+
+        expect(res, isNotNull);
+        expect(res.reminder.messageId, messageId);
+
+        verify(() => channel.client.updateReminder(messageId)).called(1);
+      });
+
+      test('with remindAt should pass remindAt to client', () async {
+        final remindAt = DateTime(2024, 8, 20, 16, 45);
+        final res = await channel.updateReminder(messageId, remindAt: remindAt);
+
+        expect(res, isNotNull);
+        expect(res.reminder.messageId, messageId);
+        expect(res.reminder.remindAt, remindAt);
+
+        verify(() => channel.client.updateReminder(
+              messageId,
+              remindAt: remindAt,
+            )).called(1);
+      });
+    });
+
+    group('`.deleteReminder`', () {
+      const messageId = 'test-message-id';
+
+      setUp(() {
+        when(() => client.deleteReminder(messageId)).thenAnswer(
+          (_) async => EmptyResponse(),
+        );
+      });
+
+      test('should call client.deleteReminder', () async {
+        final res = await channel.deleteReminder(messageId);
+
+        expect(res, isNotNull);
+
+        verify(() => channel.client.deleteReminder(messageId)).called(1);
+      });
+    });
+
     group('`.updateMessage`', () {
       test('should work fine', () async {
         final message = Message(
@@ -4264,6 +4370,335 @@ void main() {
           expect(threadDraft?.message.text, 'updated thread reply');
         },
       );
+    });
+
+    group('Reminder events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('should handle reminder.created event', () async {
+        const messageId = 'test-message-id';
+
+        // Setup initial state with a message without reminder
+        final message = Message(
+          id: messageId,
+          user: client.state.currentUser,
+          text: 'Test message',
+        );
+
+        channel.state?.updateMessage(message);
+
+        // Verify initial state - no reminder
+        final initialMessage = channel.state?.messages.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(initialMessage?.reminder, isNull);
+
+        // Create reminder
+        final reminder = MessageReminder(
+          messageId: messageId,
+          channelCid: channel.cid!,
+          userId: 'test-user-id',
+          remindAt: DateTime.now().add(const Duration(days: 30)),
+        );
+
+        // Create reminder.created event
+        final reminderCreatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.reminderCreated,
+          reminder: reminder,
+        );
+
+        // Dispatch event
+        client.addEvent(reminderCreatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify message reminder was added
+        final updatedMessage = channel.state?.messages.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(updatedMessage?.reminder, isNotNull);
+        expect(updatedMessage?.reminder?.messageId, messageId);
+        expect(updatedMessage?.reminder?.remindAt, reminder.remindAt);
+      });
+
+      test('should handle reminder.updated event', () async {
+        const messageId = 'test-message-id';
+
+        // Setup initial state with a message with existing reminder
+        final remindAt = DateTime.now().add(const Duration(days: 30));
+        final initialReminder = MessageReminder(
+          messageId: messageId,
+          channelCid: channel.cid!,
+          userId: 'test-user-id',
+          remindAt: remindAt,
+        );
+
+        final message = Message(
+          id: messageId,
+          user: client.state.currentUser,
+          text: 'Test message',
+          reminder: initialReminder,
+        );
+
+        channel.state?.updateMessage(message);
+
+        // Verify initial state
+        final initialMessage = channel.state?.messages.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(initialMessage?.reminder, isNotNull);
+        expect(initialMessage?.reminder?.remindAt, remindAt);
+
+        // Create updated reminder
+        final updatedRemindAt = remindAt.add(const Duration(days: 15));
+        final updatedReminder = initialReminder.copyWith(
+          remindAt: updatedRemindAt,
+          updatedAt: DateTime.now(),
+        );
+
+        // Create reminder.updated event
+        final reminderUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.reminderUpdated,
+          reminder: updatedReminder,
+        );
+
+        // Dispatch event
+        client.addEvent(reminderUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify message reminder was updated
+        final updatedMessage = channel.state?.messages.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(updatedMessage?.reminder, isNotNull);
+        expect(updatedMessage?.reminder?.messageId, messageId);
+        expect(updatedMessage?.reminder?.remindAt, updatedRemindAt);
+      });
+
+      test('should handle reminder.deleted event', () async {
+        const messageId = 'test-message-id';
+
+        // Setup initial state with a message with existing reminder
+        final remindAt = DateTime.now().add(const Duration(days: 30));
+        final initialReminder = MessageReminder(
+          messageId: messageId,
+          channelCid: channel.cid!,
+          userId: 'test-user-id',
+          remindAt: remindAt,
+        );
+
+        final message = Message(
+          id: messageId,
+          user: client.state.currentUser,
+          text: 'Test message',
+          reminder: initialReminder,
+        );
+
+        channel.state?.updateMessage(message);
+
+        // Verify initial state
+        final initialMessage = channel.state?.messages.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(initialMessage?.reminder, isNotNull);
+
+        // Create reminder.deleted event
+        final reminderDeletedEvent = Event(
+          cid: channel.cid,
+          type: EventType.reminderDeleted,
+          reminder: initialReminder,
+        );
+
+        // Dispatch event
+        client.addEvent(reminderDeletedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify message reminder was removed
+        final updatedMessage = channel.state?.messages.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(updatedMessage?.reminder, isNull);
+      });
+
+      test('should handle reminder.created event for thread messages',
+          () async {
+        const messageId = 'test-message-id';
+        const parentId = 'test-parent-id';
+
+        // Setup initial state with a thread message without reminder
+        final threadMessage = Message(
+          id: messageId,
+          parentId: parentId,
+          user: client.state.currentUser,
+          text: 'Thread message',
+        );
+
+        channel.state?.updateMessage(threadMessage);
+
+        // Verify initial state - no reminder
+        final initialMessage = channel.state?.threads[parentId]?.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(initialMessage?.reminder, isNull);
+
+        // Create reminder
+        final remindAt = DateTime.now().add(const Duration(days: 30));
+        final reminder = MessageReminder(
+          messageId: messageId,
+          channelCid: channel.cid!,
+          userId: 'test-user-id',
+          remindAt: remindAt,
+        );
+
+        // Create reminder.created event
+        final reminderCreatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.reminderCreated,
+          reminder: reminder,
+        );
+
+        // Dispatch event
+        client.addEvent(reminderCreatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify thread message reminder was added
+        final updatedMessage = channel.state?.threads[parentId]?.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(updatedMessage?.reminder, isNotNull);
+        expect(updatedMessage?.reminder?.messageId, messageId);
+        expect(updatedMessage?.reminder?.remindAt, reminder.remindAt);
+      });
+
+      test('should handle reminder.updated event for thread messages',
+          () async {
+        const messageId = 'test-message-id';
+        const parentId = 'test-parent-id';
+
+        // Setup initial state with a thread message with existing reminder
+        final remindAt = DateTime.now().add(const Duration(days: 30));
+        final initialReminder = MessageReminder(
+          messageId: messageId,
+          channelCid: channel.cid!,
+          userId: 'test-user-id',
+          remindAt: remindAt,
+        );
+
+        final threadMessage = Message(
+          id: messageId,
+          parentId: parentId,
+          user: client.state.currentUser,
+          text: 'Thread message',
+          reminder: initialReminder,
+        );
+
+        channel.state?.updateMessage(threadMessage);
+
+        // Verify initial state
+        final initialMessage = channel.state?.threads[parentId]?.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(initialMessage?.reminder, isNotNull);
+        expect(initialMessage?.reminder?.remindAt, remindAt);
+
+        // Create updated reminder
+        final updatedRemindAt = remindAt.add(const Duration(days: 15));
+        final updatedReminder = initialReminder.copyWith(
+          remindAt: updatedRemindAt,
+          updatedAt: DateTime.now(),
+        );
+
+        // Create reminder.updated event
+        final reminderUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.reminderUpdated,
+          reminder: updatedReminder,
+        );
+
+        // Dispatch event
+        client.addEvent(reminderUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify thread message reminder was updated
+        final updatedMessage = channel.state?.threads[parentId]?.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(updatedMessage?.reminder, isNotNull);
+        expect(updatedMessage?.reminder?.messageId, messageId);
+        expect(updatedMessage?.reminder?.remindAt, updatedRemindAt);
+      });
+
+      test('should handle reminder.deleted event for thread messages',
+          () async {
+        const messageId = 'test-message-id';
+        const parentId = 'test-parent-id';
+
+        // Setup initial state with a thread message with existing reminder
+        final remindAt = DateTime.now().add(const Duration(days: 30));
+        final initialReminder = MessageReminder(
+          messageId: messageId,
+          channelCid: channel.cid!,
+          userId: 'test-user-id',
+          remindAt: remindAt,
+        );
+
+        final threadMessage = Message(
+          id: messageId,
+          parentId: parentId,
+          user: client.state.currentUser,
+          text: 'Thread message',
+          reminder: initialReminder,
+        );
+
+        channel.state?.updateMessage(threadMessage);
+
+        // Verify initial state
+        final initialMessage = channel.state?.threads[parentId]?.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(initialMessage?.reminder, isNotNull);
+
+        // Create reminder.deleted event
+        final reminderDeletedEvent = Event(
+          cid: channel.cid,
+          type: EventType.reminderDeleted,
+          reminder: initialReminder,
+        );
+
+        // Dispatch event
+        client.addEvent(reminderDeletedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify thread message reminder was removed
+        final updatedMessage = channel.state?.threads[parentId]?.firstWhere(
+          (m) => m.id == messageId,
+        );
+        expect(updatedMessage?.reminder, isNull);
+      });
     });
   });
 

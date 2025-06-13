@@ -57,7 +57,10 @@ class _ChannelList extends State<ChannelList> {
     client: StreamChat.of(context).client,
     filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
     channelStateSort: [
-      const SortOption(ChannelSortKey.pinnedAt),
+      const SortOption(
+        ChannelSortKey.pinnedAt,
+        nullOrdering: NullOrdering.nullsLast,
+      ),
       const SortOption(ChannelSortKey.lastMessageAt),
     ],
     limit: 30,

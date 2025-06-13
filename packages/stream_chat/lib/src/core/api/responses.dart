@@ -11,6 +11,7 @@ import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
@@ -763,4 +764,41 @@ class QueryDraftsResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryDraftsResponse fromJson(Map<String, dynamic> json) =>
       _$QueryDraftsResponseFromJson(json);
+}
+
+/// Base Model response for draft based api calls.
+class MessageReminderResponse extends _BaseResponse {
+  /// Draft returned by the api call
+  late MessageReminder reminder;
+}
+
+/// Model response for [StreamChatClient.createReminder] api call
+@JsonSerializable(createToJson: false)
+class CreateReminderResponse extends MessageReminderResponse {
+  /// Create a new instance from a json
+  static CreateReminderResponse fromJson(Map<String, dynamic> json) =>
+      _$CreateReminderResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updateReminder] api call
+@JsonSerializable(createToJson: false)
+class UpdateReminderResponse extends MessageReminderResponse {
+  /// Create a new instance from a json
+  static UpdateReminderResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdateReminderResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryReminders] api call
+@JsonSerializable(createToJson: false)
+class QueryRemindersResponse extends _BaseResponse {
+  /// List of reminders returned by the query
+  @JsonKey(defaultValue: [])
+  late List<MessageReminder> reminders;
+
+  /// The next page token
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryRemindersResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryRemindersResponseFromJson(json);
 }

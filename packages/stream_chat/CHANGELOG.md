@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added support for `MessageReminder` feature, which allows users to bookmark or set reminders
+  for specific messages in a channel.
+
 ## 9.11.0
 
 ✅ Added
