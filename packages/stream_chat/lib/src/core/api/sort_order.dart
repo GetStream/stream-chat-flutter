@@ -15,11 +15,13 @@ typedef SortOrder<T extends ComparableFieldProvider> = List<SortOption<T>>;
 
 /// Defines how null values should be ordered in a sort operation.
 enum NullOrdering {
-  /// Null values are treated as less than any non-null value.
+  /// Null values appear at the beginning of the sorted list,
+  /// regardless of sort direction (ASC or DESC).
   nullsFirst,
 
-  /// Null values are treated as greater than any non-null value.
-  nullsLast,
+  /// Null values appear at the end of the sorted list,
+  /// regardless of sort direction (ASC or DESC).
+  nullsLast;
 }
 
 /// A sort specification for objects that implement [ComparableFieldProvider].
@@ -55,9 +57,9 @@ class SortOption<T extends ComparableFieldProvider> {
   /// ```
   const SortOption.desc(
     this.field, {
+    this.nullOrdering = NullOrdering.nullsFirst,
     Comparator<T>? comparator,
   })  : direction = SortOption.DESC,
-        nullOrdering = NullOrdering.nullsFirst,
         _comparator = comparator;
 
   /// Creates a SortOption for ascending order sorting by the specified field.
@@ -69,9 +71,9 @@ class SortOption<T extends ComparableFieldProvider> {
   /// ```
   const SortOption.asc(
     this.field, {
+    this.nullOrdering = NullOrdering.nullsLast,
     Comparator<T>? comparator,
   })  : direction = SortOption.ASC,
-        nullOrdering = NullOrdering.nullsLast,
         _comparator = comparator;
 
   /// Create a new instance from JSON.
@@ -104,13 +106,15 @@ class SortOption<T extends ComparableFieldProvider> {
   /// - 1 if the first object is greater than the second
   /// - -1 if the first object is less than the second
   ///
-  /// Handles null values by treating null as less than any non-null value.
+  /// Handles null values according to the nullOrdering setting.
+  /// NULLS FIRST puts nulls at the beginning regardless of sort direction.
+  /// NULLS LAST puts nulls at the end regardless of sort direction.
   ///
   /// ```dart
   /// final sortOption = SortOption<ChannelState>("last_message_at");
   /// final sortedChannels = channels.sort(sortOption.compare);
   /// ```
-  int compare(T a, T b) => direction * comparator(a, b);
+  int compare(T a, T b) => comparator(a, b);
 
   /// Returns a comparator function for sorting objects of type T.
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -128,11 +132,13 @@ class SortOption<T extends ComparableFieldProvider> {
   final Comparator<T>? _comparator;
 
   int _compareNullableFields(ComparableField? a, ComparableField? b) {
+    // Handle nulls first, independent of sort direction
     if (a == null && b == null) return 0;
     if (a == null) return nullOrdering == NullOrdering.nullsFirst ? -1 : 1;
     if (b == null) return nullOrdering == NullOrdering.nullsFirst ? 1 : -1;
 
-    return a.compareTo(b);
+    // Apply direction only to non-null comparisons
+    return direction * a.compareTo(b);
   }
 
   /// Converts this option to JSON.
