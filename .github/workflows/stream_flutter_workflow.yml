@@ -153,7 +153,7 @@ jobs:
             working-directory: sample_app/android
             build-command: bundle exec fastlane build_apk
           - platform: ios
-            os: macos-latest
+            os: macos-15 # Requires xcode 15 or later
             working-directory: sample_app/ios
             build-command: bundle exec fastlane build_ipa no_codesign:true
 
