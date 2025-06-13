@@ -102,6 +102,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
     this.attachmentActionsModalBuilder,
+    this.underMessageTextWidgetBuilder,
   });
 
   /// {@template onMentionTap}
@@ -394,6 +395,9 @@ class StreamMessageWidget extends StatefulWidget {
   /// Defaults to [center]
   final String /*center|top|bottom|left|right*/
       imageAttachmentThumbnailCropType;
+
+  ///widget under message
+  final Widget Function(BuildContext, Message)? underMessageTextWidgetBuilder;
 
   /// {@template copyWith}
   /// Creates a copy of [StreamMessageWidget] with specified attributes

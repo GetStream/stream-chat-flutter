@@ -37,6 +37,7 @@ class MessageCard extends StatefulWidget {
     this.onLinkTap,
     this.onMentionTap,
     this.onQuotedMessageTap,
+    this.underMessageTextWidgetBuilder,
   });
 
   /// {@macro isFailedState}
@@ -119,6 +120,9 @@ class MessageCard extends StatefulWidget {
 
   /// {@macro reverse}
   final bool reverse;
+
+  /// {@macro underMessageTextWidgetBuilder}
+  final Widget Function(BuildContext, Message)? underMessageTextWidgetBuilder;
 
   @override
   State<MessageCard> createState() => _MessageCardState();

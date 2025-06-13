@@ -76,6 +76,7 @@ class MessageWidgetContent extends StatelessWidget {
     this.quotedMessageBuilder,
     this.bottomRowBuilderWithDefaultWidget,
     this.userAvatarBuilder,
+    this.underMessageTextWidgetBuilder,
   });
 
   /// {@macro reverse}
@@ -227,6 +228,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro userAvatarBuilder}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
+  
+  /// {@macro underMessageTextWidgetBuilder}
+  final Widget Function(BuildContext, Message)? underMessageTextWidgetBuilder;
 
   @override
   Widget build(BuildContext context) {

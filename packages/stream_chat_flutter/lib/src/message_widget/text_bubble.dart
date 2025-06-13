@@ -20,6 +20,7 @@ class TextBubble extends StatelessWidget {
     this.textBuilder,
     this.onLinkTap,
     this.onMentionTap,
+    this.underMessageTextWidgetBuilder,
   });
 
   /// {@macro message}
@@ -49,25 +50,33 @@ class TextBubble extends StatelessWidget {
   /// {@macro hasQuotedMessage}
   final bool hasQuotedMessage;
 
+  /// {@macro underMessageTextWidgetBuilder}
+  final Widget Function(BuildContext, Message)? underMessageTextWidgetBuilder;
+
   @override
   Widget build(BuildContext context) {
     if (message.text?.trim().isEmpty ?? true) return const Empty();
     return Padding(
       padding: isOnlyEmoji ? EdgeInsets.zero : textPadding,
-      child: textBuilder != null
-          ? textBuilder!(context, message)
-          : StreamMessageText(
-              onLinkTap: onLinkTap,
-              message: message,
-              onMentionTap: onMentionTap,
-              messageTheme: isOnlyEmoji
-                  ? messageTheme.copyWith(
-                      messageTextStyle: messageTheme.messageTextStyle!.copyWith(
-                        fontSize: 42,
-                      ),
-                    )
-                  : messageTheme,
-            ),
+      child: Column(children: [
+        if (underMessageTextWidgetBuilder != null)
+          underMessageTextWidgetBuilder!(context, message),
+        if (textBuilder != null)
+          textBuilder!(context, message)
+        else
+          StreamMessageText(
+            onLinkTap: onLinkTap,
+            message: message,
+            onMentionTap: onMentionTap,
+            messageTheme: isOnlyEmoji
+                ? messageTheme.copyWith(
+                    messageTextStyle: messageTheme.messageTextStyle!.copyWith(
+                      fontSize: 42,
+                    ),
+                  )
+                : messageTheme,
+          ),
+      ]),
     );
   }
 }
