@@ -92,3 +92,14 @@ extension IterableMergeExtension<T extends Object?> on Iterable<T> {
     return itemMap.values;
   }
 }
+
+/// Extension on [Object] providing safe casting functionality.
+extension SafeCastExtension on Object? {
+  /// Safely casts the object to a specific type.
+  ///
+  /// Returns null if the object is null or cannot be cast to the type.
+  T? safeCast<T>() {
+    if (this is T) return this as T;
+    return null;
+  }
+}

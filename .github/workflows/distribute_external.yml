@@ -80,13 +80,13 @@ jobs:
           bundler-cache: true
           working-directory: sample_app/android
 
-      - name: Setup Firebase Service Account'
+      - name: Distribute to S3
         working-directory: sample_app/android
-        run: echo "${{ secrets.SAMPLE_FIREBASE_UPLOAD_CREDENTIALS }}" | base64 --decode | jq > ./firebase-service-account.json
-
-      - name: Distribute to Firebase
-        working-directory: sample_app/android
-        run: bundle exec fastlane distribute_to_firebase
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        run: bundle exec fastlane distribute_to_s3
 
   ios:
     needs: determine_platforms

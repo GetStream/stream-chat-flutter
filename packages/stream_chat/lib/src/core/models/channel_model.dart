@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'channel_model.g.dart';
@@ -118,18 +119,21 @@ class ChannelModel {
 
   /// True if the channel is disabled
   @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get disabled => extraData['disabled'] as bool?;
+  bool? get disabled => extraData['disabled'].safeCast<bool>();
 
   /// True if the channel is hidden
   @JsonKey(includeToJson: false, includeFromJson: false)
-  bool? get hidden => extraData['hidden'] as bool?;
+  bool? get hidden => extraData['hidden'].safeCast<bool>();
 
   /// The date of the last time channel got truncated
   @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime? get truncatedAt {
-    final truncatedAt = extraData['truncated_at'] as String?;
-    if (truncatedAt == null) return null;
-    return DateTime.parse(truncatedAt);
+    final truncatedAt = extraData['truncated_at'].safeCast<String>();
+    if (truncatedAt != null && truncatedAt.isNotEmpty) {
+      return DateTime.parse(truncatedAt);
+    }
+
+    return null;
   }
 
   /// Map of custom channel extraData
@@ -138,6 +142,14 @@ class ChannelModel {
   /// The team the channel belongs to
   @JsonKey(includeToJson: false)
   final String? team;
+
+  /// Shortcut for channel name
+  String? get name {
+    final name = extraData['name'].safeCast<String>();
+    if (name != null && name.isNotEmpty) return name;
+
+    return null;
+  }
 
   /// Known top level fields.
   /// Useful for [Serializer] methods.
@@ -158,9 +170,6 @@ class ChannelModel {
     'team',
     'cooldown',
   ];
-
-  /// Shortcut for channel name
-  String? get name => extraData['name'] as String?;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
