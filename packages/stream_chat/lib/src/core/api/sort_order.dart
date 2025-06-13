@@ -94,7 +94,7 @@ class SortOption<T extends ComparableFieldProvider> {
   ///
   /// Defaults to `NullOrdering.nullsFirst`, which treats null values as less
   /// than any non-null value.
-  @JsonKey(includeToJson: false)
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final NullOrdering nullOrdering;
 
   /// Compares two objects of type T using the specified field and direction.
