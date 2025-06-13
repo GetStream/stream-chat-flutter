@@ -91,7 +91,8 @@ jobs:
   ios:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
-    runs-on: macos-15 # Testflight requires macOS 15 or later
+    runs-on: macos-15 # Requires xcode 15 or later
+
     steps:
       - name: Connect Bot
         uses: webfactory/ssh-agent@v0.9.1
