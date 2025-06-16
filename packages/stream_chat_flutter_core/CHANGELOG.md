@@ -1,3 +1,7 @@
+## 9.11.0
+
+- Updated `stream_chat` dependency to [`9.11.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.10.0
 
 🐞 Fixed
