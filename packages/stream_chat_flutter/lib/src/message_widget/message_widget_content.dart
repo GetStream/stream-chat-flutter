@@ -53,7 +53,6 @@ class MessageWidgetContent extends StatelessWidget {
     required this.onReplyTap,
     required this.attachmentActionsModalBuilder,
     required this.textPadding,
-    required this.showReactionPickerTail,
     required this.translateUserAvatar,
     required this.bottomRowPadding,
     required this.showInChannel,
@@ -188,9 +187,6 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro quotedMessageBuilder}
   final Widget Function(BuildContext, Message)? quotedMessageBuilder;
-
-  /// {@macro showReactionPickerTail}
-  final bool showReactionPickerTail;
 
   /// {@macro translateUserAvatar}
   final bool translateUserAvatar;

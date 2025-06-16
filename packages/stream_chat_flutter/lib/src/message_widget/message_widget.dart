@@ -52,7 +52,6 @@ class StreamMessageWidget extends StatefulWidget {
     this.onReactionsTap,
     this.onReactionsHover,
     this.showReactionPicker = true,
-    this.showReactionTail,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
     this.showThreadReplyIndicator = false,
@@ -259,12 +258,6 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showReactionPicker;
 
-  /// {@template showReactionPickerTail}
-  /// Whether or not to show the reaction picker tail.
-  /// This is calculated internally in most cases and does not need to be set.
-  /// {@endtemplate}
-  final bool? showReactionTail;
-
   /// {@template onShowMessage}
   /// Callback when show message is tapped
   /// {@endtemplate}
@@ -439,7 +432,6 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(String)? onLinkTap,
     bool? showReactionBrowser,
     bool? showReactionPicker,
-    bool? showReactionTail,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
@@ -509,7 +501,6 @@ class StreamMessageWidget extends StatefulWidget {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
-      showReactionTail: showReactionTail ?? this.showReactionTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
@@ -747,7 +738,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                 messageWidget: widget,
                 showBottomRow: showBottomRow,
                 showPinHighlight: widget.showPinHighlight,
-                showReactionPickerTail: widget.showReactionTail == true,
                 showReactions: shouldShowReactions,
                 onReactionsTap: () {
                   final message = widget.message;
@@ -935,7 +925,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               showSendingIndicator: false,
               padding: EdgeInsets.zero,
               showPinHighlight: false,
-              showReactionTail: showPicker,
               showUserAvatar: switch (widget.reverse) {
                 true => DisplayWidget.gone,
                 false => DisplayWidget.show,
@@ -1054,7 +1043,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               showSendingIndicator: false,
               padding: EdgeInsets.zero,
               showPinHighlight: false,
-              showReactionTail: showPicker,
               showUserAvatar: switch (widget.reverse) {
                 true => DisplayWidget.gone,
                 false => DisplayWidget.show,
