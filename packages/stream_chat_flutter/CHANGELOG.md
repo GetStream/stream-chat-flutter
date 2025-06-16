@@ -24,9 +24,12 @@ For more details, please refer to the [migration guide](Unpublished).
     ),
   );
   ```
+- Added `desktopOrWeb` parameter to `PlatformWidgetBuilder` to allow specifying a single builder for both desktop and web platforms.
+- Added `reactionPickerBuilder` to `StreamMessageActionsModal`, `StreamMessageReactionsModal`, and `StreamMessageWidget` to enable custom reaction picker widgets.
+- Added `StreamReactionIcon.defaultReactions` providing a predefined list of common reaction icons.
 - Exported `StreamMessageActionsModal` and `StreamModeratedMessageActionsModal` which are now based on `StreamMessageModal` for consistent styling and behavior.
 
-## Upcoming
+## 9.11.0
 
 🐞 Fixed
 
@@ -42,12 +45,6 @@ For more details, please refer to the [migration guide](Unpublished).
 
 - Updated `share_plus` dependency to `^11.0.0`.
 - Updated `desktop_drop` dependency to `">=0.5.0 <0.7.0"`.
-
-✅ Added
-
-- Added `desktopOrWeb` parameter to `PlatformWidgetBuilder` to allow specifying a single builder for both desktop and web platforms.
-- Added `reactionPickerBuilder` to `StreamMessageActionsModal`, `StreamMessageReactionsModal`, and `StreamMessageWidget` to enable custom reaction picker widgets.
-- Added `StreamReactionIcon.defaultReactions` providing a predefined list of common reaction icons.
 
 ## 9.9.0
 

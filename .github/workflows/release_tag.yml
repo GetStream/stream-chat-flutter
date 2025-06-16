@@ -1,0 +1,56 @@
+name: release_tag
+
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    # Only run this job for commits that indicate a release
+    if: "${{ startsWith(github.event.head_commit.message, 'chore(repo): release') }}"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create and push tags
+
+    steps:
+      - name: 📚 Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+
+      - name: 🏷️ Extract Version Tag
+        id: extract_tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          commit_msg="${{ github.event.head_commit.message }}"
+          echo "📦 Commit message: $commit_msg"
+
+          # Match vX.Y.Z or vX.Y.Z-suffix (case-insensitive)
+          version_regex='[vV][0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.\-]+)?'
+
+          if [[ "$commit_msg" =~ $version_regex ]]; then
+            version="${BASH_REMATCH[0]}"
+            echo "✅ Found version tag: $version"
+            echo "tag=$version" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error ::❌ No SemVer tag found in commit message."
+            echo "::error ::Expected something like: 'chore(repo): release v1.2.3[-beta]'"
+            exit 1
+          fi
+
+      - name: 🚀 Create and Push Tag
+        shell: bash
+        run: |
+          git config user.name "Stream SDK Bot"
+          git config user.email "60655709+Stream-SDK-Bot@users.noreply.github.com"
+          
+          echo "Creating and pushing tag: ${{ steps.extract_tag.outputs.tag }}"
+          git tag ${{ steps.extract_tag.outputs.tag }}
+          git push origin ${{ steps.extract_tag.outputs.tag }}

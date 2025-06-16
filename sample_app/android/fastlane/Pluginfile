@@ -4,3 +4,4 @@
 
 gem 'fastlane-plugin-stream_actions'
 gem 'fastlane-plugin-firebase_app_distribution'
+gem 'fastlane-plugin-aws_s3'
