@@ -20,7 +20,7 @@ class StreamMessageActionsModal extends StatelessWidget {
     required this.messageActions,
     required this.messageWidget,
     this.reverse = false,
-    this.showReactionPicker = true,
+    this.showReactionPicker = false,
     this.reactionPickerBuilder = StreamReactionPicker.builder,
     this.onActionTap,
   });
