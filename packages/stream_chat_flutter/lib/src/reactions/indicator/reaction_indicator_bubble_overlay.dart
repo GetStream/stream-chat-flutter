@@ -4,7 +4,15 @@ import 'package:stream_chat_flutter/src/reactions/reaction_bubble_overlay.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// {@template reactionIndicatorBubbleOverlay}
+/// A widget that displays a reaction indicator bubble overlay attached to a
+/// [child] widget. Typically used to show the reactions for a [Message].
+///
+/// It positions the reaction indicator relative to the provided [child] widget,
+/// using the given [anchorOffset] and [childSizeDelta] for fine-tuned placement
+/// {@endtemplate}
 class ReactionIndicatorBubbleOverlay extends StatelessWidget {
+  /// {@macro reactionIndicatorBubbleOverlay}
   const ReactionIndicatorBubbleOverlay({
     super.key,
     this.onTap,
@@ -16,18 +24,25 @@ class ReactionIndicatorBubbleOverlay extends StatelessWidget {
     this.childSizeDelta = Offset.zero,
   });
 
+  /// Whether the overlay should be visible.
   final bool visible;
+
+  /// Whether to reverse the alignment of the overlay.
   final bool reverse;
+
+  /// The widget to which the overlay is anchored.
   final Widget child;
 
-  /// Message to attach the reaction to.
+  /// The message to display reactions for.
   final Message message;
 
   /// Callback triggered when the reaction indicator is tapped.
   final VoidCallback? onTap;
 
+  /// The offset to apply to the anchor position.
   final Offset anchorOffset;
 
+  /// The additional size delta to apply to the child widget for positioning.
   final Offset childSizeDelta;
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/reactions/reaction_bubble_overlay.dart';
+import 'package:stream_chat_flutter/src/reactions/picker/reaction_picker_bubble_overlay.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamMessageReactionsModal}
@@ -64,8 +64,6 @@ class StreamMessageReactionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     final alignment = switch (reverse) {
       true => AlignmentDirectional.centerEnd,
       false => AlignmentDirectional.centerStart,
@@ -83,22 +81,13 @@ class StreamMessageReactionsModal extends StatelessWidget {
     return StreamMessageModal(
       spacing: 4,
       alignment: alignment,
-      headerBuilder: (context) => ReactionBubbleOverlay(
-        config: ReactionBubbleConfig(
-          maskWidth: 0,
-          borderWidth: 0,
-          fillColor: theme.colorTheme.barsBg,
-        ),
-        anchor: ReactionBubbleAnchor(
-          offset: const Offset(0, -8),
-          follower: AlignmentDirectional.bottomCenter,
-          target: AlignmentDirectional(reverse ? -1 : 1, -1),
-        ),
-        reaction: reactionPickerBuilder.call(
-          context,
-          message,
-          onReactionPicked,
-        ),
+      headerBuilder: (context) => ReactionPickerBubbleOverlay(
+        message: message,
+        reverse: reverse,
+        visible: showReactionPicker,
+        anchorOffset: const Offset(0, -8),
+        onReactionPicked: onReactionPicked,
+        reactionPickerBuilder: reactionPickerBuilder,
         child: IgnorePointer(child: messageWidget),
       ),
       contentBuilder: (context) {

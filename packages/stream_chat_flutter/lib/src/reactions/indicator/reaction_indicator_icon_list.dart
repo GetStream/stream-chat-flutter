@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/reaction_icon.dart';
 
-/// {@template reactionPickerIconBuilder}
+/// {@template reactionIndicatorIconBuilder}
 /// Function signature for building a custom reaction icon widget.
 ///
 /// This is used to customize how each reaction icon is displayed in the
-/// [ReactionPickerIconList].
+/// [ReactionIndicatorIconList].
 ///
 /// Parameters:
 /// - [context]: The build context.
@@ -16,17 +16,26 @@ typedef ReactionIndicatorIconBuilder = Widget Function(
   ReactionIndicatorIcon icon,
 );
 
+/// {@template reactionIndicatorIconList}
+/// A widget that displays a list of reactionIcons that users have reacted with
+/// on a message.
+///
+/// also see:
+/// - [StreamReactionIndicator], which is a higher-level widget that uses this
+///   widget to display a reaction indicator in a modal or inline.
+/// {@endtemplate}
 class ReactionIndicatorIconList extends StatelessWidget {
+  /// {@macro reactionIndicatorIconList}
   const ReactionIndicatorIconList({
     super.key,
     required this.indicatorIcons,
     this.iconBuilder = _defaultIconBuilder,
   });
 
-  /// The list of available reaction picker icons.
+  /// The list of available reaction indicator icons.
   final List<ReactionIndicatorIcon> indicatorIcons;
 
-  /// The builder used to create the reaction picker icons.
+  /// The builder used to create the reaction indicator icons.
   final ReactionIndicatorIconBuilder iconBuilder;
 
   static Widget _defaultIconBuilder(

@@ -3,7 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/reactions/indicator/reaction_indicator_icon_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template streamReactionIndicator}
+/// A widget that displays a horizontal list of reaction icons that users have
+/// reacted with on a message.
+///
+/// This widget is typically used to show the reactions on a message in a
+/// compact way, allowing users to see which reactions have been added
+/// to a message without opening a full user reactions view.
+/// {@endtemplate}
 class StreamReactionIndicator extends StatelessWidget {
+  /// {@macro streamReactionIndicator}
   const StreamReactionIndicator({
     super.key,
     this.onTap,

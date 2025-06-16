@@ -124,8 +124,8 @@ class _UserReactionItem extends StatelessWidget {
             ),
             PositionedDirectional(
               bottom: 8,
-              start: isCurrentUserReaction ? 0 : null,
               end: isCurrentUserReaction ? null : 0,
+              start: isCurrentUserReaction ? 0 : null,
               child: IgnorePointer(
                 child: RepaintBoundary(
                   child: CustomPaint(

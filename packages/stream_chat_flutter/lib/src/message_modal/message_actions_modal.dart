@@ -89,6 +89,7 @@ class StreamMessageActionsModal extends StatelessWidget {
       headerBuilder: (context) => ReactionPickerBubbleOverlay(
         message: message,
         reverse: reverse,
+        visible: showReactionPicker,
         anchorOffset: const Offset(0, -8),
         onReactionPicked: onReactionPicked,
         reactionPickerBuilder: reactionPickerBuilder,

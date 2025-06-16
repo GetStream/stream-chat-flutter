@@ -56,6 +56,7 @@ class ReactionBubbleAnchor {
 
 /// An overlay widget that displays a reaction bubble near a child widget.
 class ReactionBubbleOverlay extends StatefulWidget {
+  /// Creates a new instance of [ReactionBubbleOverlay].
   const ReactionBubbleOverlay({
     super.key,
     this.visible = true,
@@ -177,6 +178,7 @@ class _ReactionBubbleOverlayState extends State<ReactionBubbleOverlay> {
 
 /// Defines the visual configuration of a ReactionBubble.
 class ReactionBubbleConfig {
+  /// Creates a new instance of [ReactionBubbleConfig] with default values.
   const ReactionBubbleConfig({
     this.flipTail = false,
     this.fillColor,
