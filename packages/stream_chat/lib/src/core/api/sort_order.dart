@@ -119,9 +119,11 @@ class SortOption<T extends ComparableFieldProvider> {
   /// Returns a comparator function for sorting objects of type T.
   @JsonKey(includeToJson: false, includeFromJson: false)
   Comparator<T> get comparator {
-    if (_comparator case final comparator?) return comparator;
+    if (_comparator case final comparator?) {
+      return (a, b) => direction * comparator(a, b);
+    }
 
-    return (T a, T b) {
+    return (a, b) {
       final aValue = a.getComparableField(field);
       final bValue = b.getComparableField(field);
 

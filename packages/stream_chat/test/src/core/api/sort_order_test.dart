@@ -140,7 +140,7 @@ void main() {
       const a = TestModel(name: 'longer_name');
       const b = TestModel(name: 'short');
 
-      expect(option.compare(a, b), lessThan(0));
+      expect(option.compare(a, b), greaterThan(0));
     });
 
     test('should respect explicit nullOrdering=nullsLast on DESC', () {
