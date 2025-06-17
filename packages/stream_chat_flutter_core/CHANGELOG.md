@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamMessageReminderListController` to manage the list of message reminders.
+
 ## 9.11.0
 
 - Updated `stream_chat` dependency to [`9.11.0`](https://pub.dev/packages/stream_chat/changelog).

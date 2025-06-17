@@ -13,6 +13,17 @@ part 'sort_order.g.dart';
 /// Example: `Sort<ChannelState>([pinnedAtSort, lastMessageAtSort])`
 typedef SortOrder<T extends ComparableFieldProvider> = List<SortOption<T>>;
 
+/// Defines how null values should be ordered in a sort operation.
+enum NullOrdering {
+  /// Null values appear at the beginning of the sorted list,
+  /// regardless of sort direction (ASC or DESC).
+  nullsFirst,
+
+  /// Null values appear at the end of the sorted list,
+  /// regardless of sort direction (ASC or DESC).
+  nullsLast;
+}
+
 /// A sort specification for objects that implement [ComparableFieldProvider].
 ///
 /// Defines a field to sort by and a direction (ascending or descending).
@@ -33,6 +44,7 @@ class SortOption<T extends ComparableFieldProvider> {
   const SortOption(
     this.field, {
     this.direction = SortOption.DESC,
+    this.nullOrdering = NullOrdering.nullsFirst,
     Comparator<T>? comparator,
   }) : _comparator = comparator;
 
@@ -45,6 +57,7 @@ class SortOption<T extends ComparableFieldProvider> {
   /// ```
   const SortOption.desc(
     this.field, {
+    this.nullOrdering = NullOrdering.nullsFirst,
     Comparator<T>? comparator,
   })  : direction = SortOption.DESC,
         _comparator = comparator;
@@ -58,6 +71,7 @@ class SortOption<T extends ComparableFieldProvider> {
   /// ```
   const SortOption.asc(
     this.field, {
+    this.nullOrdering = NullOrdering.nullsLast,
     Comparator<T>? comparator,
   })  : direction = SortOption.ASC,
         _comparator = comparator;
@@ -78,6 +92,13 @@ class SortOption<T extends ComparableFieldProvider> {
   /// The sort direction (ASC or DESC)
   final int direction;
 
+  /// The null ordering strategy to use when comparing null values.
+  ///
+  /// Defaults to `NullOrdering.nullsFirst`, which treats null values as less
+  /// than any non-null value.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  final NullOrdering nullOrdering;
+
   /// Compares two objects of type T using the specified field and direction.
   ///
   /// Returns:
@@ -85,33 +106,42 @@ class SortOption<T extends ComparableFieldProvider> {
   /// - 1 if the first object is greater than the second
   /// - -1 if the first object is less than the second
   ///
-  /// Handles null values by treating null as less than any non-null value.
+  /// Handles null values according to the nullOrdering setting.
+  /// NULLS FIRST puts nulls at the beginning regardless of sort direction.
+  /// NULLS LAST puts nulls at the end regardless of sort direction.
   ///
   /// ```dart
   /// final sortOption = SortOption<ChannelState>("last_message_at");
   /// final sortedChannels = channels.sort(sortOption.compare);
   /// ```
-  int compare(T a, T b) => direction * comparator(a, b);
+  int compare(T a, T b) => comparator(a, b);
 
   /// Returns a comparator function for sorting objects of type T.
   @JsonKey(includeToJson: false, includeFromJson: false)
   Comparator<T> get comparator {
-    if (_comparator case final comparator?) return comparator;
+    if (_comparator case final comparator?) {
+      return (a, b) => direction * comparator(a, b);
+    }
 
-    return (T a, T b) {
+    return (a, b) {
       final aValue = a.getComparableField(field);
       final bValue = b.getComparableField(field);
 
-      // Handle null values
-      if (aValue == null && bValue == null) return 0;
-      if (aValue == null) return -1;
-      if (bValue == null) return 1;
-
-      return aValue.compareTo(bValue);
+      return _compareNullableFields(aValue, bValue);
     };
   }
 
   final Comparator<T>? _comparator;
+
+  int _compareNullableFields(ComparableField? a, ComparableField? b) {
+    // Handle nulls first, independent of sort direction
+    if (a == null && b == null) return 0;
+    if (a == null) return nullOrdering == NullOrdering.nullsFirst ? -1 : 1;
+    if (b == null) return nullOrdering == NullOrdering.nullsFirst ? 1 : -1;
+
+    // Apply direction only to non-null comparisons
+    return direction * a.compareTo(b);
+  }
 
   /// Converts this option to JSON.
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
