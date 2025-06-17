@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
+import 'package:stream_chat_flutter/src/misc/flexible_fractionally_sized_box.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The display behaviour of a widget
@@ -51,7 +52,6 @@ class StreamMessageWidget extends StatefulWidget {
     this.onReactionsTap,
     this.onReactionsHover,
     this.showReactionPicker = true,
-    this.showReactionTail,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
     this.showThreadReplyIndicator = false,
@@ -258,12 +258,6 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final bool showReactionPicker;
 
-  /// {@template showReactionPickerTail}
-  /// Whether or not to show the reaction picker tail.
-  /// This is calculated internally in most cases and does not need to be set.
-  /// {@endtemplate}
-  final bool? showReactionTail;
-
   /// {@template onShowMessage}
   /// Callback when show message is tapped
   /// {@endtemplate}
@@ -438,7 +432,6 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(String)? onLinkTap,
     bool? showReactionBrowser,
     bool? showReactionPicker,
-    bool? showReactionTail,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
@@ -508,7 +501,6 @@ class StreamMessageWidget extends StatefulWidget {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
-      showReactionTail: showReactionTail ?? this.showReactionTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
@@ -704,76 +696,73 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               child: MouseRegion(child: child),
             );
           },
-          child: Padding(
-            padding: widget.padding ?? const EdgeInsets.all(8),
-            child: FractionallySizedBox(
-              alignment: switch (widget.reverse) {
-                true => Alignment.centerRight,
-                false => Alignment.centerLeft,
-              },
-              widthFactor: widget.widthFactor,
-              child: Builder(builder: (context) {
-                return MessageWidgetContent(
-                  streamChatTheme: theme,
-                  showUsername: showUsername,
-                  showTimeStamp: showTimeStamp,
-                  showEditedLabel: showEditedLabel,
-                  showThreadReplyIndicator: showThreadReplyIndicator,
-                  showSendingIndicator: showSendingIndicator,
-                  showInChannel: showInChannel,
-                  isGiphy: isGiphy,
-                  isOnlyEmoji: isOnlyEmoji,
-                  hasUrlAttachments: hasUrlAttachments,
-                  messageTheme: widget.messageTheme,
-                  reverse: widget.reverse,
-                  message: widget.message,
-                  hasNonUrlAttachments: hasNonUrlAttachments,
-                  hasPoll: hasPoll,
-                  hasQuotedMessage: hasQuotedMessage,
-                  textPadding: widget.textPadding,
-                  attachmentBuilders: widget.attachmentBuilders,
-                  attachmentPadding: widget.attachmentPadding,
-                  attachmentShape: widget.attachmentShape,
-                  onAttachmentTap: widget.onAttachmentTap,
-                  onReplyTap: widget.onReplyTap,
-                  onThreadTap: widget.onThreadTap,
-                  onShowMessage: widget.onShowMessage,
-                  attachmentActionsModalBuilder:
-                      widget.attachmentActionsModalBuilder,
-                  avatarWidth: avatarWidth,
-                  bottomRowPadding: bottomRowPadding,
-                  isFailedState: isFailedState,
-                  isPinned: isPinned,
-                  messageWidget: widget,
-                  showBottomRow: showBottomRow,
-                  showPinHighlight: widget.showPinHighlight,
-                  showReactionPickerTail: widget.showReactionTail == true,
-                  showReactions: shouldShowReactions,
-                  onReactionsTap: () {
-                    final message = widget.message;
-                    return switch (widget.onReactionsTap) {
-                      final onReactionsTap? => onReactionsTap(message),
-                      _ => _showMessageReactionsModal(context, message),
-                    };
-                  },
-                  onReactionsHover: widget.onReactionsHover,
-                  showUserAvatar: widget.showUserAvatar,
-                  streamChat: streamChat,
-                  translateUserAvatar: widget.translateUserAvatar,
-                  shape: widget.shape,
-                  borderSide: widget.borderSide,
-                  borderRadiusGeometry: widget.borderRadiusGeometry,
-                  textBuilder: widget.textBuilder,
-                  quotedMessageBuilder: widget.quotedMessageBuilder,
-                  onLinkTap: widget.onLinkTap,
-                  onMentionTap: widget.onMentionTap,
-                  onQuotedMessageTap: widget.onQuotedMessageTap,
-                  bottomRowBuilderWithDefaultWidget:
-                      widget.bottomRowBuilderWithDefaultWidget,
-                  onUserAvatarTap: widget.onUserAvatarTap,
-                  userAvatarBuilder: widget.userAvatarBuilder,
-                );
-              }),
+          child: FlexibleFractionallySizedBox(
+            widthFactor: widget.widthFactor,
+            alignment: switch (widget.reverse) {
+              true => AlignmentDirectional.centerEnd,
+              false => AlignmentDirectional.centerStart,
+            },
+            child: Padding(
+              padding: widget.padding ?? const EdgeInsets.all(8),
+              child: MessageWidgetContent(
+                streamChatTheme: theme,
+                showUsername: showUsername,
+                showTimeStamp: showTimeStamp,
+                showEditedLabel: showEditedLabel,
+                showThreadReplyIndicator: showThreadReplyIndicator,
+                showSendingIndicator: showSendingIndicator,
+                showInChannel: showInChannel,
+                isGiphy: isGiphy,
+                isOnlyEmoji: isOnlyEmoji,
+                hasUrlAttachments: hasUrlAttachments,
+                messageTheme: widget.messageTheme,
+                reverse: widget.reverse,
+                message: widget.message,
+                hasNonUrlAttachments: hasNonUrlAttachments,
+                hasPoll: hasPoll,
+                hasQuotedMessage: hasQuotedMessage,
+                textPadding: widget.textPadding,
+                attachmentBuilders: widget.attachmentBuilders,
+                attachmentPadding: widget.attachmentPadding,
+                attachmentShape: widget.attachmentShape,
+                onAttachmentTap: widget.onAttachmentTap,
+                onReplyTap: widget.onReplyTap,
+                onThreadTap: widget.onThreadTap,
+                onShowMessage: widget.onShowMessage,
+                attachmentActionsModalBuilder:
+                    widget.attachmentActionsModalBuilder,
+                avatarWidth: avatarWidth,
+                bottomRowPadding: bottomRowPadding,
+                isFailedState: isFailedState,
+                isPinned: isPinned,
+                messageWidget: widget,
+                showBottomRow: showBottomRow,
+                showPinHighlight: widget.showPinHighlight,
+                showReactions: shouldShowReactions,
+                onReactionsTap: () {
+                  final message = widget.message;
+                  return switch (widget.onReactionsTap) {
+                    final onReactionsTap? => onReactionsTap(message),
+                    _ => _showMessageReactionsModal(context, message),
+                  };
+                },
+                onReactionsHover: widget.onReactionsHover,
+                showUserAvatar: widget.showUserAvatar,
+                streamChat: streamChat,
+                translateUserAvatar: widget.translateUserAvatar,
+                shape: widget.shape,
+                borderSide: widget.borderSide,
+                borderRadiusGeometry: widget.borderRadiusGeometry,
+                textBuilder: widget.textBuilder,
+                quotedMessageBuilder: widget.quotedMessageBuilder,
+                onLinkTap: widget.onLinkTap,
+                onMentionTap: widget.onMentionTap,
+                onQuotedMessageTap: widget.onQuotedMessageTap,
+                bottomRowBuilderWithDefaultWidget:
+                    widget.bottomRowBuilderWithDefaultWidget,
+                onUserAvatarTap: widget.onUserAvatarTap,
+                userAvatarBuilder: widget.userAvatarBuilder,
+              ),
             ),
           ),
         ),
@@ -936,7 +925,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               showSendingIndicator: false,
               padding: EdgeInsets.zero,
               showPinHighlight: false,
-              showReactionTail: showPicker,
               showUserAvatar: switch (widget.reverse) {
                 true => DisplayWidget.gone,
                 false => DisplayWidget.show,
@@ -1055,7 +1043,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               showSendingIndicator: false,
               padding: EdgeInsets.zero,
               showPinHighlight: false,
-              showReactionTail: showPicker,
               showUserAvatar: switch (widget.reverse) {
                 true => DisplayWidget.gone,
                 false => DisplayWidget.show,
