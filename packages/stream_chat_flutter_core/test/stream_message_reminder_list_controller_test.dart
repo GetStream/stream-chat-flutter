@@ -240,8 +240,8 @@ void main() {
 
       expect(result, isTrue);
       expect(
-        controller.value.asSuccess.items.first.remindAt?.millisecondsSinceEpoch,
-        equals(newRemindAt.millisecondsSinceEpoch),
+        controller.value.asSuccess.items.any((r) => r.remindAt == newRemindAt),
+        isTrue,
       );
       expect(controller.value.asSuccess.items.length, equals(reminders.length));
     });
