@@ -30,7 +30,7 @@ jobs:
         run: melos run update:goldens
 
       - name: 📤 Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: "chore: Update Goldens"
           file_pattern: "**/test/**/goldens/*.png"

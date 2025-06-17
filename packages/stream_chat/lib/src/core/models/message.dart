@@ -4,6 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -67,6 +68,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.restrictedVisibility,
     this.moderation,
     this.draft,
+    this.reminder,
   })  : id = id ?? const Uuid().v4(),
         type = MessageType(type),
         pinExpires = pinExpires?.toUtc(),
@@ -307,6 +309,11 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// This is present when the message is a thread i.e. contains replies.
   final Draft? draft;
 
+  /// Optional reminder for this message.
+  ///
+  /// This is present when a user has set a reminder for this message.
+  final MessageReminder? reminder;
+
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
@@ -354,6 +361,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     'moderation',
     'moderation_details',
     'draft',
+    'reminder',
   ];
 
   /// Serialize to json.
@@ -415,6 +423,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     List<String>? restrictedVisibility,
     Moderation? moderation,
     Object? draft = _nullConst,
+    Object? reminder = _nullConst,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -495,6 +504,8 @@ class Message extends Equatable implements ComparableFieldProvider {
       restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
       moderation: moderation ?? this.moderation,
       draft: draft == _nullConst ? this.draft : draft as Draft?,
+      reminder:
+          reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
     );
   }
 
@@ -539,6 +550,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       restrictedVisibility: other.restrictedVisibility,
       moderation: other.moderation,
       draft: other.draft,
+      reminder: other.reminder,
     );
   }
 
@@ -603,6 +615,7 @@ class Message extends Equatable implements ComparableFieldProvider {
         restrictedVisibility,
         moderation,
         draft,
+        reminder,
       ];
 
   @override

@@ -10,6 +10,7 @@ class Event {
   /// Constructor used for json serialization
   Event({
     this.type = 'local.event',
+    this.userId,
     this.cid,
     this.connectionId,
     DateTime? createdAt,
@@ -39,6 +40,7 @@ class Event {
     this.unreadMessages,
     this.lastReadMessageId,
     this.draft,
+    this.reminder,
     this.extraData = const {},
     this.isLocal = true,
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
@@ -53,6 +55,9 @@ class Event {
   /// The type of the event
   /// [EventType] contains some predefined constant types
   final String type;
+
+  /// The user id of the user to which the event belongs
+  final String? userId;
 
   /// The channel cid to which the event belongs
   final String? cid;
@@ -146,6 +151,9 @@ class Event {
   /// The draft sent with the event.
   final Draft? draft;
 
+  /// The message reminder sent with the event.
+  final MessageReminder? reminder;
+
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
 
@@ -153,6 +161,7 @@ class Event {
   /// Useful for [Serializer] methods.
   static final topLevelFields = [
     'type',
+    'user_id',
     'cid',
     'connection_id',
     'created_at',
@@ -183,6 +192,7 @@ class Event {
     'unread_messages',
     'last_read_message_id',
     'draft',
+    'reminder',
   ];
 
   /// Serialize to json
@@ -193,6 +203,7 @@ class Event {
   /// Creates a copy of [Event] with specified attributes overridden.
   Event copyWith({
     String? type,
+    String? userId,
     String? cid,
     String? channelId,
     String? channelType,
@@ -222,10 +233,12 @@ class Event {
     int? unreadMessages,
     String? lastReadMessageId,
     Draft? draft,
+    MessageReminder? reminder,
     Map<String, Object?>? extraData,
   }) =>
       Event(
         type: type ?? this.type,
+        userId: userId ?? this.userId,
         cid: cid ?? this.cid,
         connectionId: connectionId ?? this.connectionId,
         createdAt: createdAt ?? this.createdAt,
@@ -255,6 +268,7 @@ class Event {
         unreadMessages: unreadMessages ?? this.unreadMessages,
         lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
         draft: draft ?? this.draft,
+        reminder: reminder ?? this.reminder,
         isLocal: isLocal,
         extraData: extraData ?? this.extraData,
       );

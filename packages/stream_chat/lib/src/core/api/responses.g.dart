@@ -443,3 +443,27 @@ QueryDraftsResponse _$QueryDraftsResponseFromJson(Map<String, dynamic> json) =>
               .toList() ??
           []
       ..next = json['next'] as String?;
+
+CreateReminderResponse _$CreateReminderResponseFromJson(
+        Map<String, dynamic> json) =>
+    CreateReminderResponse()
+      ..duration = json['duration'] as String?
+      ..reminder =
+          MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>);
+
+UpdateReminderResponse _$UpdateReminderResponseFromJson(
+        Map<String, dynamic> json) =>
+    UpdateReminderResponse()
+      ..duration = json['duration'] as String?
+      ..reminder =
+          MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>);
+
+QueryRemindersResponse _$QueryRemindersResponseFromJson(
+        Map<String, dynamic> json) =>
+    QueryRemindersResponse()
+      ..duration = json['duration'] as String?
+      ..reminders = (json['reminders'] as List<dynamic>?)
+              ?.map((e) => MessageReminder.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          []
+      ..next = json['next'] as String?;

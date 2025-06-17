@@ -9,6 +9,7 @@ import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
+import 'package:stream_chat/src/core/api/reminders_api.dart';
 import 'package:stream_chat/src/core/api/threads_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
@@ -86,6 +87,10 @@ class StreamChatApi {
   /// Api dedicated to moderation operations
   ModerationApi get moderation => _moderation ??= ModerationApi(_client);
   ModerationApi? _moderation;
+
+  /// Api dedicated to message reminders operations
+  RemindersApi get reminders => _reminders ??= RemindersApi(_client);
+  RemindersApi? _reminders;
 
   /// Api dedicated to general operations
   GeneralApi get general => _general ??= GeneralApi(_client);
