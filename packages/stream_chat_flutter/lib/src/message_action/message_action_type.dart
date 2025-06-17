@@ -125,7 +125,7 @@ final class ThreadReply extends MessageAction {
 
 /// Custom message action that allows for additional data to be passed
 /// along with the message.
-final class CustomMessageAction extends MessageAction {
+class CustomMessageAction extends MessageAction {
   /// Create a new custom message action
   const CustomMessageAction({
     required super.message,
