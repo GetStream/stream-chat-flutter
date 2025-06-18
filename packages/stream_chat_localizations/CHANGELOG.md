@@ -1,3 +1,7 @@
+## 10.0.0-beta.1
+
+- Updated `stream_chat_flutter` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 9.12.0
 
 - Updated `stream_chat_flutter` dependency to [`9.12.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
