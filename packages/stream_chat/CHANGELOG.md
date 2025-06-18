@@ -1,3 +1,7 @@
+## 10.0.0-beta.1
+
+- Bug fixes and improvements
+
 ## 9.12.0
 
 ✅ Added

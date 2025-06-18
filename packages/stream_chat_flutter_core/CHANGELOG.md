@@ -1,3 +1,7 @@
+## 10.0.0-beta.1
+
+- Updated `stream_chat` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.12.0
 
 ✅ Added

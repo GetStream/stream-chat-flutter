@@ -152,23 +152,7 @@ class _ChannelPageState extends State<ChannelPage> {
               color: colorTheme.textLowEmphasis,
             ),
             title: const Text('Edit Reminder'),
-            onTap: (message) async {
-              Navigator.of(context).pop();
-
-              final option = await showDialog<ReminderOption>(
-                context: context,
-                builder: (_) => EditReminderDialog(
-                  isBookmarkReminder: reminder.remindAt == null,
-                ),
-              );
-
-              if (option == null) return;
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-              final remindAt = option.remindAt;
-
-              client.updateReminder(messageId, remindAt: remindAt).ignore();
-            },
+            action: EditReminder(message: message, reminder: reminder),
           ),
           StreamMessageAction(
             leading: StreamSvgIcon(
@@ -176,14 +160,7 @@ class _ChannelPageState extends State<ChannelPage> {
               color: colorTheme.textLowEmphasis,
             ),
             title: const Text('Remove from later'),
-            onTap: (message) {
-              Navigator.of(context).pop();
-
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-
-              client.deleteReminder(messageId).ignore();
-            },
+            action: RemoveReminder(message: message, reminder: reminder),
           ),
         ] else ...[
           StreamMessageAction(
@@ -192,21 +169,7 @@ class _ChannelPageState extends State<ChannelPage> {
               color: colorTheme.textLowEmphasis,
             ),
             title: const Text('Remind me'),
-            onTap: (message) async {
-              Navigator.of(context).pop();
-
-              final reminder = await showDialog<ScheduledReminder>(
-                context: context,
-                builder: (_) => const CreateReminderDialog(),
-              );
-
-              if (reminder == null) return;
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-              final remindAt = reminder.remindAt;
-
-              client.createReminder(messageId, remindAt: remindAt).ignore();
-            },
+            action: CreateReminder(message: message),
           ),
           StreamMessageAction(
             leading: Icon(
@@ -214,14 +177,7 @@ class _ChannelPageState extends State<ChannelPage> {
               color: colorTheme.textLowEmphasis,
             ),
             title: const Text('Save for later'),
-            onTap: (message) {
-              Navigator.of(context).pop();
-
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-
-              client.createReminder(messageId).ignore();
-            },
+            action: CreateBookmark(message: message),
           ),
         ],
       ]
@@ -263,6 +219,13 @@ class _ChannelPageState extends State<ChannelPage> {
           defaultMessageWidget.copyWith(
             onReplyTap: _reply,
             customActions: customOptions,
+            onCustomActionTap: (it) async => await switch (it) {
+              CreateReminder() => _createReminder(it.message),
+              CreateBookmark() => _createBookmark(it.message),
+              EditReminder() => _editReminder(it.message, it.reminder),
+              RemoveReminder() => _removeReminder(it.message, it.reminder),
+              _ => null,
+            },
             onShowMessage: (message, channel) => GoRouter.of(context).goNamed(
               Routes.CHANNEL_PAGE.name,
               pathParameters: Routes.CHANNEL_PAGE.params(channel),
@@ -283,6 +246,56 @@ class _ChannelPageState extends State<ChannelPage> {
     );
   }
 
+  Future<void> _editReminder(
+    Message message,
+    MessageReminder reminder,
+  ) async {
+    final option = await showDialog<ReminderOption>(
+      context: context,
+      builder: (_) => EditReminderDialog(
+        isBookmarkReminder: reminder.remindAt == null,
+      ),
+    );
+
+    if (option == null) return;
+    final client = StreamChat.of(context).client;
+    final messageId = message.id;
+    final remindAt = option.remindAt;
+
+    return client.updateReminder(messageId, remindAt: remindAt).ignore();
+  }
+
+  Future<void> _removeReminder(
+    Message message,
+    MessageReminder reminder,
+  ) async {
+    final client = StreamChat.of(context).client;
+    final messageId = message.id;
+
+    return client.deleteReminder(messageId).ignore();
+  }
+
+  Future<void> _createReminder(Message message) async {
+    final reminder = await showDialog<ScheduledReminder>(
+      context: context,
+      builder: (_) => const CreateReminderDialog(),
+    );
+
+    if (reminder == null) return;
+    final client = StreamChat.of(context).client;
+    final messageId = message.id;
+    final remindAt = reminder.remindAt;
+
+    return client.createReminder(messageId, remindAt: remindAt).ignore();
+  }
+
+  Future<void> _createBookmark(Message message) async {
+    final client = StreamChat.of(context).client;
+    final messageId = message.id;
+
+    return client.createReminder(messageId).ignore();
+  }
+
   bool defaultFilter(Message m) {
     final currentUser = StreamChat.of(context).currentUser;
     final isMyMessage = m.user?.id == currentUser?.id;
@@ -290,4 +303,41 @@ class _ChannelPageState extends State<ChannelPage> {
     if (isDeletedOrShadowed && !isMyMessage) return false;
     return true;
   }
+}
+
+class ReminderMessageAction extends CustomMessageAction {
+  const ReminderMessageAction({
+    required super.message,
+    this.reminder,
+  });
+
+  final MessageReminder? reminder;
+}
+
+final class CreateReminder extends ReminderMessageAction {
+  const CreateReminder({required super.message});
+}
+
+final class CreateBookmark extends ReminderMessageAction {
+  const CreateBookmark({required super.message});
+}
+
+final class EditReminder extends ReminderMessageAction {
+  const EditReminder({
+    required super.message,
+    required this.reminder,
+  }) : super(reminder: reminder);
+
+  @override
+  final MessageReminder reminder;
+}
+
+final class RemoveReminder extends ReminderMessageAction {
+  const RemoveReminder({
+    required super.message,
+    required this.reminder,
+  }) : super(reminder: reminder);
+
+  @override
+  final MessageReminder reminder;
 }
