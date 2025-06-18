@@ -1,6 +1,6 @@
-# 🚀 Flutter SDK v10.0 Migration Guide
+# 🚀 Flutter SDK v10 Migration Guide
 
-**Important!** This guide details breaking changes in **SDK v10.0**. Carefully follow each step to ensure a smooth and efficient migration.
+**Important!** This guide outlines all breaking changes introduced in the Flutter SDK **v10.0.0** release, including pre-release stages like `v10.0.0-beta.1`. Follow each section based on the version you're migrating from.
 
 ---
 
@@ -10,26 +10,24 @@ This guide includes breaking changes grouped by release phase:
 
 ### 🚧 v10.0.0-beta.1
 
-- [**StreamReactionPicker**](#-streamreactionpicker-refactor)
-- [**StreamMessageAction**](#-streammessageaction-refactor)
-- [**StreamMessageReactionsModal**](#-streammessagereactionsmodal-refactor)
-- [**StreamMessageWidget**](#-streammessagewidget-refactor)
+- [StreamReactionPicker](#-streamreactionpicker)
+- [StreamMessageAction](#-streammessageaction)
+- [StreamMessageReactionsModal](#-streammessagereactionsmodal)
+- [StreamMessageWidget](#-streammessagewidget)
 
 ---
 
 ## 🧪 Migration for v10.0.0-beta.1
 
-### 🛠 StreamReactionPicker Refactor
+### 🛠 StreamReactionPicker
 
-The reaction picker has been refactored for modularity, flexibility, and explicit reaction handling.
+#### Key Changes:
 
-### Key Changes:
-**Key Changes:**
 - New `StreamReactionPicker.builder` constructor
 - Added properties: `padding`, `scrollable`, `borderRadius`
-- Removed automatic reaction handling → use `onReactionPicked`
+- Automatic reaction handling removed — must now use `onReactionPicked`
 
-### Migration Steps:
+#### Migration Steps:
 
 **Before:**
 ```dart
@@ -38,24 +36,24 @@ StreamReactionPicker(
 );
 ```
 
-**After (Recommended using Builder):**
+**After (Recommended – Builder):**
 ```dart
 StreamReactionPicker.builder(
   context,
   message,
   (Reaction reaction) {
-    // Explicitly handle reaction here
+    // Explicitly handle reaction
   },
 );
 ```
 
-**After (Alternative Direct Configuration):**
+**After (Alternative – Direct Configuration):**
 ```dart
 StreamReactionPicker(
   message: message,
   reactionIcons: StreamChatConfiguration.of(context).reactionIcons,
   onReactionPicked: (Reaction reaction) {
-    // Explicit reaction handling
+    // Handle reaction here
   },
   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
   scrollable: true,
@@ -64,51 +62,32 @@ StreamReactionPicker(
 ```
 
 > ⚠️ **Important:**  
-> Automatic reaction handling has been removed. You must explicitly handle reactions.
-
-### Summary of Changes:
-
-| Aspect                 | Previous      | New Behavior                                 |
-|------------------------|---------------|----------------------------------------------|
-| Reaction Handling      | Automatic     | Explicit (`onReactionPicked`)                |
-| Platform Constructor   | None          | Yes (`StreamReactionPicker.builder`)         |
-| Customization          | Limited       | Enhanced (`padding`, `borderRadius`, `scrollable`) |
+> Automatic reaction handling has been removed. You must explicitly handle reactions using `onReactionPicked`.
 
 ---
 
-## ✅ StreamMessageAction Refactor
+### 🛠 StreamMessageAction
 
-The `StreamMessageAction` is refactored for type safety, centralization, and enhanced customization.
+#### Key Changes:
 
-### Key Changes:
-- **Type-safe Actions:** Now generic (`StreamMessageAction<T extends MessageAction>`) for stronger typing.
-- **Centralized Action Handling:** Individual action callbacks replaced with centralized handling via `onCustomActionTap`.
-- **Customization Options:** New props:
-    - `isDestructive`: Flag destructive actions.
-    - `iconColor`: Customize icon color.
-    - `titleTextColor`: Title color customization.
-    - `titleTextStyle`: Title text styling.
-    - `backgroundColor`: Background color customization.
+- Now generic: `StreamMessageAction<T extends MessageAction>`
+- Individual `onTap` handlers removed — use `onCustomActionTap` instead
+- Added new styling props for better customization
 
-### Migration Steps:
+#### Migration Steps:
 
 **Before:**
 ```dart
 final customAction = StreamMessageAction(
   title: Text('Custom Action'),
   leading: Icon(Icons.settings),
-  onTap: (Message message) {
+  onTap: (message) {
     // Handle action
   },
 );
-
-StreamMessageWidget(
-  message: message,
-  customActions: [customAction],
-);
 ```
 
-**After (Recommended - Type-safe):**
+**After (Type-safe):**
 ```dart
 final customAction = StreamMessageAction<CustomMessageAction>(
   action: CustomMessageAction(
@@ -125,107 +104,67 @@ StreamMessageWidget(
   message: message,
   customActions: [customAction],
   onCustomActionTap: (CustomMessageAction action) {
-    // Handle action based on extraData
+    // Handle action here
   },
 );
 ```
 
 > ⚠️ **Important:**  
-> Individual `onTap` callbacks have been removed. Always use centralized `onCustomActionTap`.
-
-### Summary of Changes:
-
-| Aspect           | Previous                       | New Behavior                             |
-|------------------|--------------------------------|------------------------------------------|
-| Action Typing    | Untyped                        | Generic (type-safe)                      |
-| Action Handling  | Individual `onTap` callbacks   | Centralized (`onCustomActionTap`)        |
-| Customization    | Limited                        | Enhanced (`iconColor`, `backgroundColor`, etc.) |
+> Individual `onTap` callbacks have been removed. Always handle actions using the centralized `onCustomActionTap`.
 
 ---
 
-## ✅ StreamMessageReactionsModal Refactor
+### 🛠 StreamMessageReactionsModal
 
-Refactored to leverage `StreamMessageModal`, improving consistency and explicit reaction handling.
+#### Key Changes:
 
-### Key Changes:
-- **Base Widget Changed:** Now uses `StreamMessageModal` internally.
-- **Removed `messageTheme` Property:** Theme now automatically derived from `reverse`.
-- **Explicit Reaction Handling:** Reactions must be handled explicitly through `onReactionPicked`.
+- Based on `StreamMessageModal` for consistency
+- `messageTheme` removed — inferred automatically
+- Reaction handling must now be handled via `onReactionPicked`
 
-### Migration Steps:
+#### Migration Steps:
 
-**Step 1: Remove `messageTheme`:**
+**Before:**
 ```dart
-// Before
 StreamMessageReactionsModal(
   message: message,
   messageWidget: myMessageWidget,
-  messageTheme: myCustomMessageTheme, // remove this
-  reverse: true,
-);
-
-// After
-StreamMessageReactionsModal(
-  message: message,
-  messageWidget: myMessageWidget,
+  messageTheme: myCustomMessageTheme,
   reverse: true,
 );
 ```
 
-**Step 2: Explicit Reaction Handling:**
+**After:**
 ```dart
-// Before (automatic handling)
 StreamMessageReactionsModal(
   message: message,
   messageWidget: myMessageWidget,
-  // reactions handled internally
-);
-
-// After (explicit handling)
-StreamMessageReactionsModal(
-  message: message,
-  messageWidget: myMessageWidget,
+  reverse: true,
   onReactionPicked: (SelectReaction reactionAction) {
-    // Explicitly send or delete reaction
+    // Handle reaction explicitly
   },
 );
 ```
 
 > ⚠️ **Important:**  
-> Automatic handling is removed—explicit reaction handling required.
-
-### Summary of Changes:
-
-| Aspect             | Previous                  | New Behavior                       |
-|--------------------|---------------------------|------------------------------------|
-| Reaction Handling  | Automatic                 | Explicit (`onReactionPicked`)      |
-| Base Widget        | Custom implementation     | Uses `StreamMessageModal`          |
-| `messageTheme` Prop| Required                  | Removed; derived from `reverse`    |
+> `messageTheme` has been removed. Reaction handling must now be explicit using `onReactionPicked`.
 
 ---
 
-## ✅ StreamMessageWidget Refactor
+### 🛠 StreamMessageWidget
 
-The `StreamMessageWidget` has been simplified by removing the `showReactionTail` parameter and always showing the reaction picker tail when the reaction picker is visible.
+#### Key Changes:
 
-### Key Changes:
-- **Removed `showReactionTail` Parameter:** The parameter is no longer needed as the tail is always shown when the reaction picker is visible.
-- **Automatic Tail Display:** The reaction picker tail now automatically appears when the reaction picker is visible, providing consistent UX.
+- `showReactionTail` parameter has been removed
+- Tail now automatically shows when the picker is visible
 
-### Migration Steps:
+#### Migration Steps:
 
 **Before:**
 ```dart
 StreamMessageWidget(
   message: message,
-  showReactionTail: true, // Remove this parameter
-);
-
-// or
-
-StreamMessageWidget(
-  message: message,
-  showReactionTail: false, // Remove this parameter
+  showReactionTail: true,
 );
 ```
 
@@ -233,24 +172,17 @@ StreamMessageWidget(
 ```dart
 StreamMessageWidget(
   message: message,
-  // showReactionTail parameter removed - tail shown automatically
 );
 ```
 
 > ⚠️ **Important:**  
-> The `showReactionTail` parameter has been completely removed. The reaction picker tail will always be shown when the reaction picker is visible, ensuring consistent behavior across your app.
-
-### Summary of Changes:
-
-| Aspect                 | Previous                          | New Behavior                                 |
-|------------------------|-----------------------------------|----------------------------------------------|
-| Tail Display Control   | Manual (`showReactionTail`)       | Automatic (always shown when picker visible) |
-| Parameter Required     | Optional boolean parameter        | Parameter removed                            |
-| Consistency            | Could be inconsistent             | Always consistent                            |
+> The `showReactionTail` parameter is no longer supported. Tail is now always shown when the picker is visible.
 
 ---
 
-✅ **You're ready to migrate!**  
-Ensure you test your application thoroughly after applying these changes.
+## 🎉 You're Ready to Migrate!
 
----
+- ✅ Use `StreamReactionPicker.builder` or supply `onReactionPicked`
+- ✅ Convert all `StreamMessageAction` instances to type-safe generic usage
+- ✅ Centralize handling with `onCustomActionTap`
+- ✅ Remove deprecated props like `showReactionTail` and `messageTheme`
