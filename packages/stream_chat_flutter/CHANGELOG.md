@@ -7,7 +7,7 @@
 - `StreamMessageReactionsModal` no longer requires the `messageTheme` parameter. The theme now automatically derives from the `reverse` property.
 - `StreamMessageWidget` no longer requires the `showReactionTail` parameter. The reaction picker tail is now always shown when the reaction picker is visible.
 
-For more details, please refer to the [migration guide](Unpublished).
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 ✅ Added
 
