@@ -123,6 +123,7 @@ class _ChannelPageState extends State<ChannelPage> {
             focusNode: _focusNode,
             messageInputController: _messageInputController,
             onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
+            enableVoiceRecording: true,
           ),
         ],
       ),
