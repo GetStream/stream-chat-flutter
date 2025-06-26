@@ -1452,13 +1452,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final itemPositions = _itemPositionListener.itemPositions.value.toList();
     if (itemPositions.isEmpty) return;
 
-    final isLastItemFullyVisible = isElementAtIndexVisible(
-      itemPositions,
-      fullyVisible: true,
-      // Index of the last item in the list view is 2 as 1 is the progress
-      // indicator and 0 is the footer.
-      index: 2,
+    // Index of the last item in the list view is 2 as 1 is the progress
+    // indicator and 0 is the footer.
+    const lastItemIndex = 2;
+    final lastItemPosition = itemPositions.firstWhereOrNull(
+      (position) => position.index == lastItemIndex,
     );
+
+    var isLastItemFullyVisible = false;
+    if (lastItemPosition != null) {
+      // We consider the last item fully visible if its leading edge (reversed)
+      // is greater than or equal to 0.
+      isLastItemFullyVisible = lastItemPosition.itemLeadingEdge >= 0;
+    }
 
     if (mounted) _showScrollToBottom.value = !isLastItemFullyVisible;
     if (isLastItemFullyVisible) return _handleLastItemFullyVisible();
