@@ -55,20 +55,7 @@ class FloatingDateDivider extends StatelessWidget {
         };
 
         if (index == null) return const Empty();
-
-        // We can only calculate the date divider if the element is a message
-        // widget and not one of the special items.
-
-        // Parent Message
-        if (index == itemCount - 1) return const Empty();
-        // Header Builder
-        if (index == itemCount - 2) return const Empty();
-        // Top Loader Builder
-        if (index == itemCount - 3) return const Empty();
-        // Bottom Loader Builder
-        if (index == 1) return const Empty();
-        // Footer Builder
-        if (index == 0) return const Empty();
+        if (!_isValidMessageIndex(index)) return const Empty();
 
         // Offset the index to account for two extra items
         // (loader and footer) at the bottom of the ListView.
@@ -82,5 +69,17 @@ class FloatingDateDivider extends StatelessWidget {
         return StreamDateDivider(dateTime: message.createdAt.toLocal());
       },
     );
+  }
+
+  // Returns True if the item index is a valid message index and not one of the
+  // special items (like header, footer, loaders, etc.).
+  bool _isValidMessageIndex(int index) {
+    if (index == itemCount - 1) return false; // Parent Message
+    if (index == itemCount - 2) return false; // Header Builder
+    if (index == itemCount - 3) return false; // Top Loader Builder
+    if (index == 1) return false; // Bottom Loader Builder
+    if (index == 0) return false; // Footer Builder
+
+    return true;
   }
 }
