@@ -25,19 +25,24 @@ class FloatingDateDivider extends StatelessWidget {
   @Deprecated('No longer used, Will be removed in future versions.')
   final bool isThreadConversation;
 
-  // ignore: public_member_api_docs
+  /// A [ValueListenable] that provides the positions of items in the list view.
   final ValueListenable<Iterable<ItemPosition>> itemPositionListener;
 
-  // ignore: public_member_api_docs
+  /// Whether the list is reversed or not.
   final bool reverse;
 
-  // ignore: public_member_api_docs
+  /// The list of messages which are displayed in the list view.
   final List<Message> messages;
 
-  // ignore: public_member_api_docs
+  /// The total number of items in the list view, including special items like
+  /// loaders, headers, and footers.
   final int itemCount;
 
-  // ignore: public_member_api_docs
+  /// A optional builder function that creates a widget to display the date
+  /// divider.
+  ///
+  /// If provided, this function will be called with the date of the message
+  /// to create the date divider widget.
   final Widget Function(DateTime)? dateDividerBuilder;
 
   @override
