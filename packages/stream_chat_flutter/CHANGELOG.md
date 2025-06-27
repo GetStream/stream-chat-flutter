@@ -1,3 +1,12 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `FloatingDateDivider` not showing the correct date when the latest message was too big and
+  exceeded the viewport main axis size.
+- Fixed `ScrollToBottom` button always showing when the latest message was too big and exceeded the
+  viewport main axis size.
+
 ## 9.12.0
 
 ✅ Added

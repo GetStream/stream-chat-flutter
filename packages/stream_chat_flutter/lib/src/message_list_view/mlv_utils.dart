@@ -43,9 +43,17 @@ int getInitialIndex(
 
 /// Gets the index of the top element in the viewport.
 int? getTopElementIndex(Iterable<ItemPosition> values) {
-  final inView = values.where((position) => position.itemTrailingEdge > 0);
-  if (inView.isEmpty) return null;
+  final inView = values.where((position) {
+    if (position.itemLeadingEdge == position.itemTrailingEdge) {
+      // If the item's leading and trailing edges are the same, it means the
+      // item isn't actually rendering anything in the viewport.
+      return false;
+    }
 
+    return position.itemTrailingEdge > 0;
+  });
+
+  if (inView.isEmpty) return null;
   return inView.reduce((min, position) {
     return position.itemTrailingEdge < min.itemTrailingEdge ? position : min;
   }).index;
@@ -53,9 +61,17 @@ int? getTopElementIndex(Iterable<ItemPosition> values) {
 
 /// Gets the index of the bottom element in the viewport.
 int? getBottomElementIndex(Iterable<ItemPosition> values) {
-  final inView = values.where((position) => position.itemLeadingEdge < 1);
-  if (inView.isEmpty) return null;
+  final inView = values.where((position) {
+    if (position.itemLeadingEdge == position.itemTrailingEdge) {
+      // If the item's leading and trailing edges are the same, it means the
+      // item isn't actually rendering anything in the viewport.
+      return false;
+    }
 
+    return position.itemLeadingEdge < 1;
+  });
+
+  if (inView.isEmpty) return null;
   return inView.reduce((max, position) {
     return position.itemLeadingEdge > max.itemLeadingEdge ? position : max;
   }).index;
