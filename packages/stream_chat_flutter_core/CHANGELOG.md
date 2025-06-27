@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed pagination end detection logic to properly determine when the top or bottom of the message
+  list has been reached.
+
 ## 9.12.0
 
 ✅ Added
