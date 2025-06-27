@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed pagination end detection logic to properly determine when the top or bottom of the message
+  list has been reached.
+
 ## 10.0.0-beta.1
 
 - Updated `stream_chat` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
