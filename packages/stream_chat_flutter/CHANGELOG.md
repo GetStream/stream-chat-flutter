@@ -7,6 +7,38 @@
 - Fixed `ScrollToBottom` button always showing when the latest message was too big and exceeded the
   viewport main axis size.
 
+## 10.0.0-beta.1
+
+🛑️ Breaking
+
+- `StreamReactionPicker` now requires reactions to be explicitly handled via `onReactionPicked`. *(Automatic handling is no longer supported.)*
+- `StreamMessageAction` is now generic `(StreamMessageAction<T>)`, enhancing type safety. Individual onTap callbacks have been removed; actions are now handled centrally by widgets like `StreamMessageWidget.onCustomActionTap` or modals using action types.
+- `StreamMessageReactionsModal` no longer requires the `messageTheme` parameter. The theme now automatically derives from the `reverse` property.
+- `StreamMessageWidget` no longer requires the `showReactionTail` parameter. The reaction picker tail is now always shown when the reaction picker is visible.
+
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+
+✅ Added
+
+- Added new `StreamMessageActionsBuilder` which provides a list of actions to be displayed in the message actions modal.
+- Added new `StreamMessageActionConfirmationModal` for confirming destructive actions like delete or flag.
+- Added new `StreamMessageModal` and `showStreamMessageModal` for consistent message-related modals with improved transitions and backdrop effects.
+  ```dart
+  showStreamMessageModal(
+    context: context,
+    ...other parameters,
+    builder: (context) => StreamMessageModal(
+      ...other parameters,
+      headerBuilder: (context) => YourCustomHeader(),
+      contentBuilder: (context) => YourCustomContent(),
+    ),
+  );
+  ```
+- Added `desktopOrWeb` parameter to `PlatformWidgetBuilder` to allow specifying a single builder for both desktop and web platforms.
+- Added `reactionPickerBuilder` to `StreamMessageActionsModal`, `StreamMessageReactionsModal`, and `StreamMessageWidget` to enable custom reaction picker widgets.
+- Added `StreamReactionIcon.defaultReactions` providing a predefined list of common reaction icons.
+- Exported `StreamMessageActionsModal` and `StreamModeratedMessageActionsModal` which are now based on `StreamMessageModal` for consistent styling and behavior.
+
 ## 9.12.0
 
 ✅ Added
