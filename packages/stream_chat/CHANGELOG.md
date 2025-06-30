@@ -2,6 +2,10 @@
 
 - Bug fixes and improvements
 
+## 9.13.0
+
+- Bug fixes and improvements
+
 ## 9.12.0
 
 ✅ Added
