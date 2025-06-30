@@ -1,3 +1,7 @@
+## Upcoming Beta
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.13.0
 
 🐞 Fixed
