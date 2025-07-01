@@ -472,18 +472,12 @@ extension TypeX<T> on T? {
 extension FileTypeX on FileType {
   /// Converts the [FileType] to a [String].
   String toAttachmentType() {
-    switch (this) {
-      case FileType.image:
-        return AttachmentType.image;
-      case FileType.video:
-        return AttachmentType.video;
-      case FileType.audio:
-        return AttachmentType.audio;
-      case FileType.any:
-      case FileType.media:
-      case FileType.custom:
-        return AttachmentType.file;
-    }
+    return switch (this) {
+      FileType.image => AttachmentType.image,
+      FileType.video => AttachmentType.video,
+      FileType.audio => AttachmentType.audio,
+      FileType.any || FileType.media || FileType.custom => AttachmentType.file,
+    };
   }
 }
 
@@ -491,18 +485,16 @@ extension FileTypeX on FileType {
 extension AttachmentPickerTypeX on AttachmentPickerType {
   /// Converts the [AttachmentPickerType] to a [FileType].
   FileType get fileType {
-    switch (this) {
-      case AttachmentPickerType.images:
-        return FileType.image;
-      case AttachmentPickerType.videos:
-        return FileType.video;
-      case AttachmentPickerType.files:
-        return FileType.any;
-      case AttachmentPickerType.audios:
-        return FileType.audio;
-      case AttachmentPickerType.poll:
-        throw Exception('Polls do not have a file type');
-    }
+    return switch (this) {
+      ImagesPickerType() => FileType.image,
+      VideosPickerType() => FileType.video,
+      AudiosPickerType() => FileType.audio,
+      FilesPickerType() => FileType.any,
+      _ => throw Exception(
+          'Unsupported AttachmentPickerType: $this. '
+          'Only Images, Videos, Audios and Files are supported.',
+        ),
+    };
   }
 }
 

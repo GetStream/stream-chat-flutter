@@ -165,6 +165,8 @@ class StreamMessageInput extends StatefulWidget {
     )
     bool useNativeAttachmentPickerOnMobile = false,
     this.pollConfig,
+    this.customAttachmentPickerOptions = const [],
+    this.onCustomAttachmentPickerResult,
   })  : assert(
           idleSendIcon == null || idleSendButton == null,
           'idleSendIcon and idleSendButton cannot be used together',
@@ -423,6 +425,16 @@ class StreamMessageInput extends StatefulWidget {
   ///
   /// If not provided, the default configuration is used.
   final PollConfig? pollConfig;
+
+  /// A list of custom attachment picker options that can be used to extend the
+  /// attachment picker functionality.
+  final List<AttachmentPickerOption> customAttachmentPickerOptions;
+
+  /// Callback that is called when the custom attachment picker result is
+  /// received.
+  ///
+  /// This is used to handle the result of the custom attachment picker
+  final OnCustomAttachmentPickerResult? onCustomAttachmentPickerResult;
 
   static String? _defaultHintGetter(
     BuildContext context,
@@ -946,39 +958,28 @@ class StreamMessageInputState extends State<StreamMessageInput>
         defaultButton;
   }
 
-  Future<void> _sendPoll(Poll poll) {
-    final streamChannel = StreamChannel.of(context);
-    final channel = streamChannel.channel;
-
-    return channel.sendPoll(poll);
+  Future<void> _onPollCreated(Poll poll) async {
+    final channel = StreamChannel.of(context).channel;
+    return channel.sendPoll(poll).ignore();
   }
 
-  Future<void> _updatePoll(Poll poll) {
-    final streamChannel = StreamChannel.of(context);
-    final channel = streamChannel.channel;
+  // Returns the list of allowed attachment picker types based on the
+  // current channel configuration and context.
+  List<AttachmentPickerType> _getAllowedAttachmentPickerTypes() {
+    final allowedTypes = widget.allowedAttachmentPickerTypes.where((type) {
+      if (type != AttachmentPickerType.poll) return true;
 
-    return channel.updatePoll(poll);
-  }
+      // We don't allow editing polls.
+      if (_isEditing) return false;
+      // We don't allow creating polls in threads.
+      if (_effectiveController.message.parentId != null) return false;
 
-  Future<void> _deletePoll(Poll poll) {
-    final streamChannel = StreamChannel.of(context);
-    final channel = streamChannel.channel;
+      // Otherwise, check if the user has the permission to send polls.
+      final channel = StreamChannel.of(context).channel;
+      return channel.config?.polls == true && channel.canSendPoll;
+    });
 
-    return channel.deletePoll(poll);
-  }
-
-  Future<void> _createOrUpdatePoll(Poll? old, Poll? current) async {
-    // If both are null or the same, return
-    if ((old == null && current == null) || old == current) return;
-
-    // If old is null, i.e., there was no poll before, create the poll.
-    if (old == null) return _sendPoll(current!);
-
-    // If current is null, i.e., the poll is removed, delete the poll.
-    if (current == null) return _deletePoll(old);
-
-    // Otherwise, update the poll.
-    return _updatePoll(current);
+    return allowedTypes.toList(growable: false);
   }
 
   /// Handle the platform-specific logic for selecting files.
@@ -989,40 +990,46 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _onAttachmentButtonPressed() async {
     final initialPoll = _effectiveController.poll;
     final initialAttachments = _effectiveController.attachments;
-
-    // Remove AttachmentPickerType.poll if the user doesn't have the permission
-    // to send a poll or if this is a thread message.
-    final allowedTypes = [...widget.allowedAttachmentPickerTypes]
-      ..removeWhere((it) {
-        if (it != AttachmentPickerType.poll) return false;
-        if (_effectiveController.message.parentId != null) return true;
-        final channel = StreamChannel.of(context).channel;
-        if (channel.config?.polls == true && channel.canSendPoll) return false;
-
-        return true;
-      });
+    final allowedTypes = _getAllowedAttachmentPickerTypes();
 
     final messageInputTheme = StreamMessageInputTheme.of(context);
     final useSystemPicker = widget.useSystemAttachmentPicker ||
         (messageInputTheme.useSystemAttachmentPicker ?? false);
 
-    final value = await showStreamAttachmentPickerModalBottomSheet(
+    final result = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
-      onError: widget.onError,
       allowedTypes: allowedTypes,
-      pollConfig: widget.pollConfig,
       initialPoll: initialPoll,
+      pollConfig: widget.pollConfig,
       initialAttachments: initialAttachments,
       useSystemAttachmentPicker: useSystemPicker,
+      customOptions: widget.customAttachmentPickerOptions,
     );
 
-    if (value == null || value is! AttachmentPickerValue) return;
+    if (result == null || result is! StreamAttachmentPickerResult) return;
 
-    // Add the attachments to the controller.
-    _effectiveController.attachments = value.attachments;
+    void _onAttachmentsPicked(List<Attachment> attachments) {
+      _effectiveController.attachments = attachments;
+    }
 
-    // Create or update the poll.
-    await _createOrUpdatePoll(initialPoll, value.poll);
+    void _onAttachmentPickerError(AttachmentPickerError error) {
+      return widget.onError?.call(error.error, error.stackTrace);
+    }
+
+    void _onCustomAttachmentPickerResult(CustomAttachmentPickerResult result) {
+      return widget.onCustomAttachmentPickerResult?.call(result);
+    }
+
+    return switch (result) {
+      // Add the attachments to the controller.
+      AttachmentsPicked() => _onAttachmentsPicked(result.attachments),
+      // Send the created poll in the channel.
+      PollCreated() => _onPollCreated(result.poll),
+      // Handle custom attachment picker results.
+      CustomAttachmentPickerResult() => _onCustomAttachmentPickerResult(result),
+      // Handle/Notify returned errors.
+      AttachmentPickerError() => _onAttachmentPickerError(result),
+    };
   }
 
   Widget _buildTextInput(BuildContext context) {
