@@ -1,3 +1,11 @@
+## 10.0.0-beta.3
+
+🛑️ Breaking
+
+- `PollMessage` widget has been removed and replaced with `PollAttachment` for better integration
+  with the attachment system. Polls can now be customized through `PollAttachmentBuilder` or by
+  creating custom poll attachment widgets via the attachment builder system.
+
 ## 10.0.0-beta.2
 
 - Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
