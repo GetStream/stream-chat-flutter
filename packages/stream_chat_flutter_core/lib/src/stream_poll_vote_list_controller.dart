@@ -10,10 +10,7 @@ const defaultPollVotePagedLimit = 10;
 
 /// The default sort used for the poll vote list.
 const defaultPollVoteListSort = [
-  SortOption<PollVote>(
-    PollVoteSortKey.createdAt,
-    direction: SortOption.ASC,
-  ),
+  SortOption<PollVote>.asc(PollVoteSortKey.createdAt),
 ];
 
 const _kDefaultBackendPaginationLimit = 30;

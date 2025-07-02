@@ -41,6 +41,7 @@ class SortOption<T extends ComparableFieldProvider> {
   /// ```dart
   /// final sorting = SortOption("last_message_at") // Default: descending order
   /// ```
+  @Deprecated('Use SortOption.desc or SortOption.asc instead')
   const SortOption(
     this.field, {
     this.direction = SortOption.DESC,

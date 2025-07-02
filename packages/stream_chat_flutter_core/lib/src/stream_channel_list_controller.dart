@@ -11,7 +11,7 @@ const defaultChannelPagedLimit = 10;
 
 /// The default sort used for the channel list.
 const defaultChannelListSort = [
-  SortOption<ChannelState>(ChannelSortKey.lastUpdated),
+  SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated),
 ];
 
 const _kDefaultBackendPaginationLimit = 30;

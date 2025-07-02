@@ -122,7 +122,7 @@ void main() {
     const channelType = 'test-channel-type';
 
     final filter = Filter.in_('cid', const ['test-cid']);
-    const sort = [SortOption<ChannelState>('test-field')];
+    const sort = [SortOption<ChannelState>.desc('test-field')];
     const memberLimit = 33;
     const messageLimit = 33;
 

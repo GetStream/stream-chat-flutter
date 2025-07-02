@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Deprecated `SortOption.new` constructor in favor of `SortOption.desc` and `SortOption.asc`.
+
 ## 9.13.0
 
 - Bug fixes and improvements
