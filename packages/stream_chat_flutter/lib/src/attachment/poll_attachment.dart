@@ -14,9 +14,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 const _maxVisibleOptionCount = 10;
 
 /// {@template pollMessage}
-/// A widget that displays a poll message.
-///
-/// Used in [MessageCard] to display a poll message.
+/// A widget that displays a message poll attachment in a [StreamMessageWidget].
 /// {@endtemplate}
 class PollAttachment extends StatefulWidget {
   /// {@macro pollMessage}
