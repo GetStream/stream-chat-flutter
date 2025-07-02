@@ -1273,7 +1273,7 @@ void main() {
 
       test('should work fine with `query`', () async {
         const query = 'test-search-query';
-        const sort = [SortOption('test-sort-field')];
+        const sort = [SortOption.asc('test-sort-field')];
         const pagination = PaginationParams();
 
         final results = List.generate(3, (index) => GetMessageResponse());
@@ -1306,7 +1306,7 @@ void main() {
 
       test('should work fine with `messageFilters`', () async {
         final messageFilters = Filter.query('key', 'text');
-        const sort = [SortOption('test-sort-field')];
+        const sort = [SortOption.desc('test-sort-field')];
         const pagination = PaginationParams();
 
         final results = List.generate(3, (index) => GetMessageResponse());

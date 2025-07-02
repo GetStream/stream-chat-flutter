@@ -10,10 +10,7 @@ const defaultMemberPagedLimit = 10;
 
 /// The default sort used for the member list.
 const defaultMemberListSort = [
-  SortOption<Member>(
-    MemberSortKey.createdAt,
-    direction: SortOption.ASC,
-  ),
+  SortOption<Member>.asc(MemberSortKey.createdAt),
 ];
 
 const _kDefaultBackendPaginationLimit = 30;

@@ -68,7 +68,7 @@ void main() {
     test('should query reminders with filter, sort, and pagination', () async {
       const path = '/reminders/query';
       final filter = Filter.equal('userId', 'test-user-id');
-      const sort = [SortOption<MessageReminder>('remindAt')];
+      const sort = [SortOption<MessageReminder>.desc('remindAt')];
       const pagination = PaginationParams(limit: 10, offset: 5);
 
       final expectedPayload = jsonEncode({
