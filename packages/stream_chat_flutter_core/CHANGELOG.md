@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed cached messages are cleared from channels with unread messages when accessed
+  offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
+
 ## 9.13.0
 
 🐞 Fixed
