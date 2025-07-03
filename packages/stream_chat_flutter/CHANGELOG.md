@@ -1,4 +1,4 @@
-## 10.0.0-beta.3
+## Upcoming Beta
 
 🛑️ Breaking
 
