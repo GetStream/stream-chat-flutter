@@ -358,7 +358,6 @@ class StreamChannelState extends State<StreamChannel> {
   }) async {
     if (channel.state == null) return null;
     channel.state?.isUpToDate = false;
-    channel.state?.truncate();
 
     final pagination = PaginationParams(
       limit: limit,
@@ -461,7 +460,6 @@ class StreamChannelState extends State<StreamChannel> {
   }) async {
     if (channel.state == null) return null;
     channel.state?.isUpToDate = false;
-    channel.state?.truncate();
 
     final pagination = PaginationParams(
       limit: limit,
