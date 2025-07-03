@@ -81,6 +81,7 @@ class _ThreadPageState extends State<ThreadPage> {
             StreamMessageInput(
               focusNode: _focusNode,
               messageInputController: _messageInputController,
+              enableVoiceRecording: true,
             ),
         ],
       ),
