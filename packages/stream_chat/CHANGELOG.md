@@ -5,6 +5,11 @@
 - Fixed cached messages are cleared from channels with unread messages when accessed
   offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
 
+✅ Added
+
+- Added support for `client.getUnreadCounts()`, which returns the unread count information for the
+  current user.
+
 🔄 Changed
 
 - Deprecated `SortOption.new` constructor in favor of `SortOption.desc` and `SortOption.asc`.
