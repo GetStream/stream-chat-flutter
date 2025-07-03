@@ -2749,6 +2749,121 @@ void main() {
           ),
         ).called(1);
       });
+
+      test('should truncate state when querying around message id', () async {
+        final initialMessages = [
+          Message(id: 'msg1', text: 'Hello 1'),
+          Message(id: 'msg2', text: 'Hello 2'),
+          Message(id: 'msg3', text: 'Hello 3'),
+        ];
+
+        final stateWithMessages = _generateChannelState(
+          channelId,
+          channelType,
+        ).copyWith(messages: initialMessages);
+
+        channel.state!.updateChannelState(stateWithMessages);
+        expect(channel.state!.messages, hasLength(3));
+
+        final newState = _generateChannelState(
+          channelId,
+          channelType,
+        ).copyWith(messages: [
+          Message(id: 'msg-before-1', text: 'Message before 1'),
+          Message(id: 'msg-before-2', text: 'Message before 2'),
+          Message(id: 'target-message-id', text: 'Target message'),
+          Message(id: 'msg-after-1', text: 'Message after 1'),
+          Message(id: 'msg-after-2', text: 'Message after 2'),
+        ]);
+
+        when(
+          () => client.queryChannel(
+            channelType,
+            channelId: channelId,
+            channelData: any(named: 'channelData'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).thenAnswer((_) async => newState);
+
+        const pagination = PaginationParams(idAround: 'target-message-id');
+
+        final res = await channel.query(messagesPagination: pagination);
+
+        expect(res, isNotNull);
+        expect(channel.state!.messages, hasLength(5));
+        expect(channel.state!.messages[2].id, 'target-message-id');
+
+        verify(
+          () => client.queryChannel(
+            channelType,
+            channelId: channelId,
+            channelData: any(named: 'channelData'),
+            messagesPagination: pagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).called(1);
+      });
+
+      test('should truncate state when querying around created date', () async {
+        final initialMessages = [
+          Message(id: 'msg1', text: 'Hello 1'),
+          Message(id: 'msg2', text: 'Hello 2'),
+          Message(id: 'msg3', text: 'Hello 3'),
+        ];
+
+        final stateWithMessages = _generateChannelState(
+          channelId,
+          channelType,
+        ).copyWith(messages: initialMessages);
+
+        channel.state!.updateChannelState(stateWithMessages);
+        expect(channel.state!.messages, hasLength(3));
+
+        final targetDate = DateTime.now();
+        final newState = _generateChannelState(
+          channelId,
+          channelType,
+        ).copyWith(messages: [
+          Message(id: 'msg-before-1', text: 'Message before 1'),
+          Message(id: 'msg-before-2', text: 'Message before 2'),
+          Message(id: 'target-message', text: 'Target message'),
+          Message(id: 'msg-after-1', text: 'Message after 1'),
+          Message(id: 'msg-after-2', text: 'Message after 2'),
+        ]);
+
+        when(
+          () => client.queryChannel(
+            channelType,
+            channelId: channelId,
+            channelData: any(named: 'channelData'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).thenAnswer((_) async => newState);
+
+        final pagination = PaginationParams(createdAtAround: targetDate);
+
+        final res = await channel.query(messagesPagination: pagination);
+
+        expect(res, isNotNull);
+        expect(channel.state!.messages, hasLength(5));
+        expect(channel.state!.messages[2].id, 'target-message');
+
+        verify(
+          () => client.queryChannel(
+            channelType,
+            channelId: channelId,
+            channelData: any(named: 'channelData'),
+            messagesPagination: pagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).called(1);
+      });
     });
 
     test('`.queryMembers`', () async {
