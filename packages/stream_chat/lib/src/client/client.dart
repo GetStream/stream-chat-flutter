@@ -1547,6 +1547,20 @@ class StreamChatClient {
     }
   }
 
+  /// Returns the unread count information for the current user.
+  Future<GetUnreadCountResponse> getUnreadCount() async {
+    final response = await _chatApi.user.getUnreadCount();
+
+    // Update the current user's unread counts in the state.
+    state.currentUser = state.currentUser?.copyWith(
+      totalUnreadCount: response.totalUnreadCount,
+      unreadChannels: response.channels.length,
+      unreadThreads: response.threads.length,
+    );
+
+    return response;
+  }
+
   /// Mutes a user
   Future<EmptyResponse> muteUser(String userId) =>
       _chatApi.moderation.muteUser(userId);

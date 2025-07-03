@@ -58,6 +58,7 @@ export 'src/core/models/reaction_group.dart';
 export 'src/core/models/read.dart';
 export 'src/core/models/thread.dart';
 export 'src/core/models/thread_participant.dart';
+export 'src/core/models/unread_counts.dart';
 export 'src/core/models/user.dart';
 export 'src/core/models/user_block.dart';
 export 'src/core/platform_detector/platform_detector.dart';
