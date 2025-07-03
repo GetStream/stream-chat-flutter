@@ -42,7 +42,6 @@ class MessageWidgetContent extends StatelessWidget {
     required this.hasQuotedMessage,
     required this.hasUrlAttachments,
     required this.hasNonUrlAttachments,
-    required this.hasPoll,
     required this.isOnlyEmoji,
     required this.isGiphy,
     required this.attachmentBuilders,
@@ -136,9 +135,6 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
-
-  /// {@macro hasPoll}
-  final bool hasPoll;
 
   /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
@@ -363,7 +359,6 @@ class MessageWidgetContent extends StatelessWidget {
       hasQuotedMessage: hasQuotedMessage,
       hasUrlAttachments: hasUrlAttachments,
       hasNonUrlAttachments: hasNonUrlAttachments,
-      hasPoll: hasPoll,
       isOnlyEmoji: isOnlyEmoji,
       isGiphy: isGiphy,
       attachmentBuilders: attachmentBuilders,
