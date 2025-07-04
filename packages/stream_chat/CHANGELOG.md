@@ -1,3 +1,14 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed cached messages are cleared from channels with unread messages when accessed
+  offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
+
+🔄 Changed
+
+- Deprecated `SortOption.new` constructor in favor of `SortOption.desc` and `SortOption.asc`.
+
 ## 10.0.0-beta.2
 
 - Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).

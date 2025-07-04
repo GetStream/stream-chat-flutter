@@ -10,7 +10,7 @@ const defaultUserPagedLimit = 10;
 
 /// The default sort used for the user list.
 const defaultUserListSort = [
-  SortOption<User>(UserSortKey.createdAt),
+  SortOption<User>.desc(UserSortKey.createdAt),
 ];
 
 const _kDefaultBackendPaginationLimit = 30;
