@@ -7,7 +7,7 @@
 
 ✅ Added
 
-- Added support for `client.getUnreadCounts()`, which returns the unread count information for the
+- Added support for `client.getUnreadCount()`, which returns the unread count information for the
   current user.
 
 🔄 Changed
