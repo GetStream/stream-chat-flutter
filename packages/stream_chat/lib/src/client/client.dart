@@ -1551,12 +1551,13 @@ class StreamChatClient {
   Future<GetUnreadCountResponse> getUnreadCount() async {
     final response = await _chatApi.user.getUnreadCount();
 
-    // Update the current user's unread counts in the state.
-    state.currentUser = state.currentUser?.copyWith(
+    // Emit an local event with the unread count information as a side effect
+    // in order to update the current user state.
+    handleEvent(Event(
       totalUnreadCount: response.totalUnreadCount,
       unreadChannels: response.channels.length,
       unreadThreads: response.threads.length,
-    );
+    ));
 
     return response;
   }
