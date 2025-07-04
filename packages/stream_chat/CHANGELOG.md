@@ -14,7 +14,15 @@
 
 - Deprecated `SortOption.new` constructor in favor of `SortOption.desc` and `SortOption.asc`.
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.13.0
+
+- Bug fixes and improvements
+
+## 10.0.0-beta.1
 
 - Bug fixes and improvements
 
