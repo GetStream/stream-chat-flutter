@@ -88,4 +88,11 @@ class UserApi {
 
     return BlockedUsersResponse.fromJson(response.data);
   }
+
+  /// Requests the unread count information for the current user.
+  Future<GetUnreadCountResponse> getUnreadCount() async {
+    final response = await _client.get('/unread');
+
+    return GetUnreadCountResponse.fromJson(response.data);
+  }
 }
