@@ -68,10 +68,7 @@ class EventController<T extends Event> extends Subject<T> {
   void add(T event) {
     for (final resolver in _resolvers) {
       final result = resolver(event);
-      if (result != null) {
-        print('Type: ${result.type}, Event: $result');
-        return super.add(result);
-      }
+      if (result != null) return super.add(result);
     }
 
     // No resolver matched — emit the event as-is.
