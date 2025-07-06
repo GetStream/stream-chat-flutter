@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/client/event_resolvers.dart' as event_resolvers;
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
@@ -33,6 +34,7 @@ import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -222,21 +224,15 @@ class StreamChatClient {
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
 
-  final _eventController = PublishSubject<Event>();
-
   /// Stream of [Event] coming from [_ws] connection
   /// Listen to this or use the [on] method to filter specific event types
-  Stream<Event> get eventStream => _eventController.stream.map(
-        // If the poll vote is an answer, we should emit a different event
-        // to make it easier to handle in the state.
-        (event) => switch ((event.type, event.pollVote?.isAnswer == true)) {
-          (EventType.pollVoteCasted || EventType.pollVoteChanged, true) =>
-            event.copyWith(type: EventType.pollAnswerCasted),
-          (EventType.pollVoteRemoved, true) =>
-            event.copyWith(type: EventType.pollAnswerRemoved),
-          _ => event,
-        },
-      );
+  Stream<Event> get eventStream => _eventController.stream;
+  late final _eventController = EventController<Event>(
+    resolvers: [
+      event_resolvers.pollAnswerCastedResolver,
+      event_resolvers.pollAnswerRemovedResolver,
+    ],
+  );
 
   final _wsConnectionStatusController =
       BehaviorSubject.seeded(ConnectionStatus.disconnected);
