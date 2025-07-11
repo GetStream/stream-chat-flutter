@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
@@ -727,8 +729,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get flagMessageQuestion =>
-      'Do you want to send a copy of this message to a'
-      '\nmoderator for further investigation?';
+      'Do you want to send a copy of this message to a moderator for further investigation?';
 
   @override
   String get flagLabel => 'FLAG';
@@ -751,7 +752,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this\nmessage?';
+      'Are you sure you want to permanently delete this message?';
 
   @override
   String get operationCouldNotBeCompletedText =>

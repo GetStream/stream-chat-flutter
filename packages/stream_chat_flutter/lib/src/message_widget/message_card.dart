@@ -17,7 +17,6 @@ class MessageCard extends StatefulWidget {
     required this.hasQuotedMessage,
     required this.hasUrlAttachments,
     required this.hasNonUrlAttachments,
-    required this.hasPoll,
     required this.isOnlyEmoji,
     required this.isGiphy,
     required this.attachmentBuilders,
@@ -65,9 +64,6 @@ class MessageCard extends StatefulWidget {
 
   /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
-
-  /// {@macro hasPoll}
-  final bool hasPoll;
 
   /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
@@ -128,10 +124,6 @@ class _MessageCardState extends State<MessageCard> {
   final attachmentsKey = GlobalKey();
   double? widthLimit;
 
-  bool get hasAttachments {
-    return widget.hasUrlAttachments || widget.hasNonUrlAttachments;
-  }
-
   void _updateWidthLimit() {
     final attachmentContext = attachmentsKey.currentContext;
     final renderBox = attachmentContext?.findRenderObject() as RenderBox?;
@@ -150,11 +142,9 @@ class _MessageCardState extends State<MessageCard> {
     // If there is an attachment, we need to wait for the attachment to be
     // rendered to get the width of the attachment and set it as the width
     // limit of the message card.
-    if (hasAttachments) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _updateWidthLimit();
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateWidthLimit();
+    });
   }
 
   @override
@@ -164,9 +154,9 @@ class _MessageCardState extends State<MessageCard> {
 
     return Container(
       constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
-      margin: EdgeInsets.symmetric(
-        horizontal: (widget.isFailedState ? 12.0 : 0.0) +
-            (widget.showUserAvatar == DisplayWidget.gone ? 0 : 4.0),
+      margin: EdgeInsetsDirectional.only(
+        end: widget.reverse && widget.isFailedState ? 12.0 : 0.0,
+        start: !widget.reverse && widget.isFailedState ? 12.0 : 0.0,
       ),
       clipBehavior: Clip.hardEdge,
       decoration: ShapeDecoration(
@@ -201,23 +191,17 @@ class _MessageCardState extends State<MessageCard> {
                     hasNonUrlAttachments: widget.hasNonUrlAttachments,
                   ),
             ),
-          if (hasAttachments)
-            ParseAttachments(
-              key: attachmentsKey,
-              message: widget.message,
-              attachmentBuilders: widget.attachmentBuilders,
-              attachmentPadding: widget.attachmentPadding,
-              attachmentShape: widget.attachmentShape,
-              onAttachmentTap: widget.onAttachmentTap,
-              onShowMessage: widget.onShowMessage,
-              onReplyTap: widget.onReplyTap,
-              attachmentActionsModalBuilder:
-                  widget.attachmentActionsModalBuilder,
-            ),
-          if (widget.hasPoll)
-            PollMessage(
-              message: widget.message,
-            ),
+          ParseAttachments(
+            key: attachmentsKey,
+            message: widget.message,
+            attachmentBuilders: widget.attachmentBuilders,
+            attachmentPadding: widget.attachmentPadding,
+            attachmentShape: widget.attachmentShape,
+            onAttachmentTap: widget.onAttachmentTap,
+            onShowMessage: widget.onShowMessage,
+            onReplyTap: widget.onReplyTap,
+            attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
+          ),
           TextBubble(
             messageTheme: widget.messageTheme,
             message: widget.message,
