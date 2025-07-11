@@ -12,6 +12,7 @@ part 'url_attachment_builder.dart';
 part 'video_attachment_builder.dart';
 part 'voice_recording_attachment_playlist_builder.dart';
 part 'voice_recording_attachment_builder/voice_recording_attachment_builder.dart';
+part 'poll_attachment_builder.dart';
 
 /// {@template streamAttachmentWidgetTapCallback}
 /// Signature for a function that's called when the user taps on an attachment.
@@ -43,6 +44,8 @@ abstract class StreamAttachmentWidgetBuilder {
   ///   * [FileAttachmentBuilder]
   ///   * [ImageAttachmentBuilder]
   ///   * [VideoAttachmentBuilder]
+  ///   * [VoiceRecordingAttachmentPlaylistBuilder]
+  ///   * [PollAttachmentBuilder]
   ///   * [UrlAttachmentBuilder]
   ///   * [FallbackAttachmentBuilder]
   ///
@@ -72,7 +75,14 @@ abstract class StreamAttachmentWidgetBuilder {
     return [
       ...?customAttachmentBuilders,
 
-      // Handles a mix of image, gif, video, url and file attachments.
+      // Handles poll attachments.
+      PollAttachmentBuilder(
+        shape: shape,
+        padding: padding,
+      ),
+
+      // Handles a mix of image, gif, video, url, file and voice recording
+      // attachments.
       MixedAttachmentBuilder(
         padding: padding,
         onAttachmentTap: onAttachmentTap,

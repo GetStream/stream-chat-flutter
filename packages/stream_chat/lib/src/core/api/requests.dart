@@ -137,6 +137,11 @@ class PaginationParams extends Equatable {
         greaterThanOrEqual,
         lessThan,
         lessThanOrEqual,
+        createdAtAfterOrEqual,
+        createdAtAfter,
+        createdAtBeforeOrEqual,
+        createdAtBefore,
+        createdAtAround,
       ];
 }
 

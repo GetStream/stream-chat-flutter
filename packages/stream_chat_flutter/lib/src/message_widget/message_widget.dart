@@ -600,11 +600,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   bool get hasNonUrlAttachments => widget.message.attachments
       .any((it) => it.type != AttachmentType.urlPreview);
 
-  /// {@template hasPoll}
-  /// `true` if the [message] contains a poll.
-  /// {@endtemplate}
-  bool get hasPoll => widget.message.poll != null;
-
   /// {@template hasUrlAttachments}
   /// `true` if any of the [message]'s attachments are a giphy with a
   /// [Attachment.titleLink].
@@ -719,7 +714,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                 reverse: widget.reverse,
                 message: widget.message,
                 hasNonUrlAttachments: hasNonUrlAttachments,
-                hasPoll: hasPoll,
                 hasQuotedMessage: hasQuotedMessage,
                 textPadding: widget.textPadding,
                 attachmentBuilders: widget.attachmentBuilders,

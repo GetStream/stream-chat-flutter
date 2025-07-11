@@ -8,38 +8,41 @@ import 'package:stream_chat_flutter/src/poll/stream_poll_comments_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_options_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_results_dialog.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 const _maxVisibleOptionCount = 10;
 
-const _kDefaultPollMessageConstraints = BoxConstraints(
-  maxWidth: 270,
-);
-
 /// {@template pollMessage}
-/// A widget that displays a poll message.
-///
-/// Used in [MessageCard] to display a poll message.
+/// A widget that displays a message poll attachment in a [StreamMessageWidget].
 /// {@endtemplate}
-class PollMessage extends StatefulWidget {
+class PollAttachment extends StatefulWidget {
   /// {@macro pollMessage}
-  const PollMessage({
+  const PollAttachment({
     super.key,
     required this.message,
+    this.shape,
+    this.constraints = const BoxConstraints(),
   });
 
   /// The message with the poll to display.
   final Message message;
 
+  /// The shape of the poll attachment.
+  final ShapeBorder? shape;
+
+  /// The constraints to apply to the poll attachment widget.
+  final BoxConstraints constraints;
+
   @override
-  State<PollMessage> createState() => _PollMessageState();
+  State<PollAttachment> createState() => _PollAttachmentState();
 }
 
-class _PollMessageState extends State<PollMessage> {
+class _PollAttachmentState extends State<PollAttachment> {
   late final _messageNotifier = ValueNotifier(widget.message);
 
   @override
-  void didUpdateWidget(covariant PollMessage oldWidget) {
+  void didUpdateWidget(covariant PollAttachment oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.message != widget.message) {
       // If the message changes, schedule an update for the next frame
@@ -57,6 +60,17 @@ class _PollMessageState extends State<PollMessage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamChatTheme.of(context);
+
+    final shape = widget.shape ??
+        RoundedRectangleBorder(
+          side: BorderSide(
+            color: theme.colorTheme.borders,
+            strokeAlign: BorderSide.strokeAlignOutside,
+          ),
+          borderRadius: BorderRadius.circular(14),
+        );
+
     return ValueListenableBuilder(
       valueListenable: _messageNotifier,
       builder: (context, message, child) {
@@ -96,8 +110,9 @@ class _PollMessageState extends State<PollMessage> {
           channel.createPollOption(poll, PollOption(text: optionText));
         }
 
-        return ConstrainedBox(
-          constraints: _kDefaultPollMessageConstraints,
+        return Container(
+          constraints: widget.constraints,
+          decoration: ShapeDecoration(shape: shape),
           child: StreamPollInteractor(
             poll: poll,
             currentUser: currentUser,

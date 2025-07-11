@@ -53,12 +53,6 @@ void main() {
       expect(j, {'field': 'name', 'direction': -1});
     });
 
-    test('should create a SortOption with default DESC direction', () {
-      const option = SortOption<TestModel>('name');
-      expect(option.field, 'name');
-      expect(option.direction, SortOption.DESC);
-    });
-
     test('should create a SortOption with ASC direction', () {
       const option = SortOption<TestModel>.asc('age');
       expect(option.field, 'age');

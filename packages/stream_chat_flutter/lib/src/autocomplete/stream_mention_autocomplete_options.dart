@@ -160,7 +160,7 @@ class _StreamMentionAutocompleteOptionsState
               Filter.autoComplete('id', query),
               Filter.autoComplete('name', query),
             ]),
-      sort: [const SortOption('id', direction: SortOption.ASC)],
+      sort: [const SortOption.asc('id')],
     );
     return response.users;
   }

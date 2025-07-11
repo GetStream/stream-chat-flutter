@@ -29,12 +29,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   late final userListController = StreamUserListController(
     client: StreamChat.of(context).client,
-    sort: [
-      const SortOption(
-        'name',
-        direction: 1,
-      ),
-    ],
+    sort: [const SortOption.asc('name')],
     limit: 25,
     filter: Filter.and([
       Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
