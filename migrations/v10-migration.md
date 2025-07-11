@@ -8,12 +8,196 @@
 
 This guide includes breaking changes grouped by release phase:
 
+### 🚧 v10.0.0-beta.3
+
+- [AttachmentPickerType](#-attachmentpickertype)
+- [StreamAttachmentPickerOption](#-streamattachmentpickeroption)
+- [showStreamAttachmentPickerModalBottomSheet](#-showstreamattachmentpickermodalbottomsheet)
+- [AttachmentPickerBottomSheet](#-attachmentpickerbottomsheet)
+
 ### 🚧 v10.0.0-beta.1
 
 - [StreamReactionPicker](#-streamreactionpicker)
 - [StreamMessageAction](#-streammessageaction)
 - [StreamMessageReactionsModal](#-streammessagereactionsmodal)
 - [StreamMessageWidget](#-streammessagewidget)
+
+---
+
+## 🧪 Migration for v10.0.0-beta.3
+
+### 🛠 AttachmentPickerType
+
+#### Key Changes:
+
+- `AttachmentPickerType` enum replaced with sealed class hierarchy
+- Now supports extensible custom types like contact and location pickers
+- Use built-in types like `AttachmentPickerType.images` or define your own via `CustomAttachmentPickerType`
+
+#### Migration Steps:
+
+**Before:**
+```dart
+// Using enum-based attachment types
+final attachmentType = AttachmentPickerType.images;
+```
+
+**After:**
+```dart
+// Using sealed class attachment types
+final attachmentType = AttachmentPickerType.images;
+
+// For custom types
+class LocationAttachmentPickerType extends CustomAttachmentPickerType {
+  const LocationAttachmentPickerType();
+}
+```
+
+> ⚠️ **Important:**  
+> The enum is now a sealed class, but the basic usage remains the same for built-in types.
+
+---
+
+### 🛠 StreamAttachmentPickerOption
+
+#### Key Changes:
+
+- `StreamAttachmentPickerOption` replaced with two sealed classes:
+  - `SystemAttachmentPickerOption` for system pickers (camera, files)
+  - `TabbedAttachmentPickerOption` for tabbed pickers (gallery, polls, location)
+
+#### Migration Steps:
+
+**Before:**
+```dart
+final option = AttachmentPickerOption(
+  title: 'Gallery',
+  icon: Icon(Icons.photo_library),
+  supportedTypes: [AttachmentPickerType.images, AttachmentPickerType.videos],
+  optionViewBuilder: (context, controller) {
+    return GalleryPickerView(controller: controller);
+  },
+);
+
+final webOrDesktopOption = WebOrDesktopAttachmentPickerOption(
+  title: 'File Upload',
+  icon: Icon(Icons.upload_file),
+  type: AttachmentPickerType.files,
+);
+```
+
+**After:**
+```dart
+// For custom UI pickers (gallery, polls)
+final tabbedOption = TabbedAttachmentPickerOption(
+  title: 'Gallery',
+  icon: Icon(Icons.photo_library),
+  supportedTypes: [AttachmentPickerType.images, AttachmentPickerType.videos],
+  optionViewBuilder: (context, controller) {
+    return GalleryPickerView(controller: controller);
+  },
+);
+
+// For system pickers (camera, file dialogs)
+final systemOption = SystemAttachmentPickerOption(
+  title: 'Camera',
+  icon: Icon(Icons.camera_alt),
+  supportedTypes: [AttachmentPickerType.images],
+  onTap: (context, controller) => pickFromCamera(),
+);
+```
+
+> ⚠️ **Important:**  
+> - Use `SystemAttachmentPickerOption` for system pickers (camera, file dialogs)
+> - Use `TabbedAttachmentPickerOption` for custom UI pickers (gallery, polls)
+
+---
+
+### 🛠 showStreamAttachmentPickerModalBottomSheet
+
+#### Key Changes:
+
+- Now returns `StreamAttachmentPickerResult` instead of `AttachmentPickerValue`
+- Improved type safety and clearer intent handling
+
+#### Migration Steps:
+
+**Before:**
+```dart
+final result = await showStreamAttachmentPickerModalBottomSheet(
+  context: context,
+  controller: controller,
+);
+
+// result is AttachmentPickerValue
+```
+
+**After:**
+```dart
+final result = await showStreamAttachmentPickerModalBottomSheet(
+  context: context,
+  controller: controller,
+);
+
+// result is StreamAttachmentPickerResult
+switch (result) {
+  case AttachmentsPicked():
+    // Handle picked attachments
+  case PollCreated():
+    // Handle created poll
+  case AttachmentPickerError():
+    // Handle error
+  case CustomAttachmentPickerResult():
+    // Handle custom result
+}
+```
+
+> ⚠️ **Important:**  
+> Always handle the new `StreamAttachmentPickerResult` return type with proper switch cases.
+
+---
+
+### 🛠 AttachmentPickerBottomSheet
+
+#### Key Changes:
+
+- `StreamMobileAttachmentPickerBottomSheet` → `StreamTabbedAttachmentPickerBottomSheet`
+- `StreamWebOrDesktopAttachmentPickerBottomSheet` → `StreamSystemAttachmentPickerBottomSheet`
+
+#### Migration Steps:
+
+**Before:**
+```dart
+StreamMobileAttachmentPickerBottomSheet(
+  context: context,
+  controller: controller,
+  customOptions: [option],
+);
+
+StreamWebOrDesktopAttachmentPickerBottomSheet(
+  context: context,
+  controller: controller,
+  customOptions: [option],
+);
+```
+
+**After:**
+```dart
+StreamTabbedAttachmentPickerBottomSheet(
+  context: context,
+  controller: controller,
+  customOptions: [tabbedOption],
+);
+
+StreamSystemAttachmentPickerBottomSheet(
+  context: context,
+  controller: controller,
+  customOptions: [systemOption],
+);
+```
+
+> ⚠️ **Important:**  
+> The new names better reflect their respective layouts and functionality.
 
 ---
 
@@ -182,6 +366,12 @@ StreamMessageWidget(
 
 ## 🎉 You're Ready to Migrate!
 
+### For v10.0.0-beta.3:
+- ✅ Update attachment picker options to use `SystemAttachmentPickerOption` or `TabbedAttachmentPickerOption`
+- ✅ Handle new `StreamAttachmentPickerResult` return type from attachment picker
+- ✅ Use renamed bottom sheet classes (`StreamTabbedAttachmentPickerBottomSheet`, `StreamSystemAttachmentPickerBottomSheet`)
+
+### For v10.0.0-beta.1:
 - ✅ Use `StreamReactionPicker.builder` or supply `onReactionPicked`
 - ✅ Convert all `StreamMessageAction` instances to type-safe generic usage
 - ✅ Centralize handling with `onCustomActionTap`
