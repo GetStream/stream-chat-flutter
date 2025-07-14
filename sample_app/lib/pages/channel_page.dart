@@ -57,6 +57,7 @@ class _ChannelPageState extends State<ChannelPage> {
     final colorTheme = theme.colorTheme;
 
     final channel = StreamChannel.of(context).channel;
+    final config = channel.config;
 
     return Scaffold(
       backgroundColor: colorTheme.appBg,
@@ -131,8 +132,7 @@ class _ChannelPageState extends State<ChannelPage> {
             enableVoiceRecording: true,
             allowedAttachmentPickerTypes: [
               ...AttachmentPickerType.values,
-              if (channel.config?.sharedLocations == true &&
-                  channel.canShareLocation)
+              if (config?.sharedLocations == true && channel.canShareLocation)
                 const LocationPickerType(),
             ],
             onCustomAttachmentPickerResult: (result) {
