@@ -1093,12 +1093,14 @@ class Channel {
   /// Optionally, provide a [messageText] and [extraData] to send along with
   /// the location.
   Future<SendMessageResponse> sendStaticLocation({
+    String? id,
     String? messageText,
     required String createdByDeviceId,
     required LocationCoordinates location,
     Map<String, Object?> extraData = const {},
   }) {
     final message = Message(
+      id: id,
       text: messageText,
       extraData: extraData,
     );
@@ -1123,6 +1125,7 @@ class Channel {
   /// Optionally, provide a [messageText] and [extraData] to send along with
   /// the location.
   Future<SendMessageResponse> startLiveLocationSharing({
+    String? id,
     String? messageText,
     required DateTime endSharingAt,
     required String createdByDeviceId,
@@ -1130,6 +1133,7 @@ class Channel {
     Map<String, Object?> extraData = const {},
   }) {
     final message = Message(
+      id: id,
       text: messageText,
       extraData: extraData,
     );
@@ -3107,12 +3111,6 @@ class ChannelClientState {
         newMessages.add(message);
       }
 
-      // Handle updates to pinned messages.
-      final newPinnedMessages = _updatePinnedMessages(message);
-
-      // Handle updates to the active live locations.
-      final newActiveLiveLocations = _updateActiveLiveLocations(message);
-
       // Calculate the new last message at time.
       var lastMessageAt = _channelState.channel?.lastMessageAt;
       lastMessageAt ??= message.createdAt;
@@ -3123,18 +3121,45 @@ class ChannelClientState {
       // Apply the updated lists to the channel state.
       _channelState = _channelState.copyWith(
         messages: newMessages.sorted(_sortByCreatedAt),
-        pinnedMessages: newPinnedMessages,
-        activeLiveLocations: newActiveLiveLocations,
         channel: _channelState.channel?.copyWith(
           lastMessageAt: lastMessageAt,
         ),
       );
     }
 
-    // If the message is part of a thread, update thread information.
+    // If the message is part of a thread, update thread message.
     if (message.parentId case final parentId?) {
-      updateThreadInfo(parentId, [message]);
+      _updateThreadMessage(parentId, message);
     }
+
+    // Handle updates to pinned messages.
+    final newPinnedMessages = _updatePinnedMessages(message);
+
+    // Handle updates to the active live locations.
+    final newActiveLiveLocations = _updateActiveLiveLocations(message);
+
+    // Update the channel state with the new pinned messages and
+    // active live locations.
+    _channelState = _channelState.copyWith(
+      pinnedMessages: newPinnedMessages,
+      activeLiveLocations: newActiveLiveLocations,
+    );
+  }
+
+  void _updateThreadMessage(String parentId, Message message) {
+    final existingThreadMessages = threads[parentId] ?? [];
+    final updatedThreadMessages = <Message>[
+      ...existingThreadMessages.merge(
+        [message],
+        key: (it) => it.id,
+        update: (original, updated) => updated.syncWith(original),
+      ),
+    ];
+
+    _threads = {
+      ...threads,
+      parentId: updatedThreadMessages.sorted(_sortByCreatedAt)
+    };
   }
 
   /// Cleans up all the stale error messages which requires no action.
@@ -3206,51 +3231,64 @@ class ChannelClientState {
   void removeMessage(Message message) async {
     await _channel._client.chatPersistenceClient?.deleteMessageById(message.id);
 
-    final parentId = message.parentId;
-    // i.e. it's a thread message, Remove it
-    if (parentId != null) {
-      final newThreads = {...threads};
-      // Early return in case the thread is not available
-      if (!newThreads.containsKey(parentId)) return;
+    if (message.parentId == null || message.showInChannel == true) {
+      // Remove regular message, thread message shown in channel
+      var updatedMessages = [...messages.where((e) => e.id != message.id)];
 
-      // Remove thread message shown in thread page.
-      newThreads.update(
-        parentId,
-        (messages) => [...messages.where((e) => e.id != message.id)],
+      // Remove quoted message reference from every message if available.
+      updatedMessages = [
+        ...updatedMessages.map((it) {
+          // Early return if the message doesn't have a quoted message.
+          if (it.quotedMessageId != message.id) return it;
+
+          // Setting it to null will remove the quoted message from the message.
+          return it.copyWith(quotedMessage: null, quotedMessageId: null);
+        }),
+      ];
+
+      _channelState = _channelState.copyWith(
+        messages: updatedMessages.sorted(_sortByCreatedAt),
       );
-
-      _threads = newThreads;
-
-      // Early return if the thread message is not shown in channel.
-      if (message.showInChannel == false) return;
     }
 
-    // Remove regular message, thread message shown in channel
-    var updatedMessages = [...messages]..removeWhere((e) => e.id == message.id);
-
-    // Remove quoted message reference from every message if available.
-    updatedMessages = [...updatedMessages].map((it) {
-      // Early return if the message doesn't have a quoted message.
-      if (it.quotedMessageId != message.id) return it;
-
-      // Setting it to null will remove the quoted message from the message.
-      return it.copyWith(
-        quotedMessage: null,
-        quotedMessageId: null,
-      );
-    }).toList();
+    if (message.parentId case final parentId?) {
+      // If the message is a thread message, remove it from the threads.
+      _removeThreadMessage(message, parentId);
+    }
 
     // If the message is pinned, remove it from the pinned messages.
-    final updatedPinnedMessages = _updatePinnedMessages(message);
+    final updatedPinnedMessages = [
+      ...pinnedMessages.where((it) => it.id != message.id),
+    ];
 
     // If the message is a live location, update the active live locations.
-    final updatedActiveLiveLocations = _updateActiveLiveLocations(message);
+    final updatedActiveLiveLocations = [
+      ...activeLiveLocations.where((it) => it.messageId != message.id),
+    ];
 
     _channelState = _channelState.copyWith(
-      messages: updatedMessages.sorted(_sortByCreatedAt),
       pinnedMessages: updatedPinnedMessages,
       activeLiveLocations: updatedActiveLiveLocations,
     );
+  }
+
+  void _removeThreadMessage(Message message, String parentId) {
+    final existingThreadMessages = threads[parentId] ?? [];
+    final updatedThreadMessages = <Message>[
+      ...existingThreadMessages.where((it) => it.id != message.id),
+    ];
+
+    // If there are no more messages in the thread, remove the thread entry.
+    if (updatedThreadMessages.isEmpty) {
+      _threads = {...threads}..remove(parentId);
+      return;
+    }
+
+    // Otherwise, update the thread messages.
+    _threads = {
+      ...threads,
+      parentId: updatedThreadMessages.sorted(_sortByCreatedAt),
+    };
   }
 
   /// Removes/Updates the [message] based on the [hardDelete] value.
@@ -3543,6 +3581,7 @@ class ChannelClientState {
       read: newReads,
       draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
+      activeLiveLocations: updatedState.activeLiveLocations,
     );
   }
 
@@ -3582,19 +3621,19 @@ class ChannelClientState {
 
   /// Update threads with updated information about messages.
   void updateThreadInfo(String parentId, List<Message> messages) {
-    final newThreads = {...threads}..update(
-        parentId,
-        (original) => <Message>[
-          ...original.merge(
-            messages,
-            key: (message) => message.id,
-            update: (original, updated) => updated.syncWith(original),
-          ),
-        ].sorted(_sortByCreatedAt),
-        ifAbsent: () => messages.sorted(_sortByCreatedAt),
-      );
+    final existingThreadMessages = threads[parentId] ?? [];
+    final updatedThreadMessages = <Message>[
+      ...existingThreadMessages.merge(
+        messages,
+        key: (it) => it.id,
+        update: (original, updated) => updated.syncWith(original),
+      ),
+    ];
 
-    _threads = newThreads;
+    _threads = {
+      ...threads,
+      parentId: updatedThreadMessages.sorted(_sortByCreatedAt)
+    };
   }
 
   Draft? _getThreadDraft(String parentId, List<Message>? messages) {

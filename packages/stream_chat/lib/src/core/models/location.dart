@@ -32,8 +32,8 @@ class Location extends Equatable {
     this.endAt,
     DateTime? createdAt,
     DateTime? updatedAt,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  })  : createdAt = createdAt ?? DateTime.timestamp(),
+        updatedAt = updatedAt ?? DateTime.timestamp();
 
   /// Create a new instance from a json
   factory Location.fromJson(Map<String, dynamic> json) =>
