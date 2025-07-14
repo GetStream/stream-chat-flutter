@@ -34,11 +34,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.mentionedUsers = const [],
     this.silent = false,
     this.shadowed = false,
-    @Deprecated("Use 'reactionGroups' instead")
-    Map<String, int>? reactionCounts,
-    @Deprecated("Use 'reactionGroups' instead")
-    Map<String, int>? reactionScores,
-    Map<String, ReactionGroup>? reactionGroups,
+    this.reactionGroups,
     this.latestReactions,
     this.ownReactions,
     this.parentId,
@@ -75,11 +71,6 @@ class Message extends Equatable implements ComparableFieldProvider {
         remoteCreatedAt = createdAt,
         remoteUpdatedAt = updatedAt,
         remoteDeletedAt = deletedAt,
-        reactionGroups = _maybeGetReactionGroups(
-          reactionGroups: reactionGroups,
-          reactionCounts: reactionCounts,
-          reactionScores: reactionScores,
-        ),
         _quotedMessageId = quotedMessageId,
         _pollId = pollId;
 
@@ -126,43 +117,6 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// The list of user mentioned in the message.
   @JsonKey(toJson: User.toIds)
   final List<User> mentionedUsers;
-
-  /// A map describing the count of number of every reaction.
-  @JsonKey(includeToJson: false)
-  @Deprecated("Use 'reactionGroups' instead")
-  Map<String, int>? get reactionCounts {
-    return reactionGroups?.map((type, it) => MapEntry(type, it.count));
-  }
-
-  /// A map describing the count of score of every reaction.
-  @JsonKey(includeToJson: false)
-  @Deprecated("Use 'reactionGroups' instead")
-  Map<String, int>? get reactionScores {
-    return reactionGroups?.map((type, it) => MapEntry(type, it.sumScores));
-  }
-
-  static Map<String, ReactionGroup>? _maybeGetReactionGroups({
-    Map<String, ReactionGroup>? reactionGroups,
-    Map<String, int>? reactionCounts,
-    Map<String, int>? reactionScores,
-  }) {
-    if (reactionGroups != null) return reactionGroups;
-    if (reactionCounts == null && reactionScores == null) return null;
-
-    final reactionTypes = {...?reactionCounts?.keys, ...?reactionScores?.keys};
-    if (reactionTypes.isEmpty) return null;
-
-    final groups = <String, ReactionGroup>{};
-    for (final type in reactionTypes) {
-      final count = reactionCounts?[type] ?? 0;
-      final sumScores = reactionScores?[type] ?? 0;
-
-      if (count == 0 || sumScores == 0) continue;
-      groups[type] = ReactionGroup(count: count, sumScores: sumScores);
-    }
-
-    return groups;
-  }
 
   /// A map of reaction types and their corresponding reaction groups.
   @JsonKey(includeToJson: false)
@@ -389,10 +343,6 @@ class Message extends Equatable implements ComparableFieldProvider {
     List<User>? mentionedUsers,
     bool? silent,
     bool? shadowed,
-    @Deprecated("Use 'reactionGroups' instead")
-    Map<String, int>? reactionCounts,
-    @Deprecated("Use 'reactionGroups' instead")
-    Map<String, int>? reactionScores,
     Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
@@ -464,12 +414,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       silent: silent ?? this.silent,
       shadowed: shadowed ?? this.shadowed,
-      reactionGroups: _maybeGetReactionGroups(
-            reactionGroups: reactionGroups,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
-          ) ??
-          this.reactionGroups,
+      reactionGroups: reactionGroups ?? this.reactionGroups,
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,

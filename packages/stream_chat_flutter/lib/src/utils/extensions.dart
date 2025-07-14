@@ -561,24 +561,6 @@ extension MessageListX on Iterable<Message> {
   ///
   /// The [userRead] is the last read message by the user.
   ///
-  /// The last unread message is the last message in the list that is not
-  /// sent by the current user and is sent after the last read message.
-  @Deprecated("Use 'StreamChannel.getFirstUnreadMessage' instead.")
-  Message? lastUnreadMessage(Read? userRead) {
-    if (isEmpty || userRead == null) return null;
-
-    if (first.createdAt.isAfter(userRead.lastRead) &&
-        last.createdAt.isBefore(userRead.lastRead)) {
-      return lastWhereOrNull(
-        (it) =>
-            it.user?.id != userRead.user.id &&
-            it.id != userRead.lastReadMessageId &&
-            it.createdAt.compareTo(userRead.lastRead) > 0,
-      );
-    }
-
-    return null;
-  }
 }
 
 /// Useful extensions on [ChannelModel].

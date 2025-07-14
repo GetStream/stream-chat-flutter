@@ -306,15 +306,6 @@ class Channel {
     return math.max(0, cooldownDuration - elapsedTime);
   }
 
-  /// Stores time at which cooldown was started
-  @Deprecated(
-    "Use a combination of 'remainingCooldown' and 'currentUserLastMessageAt'",
-  )
-  DateTime? get cooldownStartedAt {
-    if (getRemainingCooldown() <= 0) return null;
-    return currentUserLastMessageAt;
-  }
-
   /// Channel creation date.
   DateTime? get createdAt {
     _checkInitialized();

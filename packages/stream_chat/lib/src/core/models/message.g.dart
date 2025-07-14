@@ -22,12 +22,6 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
           const [],
       silent: json['silent'] as bool? ?? false,
       shadowed: json['shadowed'] as bool? ?? false,
-      reactionCounts: (json['reaction_counts'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
-      reactionScores: (json['reaction_scores'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
       reactionGroups: (json['reaction_groups'] as Map<String, dynamic>?)?.map(
         (k, e) =>
             MapEntry(k, ReactionGroup.fromJson(e as Map<String, dynamic>)),

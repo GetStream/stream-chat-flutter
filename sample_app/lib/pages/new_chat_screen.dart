@@ -29,10 +29,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
     ]),
     sort: [
-      const SortOption(
-        'name',
-        direction: 1,
-      ),
+      const SortOption.asc('name'),
     ],
   );
 
