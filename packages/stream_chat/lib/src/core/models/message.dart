@@ -632,7 +632,7 @@ class Message extends Equatable implements ComparableFieldProvider {
         draft,
         reminder,
         sharedLocation,
-  ];
+      ];
 
   @override
   ComparableField? getComparableField(String sortKey) {
