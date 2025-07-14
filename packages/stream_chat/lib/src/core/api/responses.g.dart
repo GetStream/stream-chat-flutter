@@ -467,3 +467,11 @@ QueryRemindersResponse _$QueryRemindersResponseFromJson(
               .toList() ??
           []
       ..next = json['next'] as String?;
+
+GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
+        Map<String, dynamic> json) =>
+    GetActiveLiveLocationsResponse()
+      ..duration = json['duration'] as String?
+      ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
+          .map((e) => Location.fromJson(e as Map<String, dynamic>))
+          .toList();

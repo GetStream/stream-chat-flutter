@@ -95,6 +95,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       reminder: json['reminder'] == null
           ? null
           : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+      sharedLocation: json['shared_location'] == null
+          ? null
+          : Location.fromJson(json['shared_location'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -112,7 +115,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'poll_id': instance.pollId,
       if (instance.restrictedVisibility case final value?)
         'restricted_visibility': value,
-      'draft': instance.draft?.toJson(),
       'reminder': instance.reminder?.toJson(),
+      'shared_location': instance.sharedLocation?.toJson(),
       'extra_data': instance.extraData,
     };

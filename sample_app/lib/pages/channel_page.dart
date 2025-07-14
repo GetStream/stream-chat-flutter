@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/widgets/location/location_attachment.dart';
+import 'package:sample_app/widgets/location/location_detail_dialog.dart';
+import 'package:sample_app/widgets/location/location_picker_dialog.dart';
+import 'package:sample_app/widgets/location/location_picker_option.dart';
 import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -25,8 +29,7 @@ class ChannelPage extends StatefulWidget {
 
 class _ChannelPageState extends State<ChannelPage> {
   FocusNode? _focusNode;
-  final StreamMessageInputController _messageInputController =
-      StreamMessageInputController();
+  final _messageInputController = StreamMessageInputController();
 
   @override
   void initState() {
@@ -52,6 +55,8 @@ class _ChannelPageState extends State<ChannelPage> {
     final theme = StreamChatTheme.of(context);
     final textTheme = theme.textTheme;
     final colorTheme = theme.colorTheme;
+
+    final channel = StreamChannel.of(context).channel;
 
     return Scaffold(
       backgroundColor: colorTheme.appBg,
@@ -124,9 +129,73 @@ class _ChannelPageState extends State<ChannelPage> {
             messageInputController: _messageInputController,
             onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
             enableVoiceRecording: true,
+            allowedAttachmentPickerTypes: [
+              ...AttachmentPickerType.values,
+              if (channel.canShareLocation) const LocationPickerType(),
+            ],
+            onCustomAttachmentPickerResult: (result) {
+              return _onCustomAttachmentPickerResult(channel, result).ignore();
+            },
+            customAttachmentPickerOptions: [
+              TabbedAttachmentPickerOption(
+                key: 'location-picker',
+                icon: const Icon(Icons.near_me_rounded),
+                supportedTypes: [const LocationPickerType()],
+                isEnabled: (value) {
+                  // Enable if nothing has been selected yet.
+                  if (value.isEmpty) return true;
+
+                  // Otherwise, enable only if there is a location.
+                  return value.extraData['location'] != null;
+                },
+                optionViewBuilder: (context, controller) => LocationPicker(
+                  onLocationPicked: (locationResult) {
+                    if (locationResult == null) return Navigator.pop(context);
+
+                    controller.extraData = {
+                      ...controller.value.extraData,
+                      'location': locationResult,
+                    };
+
+                    final result = LocationPicked(location: locationResult);
+                    return Navigator.pop(context, result);
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _onCustomAttachmentPickerResult(
+    Channel channel,
+    CustomAttachmentPickerResult result,
+  ) async {
+    final response = switch (result) {
+      LocationPicked() => _onShareLocationPicked(channel, result.location),
+      _ => null,
+    };
+
+    return response?.ignore();
+  }
+
+  Future<SendMessageResponse> _onShareLocationPicked(
+    Channel channel,
+    LocationPickerResult result,
+  ) async {
+    if (result.endSharingAt case final endSharingAt?) {
+      return channel.startLiveLocationSharing(
+        createdByDeviceId: 'test-device-id',
+        endSharingAt: endSharingAt,
+        location: result.coordinates,
+      );
+    }
+
+    return channel.sendStaticLocation(
+      createdByDeviceId: 'test-device-id',
+      location: result.coordinates,
     );
   }
 
@@ -142,7 +211,8 @@ class _ChannelPageState extends State<ChannelPage> {
 
     final message = details.message;
     final reminder = message.reminder;
-    final channelConfig = StreamChannel.of(context).channel.config;
+    final channel = StreamChannel.of(context).channel;
+    final channelConfig = channel.config;
 
     final customOptions = <StreamMessageAction>[
       if (channelConfig?.userMessageReminders == true) ...[
@@ -184,6 +254,13 @@ class _ChannelPageState extends State<ChannelPage> {
       ]
     ];
 
+    final locationAttachmentBuilder = LocationAttachmentBuilder(
+      onAttachmentTap: (location) => showLocationDetailDialog(
+        context: context,
+        location: location,
+      ),
+    );
+
     return Container(
       color: reminder != null ? colorTheme.accentPrimary.withOpacity(.1) : null,
       child: Column(
@@ -220,6 +297,7 @@ class _ChannelPageState extends State<ChannelPage> {
           defaultMessageWidget.copyWith(
             onReplyTap: _reply,
             customActions: customOptions,
+            showEditMessage: message.sharedLocation == null,
             onCustomActionTap: (it) async => await switch (it) {
               CreateReminder() => _createReminder(it.message),
               CreateBookmark() => _createBookmark(it.message),
@@ -227,6 +305,7 @@ class _ChannelPageState extends State<ChannelPage> {
               RemoveReminder() => _removeReminder(it.message, it.reminder),
               _ => null,
             },
+            attachmentBuilders: [locationAttachmentBuilder],
             onShowMessage: (message, channel) => GoRouter.of(context).goNamed(
               Routes.CHANNEL_PAGE.name,
               pathParameters: Routes.CHANNEL_PAGE.params(channel),
