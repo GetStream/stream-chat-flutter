@@ -82,7 +82,7 @@ class LocationProvider {
   /// Clean up resources
   void reset() {
     stopTracking();
-    _positionStreamController.close();
+    if (!_positionStreamController.isClosed) _positionStreamController.close();
   }
 
   Future<bool> _handlePermission() async {
