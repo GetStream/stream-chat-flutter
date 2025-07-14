@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
 
 import 'package:stream_chat/src/client/event_resolvers.dart';
 import 'package:stream_chat/src/core/models/event.dart';
