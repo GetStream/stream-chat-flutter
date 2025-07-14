@@ -4,13 +4,6 @@ import 'package:sample_app/widgets/location/location_user_marker.dart';
 import 'package:sample_app/widgets/simple_map_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template showStreamPollCommentsDialog}
-/// Displays an interactive dialog to show all the comments for a poll.
-///
-/// The comments are paginated and get's loaded as the user scrolls.
-///
-/// The dialog also allows the user to update their comment.
-/// {@endtemplate}
 Future<T?> showLocationDetailDialog<T extends Object?>({
   required BuildContext context,
   required Location location,

@@ -85,7 +85,7 @@ class LocationAttachment extends StatelessWidget {
     return Padding(
       padding: padding,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 270, maxHeight: 180),
+        constraints: constraints,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,

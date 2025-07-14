@@ -315,12 +315,14 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// Optional reminder for this message.
   ///
   /// This is present when a user has set a reminder for this message.
+  @JsonKey(includeToJson: false)
   final MessageReminder? reminder;
 
   /// Optional shared location associated with this message.
   ///
   /// This is used to share a location in a message, allowing users to view the
   /// location on a map.
+  @JsonKey(includeToJson: false)
   final Location? sharedLocation;
 
   /// Message custom extraData.

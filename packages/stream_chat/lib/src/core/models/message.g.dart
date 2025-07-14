@@ -115,7 +115,5 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'poll_id': instance.pollId,
       if (instance.restrictedVisibility case final value?)
         'restricted_visibility': value,
-      'reminder': instance.reminder?.toJson(),
-      'shared_location': instance.sharedLocation?.toJson(),
       'extra_data': instance.extraData,
     };
