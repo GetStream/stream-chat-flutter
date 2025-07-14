@@ -17,6 +17,12 @@ class LocationProvider {
 
   StreamSubscription<Position>? _positionSubscription;
 
+  /// Opens the device's location settings page.
+  ///
+  /// Returns [true] if the location settings page could be opened, otherwise
+  /// [false] is returned.
+  Future<bool> openLocationSettings() => Geolocator.openLocationSettings();
+
   /// Get current static location
   Future<Position?> getCurrentLocation() async {
     final hasPermission = await _handlePermission();

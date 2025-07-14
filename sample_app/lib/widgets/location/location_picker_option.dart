@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sample_app/utils/location_provider.dart';
 import 'package:sample_app/widgets/location/location_picker_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -44,11 +45,11 @@ class LocationPicker extends StatelessWidget {
             children: [
               Icon(
                 size: 148,
-                Icons.pin_drop_rounded,
+                Icons.near_me_rounded,
                 color: theme.colorTheme.disabled,
               ),
               Text(
-                context.translations.enablePhotoAndVideoAccessMessage,
+                'Please enable access to your location',
                 style: theme.textTheme.body.copyWith(
                   color: theme.colorTheme.textLowEmphasis,
                 ),
@@ -56,9 +57,9 @@ class LocationPicker extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextButton(
-                onPressed: null,
+                onPressed: LocationProvider().openLocationSettings,
                 child: Text(
-                  context.translations.allowGalleryAccessMessage,
+                  'Allow Location Access',
                   style: theme.textTheme.bodyBold.copyWith(
                     color: theme.colorTheme.accentPrimary,
                   ),
