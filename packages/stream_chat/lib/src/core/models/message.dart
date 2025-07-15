@@ -118,8 +118,39 @@ class Message extends Equatable implements ComparableFieldProvider {
   @JsonKey(toJson: User.toIds)
   final List<User> mentionedUsers;
 
+  static Object? _reactionGroupsReadValue(
+    Map<Object?, Object?> json,
+    String key,
+  ) {
+    final reactionGroups = json[key] as Map<String, dynamic>?;
+    if (reactionGroups != null) return reactionGroups;
+
+    final reactionCounts = json['reaction_counts'] as Map<String, dynamic>?;
+    final reactionScores = json['reaction_scores'] as Map<String, dynamic>?;
+    if (reactionCounts == null && reactionScores == null) return null;
+
+    final reactionTypes = {...?reactionCounts?.keys, ...?reactionScores?.keys};
+    if (reactionTypes.isEmpty) return null;
+
+    final groups = <String, dynamic>{};
+    for (final type in reactionTypes) {
+      final count = reactionCounts?[type] ?? 0;
+      final sumScores = reactionScores?[type] ?? 0;
+
+      if (count == 0 || sumScores == 0) continue;
+      groups[type] = {
+        'count': count,
+        'sum_scores': sumScores,
+        'first_reaction_at': DateTime.timestamp().toIso8601String(),
+        'last_reaction_at': DateTime.timestamp().toIso8601String(),
+      };
+    }
+
+    return groups;
+  }
+
   /// A map of reaction types and their corresponding reaction groups.
-  @JsonKey(includeToJson: false)
+  @JsonKey(includeToJson: false, readValue: _reactionGroupsReadValue)
   final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.
@@ -288,8 +319,6 @@ class Message extends Equatable implements ComparableFieldProvider {
     'shadowed',
     'own_reactions',
     'mentioned_users',
-    'reaction_counts',
-    'reaction_scores',
     'reaction_groups',
     'silent',
     'parent_id',

@@ -105,7 +105,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ],
       ),
       sort: [
-        const SortOption.asc('name'),
+        const SortOption.asc(UserSortKey.name),
       ],
     );
     super.didChangeDependencies();
