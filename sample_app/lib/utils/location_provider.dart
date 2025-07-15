@@ -1,3 +1,5 @@
+// ignore_for_file: close_sinks
+
 import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
@@ -68,8 +70,8 @@ class LocationProvider {
     _positionSubscription = Geolocator.getPositionStream(
       locationSettings: settings,
     ).listen(
-      _positionStreamController.add,
-      onError: _positionStreamController.addError,
+      _positionStreamController.safeAdd,
+      onError: _positionStreamController.safeAddError,
     );
   }
 
@@ -77,12 +79,6 @@ class LocationProvider {
   void stopTracking() {
     _positionSubscription?.cancel();
     _positionSubscription = null;
-  }
-
-  /// Clean up resources
-  void reset() {
-    stopTracking();
-    if (!_positionStreamController.isClosed) _positionStreamController.close();
   }
 
   Future<bool> _handlePermission() async {

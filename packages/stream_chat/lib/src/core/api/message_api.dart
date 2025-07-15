@@ -27,7 +27,7 @@ class MessageApi {
     final response = await _client.post(
       '/channels/$channelType/$channelId/message',
       data: {
-        'message': message,
+        'message': message.toJson(),
         'skip_push': skipPush,
         'skip_enrich_url': skipEnrichUrl,
       },

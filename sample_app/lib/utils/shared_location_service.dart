@@ -80,10 +80,7 @@ class SharedLocationService {
 
   /// Clean up resources
   Future<void> dispose() async {
-    _locationProvider.reset();
-
-    _positionSubscription?.cancel();
-    _positionSubscription = null;
+    _stopTrackingLocation();
 
     _activeLiveLocationsSubscription?.cancel();
     _activeLiveLocationsSubscription = null;

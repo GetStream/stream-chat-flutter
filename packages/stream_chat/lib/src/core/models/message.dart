@@ -322,7 +322,7 @@ class Message extends Equatable implements ComparableFieldProvider {
   ///
   /// This is used to share a location in a message, allowing users to view the
   /// location on a map.
-  @JsonKey(includeToJson: false)
+  @JsonKey(includeIfNull: false)
   final Location? sharedLocation;
 
   /// Message custom extraData.
