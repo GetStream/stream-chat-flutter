@@ -9,6 +9,7 @@ import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
@@ -801,4 +802,15 @@ class QueryRemindersResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryRemindersResponse fromJson(Map<String, dynamic> json) =>
       _$QueryRemindersResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updateDraft] api call
+@JsonSerializable(createToJson: false)
+class GetActiveLiveLocationsResponse extends _BaseResponse {
+  /// List of active live locations returned by the api call
+  late List<Location> activeLiveLocations;
+
+  /// Create a new instance from a json
+  static GetActiveLiveLocationsResponse fromJson(Map<String, dynamic> json) =>
+      _$GetActiveLiveLocationsResponseFromJson(json);
 }

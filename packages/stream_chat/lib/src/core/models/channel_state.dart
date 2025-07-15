@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/read.dart';
@@ -29,6 +30,7 @@ class ChannelState implements ComparableFieldProvider {
     this.read,
     this.membership,
     this.draft,
+    this.activeLiveLocations,
   });
 
   /// The channel to which this state belongs
@@ -58,6 +60,9 @@ class ChannelState implements ComparableFieldProvider {
   /// The draft message for this channel if it exists.
   final Draft? draft;
 
+  /// The list of active live locations in the channel.
+  final List<Location>? activeLiveLocations;
+
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) =>
       _$ChannelStateFromJson(json);
@@ -76,6 +81,7 @@ class ChannelState implements ComparableFieldProvider {
     List<Read>? read,
     Member? membership,
     Object? draft = _nullConst,
+    List<Location>? activeLiveLocations,
   }) =>
       ChannelState(
         channel: channel ?? this.channel,
@@ -87,6 +93,7 @@ class ChannelState implements ComparableFieldProvider {
         read: read ?? this.read,
         membership: membership ?? this.membership,
         draft: draft == _nullConst ? this.draft : draft as Draft?,
+        activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
       );
 
   @override
