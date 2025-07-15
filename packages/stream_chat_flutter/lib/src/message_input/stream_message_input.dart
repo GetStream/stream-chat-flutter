@@ -663,7 +663,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         ),
         child: SimpleSafeArea(
           enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
-          child: Center(child: messageInput),
+          child: Center(heightFactor: 1, child: messageInput),
         ),
       ),
     );
