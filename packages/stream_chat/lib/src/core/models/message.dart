@@ -138,11 +138,12 @@ class Message extends Equatable implements ComparableFieldProvider {
       final sumScores = reactionScores?[type] ?? 0;
 
       if (count == 0 || sumScores == 0) continue;
+      final now = DateTime.timestamp();
       groups[type] = {
         'count': count,
         'sum_scores': sumScores,
-        'first_reaction_at': DateTime.timestamp().toIso8601String(),
-        'last_reaction_at': DateTime.timestamp().toIso8601String(),
+        'first_reaction_at': now.toIso8601String(),
+        'last_reaction_at': now.toIso8601String(),
       };
     }
 
@@ -319,6 +320,8 @@ class Message extends Equatable implements ComparableFieldProvider {
     'shadowed',
     'own_reactions',
     'mentioned_users',
+    'reaction_counts',
+    'reaction_scores',
     'reaction_groups',
     'silent',
     'parent_id',
