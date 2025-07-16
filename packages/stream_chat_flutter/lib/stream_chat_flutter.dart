@@ -8,9 +8,6 @@ export 'src/ai_assistant/stream_typewriter_builder.dart';
 export 'src/ai_assistant/streaming_message_view.dart';
 export 'src/attachment/attachment.dart';
 export 'src/attachment/builder/attachment_widget_builder.dart';
-export 'src/attachment/builder/voice_recording_attachment_builder/stream_voice_recording_list_player.dart';
-export 'src/attachment/builder/voice_recording_attachment_builder/stream_voice_recording_loading.dart';
-export 'src/attachment/builder/voice_recording_attachment_builder/stream_voice_recording_player.dart';
 export 'src/attachment/gallery_attachment.dart';
 export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
@@ -144,5 +141,3 @@ export 'src/utils/device_segmentation.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
 export 'src/utils/typedefs.dart';
-// TODO: Remove this in favor of StreamVideoAttachmentThumbnail.
-export 'src/video/video_thumbnail_image.dart';

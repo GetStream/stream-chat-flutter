@@ -77,8 +77,6 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   bool isDismissible = true,
   bool enableDrag = true,
   bool useSystemAttachmentPicker = false,
-  @Deprecated("Use 'useSystemAttachmentPicker' instead.")
-  bool useNativeAttachmentPickerOnMobile = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Clip? clipBehavior = Clip.hardEdge,

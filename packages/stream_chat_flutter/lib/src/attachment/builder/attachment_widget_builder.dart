@@ -11,7 +11,6 @@ part 'mixed_attachment_builder.dart';
 part 'url_attachment_builder.dart';
 part 'video_attachment_builder.dart';
 part 'voice_recording_attachment_playlist_builder.dart';
-part 'voice_recording_attachment_builder/voice_recording_attachment_builder.dart';
 part 'poll_attachment_builder.dart';
 
 /// {@template streamAttachmentWidgetTapCallback}

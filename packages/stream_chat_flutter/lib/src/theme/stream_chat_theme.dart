@@ -53,14 +53,9 @@ class StreamChatThemeData {
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
-    @Deprecated('Use StreamChatConfigurationData.reactionIcons instead')
-    List<StreamReactionIcon>? reactionIcons,
     StreamGalleryHeaderThemeData? imageHeaderTheme,
     StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
-    @Deprecated(
-        "Use 'StreamChatThemeData.voiceRecordingAttachmentTheme' instead")
-    StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
     StreamPollOptionsDialogThemeData? pollOptionsDialogTheme,
@@ -92,11 +87,9 @@ class StreamChatThemeData {
       defaultUserImage: defaultUserImage,
       placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
-      reactionIcons: reactionIcons,
       galleryHeaderTheme: imageHeaderTheme,
       galleryFooterTheme: imageFooterTheme,
       messageListViewTheme: messageListViewTheme,
-      voiceRecordingTheme: voiceRecordingTheme,
       pollCreatorTheme: pollCreatorTheme,
       pollInteractorTheme: pollInteractorTheme,
       pollOptionsDialogTheme: pollOptionsDialogTheme,
@@ -135,7 +128,6 @@ class StreamChatThemeData {
     required this.galleryHeaderTheme,
     required this.galleryFooterTheme,
     required this.messageListViewTheme,
-    required this.voiceRecordingTheme,
     required this.pollCreatorTheme,
     required this.pollInteractorTheme,
     required this.pollResultsDialogTheme,
@@ -591,9 +583,6 @@ class StreamChatThemeData {
         ),
         audioWaveformSliderTheme: audioWaveformSliderTheme,
       ),
-      voiceRecordingTheme: colorTheme.brightness == Brightness.dark
-          ? StreamVoiceRecordingThemeData.dark()
-          : StreamVoiceRecordingThemeData.light(),
     );
   }
 
@@ -634,10 +623,6 @@ class StreamChatThemeData {
 
   /// Theme configuration for the [StreamMessageListView] widget.
   final StreamMessageListViewThemeData messageListViewTheme;
-
-  /// Theme configuration for the [StreamVoiceRecordingListPLayer] widget.
-  @Deprecated("Use 'StreamChatThemeData.voiceRecordingAttachmentTheme' instead")
-  final StreamVoiceRecordingThemeData voiceRecordingTheme;
 
   /// Theme configuration for the [StreamPollCreatorWidget] widget.
   final StreamPollCreatorThemeData pollCreatorTheme;
@@ -695,13 +680,9 @@ class StreamChatThemeData {
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     StreamChannelListHeaderThemeData? channelListHeaderTheme,
-    @Deprecated('Use StreamChatConfigurationData.reactionIcons instead')
-    List<StreamReactionIcon>? reactionIcons,
     StreamGalleryHeaderThemeData? galleryHeaderTheme,
     StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
-    @Deprecated("Use 'voiceRecordingAttachmentTheme' instead")
-    StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
     StreamPollResultsDialogThemeData? pollResultsDialogTheme,
@@ -729,7 +710,6 @@ class StreamChatThemeData {
         galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
         galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
-        voiceRecordingTheme: voiceRecordingTheme ?? this.voiceRecordingTheme,
         pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
         pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
         pollResultsDialogTheme:
@@ -767,7 +747,6 @@ class StreamChatThemeData {
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
       messageListViewTheme:
           messageListViewTheme.merge(other.messageListViewTheme),
-      voiceRecordingTheme: voiceRecordingTheme.merge(other.voiceRecordingTheme),
       pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
       pollInteractorTheme: pollInteractorTheme.merge(other.pollInteractorTheme),
       pollResultsDialogTheme:
