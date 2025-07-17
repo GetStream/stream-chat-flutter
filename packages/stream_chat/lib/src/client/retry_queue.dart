@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 /// The retry queue associated to a channel.
