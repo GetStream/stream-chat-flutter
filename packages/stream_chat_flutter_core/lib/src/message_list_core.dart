@@ -238,7 +238,7 @@ class MessageListCoreState extends State<MessageListCore> {
     if (_upToDate) return;
 
     try {
-      return await _streamChannel!.reloadChannel();
+      return await _streamChannel?.reloadChannel();
     } catch (_) {
       // We just ignore the error here, as we can't do anything about it.
       // The reload might fail for various reasons, such as user already
