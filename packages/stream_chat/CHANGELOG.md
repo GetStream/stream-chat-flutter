@@ -4,6 +4,8 @@
 
 - Fixed cached messages are cleared from channels with unread messages when accessed
   offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
+- Fixed RetryQueue skipping messages due to premature removal from the
+  queue. [[#2308]](https://github.com/GetStream/stream-chat-flutter/pull/2308)
 
 ✅ Added
 
