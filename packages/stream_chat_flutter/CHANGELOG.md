@@ -1,4 +1,4 @@
-## Upcoming Beta
+## 10.0.0-beta.3
 
 🛑️ Breaking
 
@@ -21,6 +21,8 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 - Added `extraData` field to `AttachmentPickerValue` to support storing and retrieving custom picker state (e.g. tab-specific config).
 - Added `customAttachmentPickerOptions` to `StreamMessageInput` to allow injecting custom picker tabs like contact and location pickers.
 - Added `onCustomAttachmentPickerResult` callback to `StreamMessageInput` to handle results returned by custom picker tabs.
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.14.0
 

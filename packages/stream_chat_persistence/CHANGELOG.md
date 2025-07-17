@@ -1,3 +1,7 @@
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.14.0
 
 - Updated `stream_chat` dependency to [`9.14.0`](https://pub.dev/packages/stream_chat/changelog).
