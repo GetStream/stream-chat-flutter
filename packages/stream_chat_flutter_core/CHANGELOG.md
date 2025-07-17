@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `MessageListCore.dispose()` crash when channel reload fails due to insufficient permissions.
+- Fixed incorrect parent message comparison in `MessageListCore.didUpdateWidget()`.
+
 ## 9.14.0
 
 🐞 Fixed
