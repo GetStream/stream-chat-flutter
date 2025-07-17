@@ -1,3 +1,15 @@
+## 10.0.0-beta.3
+
+🛑️ Breaking
+
+- **Deprecated API Cleanup**: Removed all deprecated classes, methods, and properties for the v10 major release:
+  - **Removed Classes**: `PermissionType` (use string constants like `'delete-channel'`, `'update-channel'`), `CallApi`, `CallPayload`, `CallTokenPayload`, `CreateCallPayload`
+  - **Removed Methods**: `cooldownStartedAt` getter from `Channel`, `getCallToken` and `createCall` from `StreamChatClient`
+  - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
+  - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.14.0
 
 🐞 Fixed
@@ -16,7 +28,15 @@
 
 - Deprecated `SortOption.new` constructor in favor of `SortOption.desc` and `SortOption.asc`.
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.13.0
+
+- Bug fixes and improvements
+
+## 10.0.0-beta.1
 
 - Bug fixes and improvements
 

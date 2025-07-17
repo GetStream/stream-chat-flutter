@@ -1,3 +1,7 @@
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.14.0
 
 🐞 Fixed
@@ -5,12 +9,20 @@
 - Fixed cached messages are cleared from channels with unread messages when accessed
   offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.13.0
 
 🐞 Fixed
 
 - Fixed pagination end detection logic to properly determine when the top or bottom of the message
   list has been reached.
+
+## 10.0.0-beta.1
+
+- Updated `stream_chat` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.12.0
 

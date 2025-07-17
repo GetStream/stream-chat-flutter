@@ -47,7 +47,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                   ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
             ),
-            PositionedDirectional(
+            const PositionedDirectional(
               top: -4,
               start: 12,
               child: StreamUnreadIndicator(),

@@ -306,15 +306,6 @@ class Channel {
     return math.max(0, cooldownDuration - elapsedTime);
   }
 
-  /// Stores time at which cooldown was started
-  @Deprecated(
-    "Use a combination of 'remainingCooldown' and 'currentUserLastMessageAt'",
-  )
-  DateTime? get cooldownStartedAt {
-    if (getRemainingCooldown() <= 0) return null;
-    return currentUserLastMessageAt;
-  }
-
   /// Channel creation date.
   DateTime? get createdAt {
     _checkInitialized();
@@ -987,12 +978,20 @@ class Channel {
     }
   }
 
-  /// Retry the operation on the message based on the failed state.
+  /// Retries operations on a message based on its failed state.
   ///
-  /// For example, if the message failed to send, it will retry sending the
-  /// message and vice-versa.
+  /// This method examines the message's state and performs the appropriate
+  /// retry action:
+  /// - For [MessageState.sendingFailed], it attempts to send the message.
+  /// - For [MessageState.updatingFailed], it attempts to update the message.
+  /// - For [MessageState.deletingFailed], it attempts to delete the message.
+  ///   with the same 'hard' parameter that was used in the original request
+  /// - For messages with [isBouncedWithError], it attempts to send the message.
   Future<Object> retryMessage(Message message) async {
-    assert(message.state.isFailed, 'Message state is not failed');
+    assert(
+      message.state.isFailed || message.isBouncedWithError,
+      'Only failed or bounced messages can be retried',
+    );
 
     return message.state.maybeWhen(
       failed: (state, _) => state.when(
@@ -1000,7 +999,14 @@ class Channel {
         updatingFailed: () => updateMessage(message),
         deletingFailed: (hard) => deleteMessage(message, hard: hard),
       ),
-      orElse: () => throw StateError('Message state is not failed'),
+      orElse: () {
+        // Check if the message is bounced with error.
+        if (message.isBouncedWithError) return sendMessage(message);
+
+        throw StateError(
+          'Only failed or bounced messages can be retried',
+        );
+      },
     );
   }
 
