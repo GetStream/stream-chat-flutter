@@ -453,3 +453,25 @@ QueryRemindersResponse _$QueryRemindersResponseFromJson(
               .toList() ??
           []
       ..next = json['next'] as String?;
+
+GetUnreadCountResponse _$GetUnreadCountResponseFromJson(
+        Map<String, dynamic> json) =>
+    GetUnreadCountResponse()
+      ..duration = json['duration'] as String?
+      ..totalUnreadCount = (json['total_unread_count'] as num).toInt()
+      ..totalUnreadThreadsCount =
+          (json['total_unread_threads_count'] as num).toInt()
+      ..totalUnreadCountByTeam =
+          (json['total_unread_count_by_team'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      )
+      ..channels = (json['channels'] as List<dynamic>)
+          .map((e) => UnreadCountsChannel.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..channelType = (json['channel_type'] as List<dynamic>)
+          .map((e) =>
+              UnreadCountsChannelType.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..threads = (json['threads'] as List<dynamic>)
+          .map((e) => UnreadCountsThread.fromJson(e as Map<String, dynamic>))
+          .toList();

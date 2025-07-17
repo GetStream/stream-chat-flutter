@@ -22,6 +22,12 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 - Added `customAttachmentPickerOptions` to `StreamMessageInput` to allow injecting custom picker tabs like contact and location pickers.
 - Added `onCustomAttachmentPickerResult` callback to `StreamMessageInput` to handle results returned by custom picker tabs.
 
+## 9.14.0
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` tries to expand to full height when used in a unconstrained environment.
+
 ## 10.0.0-beta.2
 
 - Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_flutter/changelog).

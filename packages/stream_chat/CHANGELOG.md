@@ -3,17 +3,24 @@
 🛑️ Breaking
 
 - **Deprecated API Cleanup**: Removed all deprecated classes, methods, and properties for the v10 major release:
-  - **Removed Classes**: `PermissionType` (use string constants like `'delete-channel'`, `'update-channel'`), `CallApi`, `CallPayload`, `CallTokenPayload`, `CreateCallPayload`
-  - **Removed Methods**: `cooldownStartedAt` getter from `Channel`, `getCallToken` and `createCall` from `StreamChatClient`
-  - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
-  - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
+    - **Removed Classes**: `PermissionType` (use string constants like `'delete-channel'`, `'update-channel'`), `CallApi`, `CallPayload`, `CallTokenPayload`, `CreateCallPayload`
+    - **Removed Methods**: `cooldownStartedAt` getter from `Channel`, `getCallToken` and `createCall` from `StreamChatClient`
+    - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
+    - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
 
-## Upcoming
+## 9.14.0
 
 🐞 Fixed
 
 - Fixed cached messages are cleared from channels with unread messages when accessed
   offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
+- Fixed RetryQueue skipping messages due to premature removal from the
+  queue. [[#2308]](https://github.com/GetStream/stream-chat-flutter/pull/2308)
+
+✅ Added
+
+- Added support for `client.getUnreadCount()`, which returns the unread count information for the
+  current user.
 
 🔄 Changed
 

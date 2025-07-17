@@ -1,7 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
