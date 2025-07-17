@@ -263,6 +263,12 @@ class WebSocket with TimerHelper {
     setTimer(
       Duration(milliseconds: delay),
       () async {
+        // If the user is null, it means either the connection was never
+        // established or it was disconnected manually.
+        //
+        // In either case, we should not attempt to reconnect.
+        if (_user == null) return;
+
         final uri = await _buildUri(
           refreshToken: refreshToken,
           includeUserDetails: false,
