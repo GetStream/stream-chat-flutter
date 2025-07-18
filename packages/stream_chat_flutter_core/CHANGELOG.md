@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChatCore.maybeOf()` method for safe context access in async operations.
+- Added `StreamChannel.maybeOf()` method for safe context access in async operations.
+
 ## 9.14.0
 
 🐞 Fixed
