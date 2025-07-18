@@ -210,7 +210,7 @@ class MessageListCoreState extends State<MessageListCore> {
       _setupController();
     }
 
-    if (widget.parentMessage?.id != widget.parentMessage?.id) {
+    if (widget.parentMessage?.id != oldWidget.parentMessage?.id) {
       if (_isThreadConversation) {
         _streamChannel!.getReplies(
           widget.parentMessage!.id,
@@ -233,11 +233,22 @@ class MessageListCoreState extends State<MessageListCore> {
     }
   }
 
+  Future<void> _reloadChannelIfNeeded() async {
+    // If the channel is up to date, we don't need to reload it.
+    if (_upToDate) return;
+
+    try {
+      return await _streamChannel?.reloadChannel();
+    } catch (_) {
+      // We just ignore the error here, as we can't do anything about it.
+      // The reload might fail for various reasons, such as user already
+      // left the channel, or the channel is deleted.
+    }
+  }
+
   @override
   void dispose() {
-    if (!_upToDate) {
-      _streamChannel!.reloadChannel();
-    }
+    _reloadChannelIfNeeded();
     super.dispose();
   }
 }

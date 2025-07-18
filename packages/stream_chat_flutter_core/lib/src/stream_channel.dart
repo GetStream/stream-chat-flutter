@@ -722,6 +722,10 @@ class StreamChannelState extends State<StreamChannel> {
       // Otherwise, load the channel at the last read date.
       return loadChannelAtTimestamp(currentUserRead.lastRead);
     }
+
+    // If nothing above applies, we just load the channel at the latest
+    // messages if we are not already at the latest messages.
+    if (channel.state?.isUpToDate == false) return loadChannelAtMessage(null);
   }
 
   late Future<void> _channelInitFuture;
