@@ -13,6 +13,100 @@ class MockOnBackgroundEventReceived extends Mock {
 }
 
 void main() {
+  group('StreamChatCore.of()', () {
+    testWidgets(
+      'should return StreamChatCoreState when StreamChatCore is found in widget tree',
+      (tester) async {
+        final mockClient = MockClient();
+        StreamChatCoreState? chatCoreState;
+
+        final testWidget = StreamChatCore(
+          client: mockClient,
+          child: Builder(
+            builder: (context) {
+              chatCoreState = StreamChatCore.of(context);
+              return const Text('Child Widget');
+            },
+          ),
+        );
+
+        await tester.pumpWidget(MaterialApp(home: testWidget));
+
+        expect(chatCoreState, isNotNull);
+        expect(chatCoreState?.client, equals(mockClient));
+      },
+    );
+
+    testWidgets(
+      'should throw FlutterError when StreamChatCore is not found in widget tree',
+      (tester) async {
+        Object? caughtError;
+
+        final testWidget = MaterialApp(
+          home: Builder(
+            builder: (context) {
+              try {
+                StreamChatCore.of(context);
+              } catch (error) {
+                caughtError = error;
+              }
+              return const Text('Child Widget');
+            },
+          ),
+        );
+
+        await tester.pumpWidget(testWidget);
+
+        expect(caughtError, isA<FlutterError>());
+      },
+    );
+  });
+
+  group('StreamChatCore.maybeOf()', () {
+    testWidgets(
+      'should return StreamChatCoreState when StreamChatCore is found in widget tree',
+      (tester) async {
+        final mockClient = MockClient();
+        StreamChatCoreState? chatCoreState;
+
+        final testWidget = StreamChatCore(
+          client: mockClient,
+          child: Builder(
+            builder: (context) {
+              chatCoreState = StreamChatCore.maybeOf(context);
+              return const Text('Child Widget');
+            },
+          ),
+        );
+
+        await tester.pumpWidget(MaterialApp(home: testWidget));
+
+        expect(chatCoreState, isNotNull);
+        expect(chatCoreState?.client, equals(mockClient));
+      },
+    );
+
+    testWidgets(
+      'should return null when StreamChatCore is not found in widget tree',
+      (tester) async {
+        StreamChatCoreState? chatCoreState;
+
+        final testWidget = MaterialApp(
+          home: Builder(
+            builder: (context) {
+              chatCoreState = StreamChatCore.maybeOf(context);
+              return const Text('Child Widget');
+            },
+          ),
+        );
+
+        await tester.pumpWidget(testWidget);
+
+        expect(chatCoreState, isNull);
+      },
+    );
+  });
+
   testWidgets(
     'should render StreamChatCore if both client and child is provided',
     (tester) async {
