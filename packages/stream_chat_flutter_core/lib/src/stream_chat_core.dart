@@ -106,8 +106,8 @@ class StreamChatCore extends StatefulWidget {
       ),
       ErrorHint(
         'To fix this, ensure that you are using a context that is a descendant '
-        'of the StreamChatCore. You can use a Builder to get a new context that '
-        'is under the StreamChatCore:\n\n'
+        'of the StreamChatCore. You can use a Builder to get a new context '
+        'that is under the StreamChatCore:\n\n'
         '  Builder(\n'
         '    builder: (context) {\n'
         '      final chatCoreState = StreamChatCore.of(context);\n'
