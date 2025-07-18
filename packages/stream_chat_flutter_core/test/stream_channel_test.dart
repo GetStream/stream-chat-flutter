@@ -76,6 +76,7 @@ void main() {
       final mockChannel = MockChannel();
       when(() => mockChannel.cid).thenReturn('test:channel');
       when(() => mockChannel.state.unreadCount).thenReturn(0);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
       // A simple widget that provides StreamChannel
       final testWidget = MaterialApp(
@@ -319,6 +320,7 @@ void main() {
       final mockChannel1 = MockChannel();
       when(() => mockChannel1.cid).thenReturn('test:channel1');
       when(() => mockChannel1.state.unreadCount).thenReturn(0);
+      when(() => mockChannel1.state.isUpToDate).thenReturn(true);
 
       // Build with first channel
       await tester.pumpWidget(
@@ -471,6 +473,7 @@ void main() {
       (tester) async {
         when(() => mockChannel.state.messages).thenReturn([]);
         when(() => mockChannel.state.unreadCount).thenReturn(0);
+        when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
         final streamChannel = await _pumpStreamChannel(tester);
 
@@ -499,6 +502,7 @@ void main() {
         when(() => mockChannel.state.unreadCount).thenReturn(0);
         when(() => mockChannel.state.messages).thenReturn(messages);
         when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
+        when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
         final streamChannel = await _pumpStreamChannel(tester);
 
