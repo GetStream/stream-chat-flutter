@@ -263,6 +263,12 @@ class WebSocket with TimerHelper {
     setTimer(
       Duration(milliseconds: delay),
       () async {
+        // If the user is null, it means either the connection was never
+        // established or it was disconnected manually.
+        //
+        // In either case, we should not attempt to reconnect.
+        if (_user == null) return;
+
         final uri = await _buildUri(
           refreshToken: refreshToken,
           includeUserDetails: false,
@@ -475,20 +481,17 @@ class WebSocket with TimerHelper {
   /// Disconnects the WS and releases eventual resources
   void disconnect() {
     if (connectionStatus == ConnectionStatus.disconnected) return;
-
-    _resetRequestFlags(resetAttempts: true);
-
     _connectionStatus = ConnectionStatus.disconnected;
 
     _logger?.info('Disconnecting web-socket connection');
 
+    _manuallyClosed = true;
+    _resetRequestFlags(resetAttempts: true);
+    _stopMonitoringEvents();
+
     // resetting user
     _user = null;
     connectionCompleter = null;
-
-    _stopMonitoringEvents();
-
-    _manuallyClosed = true;
 
     _closeWebSocketChannel();
   }

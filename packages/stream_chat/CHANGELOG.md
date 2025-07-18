@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `WebSocket` race condition where reconnection could access null user during disconnect.
+
 ## 9.14.0
 
 🐞 Fixed
