@@ -72,18 +72,67 @@ class StreamChatCore extends StatefulWidget {
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
 
-  /// Use this method to get the current [StreamChatCoreState] instance
+  /// Finds the [StreamChatCoreState] from the closest [StreamChatCore] ancestor
+  /// that encloses the given [context].
+  ///
+  /// This will throw a [FlutterError] if no [StreamChatCore] is found in the
+  /// widget tree above the given context.
+  ///
+  /// Typical usage:
+  ///
+  /// ```dart
+  /// final chatCoreState = StreamChatCore.of(context);
+  /// ```
+  ///
+  /// If you're calling this in the same `build()` method that creates the
+  /// `StreamChatCore`, consider using a `Builder` or refactoring into a
+  /// separate widget to obtain a context below the [StreamChatCore].
+  ///
+  /// If you want to return null instead of throwing, use [maybeOf].
   static StreamChatCoreState of(BuildContext context) {
-    StreamChatCoreState? streamChatState;
+    final result = maybeOf(context);
+    if (result != null) return result;
 
-    streamChatState = context.findAncestorStateOfType<StreamChatCoreState>();
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'StreamChatCore.of() called with a context that does not contain a '
+        'StreamChatCore.',
+      ),
+      ErrorDescription(
+        'No StreamChatCore ancestor could be found starting from the context '
+        'that was passed to StreamChatCore.of(). This usually happens when the '
+        'context used comes from the widget that creates the StreamChatCore '
+        'itself.',
+      ),
+      ErrorHint(
+        'To fix this, ensure that you are using a context that is a descendant '
+        'of the StreamChatCore. You can use a Builder to get a new context '
+        'that is under the StreamChatCore:\n\n'
+        '  Builder(\n'
+        '    builder: (context) {\n'
+        '      final chatCoreState = StreamChatCore.of(context);\n'
+        '      ...\n'
+        '    },\n'
+        '  )',
+      ),
+      ErrorHint(
+        'Alternatively, split your build method into smaller widgets so that '
+        'you get a new BuildContext that is below the StreamChatCore in the '
+        'widget tree.',
+      ),
+      context.describeElement('The context used was'),
+    ]);
+  }
 
-    assert(
-      streamChatState != null,
-      'You must have a StreamChat widget at the top of your widget tree',
-    );
-
-    return streamChatState!;
+  /// Finds the [StreamChatCoreState] from the closest [StreamChatCore] ancestor
+  /// that encloses the given context.
+  ///
+  /// Returns null if no such ancestor exists.
+  ///
+  /// See also:
+  ///  * [of], which throws if no [StreamChatCore] is found.
+  static StreamChatCoreState? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<StreamChatCoreState>();
   }
 }
 
