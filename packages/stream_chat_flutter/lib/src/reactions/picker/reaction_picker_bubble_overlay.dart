@@ -59,9 +59,9 @@ class ReactionPickerBubbleOverlay extends StatelessWidget {
       visible: visible,
       childSizeDelta: childSizeDelta,
       config: ReactionBubbleConfig(
-        maskWidth: 0,
-        borderWidth: 0,
         fillColor: colorTheme.barsBg,
+        maskColor: Colors.transparent,
+        borderColor: Colors.transparent,
       ),
       anchor: ReactionBubbleAnchor(
         offset: anchorOffset,
