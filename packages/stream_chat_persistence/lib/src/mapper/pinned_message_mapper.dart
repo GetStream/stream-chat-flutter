@@ -94,6 +94,5 @@ extension PMessageX on Message {
         pinnedByUserId: pinnedBy?.id,
         i18n: i18n,
         restrictedVisibility: restrictedVisibility,
-        draftMessageId: draft?.message.id,
       );
 }
