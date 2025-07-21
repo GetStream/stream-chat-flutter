@@ -183,6 +183,70 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('getUnreadCount', () async {
+    const path = '/unread';
+
+    when(() => client.get(path)).thenAnswer(
+      (_) async => successResponse(path, data: {
+        'duration': '5.23ms',
+        'total_unread_count': 42,
+        'total_unread_threads_count': 8,
+        'total_unread_count_by_team': {'team-1': 15, 'team-2': 27},
+        'channels': [
+          {
+            'channel_id': 'messaging:test-channel-1',
+            'unread_count': 5,
+            'last_read': '2024-01-15T10:30:00.000Z',
+          },
+          {
+            'channel_id': 'messaging:test-channel-2',
+            'unread_count': 10,
+            'last_read': '2024-01-15T09:15:00.000Z',
+          },
+        ],
+        'channel_type': [
+          {
+            'channel_type': 'messaging',
+            'channel_count': 3,
+            'unread_count': 25,
+          },
+          {
+            'channel_type': 'livestream',
+            'channel_count': 1,
+            'unread_count': 17,
+          },
+        ],
+        'threads': [
+          {
+            'unread_count': 3,
+            'last_read': '2024-01-15T10:30:00.000Z',
+            'last_read_message_id': 'message-1',
+            'parent_message_id': 'parent-message-1',
+          },
+          {
+            'unread_count': 5,
+            'last_read': '2024-01-15T09:45:00.000Z',
+            'last_read_message_id': 'message-2',
+            'parent_message_id': 'parent-message-2',
+          },
+        ],
+      }),
+    );
+
+    final res = await userApi.getUnreadCount();
+
+    expect(res, isNotNull);
+    expect(res.totalUnreadCount, 42);
+    expect(res.totalUnreadThreadsCount, 8);
+    expect(res.totalUnreadCountByTeam, {'team-1': 15, 'team-2': 27});
+    expect(res.channels.length, 2);
+    expect(res.channelType.length, 2);
+    expect(res.threads.length, 2);
+
+    verify(() => client.get(path)).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
   test('getActiveLiveLocations', () async {
     const path = '/users/live_locations';
 

@@ -19,7 +19,7 @@ class StreamFilePicker extends StatelessWidget {
     this.type = FileType.any,
     this.allowedExtensions,
     this.onFileLoading,
-    this.allowCompression = true,
+    this.compressionQuality = 0,
     this.withData = false,
     this.withReadStream = false,
     this.lockParentWindow = false,
@@ -43,8 +43,8 @@ class StreamFilePicker extends StatelessWidget {
   /// Callback called when the file picker is loading a file.
   final Function(FilePickerStatus)? onFileLoading;
 
-  /// Whether to allow compression of the file.
-  final bool allowCompression;
+  /// The compression quality for the file.
+  final int compressionQuality;
 
   /// Whether to include the file data in the [Attachment].
   final bool withData;
@@ -73,7 +73,7 @@ class StreamFilePicker extends StatelessWidget {
               type: type,
               allowedExtensions: allowedExtensions,
               onFileLoading: onFileLoading,
-              allowCompression: allowCompression,
+              compressionQuality: compressionQuality,
               withData: withData,
               withReadStream: withReadStream,
               lockParentWindow: lockParentWindow,

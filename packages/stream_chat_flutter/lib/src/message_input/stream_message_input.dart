@@ -124,10 +124,8 @@ class StreamMessageInput extends StatefulWidget {
     this.hideSendAsDm = false,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
-    Widget? idleSendIcon,
-    @Deprecated("Use 'idleSendIcon' instead") Widget? idleSendButton,
-    Widget? activeSendIcon,
-    @Deprecated("Use 'activeSendIcon' instead") Widget? activeSendButton,
+    this.idleSendIcon,
+    this.activeSendIcon,
     this.showCommandsButton = true,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
@@ -158,27 +156,11 @@ class StreamMessageInput extends StatefulWidget {
     this.ogPreviewFilter = _defaultOgPreviewFilter,
     this.hintGetter = _defaultHintGetter,
     this.contentInsertionConfiguration,
-    bool useSystemAttachmentPicker = false,
-    @Deprecated(
-      'Use useSystemAttachmentPicker instead. '
-      'This feature was deprecated after v9.4.0',
-    )
-    bool useNativeAttachmentPickerOnMobile = false,
+    this.useSystemAttachmentPicker = false,
     this.pollConfig,
     this.customAttachmentPickerOptions = const [],
     this.onCustomAttachmentPickerResult,
-  })  : assert(
-          idleSendIcon == null || idleSendButton == null,
-          'idleSendIcon and idleSendButton cannot be used together',
-        ),
-        idleSendIcon = idleSendIcon ?? idleSendButton,
-        assert(
-          activeSendIcon == null || activeSendButton == null,
-          'activeSendIcon and activeSendButton cannot be used together',
-        ),
-        activeSendIcon = activeSendIcon ?? activeSendButton,
-        useSystemAttachmentPicker = useSystemAttachmentPicker || //
-            useNativeAttachmentPickerOnMobile;
+  });
 
   /// The predicate used to send a message on desktop/web
   final KeyEventPredicate sendMessageKeyPredicate;
@@ -307,16 +289,8 @@ class StreamMessageInput extends StatefulWidget {
   /// Send button widget in an idle state
   final Widget? idleSendIcon;
 
-  /// Send button widget in an idle state
-  @Deprecated("Use 'idleSendIcon' instead")
-  Widget? get idleSendButton => idleSendIcon;
-
   /// Send button widget in an active state
   final Widget? activeSendIcon;
-
-  /// Send button widget in an active state
-  @Deprecated("Use 'activeSendIcon' instead")
-  Widget? get activeSendButton => activeSendIcon;
 
   /// Customize the tile for the mentions overlay.
   final UserMentionTileBuilder? userMentionsTileBuilder;
@@ -412,14 +386,6 @@ class StreamMessageInput extends StatefulWidget {
   /// 3. Simplicity: Simplifies the implementation by leveraging the built-in
   /// functionality of the system media picker.
   final bool useSystemAttachmentPicker;
-
-  /// Forces use of native attachment picker on mobile instead of the custom
-  /// Stream attachment picker.
-  @Deprecated(
-    'Use useSystemAttachmentPicker instead. '
-    'This feature was deprecated after v9.4.0',
-  )
-  bool get useNativeAttachmentPickerOnMobile => useSystemAttachmentPicker;
 
   /// The configuration to use while creating a poll.
   ///
@@ -675,7 +641,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         ),
         child: SimpleSafeArea(
           enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
-          child: Center(child: messageInput),
+          child: Center(heightFactor: 1, child: messageInput),
         ),
       ),
     );

@@ -1,9 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
-import 'package:stream_chat/src/core/api/call_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
-import 'package:stream_chat/src/core/models/call_payload.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
@@ -19,6 +17,7 @@ import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
+import 'package:stream_chat/src/core/models/unread_counts.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/models/user_block.dart';
 
@@ -514,36 +513,6 @@ class OGAttachmentResponse extends _BaseResponse {
       _$OGAttachmentResponseFromJson(json);
 }
 
-/// The response to [CallApi.getCallToken]
-@Deprecated('Will be removed in the next major version')
-@JsonSerializable(createToJson: false)
-class CallTokenPayload extends _BaseResponse {
-  /// Create a new instance from a [json].
-  static CallTokenPayload fromJson(Map<String, dynamic> json) =>
-      _$CallTokenPayloadFromJson(json);
-
-  /// The token to use for the call.
-  String? token;
-
-  /// The user id specific to Agora.
-  int? agoraUid;
-
-  /// The appId specific to Agora.
-  String? agoraAppId;
-}
-
-/// The response to [CallApi.createCall]
-@Deprecated('Will be removed in the next major version')
-@JsonSerializable(createToJson: false)
-class CreateCallPayload extends _BaseResponse {
-  /// Create a new instance from a [json].
-  static CreateCallPayload fromJson(Map<String, dynamic> json) =>
-      _$CreateCallPayloadFromJson(json);
-
-  /// The call object.
-  CallPayload? call;
-}
-
 /// Contains information about a [User] that was banned from a [Channel] or App.
 @JsonSerializable(createToJson: false)
 class UserBlockResponse extends _BaseResponse {
@@ -802,6 +771,32 @@ class QueryRemindersResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryRemindersResponse fromJson(Map<String, dynamic> json) =>
       _$QueryRemindersResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getUnreadCount] api call
+@JsonSerializable(createToJson: false)
+class GetUnreadCountResponse extends _BaseResponse {
+  /// Total number of unread messages across all channels
+  late int totalUnreadCount;
+
+  /// Total number of threads with unread replies
+  late int totalUnreadThreadsCount;
+
+  /// Total number of unread messages grouped by team
+  late Map<String, int>? totalUnreadCountByTeam;
+
+  /// List of channels with unread messages
+  late List<UnreadCountsChannel> channels;
+
+  /// Summary of unread counts grouped by channel type
+  late List<UnreadCountsChannelType> channelType;
+
+  /// List of threads with unread replies
+  late List<UnreadCountsThread> threads;
+
+  /// Create a new instance from a json
+  static GetUnreadCountResponse fromJson(Map<String, dynamic> json) =>
+      _$GetUnreadCountResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.updateDraft] api call

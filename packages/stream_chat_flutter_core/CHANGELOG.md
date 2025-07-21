@@ -2,6 +2,17 @@
 
 🐞 Fixed
 
+- Fixed `MessageListCore.dispose()` crash when channel reload fails due to insufficient permissions.
+- Fixed incorrect parent message comparison in `MessageListCore.didUpdateWidget()`.
+
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
+## 9.14.0
+
+🐞 Fixed
+
 - Fixed cached messages are cleared from channels with unread messages when accessed
   offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
 

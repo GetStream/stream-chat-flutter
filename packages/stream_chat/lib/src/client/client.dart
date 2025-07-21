@@ -702,27 +702,6 @@ class StreamChatClient {
     }
   }
 
-  /// Returns a token associated with the [callId].
-  @Deprecated('Will be removed in the next major version')
-  Future<CallTokenPayload> getCallToken(String callId) async =>
-      _chatApi.call.getCallToken(callId);
-
-  /// Creates a new call.
-  @Deprecated('Will be removed in the next major version')
-  Future<CreateCallPayload> createCall({
-    required String callId,
-    required String callType,
-    required String channelType,
-    required String channelId,
-  }) {
-    return _chatApi.call.createCall(
-      callId: callId,
-      callType: callType,
-      channelType: channelType,
-      channelId: channelId,
-    );
-  }
-
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
@@ -1548,6 +1527,21 @@ class StreamChatClient {
       logger.severe('Error querying blocked users', e, stk);
       rethrow;
     }
+  }
+
+  /// Returns the unread count information for the current user.
+  Future<GetUnreadCountResponse> getUnreadCount() async {
+    final response = await _chatApi.user.getUnreadCount();
+
+    // Emit an local event with the unread count information as a side effect
+    // in order to update the current user state.
+    handleEvent(Event(
+      totalUnreadCount: response.totalUnreadCount,
+      unreadChannels: response.channels.length,
+      unreadThreads: response.threads.length,
+    ));
+
+    return response;
   }
 
   /// Mutes a user

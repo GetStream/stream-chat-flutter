@@ -307,20 +307,6 @@ OGAttachmentResponse _$OGAttachmentResponseFromJson(
       ..titleLink = json['title_link'] as String?
       ..type = json['type'] as String?;
 
-CallTokenPayload _$CallTokenPayloadFromJson(Map<String, dynamic> json) =>
-    CallTokenPayload()
-      ..duration = json['duration'] as String?
-      ..token = json['token'] as String?
-      ..agoraUid = (json['agora_uid'] as num?)?.toInt()
-      ..agoraAppId = json['agora_app_id'] as String?;
-
-CreateCallPayload _$CreateCallPayloadFromJson(Map<String, dynamic> json) =>
-    CreateCallPayload()
-      ..duration = json['duration'] as String?
-      ..call = json['call'] == null
-          ? null
-          : CallPayload.fromJson(json['call'] as Map<String, dynamic>);
-
 UserBlockResponse _$UserBlockResponseFromJson(Map<String, dynamic> json) =>
     UserBlockResponse()
       ..duration = json['duration'] as String?
@@ -468,8 +454,30 @@ QueryRemindersResponse _$QueryRemindersResponseFromJson(
           []
       ..next = json['next'] as String?;
 
-GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
+GetUnreadCountResponse _$GetUnreadCountResponseFromJson(
         Map<String, dynamic> json) =>
+    GetUnreadCountResponse()
+      ..duration = json['duration'] as String?
+      ..totalUnreadCount = (json['total_unread_count'] as num).toInt()
+      ..totalUnreadThreadsCount =
+          (json['total_unread_threads_count'] as num).toInt()
+      ..totalUnreadCountByTeam =
+          (json['total_unread_count_by_team'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      )
+      ..channels = (json['channels'] as List<dynamic>)
+          .map((e) => UnreadCountsChannel.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..channelType = (json['channel_type'] as List<dynamic>)
+          .map((e) =>
+              UnreadCountsChannelType.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..threads = (json['threads'] as List<dynamic>)
+          .map((e) => UnreadCountsThread.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
+    Map<String, dynamic> json) =>
     GetActiveLiveLocationsResponse()
       ..duration = json['duration'] as String?
       ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)

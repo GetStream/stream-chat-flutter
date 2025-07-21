@@ -1,7 +1,13 @@
-## Upcoming Beta
+## 10.0.0-beta.3
 
 🛑️ Breaking
 
+- **Deprecated API Cleanup**: Removed all deprecated classes, methods, and properties for the v10 major release:
+  - **Removed Classes**: `DmCheckbox` (use `DmCheckboxListTile`), `StreamIconThemeSvgIcon` (use `StreamSvgIcon`), `StreamVoiceRecordingThemeData` (use `StreamVoiceRecordingAttachmentThemeData`), `StreamVoiceRecordingLoading`, `StreamVoiceRecordingSlider` (use `StreamAudioWaveformSlider`), `StreamVoiceRecordingPlayer` (use `StreamVoiceRecordingAttachment`), `StreamVoiceRecordingListPlayer` (use `StreamVoiceRecordingAttachmentPlaylist`)
+  - **Removed Properties**: `reactionIcons` and `voiceRecordingTheme` from `StreamChatTheme`, `isThreadConversation` from `FloatingDateDivider`, `idleSendButton` and `activeSendButton` from `StreamMessageInput`, `isCommandEnabled` and `isEditEnabled` from `StreamMessageSendButton`, `assetName`, `width`, and `height` from `StreamSvgIcon`
+  - **Removed Constructor Parameters**: `useNativeAttachmentPickerOnMobile` from various components, `allowCompression` from `StreamAttachmentHandler.pickFile()` and `StreamFilePicker` (use `compressionQuality` instead), `cid` from `StreamUnreadIndicator` constructor
+  - **Removed Methods**: `lastUnreadMessage()` from message list extensions (use `StreamChannel.getFirstUnreadMessage`), `loadBuffer()` and `_loadAsync()` from `StreamVideoThumbnailImage`
+  - **StreamSvgIcon Refactoring**: Removed 80+ deprecated factory constructors. Use `StreamSvgIcon(icon: StreamSvgIcons.iconName)` instead of factory constructors like `StreamSvgIcon.add()`
 - `PollMessage` widget has been removed and replaced with `PollAttachment` for better integration with the attachment system. Polls can now be customized through `PollAttachmentBuilder` or by creating custom poll attachment widgets via the attachment builder system.
 - `AttachmentPickerType` enum has been replaced with a sealed class to support extensible custom types like contact and location pickers. Use built-in types like `AttachmentPickerType.images` or define your own via `CustomAttachmentPickerType`.
 - `StreamAttachmentPickerOption` has been replaced with two sealed classes to support layout-specific picker options: `SystemAttachmentPickerOption` for system pickers (e.g. camera, files) and `TabbedAttachmentPickerOption` for tabbed pickers (e.g. gallery, polls, location).
@@ -15,6 +21,14 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 - Added `extraData` field to `AttachmentPickerValue` to support storing and retrieving custom picker state (e.g. tab-specific config).
 - Added `customAttachmentPickerOptions` to `StreamMessageInput` to allow injecting custom picker tabs like contact and location pickers.
 - Added `onCustomAttachmentPickerResult` callback to `StreamMessageInput` to handle results returned by custom picker tabs.
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.14.0
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` tries to expand to full height when used in a unconstrained environment.
 
 ## 10.0.0-beta.2
 

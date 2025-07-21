@@ -51,8 +51,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             height: 8,
             color: StreamChatTheme.of(context).colorTheme.disabled,
           ),
-          if (channel.ownCapabilities.contains(PermissionType.deleteChannel))
-            _buildDeleteListTile(),
+          if (channel.canDeleteChannel) _buildDeleteListTile(),
         ],
       ),
     );
