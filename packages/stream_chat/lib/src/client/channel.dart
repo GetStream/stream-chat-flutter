@@ -2156,87 +2156,71 @@ class ChannelClientState {
 
     _channelStateController = BehaviorSubject.seeded(channelState);
 
+    // region TYPING EVENTS
     _listenTypingEvents();
+    // endregion
 
+    // region MESSAGE EVENTS
     _listenMessageNew();
-
     _listenMessageDeleted();
-
     _listenMessageUpdated();
+    // endregion
 
-    /* Start of draft events */
-
+    // region DRAFT EVENTS
     _listenDraftUpdated();
-
     _listenDraftDeleted();
+    // endregion
 
-    /* End of draft events */
-
+    // region REACTION EVENTS
     _listenReactionNew();
-
     _listenReactionUpdated();
-
     _listenReactionDeleted();
+    // endregion
 
-    /* Start of poll events */
-
+    // region POLL EVENTS
     _listenPollCreated();
-
     _listenPollUpdated();
-
     _listenPollClosed();
-
     _listenPollAnswerCasted();
-
     _listenPollVoteCasted();
-
     _listenPollVoteChanged();
-
     _listenPollAnswerRemoved();
-
     _listenPollVoteRemoved();
+    // endregion
 
-    /* End of poll events */
-
+    // region READ EVENTS
     _listenReadEvents();
+    // endregion
 
+    // region CHANNEL EVENTS
     _listenChannelTruncated();
-
     _listenChannelUpdated();
+    // endregion
 
+    // region MEMBER EVENTS
     _listenMemberAdded();
-
     _listenMemberRemoved();
-
     _listenMemberUpdated();
-
     _listenMemberBanned();
-
     _listenMemberUnbanned();
+    // endregion
 
+    // region USER WATCHING EVENTS
     _listenUserStartWatching();
-
     _listenUserStopWatching();
+    // endregion
 
-    /* Start of reminder events */
-
+    // region REMINDER EVENTS
     _listenReminderCreated();
-
     _listenReminderUpdated();
-
     _listenReminderDeleted();
+    // endregion
 
-    /* End of reminder events */
-
-    /* Start of location events */
-
+    // region LOCATION EVENTS
     _listenLocationShared();
-
     _listenLocationUpdated();
-
     _listenLocationExpired();
-
-    /* End of location events */
+    // endregion
 
     _startCleaningStaleTypingEvents();
 

@@ -2124,21 +2124,25 @@ class ClientState {
         }),
       );
 
+    // region CHANNEL EVENTS
     _listenChannelLeft();
-
     _listenChannelDeleted();
-
     _listenChannelHidden();
+    // endregion
 
+    // region USER EVENTS
     _listenUserUpdated();
+    // endregion
 
+    // region READ EVENTS
     _listenAllChannelsRead();
+    // endregion
 
+    // region LOCATION EVENTS
     _listenLocationShared();
-
     _listenLocationUpdated();
-
     _listenLocationExpired();
+    // endregion
 
     _startCleaningExpiredLocations();
   }
