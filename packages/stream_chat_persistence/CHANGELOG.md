@@ -1,3 +1,7 @@
+## Upcoming Beta
+
+- Added support for `Location` entity in the database.
+
 ## 10.0.0-beta.3
 
 - Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_persistence/changelog).

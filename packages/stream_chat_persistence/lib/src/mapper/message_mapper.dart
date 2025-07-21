@@ -14,6 +14,7 @@ extension MessageEntityX on MessageEntity {
     Message? quotedMessage,
     Poll? poll,
     Draft? draft,
+    Location? sharedLocation,
   }) =>
       Message(
         shadowed: shadowed,
@@ -54,6 +55,7 @@ extension MessageEntityX on MessageEntity {
         i18n: i18n,
         restrictedVisibility: restrictedVisibility,
         draft: draft,
+        sharedLocation: sharedLocation,
       );
 }
 

@@ -13,6 +13,7 @@ part 'drift_chat_database.g.dart';
   tables: [
     Channels,
     DraftMessages,
+    Locations,
     Messages,
     PinnedMessages,
     Polls,
@@ -30,6 +31,7 @@ part 'drift_chat_database.g.dart';
     ChannelDao,
     MessageDao,
     DraftMessageDao,
+    LocationDao,
     PinnedMessageDao,
     PinnedMessageReactionDao,
     MemberDao,
@@ -55,7 +57,7 @@ class DriftChatDatabase extends _$DriftChatDatabase {
 
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
