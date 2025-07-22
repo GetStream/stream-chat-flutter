@@ -102,4 +102,9 @@ class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase>
 
     return query.go();
   }
+
+  /// Deletes all the poll votes whose [DraftMessages.channelCid] is
+  /// present in [cids]
+  Future<void> deleteDraftMessagesByCids(List<String> cids) =>
+      (delete(draftMessages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 }
