@@ -49,7 +49,6 @@
   `message.reactionGroups`.
 
 🐞 Fixed
-
 - `Null check operator used on a null value` in Websocket connect.
 - Ensure query cache is cleared when refreshing channel queries.
 
@@ -57,8 +56,7 @@
 
 🐞 Fixed
 
-- [[#2013]](https://github.com/GetStream/stream-chat-flutter/issues/2013) Fix pinned message get
-  duplicated.
+- [[#2013]](https://github.com/GetStream/stream-chat-flutter/issues/2013) Fix pinned message get duplicated.
 
 🔄 Changed
 
@@ -106,10 +104,9 @@
 - Added support for message moderation feature.
 
 - Improved user blocking functionality by updating client state when blocking/unblocking users:
-    - `client.blockUser` now updates `currentUser.blockedUserIds` list with newly blocked user IDs.
-    - `client.unblockUser` now removes the unblocked user ID from `currentUser.blockedUserIds` list.
-    - `client.queryBlockedUsers` now updates `currentUser.blockedUserIds` with the latest blocked
-      users data.
+  - `client.blockUser` now updates `currentUser.blockedUserIds` list with newly blocked user IDs.
+  - `client.unblockUser` now removes the unblocked user ID from `currentUser.blockedUserIds` list.
+  - `client.queryBlockedUsers` now updates `currentUser.blockedUserIds` with the latest blocked users data.
 
 🐞 Fixed
 
@@ -127,30 +124,24 @@
 
 🐞 Fixed
 
-- [[#1775]](https://github.com/GetStream/stream-chat-flutter/issues/1775) Fix incorrect message
-  order.
+- [[#1775]](https://github.com/GetStream/stream-chat-flutter/issues/1775) Fix incorrect message order.
 
 ## 9.5.0
 
 ✅ Added
 
-- [[#2101]](https://github.com/GetStream/stream-chat-flutter/issues/2101) Added support for system
-  messages not updating `channel.lastMessageAt`.
+- [[#2101]](https://github.com/GetStream/stream-chat-flutter/issues/2101) Added support for system messages not updating `channel.lastMessageAt`.
 - Added support for sending private or restricted visibility messages.
 - Add `member.extraData` field.
 
 🐞 Fixed
 
-- [[#1774]](https://github.com/GetStream/stream-chat-flutter/issues/1774) Fixed failed to execute '
-  close' on 'WebSocket'.
-- [[#2016]](https://github.com/GetStream/stream-chat-flutter/issues/2016) Fix muted channel's
-  unreadCount incorrectly updated.
-
+- [[#1774]](https://github.com/GetStream/stream-chat-flutter/issues/1774) Fixed failed to execute 'close' on 'WebSocket'.
+- [[#2016]](https://github.com/GetStream/stream-chat-flutter/issues/2016) Fix muted channel's unreadCount incorrectly updated.
+  
 🔄 Changed
 
-- Refactored identifying the `Attachment.uploadState` logic for local and remote attachments. Also
-  updated the logic for determining the attachment type to check for ogScrapeUrl instead of
-  `AttachmentType.giphy`.
+- Refactored identifying the `Attachment.uploadState` logic for local and remote attachments. Also updated the logic for determining the attachment type to check for ogScrapeUrl instead of `AttachmentType.giphy`.
 - Improved the `x-stream-client` header generation for better client identification and analytics.
 
 ## 9.4.0
@@ -258,7 +249,7 @@
 
 🐞 Fixed
 
-- [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file
+- [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file 
   attachments from the CDN, when the message get's hard deleted.
 - [[#1819]](https://github.com/GetStream/stream-chat-flutter/issues/1819) Handle network errors
   with String payload.
@@ -267,10 +258,8 @@
 
 🐞 Fixed
 
-- [[#1811]](https://github.com/GetStream/stream-chat-flutter/issues/1811) Bumped `UUID` dependency
-  to `^4.2.1`. This
-  **might** produce a **breaking change** if you your code depends in `UUID` `3.x.x` directly or
-  indirectly.
+- [[#1811]](https://github.com/GetStream/stream-chat-flutter/issues/1811) Bumped `UUID` dependency to `^4.2.1`. This
+  **might** produce a **breaking change** if you your code depends in `UUID` `3.x.x` directly or indirectly.
 
 ## 7.0.0
 
@@ -278,20 +267,19 @@
 
 - Removed deprecated `channelQuery.sort` property. Use `channelStateSort` instead.
 - Removed deprecated `RetryPolicy.retryTimeout` property. Use `delayFactor` instead.
-- Removed deprecated `StreamChatNetworkError.fromDioError` constructor. Use
-  `StreamChatNetworkError.fromDioException`
+- Removed deprecated `StreamChatNetworkError.fromDioError` constructor. Use `StreamChatNetworkError.fromDioException`
   instead.
 - Removed deprecated `MessageSendingStatus` enum. Use `MessageState` instead.
 
 🔄 Changed
 
 - Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
-
+  
 # 6.10.0
 
 🐞 Fixed
 
-- [[#1753]](https://github.com/GetStream/stream-chat-flutter/issues/1753) Fixed Unhandled null
+- [[#1753]](https://github.com/GetStream/stream-chat-flutter/issues/1753) Fixed Unhandled null 
   check operator exception when user is removed from a channel.
 
 ## 6.9.0
@@ -311,8 +299,7 @@
 
 ✅ Added
 
-- Added support for `channel.countUnreadMentions()` to get the count of unread messages mentioning
-  the current user on a
+- Added support for `channel.countUnreadMentions()` to get the count of unread messages mentioning the current user on a
   channel. [#1692](https://github.com/GetStream/stream-chat-flutter/issues/1692)
 
 🔄 Changed
@@ -323,8 +310,7 @@
 
 ✅ Added
 
-- Added support for setting
-  `Message.type`. [#1682](https://github.com/GetStream/stream-chat-flutter/issues/1682)
+- Added support for setting `Message.type`. [#1682](https://github.com/GetStream/stream-chat-flutter/issues/1682)
   ```
   It is now possible to send system messages. System messages differ from normal messages in the way they are
   presented to the user. Like the name says, system messages are normally send from the system itself, but a user is
@@ -349,19 +335,16 @@
 
 🐞 Fixed
 
-- [[#1293]](https://github.com/GetStream/stream-chat-flutter/issues/1293) Fixed wrong message order
-  when sending
+- [[#1293]](https://github.com/GetStream/stream-chat-flutter/issues/1293) Fixed wrong message order when sending
   messages quickly.
-- [[#1612]](https://github.com/GetStream/stream-chat-flutter/issues/1612) Fixed
-  `Channel.isMutedStream` does not emit
+- [[#1612]](https://github.com/GetStream/stream-chat-flutter/issues/1612) Fixed `Channel.isMutedStream` does not emit
   when channel mute expires.
 
 ## 6.3.0
 
 🐞 Fixed
 
-- [[#1585]](https://github.com/GetStream/stream-chat-flutter/issues/1585) Fixed channels left not
-  being removed from
+- [[#1585]](https://github.com/GetStream/stream-chat-flutter/issues/1585) Fixed channels left not being removed from
   the persistent storage.
 
 🔄 Changed
@@ -372,28 +355,23 @@
 
 🐞 Fixed
 
-- [[#1422]](https://github.com/GetStream/stream-chat-flutter/issues/1422) Fixed `User.createdAt`
-  property using
+- [[#1422]](https://github.com/GetStream/stream-chat-flutter/issues/1422) Fixed `User.createdAt` property using
   currentTime when the ws connection is not established.
 
 ✅ Added
 
-- Added support for `ChatPersistenceClient.isConnected` for checking if the client is connected to
-  the database.
+- Added support for `ChatPersistenceClient.isConnected` for checking if the client is connected to the database.
 - Added support for `ChatPersistenceClient.userId` for getting the current connected user id.
-- Added two new methods `ChatPersistenceClient.disconnect` and `ChatPersistenceClient.connect` for
-  disconnecting and
+- Added two new methods `ChatPersistenceClient.disconnect` and `ChatPersistenceClient.connect` for disconnecting and
   connecting to the database.
 
 ## 6.1.0
 
 🐞 Fixed
 
-- [[#1355]](https://github.com/GetStream/stream-chat-flutter/issues/1355) Fixed error while hiding
-  channel and clearing
+- [[#1355]](https://github.com/GetStream/stream-chat-flutter/issues/1355) Fixed error while hiding channel and clearing
   message history.
-- [[#1525]](https://github.com/GetStream/stream-chat-flutter/issues/1525) Fixed removing message not
-  removing quoted
+- [[#1525]](https://github.com/GetStream/stream-chat-flutter/issues/1525) Fixed removing message not removing quoted
   message reference.
 
 ✅ Added
@@ -401,8 +379,7 @@
 - Expose `ChannelMute` class. [#1473](https://github.com/GetStream/stream-chat-flutter/issues/1473)
 - Added synchronization to the `StreamChatClient.sync`
   api. [#1392](https://github.com/GetStream/stream-chat-flutter/issues/1392)
-- Added support for `StreamChatClient.chatApiInterceptors` to add custom interceptors to the API
-  client.
+- Added support for `StreamChatClient.chatApiInterceptors` to add custom interceptors to the API client.
   [#1265](https://github.com/GetStream/stream-chat-flutter/issues/1265).
 
   ```dart
@@ -434,8 +411,7 @@
 
 🐞 Fixed
 
-- Fixed streamWatchers. Before it was always new, now it is possible to follow the watchers of a
-  channel.
+- Fixed streamWatchers. Before it was always new, now it is possible to follow the watchers of a channel.
 - Make `Message.i18n` field read-only.
 
 🔄 Changed
@@ -865,8 +841,7 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
     - `StreamChatError` -> parent type for all the stream errors.
     - `StreamWebSocketError` -> for user web socket related errors.
     - `StreamChatNetworkError` -> for network related errors.
-- `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual
-  parameters
+- `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual parameters
     - `option.state` -> bool state
     - `option.watch` -> bool watch
     - `option.presence` -> bool presence
@@ -914,8 +889,7 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
     - `StreamChatError` -> parent type for all the stream errors.
     - `StreamWebSocketError` -> for user web socket related errors.
     - `StreamChatNetworkError` -> for network related errors.
-- `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual
-  parameters
+- `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual parameters
     - `option.state` -> bool state
     - `option.watch` -> bool watch
     - `option.presence` -> bool presence
