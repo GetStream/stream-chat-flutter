@@ -631,6 +631,16 @@ void main() {
       verify(() => mockDatabase.memberDao.deleteMemberByCids(cids)).called(1);
     });
 
+    test('deleteDraftMessagesByCids', () async {
+      final cids = <String>[];
+      when(() => mockDatabase.draftMessageDao.deleteDraftMessagesByCids(cids))
+          .thenAnswer((_) => Future.value());
+
+      await client.deleteDraftMessagesByCids(cids);
+      verify(() => mockDatabase.draftMessageDao.deleteDraftMessagesByCids(cids))
+          .called(1);
+    });
+
     test('getDraftMessageByCid', () async {
       const cid = 'testCid';
       const parentId = 'testParentId';
