@@ -189,16 +189,12 @@ class _ChannelPageState extends State<ChannelPage> {
   ) async {
     if (result.endSharingAt case final endSharingAt?) {
       return channel.startLiveLocationSharing(
-        createdByDeviceId: 'test-device-id',
         endSharingAt: endSharingAt,
         location: result.coordinates,
       );
     }
 
-    return channel.sendStaticLocation(
-      createdByDeviceId: 'test-device-id',
-      location: result.coordinates,
-    );
+    return channel.sendStaticLocation(location: result.coordinates);
   }
 
   Widget customMessageBuilder(

@@ -1791,7 +1791,7 @@ class StreamChatClient {
   /// Updates an existing live location created by the current user.
   Future<Location> updateLiveLocation({
     required String messageId,
-    required String createdByDeviceId,
+    String? createdByDeviceId,
     LocationCoordinates? location,
     DateTime? endAt,
   }) {
@@ -1806,7 +1806,7 @@ class StreamChatClient {
   /// Expire an existing live location created by the current user.
   Future<Location> stopLiveLocation({
     required String messageId,
-    required String createdByDeviceId,
+    String? createdByDeviceId,
   }) {
     return updateLiveLocation(
       messageId: messageId,

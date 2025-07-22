@@ -1086,7 +1086,7 @@ class Channel {
   Future<SendMessageResponse> sendStaticLocation({
     String? id,
     String? messageText,
-    required String createdByDeviceId,
+    String? createdByDeviceId,
     required LocationCoordinates location,
     Map<String, Object?> extraData = const {},
   }) {
@@ -1118,8 +1118,8 @@ class Channel {
   Future<SendMessageResponse> startLiveLocationSharing({
     String? id,
     String? messageText,
+    String? createdByDeviceId,
     required DateTime endSharingAt,
-    required String createdByDeviceId,
     required LocationCoordinates location,
     Map<String, Object?> extraData = const {},
   }) {

@@ -18,7 +18,7 @@ Location _$LocationFromJson(Map<String, dynamic> json) => Location(
       userId: json['user_id'] as String?,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      createdByDeviceId: json['created_by_device_id'] as String,
+      createdByDeviceId: json['created_by_device_id'] as String?,
       endAt: json['end_at'] == null
           ? null
           : DateTime.parse(json['end_at'] as String),
@@ -33,6 +33,7 @@ Location _$LocationFromJson(Map<String, dynamic> json) => Location(
 Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
       'latitude': instance.latitude,
       'longitude': instance.longitude,
-      'created_by_device_id': instance.createdByDeviceId,
+      if (instance.createdByDeviceId case final value?)
+        'created_by_device_id': value,
       if (instance.endAt?.toIso8601String() case final value?) 'end_at': value,
     };

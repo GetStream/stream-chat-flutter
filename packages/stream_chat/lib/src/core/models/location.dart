@@ -28,7 +28,7 @@ class Location extends Equatable {
     this.userId,
     required this.latitude,
     required this.longitude,
-    required this.createdByDeviceId,
+    this.createdByDeviceId,
     this.endAt,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -68,7 +68,8 @@ class Location extends Equatable {
   final double longitude;
 
   /// The ID of the device that created the reminder.
-  final String createdByDeviceId;
+  @JsonKey(includeIfNull: false)
+  final String? createdByDeviceId;
 
   /// The date at which the shared location will end.
   @JsonKey(includeIfNull: false)
