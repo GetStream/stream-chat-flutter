@@ -6185,6 +6185,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<Map<String, String>?>(
               $UsersTable.$converterteamsRolen);
+  static const VerificationMeta _avgResponseTimeMeta =
+      const VerificationMeta('avgResponseTime');
+  @override
+  late final GeneratedColumn<int> avgResponseTime = GeneratedColumn<int>(
+      'avg_response_time', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, false,
@@ -6201,6 +6207,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
         online,
         banned,
         teamsRole,
+        avgResponseTime,
         extraData
       ];
   @override
@@ -6248,6 +6255,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       context.handle(_bannedMeta,
           banned.isAcceptableOrUnknown(data['banned']!, _bannedMeta));
     }
+    if (data.containsKey('avg_response_time')) {
+      context.handle(
+          _avgResponseTimeMeta,
+          avgResponseTime.isAcceptableOrUnknown(
+              data['avg_response_time']!, _avgResponseTimeMeta));
+    }
     return context;
   }
 
@@ -6276,6 +6289,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       teamsRole: $UsersTable.$converterteamsRolen.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}teams_role'])),
+      avgResponseTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}avg_response_time']),
       extraData: $UsersTable.$converterextraData.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])!),
@@ -6325,6 +6340,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   /// eg: `{'teamId': 'role', 'teamId2': 'role2'}`
   final Map<String, String>? teamsRole;
 
+  /// The average response time for the user in seconds.
+  final int? avgResponseTime;
+
   /// Map of custom user extraData
   final Map<String, dynamic> extraData;
   const UserEntity(
@@ -6337,6 +6355,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       required this.online,
       required this.banned,
       this.teamsRole,
+      this.avgResponseTime,
       required this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6363,6 +6382,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       map['teams_role'] =
           Variable<String>($UsersTable.$converterteamsRolen.toSql(teamsRole));
     }
+    if (!nullToAbsent || avgResponseTime != null) {
+      map['avg_response_time'] = Variable<int>(avgResponseTime);
+    }
     {
       map['extra_data'] =
           Variable<String>($UsersTable.$converterextraData.toSql(extraData));
@@ -6383,6 +6405,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       online: serializer.fromJson<bool>(json['online']),
       banned: serializer.fromJson<bool>(json['banned']),
       teamsRole: serializer.fromJson<Map<String, String>?>(json['teamsRole']),
+      avgResponseTime: serializer.fromJson<int?>(json['avgResponseTime']),
       extraData: serializer.fromJson<Map<String, dynamic>>(json['extraData']),
     );
   }
@@ -6399,6 +6422,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       'online': serializer.toJson<bool>(online),
       'banned': serializer.toJson<bool>(banned),
       'teamsRole': serializer.toJson<Map<String, String>?>(teamsRole),
+      'avgResponseTime': serializer.toJson<int?>(avgResponseTime),
       'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
     };
   }
@@ -6413,6 +6437,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           bool? online,
           bool? banned,
           Value<Map<String, String>?> teamsRole = const Value.absent(),
+          Value<int?> avgResponseTime = const Value.absent(),
           Map<String, dynamic>? extraData}) =>
       UserEntity(
         id: id ?? this.id,
@@ -6424,6 +6449,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
         online: online ?? this.online,
         banned: banned ?? this.banned,
         teamsRole: teamsRole.present ? teamsRole.value : this.teamsRole,
+        avgResponseTime: avgResponseTime.present
+            ? avgResponseTime.value
+            : this.avgResponseTime,
         extraData: extraData ?? this.extraData,
       );
   UserEntity copyWithCompanion(UsersCompanion data) {
@@ -6438,6 +6466,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       online: data.online.present ? data.online.value : this.online,
       banned: data.banned.present ? data.banned.value : this.banned,
       teamsRole: data.teamsRole.present ? data.teamsRole.value : this.teamsRole,
+      avgResponseTime: data.avgResponseTime.present
+          ? data.avgResponseTime.value
+          : this.avgResponseTime,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -6454,6 +6485,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           ..write('online: $online, ')
           ..write('banned: $banned, ')
           ..write('teamsRole: $teamsRole, ')
+          ..write('avgResponseTime: $avgResponseTime, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -6461,7 +6493,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 
   @override
   int get hashCode => Object.hash(id, role, language, createdAt, updatedAt,
-      lastActive, online, banned, teamsRole, extraData);
+      lastActive, online, banned, teamsRole, avgResponseTime, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6475,6 +6507,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           other.online == this.online &&
           other.banned == this.banned &&
           other.teamsRole == this.teamsRole &&
+          other.avgResponseTime == this.avgResponseTime &&
           other.extraData == this.extraData);
 }
 
@@ -6488,6 +6521,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<bool> online;
   final Value<bool> banned;
   final Value<Map<String, String>?> teamsRole;
+  final Value<int?> avgResponseTime;
   final Value<Map<String, dynamic>> extraData;
   final Value<int> rowid;
   const UsersCompanion({
@@ -6500,6 +6534,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.online = const Value.absent(),
     this.banned = const Value.absent(),
     this.teamsRole = const Value.absent(),
+    this.avgResponseTime = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -6513,6 +6548,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.online = const Value.absent(),
     this.banned = const Value.absent(),
     this.teamsRole = const Value.absent(),
+    this.avgResponseTime = const Value.absent(),
     required Map<String, dynamic> extraData,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -6527,6 +6563,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     Expression<bool>? online,
     Expression<bool>? banned,
     Expression<String>? teamsRole,
+    Expression<int>? avgResponseTime,
     Expression<String>? extraData,
     Expression<int>? rowid,
   }) {
@@ -6540,6 +6577,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       if (online != null) 'online': online,
       if (banned != null) 'banned': banned,
       if (teamsRole != null) 'teams_role': teamsRole,
+      if (avgResponseTime != null) 'avg_response_time': avgResponseTime,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -6555,6 +6593,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       Value<bool>? online,
       Value<bool>? banned,
       Value<Map<String, String>?>? teamsRole,
+      Value<int?>? avgResponseTime,
       Value<Map<String, dynamic>>? extraData,
       Value<int>? rowid}) {
     return UsersCompanion(
@@ -6567,6 +6606,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       online: online ?? this.online,
       banned: banned ?? this.banned,
       teamsRole: teamsRole ?? this.teamsRole,
+      avgResponseTime: avgResponseTime ?? this.avgResponseTime,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
     );
@@ -6603,6 +6643,9 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       map['teams_role'] = Variable<String>(
           $UsersTable.$converterteamsRolen.toSql(teamsRole.value));
     }
+    if (avgResponseTime.present) {
+      map['avg_response_time'] = Variable<int>(avgResponseTime.value);
+    }
     if (extraData.present) {
       map['extra_data'] = Variable<String>(
           $UsersTable.$converterextraData.toSql(extraData.value));
@@ -6625,6 +6668,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
           ..write('online: $online, ')
           ..write('banned: $banned, ')
           ..write('teamsRole: $teamsRole, ')
+          ..write('avgResponseTime: $avgResponseTime, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -12375,6 +12419,7 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<bool> online,
   Value<bool> banned,
   Value<Map<String, String>?> teamsRole,
+  Value<int?> avgResponseTime,
   required Map<String, dynamic> extraData,
   Value<int> rowid,
 });
@@ -12388,6 +12433,7 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<bool> online,
   Value<bool> banned,
   Value<Map<String, String>?> teamsRole,
+  Value<int?> avgResponseTime,
   Value<Map<String, dynamic>> extraData,
   Value<int> rowid,
 });
@@ -12430,6 +12476,10 @@ class $$UsersTableFilterComposer
       get teamsRole => $composableBuilder(
           column: $table.teamsRole,
           builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get avgResponseTime => $composableBuilder(
+      column: $table.avgResponseTime,
+      builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<Map<String, dynamic>, Map<String, dynamic>,
           String>
@@ -12474,6 +12524,10 @@ class $$UsersTableOrderingComposer
   ColumnOrderings<String> get teamsRole => $composableBuilder(
       column: $table.teamsRole, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get avgResponseTime => $composableBuilder(
+      column: $table.avgResponseTime,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get extraData => $composableBuilder(
       column: $table.extraData, builder: (column) => ColumnOrderings(column));
 }
@@ -12515,6 +12569,9 @@ class $$UsersTableAnnotationComposer
       get teamsRole => $composableBuilder(
           column: $table.teamsRole, builder: (column) => column);
 
+  GeneratedColumn<int> get avgResponseTime => $composableBuilder(
+      column: $table.avgResponseTime, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       get extraData => $composableBuilder(
           column: $table.extraData, builder: (column) => column);
@@ -12552,6 +12609,7 @@ class $$UsersTableTableManager extends RootTableManager<
             Value<bool> online = const Value.absent(),
             Value<bool> banned = const Value.absent(),
             Value<Map<String, String>?> teamsRole = const Value.absent(),
+            Value<int?> avgResponseTime = const Value.absent(),
             Value<Map<String, dynamic>> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -12565,6 +12623,7 @@ class $$UsersTableTableManager extends RootTableManager<
             online: online,
             banned: banned,
             teamsRole: teamsRole,
+            avgResponseTime: avgResponseTime,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -12578,6 +12637,7 @@ class $$UsersTableTableManager extends RootTableManager<
             Value<bool> online = const Value.absent(),
             Value<bool> banned = const Value.absent(),
             Value<Map<String, String>?> teamsRole = const Value.absent(),
+            Value<int?> avgResponseTime = const Value.absent(),
             required Map<String, dynamic> extraData,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -12591,6 +12651,7 @@ class $$UsersTableTableManager extends RootTableManager<
             online: online,
             banned: banned,
             teamsRole: teamsRole,
+            avgResponseTime: avgResponseTime,
             extraData: extraData,
             rowid: rowid,
           ),
