@@ -290,7 +290,7 @@ abstract class ChatPersistenceClient {
     final pollVotesToDelete = <String>[];
 
     final drafts = <Draft>[];
-    final draftsToDelete = <String>[];
+    final draftsToDeleteCids = <String>[];
 
     for (final state in channelStates) {
       final channel = state.channel;
@@ -316,7 +316,7 @@ abstract class ChatPersistenceClient {
       membersToDelete.add(cid);
       reactionsToDelete.addAll(messages?.map((it) => it.id) ?? []);
       pinnedReactionsToDelete.addAll(pinnedMessages?.map((it) => it.id) ?? []);
-      draftsToDelete.add(cid);
+      draftsToDeleteCids.add(cid);
 
       // preparing addition data
       channelWithReads[cid] = reads;
@@ -362,7 +362,7 @@ abstract class ChatPersistenceClient {
       deleteReactionsByMessageId(reactionsToDelete),
       deletePinnedMessageReactionsByMessageId(pinnedReactionsToDelete),
       deletePollVotesByPollIds(pollVotesToDelete),
-      deleteDraftMessagesByCids(draftsToDelete),
+      deleteDraftMessagesByCids(draftsToDeleteCids),
     ]);
 
     // Updating first as does not depend on any other table.
