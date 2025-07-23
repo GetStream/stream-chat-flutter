@@ -4,6 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
@@ -65,6 +66,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.moderation,
     this.draft,
     this.reminder,
+    this.sharedLocation,
   })  : id = id ?? const Uuid().v4(),
         type = MessageType(type),
         pinExpires = pinExpires?.toUtc(),
@@ -293,12 +295,21 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// Optional draft message linked to this message.
   ///
   /// This is present when the message is a thread i.e. contains replies.
+  @JsonKey(includeToJson: false)
   final Draft? draft;
 
   /// Optional reminder for this message.
   ///
   /// This is present when a user has set a reminder for this message.
+  @JsonKey(includeToJson: false)
   final MessageReminder? reminder;
+
+  /// Optional shared location associated with this message.
+  ///
+  /// This is used to share a location in a message, allowing users to view the
+  /// location on a map.
+  @JsonKey(includeIfNull: false)
+  final Location? sharedLocation;
 
   /// Message custom extraData.
   final Map<String, Object?> extraData;
@@ -348,6 +359,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     'moderation_details',
     'draft',
     'reminder',
+    'shared_location',
   ];
 
   /// Serialize to json.
@@ -406,6 +418,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     Moderation? moderation,
     Object? draft = _nullConst,
     Object? reminder = _nullConst,
+    Location? sharedLocation,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -483,6 +496,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       draft: draft == _nullConst ? this.draft : draft as Draft?,
       reminder:
           reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
+      sharedLocation: sharedLocation ?? this.sharedLocation,
     );
   }
 
@@ -528,6 +542,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       moderation: other.moderation,
       draft: other.draft,
       reminder: other.reminder,
+      sharedLocation: other.sharedLocation,
     );
   }
 
@@ -593,6 +608,7 @@ class Message extends Equatable implements ComparableFieldProvider {
         moderation,
         draft,
         reminder,
+        sharedLocation,
       ];
 
   @override

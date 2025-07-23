@@ -545,6 +545,11 @@ abstract class Translations {
 
   /// The label for draft message
   String get draftLabel;
+
+  /// The label for location attachment.
+  ///
+  /// [isLive] indicates if the location is live or not.
+  String locationLabel({bool isLive = false});
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1217,4 +1222,10 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get draftLabel => 'Draft';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Live Location';
+    return '📍 Location';
+  }
 }

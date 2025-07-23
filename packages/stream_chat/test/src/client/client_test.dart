@@ -2841,6 +2841,361 @@ void main() {
       verifyNoMoreInteractions(api.moderation);
     });
 
+    test('`.getActiveLiveLocations`', () async {
+      final locations = [
+        Location(
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        ),
+        Location(
+          latitude: 34.0522,
+          longitude: -118.2437,
+          createdByDeviceId: 'device-2',
+          endAt: DateTime.now().add(const Duration(hours: 2)),
+        ),
+      ];
+
+      when(() => api.user.getActiveLiveLocations()).thenAnswer(
+        (_) async => GetActiveLiveLocationsResponse() //
+          ..activeLiveLocations = locations,
+      );
+
+      // Initial state should be empty
+      expect(client.state.activeLiveLocations, isEmpty);
+
+      final res = await client.getActiveLiveLocations();
+
+      expect(res, isNotNull);
+      expect(res.activeLiveLocations, hasLength(2));
+      expect(res.activeLiveLocations, equals(locations));
+      expect(client.state.activeLiveLocations, equals(locations));
+
+      verify(() => api.user.getActiveLiveLocations()).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.updateLiveLocation`', () async {
+      const messageId = 'test-message-id';
+      const createdByDeviceId = 'test-device-id';
+      final endAt = DateTime.timestamp().add(const Duration(hours: 1));
+      const location = LocationCoordinates(
+        latitude: 40.7128,
+        longitude: -74.0060,
+      );
+
+      final expectedLocation = Location(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        createdByDeviceId: createdByDeviceId,
+        endAt: endAt,
+      );
+
+      when(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          location: location,
+          endAt: endAt,
+        ),
+      ).thenAnswer((_) async => expectedLocation);
+
+      final res = await client.updateLiveLocation(
+        messageId: messageId,
+        createdByDeviceId: createdByDeviceId,
+        location: location,
+        endAt: endAt,
+      );
+
+      expect(res, isNotNull);
+      expect(res, equals(expectedLocation));
+
+      verify(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          location: location,
+          endAt: endAt,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.stopLiveLocation`', () async {
+      const messageId = 'test-message-id';
+      const createdByDeviceId = 'test-device-id';
+
+      final expectedLocation = Location(
+        latitude: 40.7128,
+        longitude: -74.0060,
+        createdByDeviceId: createdByDeviceId,
+        endAt: DateTime.now(), // Should be expired
+      );
+
+      when(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          endAt: any(named: 'endAt'),
+        ),
+      ).thenAnswer((_) async => expectedLocation);
+
+      final res = await client.stopLiveLocation(
+        messageId: messageId,
+        createdByDeviceId: createdByDeviceId,
+      );
+
+      expect(res, isNotNull);
+      expect(res, equals(expectedLocation));
+
+      verify(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          endAt: any(named: 'endAt'),
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    group('Live Location Event Handling', () {
+      test('should handle location.shared event', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location,
+          ),
+        );
+
+        // Initially empty
+        expect(client.state.activeLiveLocations, isEmpty);
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should add location to active live locations
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.messageId, equals('message-123'));
+      });
+
+      test('should handle location.updated event', () async {
+        final initialLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Set initial location
+        client.state.activeLiveLocations = [initialLocation];
+
+        final updatedLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7500, // Updated latitude
+          longitude: -74.1000, // Updated longitude
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationUpdated,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: updatedLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should update the location
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.latitude, equals(40.7500));
+        expect(activeLiveLocations.first.longitude, equals(-74.1000));
+      });
+
+      test('should handle location.expired event', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Set initial location
+        client.state.activeLiveLocations = [location];
+        expect(client.state.activeLiveLocations, hasLength(1));
+
+        final expiredLocation = location.copyWith(
+          endAt: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationExpired,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: expiredLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should remove the location
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should ignore location events for other users', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: 'other-user', // Different user
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should not add location from other user
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should ignore static location events', () async {
+        final staticLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          // No endAt means it's static
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: staticLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should not add static location
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should merge locations with same key', () async {
+        final location1 = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final location2 = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-456',
+          userId: userId,
+          latitude: 40.7500,
+          longitude: -74.1000,
+          createdByDeviceId: 'device-1', // Same device, should merge
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event1 = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location1,
+          ),
+        );
+
+        final event2 = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-456',
+            sharedLocation: location2,
+          ),
+        );
+
+        // Trigger first event
+        client.handleEvent(event1);
+        await Future.delayed(Duration.zero);
+
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.messageId, equals('message-123'));
+
+        // Trigger second event - should merge/update
+        client.handleEvent(event2);
+        await Future.delayed(Duration.zero);
+
+        final activeLiveLocations2 = client.state.activeLiveLocations;
+        expect(activeLiveLocations2, hasLength(1));
+        expect(activeLiveLocations2.first.messageId, equals('message-456'));
+      });
+    });
+
     test('`.markAllRead`', () async {
       when(() => api.channel.markAllRead())
           .thenAnswer((_) async => EmptyResponse());

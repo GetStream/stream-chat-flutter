@@ -43,6 +43,8 @@ export 'src/core/models/draft.dart';
 export 'src/core/models/draft_message.dart';
 export 'src/core/models/event.dart';
 export 'src/core/models/filter.dart' show Filter;
+export 'src/core/models/location.dart';
+export 'src/core/models/location_coordinates.dart';
 export 'src/core/models/member.dart';
 export 'src/core/models/message.dart';
 export 'src/core/models/message_reminder.dart';

@@ -25,6 +25,8 @@ import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/location.dart';
+import 'package:stream_chat/src/core/models/location_coordinates.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
@@ -35,6 +37,7 @@ import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -229,8 +232,12 @@ class StreamChatClient {
   Stream<Event> get eventStream => _eventController.stream;
   late final _eventController = EventController<Event>(
     resolvers: [
+      event_resolvers.pollCreatedResolver,
       event_resolvers.pollAnswerCastedResolver,
       event_resolvers.pollAnswerRemovedResolver,
+      event_resolvers.locationSharedResolver,
+      event_resolvers.locationUpdatedResolver,
+      event_resolvers.locationExpiredResolver,
     ],
   );
 
@@ -1765,6 +1772,51 @@ class StreamChatClient {
         pagination: pagination,
       );
 
+  /// Retrieves all the active live locations of the current user.
+  Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
+    try {
+      final response = await _chatApi.user.getActiveLiveLocations();
+
+      // Update the active live locations in the state.
+      final activeLiveLocations = response.activeLiveLocations;
+      state.activeLiveLocations = activeLiveLocations;
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error getting active live locations', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Updates an existing live location created by the current user.
+  Future<Location> updateLiveLocation({
+    required String messageId,
+    String? createdByDeviceId,
+    LocationCoordinates? location,
+    DateTime? endAt,
+  }) {
+    return _chatApi.user.updateLiveLocation(
+      messageId: messageId,
+      createdByDeviceId: createdByDeviceId,
+      location: location,
+      endAt: endAt,
+    );
+  }
+
+  /// Expire an existing live location created by the current user.
+  Future<Location> stopLiveLocation({
+    required String messageId,
+    String? createdByDeviceId,
+  }) {
+    return updateLiveLocation(
+      messageId: messageId,
+      createdByDeviceId: createdByDeviceId,
+      // Passing the current time as endAt will mark the location as expired
+      // and make it inactive.
+      endAt: DateTime.timestamp(),
+    );
+  }
+
   /// Enables slow mode
   Future<PartialUpdateChannelResponse> enableSlowdown(
     String channelId,
@@ -2072,15 +2124,27 @@ class ClientState {
         }),
       );
 
+    // region CHANNEL EVENTS
     _listenChannelLeft();
-
     _listenChannelDeleted();
-
     _listenChannelHidden();
+    // endregion
 
+    // region USER EVENTS
     _listenUserUpdated();
+    // endregion
 
+    // region READ EVENTS
     _listenAllChannelsRead();
+    // endregion
+
+    // region LOCATION EVENTS
+    _listenLocationShared();
+    _listenLocationUpdated();
+    _listenLocationExpired();
+    // endregion
+
+    _startCleaningExpiredLocations();
   }
 
   /// Stops listening to the client events.
@@ -2168,6 +2232,103 @@ class ClientState {
     );
   }
 
+  void _listenLocationShared() {
+    _eventsSubscription?.add(
+      _client.on(EventType.locationShared).listen((event) {
+        final location = event.message?.sharedLocation;
+        if (location == null || location.isStatic) return;
+
+        final currentUserId = currentUser?.id;
+        if (currentUserId == null) return;
+        if (location.userId != currentUserId) return;
+
+        final newActiveLiveLocations = <Location>[
+          ...activeLiveLocations.merge(
+            [location],
+            key: (it) => (it.userId, it.channelCid, it.createdByDeviceId),
+            update: (original, updated) => updated,
+          ),
+        ];
+
+        activeLiveLocations = newActiveLiveLocations;
+      }),
+    );
+  }
+
+  void _listenLocationUpdated() {
+    _eventsSubscription?.add(
+      _client.on(EventType.locationUpdated).listen((event) {
+        final location = event.message?.sharedLocation;
+        if (location == null || location.isStatic) return;
+
+        final currentUserId = currentUser?.id;
+        if (currentUserId == null) return;
+        if (location.userId != currentUserId) return;
+
+        final newActiveLiveLocations = <Location>[
+          ...activeLiveLocations.merge(
+            [location],
+            key: (it) => (it.userId, it.channelCid, it.createdByDeviceId),
+            update: (original, updated) => updated,
+          ),
+        ];
+
+        activeLiveLocations = newActiveLiveLocations;
+      }),
+    );
+  }
+
+  void _listenLocationExpired() {
+    _eventsSubscription?.add(
+      _client.on(EventType.locationExpired).listen((event) {
+        final location = event.message?.sharedLocation;
+        if (location == null || location.isStatic) return;
+
+        final currentUserId = currentUser?.id;
+        if (currentUserId == null) return;
+        if (location.userId != currentUserId) return;
+
+        final newActiveLiveLocations = <Location>[
+          ...activeLiveLocations.where(
+            (it) => it.messageId != location.messageId,
+          )
+        ];
+
+        activeLiveLocations = newActiveLiveLocations;
+      }),
+    );
+  }
+
+  Timer? _staleLiveLocationsCleanerTimer;
+  void _startCleaningExpiredLocations() {
+    _staleLiveLocationsCleanerTimer?.cancel();
+    _staleLiveLocationsCleanerTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) {
+        final expired = activeLiveLocations.where((it) => it.isExpired);
+        if (expired.isEmpty) return;
+
+        for (final sharedLocation in expired) {
+          final lastUpdatedAt = DateTime.timestamp();
+
+          final locationExpiredEvent = Event(
+            type: EventType.locationExpired,
+            cid: sharedLocation.channelCid,
+            message: Message(
+              id: sharedLocation.messageId,
+              updatedAt: lastUpdatedAt,
+              sharedLocation: sharedLocation.copyWith(
+                updatedAt: lastUpdatedAt,
+              ),
+            ),
+          );
+
+          _client.handleEvent(locationExpiredEvent);
+        }
+      },
+    );
+  }
+
   final StreamChatClient _client;
 
   /// Sets the user currently interacting with the client
@@ -2201,6 +2362,23 @@ class ClientState {
 
   /// The current user as a stream
   Stream<Map<String, User>> get usersStream => _usersController.stream;
+
+  /// The current active live locations shared by the user.
+  List<Location> get activeLiveLocations {
+    return _activeLiveLocationsController.value;
+  }
+
+  /// The current active live locations shared by the user as a stream.
+  Stream<List<Location>> get activeLiveLocationsStream {
+    return _activeLiveLocationsController.stream;
+  }
+
+  /// Sets the active live locations.
+  set activeLiveLocations(List<Location> locations) {
+    // For safe-keeping, we filter out any inactive locations before update.
+    final activeLocations = [...locations.where((it) => it.isActive)];
+    _activeLiveLocationsController.add(activeLocations);
+  }
 
   /// The current unread channels count
   int get unreadChannels => _unreadChannelsController.value;
@@ -2274,14 +2452,18 @@ class ClientState {
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
   final _unreadThreadsController = BehaviorSubject<int>.seeded(0);
   final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
+  final _activeLiveLocationsController = BehaviorSubject.seeded(<Location>[]);
 
   /// Call this method to dispose this object
   void dispose() {
     cancelEventSubscription();
     _currentUserController.close();
+    _usersController.close();
     _unreadChannelsController.close();
     _unreadThreadsController.close();
     _totalUnreadCountController.close();
+    _activeLiveLocationsController.close();
+    _staleLiveLocationsCleanerTimer?.cancel();
 
     final channels = [...this.channels.keys];
     for (final channel in channels) {
