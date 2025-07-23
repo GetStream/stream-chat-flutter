@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/dao/dao.dart';
@@ -15,7 +17,7 @@ void main() {
   });
 
   Future<List<Location>> _prepareLocationData({
-    String cid = 'test:Cid',
+    required String cid,
     int count = 3,
   }) async {
     final channels = [ChannelModel(cid: cid)];
@@ -40,8 +42,8 @@ void main() {
         latitude: 37.7749 + index * 0.001, // San Francisco area
         longitude: -122.4194 + index * 0.001,
         createdByDeviceId: 'testDevice$index',
-        endAt: index % 2 == 0
-            ? DateTime.now().add(Duration(hours: 1))
+        endAt: index.isEven
+            ? DateTime.now().add(const Duration(hours: 1))
             : null, // Some live, some static
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

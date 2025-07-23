@@ -781,12 +781,14 @@ void main() {
 
     test('deleteLocationsByMessageIds', () async {
       final messageIds = <String>['testMessageId1', 'testMessageId2'];
-      when(() => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds))
-          .thenAnswer((_) async {});
+      when(
+        () => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds),
+      ).thenAnswer((_) async {});
 
       await client.deleteLocationsByMessageIds(messageIds);
-      verify(() => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds))
-          .called(1);
+      verify(
+        () => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds),
+      ).called(1);
     });
 
     tearDown(() async {
