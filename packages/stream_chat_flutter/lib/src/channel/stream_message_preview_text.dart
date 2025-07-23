@@ -86,6 +86,10 @@ class StreamMessagePreviewText extends StatelessWidget {
       return _pollPreviewText(context, poll, currentUser);
     }
 
+    if (message.sharedLocation case final location?) {
+      return translations.locationLabel(isLive: location.isLive);
+    }
+
     final previewText = _previewMessageContextText(context, message);
     if (previewText == null) return translations.emptyMessagePreviewText;
 

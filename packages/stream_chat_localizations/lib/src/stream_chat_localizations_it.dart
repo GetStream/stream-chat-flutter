@@ -680,4 +680,10 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get draftLabel => 'Bozza';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Posizione dal vivo';
+    return '📍 Posizione';
+  }
 }
