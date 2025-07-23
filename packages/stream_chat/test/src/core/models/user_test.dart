@@ -113,7 +113,7 @@ void main() {
         updatedAt: DateTime.parse('2021-05-04 12:39:21.817646'),
         lastActive: DateTime.parse('2021-05-06 12:39:21.817646'),
         language: 'it',
-        teamsRole: {'new-team1': 'owner', 'new-team2': 'moderator'},
+        teamsRole: {'new-team1': 'admin', 'new-team2': 'member'},
         avgResponseTime: 60,
       );
 
@@ -129,7 +129,7 @@ void main() {
       expect(newUser.updatedAt, DateTime.parse('2021-05-04 12:39:21.817646'));
       expect(newUser.lastActive, DateTime.parse('2021-05-06 12:39:21.817646'));
       expect(newUser.language, 'it');
-      expect(newUser.teamsRole, {'new-team1': 'owner', 'new-team2': 'moderator'});
+      expect(newUser.teamsRole, {'new-team1': 'admin', 'new-team2': 'member'});
       expect(newUser.avgResponseTime, 60);
     });
 
