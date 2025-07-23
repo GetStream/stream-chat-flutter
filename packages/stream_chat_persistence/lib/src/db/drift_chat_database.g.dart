@@ -2809,8 +2809,8 @@ class $LocationsTable extends Locations
       const VerificationMeta('createdByDeviceId');
   @override
   late final GeneratedColumn<String> createdByDeviceId =
-      GeneratedColumn<String>('created_by_device_id', aliasedName, false,
-          type: DriftSqlType.string, requiredDuringInsert: true);
+      GeneratedColumn<String>('created_by_device_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _endAtMeta = const VerificationMeta('endAt');
   @override
   late final GeneratedColumn<DateTime> endAt = GeneratedColumn<DateTime>(
@@ -2885,8 +2885,6 @@ class $LocationsTable extends Locations
           _createdByDeviceIdMeta,
           createdByDeviceId.isAcceptableOrUnknown(
               data['created_by_device_id']!, _createdByDeviceIdMeta));
-    } else if (isInserting) {
-      context.missing(_createdByDeviceIdMeta);
     }
     if (data.containsKey('end_at')) {
       context.handle(
@@ -2920,7 +2918,7 @@ class $LocationsTable extends Locations
       longitude: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}longitude'])!,
       createdByDeviceId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}created_by_device_id'])!,
+          DriftSqlType.string, data['${effectivePrefix}created_by_device_id']),
       endAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}end_at']),
       createdAt: attachedDatabase.typeMapping
@@ -2953,7 +2951,7 @@ class LocationEntity extends DataClass implements Insertable<LocationEntity> {
   final double longitude;
 
   /// The ID of the device that created the location
-  final String createdByDeviceId;
+  final String? createdByDeviceId;
 
   /// The date at which the shared location will end (for live locations)
   /// If null, this is a static location
@@ -2970,7 +2968,7 @@ class LocationEntity extends DataClass implements Insertable<LocationEntity> {
       this.userId,
       required this.latitude,
       required this.longitude,
-      required this.createdByDeviceId,
+      this.createdByDeviceId,
       this.endAt,
       required this.createdAt,
       required this.updatedAt});
@@ -2988,7 +2986,9 @@ class LocationEntity extends DataClass implements Insertable<LocationEntity> {
     }
     map['latitude'] = Variable<double>(latitude);
     map['longitude'] = Variable<double>(longitude);
-    map['created_by_device_id'] = Variable<String>(createdByDeviceId);
+    if (!nullToAbsent || createdByDeviceId != null) {
+      map['created_by_device_id'] = Variable<String>(createdByDeviceId);
+    }
     if (!nullToAbsent || endAt != null) {
       map['end_at'] = Variable<DateTime>(endAt);
     }
@@ -3006,7 +3006,8 @@ class LocationEntity extends DataClass implements Insertable<LocationEntity> {
       userId: serializer.fromJson<String?>(json['userId']),
       latitude: serializer.fromJson<double>(json['latitude']),
       longitude: serializer.fromJson<double>(json['longitude']),
-      createdByDeviceId: serializer.fromJson<String>(json['createdByDeviceId']),
+      createdByDeviceId:
+          serializer.fromJson<String?>(json['createdByDeviceId']),
       endAt: serializer.fromJson<DateTime?>(json['endAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -3021,7 +3022,7 @@ class LocationEntity extends DataClass implements Insertable<LocationEntity> {
       'userId': serializer.toJson<String?>(userId),
       'latitude': serializer.toJson<double>(latitude),
       'longitude': serializer.toJson<double>(longitude),
-      'createdByDeviceId': serializer.toJson<String>(createdByDeviceId),
+      'createdByDeviceId': serializer.toJson<String?>(createdByDeviceId),
       'endAt': serializer.toJson<DateTime?>(endAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -3034,7 +3035,7 @@ class LocationEntity extends DataClass implements Insertable<LocationEntity> {
           Value<String?> userId = const Value.absent(),
           double? latitude,
           double? longitude,
-          String? createdByDeviceId,
+          Value<String?> createdByDeviceId = const Value.absent(),
           Value<DateTime?> endAt = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt}) =>
@@ -3044,7 +3045,9 @@ class LocationEntity extends DataClass implements Insertable<LocationEntity> {
         userId: userId.present ? userId.value : this.userId,
         latitude: latitude ?? this.latitude,
         longitude: longitude ?? this.longitude,
-        createdByDeviceId: createdByDeviceId ?? this.createdByDeviceId,
+        createdByDeviceId: createdByDeviceId.present
+            ? createdByDeviceId.value
+            : this.createdByDeviceId,
         endAt: endAt.present ? endAt.value : this.endAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -3106,7 +3109,7 @@ class LocationsCompanion extends UpdateCompanion<LocationEntity> {
   final Value<String?> userId;
   final Value<double> latitude;
   final Value<double> longitude;
-  final Value<String> createdByDeviceId;
+  final Value<String?> createdByDeviceId;
   final Value<DateTime?> endAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -3129,14 +3132,13 @@ class LocationsCompanion extends UpdateCompanion<LocationEntity> {
     this.userId = const Value.absent(),
     required double latitude,
     required double longitude,
-    required String createdByDeviceId,
+    this.createdByDeviceId = const Value.absent(),
     this.endAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : latitude = Value(latitude),
-        longitude = Value(longitude),
-        createdByDeviceId = Value(createdByDeviceId);
+        longitude = Value(longitude);
   static Insertable<LocationEntity> custom({
     Expression<String>? channelCid,
     Expression<String>? messageId,
@@ -3169,7 +3171,7 @@ class LocationsCompanion extends UpdateCompanion<LocationEntity> {
       Value<String?>? userId,
       Value<double>? latitude,
       Value<double>? longitude,
-      Value<String>? createdByDeviceId,
+      Value<String?>? createdByDeviceId,
       Value<DateTime?>? endAt,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
@@ -10983,7 +10985,7 @@ typedef $$LocationsTableCreateCompanionBuilder = LocationsCompanion Function({
   Value<String?> userId,
   required double latitude,
   required double longitude,
-  required String createdByDeviceId,
+  Value<String?> createdByDeviceId,
   Value<DateTime?> endAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -10995,7 +10997,7 @@ typedef $$LocationsTableUpdateCompanionBuilder = LocationsCompanion Function({
   Value<String?> userId,
   Value<double> latitude,
   Value<double> longitude,
-  Value<String> createdByDeviceId,
+  Value<String?> createdByDeviceId,
   Value<DateTime?> endAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -11280,7 +11282,7 @@ class $$LocationsTableTableManager extends RootTableManager<
             Value<String?> userId = const Value.absent(),
             Value<double> latitude = const Value.absent(),
             Value<double> longitude = const Value.absent(),
-            Value<String> createdByDeviceId = const Value.absent(),
+            Value<String?> createdByDeviceId = const Value.absent(),
             Value<DateTime?> endAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
@@ -11304,7 +11306,7 @@ class $$LocationsTableTableManager extends RootTableManager<
             Value<String?> userId = const Value.absent(),
             required double latitude,
             required double longitude,
-            required String createdByDeviceId,
+            Value<String?> createdByDeviceId = const Value.absent(),
             Value<DateTime?> endAt = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),

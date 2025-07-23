@@ -26,7 +26,7 @@ class Locations extends Table {
   RealColumn get longitude => real()();
 
   /// The ID of the device that created the location
-  TextColumn get createdByDeviceId => text()();
+  TextColumn get createdByDeviceId => text().nullable()();
 
   /// The date at which the shared location will end (for live locations)
   /// If null, this is a static location
