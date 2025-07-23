@@ -1,5 +1,10 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamChatCore.maybeOf()` method for safe context access in async operations.
+- Added `StreamChannel.maybeOf()` method for safe context access in async operations.
+
 🐞 Fixed
 
 - Fixed `MessageListCore.dispose()` crash when channel reload fails due to insufficient permissions.

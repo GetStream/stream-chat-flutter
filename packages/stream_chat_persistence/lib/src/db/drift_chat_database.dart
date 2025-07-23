@@ -55,7 +55,7 @@ class DriftChatDatabase extends _$DriftChatDatabase {
 
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

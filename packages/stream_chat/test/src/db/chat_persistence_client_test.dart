@@ -33,6 +33,9 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> deleteMembersByCids(List<String> cids) => Future.value();
 
   @override
+  Future<void> deleteDraftMessagesByCids(List<String> cids) => Future.value();
+
+  @override
   Future<void> deleteMessageByCids(List<String> cids) => Future.value();
 
   @override

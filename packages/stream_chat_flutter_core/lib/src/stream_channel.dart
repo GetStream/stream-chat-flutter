@@ -94,18 +94,67 @@ class StreamChannel extends StatefulWidget {
     );
   }
 
-  /// Use this method to get the current [StreamChannelState] instance
+  /// Finds the [StreamChannelState] from the closest [StreamChannel] ancestor
+  /// that encloses the given [context].
+  ///
+  /// This will throw a [FlutterError] if no [StreamChannel] is found in the
+  /// widget tree above the given context.
+  ///
+  /// Typical usage:
+  ///
+  /// ```dart
+  /// final channelState = StreamChannel.of(context);
+  /// ```
+  ///
+  /// If you're calling this in the same `build()` method that creates the
+  /// `StreamChannel`, consider using a `Builder` or refactoring into a separate
+  /// widget to obtain a context below the [StreamChannel].
+  ///
+  /// If you want to return null instead of throwing, use [maybeOf].
   static StreamChannelState of(BuildContext context) {
-    StreamChannelState? streamChannelState;
+    final result = maybeOf(context);
+    if (result != null) return result;
 
-    streamChannelState = context.findAncestorStateOfType<StreamChannelState>();
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'StreamChannel.of() called with a context that does not contain a '
+        'StreamChannel.',
+      ),
+      ErrorDescription(
+        'No StreamChannel ancestor could be found starting from the context '
+        'that was passed to StreamChannel.of(). This usually happens when the '
+        'context used comes from the widget that creates the StreamChannel '
+        'itself.',
+      ),
+      ErrorHint(
+        'To fix this, ensure that you are using a context that is a descendant '
+        'of the StreamChannel. You can use a Builder to get a new context that '
+        'is under the StreamChannel:\n\n'
+        '  Builder(\n'
+        '    builder: (context) {\n'
+        '      final channelState = StreamChannel.of(context);\n'
+        '      ...\n'
+        '    },\n'
+        '  )',
+      ),
+      ErrorHint(
+        'Alternatively, split your build method into smaller widgets so that '
+        'you get a new BuildContext that is below the StreamChannel in the '
+        'widget tree.',
+      ),
+      context.describeElement('The context used was'),
+    ]);
+  }
 
-    assert(
-      streamChannelState != null,
-      'You must have a StreamChannel widget at the top of your widget tree',
-    );
-
-    return streamChannelState!;
+  /// Finds the [StreamChannelState] from the closest [StreamChannel] ancestor
+  /// that encloses the given context.
+  ///
+  /// Returns null if no such ancestor exists.
+  ///
+  /// See also:
+  ///  * [of], which throws if no [StreamChannel] is found.
+  static StreamChannelState? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<StreamChannelState>();
   }
 
   @override
