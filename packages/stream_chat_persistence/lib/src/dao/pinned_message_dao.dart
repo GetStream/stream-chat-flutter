@@ -35,8 +35,11 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<void> deleteMessageByCids(List<String> cids) async =>
       (delete(pinnedMessages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
-  Future<Message> _messageFromJoinRow(TypedResult rows) async {
-    final userEntity = rows.readTableOrNull(users);
+  Future<Message> _messageFromJoinRow(
+    TypedResult rows, {
+    bool fetchDraft = false,
+  }) async {
+    final userEntity = rows.readTableOrNull(_users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
     final msgEntity = rows.readTable(pinnedMessages);
     final latestReactions =
@@ -46,16 +49,25 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
       msgEntity.id,
       _db.userId,
     );
-    Message? quotedMessage;
-    final quotedMessageId = msgEntity.quotedMessageId;
-    if (quotedMessageId != null) {
-      quotedMessage = await getMessageById(quotedMessageId);
-    }
-    Poll? poll;
-    final pollId = msgEntity.pollId;
-    if (pollId != null) {
-      poll = await _db.pollDao.getPollById(pollId);
-    }
+
+    final quotedMessage = await switch (msgEntity.quotedMessageId) {
+      final id? => getMessageById(id),
+      _ => null,
+    };
+
+    final poll = await switch (msgEntity.pollId) {
+      final id? => _db.pollDao.getPollById(id),
+      _ => null,
+    };
+
+    final draft = await switch (fetchDraft) {
+      true => _db.draftMessageDao.getDraftMessageByCid(
+          msgEntity.channelCid,
+          parentId: msgEntity.id,
+        ),
+      _ => null,
+    };
+
     return msgEntity.toMessage(
       user: userEntity?.toUser(),
       pinnedBy: pinnedByEntity?.toUser(),
@@ -63,21 +75,32 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
       ownReactions: ownReactions,
       quotedMessage: quotedMessage,
       poll: poll,
+      draft: draft,
     );
   }
 
   /// Returns a single message by matching the [PinnedMessages.id] with [id]
-  Future<Message?> getMessageById(String id) async =>
-      await (select(pinnedMessages).join([
-        leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-        leftOuterJoin(
-          _pinnedByUsers,
-          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-        ),
-      ])
-            ..where(pinnedMessages.id.equals(id)))
-          .map(_messageFromJoinRow)
-          .getSingleOrNull();
+  Future<Message?> getMessageById(
+    String id, {
+    bool fetchDraft = true,
+  }) async {
+    final query = select(pinnedMessages).join([
+      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+      leftOuterJoin(
+        _pinnedByUsers,
+        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+      ),
+    ])
+      ..where(pinnedMessages.id.equals(id));
+
+    final result = await query.getSingleOrNull();
+    if (result == null) return null;
+
+    return _messageFromJoinRow(
+      result,
+      fetchDraft: fetchDraft,
+    );
+  }
 
   /// Returns all the messages of a particular thread by matching
   /// [PinnedMessages.channelCid] with [cid]
@@ -142,21 +165,32 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
   /// [PinnedMessages.channelCid] with [parentId]
   Future<List<Message>> getMessagesByCid(
     String cid, {
+    bool fetchDraft = true,
     PaginationParams? messagePagination,
   }) async {
-    final msgList = await Future.wait(await (select(pinnedMessages).join([
+    final query = select(pinnedMessages).join([
       leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
       leftOuterJoin(
         _pinnedByUsers,
         pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
       ),
     ])
-          ..where(pinnedMessages.channelCid.equals(cid))
-          ..where(pinnedMessages.parentId.isNull() |
-              pinnedMessages.showInChannel.equals(true))
-          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
-        .map(_messageFromJoinRow)
-        .get());
+      ..where(pinnedMessages.channelCid.equals(cid))
+      ..where(pinnedMessages.parentId.isNull() |
+          pinnedMessages.showInChannel.equals(true))
+      ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]);
+
+    final result = await query.get();
+    if (result.isEmpty) return [];
+
+    final msgList = await Future.wait(
+      result.map(
+        (row) => _messageFromJoinRow(
+          row,
+          fetchDraft: fetchDraft,
+        ),
+      ),
+    );
 
     if (msgList.isNotEmpty) {
       if (messagePagination?.lessThan != null) {

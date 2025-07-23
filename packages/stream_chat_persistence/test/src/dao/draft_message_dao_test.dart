@@ -343,6 +343,41 @@ void main() {
     );
   });
 
+  group('deleteDraftMessagesByCids', () {
+    test('should delete drafts for specified channel cids', () async {
+      const cid1 = 'test:deleteByCids1';
+      const cid2 = 'test:deleteByCids2';
+      const cid3 = 'test:deleteByCids3';
+
+      // Create drafts for multiple channels
+      await _prepareTestData(cid1, count: 1);
+      await _prepareTestData(cid2, count: 1);
+      await _prepareTestData(cid3, count: 1);
+
+      // Verify all drafts exist
+      final draft1Before = await draftMessageDao.getDraftMessageByCid(cid1);
+      final draft2Before = await draftMessageDao.getDraftMessageByCid(cid2);
+      final draft3Before = await draftMessageDao.getDraftMessageByCid(cid3);
+      expect(draft1Before, isNotNull);
+      expect(draft2Before, isNotNull);
+      expect(draft3Before, isNotNull);
+
+      // Delete drafts for cid1 and cid2
+      await draftMessageDao.deleteDraftMessagesByCids([cid1, cid2]);
+
+      // Verify drafts for cid1 and cid2 are deleted
+      final draft1After = await draftMessageDao.getDraftMessageByCid(cid1);
+      final draft2After = await draftMessageDao.getDraftMessageByCid(cid2);
+      expect(draft1After, isNull);
+      expect(draft2After, isNull);
+
+      // Verify draft for cid3 still exists
+      final draft3After = await draftMessageDao.getDraftMessageByCid(cid3);
+      expect(draft3After, isNotNull);
+      expect(draft3After!.channelCid, cid3);
+    });
+  });
+
   group('DraftMessages entity references', () {
     test(
       'should delete draft messages when referenced channel is deleted',

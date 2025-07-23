@@ -240,6 +240,9 @@ abstract class ChatPersistenceClient {
   /// Deletes all the members by channel [cids]
   Future<void> deleteMembersByCids(List<String> cids);
 
+  /// Deletes all the draft messages by channel [cids]
+  Future<void> deleteDraftMessagesByCids(List<String> cids);
+
   /// Updates the channel [cid] threads data along with reactions and users.
   Future<void> updateChannelThreads(
     String cid,
@@ -277,7 +280,6 @@ abstract class ChatPersistenceClient {
     final channelWithPinnedMessages = <String, List<Message>?>{};
     final channelWithReads = <String, List<Read>?>{};
     final channelWithMembers = <String, List<Member>?>{};
-    final drafts = <Draft>[];
 
     final users = <User>[];
     final reactions = <Reaction>[];
@@ -286,6 +288,9 @@ abstract class ChatPersistenceClient {
     final polls = <Poll>[];
     final pollVotes = <PollVote>[];
     final pollVotesToDelete = <String>[];
+
+    final drafts = <Draft>[];
+    final draftsToDeleteCids = <String>[];
 
     for (final state in channelStates) {
       final channel = state.channel;
@@ -311,6 +316,7 @@ abstract class ChatPersistenceClient {
       membersToDelete.add(cid);
       reactionsToDelete.addAll(messages?.map((it) => it.id) ?? []);
       pinnedReactionsToDelete.addAll(pinnedMessages?.map((it) => it.id) ?? []);
+      draftsToDeleteCids.add(cid);
 
       // preparing addition data
       channelWithReads[cid] = reads;
@@ -356,6 +362,7 @@ abstract class ChatPersistenceClient {
       deleteReactionsByMessageId(reactionsToDelete),
       deletePinnedMessageReactionsByMessageId(pinnedReactionsToDelete),
       deletePollVotesByPollIds(pollVotesToDelete),
+      deleteDraftMessagesByCids(draftsToDeleteCids),
     ]);
 
     // Updating first as does not depend on any other table.
