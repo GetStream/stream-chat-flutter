@@ -925,7 +925,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Future<void> _onPollCreated(Poll poll) async {
-    final channel = StreamChannel.of(context).channel;
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    if (channel == null) return;
+
     return channel.sendPoll(poll).ignore();
   }
 
@@ -1183,11 +1185,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   late final _onChangedDebounced = debounce(
     () {
-      var value = _effectiveController.text;
       if (!mounted) return;
-      value = value.trim();
 
-      final channel = StreamChannel.of(context).channel;
+      final channel = StreamChannel.maybeOf(context)?.channel;
+      if (channel == null) return;
+
+      final value = _effectiveController.text.trim();
       if (value.isNotEmpty && channel.canSendTypingEvents) {
         // Notify the server that the user started typing.
         channel.keyStroke(_effectiveController.message.parentId).onError(
@@ -1208,7 +1211,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       setState(() => _actionsShrunk = value.isNotEmpty && actionsLength > 1);
 
-      _checkContainsUrl(value, context);
+      _checkContainsUrl(value, channel);
     },
     const Duration(milliseconds: 350),
     leading: true,
@@ -1237,7 +1240,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     caseSensitive: false,
   );
 
-  void _checkContainsUrl(String value, BuildContext context) async {
+  void _checkContainsUrl(String value, Channel channel) async {
     // Cancel the previous operation if it's still running
     _enrichUrlOperation?.cancel();
 
@@ -1254,10 +1257,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }).toList();
 
     // Reset the og attachment if the text doesn't contain any url
-    if (matchedUrls.isEmpty ||
-        !StreamChannel.of(context).channel.canSendLinks) {
-      _effectiveController.clearOGAttachment();
-      return;
+    if (matchedUrls.isEmpty || !channel.canSendLinks) {
+      return _effectiveController.clearOGAttachment();
     }
 
     final firstMatchedUrl = matchedUrls.first.group(0)!;
@@ -1267,7 +1268,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       return;
     }
 
-    final client = StreamChat.of(context).client;
+    final client = StreamChat.maybeOf(context)?.client;
+    if (client == null) return;
 
     _enrichUrlOperation = CancelableOperation.fromFuture(
       _enrichUrl(firstMatchedUrl, client),
@@ -1292,7 +1294,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   ) async {
     var response = _ogAttachmentCache[url];
     if (response == null) {
-      final client = StreamChat.of(context).client;
       try {
         response = await client.enrichUrl(url);
         _ogAttachmentCache[url] = response;
@@ -1435,7 +1436,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     if (_effectiveController.isSlowModeActive) return;
     if (!widget.validator(_effectiveController.message)) return;
 
-    final streamChannel = StreamChannel.of(context);
+    final streamChannel = StreamChannel.maybeOf(context);
+    if (streamChannel == null) return;
+
     final channel = streamChannel.channel;
     var message = _effectiveController.value;
 
@@ -1456,7 +1459,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       return;
     }
 
-    _maybeDeleteDraftMessage(message);
+    _maybeDeleteDraftMessage(message, channel);
     widget.onQuotedMessageCleared?.call();
     _effectiveController.reset();
 
@@ -1474,7 +1477,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       await WidgetsBinding.instance.endOfFrame;
     }
 
-    await _sendOrUpdateMessage(message: message);
+    await _sendOrUpdateMessage(message: message, channel: channel);
 
     if (mounted) {
       if (widget.shouldKeepFocusAfterMessage ?? !_commandEnabled) {
@@ -1487,10 +1490,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
   Future<void> _sendOrUpdateMessage({
     required Message message,
+    required Channel channel,
   }) async {
     try {
-      final channel = StreamChannel.of(context).channel;
-
       // Note: edited messages which are bounced back with an error needs to be
       // sent as new messages as the backend doesn't store them.
       final resp = await switch (_isEditing && !message.isBouncedWithError) {
@@ -1531,19 +1533,21 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   void _maybeUpdateOrDeleteDraftMessage() {
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    if (channel == null) return;
+
     final message = _effectiveController.message;
     final isMessageValid = widget.validator.call(message);
 
     // If the message is valid, we need to create or update it as a draft
     // message for the channel or thread.
-    if (isMessageValid) return _maybeUpdateDraftMessage(message);
+    if (isMessageValid) return _maybeUpdateDraftMessage(message, channel);
 
     // Otherwise, we need to delete the draft message.
-    return _maybeDeleteDraftMessage(message);
+    return _maybeDeleteDraftMessage(message, channel);
   }
 
-  void _maybeUpdateDraftMessage(Message message) {
-    final channel = StreamChannel.of(context).channel;
+  void _maybeUpdateDraftMessage(Message message, Channel channel) {
     final draft = switch (message.parentId) {
       final parentId? => channel.state?.threadDraft(parentId),
       null => channel.state?.draft,
@@ -1557,8 +1561,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return channel.createDraft(draftMessage).ignore();
   }
 
-  void _maybeDeleteDraftMessage(Message message) {
-    final channel = StreamChannel.of(context).channel;
+  void _maybeDeleteDraftMessage(Message message, Channel channel) {
     final draft = switch (message.parentId) {
       final parentId? => channel.state?.threadDraft(parentId),
       null => channel.state?.draft,

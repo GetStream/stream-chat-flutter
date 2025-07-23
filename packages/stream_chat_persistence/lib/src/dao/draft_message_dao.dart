@@ -111,4 +111,9 @@ class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase>
 
     return query.go();
   }
+
+  /// Deletes all the draft messages by matching [DraftMessages.channelCid]
+  /// with the given list of [cids].
+  Future<void> deleteDraftMessagesByCids(List<String> cids) =>
+      (delete(draftMessages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 }

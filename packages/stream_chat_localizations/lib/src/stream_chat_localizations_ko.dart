@@ -649,4 +649,10 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => '임시글';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 실시간 위치';
+    return '📍 위치';
+  }
 }

@@ -676,4 +676,10 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get draftLabel => 'Borrador';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Ubicación en vivo';
+    return '📍 Ubicación';
+  }
 }

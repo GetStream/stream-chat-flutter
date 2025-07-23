@@ -659,4 +659,10 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Utkast';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Direkte posisjon';
+    return '📍 Posisjon';
+  }
 }

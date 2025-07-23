@@ -2,6 +2,13 @@
 
 - Added support for `Location` entity in the database.
 
+## Upcoming
+
+🐞 Fixed
+
+- Fixed draft message retrieval logic where channel drafts were incorrectly attached to all messages
+  instead of only thread drafts being attached to their respective parent messages.
+
 ## 10.0.0-beta.3
 
 - Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_persistence/changelog).

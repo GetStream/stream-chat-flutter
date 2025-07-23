@@ -674,4 +674,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Esborrany';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Ubicació en directe';
+    return '📍 Ubicació';
+  }
 }

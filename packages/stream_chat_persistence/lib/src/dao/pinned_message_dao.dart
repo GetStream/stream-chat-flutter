@@ -62,7 +62,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
     final draft = await switch (fetchDraft) {
       true => _db.draftMessageDao.getDraftMessageByCid(
           msgEntity.channelCid,
-          parentId: msgEntity.parentId,
+          parentId: msgEntity.id,
         ),
       _ => null,
     };

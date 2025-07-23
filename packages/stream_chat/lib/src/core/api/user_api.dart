@@ -110,7 +110,7 @@ class UserApi {
   /// Updates an existing live location created by the current user.
   Future<Location> updateLiveLocation({
     required String messageId,
-    required String createdByDeviceId,
+    String? createdByDeviceId,
     LocationCoordinates? location,
     DateTime? endAt,
   }) async {
@@ -118,7 +118,8 @@ class UserApi {
       '/users/live_locations',
       data: json.encode({
         'message_id': messageId,
-        'created_by_device_id': createdByDeviceId,
+        if (createdByDeviceId != null)
+          'created_by_device_id': createdByDeviceId,
         if (location?.latitude case final latitude) 'latitude': latitude,
         if (location?.longitude case final longitude) 'longitude': longitude,
         if (endAt != null) 'end_at': endAt.toIso8601String(),
