@@ -92,7 +92,6 @@ void main() {
       );
 
       final mockChannel = MockChannel();
-      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.messagesStream)
@@ -135,7 +134,6 @@ void main() {
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value([]));
       when(() => mockChannel.state.messages).thenReturn([]);
-      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
 
       await tester.pumpWidget(
         StreamChannel(
@@ -178,7 +176,6 @@ void main() {
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
-      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
 
       await tester.pumpWidget(
         StreamChannel(
@@ -224,7 +221,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       const error = 'Error! Error! Error!';
       when(() => mockChannel.state.messagesStream)
@@ -266,7 +262,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       const messages = <Message>[];
       when(() => mockChannel.state.messagesStream)
@@ -307,7 +302,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(false);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
       when(() => mockChannel.query(
             state: any(named: 'state'),
             watch: any(named: 'watch'),
@@ -362,7 +356,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       final messages = _generateMessages();
       when(() => mockChannel.state.messagesStream)
@@ -411,7 +404,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       final threads = {parentMessage.id: messages};
 

@@ -37,6 +37,9 @@ class NonInitializedMockChannel extends Mock implements Channel {
 
   @override
   ChannelClientState? get state => null;
+
+  @override
+  Future<bool> get initialized async => false;
 }
 
 class MockChannel extends NonInitializedMockChannel {
@@ -44,6 +47,9 @@ class MockChannel extends NonInitializedMockChannel {
 
   @override
   ChannelClientState get state => _state ??= MockChannelState();
+
+  @override
+  Future<bool> get initialized async => true;
 }
 
 class MockChannelState extends Mock implements ChannelClientState {}
