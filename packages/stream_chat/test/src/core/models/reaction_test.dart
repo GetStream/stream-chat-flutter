@@ -37,8 +37,7 @@ void main() {
           name: 'Daisy Morgan',
         ),
         userId: '2de0297c-f3f2-489d-b930-ef77342edccf',
-        extraData: {'bananas': 'yes'},
-        score: 1,
+        extraData: const {'bananas': 'yes'},
         emojiCode: '😮',
       );
 
@@ -126,7 +125,6 @@ void main() {
           emojiCode: '😂',
           createdAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
           updatedAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
-          extraData: {},
           messageId: 'test',
           score: 2,
           user: User(
