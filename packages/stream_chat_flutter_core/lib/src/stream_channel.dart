@@ -733,7 +733,7 @@ class StreamChannelState extends State<StreamChannel> {
   @override
   void initState() {
     super.initState();
-    _channelInitFuture = _maybeInitChannel();
+    _channelInitFuture = [_maybeInitChannel(), channel.initialized].wait;
   }
 
   @override
@@ -742,7 +742,7 @@ class StreamChannelState extends State<StreamChannel> {
     if (oldWidget.channel.cid != widget.channel.cid ||
         oldWidget.initialMessageId != widget.initialMessageId) {
       // Re-initialize channel if the channel CID or initial message ID changes.
-      _channelInitFuture = _maybeInitChannel();
+      _channelInitFuture = [_maybeInitChannel(), channel.initialized].wait;
     }
   }
 
