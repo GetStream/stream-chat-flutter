@@ -3,6 +3,12 @@
 ✅ Added
 
 - Added `bottom` and `bottomOpacity` to the `StreamChannelHeader` widget.
+- Added `StreamChat.maybeOf()` method for safe context access in async operations.
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` crashes with "Null check operator used on a null value" when async
+  operations continue after widget unmounting.
 
 ## 9.14.0
 

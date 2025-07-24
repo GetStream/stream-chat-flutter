@@ -32,6 +32,7 @@ class OwnUser extends User {
     super.teams,
     super.language,
     super.teamsRole,
+    super.avgResponseTime,
   });
 
   /// Create a new instance from json.
@@ -55,6 +56,7 @@ class OwnUser extends User {
         teams: user.teams,
         language: user.language,
         teamsRole: user.teamsRole,
+        avgResponseTime: user.avgResponseTime,
       );
 
   /// Creates a copy of [OwnUser] with specified attributes overridden.
@@ -81,6 +83,7 @@ class OwnUser extends User {
     int? unreadThreads,
     String? language,
     Map<String, String>? teamsRole,
+    int? avgResponseTime,
   }) =>
       OwnUser(
         id: id ?? this.id,
@@ -107,6 +110,7 @@ class OwnUser extends User {
         blockedUserIds: blockedUserIds ?? this.blockedUserIds,
         language: language ?? this.language,
         teamsRole: teamsRole ?? this.teamsRole,
+        avgResponseTime: avgResponseTime ?? this.avgResponseTime,
       );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
@@ -135,6 +139,7 @@ class OwnUser extends User {
       updatedAt: other.updatedAt,
       language: other.language,
       teamsRole: other.teamsRole,
+      avgResponseTime: other.avgResponseTime,
     );
   }
 

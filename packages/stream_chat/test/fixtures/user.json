@@ -13,5 +13,7 @@
   "created_at": "2021-08-03 12:39:21.817646",
   "updated_at": "2021-08-04 12:39:21.817646",
   "last_active" : "2021-08-05 12:39:21.817646",
-  "language": "en"
+  "language": "en",
+  "teams_role": {"team-1": "admin", "team-2": "member"},
+  "avg_response_time": 120
 }

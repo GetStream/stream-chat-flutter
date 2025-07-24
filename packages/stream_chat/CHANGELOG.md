@@ -1,8 +1,14 @@
 ## Upcoming
 
+✅ Added
+
+- Added `avgResponseTime` field to the `User` model to track average response time in seconds.
+
 🐞 Fixed
 
 - Fixed `WebSocket` race condition where reconnection could access null user during disconnect.
+- Fixed draft message persistence issues where removed drafts were not properly deleted from the
+  database.
 
 ✅ Added
 

@@ -425,6 +425,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> deleteDraftMessagesByCids(List<String> cids) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteDraftMessagesByCids');
+    return db!.draftMessageDao.deleteDraftMessagesByCids(cids);
+  }
+
+  @override
   Future<void> deleteDraftMessageByCid(
     String cid, {
     String? parentId,
