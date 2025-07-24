@@ -9,6 +9,8 @@
 
 - Fixed `MessageListCore.dispose()` crash when channel reload fails due to insufficient permissions.
 - Fixed incorrect parent message comparison in `MessageListCore.didUpdateWidget()`.
+- Ensure `StreamChannel` future builder completes after channel
+  initialization. [[#2323]](https://github.com/GetStream/stream-chat-flutter/issues/2323)
 
 ## 10.0.0-beta.3
 
