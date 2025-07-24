@@ -8,6 +8,10 @@
 
 This guide includes breaking changes grouped by release phase:
 
+### 🚧 v10.0.0-beta.4
+
+- [SendReaction](#-sendreaction)
+
 ### 🚧 v10.0.0-beta.3
 
 - [AttachmentPickerType](#-attachmentpickertype)
@@ -21,6 +25,65 @@ This guide includes breaking changes grouped by release phase:
 - [StreamMessageAction](#-streammessageaction)
 - [StreamMessageReactionsModal](#-streammessagereactionsmodal)
 - [StreamMessageWidget](#-streammessagewidget)
+
+---
+
+## 🧪 Migration for v10.0.0-beta.4
+
+### 🛠 SendReaction
+
+#### Key Changes:
+
+- `sendReaction` method now accepts a full `Reaction` object instead of individual parameters.
+
+#### Migration Steps:
+
+**Before:**
+```dart
+// Using individual parameters
+channel.sendReaction(
+  message,
+  'like',
+  score: 1,
+  extraData: {'custom_field': 'value'},
+);
+
+client.sendReaction(
+  messageId,
+  'love',
+  enforceUnique: true,
+  extraData: {'custom_field': 'value'},
+);
+```
+
+**After:**
+```dart
+// Using Reaction object
+channel.sendReaction(
+  message,
+  Reaction(
+    type: 'like',
+    score: 1,
+    emojiCode: '👍',
+    extraData: {'custom_field': 'value'},
+  ),
+);
+
+client.sendReaction(
+  messageId,
+  Reaction(
+    type: 'love',
+    emojiCode: '❤️',
+    extraData: {'custom_field': 'value'},
+  ),
+  enforceUnique: true,
+);
+```
+
+> ⚠️ **Important:**  
+> - The `sendReaction` method now requires a `Reaction` object
+> - Optional parameters like `enforceUnique` and `skipPush` remain as method parameters
+> - You can now specify custom emoji codes for reactions using the `emojiCode` field
 
 ---
 
