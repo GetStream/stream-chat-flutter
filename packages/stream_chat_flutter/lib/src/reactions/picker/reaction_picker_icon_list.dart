@@ -184,7 +184,7 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
 
                 final onPressed = switch (widget.onReactionPicked) {
                   final onPicked? => () {
-                      final picked = reaction ?? Reaction(type: icon.type);
+                      final picked = reaction ?? icon.toReaction();
                       return onPicked(picked);
                     },
                   _ => null,

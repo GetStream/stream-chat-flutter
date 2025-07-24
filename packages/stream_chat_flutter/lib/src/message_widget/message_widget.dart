@@ -1159,7 +1159,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
     return channel.sendReaction(
       message,
-      reaction.type,
+      reaction,
       enforceUnique: enforceUnique,
     );
   }

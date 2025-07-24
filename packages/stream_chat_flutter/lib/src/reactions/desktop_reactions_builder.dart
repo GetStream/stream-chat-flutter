@@ -183,8 +183,7 @@ class _BottomReaction extends StatelessWidget {
         } else if (reactionIcon != null) {
           StreamChannel.of(context).channel.sendReaction(
                 message,
-                reactionIcon!.type,
-                score: reaction.score + 1,
+                reactionIcon!.toReaction(),
                 enforceUnique:
                     StreamChatConfiguration.of(context).enforceUniqueReactions,
               );
