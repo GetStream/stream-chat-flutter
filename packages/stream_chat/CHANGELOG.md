@@ -4,6 +4,10 @@
 
 - Fixed `WebSocket` race condition where reconnection could access null user during disconnect.
 
+✅ Added
+
+- Added `bottom` and `bottomOpacity` to the `StreamChannelHeader` widget.
+
 ## 9.14.0
 
 🐞 Fixed

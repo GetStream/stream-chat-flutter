@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `bottom` and `bottomOpacity` to the `StreamChannelHeader` widget.
+
 ## 9.14.0
 
 🐞 Fixed
