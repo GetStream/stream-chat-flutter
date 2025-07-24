@@ -623,7 +623,7 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
         children: [
           if (headerBuilder != null) ...[
             headerBuilder!(context),
-            const Divider(height: 0),
+            Divider(height: 0, color: color ?? colorTheme.barsBg),
           ],
           LimitedBox(
             maxHeight: maxHeight ?? height * 0.5,
