@@ -253,7 +253,6 @@ void main() {
   test('sendReaction', () async {
     const messageId = 'test-message-id';
     const reactionType = 'test-reaction-type';
-    const extraData = {'test-key': 'test-data'};
 
     const path = '/messages/$messageId/reaction';
 
@@ -262,21 +261,17 @@ void main() {
 
     when(() => client.post(
           path,
-          data: {
-            'reaction': Map<String, Object?>.from(extraData)
-              ..addAll({'type': reactionType}),
+          data: jsonEncode({
+            'reaction': reaction.toJson(),
+            'skip_push': false,
             'enforce_unique': false,
-          },
+          }),
         )).thenAnswer((_) async => successResponse(path, data: {
           'message': message.toJson(),
-          'reaction': reaction.toJson(),
+          'reaction': {...reaction.toJson(), 'message_id': messageId},
         }));
 
-    final res = await messageApi.sendReaction(
-      messageId,
-      reactionType,
-      extraData: extraData,
-    );
+    final res = await messageApi.sendReaction(messageId, reaction);
 
     expect(res, isNotNull);
     expect(res.message.id, messageId);
@@ -290,7 +285,6 @@ void main() {
   test('sendReaction with enforceUnique: true', () async {
     const messageId = 'test-message-id';
     const reactionType = 'test-reaction-type';
-    const extraData = {'test-key': 'test-data'};
 
     const path = '/messages/$messageId/reaction';
 
@@ -299,20 +293,19 @@ void main() {
 
     when(() => client.post(
           path,
-          data: {
-            'reaction': Map<String, Object?>.from(extraData)
-              ..addAll({'type': reactionType}),
+          data: jsonEncode({
+            'reaction': reaction.toJson(),
+            'skip_push': false,
             'enforce_unique': true,
-          },
+          }),
         )).thenAnswer((_) async => successResponse(path, data: {
           'message': message.toJson(),
-          'reaction': reaction.toJson(),
+          'reaction': {...reaction.toJson(), 'message_id': messageId},
         }));
 
     final res = await messageApi.sendReaction(
       messageId,
-      reactionType,
-      extraData: extraData,
+      reaction,
       enforceUnique: true,
     );
 
@@ -362,7 +355,11 @@ void main() {
             ...const PaginationParams().toJson(),
           },
         )).thenAnswer((_) async => successResponse(path, data: {
-          'reactions': [...reactions.map((it) => it.toJson())]
+          'reactions': [
+            ...reactions.map(
+              (it) => {...it.toJson(), 'message_id': messageId},
+            ),
+          ]
         }));
 
     final res = await messageApi.getReactions(messageId, pagination: options);

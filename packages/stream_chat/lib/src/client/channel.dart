@@ -1407,28 +1407,17 @@ class Channel {
   /// Set [enforceUnique] to true to remove the existing user reaction.
   Future<SendReactionResponse> sendReaction(
     Message message,
-    String type, {
-    int score = 1,
-    Map<String, Object?> extraData = const {},
+    Reaction reaction, {
+    bool skipPush = false,
     bool enforceUnique = false,
   }) async {
     _checkInitialized();
-    final currentUser = _client.state.currentUser;
-    if (currentUser == null) {
-      throw StateError(
-        'Cannot send reaction: current user is not available. '
-        'Ensure the client is connected and a user is set.',
-      );
-    }
 
     final messageId = message.id;
-    final reaction = Reaction(
-      type: type,
+    // ignore: parameter_assignments
+    reaction = reaction.copyWith(
       messageId: messageId,
-      user: currentUser,
-      score: score,
-      createdAt: DateTime.timestamp(),
-      extraData: extraData,
+      user: _client.state.currentUser,
     );
 
     final updatedMessage = message.addMyReaction(
@@ -1441,9 +1430,8 @@ class Channel {
     try {
       final reactionResp = await _client.sendReaction(
         messageId,
-        reaction.type,
-        score: reaction.score,
-        extraData: reaction.extraData,
+        reaction,
+        skipPush: skipPush,
         enforceUnique: enforceUnique,
       );
       return reactionResp;
