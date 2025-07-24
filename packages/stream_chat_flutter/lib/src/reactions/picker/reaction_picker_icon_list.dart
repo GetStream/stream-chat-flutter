@@ -200,8 +200,8 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      curve: Curves.easeInOutBack,
-      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutBack,
+      duration: const Duration(milliseconds: 335),
       builder: (context, scale, child) {
         return Transform.scale(scale: scale, child: child);
       },

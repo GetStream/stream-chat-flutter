@@ -18,7 +18,7 @@ Future<T?> showStreamMessageModal<T>({
   bool barrierDismissible = true,
   String? barrierLabel,
   Color? barrierColor,
-  Duration transitionDuration = const Duration(milliseconds: 300),
+  Duration transitionDuration = const Duration(milliseconds: 335),
   RouteTransitionsBuilder? transitionBuilder,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
@@ -47,7 +47,7 @@ Future<T?> showStreamMessageModal<T>({
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final sigma = 10 * animation.value;
       final scaleAnimation = Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(parent: animation, curve: Curves.easeInOutBack),
+        CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
       );
 
       return BackdropFilter(
