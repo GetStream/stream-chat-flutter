@@ -34,6 +34,9 @@ class Users extends Table {
   /// eg: `{'teamId': 'role', 'teamId2': 'role2'}`
   TextColumn get teamsRole => text().nullable().map(MapConverter<String>())();
 
+  /// The average response time for the user in seconds.
+  IntColumn get avgResponseTime => integer().nullable()();
+
   /// Map of custom user extraData
   TextColumn get extraData => text().map(MapConverter())();
 

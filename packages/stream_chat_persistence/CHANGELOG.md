@@ -5,6 +5,10 @@
 - Fixed draft message retrieval logic where channel drafts were incorrectly attached to all messages
   instead of only thread drafts being attached to their respective parent messages.
 
+✅ Added
+
+- Added support for `User.avgResponseTime` field.
+
 ## 9.14.0
 
 - Updated `stream_chat` dependency to [`9.14.0`](https://pub.dev/packages/stream_chat/changelog).

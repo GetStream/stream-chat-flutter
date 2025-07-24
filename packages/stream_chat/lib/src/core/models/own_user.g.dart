@@ -50,4 +50,5 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
       teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),
+      avgResponseTime: (json['avg_response_time'] as num?)?.toInt(),
     );

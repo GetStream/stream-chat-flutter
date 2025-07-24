@@ -47,6 +47,7 @@ class User extends Equatable implements ComparableFieldProvider {
     this.teams = const [],
     this.language,
     this.teamsRole,
+    this.avgResponseTime,
   }) :
         // For backwards compatibility, set 'name', 'image' in [extraData].
         extraData = {
@@ -74,6 +75,7 @@ class User extends Equatable implements ComparableFieldProvider {
     'teams',
     'language',
     'teams_role',
+    'avg_response_time',
   ];
 
   /// User id.
@@ -143,6 +145,10 @@ class User extends Equatable implements ComparableFieldProvider {
   @JsonKey(includeIfNull: false)
   final Map< /*Team*/ String, /*Role*/ String>? teamsRole;
 
+  /// The average response time of the user in seconds.
+  @JsonKey(includeToJson: false)
+  final int? avgResponseTime;
+
   /// Map of custom user extraData.
   final Map<String, Object?> extraData;
 
@@ -171,6 +177,7 @@ class User extends Equatable implements ComparableFieldProvider {
     List<String>? teams,
     String? language,
     Map<String, String>? teamsRole,
+    int? avgResponseTime,
   }) =>
       User(
         id: id ?? this.id,
@@ -190,6 +197,7 @@ class User extends Equatable implements ComparableFieldProvider {
         teams: teams ?? this.teams,
         language: language ?? this.language,
         teamsRole: teamsRole ?? this.teamsRole,
+        avgResponseTime: avgResponseTime ?? this.avgResponseTime,
       );
 
   @override
@@ -204,6 +212,7 @@ class User extends Equatable implements ComparableFieldProvider {
         teams,
         language,
         teamsRole,
+        avgResponseTime,
       ];
 
   @override
