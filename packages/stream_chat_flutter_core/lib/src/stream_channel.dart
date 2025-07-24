@@ -81,14 +81,24 @@ class StreamChannel extends StatefulWidget {
     StackTrace? stackTrace,
   ) {
     final backgroundColor = _getDefaultBackgroundColor(context);
+
+    Object? unwrapParallelError(Object error) {
+      if (error case ParallelWaitError(:final List<AsyncError?> errors)) {
+        return errors.firstWhereOrNull((it) => it != null)?.error;
+      }
+
+      return error;
+    }
+
+    final exception = unwrapParallelError(error);
     return Material(
       color: backgroundColor,
       child: Center(
-        child: switch (error) {
+        child: switch (exception) {
           DioException(type: DioExceptionType.badResponse) =>
-            Text(error.message ?? 'Bad response'),
+            Text(exception.message ?? 'Bad response'),
           DioException() => const Text('Check your connection and retry'),
-          _ => Text(error.toString()),
+          _ => Text(exception.toString()),
         },
       ),
     );
@@ -728,7 +738,7 @@ class StreamChannelState extends State<StreamChannel> {
     if (channel.state?.isUpToDate == false) return loadChannelAtMessage(null);
   }
 
-  late Future<void> _channelInitFuture;
+  late Future<List<void>> _channelInitFuture;
 
   @override
   void initState() {
