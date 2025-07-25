@@ -59,6 +59,7 @@ void main() {
         watcherCount: 5,
         pinnedMessages: [],
         watchers: [],
+        activeLiveLocations: [],
       );
 
       expect(

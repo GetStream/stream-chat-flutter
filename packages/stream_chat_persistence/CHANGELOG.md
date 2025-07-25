@@ -1,3 +1,10 @@
+## 10.0.0-beta.4
+
+- Added support for `Location` entity in the database.
+- Added support for `emojiCode` and `updatedAt` fields in `Reaction` entity.
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.15.0
 
 🐞 Fixed
@@ -9,13 +16,25 @@
 
 - Added support for `User.avgResponseTime` field.
 
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.14.0
 
 - Updated `stream_chat` dependency to [`9.14.0`](https://pub.dev/packages/stream_chat/changelog).
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.13.0
 
 - Updated `stream_chat` dependency to [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.1
+
+- Updated `stream_chat` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.12.0
 

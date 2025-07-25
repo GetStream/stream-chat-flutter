@@ -440,6 +440,8 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
   LocalNotificationObserver? localNotificationObserver;
 
+  GoRouter? router;
+
   /// Conditionally sets up the router and adding an observer for the
   /// current chat client.
   GoRouter _setupRouter() {
@@ -449,7 +451,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     localNotificationObserver = LocalNotificationObserver(
         _initNotifier.initData!.client, _navigatorKey);
 
-    return GoRouter(
+    return router ??= GoRouter(
       refreshListenable: _initNotifier,
       initialLocation: Routes.CHANNEL_LIST_PAGE.path,
       navigatorKey: _navigatorKey,

@@ -53,7 +53,7 @@ void main() {
 }
 
 final _channelPreviewThemeControl = StreamChannelPreviewThemeData(
-  unreadCounterColor: StreamColorTheme.light().accentError,
+  unreadCounterColor: const StreamColorTheme.light().accentError,
   avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
@@ -61,13 +61,13 @@ final _channelPreviewThemeControl = StreamChannelPreviewThemeData(
       width: 40,
     ),
   ),
-  titleStyle: StreamTextTheme.light().bodyBold,
-  subtitleStyle: StreamTextTheme.light().footnote.copyWith(
+  titleStyle: const StreamTextTheme.light().bodyBold,
+  subtitleStyle: const StreamTextTheme.light().footnote.copyWith(
         color: const Color(0xff7A7A7A),
       ),
-  lastMessageAtStyle: StreamTextTheme.light().footnote.copyWith(
+  lastMessageAtStyle: const StreamTextTheme.light().footnote.copyWith(
         // ignore: deprecated_member_use
-        color: StreamColorTheme.light().textHighEmphasis.withOpacity(0.5),
+        color: const StreamColorTheme.light().textHighEmphasis.withOpacity(0.5),
       ),
   indicatorIconSize: 16,
 );
@@ -91,7 +91,7 @@ final _channelPreviewThemeControlMidLerp = StreamChannelPreviewThemeData(
     fontSize: 12,
     fontWeight: FontWeight.w400,
   ),
-  lastMessageAtStyle: StreamTextTheme.light().footnote.copyWith(
+  lastMessageAtStyle: const StreamTextTheme.light().footnote.copyWith(
         // ignore: deprecated_member_use
         color: const Color(0x807f7f7f).withOpacity(0.5),
       ),
@@ -99,7 +99,7 @@ final _channelPreviewThemeControlMidLerp = StreamChannelPreviewThemeData(
 );
 
 final _channelPreviewThemeControlDark = StreamChannelPreviewThemeData(
-  unreadCounterColor: StreamColorTheme.dark().accentError,
+  unreadCounterColor: const StreamColorTheme.dark().accentError,
   avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
@@ -107,13 +107,13 @@ final _channelPreviewThemeControlDark = StreamChannelPreviewThemeData(
       width: 40,
     ),
   ),
-  titleStyle: StreamTextTheme.dark().bodyBold,
-  subtitleStyle: StreamTextTheme.dark().footnote.copyWith(
+  titleStyle: const StreamTextTheme.dark().bodyBold,
+  subtitleStyle: const StreamTextTheme.dark().footnote.copyWith(
         color: const Color(0xff7A7A7A),
       ),
-  lastMessageAtStyle: StreamTextTheme.dark().footnote.copyWith(
+  lastMessageAtStyle: const StreamTextTheme.dark().footnote.copyWith(
         // ignore: deprecated_member_use
-        color: StreamColorTheme.dark().textHighEmphasis.withOpacity(0.5),
+        color: const StreamColorTheme.dark().textHighEmphasis.withOpacity(0.5),
       ),
   indicatorIconSize: 16,
 );

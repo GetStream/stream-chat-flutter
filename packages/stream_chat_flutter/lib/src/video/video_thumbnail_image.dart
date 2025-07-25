@@ -87,10 +87,9 @@ class StreamVideoThumbnailImage
   }
 
   @override
-  @Deprecated('Will get replaced by loadImage in the next major version.')
-  ImageStreamCompleter loadBuffer(
+  ImageStreamCompleter loadImage(
     StreamVideoThumbnailImage key,
-    DecoderBufferCallback decode,
+    ImageDecoderCallback decode,
   ) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
@@ -103,10 +102,9 @@ class StreamVideoThumbnailImage
     );
   }
 
-  @Deprecated('Will get replaced by loadImage in the next major version.')
   Future<ui.Codec> _loadAsync(
     StreamVideoThumbnailImage key,
-    DecoderBufferCallback decode,
+    ImageDecoderCallback decode,
   ) async {
     assert(key == this, '$key is not $this');
 
