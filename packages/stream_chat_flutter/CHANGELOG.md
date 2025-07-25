@@ -1,3 +1,10 @@
+## Upcoming Beta
+
+✅ Added
+
+- Added `emojiCode` property to `StreamReactionIcon` to support custom emojis in reactions.
+- Updated default reaction builders with standard emoji codes. (`❤️`, `👍`, `👎`, `😂`, `😮`)
+
 ## Upcoming
 
 ✅ Added

@@ -1505,15 +1505,24 @@ void main() {
 
     group('`.sendReaction`', () {
       test('should work fine', () async {
-        const type = 'test-reaction-type';
         final message = Message(
           id: 'test-message-id',
           state: MessageState.sent,
         );
 
-        final reaction = Reaction(type: type, messageId: message.id);
+        const type = 'like';
+        const emojiCode = '👍';
+        const score = 4;
 
-        when(() => client.sendReaction(message.id, type)).thenAnswer(
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          emojiCode: emojiCode,
+          score: score,
+          user: client.state.currentUser,
+        );
+
+        when(() => client.sendReaction(message.id, reaction)).thenAnswer(
           (_) async => SendReactionResponse()
             ..message = message
             ..reaction = reaction,
@@ -1538,156 +1547,15 @@ void main() {
           ]),
         );
 
-        final res = await channel.sendReaction(message, type);
+        final res = await channel.sendReaction(message, reaction);
 
         expect(res, isNotNull);
         expect(res.reaction.type, type);
         expect(res.reaction.messageId, message.id);
-
-        verify(() => client.sendReaction(message.id, type)).called(1);
-      });
-
-      test('should work fine with score passed explicitly', () async {
-        const type = 'test-reaction-type';
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.sent,
-        );
-
-        const score = 5;
-        final reaction = Reaction(
-          type: type,
-          messageId: message.id,
-          score: score,
-        );
-
-        when(() => client.sendReaction(
-              message.id,
-              type,
-              score: score,
-            )).thenAnswer(
-          (_) async => SendReactionResponse()
-            ..message = message
-            ..reaction = reaction,
-        );
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sent,
-                  reactionGroups: {
-                    type: ReactionGroup(
-                      count: 1,
-                      sumScores: score,
-                    )
-                  },
-                  latestReactions: [reaction],
-                  ownReactions: [reaction],
-                ),
-                matchReactions: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        final res = await channel.sendReaction(
-          message,
-          type,
-          score: score,
-        );
-
-        expect(res, isNotNull);
-        expect(res.reaction.type, type);
-        expect(res.reaction.messageId, message.id);
+        expect(res.reaction.emojiCode, emojiCode);
         expect(res.reaction.score, score);
 
-        verify(() => client.sendReaction(
-              message.id,
-              type,
-              score: score,
-            )).called(1);
-      });
-
-      test('should work fine with score passed explicitly and in extraData',
-          () async {
-        const type = 'test-reaction-type';
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.sent,
-        );
-
-        const score = 5;
-        const extraDataScore = 3;
-        const extraData = {
-          'score': extraDataScore,
-        };
-        final reaction = Reaction(
-          type: type,
-          messageId: message.id,
-          score: extraDataScore,
-        );
-
-        when(() => client.sendReaction(
-              message.id,
-              type,
-              score: score,
-              extraData: extraData,
-            )).thenAnswer(
-          (_) async => SendReactionResponse()
-            ..message = message
-            ..reaction = reaction,
-        );
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sent,
-                  reactionGroups: {
-                    type: ReactionGroup(
-                      count: 1,
-                      sumScores: extraDataScore,
-                    )
-                  },
-                  latestReactions: [reaction],
-                  ownReactions: [reaction],
-                ),
-                matchReactions: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        final res = await channel.sendReaction(
-          message,
-          type,
-          score: score,
-          extraData: extraData,
-        );
-
-        expect(res, isNotNull);
-        expect(res.reaction.type, type);
-        expect(res.reaction.messageId, message.id);
-        expect(
-          res.reaction.score,
-          extraDataScore,
-        );
-
-        verify(() => client.sendReaction(
-              message.id,
-              type,
-              score: score,
-              extraData: extraData,
-            )).called(1);
+        verify(() => client.sendReaction(message.id, reaction)).called(1);
       });
 
       test(
@@ -1699,9 +1567,13 @@ void main() {
             state: MessageState.sent,
           );
 
-          final reaction = Reaction(type: type, messageId: message.id);
+          final reaction = Reaction(
+            type: type,
+            messageId: message.id,
+            user: client.state.currentUser,
+          );
 
-          when(() => client.sendReaction(message.id, type))
+          when(() => client.sendReaction(message.id, reaction))
               .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
           expectLater(
@@ -1736,25 +1608,24 @@ void main() {
           );
 
           try {
-            await channel.sendReaction(message, type);
+            await channel.sendReaction(message, reaction);
           } catch (e) {
             expect(e, isA<StreamChatNetworkError>());
           }
 
-          verify(() => client.sendReaction(message.id, type)).called(1);
+          verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
       );
 
       test(
         '''should override previous reaction if present and `enforceUnique` is true''',
         () async {
-          const userId = 'test-user-id';
           const messageId = 'test-message-id';
           const prevType = 'test-reaction-type';
           final prevReaction = Reaction(
             type: prevType,
             messageId: messageId,
-            userId: userId,
+            user: client.state.currentUser,
           );
           final message = Message(
             id: messageId,
@@ -1773,7 +1644,7 @@ void main() {
           final newReaction = Reaction(
             type: type,
             messageId: messageId,
-            userId: userId,
+            user: client.state.currentUser,
           );
           final newMessage = message.copyWith(
             ownReactions: [newReaction],
@@ -1784,7 +1655,7 @@ void main() {
 
           when(() => client.sendReaction(
                 messageId,
-                type,
+                newReaction,
                 enforceUnique: enforceUnique,
               )).thenAnswer(
             (_) async => SendReactionResponse()
@@ -1808,7 +1679,7 @@ void main() {
 
           final res = await channel.sendReaction(
             message,
-            type,
+            newReaction,
             enforceUnique: enforceUnique,
           );
 
@@ -1818,7 +1689,7 @@ void main() {
 
           verify(() => client.sendReaction(
                 messageId,
-                type,
+                newReaction,
                 enforceUnique: enforceUnique,
               )).called(1);
         },
@@ -1834,9 +1705,13 @@ void main() {
           state: MessageState.sent,
         );
 
-        final reaction = Reaction(type: type, messageId: message.id);
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          user: client.state.currentUser,
+        );
 
-        when(() => client.sendReaction(message.id, type)).thenAnswer(
+        when(() => client.sendReaction(message.id, reaction)).thenAnswer(
           (_) async => SendReactionResponse()
             ..message = message
             ..reaction = reaction,
@@ -1869,13 +1744,13 @@ void main() {
           ]),
         );
 
-        final res = await channel.sendReaction(message, type);
+        final res = await channel.sendReaction(message, reaction);
 
         expect(res, isNotNull);
         expect(res.reaction.type, type);
         expect(res.reaction.messageId, message.id);
 
-        verify(() => client.sendReaction(message.id, type)).called(1);
+        verify(() => client.sendReaction(message.id, reaction)).called(1);
       });
 
       test(
@@ -1888,9 +1763,13 @@ void main() {
             state: MessageState.sent,
           );
 
-          final reaction = Reaction(type: type, messageId: message.id);
+          final reaction = Reaction(
+            type: type,
+            messageId: message.id,
+            user: client.state.currentUser,
+          );
 
-          when(() => client.sendReaction(message.id, type))
+          when(() => client.sendReaction(message.id, reaction))
               .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
           expectLater(
@@ -1929,26 +1808,25 @@ void main() {
           );
 
           try {
-            await channel.sendReaction(message, type);
+            await channel.sendReaction(message, reaction);
           } catch (e) {
             expect(e, isA<StreamChatNetworkError>());
           }
 
-          verify(() => client.sendReaction(message.id, type)).called(1);
+          verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
       );
 
       test(
         '''should override previous thread reaction if present and `enforceUnique` is true''',
         () async {
-          const userId = 'test-user-id';
           const messageId = 'test-message-id';
           const parentId = 'test-parent-id';
           const prevType = 'test-reaction-type';
           final prevReaction = Reaction(
             type: prevType,
             messageId: messageId,
-            userId: userId,
+            user: client.state.currentUser,
           );
           final message = Message(
             id: messageId,
@@ -1968,7 +1846,7 @@ void main() {
           final newReaction = Reaction(
             type: type,
             messageId: messageId,
-            userId: userId,
+            user: client.state.currentUser,
           );
           final newMessage = message.copyWith(
             ownReactions: [newReaction],
@@ -1979,7 +1857,7 @@ void main() {
 
           when(() => client.sendReaction(
                 messageId,
-                type,
+                newReaction,
                 enforceUnique: enforceUnique,
               )).thenAnswer(
             (_) async => SendReactionResponse()
@@ -2006,7 +1884,7 @@ void main() {
 
           final res = await channel.sendReaction(
             message,
-            type,
+            newReaction,
             enforceUnique: enforceUnique,
           );
 
@@ -2016,7 +1894,7 @@ void main() {
 
           verify(() => client.sendReaction(
                 messageId,
-                type,
+                newReaction,
                 enforceUnique: enforceUnique,
               )).called(1);
         },

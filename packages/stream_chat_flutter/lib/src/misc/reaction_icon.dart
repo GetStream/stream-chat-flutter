@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template reactionIconBuilder}
 /// Signature for a function that builds a reaction icon.
@@ -20,16 +21,26 @@ class StreamReactionIcon {
   /// {@macro streamReactionIcon}
   const StreamReactionIcon({
     required this.type,
+    this.emojiCode,
     required this.builder,
   });
 
   /// Creates a reaction icon with a default unknown icon.
   const StreamReactionIcon.unknown()
       : type = 'unknown',
-        builder = _unknownReactionBuilder;
+        emojiCode = null,
+        builder = _unknownBuilder;
+
+  /// Converts this [StreamReactionIcon] to a [Reaction] object.
+  Reaction toReaction() => Reaction(type: type, emojiCode: emojiCode);
 
   /// Type of reaction
   final String type;
+
+  /// Optional emoji code for the reaction.
+  ///
+  /// Used to display a custom emoji in the notification.
+  final String? emojiCode;
 
   /// {@macro reactionIconBuilder}
   final ReactionIconBuilder builder;
@@ -46,14 +57,14 @@ class StreamReactionIcon {
   /// These default reactions can be used directly or as a starting point for
   /// custom reaction configurations.
   static const List<StreamReactionIcon> defaultReactions = [
-    StreamReactionIcon(type: 'love', builder: _loveReactionBuilder),
-    StreamReactionIcon(type: 'like', builder: _likeReactionBuilder),
-    StreamReactionIcon(type: 'sad', builder: _sadReactionBuilder),
-    StreamReactionIcon(type: 'haha', builder: _hahaReactionBuilder),
-    StreamReactionIcon(type: 'wow', builder: _wowReactionBuilder),
+    StreamReactionIcon(type: 'love', emojiCode: '❤️', builder: _loveBuilder),
+    StreamReactionIcon(type: 'like', emojiCode: '👍', builder: _likeBuilder),
+    StreamReactionIcon(type: 'sad', emojiCode: '👎', builder: _sadBuilder),
+    StreamReactionIcon(type: 'haha', emojiCode: '😂', builder: _hahaBuilder),
+    StreamReactionIcon(type: 'wow', emojiCode: '😮', builder: _wowBuilder),
   ];
 
-  static Widget _loveReactionBuilder(
+  static Widget _loveBuilder(
     BuildContext context,
     bool highlighted,
     double size,
@@ -71,7 +82,7 @@ class StreamReactionIcon {
     );
   }
 
-  static Widget _likeReactionBuilder(
+  static Widget _likeBuilder(
     BuildContext context,
     bool highlighted,
     double size,
@@ -89,7 +100,7 @@ class StreamReactionIcon {
     );
   }
 
-  static Widget _sadReactionBuilder(
+  static Widget _sadBuilder(
     BuildContext context,
     bool highlighted,
     double size,
@@ -107,7 +118,7 @@ class StreamReactionIcon {
     );
   }
 
-  static Widget _hahaReactionBuilder(
+  static Widget _hahaBuilder(
     BuildContext context,
     bool highlighted,
     double size,
@@ -125,7 +136,7 @@ class StreamReactionIcon {
     );
   }
 
-  static Widget _wowReactionBuilder(
+  static Widget _wowBuilder(
     BuildContext context,
     bool highlighted,
     double size,
@@ -143,7 +154,7 @@ class StreamReactionIcon {
     );
   }
 
-  static Widget _unknownReactionBuilder(
+  static Widget _unknownBuilder(
     BuildContext context,
     bool highlighted,
     double size,

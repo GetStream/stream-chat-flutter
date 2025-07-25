@@ -34,6 +34,7 @@ import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
@@ -1587,23 +1588,16 @@ class StreamChatClient {
   /// Set [enforceUnique] to true to remove the existing user reaction
   Future<SendReactionResponse> sendReaction(
     String messageId,
-    String reactionType, {
-    int score = 1,
-    Map<String, Object?> extraData = const {},
+    Reaction reaction, {
+    bool skipPush = false,
     bool enforceUnique = false,
-  }) {
-    final _extraData = {
-      'score': score,
-      ...extraData,
-    };
-
-    return _chatApi.message.sendReaction(
-      messageId,
-      reactionType,
-      extraData: _extraData,
-      enforceUnique: enforceUnique,
-    );
-  }
+  }) =>
+      _chatApi.message.sendReaction(
+        messageId,
+        reaction,
+        skipPush: skipPush,
+        enforceUnique: enforceUnique,
+      );
 
   /// Delete a [reactionType] from this [messageId]
   Future<EmptyResponse> deleteReaction(

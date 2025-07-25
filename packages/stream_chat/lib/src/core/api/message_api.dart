@@ -8,6 +8,7 @@ import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/reaction.dart';
 
 /// Defines the api dedicated to messages operations
 class MessageApi {
@@ -208,19 +209,17 @@ class MessageApi {
   /// Set [enforceUnique] to true to remove the existing user reaction
   Future<SendReactionResponse> sendReaction(
     String messageId,
-    String reactionType, {
-    Map<String, Object?> extraData = const {},
+    Reaction reaction, {
+    bool skipPush = false,
     bool enforceUnique = false,
   }) async {
-    final reaction = Map<String, Object?>.from(extraData)
-      ..addAll({'type': reactionType});
-
     final response = await _client.post(
       '/messages/$messageId/reaction',
-      data: {
-        'reaction': reaction,
+      data: json.encode({
+        'reaction': reaction.toJson(),
+        'skip_push': skipPush,
         'enforce_unique': enforceUnique,
-      },
+      }),
     );
     return SendReactionResponse.fromJson(response.data);
   }

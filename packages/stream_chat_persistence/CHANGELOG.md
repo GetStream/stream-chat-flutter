@@ -1,6 +1,7 @@
 ## Upcoming Beta
 
 - Added support for `Location` entity in the database.
+- Added support for `emojiCode` and `updatedAt` fields in `Reaction` entity.
 
 ## Upcoming
 

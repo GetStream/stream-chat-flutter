@@ -5905,15 +5905,15 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _messageIdMeta =
       const VerificationMeta('messageId');
   @override
   late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
+      'message_id', aliasedName, true,
       type: DriftSqlType.string,
-      requiredDuringInsert: true,
+      requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES pinned_messages (id) ON DELETE CASCADE'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -5921,11 +5921,25 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _emojiCodeMeta =
+      const VerificationMeta('emojiCode');
+  @override
+  late final GeneratedColumn<String> emojiCode = GeneratedColumn<String>(
+      'emoji_code', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
@@ -5943,8 +5957,16 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
           .withConverter<Map<String, dynamic>?>(
               $PinnedMessageReactionsTable.$converterextraDatan);
   @override
-  List<GeneratedColumn> get $columns =>
-      [userId, messageId, type, createdAt, score, extraData];
+  List<GeneratedColumn> get $columns => [
+        userId,
+        messageId,
+        type,
+        emojiCode,
+        createdAt,
+        updatedAt,
+        score,
+        extraData
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -5959,14 +5981,10 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('message_id')) {
       context.handle(_messageIdMeta,
           messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -5974,9 +5992,17 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    if (data.containsKey('emoji_code')) {
+      context.handle(_emojiCodeMeta,
+          emojiCode.isAcceptableOrUnknown(data['emoji_code']!, _emojiCodeMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
     if (data.containsKey('score')) {
       context.handle(
@@ -5993,13 +6019,17 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PinnedMessageReactionEntity(
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id']),
       type: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      emojiCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}emoji_code']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
       score: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}score'])!,
       extraData: $PinnedMessageReactionsTable.$converterextraDatan.fromSql(
@@ -6022,16 +6052,22 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
 class PinnedMessageReactionEntity extends DataClass
     implements Insertable<PinnedMessageReactionEntity> {
   /// The id of the user that sent the reaction
-  final String userId;
+  final String? userId;
 
   /// The messageId to which the reaction belongs
-  final String messageId;
+  final String? messageId;
 
   /// The type of the reaction
   final String type;
 
+  /// The emoji code for the reaction
+  final String? emojiCode;
+
   /// The DateTime on which the reaction is created
   final DateTime createdAt;
+
+  /// The DateTime on which the reaction was last updated
+  final DateTime updatedAt;
 
   /// The score of the reaction (ie. number of reactions sent)
   final int score;
@@ -6039,19 +6075,29 @@ class PinnedMessageReactionEntity extends DataClass
   /// Reaction custom extraData
   final Map<String, dynamic>? extraData;
   const PinnedMessageReactionEntity(
-      {required this.userId,
-      required this.messageId,
+      {this.userId,
+      this.messageId,
       required this.type,
+      this.emojiCode,
       required this.createdAt,
+      required this.updatedAt,
       required this.score,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['user_id'] = Variable<String>(userId);
-    map['message_id'] = Variable<String>(messageId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || messageId != null) {
+      map['message_id'] = Variable<String>(messageId);
+    }
     map['type'] = Variable<String>(type);
+    if (!nullToAbsent || emojiCode != null) {
+      map['emoji_code'] = Variable<String>(emojiCode);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     map['score'] = Variable<int>(score);
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
@@ -6064,10 +6110,12 @@ class PinnedMessageReactionEntity extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PinnedMessageReactionEntity(
-      userId: serializer.fromJson<String>(json['userId']),
-      messageId: serializer.fromJson<String>(json['messageId']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      messageId: serializer.fromJson<String?>(json['messageId']),
       type: serializer.fromJson<String>(json['type']),
+      emojiCode: serializer.fromJson<String?>(json['emojiCode']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       score: serializer.fromJson<int>(json['score']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
@@ -6076,27 +6124,33 @@ class PinnedMessageReactionEntity extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'userId': serializer.toJson<String>(userId),
-      'messageId': serializer.toJson<String>(messageId),
+      'userId': serializer.toJson<String?>(userId),
+      'messageId': serializer.toJson<String?>(messageId),
       'type': serializer.toJson<String>(type),
+      'emojiCode': serializer.toJson<String?>(emojiCode),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'score': serializer.toJson<int>(score),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
 
   PinnedMessageReactionEntity copyWith(
-          {String? userId,
-          String? messageId,
+          {Value<String?> userId = const Value.absent(),
+          Value<String?> messageId = const Value.absent(),
           String? type,
+          Value<String?> emojiCode = const Value.absent(),
           DateTime? createdAt,
+          DateTime? updatedAt,
           int? score,
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       PinnedMessageReactionEntity(
-        userId: userId ?? this.userId,
-        messageId: messageId ?? this.messageId,
+        userId: userId.present ? userId.value : this.userId,
+        messageId: messageId.present ? messageId.value : this.messageId,
         type: type ?? this.type,
+        emojiCode: emojiCode.present ? emojiCode.value : this.emojiCode,
         createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
         score: score ?? this.score,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
@@ -6106,7 +6160,9 @@ class PinnedMessageReactionEntity extends DataClass
       userId: data.userId.present ? data.userId.value : this.userId,
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
       type: data.type.present ? data.type.value : this.type,
+      emojiCode: data.emojiCode.present ? data.emojiCode.value : this.emojiCode,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       score: data.score.present ? data.score.value : this.score,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
@@ -6118,7 +6174,9 @@ class PinnedMessageReactionEntity extends DataClass
           ..write('userId: $userId, ')
           ..write('messageId: $messageId, ')
           ..write('type: $type, ')
+          ..write('emojiCode: $emojiCode, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('score: $score, ')
           ..write('extraData: $extraData')
           ..write(')'))
@@ -6126,8 +6184,8 @@ class PinnedMessageReactionEntity extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(userId, messageId, type, createdAt, score, extraData);
+  int get hashCode => Object.hash(userId, messageId, type, emojiCode, createdAt,
+      updatedAt, score, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6135,17 +6193,21 @@ class PinnedMessageReactionEntity extends DataClass
           other.userId == this.userId &&
           other.messageId == this.messageId &&
           other.type == this.type &&
+          other.emojiCode == this.emojiCode &&
           other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
           other.score == this.score &&
           other.extraData == this.extraData);
 }
 
 class PinnedMessageReactionsCompanion
     extends UpdateCompanion<PinnedMessageReactionEntity> {
-  final Value<String> userId;
-  final Value<String> messageId;
+  final Value<String?> userId;
+  final Value<String?> messageId;
   final Value<String> type;
+  final Value<String?> emojiCode;
   final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
   final Value<int> score;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
@@ -6153,27 +6215,31 @@ class PinnedMessageReactionsCompanion
     this.userId = const Value.absent(),
     this.messageId = const Value.absent(),
     this.type = const Value.absent(),
+    this.emojiCode = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.score = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PinnedMessageReactionsCompanion.insert({
-    required String userId,
-    required String messageId,
+    this.userId = const Value.absent(),
+    this.messageId = const Value.absent(),
     required String type,
+    this.emojiCode = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.score = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : userId = Value(userId),
-        messageId = Value(messageId),
-        type = Value(type);
+  }) : type = Value(type);
   static Insertable<PinnedMessageReactionEntity> custom({
     Expression<String>? userId,
     Expression<String>? messageId,
     Expression<String>? type,
+    Expression<String>? emojiCode,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? score,
     Expression<String>? extraData,
     Expression<int>? rowid,
@@ -6182,7 +6248,9 @@ class PinnedMessageReactionsCompanion
       if (userId != null) 'user_id': userId,
       if (messageId != null) 'message_id': messageId,
       if (type != null) 'type': type,
+      if (emojiCode != null) 'emoji_code': emojiCode,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (score != null) 'score': score,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
@@ -6190,10 +6258,12 @@ class PinnedMessageReactionsCompanion
   }
 
   PinnedMessageReactionsCompanion copyWith(
-      {Value<String>? userId,
-      Value<String>? messageId,
+      {Value<String?>? userId,
+      Value<String?>? messageId,
       Value<String>? type,
+      Value<String?>? emojiCode,
       Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
       Value<int>? score,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
@@ -6201,7 +6271,9 @@ class PinnedMessageReactionsCompanion
       userId: userId ?? this.userId,
       messageId: messageId ?? this.messageId,
       type: type ?? this.type,
+      emojiCode: emojiCode ?? this.emojiCode,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       score: score ?? this.score,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
@@ -6220,8 +6292,14 @@ class PinnedMessageReactionsCompanion
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
+    if (emojiCode.present) {
+      map['emoji_code'] = Variable<String>(emojiCode.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (score.present) {
       map['score'] = Variable<int>(score.value);
@@ -6243,7 +6321,9 @@ class PinnedMessageReactionsCompanion
           ..write('userId: $userId, ')
           ..write('messageId: $messageId, ')
           ..write('type: $type, ')
+          ..write('emojiCode: $emojiCode, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('score: $score, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
@@ -6261,15 +6341,15 @@ class $ReactionsTable extends Reactions
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _messageIdMeta =
       const VerificationMeta('messageId');
   @override
   late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
+      'message_id', aliasedName, true,
       type: DriftSqlType.string,
-      requiredDuringInsert: true,
+      requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES messages (id) ON DELETE CASCADE'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -6277,11 +6357,25 @@ class $ReactionsTable extends Reactions
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _emojiCodeMeta =
+      const VerificationMeta('emojiCode');
+  @override
+  late final GeneratedColumn<String> emojiCode = GeneratedColumn<String>(
+      'emoji_code', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
@@ -6299,8 +6393,16 @@ class $ReactionsTable extends Reactions
           .withConverter<Map<String, dynamic>?>(
               $ReactionsTable.$converterextraDatan);
   @override
-  List<GeneratedColumn> get $columns =>
-      [userId, messageId, type, createdAt, score, extraData];
+  List<GeneratedColumn> get $columns => [
+        userId,
+        messageId,
+        type,
+        emojiCode,
+        createdAt,
+        updatedAt,
+        score,
+        extraData
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -6314,14 +6416,10 @@ class $ReactionsTable extends Reactions
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('message_id')) {
       context.handle(_messageIdMeta,
           messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -6329,9 +6427,17 @@ class $ReactionsTable extends Reactions
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    if (data.containsKey('emoji_code')) {
+      context.handle(_emojiCodeMeta,
+          emojiCode.isAcceptableOrUnknown(data['emoji_code']!, _emojiCodeMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
     if (data.containsKey('score')) {
       context.handle(
@@ -6347,13 +6453,17 @@ class $ReactionsTable extends Reactions
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ReactionEntity(
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id']),
       type: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      emojiCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}emoji_code']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
       score: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}score'])!,
       extraData: $ReactionsTable.$converterextraDatan.fromSql(attachedDatabase
@@ -6375,16 +6485,22 @@ class $ReactionsTable extends Reactions
 
 class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   /// The id of the user that sent the reaction
-  final String userId;
+  final String? userId;
 
   /// The messageId to which the reaction belongs
-  final String messageId;
+  final String? messageId;
 
   /// The type of the reaction
   final String type;
 
+  /// The emoji code for the reaction
+  final String? emojiCode;
+
   /// The DateTime on which the reaction is created
   final DateTime createdAt;
+
+  /// The DateTime on which the reaction was last updated
+  final DateTime updatedAt;
 
   /// The score of the reaction (ie. number of reactions sent)
   final int score;
@@ -6392,19 +6508,29 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   /// Reaction custom extraData
   final Map<String, dynamic>? extraData;
   const ReactionEntity(
-      {required this.userId,
-      required this.messageId,
+      {this.userId,
+      this.messageId,
       required this.type,
+      this.emojiCode,
       required this.createdAt,
+      required this.updatedAt,
       required this.score,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['user_id'] = Variable<String>(userId);
-    map['message_id'] = Variable<String>(messageId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || messageId != null) {
+      map['message_id'] = Variable<String>(messageId);
+    }
     map['type'] = Variable<String>(type);
+    if (!nullToAbsent || emojiCode != null) {
+      map['emoji_code'] = Variable<String>(emojiCode);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     map['score'] = Variable<int>(score);
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
@@ -6417,10 +6543,12 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ReactionEntity(
-      userId: serializer.fromJson<String>(json['userId']),
-      messageId: serializer.fromJson<String>(json['messageId']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      messageId: serializer.fromJson<String?>(json['messageId']),
       type: serializer.fromJson<String>(json['type']),
+      emojiCode: serializer.fromJson<String?>(json['emojiCode']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       score: serializer.fromJson<int>(json['score']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
@@ -6429,27 +6557,33 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'userId': serializer.toJson<String>(userId),
-      'messageId': serializer.toJson<String>(messageId),
+      'userId': serializer.toJson<String?>(userId),
+      'messageId': serializer.toJson<String?>(messageId),
       'type': serializer.toJson<String>(type),
+      'emojiCode': serializer.toJson<String?>(emojiCode),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'score': serializer.toJson<int>(score),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
 
   ReactionEntity copyWith(
-          {String? userId,
-          String? messageId,
+          {Value<String?> userId = const Value.absent(),
+          Value<String?> messageId = const Value.absent(),
           String? type,
+          Value<String?> emojiCode = const Value.absent(),
           DateTime? createdAt,
+          DateTime? updatedAt,
           int? score,
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       ReactionEntity(
-        userId: userId ?? this.userId,
-        messageId: messageId ?? this.messageId,
+        userId: userId.present ? userId.value : this.userId,
+        messageId: messageId.present ? messageId.value : this.messageId,
         type: type ?? this.type,
+        emojiCode: emojiCode.present ? emojiCode.value : this.emojiCode,
         createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
         score: score ?? this.score,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
@@ -6458,7 +6592,9 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
       userId: data.userId.present ? data.userId.value : this.userId,
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
       type: data.type.present ? data.type.value : this.type,
+      emojiCode: data.emojiCode.present ? data.emojiCode.value : this.emojiCode,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       score: data.score.present ? data.score.value : this.score,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
@@ -6470,7 +6606,9 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
           ..write('userId: $userId, ')
           ..write('messageId: $messageId, ')
           ..write('type: $type, ')
+          ..write('emojiCode: $emojiCode, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('score: $score, ')
           ..write('extraData: $extraData')
           ..write(')'))
@@ -6478,8 +6616,8 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(userId, messageId, type, createdAt, score, extraData);
+  int get hashCode => Object.hash(userId, messageId, type, emojiCode, createdAt,
+      updatedAt, score, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6487,16 +6625,20 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
           other.userId == this.userId &&
           other.messageId == this.messageId &&
           other.type == this.type &&
+          other.emojiCode == this.emojiCode &&
           other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
           other.score == this.score &&
           other.extraData == this.extraData);
 }
 
 class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
-  final Value<String> userId;
-  final Value<String> messageId;
+  final Value<String?> userId;
+  final Value<String?> messageId;
   final Value<String> type;
+  final Value<String?> emojiCode;
   final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
   final Value<int> score;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
@@ -6504,27 +6646,31 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
     this.userId = const Value.absent(),
     this.messageId = const Value.absent(),
     this.type = const Value.absent(),
+    this.emojiCode = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.score = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReactionsCompanion.insert({
-    required String userId,
-    required String messageId,
+    this.userId = const Value.absent(),
+    this.messageId = const Value.absent(),
     required String type,
+    this.emojiCode = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.score = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : userId = Value(userId),
-        messageId = Value(messageId),
-        type = Value(type);
+  }) : type = Value(type);
   static Insertable<ReactionEntity> custom({
     Expression<String>? userId,
     Expression<String>? messageId,
     Expression<String>? type,
+    Expression<String>? emojiCode,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? score,
     Expression<String>? extraData,
     Expression<int>? rowid,
@@ -6533,7 +6679,9 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
       if (userId != null) 'user_id': userId,
       if (messageId != null) 'message_id': messageId,
       if (type != null) 'type': type,
+      if (emojiCode != null) 'emoji_code': emojiCode,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (score != null) 'score': score,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
@@ -6541,10 +6689,12 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
   }
 
   ReactionsCompanion copyWith(
-      {Value<String>? userId,
-      Value<String>? messageId,
+      {Value<String?>? userId,
+      Value<String?>? messageId,
       Value<String>? type,
+      Value<String?>? emojiCode,
       Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
       Value<int>? score,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
@@ -6552,7 +6702,9 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
       userId: userId ?? this.userId,
       messageId: messageId ?? this.messageId,
       type: type ?? this.type,
+      emojiCode: emojiCode ?? this.emojiCode,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       score: score ?? this.score,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
@@ -6571,8 +6723,14 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
+    if (emojiCode.present) {
+      map['emoji_code'] = Variable<String>(emojiCode.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (score.present) {
       map['score'] = Variable<int>(score.value);
@@ -6593,7 +6751,9 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
           ..write('userId: $userId, ')
           ..write('messageId: $messageId, ')
           ..write('type: $type, ')
+          ..write('emojiCode: $emojiCode, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('score: $score, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
@@ -12876,20 +13036,24 @@ typedef $$PollVotesTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function({bool pollId})>;
 typedef $$PinnedMessageReactionsTableCreateCompanionBuilder
     = PinnedMessageReactionsCompanion Function({
-  required String userId,
-  required String messageId,
+  Value<String?> userId,
+  Value<String?> messageId,
   required String type,
+  Value<String?> emojiCode,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
   Value<int> score,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
 typedef $$PinnedMessageReactionsTableUpdateCompanionBuilder
     = PinnedMessageReactionsCompanion Function({
-  Value<String> userId,
-  Value<String> messageId,
+  Value<String?> userId,
+  Value<String?> messageId,
   Value<String> type,
+  Value<String?> emojiCode,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
   Value<int> score,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
@@ -12906,9 +13070,9 @@ final class $$PinnedMessageReactionsTableReferences extends BaseReferences<
       db.pinnedMessages.createAlias($_aliasNameGenerator(
           db.pinnedMessageReactions.messageId, db.pinnedMessages.id));
 
-  $$PinnedMessagesTableProcessedTableManager get messageId {
-    final $_column = $_itemColumn<String>('message_id')!;
-
+  $$PinnedMessagesTableProcessedTableManager? get messageId {
+    final $_column = $_itemColumn<String>('message_id');
+    if ($_column == null) return null;
     final manager = $$PinnedMessagesTableTableManager($_db, $_db.pinnedMessages)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
@@ -12933,8 +13097,14 @@ class $$PinnedMessageReactionsTableFilterComposer
   ColumnFilters<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get emojiCode => $composableBuilder(
+      column: $table.emojiCode, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnFilters(column));
@@ -12981,8 +13151,14 @@ class $$PinnedMessageReactionsTableOrderingComposer
   ColumnOrderings<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get emojiCode => $composableBuilder(
+      column: $table.emojiCode, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnOrderings(column));
@@ -13026,8 +13202,14 @@ class $$PinnedMessageReactionsTableAnnotationComposer
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
+  GeneratedColumn<String> get emojiCode =>
+      $composableBuilder(column: $table.emojiCode, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<int> get score =>
       $composableBuilder(column: $table.score, builder: (column) => column);
@@ -13084,10 +13266,12 @@ class $$PinnedMessageReactionsTableTableManager extends RootTableManager<
               $$PinnedMessageReactionsTableAnnotationComposer(
                   $db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> userId = const Value.absent(),
-            Value<String> messageId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
             Value<String> type = const Value.absent(),
+            Value<String?> emojiCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
             Value<int> score = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -13096,16 +13280,20 @@ class $$PinnedMessageReactionsTableTableManager extends RootTableManager<
             userId: userId,
             messageId: messageId,
             type: type,
+            emojiCode: emojiCode,
             createdAt: createdAt,
+            updatedAt: updatedAt,
             score: score,
             extraData: extraData,
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String userId,
-            required String messageId,
+            Value<String?> userId = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
             required String type,
+            Value<String?> emojiCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
             Value<int> score = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -13114,7 +13302,9 @@ class $$PinnedMessageReactionsTableTableManager extends RootTableManager<
             userId: userId,
             messageId: messageId,
             type: type,
+            emojiCode: emojiCode,
             createdAt: createdAt,
+            updatedAt: updatedAt,
             score: score,
             extraData: extraData,
             rowid: rowid,
@@ -13178,19 +13368,23 @@ typedef $$PinnedMessageReactionsTableProcessedTableManager
         PinnedMessageReactionEntity,
         PrefetchHooks Function({bool messageId})>;
 typedef $$ReactionsTableCreateCompanionBuilder = ReactionsCompanion Function({
-  required String userId,
-  required String messageId,
+  Value<String?> userId,
+  Value<String?> messageId,
   required String type,
+  Value<String?> emojiCode,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
   Value<int> score,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
 typedef $$ReactionsTableUpdateCompanionBuilder = ReactionsCompanion Function({
-  Value<String> userId,
-  Value<String> messageId,
+  Value<String?> userId,
+  Value<String?> messageId,
   Value<String> type,
+  Value<String?> emojiCode,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
   Value<int> score,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
@@ -13204,9 +13398,9 @@ final class $$ReactionsTableReferences extends BaseReferences<
       db.messages.createAlias(
           $_aliasNameGenerator(db.reactions.messageId, db.messages.id));
 
-  $$MessagesTableProcessedTableManager get messageId {
-    final $_column = $_itemColumn<String>('message_id')!;
-
+  $$MessagesTableProcessedTableManager? get messageId {
+    final $_column = $_itemColumn<String>('message_id');
+    if ($_column == null) return null;
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
@@ -13231,8 +13425,14 @@ class $$ReactionsTableFilterComposer
   ColumnFilters<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get emojiCode => $composableBuilder(
+      column: $table.emojiCode, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnFilters(column));
@@ -13279,8 +13479,14 @@ class $$ReactionsTableOrderingComposer
   ColumnOrderings<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get emojiCode => $composableBuilder(
+      column: $table.emojiCode, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnOrderings(column));
@@ -13324,8 +13530,14 @@ class $$ReactionsTableAnnotationComposer
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
+  GeneratedColumn<String> get emojiCode =>
+      $composableBuilder(column: $table.emojiCode, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<int> get score =>
       $composableBuilder(column: $table.score, builder: (column) => column);
@@ -13378,10 +13590,12 @@ class $$ReactionsTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$ReactionsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> userId = const Value.absent(),
-            Value<String> messageId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
             Value<String> type = const Value.absent(),
+            Value<String?> emojiCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
             Value<int> score = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -13390,16 +13604,20 @@ class $$ReactionsTableTableManager extends RootTableManager<
             userId: userId,
             messageId: messageId,
             type: type,
+            emojiCode: emojiCode,
             createdAt: createdAt,
+            updatedAt: updatedAt,
             score: score,
             extraData: extraData,
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String userId,
-            required String messageId,
+            Value<String?> userId = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
             required String type,
+            Value<String?> emojiCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
             Value<int> score = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -13408,7 +13626,9 @@ class $$ReactionsTableTableManager extends RootTableManager<
             userId: userId,
             messageId: messageId,
             type: type,
+            emojiCode: emojiCode,
             createdAt: createdAt,
+            updatedAt: updatedAt,
             score: score,
             extraData: extraData,
             rowid: rowid,

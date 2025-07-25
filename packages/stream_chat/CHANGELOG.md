@@ -1,5 +1,11 @@
 ## Upcoming Beta
 
+🛑️ Breaking
+
+- **Changed `sendReaction` method signature**: The `sendReaction` method on both `Client` and
+  `Channel` now accepts a full `Reaction` object instead of individual parameters (`type`, `score`,
+  `extraData`). This change provides more flexibility and better type safety.
+
 ✅ Added
 
 - Added comprehensive location sharing support with static and live location features:
