@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `bottom` and `bottomOpacity` to the `StreamChannelHeader` widget.
 - Added `StreamChat.maybeOf()` method for safe context access in async operations.
 
 🐞 Fixed

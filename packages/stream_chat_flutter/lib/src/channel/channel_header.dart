@@ -66,9 +66,11 @@ class StreamChannelHeader extends StatelessWidget
     this.centerTitle,
     this.leading,
     this.actions,
+    this.bottom,
     this.backgroundColor,
     this.elevation = 1,
-  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
+    this.bottomOpacity = 1,
+  });
 
   /// Whether to show the leading back button
   ///
@@ -106,6 +108,9 @@ class StreamChannelHeader extends StatelessWidget
   /// Leading widget
   final Widget? leading;
 
+  /// The bottom widget
+  final PreferredSizeWidget? bottom;
+
   /// {@macro flutter.material.appbar.actions}
   ///
   /// The [StreamChannelAvatar] is shown by default
@@ -117,8 +122,14 @@ class StreamChannelHeader extends StatelessWidget
   /// The elevation for this [StreamChannelHeader].
   final double elevation;
 
+  /// The opacity of the bottom widget.
+  final double bottomOpacity;
+
   @override
-  final Size preferredSize;
+  Size get preferredSize {
+    final bottomHeight = bottom?.preferredSize.height ?? 0;
+    return Size.fromHeight(kToolbarHeight + bottomHeight);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +180,8 @@ class StreamChannelHeader extends StatelessWidget
                 : SystemUiOverlayStyle.dark,
             elevation: elevation,
             leading: leadingWidget,
+            bottom: bottom,
+            bottomOpacity: bottomOpacity,
             backgroundColor: backgroundColor ?? channelHeaderTheme.color,
             actions: actions ??
                 <Widget>[
