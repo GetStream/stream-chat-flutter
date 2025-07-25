@@ -131,7 +131,7 @@ void main() {
       await tester.pumpWidget(
         buildWidget(
           const StreamMessageInput(
-            textFieldMargin: EdgeInsets.only(left: 50),
+            textInputMargin: EdgeInsets.only(left: 50),
           ),
         ),
       );

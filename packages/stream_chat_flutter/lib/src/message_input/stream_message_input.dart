@@ -166,7 +166,7 @@ class StreamMessageInput extends StatefulWidget {
     bool useNativeAttachmentPickerOnMobile = false,
     this.pollConfig,
     this.padding = const EdgeInsets.all(8),
-    this.textFieldMargin,
+    this.textInputMargin,
   })  : assert(
           idleSendIcon == null || idleSendButton == null,
           'idleSendIcon and idleSendButton cannot be used together',
@@ -436,7 +436,7 @@ class StreamMessageInput extends StatefulWidget {
   ///
   /// Defaults to null, and margin is applied based on action and send button
   /// locations.
-  final EdgeInsets? textFieldMargin;
+  final EdgeInsets? textInputMargin;
 
   static String? _defaultHintGetter(
     BuildContext context,
@@ -1063,7 +1063,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       },
       onDragExited: (details) {},
       child: Container(
-        margin: widget.textFieldMargin ?? margin,
+        margin: widget.textInputMargin ?? margin,
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: _messageInputTheme.borderRadius,
