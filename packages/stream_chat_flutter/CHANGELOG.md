@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added `StreamChat.maybeOf()` method for safe context access in async operations.
+- Added `padding` and `textFieldMargin` to `StreamMessageInput` to allow fine-tuning the layout. 
 
 🐞 Fixed
 

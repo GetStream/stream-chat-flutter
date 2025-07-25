@@ -165,6 +165,8 @@ class StreamMessageInput extends StatefulWidget {
     )
     bool useNativeAttachmentPickerOnMobile = false,
     this.pollConfig,
+    this.padding = const EdgeInsets.all(8),
+    this.textFieldMargin,
   })  : assert(
           idleSendIcon == null || idleSendButton == null,
           'idleSendIcon and idleSendButton cannot be used together',
@@ -423,6 +425,18 @@ class StreamMessageInput extends StatefulWidget {
   ///
   /// If not provided, the default configuration is used.
   final PollConfig? pollConfig;
+
+  /// Padding for the message input.
+  ///
+  /// Defaults to `EdgeInsets.all(8)`.
+  final EdgeInsets padding;
+
+  /// Margin for the message input. Allows overriding the default computed
+  /// margin.
+  ///
+  /// Defaults to null, and margin is applied based on action and send button
+  /// locations.
+  final EdgeInsets? textFieldMargin;
 
   static String? _defaultHintGetter(
     BuildContext context,
@@ -733,7 +747,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, _) => Padding(
-        padding: const EdgeInsets.all(8),
+        padding: widget.padding,
         child: Column(
           spacing: 8,
           mainAxisSize: MainAxisSize.min,
@@ -1049,7 +1063,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       },
       onDragExited: (details) {},
       child: Container(
-        margin: margin,
+        margin: widget.textFieldMargin ?? margin,
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: _messageInputTheme.borderRadius,

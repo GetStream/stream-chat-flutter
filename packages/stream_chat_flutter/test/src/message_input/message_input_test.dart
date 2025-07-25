@@ -1,5 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,67 +14,8 @@ void main() {
   testWidgets(
     'checks message input features',
     (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
-      final channel = MockChannel();
-      final channelState = MockChannelState();
-      final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
-
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(() => channel.state).thenReturn(channelState);
-      when(() => channel.client).thenReturn(client);
-      when(channel.getRemainingCooldown).thenReturn(0);
-      when(() => channel.isMuted).thenReturn(false);
-      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer(
-        (i) => Stream.value({
-          'name': 'test',
-        }),
-      );
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
-      when(() => channelState.membersStream).thenAnswer(
-        (i) => Stream.value([
-          Member(
-            userId: 'user-id',
-            user: User(id: 'user-id'),
-          )
-        ]),
-      );
-      when(() => channelState.members).thenReturn([
-        Member(
-          userId: 'user-id',
-          user: User(id: 'user-id'),
-        ),
-      ]);
-      when(() => channelState.messages).thenReturn([
-        Message(
-          text: 'hello',
-          user: User(id: 'other-user'),
-        )
-      ]);
-      when(() => channelState.messagesStream).thenAnswer(
-        (i) => Stream.value([
-          Message(
-            text: 'hello',
-            user: User(id: 'other-user'),
-          )
-        ]),
-      );
-
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: StreamMessageInput(),
-            ),
-          ),
-        ),
+      await tester.pumpWidget(buildWidget(
+        const StreamMessageInput(),
       ));
 
       // wait for the initial state to be rendered.
@@ -156,6 +98,53 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Slow mode ON'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'allows setting padding on message input',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildWidget(
+          const StreamMessageInput(
+            padding: EdgeInsets.only(left: 50),
+          ),
+        ),
+      );
+
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
+      expect(
+          find.descendant(
+              of: find.byType(StreamMessageValueListenableBuilder),
+              matching: find.byWidgetPredicate((w) =>
+                  w is Padding &&
+                  w.padding == const EdgeInsets.only(left: 50))),
+          findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'allows setting explicit margin on text field',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildWidget(
+          const StreamMessageInput(
+            textFieldMargin: EdgeInsets.only(left: 50),
+          ),
+        ),
+      );
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
+      expect(
+          find.descendant(
+              of: find.byType(DropTarget),
+              matching: find.byWidgetPredicate((w) =>
+                  w is Container &&
+                  w.margin == const EdgeInsets.only(left: 50))),
+          findsOneWidget);
     },
   );
 
@@ -523,6 +512,69 @@ void main() {
       },
     );
   });
+}
+
+MaterialApp buildWidget(StreamMessageInput input) {
+  final client = MockClient();
+  final clientState = MockClientState();
+  final channel = MockChannel();
+  final channelState = MockChannelState();
+  final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
+
+  when(() => client.state).thenReturn(clientState);
+  when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+  when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+  when(() => channel.state).thenReturn(channelState);
+  when(() => channel.client).thenReturn(client);
+  when(channel.getRemainingCooldown).thenReturn(0);
+  when(() => channel.isMuted).thenReturn(false);
+  when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+  when(() => channel.extraDataStream).thenAnswer(
+    (i) => Stream.value({
+      'name': 'test',
+    }),
+  );
+  when(() => channel.extraData).thenReturn({
+    'name': 'test',
+  });
+  when(() => channelState.membersStream).thenAnswer(
+    (i) => Stream.value([
+      Member(
+        userId: 'user-id',
+        user: User(id: 'user-id'),
+      )
+    ]),
+  );
+  when(() => channelState.members).thenReturn([
+    Member(
+      userId: 'user-id',
+      user: User(id: 'user-id'),
+    ),
+  ]);
+  when(() => channelState.messages).thenReturn([
+    Message(
+      text: 'hello',
+      user: User(id: 'other-user'),
+    )
+  ]);
+  when(() => channelState.messagesStream).thenAnswer(
+    (i) => Stream.value([
+      Message(
+        text: 'hello',
+        user: User(id: 'other-user'),
+      )
+    ]),
+  );
+
+  return MaterialApp(
+    home: StreamChat(
+      client: client,
+      child: StreamChannel(
+        channel: channel,
+        child: Scaffold(body: input),
+      ),
+    ),
+  );
 }
 
 // Helper function to simulate key press events
