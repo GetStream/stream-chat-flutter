@@ -543,7 +543,10 @@ void main() {
       final channel = MockChannel();
 
       final message = Message(
-        state: MessageState.sendingFailed,
+        state: MessageState.sendingFailed(
+          skipPush: false,
+          skipEnrichUrl: false,
+        ),
         text: 'test',
         user: User(
           id: 'user-id',

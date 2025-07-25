@@ -1834,22 +1834,22 @@ FailedState _$FailedStateFromJson(Map<String, dynamic> json) {
 mixin _$FailedState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() sendingFailed,
-    required TResult Function() updatingFailed,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
+    required TResult Function(bool skipEnrichUrl) updatingFailed,
     required TResult Function(bool hard) deletingFailed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sendingFailed,
-    TResult? Function()? updatingFailed,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult? Function(bool skipEnrichUrl)? updatingFailed,
     TResult? Function(bool hard)? deletingFailed,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sendingFailed,
-    TResult Function()? updatingFailed,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult Function(bool skipEnrichUrl)? updatingFailed,
     TResult Function(bool hard)? deletingFailed,
     required TResult orElse(),
   }) =>
@@ -1907,6 +1907,8 @@ abstract class _$$SendingFailedImplCopyWith<$Res> {
   factory _$$SendingFailedImplCopyWith(
           _$SendingFailedImpl value, $Res Function(_$SendingFailedImpl) then) =
       __$$SendingFailedImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({bool skipPush, bool skipEnrichUrl});
 }
 
 /// @nodoc
@@ -1917,6 +1919,24 @@ class __$$SendingFailedImplCopyWithImpl<$Res>
       _$SendingFailedImpl _value, $Res Function(_$SendingFailedImpl) _then)
       : super(_value, _then);
 
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? skipPush = null,
+    Object? skipEnrichUrl = null,
+  }) {
+    return _then(_$SendingFailedImpl(
+      skipPush: null == skipPush
+          ? _value.skipPush
+          : skipPush // ignore: cast_nullable_to_non_nullable
+              as bool,
+      skipEnrichUrl: null == skipEnrichUrl
+          ? _value.skipEnrichUrl
+          : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+
   /// Create a copy of FailedState
   /// with the given fields replaced by the non-null parameter values.
 }
@@ -1924,60 +1944,79 @@ class __$$SendingFailedImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$SendingFailedImpl implements SendingFailed {
-  const _$SendingFailedImpl({final String? $type})
+  const _$SendingFailedImpl(
+      {this.skipPush = false, this.skipEnrichUrl = false, final String? $type})
       : $type = $type ?? 'sendingFailed';
 
   factory _$SendingFailedImpl.fromJson(Map<String, dynamic> json) =>
       _$$SendingFailedImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final bool skipPush;
+  @override
+  @JsonKey()
+  final bool skipEnrichUrl;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
   String toString() {
-    return 'FailedState.sendingFailed()';
+    return 'FailedState.sendingFailed(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$SendingFailedImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$SendingFailedImpl &&
+            (identical(other.skipPush, skipPush) ||
+                other.skipPush == skipPush) &&
+            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
+                other.skipEnrichUrl == skipEnrichUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, skipPush, skipEnrichUrl);
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SendingFailedImplCopyWith<_$SendingFailedImpl> get copyWith =>
+      __$$SendingFailedImplCopyWithImpl<_$SendingFailedImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() sendingFailed,
-    required TResult Function() updatingFailed,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
+    required TResult Function(bool skipEnrichUrl) updatingFailed,
     required TResult Function(bool hard) deletingFailed,
   }) {
-    return sendingFailed();
+    return sendingFailed(skipPush, skipEnrichUrl);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sendingFailed,
-    TResult? Function()? updatingFailed,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult? Function(bool skipEnrichUrl)? updatingFailed,
     TResult? Function(bool hard)? deletingFailed,
   }) {
-    return sendingFailed?.call();
+    return sendingFailed?.call(skipPush, skipEnrichUrl);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sendingFailed,
-    TResult Function()? updatingFailed,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult Function(bool skipEnrichUrl)? updatingFailed,
     TResult Function(bool hard)? deletingFailed,
     required TResult orElse(),
   }) {
     if (sendingFailed != null) {
-      return sendingFailed();
+      return sendingFailed(skipPush, skipEnrichUrl);
     }
     return orElse();
   }
@@ -2025,10 +2064,17 @@ class _$SendingFailedImpl implements SendingFailed {
 }
 
 abstract class SendingFailed implements FailedState {
-  const factory SendingFailed() = _$SendingFailedImpl;
+  const factory SendingFailed({final bool skipPush, final bool skipEnrichUrl}) =
+      _$SendingFailedImpl;
 
   factory SendingFailed.fromJson(Map<String, dynamic> json) =
       _$SendingFailedImpl.fromJson;
+
+  bool get skipPush;
+  bool get skipEnrichUrl;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$SendingFailedImplCopyWith<_$SendingFailedImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -2036,6 +2082,8 @@ abstract class _$$UpdatingFailedImplCopyWith<$Res> {
   factory _$$UpdatingFailedImplCopyWith(_$UpdatingFailedImpl value,
           $Res Function(_$UpdatingFailedImpl) then) =
       __$$UpdatingFailedImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({bool skipEnrichUrl});
 }
 
 /// @nodoc
@@ -2046,6 +2094,19 @@ class __$$UpdatingFailedImplCopyWithImpl<$Res>
       _$UpdatingFailedImpl _value, $Res Function(_$UpdatingFailedImpl) _then)
       : super(_value, _then);
 
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? skipEnrichUrl = null,
+  }) {
+    return _then(_$UpdatingFailedImpl(
+      skipEnrichUrl: null == skipEnrichUrl
+          ? _value.skipEnrichUrl
+          : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+
   /// Create a copy of FailedState
   /// with the given fields replaced by the non-null parameter values.
 }
@@ -2053,60 +2114,74 @@ class __$$UpdatingFailedImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$UpdatingFailedImpl implements UpdatingFailed {
-  const _$UpdatingFailedImpl({final String? $type})
+  const _$UpdatingFailedImpl({this.skipEnrichUrl = false, final String? $type})
       : $type = $type ?? 'updatingFailed';
 
   factory _$UpdatingFailedImpl.fromJson(Map<String, dynamic> json) =>
       _$$UpdatingFailedImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final bool skipEnrichUrl;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
   String toString() {
-    return 'FailedState.updatingFailed()';
+    return 'FailedState.updatingFailed(skipEnrichUrl: $skipEnrichUrl)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$UpdatingFailedImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$UpdatingFailedImpl &&
+            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
+                other.skipEnrichUrl == skipEnrichUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, skipEnrichUrl);
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdatingFailedImplCopyWith<_$UpdatingFailedImpl> get copyWith =>
+      __$$UpdatingFailedImplCopyWithImpl<_$UpdatingFailedImpl>(
+          this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() sendingFailed,
-    required TResult Function() updatingFailed,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
+    required TResult Function(bool skipEnrichUrl) updatingFailed,
     required TResult Function(bool hard) deletingFailed,
   }) {
-    return updatingFailed();
+    return updatingFailed(skipEnrichUrl);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sendingFailed,
-    TResult? Function()? updatingFailed,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult? Function(bool skipEnrichUrl)? updatingFailed,
     TResult? Function(bool hard)? deletingFailed,
   }) {
-    return updatingFailed?.call();
+    return updatingFailed?.call(skipEnrichUrl);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sendingFailed,
-    TResult Function()? updatingFailed,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult Function(bool skipEnrichUrl)? updatingFailed,
     TResult Function(bool hard)? deletingFailed,
     required TResult orElse(),
   }) {
     if (updatingFailed != null) {
-      return updatingFailed();
+      return updatingFailed(skipEnrichUrl);
     }
     return orElse();
   }
@@ -2154,10 +2229,16 @@ class _$UpdatingFailedImpl implements UpdatingFailed {
 }
 
 abstract class UpdatingFailed implements FailedState {
-  const factory UpdatingFailed() = _$UpdatingFailedImpl;
+  const factory UpdatingFailed({final bool skipEnrichUrl}) =
+      _$UpdatingFailedImpl;
 
   factory UpdatingFailed.fromJson(Map<String, dynamic> json) =
       _$UpdatingFailedImpl.fromJson;
+
+  bool get skipEnrichUrl;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$UpdatingFailedImplCopyWith<_$UpdatingFailedImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -2238,8 +2319,8 @@ class _$DeletingFailedImpl implements DeletingFailed {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() sendingFailed,
-    required TResult Function() updatingFailed,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
+    required TResult Function(bool skipEnrichUrl) updatingFailed,
     required TResult Function(bool hard) deletingFailed,
   }) {
     return deletingFailed(hard);
@@ -2248,8 +2329,8 @@ class _$DeletingFailedImpl implements DeletingFailed {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sendingFailed,
-    TResult? Function()? updatingFailed,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult? Function(bool skipEnrichUrl)? updatingFailed,
     TResult? Function(bool hard)? deletingFailed,
   }) {
     return deletingFailed?.call(hard);
@@ -2258,8 +2339,8 @@ class _$DeletingFailedImpl implements DeletingFailed {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sendingFailed,
-    TResult Function()? updatingFailed,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult Function(bool skipEnrichUrl)? updatingFailed,
     TResult Function(bool hard)? deletingFailed,
     required TResult orElse(),
   }) {

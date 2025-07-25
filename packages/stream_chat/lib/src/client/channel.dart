@@ -741,7 +741,10 @@ class Channel {
         state!._retryQueue.add([
           message.copyWith(
             // Update the message state to failed.
-            state: MessageState.sendingFailed,
+            state: MessageState.sendingFailed(
+              skipPush: skipPush,
+              skipEnrichUrl: skipEnrichUrl,
+            ),
           ),
         ]);
       }
@@ -824,14 +827,14 @@ class Channel {
           state!._retryQueue.add([
             message.copyWith(
               // Update the message state to failed.
-              state: MessageState.updatingFailed,
+              state: MessageState.updatingFailed(skipEnrichUrl: skipEnrichUrl),
             ),
           ]);
         } else {
           // Reset the message to original state if the update fails and is not
           // retriable.
           state?.updateMessage(originalMessage.copyWith(
-            state: MessageState.updatingFailed,
+            state: MessageState.updatingFailed(skipEnrichUrl: skipEnrichUrl),
           ));
         }
       }
@@ -894,14 +897,14 @@ class Channel {
           state!._retryQueue.add([
             message.copyWith(
               // Update the message state to failed.
-              state: MessageState.updatingFailed,
+              state: MessageState.updatingFailed(skipEnrichUrl: skipEnrichUrl),
             ),
           ]);
         } else {
           // Reset the message to original state if the update fails and is not
           // retriable.
           state?.updateMessage(originalMessage.copyWith(
-            state: MessageState.updatingFailed,
+            state: MessageState.updatingFailed(skipEnrichUrl: skipEnrichUrl),
           ));
         }
       }
@@ -998,8 +1001,15 @@ class Channel {
 
     return message.state.maybeWhen(
       failed: (state, _) => state.when(
-        sendingFailed: () => sendMessage(message),
-        updatingFailed: () => updateMessage(message),
+        sendingFailed: (skipPush, skipEnrichUrl) => sendMessage(
+          message,
+          skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+        updatingFailed: (skipEnrichUrl) => updateMessage(
+          message,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
         deletingFailed: (hard) => deleteMessage(message, hard: hard),
       ),
       orElse: () => throw StateError('Message state is not failed'),

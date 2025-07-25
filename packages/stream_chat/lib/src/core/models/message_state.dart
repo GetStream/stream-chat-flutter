@@ -182,6 +182,30 @@ sealed class MessageState with _$MessageState {
     );
   }
 
+  /// Sending failed state when the message fails to be sent.
+  factory MessageState.sendingFailed({
+    required bool skipPush,
+    required bool skipEnrichUrl,
+  }) {
+    return MessageState.failed(
+      state: FailedState.sendingFailed(
+        skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+  }
+
+  /// Updating failed state when the message fails to be updated.
+  factory MessageState.updatingFailed({
+    required bool skipEnrichUrl,
+  }) {
+    return MessageState.failed(
+      state: FailedState.updatingFailed(
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+  }
+
   /// Sending state when the message is being sent.
   static const sending = MessageState.outgoing(
     state: OutgoingState.sending(),
@@ -220,16 +244,6 @@ sealed class MessageState with _$MessageState {
   /// Hard deleted state when the message has been successfully hard deleted.
   static const hardDeleted = MessageState.completed(
     state: CompletedState.deleted(hard: true),
-  );
-
-  /// Sending failed state when the message fails to be sent.
-  static const sendingFailed = MessageState.failed(
-    state: FailedState.sendingFailed(),
-  );
-
-  /// Updating failed state when the message fails to be updated.
-  static const updatingFailed = MessageState.failed(
-    state: FailedState.updatingFailed(),
   );
 
   /// Deleting failed state when the message fails to be soft deleted.
@@ -285,10 +299,15 @@ sealed class CompletedState with _$CompletedState {
 @freezed
 sealed class FailedState with _$FailedState {
   /// Sending failed state when the message fails to be sent.
-  const factory FailedState.sendingFailed() = SendingFailed;
+  const factory FailedState.sendingFailed({
+    @Default(false) bool skipPush,
+    @Default(false) bool skipEnrichUrl,
+  }) = SendingFailed;
 
   /// Updating failed state when the message fails to be updated.
-  const factory FailedState.updatingFailed() = UpdatingFailed;
+  const factory FailedState.updatingFailed({
+    @Default(false) bool skipEnrichUrl,
+  }) = UpdatingFailed;
 
   /// Deleting failed state when the message fails to be deleted.
   const factory FailedState.deletingFailed({
