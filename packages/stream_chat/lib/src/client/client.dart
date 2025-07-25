@@ -1672,10 +1672,12 @@ class StreamChatClient {
   /// Update the given message
   Future<UpdateMessageResponse> updateMessage(
     Message message, {
+    bool skipPush = false,
     bool skipEnrichUrl = false,
   }) =>
       _chatApi.message.updateMessage(
         message,
+        skipPush: skipPush,
         skipEnrichUrl: skipEnrichUrl,
       );
 

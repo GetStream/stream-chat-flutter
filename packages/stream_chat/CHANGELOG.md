@@ -3,6 +3,8 @@
 ✅ Added
 
 - Added `avgResponseTime` field to the `User` model to track average response time in seconds.
+- Added support for `skipPush` while updating a channel message, which allows you to update a
+  message without sending a push notification.
 
 🐞 Fixed
 
