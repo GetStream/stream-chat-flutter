@@ -2833,20 +2833,19 @@ class ChannelClientState {
   void _listenReactionDeleted() {
     _subscriptions.add(
       _channel.on(EventType.reactionDeleted).listen((event) {
-        final (reaction, eventMessage) = (event.reaction, event.message);
-        if (reaction == null || eventMessage == null) return;
+        final (eventReaction, eventMessage) = (event.reaction, event.message);
+        if (eventReaction == null || eventMessage == null) return;
 
         final messageId = eventMessage.id;
         final parentId = eventMessage.parentId;
 
         for (final message in [...messages, ...?threads[parentId]]) {
           if (message.id == messageId) {
-            final reactionUserId = event.reaction?.userId;
             final currentUserId = _channel.client.state.currentUser?.id;
 
             final currentMessage = switch (currentUserId) {
-              final userId? when userId == reactionUserId =>
-                message.deleteMyReaction(reactionType: reaction.type),
+              final userId? when userId == eventReaction.userId =>
+                message.deleteMyReaction(reactionType: eventReaction.type),
               _ => message,
             };
 
@@ -2871,11 +2870,10 @@ class ChannelClientState {
 
       for (final message in [...messages, ...?threads[parentId]]) {
         if (message.id == messageId) {
-          final reactionUserId = event.reaction?.userId;
           final currentUserId = _channel.client.state.currentUser?.id;
 
           final currentMessage = switch (currentUserId) {
-            final userId? when userId == reactionUserId =>
+            final userId? when userId == eventReaction.userId =>
               message.addMyReaction(eventReaction),
             _ => message,
           };
@@ -2901,11 +2899,10 @@ class ChannelClientState {
 
         for (final message in [...messages, ...?threads[parentId]]) {
           if (message.id == messageId) {
-            final reactionUserId = event.reaction?.userId;
             final currentUserId = _channel.client.state.currentUser?.id;
 
             final currentMessage = switch (currentUserId) {
-              final userId? when userId == reactionUserId =>
+              final userId? when userId == eventReaction.userId =>
                 // reaction.updated is only called if enforce_unique is true
                 message.addMyReaction(eventReaction, enforceUnique: true),
               _ => message,
