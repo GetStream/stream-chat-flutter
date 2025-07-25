@@ -51,9 +51,8 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
           ),
           title: Text(
             context.translations.instantCommandsLabel,
-            style: TextStyle(
-              // ignore: deprecated_member_use
-              color: colorTheme.textHighEmphasis.withOpacity(0.5),
+            style: textTheme.body.copyWith(
+              color: colorTheme.textLowEmphasis,
             ),
           ),
         );
@@ -67,8 +66,8 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
             children: [
               Text(
                 command.name.capitalize(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+                style: textTheme.bodyBold.copyWith(
+                  color: colorTheme.textHighEmphasis,
                 ),
               ),
               const SizedBox(width: 8),

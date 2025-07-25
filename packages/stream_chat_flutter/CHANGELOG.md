@@ -1,7 +1,8 @@
-## Upcoming
+## 9.15.0
 
 ✅ Added
 
+- Added `bottom` and `bottomOpacity` to the `StreamChannelHeader` widget.
 - Added `StreamChat.maybeOf()` method for safe context access in async operations.
 - Added `padding` and `textFieldMargin` to `StreamMessageInput` to allow fine-tuning the layout. 
 
@@ -15,6 +16,7 @@
 🐞 Fixed
 
 - Fixed `StreamMessageInput` tries to expand to full height when used in a unconstrained environment.
+- Fixed `StreamCommandAutocompleteOptions` to style the command name with `textHighEmphasis` style.
 
 ## 9.13.0
 
