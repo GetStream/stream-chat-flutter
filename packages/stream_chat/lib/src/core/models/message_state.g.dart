@@ -124,22 +124,28 @@ Map<String, dynamic> _$$DeletedImplToJson(_$DeletedImpl instance) =>
 
 _$SendingFailedImpl _$$SendingFailedImplFromJson(Map<String, dynamic> json) =>
     _$SendingFailedImpl(
+      skipPush: json['skip_push'] as bool? ?? false,
+      skipEnrichUrl: json['skip_enrich_url'] as bool? ?? false,
       $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$$SendingFailedImplToJson(_$SendingFailedImpl instance) =>
     <String, dynamic>{
+      'skip_push': instance.skipPush,
+      'skip_enrich_url': instance.skipEnrichUrl,
       'runtimeType': instance.$type,
     };
 
 _$UpdatingFailedImpl _$$UpdatingFailedImplFromJson(Map<String, dynamic> json) =>
     _$UpdatingFailedImpl(
+      skipEnrichUrl: json['skip_enrich_url'] as bool? ?? false,
       $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$$UpdatingFailedImplToJson(
         _$UpdatingFailedImpl instance) =>
     <String, dynamic>{
+      'skip_enrich_url': instance.skipEnrichUrl,
       'runtimeType': instance.$type,
     };
 

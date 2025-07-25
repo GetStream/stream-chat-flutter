@@ -215,6 +215,7 @@ void main() {
 
     tearDown(() {
       channel.dispose();
+      clearInteractions(client);
     });
 
     test('should throw if trying to set `extraData`', () {
@@ -286,6 +287,268 @@ void main() {
               channelId,
               channelType,
             )).called(1);
+      });
+
+      test(
+          'should handle StreamChatNetworkError by adding message to retry queue with skipPush: true, skipEnrichUrl: false',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          user: client.state.currentUser,
+        );
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipPush: true,
+            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.sending),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.sendingFailed(
+                    skipPush: true,
+                    skipEnrichUrl: false,
+                  ),
+                ),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.sendMessage(
+            message,
+            skipPush: true,
+          );
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+        }
+      });
+
+      test(
+          'should handle StreamChatNetworkError by adding message to retry queue with skipPush: true, skipEnrichUrl: true',
+          () async {
+        final message = Message(
+          id: 'test-message-id-2',
+          user: client.state.currentUser,
+        );
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipPush: true,
+              skipEnrichUrl: true,
+            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.sending),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.sendingFailed(
+                    skipPush: true,
+                    skipEnrichUrl: true,
+                  ),
+                ),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.sendMessage(
+            message,
+            skipPush: true,
+            skipEnrichUrl: true,
+          );
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+        }
+      });
+
+      test(
+          'should handle StreamChatNetworkError by adding message to retry queue with skipPush: false, skipEnrichUrl: true',
+          () async {
+        final message = Message(
+          id: 'test-message-id-3',
+          user: client.state.currentUser,
+        );
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipEnrichUrl: true,
+            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.sending),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.sendingFailed(
+                    skipPush: false,
+                    skipEnrichUrl: true,
+                  ),
+                ),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.sendMessage(
+            message,
+            skipEnrichUrl: true,
+          );
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+        }
+      });
+
+      test(
+          'should handle StreamChatNetworkError by adding message to retry queue with skipPush: false, skipEnrichUrl: false',
+          () async {
+        final message = Message(
+          id: 'test-message-id-4',
+          user: client.state.currentUser,
+        );
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.sending),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.sendingFailed(
+                    skipPush: false,
+                    skipEnrichUrl: false,
+                  ),
+                ),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.sendMessage(
+            message,
+          );
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+        }
+      });
+
+      test('should not update message state when non-retriable error occurs',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          user: client.state.currentUser,
+        );
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            )).thenThrow(StreamChatNetworkError.raw(
+          code: ChatErrorCode.inputError.code,
+          message: 'Input error',
+          data: ErrorResponse()
+            ..code = ChatErrorCode.inputError.code
+            ..message = 'Input error'
+            ..statusCode = 400,
+        ));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.sending),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.sendMessage(message);
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+        }
+
+        final updatedMessage =
+            channel.state!.messages.firstWhere((m) => m.id == message.id);
+        expect(updatedMessage.state, isA<MessageState>());
+        expect(
+            updatedMessage.state.maybeWhen(
+              failed: (state, _) => state.when(
+                sendingFailed: (_, __) => false,
+                updatingFailed: (_) => false,
+                deletingFailed: (_) => false,
+              ),
+              orElse: () => true,
+            ),
+            isTrue);
       });
 
       test('with attachments should work just fine', () async {
@@ -887,6 +1150,224 @@ void main() {
               any(that: isSameMessageAs(message)),
             )).called(1);
       });
+
+      test(
+          'should not update message state when error is not StreamChatNetworkError',
+          () async {
+        final message = Message(
+          id: 'test-message-id-error-1',
+          state: MessageState.sent,
+        );
+
+        when(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            )).thenThrow(ArgumentError('Invalid argument'));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.updating),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.updateMessage(message, skipEnrichUrl: true);
+        } catch (e) {
+          expect(e, isA<ArgumentError>());
+        }
+      });
+
+      test(
+          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: true',
+          () async {
+        final message = Message(
+          id: 'test-message-id-retry-1',
+          state: MessageState.sent,
+        );
+
+        // Create a retriable error (data == null)
+        when(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            )).thenThrow(StreamChatNetworkError.raw(
+          code: ChatErrorCode.requestTimeout.code,
+          message: 'Request timed out',
+        ));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.updating),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(skipEnrichUrl: true),
+                ),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.updateMessage(message, skipEnrichUrl: true);
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.requestTimeout.code));
+          expect(networkError.isRetriable, isTrue);
+        }
+      });
+
+      test(
+          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: false',
+          () async {
+        final message = Message(
+          id: 'test-message-id-retry-2',
+          state: MessageState.sent,
+        );
+
+        // Create a retriable error (data == null)
+        when(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+            )).thenThrow(StreamChatNetworkError.raw(
+          code: ChatErrorCode.internalSystemError.code,
+          message: 'Internal system error',
+        ));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.updating),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(skipEnrichUrl: false),
+                ),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.updateMessage(message);
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code,
+              equals(ChatErrorCode.internalSystemError.code));
+          expect(networkError.isRetriable, isTrue);
+        }
+      });
+
+      test(
+          'should handle non-retriable StreamChatNetworkError with skipEnrichUrl: true',
+          () async {
+        final message = Message(
+          id: 'test-message-id-error-2',
+          state: MessageState.sent,
+        );
+
+        when(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.updating),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(skipEnrichUrl: true),
+                ),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.updateMessage(message, skipEnrichUrl: true);
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+        }
+      });
+
+      test(
+          'should handle non-retriable StreamChatNetworkError with skipEnrichUrl: false',
+          () async {
+        final message = Message(
+          id: 'test-message-id-error-3',
+          state: MessageState.sent,
+        );
+
+        when(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.updating),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(skipEnrichUrl: false),
+                ),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.updateMessage(message);
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+        }
+      });
     });
 
     test('`.partialUpdateMessage`', () async {
@@ -945,6 +1426,316 @@ void main() {
       verify(
         () => client.partialUpdateMessage(message.id, set: set, unset: unset),
       ).called(1);
+    });
+
+    group('`.partialUpdateMessage` error handling', () {
+      test(
+          'should not update message state when error is not StreamChatNetworkError',
+          () async {
+        final message = Message(
+          id: 'test-message-id-error-partial-1',
+          state: MessageState.sent,
+        );
+
+        // Add message to channel state first
+        channel.state?.updateMessage(message);
+
+        const set = {'text': 'Update Message text'};
+        const unset = ['pinExpires'];
+
+        when(
+          () => client.partialUpdateMessage(
+            message.id,
+            set: set,
+            unset: unset,
+          ),
+        ).thenThrow(ArgumentError('Invalid argument'));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updating,
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.partialUpdateMessage(
+            message,
+            set: set,
+            unset: unset,
+          );
+        } catch (e) {
+          expect(e, isA<ArgumentError>());
+        }
+      });
+
+      test(
+          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: true',
+          () async {
+        final message = Message(
+          id: 'test-message-id-retry-partial-1',
+          state: MessageState.sent,
+        );
+
+        // Add message to channel state first
+        channel.state?.updateMessage(message);
+
+        const set = {'text': 'Update Message text'};
+        const unset = ['pinExpires'];
+
+        // Create a retriable error (data == null)
+        when(
+          () => client.partialUpdateMessage(
+            message.id,
+            set: set,
+            unset: unset,
+            skipEnrichUrl: true,
+          ),
+        ).thenThrow(StreamChatNetworkError.raw(
+          code: ChatErrorCode.requestTimeout.code,
+          message: 'Request timed out',
+        ));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updating,
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(skipEnrichUrl: true),
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.partialUpdateMessage(
+            message,
+            set: set,
+            unset: unset,
+            skipEnrichUrl: true,
+          );
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.requestTimeout.code));
+          expect(networkError.isRetriable, isTrue);
+        }
+      });
+
+      test(
+          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: false',
+          () async {
+        final message = Message(
+          id: 'test-message-id-retry-partial-2',
+          state: MessageState.sent,
+        );
+
+        // Add message to channel state first
+        channel.state?.updateMessage(message);
+
+        const set = {'text': 'Update Message text'};
+        const unset = ['pinExpires'];
+
+        // Create a retriable error (data == null)
+        when(
+          () => client.partialUpdateMessage(
+            message.id,
+            set: set,
+            unset: unset,
+          ),
+        ).thenThrow(StreamChatNetworkError.raw(
+          code: ChatErrorCode.internalSystemError.code,
+          message: 'Internal system error',
+        ));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updating,
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(skipEnrichUrl: false),
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.partialUpdateMessage(
+            message,
+            set: set,
+            unset: unset,
+          );
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code,
+              equals(ChatErrorCode.internalSystemError.code));
+          expect(networkError.isRetriable, isTrue);
+        }
+      });
+
+      test(
+          'should handle non-retriable StreamChatNetworkError with skipEnrichUrl: true',
+          () async {
+        final message = Message(
+          id: 'test-message-id-error-partial-2',
+          state: MessageState.sent,
+        );
+
+        // Add message to channel state first
+        channel.state?.updateMessage(message);
+
+        const set = {'text': 'Update Message text'};
+        const unset = ['pinExpires'];
+
+        when(
+          () => client.partialUpdateMessage(
+            message.id,
+            set: set,
+            unset: unset,
+            skipEnrichUrl: true,
+          ),
+        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updating,
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(skipEnrichUrl: true),
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.partialUpdateMessage(
+            message,
+            set: set,
+            unset: unset,
+            skipEnrichUrl: true,
+          );
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+        }
+      });
+
+      test(
+          'should handle non-retriable StreamChatNetworkError with skipEnrichUrl: false',
+          () async {
+        final message = Message(
+          id: 'test-message-id-error-partial-3',
+          state: MessageState.sent,
+        );
+
+        // Add message to channel state first
+        channel.state?.updateMessage(message);
+
+        const set = {'text': 'Update Message text'};
+        const unset = ['pinExpires'];
+
+        when(
+          () => client.partialUpdateMessage(
+            message.id,
+            set: set,
+            unset: unset,
+          ),
+        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updating,
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(skipEnrichUrl: false),
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        try {
+          await channel.partialUpdateMessage(
+            message,
+            set: set,
+            unset: unset,
+          );
+        } catch (e) {
+          expect(e, isA<StreamChatNetworkError>());
+
+          final networkError = e as StreamChatNetworkError;
+          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
+        }
+      });
     });
 
     group('`.deleteMessage`', () {
@@ -5093,6 +5884,288 @@ void main() {
       expect(channel.canDeleteOwnMessage, true);
       expect(channel.canDeleteAnyMessage, false);
       expect(channel.canUpdateChannel, false);
+    });
+  });
+
+  group('Retry functionality with parameter preservation', () {
+    late final client = MockStreamChatClient();
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    late Channel channel;
+
+    setUpAll(() {
+      registerFallbackValue(FakeMessage());
+      registerFallbackValue(<Message>[]);
+      registerFallbackValue(FakeAttachmentFile());
+
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+
+      final clientState = FakeClientState();
+      when(() => client.state).thenReturn(clientState);
+
+      final retryPolicy = RetryPolicy(
+        shouldRetry: (_, __, error) {
+          return error is StreamChatNetworkError && error.isRetriable;
+        },
+      );
+      when(() => client.retryPolicy).thenReturn(retryPolicy);
+    });
+
+    setUp(() {
+      final channelState = _generateChannelState(channelId, channelType);
+      channel = Channel.fromState(client, channelState);
+    });
+
+    tearDown(() {
+      channel.dispose();
+    });
+
+    group('retryMessage method', () {
+      test(
+          'should call sendMessage with preserved skipPush and skipEnrichUrl parameters',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sendingFailed(
+            skipPush: true,
+            skipEnrichUrl: true,
+          ),
+        );
+
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(state: MessageState.sent);
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipPush: true,
+              skipEnrichUrl: true,
+            )).thenAnswer((_) async => sendMessageResponse);
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<SendMessageResponse>());
+
+        verify(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipPush: true,
+              skipEnrichUrl: true,
+            )).called(1);
+      });
+
+      test('should call sendMessage with preserved skipPush parameter',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sendingFailed(
+            skipPush: true,
+            skipEnrichUrl: false,
+          ),
+        );
+
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(state: MessageState.sent);
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipPush: true,
+            )).thenAnswer((_) async => sendMessageResponse);
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<SendMessageResponse>());
+
+        verify(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipPush: true,
+            )).called(1);
+      });
+
+      test('should call sendMessage with preserved skipEnrichUrl parameter',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sendingFailed(
+            skipPush: false,
+            skipEnrichUrl: true,
+          ),
+        );
+
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(state: MessageState.sent);
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipEnrichUrl: true,
+            )).thenAnswer((_) async => sendMessageResponse);
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<SendMessageResponse>());
+
+        verify(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+              skipEnrichUrl: true,
+            )).called(1);
+      });
+
+      test(
+          'should call sendMessage with preserved false skipPush and skipEnrichUrl parameters',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sendingFailed(
+            skipPush: false,
+            skipEnrichUrl: false,
+          ),
+        );
+
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(state: MessageState.sent);
+
+        when(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            )).thenAnswer((_) async => sendMessageResponse);
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<SendMessageResponse>());
+
+        verify(() => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            )).called(1);
+      });
+
+      test('should call updateMessage with preserved skipEnrichUrl parameter',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.updatingFailed(skipEnrichUrl: true),
+        );
+
+        final updateMessageResponse = UpdateMessageResponse()
+          ..message = message.copyWith(state: MessageState.updated);
+
+        when(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            )).thenAnswer((_) async => updateMessageResponse);
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<UpdateMessageResponse>());
+
+        verify(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+              skipEnrichUrl: true,
+            )).called(1);
+      });
+
+      test(
+          'should call updateMessage with preserved false skipEnrichUrl parameter',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.updatingFailed(skipEnrichUrl: false),
+        );
+
+        final updateMessageResponse = UpdateMessageResponse()
+          ..message = message.copyWith(state: MessageState.updated);
+
+        when(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+            )).thenAnswer((_) async => updateMessageResponse);
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<UpdateMessageResponse>());
+
+        verify(() => client.updateMessage(
+              any(that: isSameMessageAs(message)),
+            )).called(1);
+      });
+
+      test('should call deleteMessage with preserved hard parameter', () async {
+        final message = Message(
+          id: 'test-message-id',
+          createdAt: DateTime.now(),
+          state: MessageState.deletingFailed(hard: true),
+        );
+
+        when(() => client.deleteMessage(
+              message.id,
+              hard: true,
+            )).thenAnswer((_) async => EmptyResponse());
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<EmptyResponse>());
+
+        verify(() => client.deleteMessage(
+              message.id,
+              hard: true,
+            )).called(1);
+      });
+
+      test('should call deleteMessage with preserved false hard parameter',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          createdAt: DateTime.now(),
+          state: MessageState.deletingFailed(hard: false),
+        );
+
+        when(() => client.deleteMessage(
+              message.id,
+            )).thenAnswer((_) async => EmptyResponse());
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<EmptyResponse>());
+
+        verify(() => client.deleteMessage(
+              message.id,
+            )).called(1);
+      });
+
+      test('should throw AssertionError when message state is not failed',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sent,
+        );
+
+        expect(() => channel.retryMessage(message),
+            throwsA(isA<AssertionError>()));
+      });
     });
   });
 }
