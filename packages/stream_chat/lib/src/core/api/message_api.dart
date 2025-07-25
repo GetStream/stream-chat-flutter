@@ -136,12 +136,14 @@ class MessageApi {
   /// Updates the given [message]
   Future<UpdateMessageResponse> updateMessage(
     Message message, {
+    bool skipPush = false,
     bool skipEnrichUrl = false,
   }) async {
     final response = await _client.post(
       '/messages/${message.id}',
       data: {
         'message': message,
+        'skip_push': skipPush,
         'skip_enrich_url': skipEnrichUrl,
       },
     );
