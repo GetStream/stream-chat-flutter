@@ -4,6 +4,7 @@
 
 - Added `emojiCode` property to `StreamReactionIcon` to support custom emojis in reactions.
 - Updated default reaction builders with standard emoji codes. (`❤️`, `👍`, `👎`, `😂`, `😮`)
+- Added `StreamChatConfiguration.maybeOf()` method for safe context access in async operations.
 
 ## Upcoming
 
