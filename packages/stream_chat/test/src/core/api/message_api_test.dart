@@ -143,6 +143,7 @@ void main() {
           path,
           data: {
             'message': message,
+            'skip_push': false,
             'skip_enrich_url': false,
           },
         )).thenAnswer(

@@ -9,17 +9,19 @@
 ✅ Added
 
 - Added comprehensive location sharing support with static and live location features:
-  - `Channel.sendStaticLocation()` - Send a static location message to the channel
-  - `Channel.startLiveLocationSharing()` - Start sharing live location with automatic updates
-  - `Channel.activeLiveLocations` - Track members active live location shares in the channel
-  - `Client.activeLiveLocations` - Access current user active live location shares across channels
-  - Location event listeners for `locationShared`, `locationUpdated`, and `locationExpired` events
+    - `Channel.sendStaticLocation()` - Send a static location message to the channel
+    - `Channel.startLiveLocationSharing()` - Start sharing live location with automatic updates
+    - `Channel.activeLiveLocations` - Track members active live location shares in the channel
+    - `Client.activeLiveLocations` - Access current user active live location shares across channels
+    - Location event listeners for `locationShared`, `locationUpdated`, and `locationExpired` events
 
-## Upcoming
+## 9.15.0
 
 ✅ Added
 
 - Added `avgResponseTime` field to the `User` model to track average response time in seconds.
+- Added support for `skipPush` while updating a channel message, which allows you to update a
+  message without sending a push notification.
 
 🐞 Fixed
 

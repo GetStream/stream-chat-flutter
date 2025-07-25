@@ -6,10 +6,11 @@
 - Updated default reaction builders with standard emoji codes. (`❤️`, `👍`, `👎`, `😂`, `😮`)
 - Added `StreamChatConfiguration.maybeOf()` method for safe context access in async operations.
 
-## Upcoming
+## 9.15.0
 
 ✅ Added
 
+- Added `bottom` and `bottomOpacity` to the `StreamChannelHeader` widget.
 - Added `StreamChat.maybeOf()` method for safe context access in async operations.
 
 🐞 Fixed
@@ -48,6 +49,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 🐞 Fixed
 
 - Fixed `StreamMessageInput` tries to expand to full height when used in a unconstrained environment.
+- Fixed `StreamCommandAutocompleteOptions` to style the command name with `textHighEmphasis` style.
 
 ## 10.0.0-beta.2
 

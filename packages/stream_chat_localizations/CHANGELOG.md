@@ -2,6 +2,10 @@
 
 - Added translations for new `locationLabel` label.
 
+## 9.15.0
+
+- Updated `stream_chat_flutter` dependency to [`9.15.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 10.0.0-beta.3
 
 - Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_localizations/changelog).

@@ -749,6 +749,7 @@ class Channel {
   /// before actually updating the message.
   Future<UpdateMessageResponse> updateMessage(
     Message message, {
+    bool skipPush = false,
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
@@ -794,6 +795,7 @@ class Channel {
       final response = await _updateMessageLock.synchronized(
         () => _client.updateMessage(
           message,
+          skipPush: skipPush,
           skipEnrichUrl: skipEnrichUrl,
         ),
       );

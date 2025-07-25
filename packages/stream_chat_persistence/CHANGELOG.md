@@ -3,7 +3,7 @@
 - Added support for `Location` entity in the database.
 - Added support for `emojiCode` and `updatedAt` fields in `Reaction` entity.
 
-## Upcoming
+## 9.15.0
 
 🐞 Fixed
 
