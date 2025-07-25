@@ -1,7 +1,9 @@
-## Upcoming Beta
+## 10.0.0-beta.4
 
 - Added support for `Location` entity in the database.
 - Added support for `emojiCode` and `updatedAt` fields in `Reaction` entity.
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.15.0
 

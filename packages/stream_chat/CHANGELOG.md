@@ -1,4 +1,4 @@
-## Upcoming Beta
+## 10.0.0-beta.4
 
 🛑️ Breaking
 
@@ -9,11 +9,13 @@
 ✅ Added
 
 - Added comprehensive location sharing support with static and live location features:
-    - `Channel.sendStaticLocation()` - Send a static location message to the channel
-    - `Channel.startLiveLocationSharing()` - Start sharing live location with automatic updates
-    - `Channel.activeLiveLocations` - Track members active live location shares in the channel
-    - `Client.activeLiveLocations` - Access current user active live location shares across channels
-    - Location event listeners for `locationShared`, `locationUpdated`, and `locationExpired` events
+  - `Channel.sendStaticLocation()` - Send a static location message to the channel
+  - `Channel.startLiveLocationSharing()` - Start sharing live location with automatic updates
+  - `Channel.activeLiveLocations` - Track members active live location shares in the channel
+  - `Client.activeLiveLocations` - Access current user active live location shares across channels
+  - Location event listeners for `locationShared`, `locationUpdated`, and `locationExpired` events
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.15.0
 
@@ -39,7 +41,7 @@
   - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
   - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
 
-- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.14.0
 

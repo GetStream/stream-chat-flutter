@@ -1,10 +1,12 @@
-## Upcoming Beta
+## 10.0.0-beta.4
 
 ✅ Added
 
 - Added `emojiCode` property to `StreamReactionIcon` to support custom emojis in reactions.
 - Updated default reaction builders with standard emoji codes. (`❤️`, `👍`, `👎`, `😂`, `😮`)
 - Added `StreamChatConfiguration.maybeOf()` method for safe context access in async operations.
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.15.0
 
