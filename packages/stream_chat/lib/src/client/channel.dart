@@ -1447,6 +1447,8 @@ class Channel {
     Message message,
     Reaction reaction,
   ) async {
+    _checkInitialized();
+
     final updatedMessage = message.deleteMyReaction(
       reactionType: reaction.type,
     );
@@ -2831,24 +2833,26 @@ class ChannelClientState {
   void _listenReactionDeleted() {
     _subscriptions.add(
       _channel.on(EventType.reactionDeleted).listen((event) {
-        final eventMessage = event.message;
-        if (eventMessage == null) return;
-
-        final reaction = event.reaction;
-        if (reaction == null) return;
+        final (reaction, eventMessage) = (event.reaction, event.message);
+        if (reaction == null || eventMessage == null) return;
 
         final messageId = eventMessage.id;
         final parentId = eventMessage.parentId;
 
         for (final message in [...messages, ...?threads[parentId]]) {
           if (message.id == messageId) {
-            final updatedOwnReactions = message.ownReactions?.where((it) {
-              return it.userId != reaction.userId || it.type != reaction.type;
-            });
+            final reactionUserId = event.reaction?.userId;
+            final currentUserId = _channel.client.state.currentUser?.id;
+
+            final currentMessage = switch (currentUserId) {
+              final userId? when userId == reactionUserId =>
+                message.deleteMyReaction(reactionType: reaction.type),
+              _ => message,
+            };
 
             return updateMessage(
               eventMessage.copyWith(
-                ownReactions: updatedOwnReactions?.toList(),
+                ownReactions: currentMessage.ownReactions,
               ),
             );
           }
@@ -2859,17 +2863,26 @@ class ChannelClientState {
 
   void _listenReactionNew() {
     _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
-      final eventMessage = event.message;
-      if (eventMessage == null) return;
+      final (eventReaction, eventMessage) = (event.reaction, event.message);
+      if (eventReaction == null || eventMessage == null) return;
 
       final messageId = eventMessage.id;
       final parentId = eventMessage.parentId;
 
       for (final message in [...messages, ...?threads[parentId]]) {
         if (message.id == messageId) {
+          final reactionUserId = event.reaction?.userId;
+          final currentUserId = _channel.client.state.currentUser?.id;
+
+          final currentMessage = switch (currentUserId) {
+            final userId? when userId == reactionUserId =>
+              message.addMyReaction(eventReaction),
+            _ => message,
+          };
+
           return updateMessage(
             eventMessage.copyWith(
-              ownReactions: message.ownReactions,
+              ownReactions: currentMessage.ownReactions,
             ),
           );
         }
@@ -2880,17 +2893,27 @@ class ChannelClientState {
   void _listenReactionUpdated() {
     _subscriptions.add(
       _channel.on(EventType.reactionUpdated).listen((event) {
-        final eventMessage = event.message;
-        if (eventMessage == null) return;
+        final (eventReaction, eventMessage) = (event.reaction, event.message);
+        if (eventReaction == null || eventMessage == null) return;
 
         final messageId = eventMessage.id;
         final parentId = eventMessage.parentId;
 
         for (final message in [...messages, ...?threads[parentId]]) {
           if (message.id == messageId) {
+            final reactionUserId = event.reaction?.userId;
+            final currentUserId = _channel.client.state.currentUser?.id;
+
+            final currentMessage = switch (currentUserId) {
+              final userId? when userId == reactionUserId =>
+                // reaction.updated is only called if enforce_unique is true
+                message.addMyReaction(eventReaction, enforceUnique: true),
+              _ => message,
+            };
+
             return updateMessage(
               eventMessage.copyWith(
-                ownReactions: message.ownReactions,
+                ownReactions: currentMessage.ownReactions,
               ),
             );
           }
