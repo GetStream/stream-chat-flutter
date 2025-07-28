@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added `padding` and `textFieldMargin` to `StreamMessageInput` to allow fine-tuning the layout. 
+- Added `padding` and `textInputMargin` to `StreamMessageInput` to allow fine-tuning the layout. 
 
 ## 9.15.0
 
