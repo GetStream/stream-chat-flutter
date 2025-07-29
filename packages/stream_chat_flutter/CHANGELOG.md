@@ -5,6 +5,10 @@
 - Fixed context menu being truncated and scrollable on web when there was enough space to display it
   fully. [[#2317]](https://github.com/GetStream/stream-chat-flutter/issues/2317)
 
+✅ Added
+
+- Added `padding` and `textInputMargin` to `StreamMessageInput` to allow fine-tuning the layout. 
+
 ## 9.15.0
 
 ✅ Added
