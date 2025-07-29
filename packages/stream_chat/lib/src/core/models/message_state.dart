@@ -197,10 +197,12 @@ sealed class MessageState with _$MessageState {
 
   /// Updating failed state when the message fails to be updated.
   factory MessageState.updatingFailed({
+    required bool skipPush,
     required bool skipEnrichUrl,
   }) {
     return MessageState.failed(
       state: FailedState.updatingFailed(
+        skipPush: skipPush,
         skipEnrichUrl: skipEnrichUrl,
       ),
     );
@@ -306,6 +308,7 @@ sealed class FailedState with _$FailedState {
 
   /// Updating failed state when the message fails to be updated.
   const factory FailedState.updatingFailed({
+    @Default(false) bool skipPush,
     @Default(false) bool skipEnrichUrl,
   }) = UpdatingFailed;
 
@@ -635,14 +638,16 @@ extension FailedStatePatternMatching on FailedState {
   /// @nodoc
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() sendingFailed,
-    required TResult Function() updatingFailed,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) updatingFailed,
     required TResult Function(bool hard) deletingFailed,
   }) {
     final failedState = this;
     return switch (failedState) {
-      SendingFailed() => sendingFailed(),
-      UpdatingFailed() => updatingFailed(),
+      SendingFailed() =>
+        sendingFailed(failedState.skipPush, failedState.skipEnrichUrl),
+      UpdatingFailed() =>
+        updatingFailed(failedState.skipPush, failedState.skipEnrichUrl),
       DeletingFailed() => deletingFailed(failedState.hard),
     };
   }
@@ -650,14 +655,16 @@ extension FailedStatePatternMatching on FailedState {
   /// @nodoc
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sendingFailed,
-    TResult? Function()? updatingFailed,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? updatingFailed,
     TResult? Function(bool hard)? deletingFailed,
   }) {
     final failedState = this;
     return switch (failedState) {
-      SendingFailed() => sendingFailed?.call(),
-      UpdatingFailed() => updatingFailed?.call(),
+      SendingFailed() =>
+        sendingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
+      UpdatingFailed() =>
+        updatingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
       DeletingFailed() => deletingFailed?.call(failedState.hard),
     };
   }
@@ -665,15 +672,17 @@ extension FailedStatePatternMatching on FailedState {
   /// @nodoc
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sendingFailed,
-    TResult Function()? updatingFailed,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? updatingFailed,
     TResult Function(bool hard)? deletingFailed,
     required TResult orElse(),
   }) {
     final failedState = this;
     final result = switch (failedState) {
-      SendingFailed() => sendingFailed?.call(),
-      UpdatingFailed() => updatingFailed?.call(),
+      SendingFailed() =>
+        sendingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
+      UpdatingFailed() =>
+        updatingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
       DeletingFailed() => deletingFailed?.call(failedState.hard),
     };
 

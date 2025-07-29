@@ -543,7 +543,7 @@ void main() {
             updatedMessage.state.maybeWhen(
               failed: (state, _) => state.when(
                 sendingFailed: (_, __) => false,
-                updatingFailed: (_) => false,
+                updatingFailed: (_, __) => false,
                 deletingFailed: (_) => false,
               ),
               orElse: () => true,
@@ -1214,7 +1214,9 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updatingFailed(skipEnrichUrl: true),
+                  state: MessageState.updatingFailed(
+                    skipEnrichUrl: true,
+                  ),
                 ),
                 matchMessageState: true,
               ),

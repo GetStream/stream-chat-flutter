@@ -827,14 +827,20 @@ class Channel {
           state!._retryQueue.add([
             message.copyWith(
               // Update the message state to failed.
-              state: MessageState.updatingFailed(skipEnrichUrl: skipEnrichUrl),
+              state: MessageState.updatingFailed(
+                skipPush: skipPush,
+                skipEnrichUrl: skipEnrichUrl,
+              ),
             ),
           ]);
         } else {
           // Reset the message to original state if the update fails and is not
           // retriable.
           state?.updateMessage(originalMessage.copyWith(
-            state: MessageState.updatingFailed(skipEnrichUrl: skipEnrichUrl),
+            state: MessageState.updatingFailed(
+              skipPush: skipPush,
+              skipEnrichUrl: skipEnrichUrl,
+            ),
           ));
         }
       }
@@ -897,14 +903,20 @@ class Channel {
           state!._retryQueue.add([
             message.copyWith(
               // Update the message state to failed.
-              state: MessageState.updatingFailed(skipEnrichUrl: skipEnrichUrl),
+              state: MessageState.updatingFailed(
+                skipPush: false,
+                skipEnrichUrl: skipEnrichUrl,
+              ),
             ),
           ]);
         } else {
           // Reset the message to original state if the update fails and is not
           // retriable.
           state?.updateMessage(originalMessage.copyWith(
-            state: MessageState.updatingFailed(skipEnrichUrl: skipEnrichUrl),
+            state: MessageState.updatingFailed(
+              skipPush: false,
+              skipEnrichUrl: skipEnrichUrl,
+            ),
           ));
         }
       }
@@ -1006,8 +1018,9 @@ class Channel {
           skipPush: skipPush,
           skipEnrichUrl: skipEnrichUrl,
         ),
-        updatingFailed: (skipEnrichUrl) => updateMessage(
+        updatingFailed: (skipPush, skipEnrichUrl) => updateMessage(
           message,
+          skipPush: skipPush,
           skipEnrichUrl: skipEnrichUrl,
         ),
         deletingFailed: (hard) => deleteMessage(message, hard: hard),

@@ -1,3 +1,4 @@
+// dart format width=80
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
@@ -9,11 +10,8 @@ part of 'message_state.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
-
 MessageState _$MessageStateFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType']) {
     case 'initial':
@@ -33,122 +31,13 @@ MessageState _$MessageStateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$MessageState {
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function(OutgoingState state) outgoing,
-    required TResult Function(CompletedState state) completed,
-    required TResult Function(FailedState state, Object? reason) failed,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function(OutgoingState state)? outgoing,
-    TResult? Function(CompletedState state)? completed,
-    TResult? Function(FailedState state, Object? reason)? failed,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function(OutgoingState state)? outgoing,
-    TResult Function(CompletedState state)? completed,
-    TResult Function(FailedState state, Object? reason)? failed,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(MessageInitial value) initial,
-    required TResult Function(MessageOutgoing value) outgoing,
-    required TResult Function(MessageCompleted value) completed,
-    required TResult Function(MessageFailed value) failed,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(MessageInitial value)? initial,
-    TResult? Function(MessageOutgoing value)? outgoing,
-    TResult? Function(MessageCompleted value)? completed,
-    TResult? Function(MessageFailed value)? failed,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(MessageInitial value)? initial,
-    TResult Function(MessageOutgoing value)? outgoing,
-    TResult Function(MessageCompleted value)? completed,
-    TResult Function(MessageFailed value)? failed,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-
   /// Serializes this MessageState to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $MessageStateCopyWith<$Res> {
-  factory $MessageStateCopyWith(
-          MessageState value, $Res Function(MessageState) then) =
-      _$MessageStateCopyWithImpl<$Res, MessageState>;
-}
-
-/// @nodoc
-class _$MessageStateCopyWithImpl<$Res, $Val extends MessageState>
-    implements $MessageStateCopyWith<$Res> {
-  _$MessageStateCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-abstract class _$$MessageInitialImplCopyWith<$Res> {
-  factory _$$MessageInitialImplCopyWith(_$MessageInitialImpl value,
-          $Res Function(_$MessageInitialImpl) then) =
-      __$$MessageInitialImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$MessageInitialImplCopyWithImpl<$Res>
-    extends _$MessageStateCopyWithImpl<$Res, _$MessageInitialImpl>
-    implements _$$MessageInitialImplCopyWith<$Res> {
-  __$$MessageInitialImplCopyWithImpl(
-      _$MessageInitialImpl _value, $Res Function(_$MessageInitialImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$MessageInitialImpl implements MessageInitial {
-  const _$MessageInitialImpl({final String? $type})
-      : $type = $type ?? 'initial';
-
-  factory _$MessageInitialImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MessageInitialImplFromJson(json);
-
-  @JsonKey(name: 'runtimeType')
-  final String $type;
-
-  @override
-  String toString() {
-    return 'MessageState.initial()';
-  }
+  Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$MessageInitialImpl);
+        (other.runtimeType == runtimeType && other is MessageState);
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -156,99 +45,100 @@ class _$MessageInitialImpl implements MessageInitial {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function(OutgoingState state) outgoing,
-    required TResult Function(CompletedState state) completed,
-    required TResult Function(FailedState state, Object? reason) failed,
-  }) {
-    return initial();
+  String toString() {
+    return 'MessageState()';
   }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function(OutgoingState state)? outgoing,
-    TResult? Function(CompletedState state)? completed,
-    TResult? Function(FailedState state, Object? reason)? failed,
-  }) {
-    return initial?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function(OutgoingState state)? outgoing,
-    TResult Function(CompletedState state)? completed,
-    TResult Function(FailedState state, Object? reason)? failed,
-    required TResult orElse(),
-  }) {
-    if (initial != null) {
-      return initial();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(MessageInitial value) initial,
-    required TResult Function(MessageOutgoing value) outgoing,
-    required TResult Function(MessageCompleted value) completed,
-    required TResult Function(MessageFailed value) failed,
-  }) {
-    return initial(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(MessageInitial value)? initial,
-    TResult? Function(MessageOutgoing value)? outgoing,
-    TResult? Function(MessageCompleted value)? completed,
-    TResult? Function(MessageFailed value)? failed,
-  }) {
-    return initial?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(MessageInitial value)? initial,
-    TResult Function(MessageOutgoing value)? outgoing,
-    TResult Function(MessageCompleted value)? completed,
-    TResult Function(MessageFailed value)? failed,
-    required TResult orElse(),
-  }) {
-    if (initial != null) {
-      return initial(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MessageInitialImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class MessageInitial implements MessageState {
-  const factory MessageInitial() = _$MessageInitialImpl;
-
-  factory MessageInitial.fromJson(Map<String, dynamic> json) =
-      _$MessageInitialImpl.fromJson;
 }
 
 /// @nodoc
-abstract class _$$MessageOutgoingImplCopyWith<$Res> {
-  factory _$$MessageOutgoingImplCopyWith(_$MessageOutgoingImpl value,
-          $Res Function(_$MessageOutgoingImpl) then) =
-      __$$MessageOutgoingImplCopyWithImpl<$Res>;
+class $MessageStateCopyWith<$Res> {
+  $MessageStateCopyWith(MessageState _, $Res Function(MessageState) __);
+}
+
+/// @nodoc
+@JsonSerializable()
+class MessageInitial implements MessageState {
+  const MessageInitial({final String? $type}) : $type = $type ?? 'initial';
+  factory MessageInitial.fromJson(Map<String, dynamic> json) =>
+      _$MessageInitialFromJson(json);
+
+  @JsonKey(name: 'runtimeType')
+  final String $type;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$MessageInitialToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is MessageInitial);
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'MessageState.initial()';
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class MessageOutgoing implements MessageState {
+  const MessageOutgoing({required this.state, final String? $type})
+      : $type = $type ?? 'outgoing';
+  factory MessageOutgoing.fromJson(Map<String, dynamic> json) =>
+      _$MessageOutgoingFromJson(json);
+
+  final OutgoingState state;
+
+  @JsonKey(name: 'runtimeType')
+  final String $type;
+
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MessageOutgoingCopyWith<MessageOutgoing> get copyWith =>
+      _$MessageOutgoingCopyWithImpl<MessageOutgoing>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$MessageOutgoingToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is MessageOutgoing &&
+            (identical(other.state, state) || other.state == state));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, state);
+
+  @override
+  String toString() {
+    return 'MessageState.outgoing(state: $state)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $MessageOutgoingCopyWith<$Res>
+    implements $MessageStateCopyWith<$Res> {
+  factory $MessageOutgoingCopyWith(
+          MessageOutgoing value, $Res Function(MessageOutgoing) _then) =
+      _$MessageOutgoingCopyWithImpl;
   @useResult
   $Res call({OutgoingState state});
 
@@ -256,23 +146,22 @@ abstract class _$$MessageOutgoingImplCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$MessageOutgoingImplCopyWithImpl<$Res>
-    extends _$MessageStateCopyWithImpl<$Res, _$MessageOutgoingImpl>
-    implements _$$MessageOutgoingImplCopyWith<$Res> {
-  __$$MessageOutgoingImplCopyWithImpl(
-      _$MessageOutgoingImpl _value, $Res Function(_$MessageOutgoingImpl) _then)
-      : super(_value, _then);
+class _$MessageOutgoingCopyWithImpl<$Res>
+    implements $MessageOutgoingCopyWith<$Res> {
+  _$MessageOutgoingCopyWithImpl(this._self, this._then);
+
+  final MessageOutgoing _self;
+  final $Res Function(MessageOutgoing) _then;
 
   /// Create a copy of MessageState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  @override
   $Res call({
     Object? state = null,
   }) {
-    return _then(_$MessageOutgoingImpl(
+    return _then(MessageOutgoing(
       state: null == state
-          ? _value.state
+          ? _self.state
           : state // ignore: cast_nullable_to_non_nullable
               as OutgoingState,
     ));
@@ -283,37 +172,44 @@ class __$$MessageOutgoingImplCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $OutgoingStateCopyWith<$Res> get state {
-    return $OutgoingStateCopyWith<$Res>(_value.state, (value) {
-      return _then(_value.copyWith(state: value));
+    return $OutgoingStateCopyWith<$Res>(_self.state, (value) {
+      return _then(_self.copyWith(state: value));
     });
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MessageOutgoingImpl implements MessageOutgoing {
-  const _$MessageOutgoingImpl({required this.state, final String? $type})
-      : $type = $type ?? 'outgoing';
+class MessageCompleted implements MessageState {
+  const MessageCompleted({required this.state, final String? $type})
+      : $type = $type ?? 'completed';
+  factory MessageCompleted.fromJson(Map<String, dynamic> json) =>
+      _$MessageCompletedFromJson(json);
 
-  factory _$MessageOutgoingImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MessageOutgoingImplFromJson(json);
-
-  @override
-  final OutgoingState state;
+  final CompletedState state;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MessageCompletedCopyWith<MessageCompleted> get copyWith =>
+      _$MessageCompletedCopyWithImpl<MessageCompleted>(this, _$identity);
+
   @override
-  String toString() {
-    return 'MessageState.outgoing(state: $state)';
+  Map<String, dynamic> toJson() {
+    return _$MessageCompletedToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$MessageOutgoingImpl &&
+            other is MessageCompleted &&
             (identical(other.state, state) || other.state == state));
   }
 
@@ -321,118 +217,18 @@ class _$MessageOutgoingImpl implements MessageOutgoing {
   @override
   int get hashCode => Object.hash(runtimeType, state);
 
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$MessageOutgoingImplCopyWith<_$MessageOutgoingImpl> get copyWith =>
-      __$$MessageOutgoingImplCopyWithImpl<_$MessageOutgoingImpl>(
-          this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function(OutgoingState state) outgoing,
-    required TResult Function(CompletedState state) completed,
-    required TResult Function(FailedState state, Object? reason) failed,
-  }) {
-    return outgoing(state);
+  String toString() {
+    return 'MessageState.completed(state: $state)';
   }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function(OutgoingState state)? outgoing,
-    TResult? Function(CompletedState state)? completed,
-    TResult? Function(FailedState state, Object? reason)? failed,
-  }) {
-    return outgoing?.call(state);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function(OutgoingState state)? outgoing,
-    TResult Function(CompletedState state)? completed,
-    TResult Function(FailedState state, Object? reason)? failed,
-    required TResult orElse(),
-  }) {
-    if (outgoing != null) {
-      return outgoing(state);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(MessageInitial value) initial,
-    required TResult Function(MessageOutgoing value) outgoing,
-    required TResult Function(MessageCompleted value) completed,
-    required TResult Function(MessageFailed value) failed,
-  }) {
-    return outgoing(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(MessageInitial value)? initial,
-    TResult? Function(MessageOutgoing value)? outgoing,
-    TResult? Function(MessageCompleted value)? completed,
-    TResult? Function(MessageFailed value)? failed,
-  }) {
-    return outgoing?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(MessageInitial value)? initial,
-    TResult Function(MessageOutgoing value)? outgoing,
-    TResult Function(MessageCompleted value)? completed,
-    TResult Function(MessageFailed value)? failed,
-    required TResult orElse(),
-  }) {
-    if (outgoing != null) {
-      return outgoing(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MessageOutgoingImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class MessageOutgoing implements MessageState {
-  const factory MessageOutgoing({required final OutgoingState state}) =
-      _$MessageOutgoingImpl;
-
-  factory MessageOutgoing.fromJson(Map<String, dynamic> json) =
-      _$MessageOutgoingImpl.fromJson;
-
-  OutgoingState get state;
-
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MessageOutgoingImplCopyWith<_$MessageOutgoingImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$MessageCompletedImplCopyWith<$Res> {
-  factory _$$MessageCompletedImplCopyWith(_$MessageCompletedImpl value,
-          $Res Function(_$MessageCompletedImpl) then) =
-      __$$MessageCompletedImplCopyWithImpl<$Res>;
+abstract mixin class $MessageCompletedCopyWith<$Res>
+    implements $MessageStateCopyWith<$Res> {
+  factory $MessageCompletedCopyWith(
+          MessageCompleted value, $Res Function(MessageCompleted) _then) =
+      _$MessageCompletedCopyWithImpl;
   @useResult
   $Res call({CompletedState state});
 
@@ -440,23 +236,22 @@ abstract class _$$MessageCompletedImplCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$MessageCompletedImplCopyWithImpl<$Res>
-    extends _$MessageStateCopyWithImpl<$Res, _$MessageCompletedImpl>
-    implements _$$MessageCompletedImplCopyWith<$Res> {
-  __$$MessageCompletedImplCopyWithImpl(_$MessageCompletedImpl _value,
-      $Res Function(_$MessageCompletedImpl) _then)
-      : super(_value, _then);
+class _$MessageCompletedCopyWithImpl<$Res>
+    implements $MessageCompletedCopyWith<$Res> {
+  _$MessageCompletedCopyWithImpl(this._self, this._then);
+
+  final MessageCompleted _self;
+  final $Res Function(MessageCompleted) _then;
 
   /// Create a copy of MessageState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  @override
   $Res call({
     Object? state = null,
   }) {
-    return _then(_$MessageCompletedImpl(
+    return _then(MessageCompleted(
       state: null == state
-          ? _value.state
+          ? _self.state
           : state // ignore: cast_nullable_to_non_nullable
               as CompletedState,
     ));
@@ -467,226 +262,45 @@ class __$$MessageCompletedImplCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $CompletedStateCopyWith<$Res> get state {
-    return $CompletedStateCopyWith<$Res>(_value.state, (value) {
-      return _then(_value.copyWith(state: value));
+    return $CompletedStateCopyWith<$Res>(_self.state, (value) {
+      return _then(_self.copyWith(state: value));
     });
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MessageCompletedImpl implements MessageCompleted {
-  const _$MessageCompletedImpl({required this.state, final String? $type})
-      : $type = $type ?? 'completed';
-
-  factory _$MessageCompletedImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MessageCompletedImplFromJson(json);
-
-  @override
-  final CompletedState state;
-
-  @JsonKey(name: 'runtimeType')
-  final String $type;
-
-  @override
-  String toString() {
-    return 'MessageState.completed(state: $state)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MessageCompletedImpl &&
-            (identical(other.state, state) || other.state == state));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, state);
-
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MessageCompletedImplCopyWith<_$MessageCompletedImpl> get copyWith =>
-      __$$MessageCompletedImplCopyWithImpl<_$MessageCompletedImpl>(
-          this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function(OutgoingState state) outgoing,
-    required TResult Function(CompletedState state) completed,
-    required TResult Function(FailedState state, Object? reason) failed,
-  }) {
-    return completed(state);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function(OutgoingState state)? outgoing,
-    TResult? Function(CompletedState state)? completed,
-    TResult? Function(FailedState state, Object? reason)? failed,
-  }) {
-    return completed?.call(state);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function(OutgoingState state)? outgoing,
-    TResult Function(CompletedState state)? completed,
-    TResult Function(FailedState state, Object? reason)? failed,
-    required TResult orElse(),
-  }) {
-    if (completed != null) {
-      return completed(state);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(MessageInitial value) initial,
-    required TResult Function(MessageOutgoing value) outgoing,
-    required TResult Function(MessageCompleted value) completed,
-    required TResult Function(MessageFailed value) failed,
-  }) {
-    return completed(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(MessageInitial value)? initial,
-    TResult? Function(MessageOutgoing value)? outgoing,
-    TResult? Function(MessageCompleted value)? completed,
-    TResult? Function(MessageFailed value)? failed,
-  }) {
-    return completed?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(MessageInitial value)? initial,
-    TResult Function(MessageOutgoing value)? outgoing,
-    TResult Function(MessageCompleted value)? completed,
-    TResult Function(MessageFailed value)? failed,
-    required TResult orElse(),
-  }) {
-    if (completed != null) {
-      return completed(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MessageCompletedImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class MessageCompleted implements MessageState {
-  const factory MessageCompleted({required final CompletedState state}) =
-      _$MessageCompletedImpl;
-
-  factory MessageCompleted.fromJson(Map<String, dynamic> json) =
-      _$MessageCompletedImpl.fromJson;
-
-  CompletedState get state;
-
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MessageCompletedImplCopyWith<_$MessageCompletedImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class _$$MessageFailedImplCopyWith<$Res> {
-  factory _$$MessageFailedImplCopyWith(
-          _$MessageFailedImpl value, $Res Function(_$MessageFailedImpl) then) =
-      __$$MessageFailedImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({FailedState state, Object? reason});
-
-  $FailedStateCopyWith<$Res> get state;
-}
-
-/// @nodoc
-class __$$MessageFailedImplCopyWithImpl<$Res>
-    extends _$MessageStateCopyWithImpl<$Res, _$MessageFailedImpl>
-    implements _$$MessageFailedImplCopyWith<$Res> {
-  __$$MessageFailedImplCopyWithImpl(
-      _$MessageFailedImpl _value, $Res Function(_$MessageFailedImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? state = null,
-    Object? reason = freezed,
-  }) {
-    return _then(_$MessageFailedImpl(
-      state: null == state
-          ? _value.state
-          : state // ignore: cast_nullable_to_non_nullable
-              as FailedState,
-      reason: freezed == reason ? _value.reason : reason,
-    ));
-  }
-
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $FailedStateCopyWith<$Res> get state {
-    return $FailedStateCopyWith<$Res>(_value.state, (value) {
-      return _then(_value.copyWith(state: value));
-    });
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$MessageFailedImpl implements MessageFailed {
-  const _$MessageFailedImpl(
-      {required this.state, this.reason, final String? $type})
+class MessageFailed implements MessageState {
+  const MessageFailed({required this.state, this.reason, final String? $type})
       : $type = $type ?? 'failed';
+  factory MessageFailed.fromJson(Map<String, dynamic> json) =>
+      _$MessageFailedFromJson(json);
 
-  factory _$MessageFailedImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MessageFailedImplFromJson(json);
-
-  @override
   final FailedState state;
-  @override
   final Object? reason;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $MessageFailedCopyWith<MessageFailed> get copyWith =>
+      _$MessageFailedCopyWithImpl<MessageFailed>(this, _$identity);
+
   @override
-  String toString() {
-    return 'MessageState.failed(state: $state, reason: $reason)';
+  Map<String, dynamic> toJson() {
+    return _$MessageFailedToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$MessageFailedImpl &&
+            other is MessageFailed &&
             (identical(other.state, state) || other.state == state) &&
             const DeepCollectionEquality().equals(other.reason, reason));
   }
@@ -696,112 +310,57 @@ class _$MessageFailedImpl implements MessageFailed {
   int get hashCode => Object.hash(
       runtimeType, state, const DeepCollectionEquality().hash(reason));
 
-  /// Create a copy of MessageState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$MessageFailedImplCopyWith<_$MessageFailedImpl> get copyWith =>
-      __$$MessageFailedImplCopyWithImpl<_$MessageFailedImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function(OutgoingState state) outgoing,
-    required TResult Function(CompletedState state) completed,
-    required TResult Function(FailedState state, Object? reason) failed,
-  }) {
-    return failed(state, reason);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function(OutgoingState state)? outgoing,
-    TResult? Function(CompletedState state)? completed,
-    TResult? Function(FailedState state, Object? reason)? failed,
-  }) {
-    return failed?.call(state, reason);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function(OutgoingState state)? outgoing,
-    TResult Function(CompletedState state)? completed,
-    TResult Function(FailedState state, Object? reason)? failed,
-    required TResult orElse(),
-  }) {
-    if (failed != null) {
-      return failed(state, reason);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(MessageInitial value) initial,
-    required TResult Function(MessageOutgoing value) outgoing,
-    required TResult Function(MessageCompleted value) completed,
-    required TResult Function(MessageFailed value) failed,
-  }) {
-    return failed(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(MessageInitial value)? initial,
-    TResult? Function(MessageOutgoing value)? outgoing,
-    TResult? Function(MessageCompleted value)? completed,
-    TResult? Function(MessageFailed value)? failed,
-  }) {
-    return failed?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(MessageInitial value)? initial,
-    TResult Function(MessageOutgoing value)? outgoing,
-    TResult Function(MessageCompleted value)? completed,
-    TResult Function(MessageFailed value)? failed,
-    required TResult orElse(),
-  }) {
-    if (failed != null) {
-      return failed(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MessageFailedImplToJson(
-      this,
-    );
+  String toString() {
+    return 'MessageState.failed(state: $state, reason: $reason)';
   }
 }
 
-abstract class MessageFailed implements MessageState {
-  const factory MessageFailed(
-      {required final FailedState state,
-      final Object? reason}) = _$MessageFailedImpl;
+/// @nodoc
+abstract mixin class $MessageFailedCopyWith<$Res>
+    implements $MessageStateCopyWith<$Res> {
+  factory $MessageFailedCopyWith(
+          MessageFailed value, $Res Function(MessageFailed) _then) =
+      _$MessageFailedCopyWithImpl;
+  @useResult
+  $Res call({FailedState state, Object? reason});
 
-  factory MessageFailed.fromJson(Map<String, dynamic> json) =
-      _$MessageFailedImpl.fromJson;
+  $FailedStateCopyWith<$Res> get state;
+}
 
-  FailedState get state;
-  Object? get reason;
+/// @nodoc
+class _$MessageFailedCopyWithImpl<$Res>
+    implements $MessageFailedCopyWith<$Res> {
+  _$MessageFailedCopyWithImpl(this._self, this._then);
+
+  final MessageFailed _self;
+  final $Res Function(MessageFailed) _then;
 
   /// Create a copy of MessageState
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MessageFailedImplCopyWith<_$MessageFailedImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? state = null,
+    Object? reason = freezed,
+  }) {
+    return _then(MessageFailed(
+      state: null == state
+          ? _self.state
+          : state // ignore: cast_nullable_to_non_nullable
+              as FailedState,
+      reason: freezed == reason ? _self.reason : reason,
+    ));
+  }
+
+  /// Create a copy of MessageState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $FailedStateCopyWith<$Res> get state {
+    return $FailedStateCopyWith<$Res>(_self.state, (value) {
+      return _then(_self.copyWith(state: value));
+    });
+  }
 }
 
 OutgoingState _$OutgoingStateFromJson(Map<String, dynamic> json) {
@@ -821,242 +380,84 @@ OutgoingState _$OutgoingStateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$OutgoingState {
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() sending,
-    required TResult Function() updating,
-    required TResult Function(bool hard) deleting,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sending,
-    TResult? Function()? updating,
-    TResult? Function(bool hard)? deleting,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sending,
-    TResult Function()? updating,
-    TResult Function(bool hard)? deleting,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Sending value) sending,
-    required TResult Function(Updating value) updating,
-    required TResult Function(Deleting value) deleting,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Sending value)? sending,
-    TResult? Function(Updating value)? updating,
-    TResult? Function(Deleting value)? deleting,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Sending value)? sending,
-    TResult Function(Updating value)? updating,
-    TResult Function(Deleting value)? deleting,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-
   /// Serializes this OutgoingState to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is OutgoingState);
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'OutgoingState()';
+  }
 }
 
 /// @nodoc
-abstract class $OutgoingStateCopyWith<$Res> {
-  factory $OutgoingStateCopyWith(
-          OutgoingState value, $Res Function(OutgoingState) then) =
-      _$OutgoingStateCopyWithImpl<$Res, OutgoingState>;
-}
-
-/// @nodoc
-class _$OutgoingStateCopyWithImpl<$Res, $Val extends OutgoingState>
-    implements $OutgoingStateCopyWith<$Res> {
-  _$OutgoingStateCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of OutgoingState
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-abstract class _$$SendingImplCopyWith<$Res> {
-  factory _$$SendingImplCopyWith(
-          _$SendingImpl value, $Res Function(_$SendingImpl) then) =
-      __$$SendingImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$SendingImplCopyWithImpl<$Res>
-    extends _$OutgoingStateCopyWithImpl<$Res, _$SendingImpl>
-    implements _$$SendingImplCopyWith<$Res> {
-  __$$SendingImplCopyWithImpl(
-      _$SendingImpl _value, $Res Function(_$SendingImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of OutgoingState
-  /// with the given fields replaced by the non-null parameter values.
+class $OutgoingStateCopyWith<$Res> {
+  $OutgoingStateCopyWith(OutgoingState _, $Res Function(OutgoingState) __);
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$SendingImpl implements Sending {
-  const _$SendingImpl({final String? $type}) : $type = $type ?? 'sending';
-
-  factory _$SendingImpl.fromJson(Map<String, dynamic> json) =>
-      _$$SendingImplFromJson(json);
+class Sending implements OutgoingState {
+  const Sending({final String? $type}) : $type = $type ?? 'sending';
+  factory Sending.fromJson(Map<String, dynamic> json) =>
+      _$SendingFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$SendingToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is Sending);
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() {
     return 'OutgoingState.sending()';
   }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$SendingImpl);
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() sending,
-    required TResult Function() updating,
-    required TResult Function(bool hard) deleting,
-  }) {
-    return sending();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sending,
-    TResult? Function()? updating,
-    TResult? Function(bool hard)? deleting,
-  }) {
-    return sending?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sending,
-    TResult Function()? updating,
-    TResult Function(bool hard)? deleting,
-    required TResult orElse(),
-  }) {
-    if (sending != null) {
-      return sending();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Sending value) sending,
-    required TResult Function(Updating value) updating,
-    required TResult Function(Deleting value) deleting,
-  }) {
-    return sending(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Sending value)? sending,
-    TResult? Function(Updating value)? updating,
-    TResult? Function(Deleting value)? deleting,
-  }) {
-    return sending?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Sending value)? sending,
-    TResult Function(Updating value)? updating,
-    TResult Function(Deleting value)? deleting,
-    required TResult orElse(),
-  }) {
-    if (sending != null) {
-      return sending(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$SendingImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class Sending implements OutgoingState {
-  const factory Sending() = _$SendingImpl;
-
-  factory Sending.fromJson(Map<String, dynamic> json) = _$SendingImpl.fromJson;
-}
-
-/// @nodoc
-abstract class _$$UpdatingImplCopyWith<$Res> {
-  factory _$$UpdatingImplCopyWith(
-          _$UpdatingImpl value, $Res Function(_$UpdatingImpl) then) =
-      __$$UpdatingImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$UpdatingImplCopyWithImpl<$Res>
-    extends _$OutgoingStateCopyWithImpl<$Res, _$UpdatingImpl>
-    implements _$$UpdatingImplCopyWith<$Res> {
-  __$$UpdatingImplCopyWithImpl(
-      _$UpdatingImpl _value, $Res Function(_$UpdatingImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of OutgoingState
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$UpdatingImpl implements Updating {
-  const _$UpdatingImpl({final String? $type}) : $type = $type ?? 'updating';
-
-  factory _$UpdatingImpl.fromJson(Map<String, dynamic> json) =>
-      _$$UpdatingImplFromJson(json);
+class Updating implements OutgoingState {
+  const Updating({final String? $type}) : $type = $type ?? 'updating';
+  factory Updating.fromJson(Map<String, dynamic> json) =>
+      _$UpdatingFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
-  String toString() {
-    return 'OutgoingState.updating()';
+  Map<String, dynamic> toJson() {
+    return _$UpdatingToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$UpdatingImpl);
+        (other.runtimeType == runtimeType && other is Updating);
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1064,147 +465,44 @@ class _$UpdatingImpl implements Updating {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() sending,
-    required TResult Function() updating,
-    required TResult Function(bool hard) deleting,
-  }) {
-    return updating();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sending,
-    TResult? Function()? updating,
-    TResult? Function(bool hard)? deleting,
-  }) {
-    return updating?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sending,
-    TResult Function()? updating,
-    TResult Function(bool hard)? deleting,
-    required TResult orElse(),
-  }) {
-    if (updating != null) {
-      return updating();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Sending value) sending,
-    required TResult Function(Updating value) updating,
-    required TResult Function(Deleting value) deleting,
-  }) {
-    return updating(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Sending value)? sending,
-    TResult? Function(Updating value)? updating,
-    TResult? Function(Deleting value)? deleting,
-  }) {
-    return updating?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Sending value)? sending,
-    TResult Function(Updating value)? updating,
-    TResult Function(Deleting value)? deleting,
-    required TResult orElse(),
-  }) {
-    if (updating != null) {
-      return updating(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$UpdatingImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class Updating implements OutgoingState {
-  const factory Updating() = _$UpdatingImpl;
-
-  factory Updating.fromJson(Map<String, dynamic> json) =
-      _$UpdatingImpl.fromJson;
-}
-
-/// @nodoc
-abstract class _$$DeletingImplCopyWith<$Res> {
-  factory _$$DeletingImplCopyWith(
-          _$DeletingImpl value, $Res Function(_$DeletingImpl) then) =
-      __$$DeletingImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({bool hard});
-}
-
-/// @nodoc
-class __$$DeletingImplCopyWithImpl<$Res>
-    extends _$OutgoingStateCopyWithImpl<$Res, _$DeletingImpl>
-    implements _$$DeletingImplCopyWith<$Res> {
-  __$$DeletingImplCopyWithImpl(
-      _$DeletingImpl _value, $Res Function(_$DeletingImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of OutgoingState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? hard = null,
-  }) {
-    return _then(_$DeletingImpl(
-      hard: null == hard
-          ? _value.hard
-          : hard // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+  String toString() {
+    return 'OutgoingState.updating()';
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$DeletingImpl implements Deleting {
-  const _$DeletingImpl({this.hard = false, final String? $type})
+class Deleting implements OutgoingState {
+  const Deleting({this.hard = false, final String? $type})
       : $type = $type ?? 'deleting';
+  factory Deleting.fromJson(Map<String, dynamic> json) =>
+      _$DeletingFromJson(json);
 
-  factory _$DeletingImpl.fromJson(Map<String, dynamic> json) =>
-      _$$DeletingImplFromJson(json);
-
-  @override
   @JsonKey()
   final bool hard;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $DeletingCopyWith<Deleting> get copyWith =>
+      _$DeletingCopyWithImpl<Deleting>(this, _$identity);
+
   @override
-  String toString() {
-    return 'OutgoingState.deleting(hard: $hard)';
+  Map<String, dynamic> toJson() {
+    return _$DeletingToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$DeletingImpl &&
+            other is Deleting &&
             (identical(other.hard, hard) || other.hard == hard));
   }
 
@@ -1212,103 +510,41 @@ class _$DeletingImpl implements Deleting {
   @override
   int get hashCode => Object.hash(runtimeType, hard);
 
-  /// Create a copy of OutgoingState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$DeletingImplCopyWith<_$DeletingImpl> get copyWith =>
-      __$$DeletingImplCopyWithImpl<_$DeletingImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() sending,
-    required TResult Function() updating,
-    required TResult Function(bool hard) deleting,
-  }) {
-    return deleting(hard);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sending,
-    TResult? Function()? updating,
-    TResult? Function(bool hard)? deleting,
-  }) {
-    return deleting?.call(hard);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sending,
-    TResult Function()? updating,
-    TResult Function(bool hard)? deleting,
-    required TResult orElse(),
-  }) {
-    if (deleting != null) {
-      return deleting(hard);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Sending value) sending,
-    required TResult Function(Updating value) updating,
-    required TResult Function(Deleting value) deleting,
-  }) {
-    return deleting(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Sending value)? sending,
-    TResult? Function(Updating value)? updating,
-    TResult? Function(Deleting value)? deleting,
-  }) {
-    return deleting?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Sending value)? sending,
-    TResult Function(Updating value)? updating,
-    TResult Function(Deleting value)? deleting,
-    required TResult orElse(),
-  }) {
-    if (deleting != null) {
-      return deleting(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$DeletingImplToJson(
-      this,
-    );
+  String toString() {
+    return 'OutgoingState.deleting(hard: $hard)';
   }
 }
 
-abstract class Deleting implements OutgoingState {
-  const factory Deleting({final bool hard}) = _$DeletingImpl;
+/// @nodoc
+abstract mixin class $DeletingCopyWith<$Res>
+    implements $OutgoingStateCopyWith<$Res> {
+  factory $DeletingCopyWith(Deleting value, $Res Function(Deleting) _then) =
+      _$DeletingCopyWithImpl;
+  @useResult
+  $Res call({bool hard});
+}
 
-  factory Deleting.fromJson(Map<String, dynamic> json) =
-      _$DeletingImpl.fromJson;
+/// @nodoc
+class _$DeletingCopyWithImpl<$Res> implements $DeletingCopyWith<$Res> {
+  _$DeletingCopyWithImpl(this._self, this._then);
 
-  bool get hard;
+  final Deleting _self;
+  final $Res Function(Deleting) _then;
 
   /// Create a copy of OutgoingState
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$DeletingImplCopyWith<_$DeletingImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? hard = null,
+  }) {
+    return _then(Deleting(
+      hard: null == hard
+          ? _self.hard
+          : hard // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
 }
 
 CompletedState _$CompletedStateFromJson(Map<String, dynamic> json) {
@@ -1328,241 +564,83 @@ CompletedState _$CompletedStateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$CompletedState {
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() sent,
-    required TResult Function() updated,
-    required TResult Function(bool hard) deleted,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sent,
-    TResult? Function()? updated,
-    TResult? Function(bool hard)? deleted,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sent,
-    TResult Function()? updated,
-    TResult Function(bool hard)? deleted,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Sent value) sent,
-    required TResult Function(Updated value) updated,
-    required TResult Function(Deleted value) deleted,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Sent value)? sent,
-    TResult? Function(Updated value)? updated,
-    TResult? Function(Deleted value)? deleted,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Sent value)? sent,
-    TResult Function(Updated value)? updated,
-    TResult Function(Deleted value)? deleted,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-
   /// Serializes this CompletedState to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is CompletedState);
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'CompletedState()';
+  }
 }
 
 /// @nodoc
-abstract class $CompletedStateCopyWith<$Res> {
-  factory $CompletedStateCopyWith(
-          CompletedState value, $Res Function(CompletedState) then) =
-      _$CompletedStateCopyWithImpl<$Res, CompletedState>;
-}
-
-/// @nodoc
-class _$CompletedStateCopyWithImpl<$Res, $Val extends CompletedState>
-    implements $CompletedStateCopyWith<$Res> {
-  _$CompletedStateCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of CompletedState
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-abstract class _$$SentImplCopyWith<$Res> {
-  factory _$$SentImplCopyWith(
-          _$SentImpl value, $Res Function(_$SentImpl) then) =
-      __$$SentImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$SentImplCopyWithImpl<$Res>
-    extends _$CompletedStateCopyWithImpl<$Res, _$SentImpl>
-    implements _$$SentImplCopyWith<$Res> {
-  __$$SentImplCopyWithImpl(_$SentImpl _value, $Res Function(_$SentImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of CompletedState
-  /// with the given fields replaced by the non-null parameter values.
+class $CompletedStateCopyWith<$Res> {
+  $CompletedStateCopyWith(CompletedState _, $Res Function(CompletedState) __);
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$SentImpl implements Sent {
-  const _$SentImpl({final String? $type}) : $type = $type ?? 'sent';
-
-  factory _$SentImpl.fromJson(Map<String, dynamic> json) =>
-      _$$SentImplFromJson(json);
+class Sent implements CompletedState {
+  const Sent({final String? $type}) : $type = $type ?? 'sent';
+  factory Sent.fromJson(Map<String, dynamic> json) => _$SentFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$SentToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is Sent);
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() {
     return 'CompletedState.sent()';
   }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$SentImpl);
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() sent,
-    required TResult Function() updated,
-    required TResult Function(bool hard) deleted,
-  }) {
-    return sent();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sent,
-    TResult? Function()? updated,
-    TResult? Function(bool hard)? deleted,
-  }) {
-    return sent?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sent,
-    TResult Function()? updated,
-    TResult Function(bool hard)? deleted,
-    required TResult orElse(),
-  }) {
-    if (sent != null) {
-      return sent();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Sent value) sent,
-    required TResult Function(Updated value) updated,
-    required TResult Function(Deleted value) deleted,
-  }) {
-    return sent(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Sent value)? sent,
-    TResult? Function(Updated value)? updated,
-    TResult? Function(Deleted value)? deleted,
-  }) {
-    return sent?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Sent value)? sent,
-    TResult Function(Updated value)? updated,
-    TResult Function(Deleted value)? deleted,
-    required TResult orElse(),
-  }) {
-    if (sent != null) {
-      return sent(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$SentImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class Sent implements CompletedState {
-  const factory Sent() = _$SentImpl;
-
-  factory Sent.fromJson(Map<String, dynamic> json) = _$SentImpl.fromJson;
-}
-
-/// @nodoc
-abstract class _$$UpdatedImplCopyWith<$Res> {
-  factory _$$UpdatedImplCopyWith(
-          _$UpdatedImpl value, $Res Function(_$UpdatedImpl) then) =
-      __$$UpdatedImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$UpdatedImplCopyWithImpl<$Res>
-    extends _$CompletedStateCopyWithImpl<$Res, _$UpdatedImpl>
-    implements _$$UpdatedImplCopyWith<$Res> {
-  __$$UpdatedImplCopyWithImpl(
-      _$UpdatedImpl _value, $Res Function(_$UpdatedImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of CompletedState
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$UpdatedImpl implements Updated {
-  const _$UpdatedImpl({final String? $type}) : $type = $type ?? 'updated';
-
-  factory _$UpdatedImpl.fromJson(Map<String, dynamic> json) =>
-      _$$UpdatedImplFromJson(json);
+class Updated implements CompletedState {
+  const Updated({final String? $type}) : $type = $type ?? 'updated';
+  factory Updated.fromJson(Map<String, dynamic> json) =>
+      _$UpdatedFromJson(json);
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
-  String toString() {
-    return 'CompletedState.updated()';
+  Map<String, dynamic> toJson() {
+    return _$UpdatedToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$UpdatedImpl);
+        (other.runtimeType == runtimeType && other is Updated);
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1570,146 +648,44 @@ class _$UpdatedImpl implements Updated {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() sent,
-    required TResult Function() updated,
-    required TResult Function(bool hard) deleted,
-  }) {
-    return updated();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sent,
-    TResult? Function()? updated,
-    TResult? Function(bool hard)? deleted,
-  }) {
-    return updated?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sent,
-    TResult Function()? updated,
-    TResult Function(bool hard)? deleted,
-    required TResult orElse(),
-  }) {
-    if (updated != null) {
-      return updated();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Sent value) sent,
-    required TResult Function(Updated value) updated,
-    required TResult Function(Deleted value) deleted,
-  }) {
-    return updated(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Sent value)? sent,
-    TResult? Function(Updated value)? updated,
-    TResult? Function(Deleted value)? deleted,
-  }) {
-    return updated?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Sent value)? sent,
-    TResult Function(Updated value)? updated,
-    TResult Function(Deleted value)? deleted,
-    required TResult orElse(),
-  }) {
-    if (updated != null) {
-      return updated(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$UpdatedImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class Updated implements CompletedState {
-  const factory Updated() = _$UpdatedImpl;
-
-  factory Updated.fromJson(Map<String, dynamic> json) = _$UpdatedImpl.fromJson;
-}
-
-/// @nodoc
-abstract class _$$DeletedImplCopyWith<$Res> {
-  factory _$$DeletedImplCopyWith(
-          _$DeletedImpl value, $Res Function(_$DeletedImpl) then) =
-      __$$DeletedImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({bool hard});
-}
-
-/// @nodoc
-class __$$DeletedImplCopyWithImpl<$Res>
-    extends _$CompletedStateCopyWithImpl<$Res, _$DeletedImpl>
-    implements _$$DeletedImplCopyWith<$Res> {
-  __$$DeletedImplCopyWithImpl(
-      _$DeletedImpl _value, $Res Function(_$DeletedImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of CompletedState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? hard = null,
-  }) {
-    return _then(_$DeletedImpl(
-      hard: null == hard
-          ? _value.hard
-          : hard // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+  String toString() {
+    return 'CompletedState.updated()';
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$DeletedImpl implements Deleted {
-  const _$DeletedImpl({this.hard = false, final String? $type})
+class Deleted implements CompletedState {
+  const Deleted({this.hard = false, final String? $type})
       : $type = $type ?? 'deleted';
+  factory Deleted.fromJson(Map<String, dynamic> json) =>
+      _$DeletedFromJson(json);
 
-  factory _$DeletedImpl.fromJson(Map<String, dynamic> json) =>
-      _$$DeletedImplFromJson(json);
-
-  @override
   @JsonKey()
   final bool hard;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
+  /// Create a copy of CompletedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $DeletedCopyWith<Deleted> get copyWith =>
+      _$DeletedCopyWithImpl<Deleted>(this, _$identity);
+
   @override
-  String toString() {
-    return 'CompletedState.deleted(hard: $hard)';
+  Map<String, dynamic> toJson() {
+    return _$DeletedToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$DeletedImpl &&
+            other is Deleted &&
             (identical(other.hard, hard) || other.hard == hard));
   }
 
@@ -1717,102 +693,41 @@ class _$DeletedImpl implements Deleted {
   @override
   int get hashCode => Object.hash(runtimeType, hard);
 
-  /// Create a copy of CompletedState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$DeletedImplCopyWith<_$DeletedImpl> get copyWith =>
-      __$$DeletedImplCopyWithImpl<_$DeletedImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() sent,
-    required TResult Function() updated,
-    required TResult Function(bool hard) deleted,
-  }) {
-    return deleted(hard);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sent,
-    TResult? Function()? updated,
-    TResult? Function(bool hard)? deleted,
-  }) {
-    return deleted?.call(hard);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sent,
-    TResult Function()? updated,
-    TResult Function(bool hard)? deleted,
-    required TResult orElse(),
-  }) {
-    if (deleted != null) {
-      return deleted(hard);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Sent value) sent,
-    required TResult Function(Updated value) updated,
-    required TResult Function(Deleted value) deleted,
-  }) {
-    return deleted(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(Sent value)? sent,
-    TResult? Function(Updated value)? updated,
-    TResult? Function(Deleted value)? deleted,
-  }) {
-    return deleted?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Sent value)? sent,
-    TResult Function(Updated value)? updated,
-    TResult Function(Deleted value)? deleted,
-    required TResult orElse(),
-  }) {
-    if (deleted != null) {
-      return deleted(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$DeletedImplToJson(
-      this,
-    );
+  String toString() {
+    return 'CompletedState.deleted(hard: $hard)';
   }
 }
 
-abstract class Deleted implements CompletedState {
-  const factory Deleted({final bool hard}) = _$DeletedImpl;
+/// @nodoc
+abstract mixin class $DeletedCopyWith<$Res>
+    implements $CompletedStateCopyWith<$Res> {
+  factory $DeletedCopyWith(Deleted value, $Res Function(Deleted) _then) =
+      _$DeletedCopyWithImpl;
+  @useResult
+  $Res call({bool hard});
+}
 
-  factory Deleted.fromJson(Map<String, dynamic> json) = _$DeletedImpl.fromJson;
+/// @nodoc
+class _$DeletedCopyWithImpl<$Res> implements $DeletedCopyWith<$Res> {
+  _$DeletedCopyWithImpl(this._self, this._then);
 
-  bool get hard;
+  final Deleted _self;
+  final $Res Function(Deleted) _then;
 
   /// Create a copy of CompletedState
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$DeletedImplCopyWith<_$DeletedImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? hard = null,
+  }) {
+    return _then(Deleted(
+      hard: null == hard
+          ? _self.hard
+          : hard // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
 }
 
 FailedState _$FailedStateFromJson(Map<String, dynamic> json) {
@@ -1832,145 +747,66 @@ FailedState _$FailedStateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$FailedState {
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
-    required TResult Function(bool skipEnrichUrl) updatingFailed,
-    required TResult Function(bool hard) deletingFailed,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
-    TResult? Function(bool skipEnrichUrl)? updatingFailed,
-    TResult? Function(bool hard)? deletingFailed,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
-    TResult Function(bool skipEnrichUrl)? updatingFailed,
-    TResult Function(bool hard)? deletingFailed,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(SendingFailed value) sendingFailed,
-    required TResult Function(UpdatingFailed value) updatingFailed,
-    required TResult Function(DeletingFailed value) deletingFailed,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(SendingFailed value)? sendingFailed,
-    TResult? Function(UpdatingFailed value)? updatingFailed,
-    TResult? Function(DeletingFailed value)? deletingFailed,
-  }) =>
-      throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(SendingFailed value)? sendingFailed,
-    TResult Function(UpdatingFailed value)? updatingFailed,
-    TResult Function(DeletingFailed value)? deletingFailed,
-    required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
-
   /// Serializes this FailedState to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-}
+  Map<String, dynamic> toJson();
 
-/// @nodoc
-abstract class $FailedStateCopyWith<$Res> {
-  factory $FailedStateCopyWith(
-          FailedState value, $Res Function(FailedState) then) =
-      _$FailedStateCopyWithImpl<$Res, FailedState>;
-}
-
-/// @nodoc
-class _$FailedStateCopyWithImpl<$Res, $Val extends FailedState>
-    implements $FailedStateCopyWith<$Res> {
-  _$FailedStateCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-}
-
-/// @nodoc
-abstract class _$$SendingFailedImplCopyWith<$Res> {
-  factory _$$SendingFailedImplCopyWith(
-          _$SendingFailedImpl value, $Res Function(_$SendingFailedImpl) then) =
-      __$$SendingFailedImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({bool skipPush, bool skipEnrichUrl});
-}
-
-/// @nodoc
-class __$$SendingFailedImplCopyWithImpl<$Res>
-    extends _$FailedStateCopyWithImpl<$Res, _$SendingFailedImpl>
-    implements _$$SendingFailedImplCopyWith<$Res> {
-  __$$SendingFailedImplCopyWithImpl(
-      _$SendingFailedImpl _value, $Res Function(_$SendingFailedImpl) _then)
-      : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? skipPush = null,
-    Object? skipEnrichUrl = null,
-  }) {
-    return _then(_$SendingFailedImpl(
-      skipPush: null == skipPush
-          ? _value.skipPush
-          : skipPush // ignore: cast_nullable_to_non_nullable
-              as bool,
-      skipEnrichUrl: null == skipEnrichUrl
-          ? _value.skipEnrichUrl
-          : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is FailedState);
   }
 
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'FailedState()';
+  }
+}
+
+/// @nodoc
+class $FailedStateCopyWith<$Res> {
+  $FailedStateCopyWith(FailedState _, $Res Function(FailedState) __);
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$SendingFailedImpl implements SendingFailed {
-  const _$SendingFailedImpl(
+class SendingFailed implements FailedState {
+  const SendingFailed(
       {this.skipPush = false, this.skipEnrichUrl = false, final String? $type})
       : $type = $type ?? 'sendingFailed';
+  factory SendingFailed.fromJson(Map<String, dynamic> json) =>
+      _$SendingFailedFromJson(json);
 
-  factory _$SendingFailedImpl.fromJson(Map<String, dynamic> json) =>
-      _$$SendingFailedImplFromJson(json);
-
-  @override
   @JsonKey()
   final bool skipPush;
-  @override
   @JsonKey()
   final bool skipEnrichUrl;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SendingFailedCopyWith<SendingFailed> get copyWith =>
+      _$SendingFailedCopyWithImpl<SendingFailed>(this, _$identity);
+
   @override
-  String toString() {
-    return 'FailedState.sendingFailed(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
+  Map<String, dynamic> toJson() {
+    return _$SendingFailedToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$SendingFailedImpl &&
+            other is SendingFailed &&
             (identical(other.skipPush, skipPush) ||
                 other.skipPush == skipPush) &&
             (identical(other.skipEnrichUrl, skipEnrichUrl) ||
@@ -1981,294 +817,135 @@ class _$SendingFailedImpl implements SendingFailed {
   @override
   int get hashCode => Object.hash(runtimeType, skipPush, skipEnrichUrl);
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$SendingFailedImplCopyWith<_$SendingFailedImpl> get copyWith =>
-      __$$SendingFailedImplCopyWithImpl<_$SendingFailedImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
-    required TResult Function(bool skipEnrichUrl) updatingFailed,
-    required TResult Function(bool hard) deletingFailed,
-  }) {
-    return sendingFailed(skipPush, skipEnrichUrl);
+  String toString() {
+    return 'FailedState.sendingFailed(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
   }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
-    TResult? Function(bool skipEnrichUrl)? updatingFailed,
-    TResult? Function(bool hard)? deletingFailed,
-  }) {
-    return sendingFailed?.call(skipPush, skipEnrichUrl);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
-    TResult Function(bool skipEnrichUrl)? updatingFailed,
-    TResult Function(bool hard)? deletingFailed,
-    required TResult orElse(),
-  }) {
-    if (sendingFailed != null) {
-      return sendingFailed(skipPush, skipEnrichUrl);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(SendingFailed value) sendingFailed,
-    required TResult Function(UpdatingFailed value) updatingFailed,
-    required TResult Function(DeletingFailed value) deletingFailed,
-  }) {
-    return sendingFailed(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(SendingFailed value)? sendingFailed,
-    TResult? Function(UpdatingFailed value)? updatingFailed,
-    TResult? Function(DeletingFailed value)? deletingFailed,
-  }) {
-    return sendingFailed?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(SendingFailed value)? sendingFailed,
-    TResult Function(UpdatingFailed value)? updatingFailed,
-    TResult Function(DeletingFailed value)? deletingFailed,
-    required TResult orElse(),
-  }) {
-    if (sendingFailed != null) {
-      return sendingFailed(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$SendingFailedImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class SendingFailed implements FailedState {
-  const factory SendingFailed({final bool skipPush, final bool skipEnrichUrl}) =
-      _$SendingFailedImpl;
-
-  factory SendingFailed.fromJson(Map<String, dynamic> json) =
-      _$SendingFailedImpl.fromJson;
-
-  bool get skipPush;
-  bool get skipEnrichUrl;
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$SendingFailedImplCopyWith<_$SendingFailedImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$UpdatingFailedImplCopyWith<$Res> {
-  factory _$$UpdatingFailedImplCopyWith(_$UpdatingFailedImpl value,
-          $Res Function(_$UpdatingFailedImpl) then) =
-      __$$UpdatingFailedImplCopyWithImpl<$Res>;
+abstract mixin class $SendingFailedCopyWith<$Res>
+    implements $FailedStateCopyWith<$Res> {
+  factory $SendingFailedCopyWith(
+          SendingFailed value, $Res Function(SendingFailed) _then) =
+      _$SendingFailedCopyWithImpl;
   @useResult
-  $Res call({bool skipEnrichUrl});
+  $Res call({bool skipPush, bool skipEnrichUrl});
 }
 
 /// @nodoc
-class __$$UpdatingFailedImplCopyWithImpl<$Res>
-    extends _$FailedStateCopyWithImpl<$Res, _$UpdatingFailedImpl>
-    implements _$$UpdatingFailedImplCopyWith<$Res> {
-  __$$UpdatingFailedImplCopyWithImpl(
-      _$UpdatingFailedImpl _value, $Res Function(_$UpdatingFailedImpl) _then)
-      : super(_value, _then);
+class _$SendingFailedCopyWithImpl<$Res>
+    implements $SendingFailedCopyWith<$Res> {
+  _$SendingFailedCopyWithImpl(this._self, this._then);
 
+  final SendingFailed _self;
+  final $Res Function(SendingFailed) _then;
+
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  @override
   $Res call({
+    Object? skipPush = null,
     Object? skipEnrichUrl = null,
   }) {
-    return _then(_$UpdatingFailedImpl(
+    return _then(SendingFailed(
+      skipPush: null == skipPush
+          ? _self.skipPush
+          : skipPush // ignore: cast_nullable_to_non_nullable
+              as bool,
       skipEnrichUrl: null == skipEnrichUrl
-          ? _value.skipEnrichUrl
+          ? _self.skipEnrichUrl
           : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$UpdatingFailedImpl implements UpdatingFailed {
-  const _$UpdatingFailedImpl({this.skipEnrichUrl = false, final String? $type})
+class UpdatingFailed implements FailedState {
+  const UpdatingFailed(
+      {this.skipPush = false, this.skipEnrichUrl = false, final String? $type})
       : $type = $type ?? 'updatingFailed';
+  factory UpdatingFailed.fromJson(Map<String, dynamic> json) =>
+      _$UpdatingFailedFromJson(json);
 
-  factory _$UpdatingFailedImpl.fromJson(Map<String, dynamic> json) =>
-      _$$UpdatingFailedImplFromJson(json);
-
-  @override
+  @JsonKey()
+  final bool skipPush;
   @JsonKey()
   final bool skipEnrichUrl;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpdatingFailedCopyWith<UpdatingFailed> get copyWith =>
+      _$UpdatingFailedCopyWithImpl<UpdatingFailed>(this, _$identity);
+
   @override
-  String toString() {
-    return 'FailedState.updatingFailed(skipEnrichUrl: $skipEnrichUrl)';
+  Map<String, dynamic> toJson() {
+    return _$UpdatingFailedToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$UpdatingFailedImpl &&
+            other is UpdatingFailed &&
+            (identical(other.skipPush, skipPush) ||
+                other.skipPush == skipPush) &&
             (identical(other.skipEnrichUrl, skipEnrichUrl) ||
                 other.skipEnrichUrl == skipEnrichUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, skipEnrichUrl);
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$UpdatingFailedImplCopyWith<_$UpdatingFailedImpl> get copyWith =>
-      __$$UpdatingFailedImplCopyWithImpl<_$UpdatingFailedImpl>(
-          this, _$identity);
+  int get hashCode => Object.hash(runtimeType, skipPush, skipEnrichUrl);
 
   @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
-    required TResult Function(bool skipEnrichUrl) updatingFailed,
-    required TResult Function(bool hard) deletingFailed,
-  }) {
-    return updatingFailed(skipEnrichUrl);
+  String toString() {
+    return 'FailedState.updatingFailed(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
   }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
-    TResult? Function(bool skipEnrichUrl)? updatingFailed,
-    TResult? Function(bool hard)? deletingFailed,
-  }) {
-    return updatingFailed?.call(skipEnrichUrl);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
-    TResult Function(bool skipEnrichUrl)? updatingFailed,
-    TResult Function(bool hard)? deletingFailed,
-    required TResult orElse(),
-  }) {
-    if (updatingFailed != null) {
-      return updatingFailed(skipEnrichUrl);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(SendingFailed value) sendingFailed,
-    required TResult Function(UpdatingFailed value) updatingFailed,
-    required TResult Function(DeletingFailed value) deletingFailed,
-  }) {
-    return updatingFailed(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(SendingFailed value)? sendingFailed,
-    TResult? Function(UpdatingFailed value)? updatingFailed,
-    TResult? Function(DeletingFailed value)? deletingFailed,
-  }) {
-    return updatingFailed?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(SendingFailed value)? sendingFailed,
-    TResult Function(UpdatingFailed value)? updatingFailed,
-    TResult Function(DeletingFailed value)? deletingFailed,
-    required TResult orElse(),
-  }) {
-    if (updatingFailed != null) {
-      return updatingFailed(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$UpdatingFailedImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class UpdatingFailed implements FailedState {
-  const factory UpdatingFailed({final bool skipEnrichUrl}) =
-      _$UpdatingFailedImpl;
-
-  factory UpdatingFailed.fromJson(Map<String, dynamic> json) =
-      _$UpdatingFailedImpl.fromJson;
-
-  bool get skipEnrichUrl;
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$UpdatingFailedImplCopyWith<_$UpdatingFailedImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$DeletingFailedImplCopyWith<$Res> {
-  factory _$$DeletingFailedImplCopyWith(_$DeletingFailedImpl value,
-          $Res Function(_$DeletingFailedImpl) then) =
-      __$$DeletingFailedImplCopyWithImpl<$Res>;
+abstract mixin class $UpdatingFailedCopyWith<$Res>
+    implements $FailedStateCopyWith<$Res> {
+  factory $UpdatingFailedCopyWith(
+          UpdatingFailed value, $Res Function(UpdatingFailed) _then) =
+      _$UpdatingFailedCopyWithImpl;
   @useResult
-  $Res call({bool hard});
+  $Res call({bool skipPush, bool skipEnrichUrl});
 }
 
 /// @nodoc
-class __$$DeletingFailedImplCopyWithImpl<$Res>
-    extends _$FailedStateCopyWithImpl<$Res, _$DeletingFailedImpl>
-    implements _$$DeletingFailedImplCopyWith<$Res> {
-  __$$DeletingFailedImplCopyWithImpl(
-      _$DeletingFailedImpl _value, $Res Function(_$DeletingFailedImpl) _then)
-      : super(_value, _then);
+class _$UpdatingFailedCopyWithImpl<$Res>
+    implements $UpdatingFailedCopyWith<$Res> {
+  _$UpdatingFailedCopyWithImpl(this._self, this._then);
+
+  final UpdatingFailed _self;
+  final $Res Function(UpdatingFailed) _then;
 
   /// Create a copy of FailedState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  @override
   $Res call({
-    Object? hard = null,
+    Object? skipPush = null,
+    Object? skipEnrichUrl = null,
   }) {
-    return _then(_$DeletingFailedImpl(
-      hard: null == hard
-          ? _value.hard
-          : hard // ignore: cast_nullable_to_non_nullable
+    return _then(UpdatingFailed(
+      skipPush: null == skipPush
+          ? _self.skipPush
+          : skipPush // ignore: cast_nullable_to_non_nullable
+              as bool,
+      skipEnrichUrl: null == skipEnrichUrl
+          ? _self.skipEnrichUrl
+          : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }
@@ -2276,30 +953,37 @@ class __$$DeletingFailedImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$DeletingFailedImpl implements DeletingFailed {
-  const _$DeletingFailedImpl({this.hard = false, final String? $type})
+class DeletingFailed implements FailedState {
+  const DeletingFailed({this.hard = false, final String? $type})
       : $type = $type ?? 'deletingFailed';
+  factory DeletingFailed.fromJson(Map<String, dynamic> json) =>
+      _$DeletingFailedFromJson(json);
 
-  factory _$DeletingFailedImpl.fromJson(Map<String, dynamic> json) =>
-      _$$DeletingFailedImplFromJson(json);
-
-  @override
   @JsonKey()
   final bool hard;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $DeletingFailedCopyWith<DeletingFailed> get copyWith =>
+      _$DeletingFailedCopyWithImpl<DeletingFailed>(this, _$identity);
+
   @override
-  String toString() {
-    return 'FailedState.deletingFailed(hard: $hard)';
+  Map<String, dynamic> toJson() {
+    return _$DeletingFailedToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$DeletingFailedImpl &&
+            other is DeletingFailed &&
             (identical(other.hard, hard) || other.hard == hard));
   }
 
@@ -2307,102 +991,43 @@ class _$DeletingFailedImpl implements DeletingFailed {
   @override
   int get hashCode => Object.hash(runtimeType, hard);
 
+  @override
+  String toString() {
+    return 'FailedState.deletingFailed(hard: $hard)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $DeletingFailedCopyWith<$Res>
+    implements $FailedStateCopyWith<$Res> {
+  factory $DeletingFailedCopyWith(
+          DeletingFailed value, $Res Function(DeletingFailed) _then) =
+      _$DeletingFailedCopyWithImpl;
+  @useResult
+  $Res call({bool hard});
+}
+
+/// @nodoc
+class _$DeletingFailedCopyWithImpl<$Res>
+    implements $DeletingFailedCopyWith<$Res> {
+  _$DeletingFailedCopyWithImpl(this._self, this._then);
+
+  final DeletingFailed _self;
+  final $Res Function(DeletingFailed) _then;
+
   /// Create a copy of FailedState
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
   @pragma('vm:prefer-inline')
-  _$$DeletingFailedImplCopyWith<_$DeletingFailedImpl> get copyWith =>
-      __$$DeletingFailedImplCopyWithImpl<_$DeletingFailedImpl>(
-          this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
-    required TResult Function(bool skipEnrichUrl) updatingFailed,
-    required TResult Function(bool hard) deletingFailed,
+  $Res call({
+    Object? hard = null,
   }) {
-    return deletingFailed(hard);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
-    TResult? Function(bool skipEnrichUrl)? updatingFailed,
-    TResult? Function(bool hard)? deletingFailed,
-  }) {
-    return deletingFailed?.call(hard);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
-    TResult Function(bool skipEnrichUrl)? updatingFailed,
-    TResult Function(bool hard)? deletingFailed,
-    required TResult orElse(),
-  }) {
-    if (deletingFailed != null) {
-      return deletingFailed(hard);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(SendingFailed value) sendingFailed,
-    required TResult Function(UpdatingFailed value) updatingFailed,
-    required TResult Function(DeletingFailed value) deletingFailed,
-  }) {
-    return deletingFailed(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(SendingFailed value)? sendingFailed,
-    TResult? Function(UpdatingFailed value)? updatingFailed,
-    TResult? Function(DeletingFailed value)? deletingFailed,
-  }) {
-    return deletingFailed?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(SendingFailed value)? sendingFailed,
-    TResult Function(UpdatingFailed value)? updatingFailed,
-    TResult Function(DeletingFailed value)? deletingFailed,
-    required TResult orElse(),
-  }) {
-    if (deletingFailed != null) {
-      return deletingFailed(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$DeletingFailedImplToJson(
-      this,
-    );
+    return _then(DeletingFailed(
+      hard: null == hard
+          ? _self.hard
+          : hard // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 
-abstract class DeletingFailed implements FailedState {
-  const factory DeletingFailed({final bool hard}) = _$DeletingFailedImpl;
-
-  factory DeletingFailed.fromJson(Map<String, dynamic> json) =
-      _$DeletingFailedImpl.fromJson;
-
-  bool get hard;
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$DeletingFailedImplCopyWith<_$DeletingFailedImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
+// dart format on

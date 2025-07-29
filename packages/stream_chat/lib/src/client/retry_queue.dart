@@ -122,7 +122,7 @@ class RetryQueue {
     return message.state.maybeWhen(
       failed: (state, _) => state.when(
         sendingFailed: (_, __) => message.createdAt,
-        updatingFailed: (_) => message.updatedAt,
+        updatingFailed: (_, __) => message.updatedAt,
         deletingFailed: (_) => message.deletedAt,
       ),
       orElse: () => null,
