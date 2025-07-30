@@ -1,9 +1,10 @@
-import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart' hide ButtonStyle;
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
+import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction_picker.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
 import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
@@ -696,9 +697,14 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         // context menu actions.
         if (message.state.isDeleted || message.state.isOutgoing) return child;
 
-        return ContextMenuArea(
-          verticalPadding: 0,
-          builder: (_) => _buildDesktopOrWebActions(context, message),
+        final menuItems = _buildDesktopOrWebActions(context, message);
+        if (menuItems.isEmpty) return child;
+
+        return ContextMenuRegion(
+          contextMenuBuilder: (_, anchor) => ContextMenu(
+            anchor: anchor,
+            menuItems: menuItems,
+          ),
           child: child,
         );
       },
