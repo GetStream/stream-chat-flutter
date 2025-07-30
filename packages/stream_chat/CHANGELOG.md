@@ -4,6 +4,25 @@
 
 - Fixed `skipPush` and `skipEnrichUrl` not preserving during message send or update retry
 
+## 10.0.0-beta.4
+
+🛑️ Breaking
+
+- **Changed `sendReaction` method signature**: The `sendReaction` method on both `Client` and
+  `Channel` now accepts a full `Reaction` object instead of individual parameters (`type`, `score`,
+  `extraData`). This change provides more flexibility and better type safety.
+
+✅ Added
+
+- Added comprehensive location sharing support with static and live location features:
+  - `Channel.sendStaticLocation()` - Send a static location message to the channel
+  - `Channel.startLiveLocationSharing()` - Start sharing live location with automatic updates
+  - `Channel.activeLiveLocations` - Track members active live location shares in the channel
+  - `Client.activeLiveLocations` - Access current user active live location shares across channels
+  - Location event listeners for `locationShared`, `locationUpdated`, and `locationExpired` events
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.15.0
 
 ✅ Added
@@ -17,6 +36,18 @@
 - Fixed `WebSocket` race condition where reconnection could access null user during disconnect.
 - Fixed draft message persistence issues where removed drafts were not properly deleted from the
   database.
+
+## 10.0.0-beta.3
+
+🛑️ Breaking
+
+- **Deprecated API Cleanup**: Removed all deprecated classes, methods, and properties for the v10 major release:
+  - **Removed Classes**: `PermissionType` (use string constants like `'delete-channel'`, `'update-channel'`), `CallApi`, `CallPayload`, `CallTokenPayload`, `CreateCallPayload`
+  - **Removed Methods**: `cooldownStartedAt` getter from `Channel`, `getCallToken` and `createCall` from `StreamChatClient`
+  - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
+  - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.14.0
 
@@ -36,7 +67,15 @@
 
 - Deprecated `SortOption.new` constructor in favor of `SortOption.desc` and `SortOption.asc`.
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.13.0
+
+- Bug fixes and improvements
+
+## 10.0.0-beta.1
 
 - Bug fixes and improvements
 

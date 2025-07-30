@@ -725,6 +725,109 @@ void main() {
       });
     });
 
+    group('`.sendStaticLocation`', () {
+      const deviceId = 'test-device-id';
+      const locationId = 'test-location-id';
+      const coordinates = LocationCoordinates(
+        latitude: 40.7128,
+        longitude: -74.0060,
+      );
+
+      test('should create a static location and call sendMessage', () async {
+        when(
+          () => client.sendMessage(any(), channelId, channelType),
+        ).thenAnswer(
+          (_) async => SendMessageResponse()
+            ..message = Message(
+              id: locationId,
+              text: 'Location shared',
+              extraData: const {'custom': 'data'},
+              sharedLocation: Location(
+                channelCid: channel.cid,
+                messageId: locationId,
+                userId: client.state.currentUser?.id,
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude,
+                createdByDeviceId: deviceId,
+              ),
+            ),
+        );
+
+        final response = await channel.sendStaticLocation(
+          id: locationId,
+          messageText: 'Location shared',
+          createdByDeviceId: deviceId,
+          location: coordinates,
+          extraData: {'custom': 'data'},
+        );
+
+        expect(response, isNotNull);
+        expect(response.message.id, locationId);
+        expect(response.message.text, 'Location shared');
+        expect(response.message.extraData['custom'], 'data');
+        expect(response.message.sharedLocation, isNotNull);
+
+        verify(
+          () => client.sendMessage(any(), channelId, channelType),
+        ).called(1);
+      });
+    });
+
+    group('`.startLiveLocationSharing`', () {
+      const deviceId = 'test-device-id';
+      const locationId = 'test-location-id';
+      final endSharingAt = DateTime.now().add(const Duration(hours: 1));
+      const coordinates = LocationCoordinates(
+        latitude: 40.7128,
+        longitude: -74.0060,
+      );
+
+      test(
+        'should create message with live location and call sendMessage',
+        () async {
+          when(
+            () => client.sendMessage(any(), channelId, channelType),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = Message(
+                id: locationId,
+                text: 'Location shared',
+                extraData: const {'custom': 'data'},
+                sharedLocation: Location(
+                  channelCid: channel.cid,
+                  messageId: locationId,
+                  userId: client.state.currentUser?.id,
+                  latitude: coordinates.latitude,
+                  longitude: coordinates.longitude,
+                  createdByDeviceId: deviceId,
+                  endAt: endSharingAt,
+                ),
+              ),
+          );
+
+          final response = await channel.startLiveLocationSharing(
+            id: locationId,
+            messageText: 'Location shared',
+            createdByDeviceId: deviceId,
+            location: coordinates,
+            endSharingAt: endSharingAt,
+            extraData: {'custom': 'data'},
+          );
+
+          expect(response, isNotNull);
+          expect(response.message.id, locationId);
+          expect(response.message.text, 'Location shared');
+          expect(response.message.extraData['custom'], 'data');
+          expect(response.message.sharedLocation, isNotNull);
+          expect(response.message.sharedLocation?.endAt, endSharingAt);
+
+          verify(
+            () => client.sendMessage(any(), channelId, channelType),
+          ).called(1);
+        },
+      );
+    });
+
     group('`.createDraft`', () {
       final draftMessage = DraftMessage(text: 'Draft message text');
 
@@ -2228,15 +2331,24 @@ void main() {
 
     group('`.sendReaction`', () {
       test('should work fine', () async {
-        const type = 'test-reaction-type';
         final message = Message(
           id: 'test-message-id',
           state: MessageState.sent,
         );
 
-        final reaction = Reaction(type: type, messageId: message.id);
+        const type = 'like';
+        const emojiCode = '👍';
+        const score = 4;
 
-        when(() => client.sendReaction(message.id, type)).thenAnswer(
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          emojiCode: emojiCode,
+          score: score,
+          user: client.state.currentUser,
+        );
+
+        when(() => client.sendReaction(message.id, reaction)).thenAnswer(
           (_) async => SendReactionResponse()
             ..message = message
             ..reaction = reaction,
@@ -2261,156 +2373,15 @@ void main() {
           ]),
         );
 
-        final res = await channel.sendReaction(message, type);
+        final res = await channel.sendReaction(message, reaction);
 
         expect(res, isNotNull);
         expect(res.reaction.type, type);
         expect(res.reaction.messageId, message.id);
-
-        verify(() => client.sendReaction(message.id, type)).called(1);
-      });
-
-      test('should work fine with score passed explicitly', () async {
-        const type = 'test-reaction-type';
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.sent,
-        );
-
-        const score = 5;
-        final reaction = Reaction(
-          type: type,
-          messageId: message.id,
-          score: score,
-        );
-
-        when(() => client.sendReaction(
-              message.id,
-              type,
-              score: score,
-            )).thenAnswer(
-          (_) async => SendReactionResponse()
-            ..message = message
-            ..reaction = reaction,
-        );
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sent,
-                  reactionGroups: {
-                    type: ReactionGroup(
-                      count: 1,
-                      sumScores: score,
-                    )
-                  },
-                  latestReactions: [reaction],
-                  ownReactions: [reaction],
-                ),
-                matchReactions: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        final res = await channel.sendReaction(
-          message,
-          type,
-          score: score,
-        );
-
-        expect(res, isNotNull);
-        expect(res.reaction.type, type);
-        expect(res.reaction.messageId, message.id);
+        expect(res.reaction.emojiCode, emojiCode);
         expect(res.reaction.score, score);
 
-        verify(() => client.sendReaction(
-              message.id,
-              type,
-              score: score,
-            )).called(1);
-      });
-
-      test('should work fine with score passed explicitly and in extraData',
-          () async {
-        const type = 'test-reaction-type';
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.sent,
-        );
-
-        const score = 5;
-        const extraDataScore = 3;
-        const extraData = {
-          'score': extraDataScore,
-        };
-        final reaction = Reaction(
-          type: type,
-          messageId: message.id,
-          score: extraDataScore,
-        );
-
-        when(() => client.sendReaction(
-              message.id,
-              type,
-              score: score,
-              extraData: extraData,
-            )).thenAnswer(
-          (_) async => SendReactionResponse()
-            ..message = message
-            ..reaction = reaction,
-        );
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sent,
-                  reactionGroups: {
-                    type: ReactionGroup(
-                      count: 1,
-                      sumScores: extraDataScore,
-                    )
-                  },
-                  latestReactions: [reaction],
-                  ownReactions: [reaction],
-                ),
-                matchReactions: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        final res = await channel.sendReaction(
-          message,
-          type,
-          score: score,
-          extraData: extraData,
-        );
-
-        expect(res, isNotNull);
-        expect(res.reaction.type, type);
-        expect(res.reaction.messageId, message.id);
-        expect(
-          res.reaction.score,
-          extraDataScore,
-        );
-
-        verify(() => client.sendReaction(
-              message.id,
-              type,
-              score: score,
-              extraData: extraData,
-            )).called(1);
+        verify(() => client.sendReaction(message.id, reaction)).called(1);
       });
 
       test(
@@ -2422,9 +2393,13 @@ void main() {
             state: MessageState.sent,
           );
 
-          final reaction = Reaction(type: type, messageId: message.id);
+          final reaction = Reaction(
+            type: type,
+            messageId: message.id,
+            user: client.state.currentUser,
+          );
 
-          when(() => client.sendReaction(message.id, type))
+          when(() => client.sendReaction(message.id, reaction))
               .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
           expectLater(
@@ -2459,25 +2434,24 @@ void main() {
           );
 
           try {
-            await channel.sendReaction(message, type);
+            await channel.sendReaction(message, reaction);
           } catch (e) {
             expect(e, isA<StreamChatNetworkError>());
           }
 
-          verify(() => client.sendReaction(message.id, type)).called(1);
+          verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
       );
 
       test(
         '''should override previous reaction if present and `enforceUnique` is true''',
         () async {
-          const userId = 'test-user-id';
           const messageId = 'test-message-id';
           const prevType = 'test-reaction-type';
           final prevReaction = Reaction(
             type: prevType,
             messageId: messageId,
-            userId: userId,
+            user: client.state.currentUser,
           );
           final message = Message(
             id: messageId,
@@ -2496,7 +2470,7 @@ void main() {
           final newReaction = Reaction(
             type: type,
             messageId: messageId,
-            userId: userId,
+            user: client.state.currentUser,
           );
           final newMessage = message.copyWith(
             ownReactions: [newReaction],
@@ -2507,7 +2481,7 @@ void main() {
 
           when(() => client.sendReaction(
                 messageId,
-                type,
+                newReaction,
                 enforceUnique: enforceUnique,
               )).thenAnswer(
             (_) async => SendReactionResponse()
@@ -2531,7 +2505,7 @@ void main() {
 
           final res = await channel.sendReaction(
             message,
-            type,
+            newReaction,
             enforceUnique: enforceUnique,
           );
 
@@ -2541,7 +2515,7 @@ void main() {
 
           verify(() => client.sendReaction(
                 messageId,
-                type,
+                newReaction,
                 enforceUnique: enforceUnique,
               )).called(1);
         },
@@ -2557,9 +2531,13 @@ void main() {
           state: MessageState.sent,
         );
 
-        final reaction = Reaction(type: type, messageId: message.id);
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          user: client.state.currentUser,
+        );
 
-        when(() => client.sendReaction(message.id, type)).thenAnswer(
+        when(() => client.sendReaction(message.id, reaction)).thenAnswer(
           (_) async => SendReactionResponse()
             ..message = message
             ..reaction = reaction,
@@ -2592,13 +2570,13 @@ void main() {
           ]),
         );
 
-        final res = await channel.sendReaction(message, type);
+        final res = await channel.sendReaction(message, reaction);
 
         expect(res, isNotNull);
         expect(res.reaction.type, type);
         expect(res.reaction.messageId, message.id);
 
-        verify(() => client.sendReaction(message.id, type)).called(1);
+        verify(() => client.sendReaction(message.id, reaction)).called(1);
       });
 
       test(
@@ -2611,9 +2589,13 @@ void main() {
             state: MessageState.sent,
           );
 
-          final reaction = Reaction(type: type, messageId: message.id);
+          final reaction = Reaction(
+            type: type,
+            messageId: message.id,
+            user: client.state.currentUser,
+          );
 
-          when(() => client.sendReaction(message.id, type))
+          when(() => client.sendReaction(message.id, reaction))
               .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
           expectLater(
@@ -2652,26 +2634,25 @@ void main() {
           );
 
           try {
-            await channel.sendReaction(message, type);
+            await channel.sendReaction(message, reaction);
           } catch (e) {
             expect(e, isA<StreamChatNetworkError>());
           }
 
-          verify(() => client.sendReaction(message.id, type)).called(1);
+          verify(() => client.sendReaction(message.id, reaction)).called(1);
         },
       );
 
       test(
         '''should override previous thread reaction if present and `enforceUnique` is true''',
         () async {
-          const userId = 'test-user-id';
           const messageId = 'test-message-id';
           const parentId = 'test-parent-id';
           const prevType = 'test-reaction-type';
           final prevReaction = Reaction(
             type: prevType,
             messageId: messageId,
-            userId: userId,
+            user: client.state.currentUser,
           );
           final message = Message(
             id: messageId,
@@ -2691,7 +2672,7 @@ void main() {
           final newReaction = Reaction(
             type: type,
             messageId: messageId,
-            userId: userId,
+            user: client.state.currentUser,
           );
           final newMessage = message.copyWith(
             ownReactions: [newReaction],
@@ -2702,7 +2683,7 @@ void main() {
 
           when(() => client.sendReaction(
                 messageId,
-                type,
+                newReaction,
                 enforceUnique: enforceUnique,
               )).thenAnswer(
             (_) async => SendReactionResponse()
@@ -2729,7 +2710,7 @@ void main() {
 
           final res = await channel.sendReaction(
             message,
-            type,
+            newReaction,
             enforceUnique: enforceUnique,
           );
 
@@ -2739,7 +2720,7 @@ void main() {
 
           verify(() => client.sendReaction(
                 messageId,
-                type,
+                newReaction,
                 enforceUnique: enforceUnique,
               )).called(1);
         },
@@ -5640,6 +5621,486 @@ void main() {
         expect(updatedMessage?.reminder, isNull);
       });
     });
+
+    group('Location events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('should handle location.shared event', () async {
+        // Verify initial state
+        expect(channel.state?.activeLiveLocations, isEmpty);
+
+        // Create live location
+        final liveLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1',
+          messageId: 'msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final locationMessage = Message(
+          id: 'msg1',
+          text: 'Live location shared',
+          sharedLocation: liveLocation,
+        );
+
+        // Create location.shared event
+        final locationSharedEvent = Event(
+          cid: channel.cid,
+          type: EventType.locationShared,
+          message: locationMessage,
+        );
+
+        // Dispatch event
+        client.addEvent(locationSharedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Check if message was added
+        final messages = channel.state?.messages;
+        final message = messages?.firstWhere((m) => m.id == 'msg1');
+        expect(message, isNotNull);
+
+        // Check if active live location was updated
+        final activeLiveLocations = channel.state?.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations?.first.messageId, equals('msg1'));
+      });
+
+      test('should handle location.updated event', () async {
+        // Setup initial state with location message
+        final liveLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1',
+          messageId: 'msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final locationMessage = Message(
+          id: 'msg1',
+          text: 'Live location shared',
+          sharedLocation: liveLocation,
+        );
+
+        // Add initial message
+        channel.state?.addNewMessage(locationMessage);
+
+        // Create updated location
+        final updatedLocation = liveLocation.copyWith(
+          latitude: 40.7500, // Updated latitude
+          longitude: -74.1000, // Updated longitude
+        );
+
+        final updatedMessage = locationMessage.copyWith(
+          sharedLocation: updatedLocation,
+        );
+
+        // Create location.updated event
+        final locationUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.locationUpdated,
+          message: updatedMessage,
+        );
+
+        // Dispatch event
+        client.addEvent(locationUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Check if message was updated
+        final messages = channel.state?.messages;
+        final message = messages?.firstWhere((m) => m.id == 'msg1');
+        expect(message?.sharedLocation?.latitude, equals(40.7500));
+        expect(message?.sharedLocation?.longitude, equals(-74.1000));
+
+        // Check if active live location was updated
+        final activeLiveLocations = channel.state?.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations?.first.latitude, equals(40.7500));
+        expect(activeLiveLocations?.first.longitude, equals(-74.1000));
+      });
+
+      test('should handle location.expired event', () async {
+        // Setup initial state with location message
+        final liveLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1',
+          messageId: 'msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final locationMessage = Message(
+          id: 'msg1',
+          text: 'Live location shared',
+          sharedLocation: liveLocation,
+        );
+
+        // Add initial message
+        channel.state?.addNewMessage(locationMessage);
+        expect(channel.state?.activeLiveLocations, hasLength(1));
+
+        // Create expired location
+        final expiredLocation = liveLocation.copyWith(
+          endAt: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+
+        final expiredMessage = locationMessage.copyWith(
+          sharedLocation: expiredLocation,
+        );
+
+        // Create location.expired event
+        final locationExpiredEvent = Event(
+          cid: channel.cid,
+          type: EventType.locationExpired,
+          message: expiredMessage,
+        );
+
+        // Dispatch event
+        client.addEvent(locationExpiredEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Check if message was updated
+        final messages = channel.state?.messages;
+        final message = messages?.firstWhere((m) => m.id == 'msg1');
+        expect(message?.sharedLocation?.isExpired, isTrue);
+
+        // Check if active live location was removed
+        expect(channel.state?.activeLiveLocations, isEmpty);
+      });
+
+      test('should not add static location to active locations', () async {
+        final staticLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1',
+          messageId: 'msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          // No endAt - static location
+        );
+
+        final staticMessage = Message(
+          id: 'msg1',
+          text: 'Static location shared',
+          sharedLocation: staticLocation,
+        );
+
+        // Create location.shared event
+        final locationSharedEvent = Event(
+          cid: channel.cid,
+          type: EventType.locationShared,
+          message: staticMessage,
+        );
+
+        // Dispatch event
+        client.addEvent(locationSharedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Check if message was added
+        final messages = channel.state?.messages;
+        final message = messages?.firstWhere((m) => m.id == 'msg1');
+        expect(message?.sharedLocation, isNotNull);
+
+        // Check if active live location was NOT updated (should remain empty)
+        expect(channel.state?.activeLiveLocations, isEmpty);
+      });
+
+      test(
+        'should update active locations when location message is deleted',
+        () async {
+          final liveLocation = Location(
+            channelCid: channel.cid,
+            userId: 'user1',
+            messageId: 'msg1',
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device1',
+            endAt: DateTime.now().add(const Duration(hours: 1)),
+          );
+
+          final locationMessage = Message(
+            id: 'msg1',
+            text: 'Live location shared',
+            sharedLocation: liveLocation,
+          );
+
+          // Verify initial state
+          channel.state?.addNewMessage(locationMessage);
+          expect(channel.state?.activeLiveLocations, hasLength(1));
+
+          final messageDeletedEvent = Event(
+            type: EventType.messageDeleted,
+            cid: channel.cid,
+            message: locationMessage.copyWith(
+              type: MessageType.deleted,
+              deletedAt: DateTime.timestamp(),
+            ),
+          );
+
+          // Dispatch event
+          client.addEvent(messageDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify active locations are updated
+          expect(channel.state?.activeLiveLocations, isEmpty);
+        },
+      );
+
+      test('should merge locations with same key', () async {
+        final liveLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1',
+          messageId: 'msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final locationMessage = Message(
+          id: 'msg1',
+          text: 'Live location shared',
+          sharedLocation: liveLocation,
+        );
+
+        // Add initial location for setup
+        channel.state?.addNewMessage(locationMessage);
+        expect(channel.state?.activeLiveLocations, hasLength(1));
+
+        // Create new location with same user, channel, and device
+        final newLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1', // Same user
+          messageId: 'msg2', // Different message
+          latitude: 40.7500,
+          longitude: -74.1000,
+          createdByDeviceId: 'device1', // Same device
+          endAt: DateTime.now().add(const Duration(hours: 2)),
+        );
+
+        final newMessage = Message(
+          id: 'msg2',
+          text: 'Updated location',
+          sharedLocation: newLocation,
+        );
+
+        // Create location.shared event for the new message
+        final locationSharedEvent = Event(
+          cid: channel.cid,
+          type: EventType.locationShared,
+          message: newMessage,
+        );
+
+        // Dispatch event
+        client.addEvent(locationSharedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Should still have only one active location (merged)
+        final activeLiveLocations = channel.state?.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations?.first.messageId, equals('msg2'));
+        expect(activeLiveLocations?.first.latitude, equals(40.7500));
+      });
+
+      test(
+        'should handle multiple active locations from different devices',
+        () async {
+          final liveLocation = Location(
+            channelCid: channel.cid,
+            userId: 'user1',
+            messageId: 'msg1',
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device1',
+            endAt: DateTime.now().add(const Duration(hours: 1)),
+          );
+
+          final locationMessage = Message(
+            id: 'msg1',
+            text: 'Live location shared',
+            sharedLocation: liveLocation,
+          );
+
+          // Add first location for setup
+          channel.state?.addNewMessage(locationMessage);
+          expect(channel.state?.activeLiveLocations, hasLength(1));
+
+          // Create location from different device
+          final location2 = Location(
+            channelCid: channel.cid,
+            userId: 'user1', // Same user
+            messageId: 'msg2',
+            latitude: 34.0522,
+            longitude: -118.2437,
+            createdByDeviceId: 'device2', // Different device
+            endAt: DateTime.now().add(const Duration(hours: 1)),
+          );
+
+          final message2 = Message(
+            id: 'msg2',
+            text: 'Location from device 2',
+            sharedLocation: location2,
+          );
+
+          // Create location.shared event for the second message
+          final locationSharedEvent = Event(
+            cid: channel.cid,
+            type: EventType.locationShared,
+            message: message2,
+          );
+
+          // Dispatch event
+          client.addEvent(locationSharedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Should have two active locations
+          expect(channel.state?.activeLiveLocations, hasLength(2));
+        },
+      );
+
+      test('should handle location messages in threads', () async {
+        final parentMessage = Message(
+          id: 'parent1',
+          text: 'Thread parent',
+        );
+
+        // Add parent message first for setup
+        channel.state?.addNewMessage(parentMessage);
+
+        final liveLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1',
+          messageId: 'thread-msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final threadLocationMessage = Message(
+          id: 'thread-msg1',
+          text: 'Live location in thread',
+          parentId: 'parent1',
+          sharedLocation: liveLocation,
+        );
+
+        // Create location.shared event for the thread message
+        final locationSharedEvent = Event(
+          cid: channel.cid,
+          type: EventType.locationShared,
+          message: threadLocationMessage,
+        );
+
+        // Dispatch event
+        client.addEvent(locationSharedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Check if thread message was added
+        final thread = channel.state?.threads['parent1'];
+        expect(thread, contains(threadLocationMessage));
+
+        // Check if location was added to active locations
+        final activeLiveLocations = channel.state?.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations?.first.messageId, equals('thread-msg1'));
+      });
+
+      test('should update thread location messages', () async {
+        final parentMessage = Message(
+          id: 'parent1',
+          text: 'Thread parent',
+        );
+
+        final liveLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1',
+          messageId: 'thread-msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final threadLocationMessage = Message(
+          id: 'thread-msg1',
+          text: 'Live location in thread',
+          parentId: 'parent1',
+          sharedLocation: liveLocation,
+        );
+
+        // Add messages
+        channel.state?.addNewMessage(parentMessage);
+        channel.state?.addNewMessage(threadLocationMessage);
+
+        // Update the location
+        final updatedLocation = liveLocation.copyWith(
+          latitude: 40.7500,
+          longitude: -74.1000,
+        );
+
+        final updatedThreadMessage = threadLocationMessage.copyWith(
+          sharedLocation: updatedLocation,
+        );
+
+        // Create location.updated event for the thread message
+        final locationUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.locationUpdated,
+          message: updatedThreadMessage,
+        );
+
+        // Dispatch event
+        client.addEvent(locationUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Check if thread message was updated
+        final thread = channel.state?.threads['parent1'];
+        final threadMessage = thread?.firstWhere((m) => m.id == 'thread-msg1');
+        expect(threadMessage?.sharedLocation?.latitude, equals(40.7500));
+        expect(threadMessage?.sharedLocation?.longitude, equals(-74.1000));
+
+        // Check if active location was updated
+        final activeLiveLocations = channel.state?.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations?.first.latitude, equals(40.7500));
+        expect(activeLiveLocations?.first.longitude, equals(-74.1000));
+      });
+    });
   });
 
   group('ChannelCapabilityCheck', () {
@@ -5900,6 +6361,12 @@ void main() {
       'QueryPollVotes',
       ChannelCapability.queryPollVotes,
       (channel) => channel.canQueryPollVotes,
+    );
+
+    testCapability(
+      'ShareLocation',
+      ChannelCapability.shareLocation,
+      (channel) => channel.canShareLocation,
     );
 
     test('returns correct values with multiple capabilities', () {

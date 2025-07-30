@@ -7,6 +7,7 @@ import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -82,6 +83,12 @@ abstract class ChatPersistenceClient {
   /// Get stored [Draft] message by providing channel [cid] and a optional
   /// [parentId] for thread messages.
   Future<Draft?> getDraftMessageByCid(String cid, {String? parentId});
+
+  /// Get stored [Location]s by providing channel [cid]
+  Future<List<Location>> getLocationsByCid(String cid);
+
+  /// Get stored [Location] by providing [messageId]
+  Future<Location?> getLocationByMessageId(String messageId);
 
   /// Get [ChannelState] data by providing channel [cid]
   Future<ChannelState> getChannelStateByCid(
@@ -168,6 +175,12 @@ abstract class ChatPersistenceClient {
   /// [DraftMessages.parentId].
   Future<void> deleteDraftMessageByCid(String cid, {String? parentId});
 
+  /// Removes locations by channel [cid]
+  Future<void> deleteLocationsByCid(String cid);
+
+  /// Removes locations by message [messageIds]
+  Future<void> deleteLocationsByMessageIds(List<String> messageIds);
+
   /// Updates the message data of a particular channel [cid] with
   /// the new [messages] data
   Future<void> updateMessages(String cid, List<Message> messages) =>
@@ -227,6 +240,9 @@ abstract class ChatPersistenceClient {
 
   /// Updates the draft messages data with the new [draftMessages] data
   Future<void> updateDraftMessages(List<Draft> draftMessages);
+
+  /// Updates the locations data with the new [locations] data
+  Future<void> updateLocations(List<Location> locations);
 
   /// Deletes all the reactions by [messageIds]
   Future<void> deleteReactionsByMessageId(List<String> messageIds);
@@ -292,6 +308,8 @@ abstract class ChatPersistenceClient {
     final drafts = <Draft>[];
     final draftsToDeleteCids = <String>[];
 
+    final locations = <Location>[];
+
     for (final state in channelStates) {
       final channel = state.channel;
       // Continue if channel is not available.
@@ -342,6 +360,11 @@ abstract class ChatPersistenceClient {
         ...?pinnedMessages?.map((it) => it.draft),
       ].nonNulls);
 
+      locations.addAll([
+        ...?messages?.map((it) => it.sharedLocation),
+        ...?pinnedMessages?.map((it) => it.sharedLocation),
+      ].nonNulls);
+
       users.addAll([
         channel.createdBy,
         ...?messages?.map((it) => it.user),
@@ -386,6 +409,7 @@ abstract class ChatPersistenceClient {
       updatePinnedMessageReactions(pinnedReactions),
       updatePollVotes(pollVotes),
       updateDraftMessages(drafts),
+      updateLocations(locations),
     ]);
   }
 

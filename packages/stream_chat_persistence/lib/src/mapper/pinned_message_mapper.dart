@@ -14,6 +14,7 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
     Message? quotedMessage,
     Poll? poll,
     Draft? draft,
+    Location? sharedLocation,
   }) =>
       Message(
         shadowed: shadowed,
@@ -54,6 +55,7 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
         i18n: i18n,
         restrictedVisibility: restrictedVisibility,
         draft: draft,
+        sharedLocation: sharedLocation,
       );
 }
 

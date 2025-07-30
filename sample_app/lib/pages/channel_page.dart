@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/widgets/location/location_attachment.dart';
+import 'package:sample_app/widgets/location/location_detail_dialog.dart';
+import 'package:sample_app/widgets/location/location_picker_dialog.dart';
+import 'package:sample_app/widgets/location/location_picker_option.dart';
 import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -25,8 +29,7 @@ class ChannelPage extends StatefulWidget {
 
 class _ChannelPageState extends State<ChannelPage> {
   FocusNode? _focusNode;
-  final StreamMessageInputController _messageInputController =
-      StreamMessageInputController();
+  final _messageInputController = StreamMessageInputController();
 
   @override
   void initState() {
@@ -52,6 +55,9 @@ class _ChannelPageState extends State<ChannelPage> {
     final theme = StreamChatTheme.of(context);
     final textTheme = theme.textTheme;
     final colorTheme = theme.colorTheme;
+
+    final channel = StreamChannel.of(context).channel;
+    final config = channel.config;
 
     return Scaffold(
       backgroundColor: colorTheme.appBg,
@@ -124,10 +130,71 @@ class _ChannelPageState extends State<ChannelPage> {
             messageInputController: _messageInputController,
             onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
             enableVoiceRecording: true,
+            allowedAttachmentPickerTypes: [
+              ...AttachmentPickerType.values,
+              if (config?.sharedLocations == true && channel.canShareLocation)
+                const LocationPickerType(),
+            ],
+            onCustomAttachmentPickerResult: (result) {
+              return _onCustomAttachmentPickerResult(channel, result).ignore();
+            },
+            customAttachmentPickerOptions: [
+              TabbedAttachmentPickerOption(
+                key: 'location-picker',
+                icon: const Icon(Icons.near_me_rounded),
+                supportedTypes: [const LocationPickerType()],
+                isEnabled: (value) {
+                  // Enable if nothing has been selected yet.
+                  if (value.isEmpty) return true;
+
+                  // Otherwise, enable only if there is a location.
+                  return value.extraData['location'] != null;
+                },
+                optionViewBuilder: (context, controller) => LocationPicker(
+                  onLocationPicked: (locationResult) {
+                    if (locationResult == null) return Navigator.pop(context);
+
+                    controller.extraData = {
+                      ...controller.value.extraData,
+                      'location': locationResult,
+                    };
+
+                    final result = LocationPicked(location: locationResult);
+                    return Navigator.pop(context, result);
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _onCustomAttachmentPickerResult(
+    Channel channel,
+    CustomAttachmentPickerResult result,
+  ) async {
+    final response = switch (result) {
+      LocationPicked() => _onShareLocationPicked(channel, result.location),
+      _ => null,
+    };
+
+    return response?.ignore();
+  }
+
+  Future<SendMessageResponse> _onShareLocationPicked(
+    Channel channel,
+    LocationPickerResult result,
+  ) async {
+    if (result.endSharingAt case final endSharingAt?) {
+      return channel.startLiveLocationSharing(
+        endSharingAt: endSharingAt,
+        location: result.coordinates,
+      );
+    }
+
+    return channel.sendStaticLocation(location: result.coordinates);
   }
 
   Widget customMessageBuilder(
@@ -142,7 +209,8 @@ class _ChannelPageState extends State<ChannelPage> {
 
     final message = details.message;
     final reminder = message.reminder;
-    final channelConfig = StreamChannel.of(context).channel.config;
+    final channel = StreamChannel.of(context).channel;
+    final channelConfig = channel.config;
 
     final customOptions = <StreamMessageAction>[
       if (channelConfig?.userMessageReminders == true) ...[
@@ -153,23 +221,7 @@ class _ChannelPageState extends State<ChannelPage> {
               color: colorTheme.textLowEmphasis,
             ),
             title: const Text('Edit Reminder'),
-            onTap: (message) async {
-              Navigator.of(context).pop();
-
-              final option = await showDialog<ReminderOption>(
-                context: context,
-                builder: (_) => EditReminderDialog(
-                  isBookmarkReminder: reminder.remindAt == null,
-                ),
-              );
-
-              if (option == null) return;
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-              final remindAt = option.remindAt;
-
-              client.updateReminder(messageId, remindAt: remindAt).ignore();
-            },
+            action: EditReminder(message: message, reminder: reminder),
           ),
           StreamMessageAction(
             leading: StreamSvgIcon(
@@ -177,14 +229,7 @@ class _ChannelPageState extends State<ChannelPage> {
               color: colorTheme.textLowEmphasis,
             ),
             title: const Text('Remove from later'),
-            onTap: (message) {
-              Navigator.of(context).pop();
-
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-
-              client.deleteReminder(messageId).ignore();
-            },
+            action: RemoveReminder(message: message, reminder: reminder),
           ),
         ] else ...[
           StreamMessageAction(
@@ -193,21 +238,7 @@ class _ChannelPageState extends State<ChannelPage> {
               color: colorTheme.textLowEmphasis,
             ),
             title: const Text('Remind me'),
-            onTap: (message) async {
-              Navigator.of(context).pop();
-
-              final reminder = await showDialog<ScheduledReminder>(
-                context: context,
-                builder: (_) => const CreateReminderDialog(),
-              );
-
-              if (reminder == null) return;
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-              final remindAt = reminder.remindAt;
-
-              client.createReminder(messageId, remindAt: remindAt).ignore();
-            },
+            action: CreateReminder(message: message),
           ),
           StreamMessageAction(
             leading: Icon(
@@ -215,18 +246,18 @@ class _ChannelPageState extends State<ChannelPage> {
               color: colorTheme.textLowEmphasis,
             ),
             title: const Text('Save for later'),
-            onTap: (message) {
-              Navigator.of(context).pop();
-
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-
-              client.createReminder(messageId).ignore();
-            },
+            action: CreateBookmark(message: message),
           ),
         ],
       ]
     ];
+
+    final locationAttachmentBuilder = LocationAttachmentBuilder(
+      onAttachmentTap: (location) => showLocationDetailDialog(
+        context: context,
+        location: location,
+      ),
+    );
 
     return Container(
       color: reminder != null ? colorTheme.accentPrimary.withOpacity(.1) : null,
@@ -264,6 +295,15 @@ class _ChannelPageState extends State<ChannelPage> {
           defaultMessageWidget.copyWith(
             onReplyTap: _reply,
             customActions: customOptions,
+            showEditMessage: message.sharedLocation == null,
+            onCustomActionTap: (it) async => await switch (it) {
+              CreateReminder() => _createReminder(it.message),
+              CreateBookmark() => _createBookmark(it.message),
+              EditReminder() => _editReminder(it.message, it.reminder),
+              RemoveReminder() => _removeReminder(it.message, it.reminder),
+              _ => null,
+            },
+            attachmentBuilders: [locationAttachmentBuilder],
             onShowMessage: (message, channel) => GoRouter.of(context).goNamed(
               Routes.CHANNEL_PAGE.name,
               pathParameters: Routes.CHANNEL_PAGE.params(channel),
@@ -284,6 +324,56 @@ class _ChannelPageState extends State<ChannelPage> {
     );
   }
 
+  Future<void> _editReminder(
+    Message message,
+    MessageReminder reminder,
+  ) async {
+    final option = await showDialog<ReminderOption>(
+      context: context,
+      builder: (_) => EditReminderDialog(
+        isBookmarkReminder: reminder.remindAt == null,
+      ),
+    );
+
+    if (option == null) return;
+    final client = StreamChat.of(context).client;
+    final messageId = message.id;
+    final remindAt = option.remindAt;
+
+    return client.updateReminder(messageId, remindAt: remindAt).ignore();
+  }
+
+  Future<void> _removeReminder(
+    Message message,
+    MessageReminder reminder,
+  ) async {
+    final client = StreamChat.of(context).client;
+    final messageId = message.id;
+
+    return client.deleteReminder(messageId).ignore();
+  }
+
+  Future<void> _createReminder(Message message) async {
+    final reminder = await showDialog<ScheduledReminder>(
+      context: context,
+      builder: (_) => const CreateReminderDialog(),
+    );
+
+    if (reminder == null) return;
+    final client = StreamChat.of(context).client;
+    final messageId = message.id;
+    final remindAt = reminder.remindAt;
+
+    return client.createReminder(messageId, remindAt: remindAt).ignore();
+  }
+
+  Future<void> _createBookmark(Message message) async {
+    final client = StreamChat.of(context).client;
+    final messageId = message.id;
+
+    return client.createReminder(messageId).ignore();
+  }
+
   bool defaultFilter(Message m) {
     final currentUser = StreamChat.of(context).currentUser;
     final isMyMessage = m.user?.id == currentUser?.id;
@@ -291,4 +381,41 @@ class _ChannelPageState extends State<ChannelPage> {
     if (isDeletedOrShadowed && !isMyMessage) return false;
     return true;
   }
+}
+
+class ReminderMessageAction extends CustomMessageAction {
+  const ReminderMessageAction({
+    required super.message,
+    this.reminder,
+  });
+
+  final MessageReminder? reminder;
+}
+
+final class CreateReminder extends ReminderMessageAction {
+  const CreateReminder({required super.message});
+}
+
+final class CreateBookmark extends ReminderMessageAction {
+  const CreateBookmark({required super.message});
+}
+
+final class EditReminder extends ReminderMessageAction {
+  const EditReminder({
+    required super.message,
+    required this.reminder,
+  }) : super(reminder: reminder);
+
+  @override
+  final MessageReminder reminder;
+}
+
+final class RemoveReminder extends ReminderMessageAction {
+  const RemoveReminder({
+    required super.message,
+    required this.reminder,
+  }) : super(reminder: reminder);
+
+  @override
+  final MessageReminder reminder;
 }
