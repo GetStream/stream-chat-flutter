@@ -1,8 +1,9 @@
-import 'package:contextmenu/contextmenu.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
+import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
 import 'package:stream_chat_flutter/src/context_menu_items/download_menu_item.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/gallery_navigation_item.dart';
@@ -121,14 +122,18 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
   Widget _buildVideoPageView() {
     return Stack(
       children: [
-        ContextMenuArea(
-          verticalPadding: 0,
-          builder: (_) => [
-            DownloadMenuItem(
-              attachment:
-                  widget.mediaAttachmentPackages[_currentPage.value].attachment,
-            ),
-          ],
+        ContextMenuRegion(
+          contextMenuBuilder: (_, anchor) {
+            return ContextMenu(
+              anchor: anchor,
+              menuItems: [
+                DownloadMenuItem(
+                  attachment: widget
+                      .mediaAttachmentPackages[_currentPage.value].attachment,
+                ),
+              ],
+            );
+          },
           child: _PlaylistPlayer(
             packages: videoPackages.values.toList(),
             autoStart: widget.autoplayVideos,
@@ -356,13 +361,17 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                                   ? kToolbarHeight + bottomPadding
                                   : 0,
                             ),
-                            child: ContextMenuArea(
-                              verticalPadding: 0,
-                              builder: (_) => [
-                                DownloadMenuItem(
-                                  attachment: attachment,
-                                ),
-                              ],
+                            child: ContextMenuRegion(
+                              contextMenuBuilder: (_, anchor) {
+                                return ContextMenu(
+                                  anchor: anchor,
+                                  menuItems: [
+                                    DownloadMenuItem(
+                                      attachment: attachment,
+                                    ),
+                                  ],
+                                );
+                              },
                               child: Video(
                                 controller: package.controller,
                               ),
