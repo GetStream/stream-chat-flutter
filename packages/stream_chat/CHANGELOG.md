@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `skipPush` and `skipEnrichUrl` not preserving during message send or update retry
+
 ## 10.0.0-beta.4
 
 🛑️ Breaking

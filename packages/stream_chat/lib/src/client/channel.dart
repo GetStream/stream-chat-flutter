@@ -732,7 +732,10 @@ class Channel {
         state!._retryQueue.add([
           message.copyWith(
             // Update the message state to failed.
-            state: MessageState.sendingFailed,
+            state: MessageState.sendingFailed(
+              skipPush: skipPush,
+              skipEnrichUrl: skipEnrichUrl,
+            ),
           ),
         ]);
       }
@@ -815,14 +818,20 @@ class Channel {
           state!._retryQueue.add([
             message.copyWith(
               // Update the message state to failed.
-              state: MessageState.updatingFailed,
+              state: MessageState.updatingFailed(
+                skipPush: skipPush,
+                skipEnrichUrl: skipEnrichUrl,
+              ),
             ),
           ]);
         } else {
           // Reset the message to original state if the update fails and is not
           // retriable.
           state?.updateMessage(originalMessage.copyWith(
-            state: MessageState.updatingFailed,
+            state: MessageState.updatingFailed(
+              skipPush: skipPush,
+              skipEnrichUrl: skipEnrichUrl,
+            ),
           ));
         }
       }
@@ -885,15 +894,25 @@ class Channel {
           state!._retryQueue.add([
             message.copyWith(
               // Update the message state to failed.
-              state: MessageState.updatingFailed,
+              state: MessageState.partialUpdatingFailed(
+                set: set,
+                unset: unset,
+                skipEnrichUrl: skipEnrichUrl,
+              ),
             ),
           ]);
         } else {
           // Reset the message to original state if the update fails and is not
           // retriable.
-          state?.updateMessage(originalMessage.copyWith(
-            state: MessageState.updatingFailed,
-          ));
+          state?.updateMessage(
+            originalMessage.copyWith(
+              state: MessageState.partialUpdatingFailed(
+                set: set,
+                unset: unset,
+                skipEnrichUrl: skipEnrichUrl,
+              ),
+            ),
+          );
         }
       }
 
@@ -997,8 +1016,23 @@ class Channel {
 
     return message.state.maybeWhen(
       failed: (state, _) => state.when(
-        sendingFailed: () => sendMessage(message),
-        updatingFailed: () => updateMessage(message),
+        sendingFailed: (skipPush, skipEnrichUrl) => sendMessage(
+          message,
+          skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+        updatingFailed: (skipPush, skipEnrichUrl) => updateMessage(
+          message,
+          skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+        partialUpdatingFailed: (set, unset, skipEnrichUrl) =>
+            partialUpdateMessage(
+          message,
+          set: set,
+          unset: unset,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
         deletingFailed: (hard) => deleteMessage(message, hard: hard),
       ),
       orElse: () {

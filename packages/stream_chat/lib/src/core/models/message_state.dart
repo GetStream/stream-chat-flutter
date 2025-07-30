@@ -103,9 +103,11 @@ extension MessageStateX on MessageState {
 
   /// Returns true if the message is in failed updating state.
   bool get isUpdatingFailed {
-    final messageState = this;
-    if (messageState is! MessageFailed) return false;
-    return messageState.state is UpdatingFailed;
+    return switch (this) {
+      MessageFailed(state: UpdatingFailed()) => true,
+      MessageFailed(state: PartialUpdatingFailed()) => true,
+      _ => false,
+    };
   }
 
   /// Returns true if the message is in failed deleting state.
@@ -182,6 +184,46 @@ sealed class MessageState with _$MessageState {
     );
   }
 
+  /// Sending failed state when the message fails to be sent.
+  factory MessageState.sendingFailed({
+    required bool skipPush,
+    required bool skipEnrichUrl,
+  }) {
+    return MessageState.failed(
+      state: FailedState.sendingFailed(
+        skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+  }
+
+  /// Updating failed state when the message fails to be updated.
+  factory MessageState.updatingFailed({
+    required bool skipPush,
+    required bool skipEnrichUrl,
+  }) {
+    return MessageState.failed(
+      state: FailedState.updatingFailed(
+        skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+  }
+
+  factory MessageState.partialUpdatingFailed({
+    Map<String, Object?>? set,
+    List<String>? unset,
+    required bool skipEnrichUrl,
+  }) {
+    return MessageState.failed(
+      state: FailedState.partialUpdatingFailed(
+        set: set,
+        unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+  }
+
   /// Sending state when the message is being sent.
   static const sending = MessageState.outgoing(
     state: OutgoingState.sending(),
@@ -220,16 +262,6 @@ sealed class MessageState with _$MessageState {
   /// Hard deleted state when the message has been successfully hard deleted.
   static const hardDeleted = MessageState.completed(
     state: CompletedState.deleted(hard: true),
-  );
-
-  /// Sending failed state when the message fails to be sent.
-  static const sendingFailed = MessageState.failed(
-    state: FailedState.sendingFailed(),
-  );
-
-  /// Updating failed state when the message fails to be updated.
-  static const updatingFailed = MessageState.failed(
-    state: FailedState.updatingFailed(),
   );
 
   /// Deleting failed state when the message fails to be soft deleted.
@@ -285,10 +317,22 @@ sealed class CompletedState with _$CompletedState {
 @freezed
 sealed class FailedState with _$FailedState {
   /// Sending failed state when the message fails to be sent.
-  const factory FailedState.sendingFailed() = SendingFailed;
+  const factory FailedState.sendingFailed({
+    @Default(false) bool skipPush,
+    @Default(false) bool skipEnrichUrl,
+  }) = SendingFailed;
 
   /// Updating failed state when the message fails to be updated.
-  const factory FailedState.updatingFailed() = UpdatingFailed;
+  const factory FailedState.updatingFailed({
+    @Default(false) bool skipPush,
+    @Default(false) bool skipEnrichUrl,
+  }) = UpdatingFailed;
+
+  const factory FailedState.partialUpdatingFailed({
+    Map<String, Object?>? set,
+    List<String>? unset,
+    @Default(false) bool skipEnrichUrl,
+  }) = PartialUpdatingFailed;
 
   /// Deleting failed state when the message fails to be deleted.
   const factory FailedState.deletingFailed({
@@ -616,14 +660,21 @@ extension FailedStatePatternMatching on FailedState {
   /// @nodoc
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() sendingFailed,
-    required TResult Function() updatingFailed,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) sendingFailed,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) updatingFailed,
+    required TResult Function(
+            Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl)
+        partialUpdatingFailed,
     required TResult Function(bool hard) deletingFailed,
   }) {
     final failedState = this;
     return switch (failedState) {
-      SendingFailed() => sendingFailed(),
-      UpdatingFailed() => updatingFailed(),
+      SendingFailed() =>
+        sendingFailed(failedState.skipPush, failedState.skipEnrichUrl),
+      UpdatingFailed() =>
+        updatingFailed(failedState.skipPush, failedState.skipEnrichUrl),
+      PartialUpdatingFailed() => partialUpdatingFailed(
+          failedState.set, failedState.unset, failedState.skipEnrichUrl),
       DeletingFailed() => deletingFailed(failedState.hard),
     };
   }
@@ -631,14 +682,21 @@ extension FailedStatePatternMatching on FailedState {
   /// @nodoc
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sendingFailed,
-    TResult? Function()? updatingFailed,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? updatingFailed,
+    required TResult Function(
+            Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl)
+        partialUpdatingFailed,
     TResult? Function(bool hard)? deletingFailed,
   }) {
     final failedState = this;
     return switch (failedState) {
-      SendingFailed() => sendingFailed?.call(),
-      UpdatingFailed() => updatingFailed?.call(),
+      SendingFailed() =>
+        sendingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
+      UpdatingFailed() =>
+        updatingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
+      PartialUpdatingFailed() => partialUpdatingFailed(
+          failedState.set, failedState.unset, failedState.skipEnrichUrl),
       DeletingFailed() => deletingFailed?.call(failedState.hard),
     };
   }
@@ -646,15 +704,22 @@ extension FailedStatePatternMatching on FailedState {
   /// @nodoc
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sendingFailed,
-    TResult Function()? updatingFailed,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? sendingFailed,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? updatingFailed,
+    required TResult Function(
+            Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl)
+        partialUpdatingFailed,
     TResult Function(bool hard)? deletingFailed,
     required TResult orElse(),
   }) {
     final failedState = this;
     final result = switch (failedState) {
-      SendingFailed() => sendingFailed?.call(),
-      UpdatingFailed() => updatingFailed?.call(),
+      SendingFailed() =>
+        sendingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
+      UpdatingFailed() =>
+        updatingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
+      PartialUpdatingFailed() => partialUpdatingFailed(
+          failedState.set, failedState.unset, failedState.skipEnrichUrl),
       DeletingFailed() => deletingFailed?.call(failedState.hard),
     };
 
@@ -666,12 +731,15 @@ extension FailedStatePatternMatching on FailedState {
   TResult map<TResult extends Object?>({
     required TResult Function(SendingFailed value) sendingFailed,
     required TResult Function(UpdatingFailed value) updatingFailed,
+    required TResult Function(PartialUpdatingFailed value)
+        partialUpdatingFailed,
     required TResult Function(DeletingFailed value) deletingFailed,
   }) {
     final failedState = this;
     return switch (failedState) {
       SendingFailed() => sendingFailed(failedState),
       UpdatingFailed() => updatingFailed(failedState),
+      PartialUpdatingFailed() => partialUpdatingFailed(failedState),
       DeletingFailed() => deletingFailed(failedState),
     };
   }
@@ -681,12 +749,14 @@ extension FailedStatePatternMatching on FailedState {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(SendingFailed value)? sendingFailed,
     TResult? Function(UpdatingFailed value)? updatingFailed,
+    TResult? Function(PartialUpdatingFailed value)? partialUpdatingFailed,
     TResult? Function(DeletingFailed value)? deletingFailed,
   }) {
     final failedState = this;
     return switch (failedState) {
       SendingFailed() => sendingFailed?.call(failedState),
       UpdatingFailed() => updatingFailed?.call(failedState),
+      PartialUpdatingFailed() => partialUpdatingFailed?.call(failedState),
       DeletingFailed() => deletingFailed?.call(failedState),
     };
   }
@@ -696,6 +766,7 @@ extension FailedStatePatternMatching on FailedState {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(SendingFailed value)? sendingFailed,
     TResult Function(UpdatingFailed value)? updatingFailed,
+    TResult Function(PartialUpdatingFailed value)? partialUpdatingFailed,
     TResult Function(DeletingFailed value)? deletingFailed,
     required TResult orElse(),
   }) {
@@ -703,6 +774,7 @@ extension FailedStatePatternMatching on FailedState {
     final result = switch (failedState) {
       SendingFailed() => sendingFailed?.call(failedState),
       UpdatingFailed() => updatingFailed?.call(failedState),
+      PartialUpdatingFailed() => partialUpdatingFailed?.call(failedState),
       DeletingFailed() => deletingFailed?.call(failedState),
     };
 

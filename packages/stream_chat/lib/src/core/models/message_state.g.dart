@@ -108,21 +108,48 @@ Map<String, dynamic> _$DeletedToJson(Deleted instance) => <String, dynamic>{
 
 SendingFailed _$SendingFailedFromJson(Map<String, dynamic> json) =>
     SendingFailed(
+      skipPush: json['skip_push'] as bool? ?? false,
+      skipEnrichUrl: json['skip_enrich_url'] as bool? ?? false,
       $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$SendingFailedToJson(SendingFailed instance) =>
     <String, dynamic>{
+      'skip_push': instance.skipPush,
+      'skip_enrich_url': instance.skipEnrichUrl,
       'runtimeType': instance.$type,
     };
 
 UpdatingFailed _$UpdatingFailedFromJson(Map<String, dynamic> json) =>
     UpdatingFailed(
+      skipPush: json['skip_push'] as bool? ?? false,
+      skipEnrichUrl: json['skip_enrich_url'] as bool? ?? false,
       $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$UpdatingFailedToJson(UpdatingFailed instance) =>
     <String, dynamic>{
+      'skip_push': instance.skipPush,
+      'skip_enrich_url': instance.skipEnrichUrl,
+      'runtimeType': instance.$type,
+    };
+
+PartialUpdatingFailed _$PartialUpdatingFailedFromJson(
+        Map<String, dynamic> json) =>
+    PartialUpdatingFailed(
+      set: json['set'] as Map<String, dynamic>?,
+      unset:
+          (json['unset'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      skipEnrichUrl: json['skip_enrich_url'] as bool? ?? false,
+      $type: json['runtimeType'] as String?,
+    );
+
+Map<String, dynamic> _$PartialUpdatingFailedToJson(
+        PartialUpdatingFailed instance) =>
+    <String, dynamic>{
+      'set': instance.set,
+      'unset': instance.unset,
+      'skip_enrich_url': instance.skipEnrichUrl,
       'runtimeType': instance.$type,
     };
 
