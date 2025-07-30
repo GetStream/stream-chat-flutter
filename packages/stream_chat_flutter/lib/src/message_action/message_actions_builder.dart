@@ -61,10 +61,11 @@ class StreamMessageActionsBuilder {
     OwnUser? currentUser,
     Iterable<StreamMessageAction>? customActions,
   }) {
-    // If the message is deleted, we don't show any actions.
-    if (message.isDeleted) return [];
-
     final messageState = message.state;
+
+    // If the message is deleted, we don't show any actions.
+    if (messageState.isDeleted) return [];
+
     if (messageState.isFailed) {
       return [
         if (messageState.isSendingFailed || messageState.isUpdatingFailed) ...[

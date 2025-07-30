@@ -665,7 +665,7 @@ class Channel {
     _checkInitialized();
 
     // Clean up stale error messages before sending a new message.
-    state!.cleanUpStaleErrorMessages();
+    state?.cleanUpStaleErrorMessages();
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
@@ -690,7 +690,7 @@ class Channel {
       ).toList(),
     );
 
-    state!.updateMessage(message);
+    state?.updateMessage(message);
 
     try {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
@@ -724,20 +724,22 @@ class Channel {
             state: MessageState.sent,
           );
 
-      state!.updateMessage(sentMessage);
+      state?.updateMessage(sentMessage);
 
       return response;
     } catch (e) {
+      final failedMessage = message.copyWith(
+        // Update the message state to failed.
+        state: MessageState.sendingFailed(
+          skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+      );
+
+      state?.updateMessage(failedMessage);
+      // If the error is retriable, add it to the retry queue.
       if (e is StreamChatNetworkError && e.isRetriable) {
-        state!._retryQueue.add([
-          message.copyWith(
-            // Update the message state to failed.
-            state: MessageState.sendingFailed(
-              skipPush: skipPush,
-              skipEnrichUrl: skipEnrichUrl,
-            ),
-          ),
-        ]);
+        state?._retryQueue.add([failedMessage]);
       }
 
       rethrow;
@@ -756,7 +758,6 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
-    final originalMessage = message;
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
@@ -813,28 +814,20 @@ class Channel {
 
       return response;
     } catch (e) {
-      if (e is StreamChatNetworkError) {
-        if (e.isRetriable) {
-          state!._retryQueue.add([
-            message.copyWith(
-              // Update the message state to failed.
-              state: MessageState.updatingFailed(
-                skipPush: skipPush,
-                skipEnrichUrl: skipEnrichUrl,
-              ),
-            ),
-          ]);
-        } else {
-          // Reset the message to original state if the update fails and is not
-          // retriable.
-          state?.updateMessage(originalMessage.copyWith(
-            state: MessageState.updatingFailed(
-              skipPush: skipPush,
-              skipEnrichUrl: skipEnrichUrl,
-            ),
-          ));
-        }
+      final failedMessage = message.copyWith(
+        // Update the message state to failed.
+        state: MessageState.updatingFailed(
+          skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+      );
+
+      state?.updateMessage(failedMessage);
+      // If the error is retriable, add it to the retry queue.
+      if (e is StreamChatNetworkError && e.isRetriable) {
+        state?._retryQueue.add([failedMessage]);
       }
+
       rethrow;
     }
   }
@@ -851,7 +844,6 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
-    final originalMessage = message;
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
@@ -889,31 +881,19 @@ class Channel {
 
       return response;
     } catch (e) {
-      if (e is StreamChatNetworkError) {
-        if (e.isRetriable) {
-          state!._retryQueue.add([
-            message.copyWith(
-              // Update the message state to failed.
-              state: MessageState.partialUpdatingFailed(
-                set: set,
-                unset: unset,
-                skipEnrichUrl: skipEnrichUrl,
-              ),
-            ),
-          ]);
-        } else {
-          // Reset the message to original state if the update fails and is not
-          // retriable.
-          state?.updateMessage(
-            originalMessage.copyWith(
-              state: MessageState.partialUpdatingFailed(
-                set: set,
-                unset: unset,
-                skipEnrichUrl: skipEnrichUrl,
-              ),
-            ),
-          );
-        }
+      final failedMessage = message.copyWith(
+        // Update the message state to failed.
+        state: MessageState.partialUpdatingFailed(
+          set: set,
+          unset: unset,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+      );
+
+      state?.updateMessage(failedMessage);
+      // If the error is retriable, add it to the retry queue.
+      if (e is StreamChatNetworkError && e.isRetriable) {
+        state?._retryQueue.add([failedMessage]);
       }
 
       rethrow;
@@ -932,7 +912,7 @@ class Channel {
     // Directly deleting the local messages and bounced error messages as they
     // are not available on the server.
     if (message.remoteCreatedAt == null || message.isBouncedWithError) {
-      state!.deleteMessage(
+      state?.deleteMessage(
         message.copyWith(
           type: MessageType.deleted,
           localDeletedAt: DateTime.now(),
@@ -987,14 +967,17 @@ class Channel {
 
       return response;
     } catch (e) {
+      final failedMessage = message.copyWith(
+        // Update the message state to failed.
+        state: MessageState.deletingFailed(hard: hard),
+      );
+
+      state?.deleteMessage(failedMessage, hardDelete: hard);
+      // If the error is retriable, add it to the retry queue.
       if (e is StreamChatNetworkError && e.isRetriable) {
-        state!._retryQueue.add([
-          message.copyWith(
-            // Update the message state to failed.
-            state: MessageState.deletingFailed(hard: hard),
-          ),
-        ]);
+        state?._retryQueue.add([failedMessage]);
       }
+
       rethrow;
     }
   }
@@ -1005,6 +988,9 @@ class Channel {
   /// retry action:
   /// - For [MessageState.sendingFailed], it attempts to send the message.
   /// - For [MessageState.updatingFailed], it attempts to update the message.
+  /// - For [MessageState.partialUpdatingFailed], it attempts to partially
+  ///   update the message with the same 'set' and 'unset' parameters that were
+  ///   used in the original request.
   /// - For [MessageState.deletingFailed], it attempts to delete the message.
   ///   with the same 'hard' parameter that was used in the original request
   /// - For messages with [isBouncedWithError], it attempts to send the message.
@@ -1026,13 +1012,14 @@ class Channel {
           skipPush: skipPush,
           skipEnrichUrl: skipEnrichUrl,
         ),
-        partialUpdatingFailed: (set, unset, skipEnrichUrl) =>
-            partialUpdateMessage(
-          message,
-          set: set,
-          unset: unset,
-          skipEnrichUrl: skipEnrichUrl,
-        ),
+        partialUpdatingFailed: (set, unset, skipEnrichUrl) {
+          return partialUpdateMessage(
+            message,
+            set: set,
+            unset: unset,
+            skipEnrichUrl: skipEnrichUrl,
+          );
+        },
         deletingFailed: (hard) => deleteMessage(message, hard: hard),
       ),
       orElse: () {
@@ -2516,8 +2503,10 @@ class ChannelClientState {
 
   /// Retry failed message.
   Future<void> retryFailedMessages() async {
-    final failedMessages = [...messages, ...threads.values.expand((v) => v)]
-        .where((it) => it.state.isFailed);
+    final allMessages = [...messages, ...threads.values.flattened];
+    final failedMessages = allMessages.where((it) => it.state.isFailed);
+
+    if (failedMessages.isEmpty) return;
     _retryQueue.add(failedMessages);
   }
 

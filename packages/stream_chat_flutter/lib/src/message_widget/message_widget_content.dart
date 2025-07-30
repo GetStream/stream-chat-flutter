@@ -342,12 +342,18 @@ class MessageWidgetContent extends StatelessWidget {
   }
 
   Widget _buildMessageCard(BuildContext context) {
-    if (message.isDeleted && !isFailedState) {
-      return StreamDeletedMessage(
-        borderRadiusGeometry: borderRadiusGeometry,
-        borderSide: borderSide,
-        shape: shape,
-        messageTheme: messageTheme,
+    if (message.isDeleted) {
+      return Container(
+        margin: EdgeInsetsDirectional.only(
+          end: reverse && isFailedState ? 12.0 : 0.0,
+          start: !reverse && isFailedState ? 12.0 : 0.0,
+        ),
+        child: StreamDeletedMessage(
+          borderRadiusGeometry: borderRadiusGeometry,
+          borderSide: borderSide,
+          shape: shape,
+          messageTheme: messageTheme,
+        ),
       );
     }
 
