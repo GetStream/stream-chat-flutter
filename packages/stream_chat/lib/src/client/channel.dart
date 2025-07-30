@@ -903,8 +903,9 @@ class Channel {
           state!._retryQueue.add([
             message.copyWith(
               // Update the message state to failed.
-              state: MessageState.updatingFailed(
-                skipPush: false,
+              state: MessageState.partialUpdateFailed(
+                set: set,
+                unset: unset,
                 skipEnrichUrl: skipEnrichUrl,
               ),
             ),
@@ -912,12 +913,15 @@ class Channel {
         } else {
           // Reset the message to original state if the update fails and is not
           // retriable.
-          state?.updateMessage(originalMessage.copyWith(
-            state: MessageState.updatingFailed(
-              skipPush: false,
-              skipEnrichUrl: skipEnrichUrl,
+          state?.updateMessage(
+            originalMessage.copyWith(
+              state: MessageState.partialUpdateFailed(
+                set: set,
+                unset: unset,
+                skipEnrichUrl: skipEnrichUrl,
+              ),
             ),
-          ));
+          );
         }
       }
 
@@ -1021,6 +1025,13 @@ class Channel {
         updatingFailed: (skipPush, skipEnrichUrl) => updateMessage(
           message,
           skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+        partialUpdateFailed: (set, unset, skipEnrichUrl) =>
+            partialUpdateMessage(
+          message,
+          set: set,
+          unset: unset,
           skipEnrichUrl: skipEnrichUrl,
         ),
         deletingFailed: (hard) => deleteMessage(message, hard: hard),

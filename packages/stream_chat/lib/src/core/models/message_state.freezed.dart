@@ -736,6 +736,8 @@ FailedState _$FailedStateFromJson(Map<String, dynamic> json) {
       return SendingFailed.fromJson(json);
     case 'updatingFailed':
       return UpdatingFailed.fromJson(json);
+    case 'partialUpdateFailed':
+      return PartialUpdateFailed.fromJson(json);
     case 'deletingFailed':
       return DeletingFailed.fromJson(json);
 
@@ -943,6 +945,127 @@ class _$UpdatingFailedCopyWithImpl<$Res>
           ? _self.skipPush
           : skipPush // ignore: cast_nullable_to_non_nullable
               as bool,
+      skipEnrichUrl: null == skipEnrichUrl
+          ? _self.skipEnrichUrl
+          : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class PartialUpdateFailed implements FailedState {
+  const PartialUpdateFailed(
+      {final Map<String, Object?>? set,
+      final List<String>? unset,
+      this.skipEnrichUrl = false,
+      final String? $type})
+      : _set = set,
+        _unset = unset,
+        $type = $type ?? 'partialUpdateFailed';
+  factory PartialUpdateFailed.fromJson(Map<String, dynamic> json) =>
+      _$PartialUpdateFailedFromJson(json);
+
+  final Map<String, Object?>? _set;
+  Map<String, Object?>? get set {
+    final value = _set;
+    if (value == null) return null;
+    if (_set is EqualUnmodifiableMapView) return _set;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
+  final List<String>? _unset;
+  List<String>? get unset {
+    final value = _unset;
+    if (value == null) return null;
+    if (_unset is EqualUnmodifiableListView) return _unset;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  @JsonKey()
+  final bool skipEnrichUrl;
+
+  @JsonKey(name: 'runtimeType')
+  final String $type;
+
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $PartialUpdateFailedCopyWith<PartialUpdateFailed> get copyWith =>
+      _$PartialUpdateFailedCopyWithImpl<PartialUpdateFailed>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$PartialUpdateFailedToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is PartialUpdateFailed &&
+            const DeepCollectionEquality().equals(other._set, _set) &&
+            const DeepCollectionEquality().equals(other._unset, _unset) &&
+            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
+                other.skipEnrichUrl == skipEnrichUrl));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_set),
+      const DeepCollectionEquality().hash(_unset),
+      skipEnrichUrl);
+
+  @override
+  String toString() {
+    return 'FailedState.partialUpdateFailed(set: $set, unset: $unset, skipEnrichUrl: $skipEnrichUrl)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $PartialUpdateFailedCopyWith<$Res>
+    implements $FailedStateCopyWith<$Res> {
+  factory $PartialUpdateFailedCopyWith(
+          PartialUpdateFailed value, $Res Function(PartialUpdateFailed) _then) =
+      _$PartialUpdateFailedCopyWithImpl;
+  @useResult
+  $Res call(
+      {Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl});
+}
+
+/// @nodoc
+class _$PartialUpdateFailedCopyWithImpl<$Res>
+    implements $PartialUpdateFailedCopyWith<$Res> {
+  _$PartialUpdateFailedCopyWithImpl(this._self, this._then);
+
+  final PartialUpdateFailed _self;
+  final $Res Function(PartialUpdateFailed) _then;
+
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? set = freezed,
+    Object? unset = freezed,
+    Object? skipEnrichUrl = null,
+  }) {
+    return _then(PartialUpdateFailed(
+      set: freezed == set
+          ? _self._set
+          : set // ignore: cast_nullable_to_non_nullable
+              as Map<String, Object?>?,
+      unset: freezed == unset
+          ? _self._unset
+          : unset // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       skipEnrichUrl: null == skipEnrichUrl
           ? _self.skipEnrichUrl
           : skipEnrichUrl // ignore: cast_nullable_to_non_nullable

@@ -541,9 +541,10 @@ void main() {
         expect(updatedMessage.state, isA<MessageState>());
         expect(
             updatedMessage.state.maybeWhen(
-              failed: (state, _) => state.when(
-                sendingFailed: (_, __) => false,
-                updatingFailed: (_, __) => false,
+              failed: (state, _) => state.map(
+                sendingFailed: (_) => false,
+                updatingFailed: (_) => false,
+                partialUpdateFailed: (_) => false,
                 deletingFailed: (_) => false,
               ),
               orElse: () => true,
@@ -1185,7 +1186,7 @@ void main() {
       });
 
       test(
-          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: true',
+          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipPush: false, skipEnrichUrl: true',
           () async {
         final message = Message(
           id: 'test-message-id-retry-1',
@@ -1236,7 +1237,7 @@ void main() {
       });
 
       test(
-          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: false',
+          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipPush: true, skipEnrichUrl: false',
           () async {
         final message = Message(
           id: 'test-message-id-retry-2',
@@ -1246,6 +1247,7 @@ void main() {
         // Create a retriable error (data == null)
         when(() => client.updateMessage(
               any(that: isSameMessageAs(message)),
+              skipPush: true,
             )).thenThrow(StreamChatNetworkError.raw(
           code: ChatErrorCode.internalSystemError.code,
           message: 'Internal system error',
@@ -1264,7 +1266,10 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updatingFailed(skipEnrichUrl: false),
+                  state: MessageState.updatingFailed(
+                    skipPush: true,
+                    skipEnrichUrl: false,
+                  ),
                 ),
                 matchMessageState: true,
               ),
@@ -1273,7 +1278,7 @@ void main() {
         );
 
         try {
-          await channel.updateMessage(message);
+          await channel.updateMessage(message, skipPush: true);
         } catch (e) {
           expect(e, isA<StreamChatNetworkError>());
 
@@ -1285,7 +1290,7 @@ void main() {
       });
 
       test(
-          'should handle non-retriable StreamChatNetworkError with skipEnrichUrl: true',
+          'should handle non-retriable StreamChatNetworkError with skipPush: true, skipEnrichUrl: true',
           () async {
         final message = Message(
           id: 'test-message-id-error-2',
@@ -1294,6 +1299,7 @@ void main() {
 
         when(() => client.updateMessage(
               any(that: isSameMessageAs(message)),
+              skipPush: true,
               skipEnrichUrl: true,
             )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
 
@@ -1310,7 +1316,10 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updatingFailed(skipEnrichUrl: true),
+                  state: MessageState.updatingFailed(
+                    skipPush: true,
+                    skipEnrichUrl: true,
+                  ),
                 ),
                 matchMessageState: true,
               ),
@@ -1319,7 +1328,11 @@ void main() {
         );
 
         try {
-          await channel.updateMessage(message, skipEnrichUrl: true);
+          await channel.updateMessage(
+            message,
+            skipPush: true,
+            skipEnrichUrl: true,
+          );
         } catch (e) {
           expect(e, isA<StreamChatNetworkError>());
 
@@ -1329,7 +1342,7 @@ void main() {
       });
 
       test(
-          'should handle non-retriable StreamChatNetworkError with skipEnrichUrl: false',
+          'should handle non-retriable StreamChatNetworkError with skipPush: false, skipEnrichUrl: false',
           () async {
         final message = Message(
           id: 'test-message-id-error-3',
@@ -1353,7 +1366,9 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updatingFailed(skipEnrichUrl: false),
+                  state: MessageState.updatingFailed(
+                    skipEnrichUrl: false,
+                  ),
                 ),
                 matchMessageState: true,
               ),
@@ -1523,7 +1538,11 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updatingFailed(skipEnrichUrl: true),
+                  state: MessageState.partialUpdateFailed(
+                    set: set,
+                    unset: unset,
+                    skipEnrichUrl: true,
+                  ),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -1590,7 +1609,10 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updatingFailed(skipEnrichUrl: false),
+                  state: MessageState.partialUpdateFailed(
+                    set: set,
+                    unset: unset,
+                  ),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -1654,7 +1676,11 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updatingFailed(skipEnrichUrl: true),
+                  state: MessageState.partialUpdateFailed(
+                    set: set,
+                    unset: unset,
+                    skipEnrichUrl: true,
+                  ),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -1716,7 +1742,10 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updatingFailed(skipEnrichUrl: false),
+                  state: MessageState.partialUpdateFailed(
+                    set: set,
+                    unset: unset,
+                  ),
                 ),
                 matchText: true,
                 matchMessageState: true,
