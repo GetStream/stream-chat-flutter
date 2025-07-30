@@ -134,8 +134,9 @@ Map<String, dynamic> _$UpdatingFailedToJson(UpdatingFailed instance) =>
       'runtimeType': instance.$type,
     };
 
-PartialUpdateFailed _$PartialUpdateFailedFromJson(Map<String, dynamic> json) =>
-    PartialUpdateFailed(
+PartialUpdatingFailed _$PartialUpdatingFailedFromJson(
+        Map<String, dynamic> json) =>
+    PartialUpdatingFailed(
       set: json['set'] as Map<String, dynamic>?,
       unset:
           (json['unset'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -143,8 +144,8 @@ PartialUpdateFailed _$PartialUpdateFailedFromJson(Map<String, dynamic> json) =>
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$PartialUpdateFailedToJson(
-        PartialUpdateFailed instance) =>
+Map<String, dynamic> _$PartialUpdatingFailedToJson(
+        PartialUpdatingFailed instance) =>
     <String, dynamic>{
       'set': instance.set,
       'unset': instance.unset,

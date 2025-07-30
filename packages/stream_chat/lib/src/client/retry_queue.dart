@@ -123,7 +123,7 @@ class RetryQueue {
       failed: (it) => it.state.map(
         sendingFailed: (_) => message.createdAt,
         updatingFailed: (_) => message.updatedAt,
-        partialUpdateFailed: (_) => message.updatedAt,
+        partialUpdatingFailed: (_) => message.updatedAt,
         deletingFailed: (_) => message.deletedAt,
       ),
       orElse: () => null,

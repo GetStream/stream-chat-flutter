@@ -736,8 +736,8 @@ FailedState _$FailedStateFromJson(Map<String, dynamic> json) {
       return SendingFailed.fromJson(json);
     case 'updatingFailed':
       return UpdatingFailed.fromJson(json);
-    case 'partialUpdateFailed':
-      return PartialUpdateFailed.fromJson(json);
+    case 'partialUpdatingFailed':
+      return PartialUpdatingFailed.fromJson(json);
     case 'deletingFailed':
       return DeletingFailed.fromJson(json);
 
@@ -955,17 +955,17 @@ class _$UpdatingFailedCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class PartialUpdateFailed implements FailedState {
-  const PartialUpdateFailed(
+class PartialUpdatingFailed implements FailedState {
+  const PartialUpdatingFailed(
       {final Map<String, Object?>? set,
       final List<String>? unset,
       this.skipEnrichUrl = false,
       final String? $type})
       : _set = set,
         _unset = unset,
-        $type = $type ?? 'partialUpdateFailed';
-  factory PartialUpdateFailed.fromJson(Map<String, dynamic> json) =>
-      _$PartialUpdateFailedFromJson(json);
+        $type = $type ?? 'partialUpdatingFailed';
+  factory PartialUpdatingFailed.fromJson(Map<String, dynamic> json) =>
+      _$PartialUpdatingFailedFromJson(json);
 
   final Map<String, Object?>? _set;
   Map<String, Object?>? get set {
@@ -995,12 +995,13 @@ class PartialUpdateFailed implements FailedState {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $PartialUpdateFailedCopyWith<PartialUpdateFailed> get copyWith =>
-      _$PartialUpdateFailedCopyWithImpl<PartialUpdateFailed>(this, _$identity);
+  $PartialUpdatingFailedCopyWith<PartialUpdatingFailed> get copyWith =>
+      _$PartialUpdatingFailedCopyWithImpl<PartialUpdatingFailed>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$PartialUpdateFailedToJson(
+    return _$PartialUpdatingFailedToJson(
       this,
     );
   }
@@ -1009,7 +1010,7 @@ class PartialUpdateFailed implements FailedState {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is PartialUpdateFailed &&
+            other is PartialUpdatingFailed &&
             const DeepCollectionEquality().equals(other._set, _set) &&
             const DeepCollectionEquality().equals(other._unset, _unset) &&
             (identical(other.skipEnrichUrl, skipEnrichUrl) ||
@@ -1026,28 +1027,28 @@ class PartialUpdateFailed implements FailedState {
 
   @override
   String toString() {
-    return 'FailedState.partialUpdateFailed(set: $set, unset: $unset, skipEnrichUrl: $skipEnrichUrl)';
+    return 'FailedState.partialUpdatingFailed(set: $set, unset: $unset, skipEnrichUrl: $skipEnrichUrl)';
   }
 }
 
 /// @nodoc
-abstract mixin class $PartialUpdateFailedCopyWith<$Res>
+abstract mixin class $PartialUpdatingFailedCopyWith<$Res>
     implements $FailedStateCopyWith<$Res> {
-  factory $PartialUpdateFailedCopyWith(
-          PartialUpdateFailed value, $Res Function(PartialUpdateFailed) _then) =
-      _$PartialUpdateFailedCopyWithImpl;
+  factory $PartialUpdatingFailedCopyWith(PartialUpdatingFailed value,
+          $Res Function(PartialUpdatingFailed) _then) =
+      _$PartialUpdatingFailedCopyWithImpl;
   @useResult
   $Res call(
       {Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl});
 }
 
 /// @nodoc
-class _$PartialUpdateFailedCopyWithImpl<$Res>
-    implements $PartialUpdateFailedCopyWith<$Res> {
-  _$PartialUpdateFailedCopyWithImpl(this._self, this._then);
+class _$PartialUpdatingFailedCopyWithImpl<$Res>
+    implements $PartialUpdatingFailedCopyWith<$Res> {
+  _$PartialUpdatingFailedCopyWithImpl(this._self, this._then);
 
-  final PartialUpdateFailed _self;
-  final $Res Function(PartialUpdateFailed) _then;
+  final PartialUpdatingFailed _self;
+  final $Res Function(PartialUpdatingFailed) _then;
 
   /// Create a copy of FailedState
   /// with the given fields replaced by the non-null parameter values.
@@ -1057,7 +1058,7 @@ class _$PartialUpdateFailedCopyWithImpl<$Res>
     Object? unset = freezed,
     Object? skipEnrichUrl = null,
   }) {
-    return _then(PartialUpdateFailed(
+    return _then(PartialUpdatingFailed(
       set: freezed == set
           ? _self._set
           : set // ignore: cast_nullable_to_non_nullable

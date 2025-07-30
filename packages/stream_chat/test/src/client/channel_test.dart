@@ -544,7 +544,7 @@ void main() {
               failed: (state, _) => state.map(
                 sendingFailed: (_) => false,
                 updatingFailed: (_) => false,
-                partialUpdateFailed: (_) => false,
+                partialUpdatingFailed: (_) => false,
                 deletingFailed: (_) => false,
               ),
               orElse: () => true,
@@ -1216,6 +1216,7 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.updatingFailed(
+                    skipPush: false,
                     skipEnrichUrl: true,
                   ),
                 ),
@@ -1367,6 +1368,7 @@ void main() {
               isSameMessageAs(
                 message.copyWith(
                   state: MessageState.updatingFailed(
+                    skipPush: false,
                     skipEnrichUrl: false,
                   ),
                 ),
@@ -1538,7 +1540,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.partialUpdateFailed(
+                  state: MessageState.partialUpdatingFailed(
                     set: set,
                     unset: unset,
                     skipEnrichUrl: true,
@@ -1609,9 +1611,10 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.partialUpdateFailed(
+                  state: MessageState.partialUpdatingFailed(
                     set: set,
                     unset: unset,
+                    skipEnrichUrl: false,
                   ),
                 ),
                 matchText: true,
@@ -1676,7 +1679,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.partialUpdateFailed(
+                  state: MessageState.partialUpdatingFailed(
                     set: set,
                     unset: unset,
                     skipEnrichUrl: true,
@@ -1742,9 +1745,10 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.partialUpdateFailed(
+                  state: MessageState.partialUpdatingFailed(
                     set: set,
                     unset: unset,
+                    skipEnrichUrl: false,
                   ),
                 ),
                 matchText: true,
@@ -6091,11 +6095,15 @@ void main() {
             )).called(1);
       });
 
-      test('should call updateMessage with preserved skipEnrichUrl parameter',
+      test(
+          'should call updateMessage with preserved skipPush, skipEnrichUrl parameter',
           () async {
         final message = Message(
           id: 'test-message-id',
-          state: MessageState.updatingFailed(skipEnrichUrl: true),
+          state: MessageState.updatingFailed(
+            skipPush: true,
+            skipEnrichUrl: true,
+          ),
         );
 
         final updateMessageResponse = UpdateMessageResponse()
@@ -6118,11 +6126,14 @@ void main() {
       });
 
       test(
-          'should call updateMessage with preserved false skipEnrichUrl parameter',
+          'should call updateMessage with preserved false skipPush, skipEnrichUrl parameter',
           () async {
         final message = Message(
           id: 'test-message-id',
-          state: MessageState.updatingFailed(skipEnrichUrl: false),
+          state: MessageState.updatingFailed(
+            skipPush: false,
+            skipEnrichUrl: false,
+          ),
         );
 
         final updateMessageResponse = UpdateMessageResponse()
