@@ -6578,6 +6578,7 @@ void main() {
 
         when(() => client.updateMessage(
               any(that: isSameMessageAs(message)),
+              skipPush: true,
               skipEnrichUrl: true,
             )).thenAnswer((_) async => updateMessageResponse);
 
@@ -6588,6 +6589,7 @@ void main() {
 
         verify(() => client.updateMessage(
               any(that: isSameMessageAs(message)),
+              skipPush: true,
               skipEnrichUrl: true,
             )).called(1);
       });
