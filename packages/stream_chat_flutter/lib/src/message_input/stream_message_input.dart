@@ -160,6 +160,8 @@ class StreamMessageInput extends StatefulWidget {
     this.pollConfig,
     this.customAttachmentPickerOptions = const [],
     this.onCustomAttachmentPickerResult,
+    this.padding = const EdgeInsets.all(8),
+    this.textInputMargin,
   });
 
   /// The predicate used to send a message on desktop/web
@@ -401,6 +403,18 @@ class StreamMessageInput extends StatefulWidget {
   ///
   /// This is used to handle the result of the custom attachment picker
   final OnCustomAttachmentPickerResult? onCustomAttachmentPickerResult;
+
+  /// Padding for the message input.
+  ///
+  /// Defaults to `EdgeInsets.all(8)`.
+  final EdgeInsets padding;
+
+  /// Margin for the message input. Allows overriding the default computed
+  /// margin.
+  ///
+  /// Defaults to null, and margin is applied based on action and send button
+  /// locations.
+  final EdgeInsets? textInputMargin;
 
   static String? _defaultHintGetter(
     BuildContext context,
@@ -711,7 +725,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, _) => Padding(
-        padding: const EdgeInsets.all(8),
+        padding: widget.padding,
         child: Column(
           spacing: 8,
           mainAxisSize: MainAxisSize.min,
@@ -1024,7 +1038,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       },
       onDragExited: (details) {},
       child: Container(
-        margin: margin,
+        margin: widget.textInputMargin ?? margin,
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: _messageInputTheme.borderRadius,
