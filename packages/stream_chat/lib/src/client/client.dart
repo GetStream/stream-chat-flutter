@@ -123,6 +123,13 @@ class StreamChatClient {
           },
         );
 
+    _connectionStatusSubscription = wsConnectionStatusStream.pairwise().listen(
+      (statusPair) {
+        final [prevStatus, currStatus] = statusPair;
+        return _onConnectionStatusChanged(prevStatus, currStatus);
+      },
+    );
+
     state = ClientState(this);
   }
 
@@ -220,7 +227,7 @@ class StreamChatClient {
   ///```
   final LogHandlerFunction logHandlerFunction;
 
-  StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
+  StreamSubscription<List<ConnectionStatus>>? _connectionStatusSubscription;
 
   final _eventController = PublishSubject<Event>();
 
@@ -244,7 +251,7 @@ class StreamChatClient {
   /// This notifies the connection status of the [_ws] connection.
   /// Listen to this to get notified when the [_ws] tries to reconnect.
   Stream<ConnectionStatus> get wsConnectionStatusStream {
-    return _ws.connectionStatusStream;
+    return _ws.connectionStatusStream.distinct();
   }
 
   /// Default log handler function for the [StreamChatClient] logger.
@@ -441,10 +448,6 @@ class StreamChatClient {
       throw StreamChatError('Connection already available for ${user.id}');
     }
 
-    _connectionStatusSubscription = wsConnectionStatusStream.listen(
-      _connectionStatusHandler,
-    );
-
     try {
       final event = await _ws.connect(
         user,
@@ -468,9 +471,6 @@ class StreamChatClient {
   /// You need to call [openConnection] to reconnect to [_ws].
   void closeConnection() {
     logger.info('Closing web-socket connection for ${state.currentUser?.id}');
-
-    _connectionStatusSubscription?.cancel();
-    _connectionStatusSubscription = null;
 
     // Stop listening to events
     state.cancelEventSubscription();
@@ -498,18 +498,25 @@ class StreamChatClient {
     return _eventController.add(event);
   }
 
-  void _connectionStatusHandler(ConnectionStatus status) async {
-    final previousState = wsConnectionStatus;
+  void _onConnectionStatusChanged(
+    ConnectionStatus prevStatus,
+    ConnectionStatus currStatus,
+  ) async {
+    // If the status hasn't changed, we don't need to do anything.
+    if (prevStatus == currStatus) return;
 
-    if (previousState != status) {
-      handleEvent(Event(
-        type: EventType.connectionChanged,
-        online: status == ConnectionStatus.connected,
-      ));
-    }
+    final wasConnected = prevStatus == ConnectionStatus.connected;
+    final isConnected = currStatus == ConnectionStatus.connected;
 
-    if (status == ConnectionStatus.connected &&
-        previousState != ConnectionStatus.connected) {
+    // Notify the connection status change event
+    handleEvent(Event(
+      type: EventType.connectionChanged,
+      online: isConnected,
+    ));
+
+    final connectionRecovered = !wasConnected && isConnected;
+
+    if (connectionRecovered) {
       // connection recovered
       final cids = state.channels.keys.toList(growable: false);
       if (cids.isNotEmpty) {
@@ -2032,6 +2039,7 @@ class StreamChatClient {
     await disconnectUser();
     await _ws.dispose();
     await _eventController.close();
+    await _connectionStatusSubscription?.cancel();
   }
 }
 
