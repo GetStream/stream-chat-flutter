@@ -43,6 +43,7 @@ class WebSocket with TimerHelper {
     this.reconnectionMonitorInterval = 10,
     this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
+    this.maxReconnectAttempts = 6,
     this.queryParameters = const {},
   }) : _logger = logger;
 
@@ -92,6 +93,11 @@ class WebSocket with TimerHelper {
   /// The timeout that uses the reconnection monitor timer to consider the
   /// connection unhealthy
   final int reconnectionMonitorTimeout;
+
+  /// Maximum number of reconnection attempts before giving up.
+  ///
+  /// Default is 6 attempts. ~30 seconds of reconnection attempts
+  final int maxReconnectAttempts;
 
   User? _user;
   String? _connectionId;
@@ -252,6 +258,12 @@ class WebSocket with TimerHelper {
   void _reconnect({bool refreshToken = false}) async {
     _logger?.info('Retrying connection : $_reconnectAttempt');
     if (_reconnectRequestInProgress) return;
+
+    if (_reconnectAttempt >= maxReconnectAttempts) {
+      _logger?.severe('Max reconnect attempts reached: $maxReconnectAttempts');
+      return disconnect();
+    }
+
     _reconnectRequestInProgress = true;
 
     _stopMonitoringEvents();
