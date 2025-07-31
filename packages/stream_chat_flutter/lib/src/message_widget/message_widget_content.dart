@@ -281,8 +281,8 @@ class MessageWidgetContent extends StatelessWidget {
                         UserAvatarTransform(
                           onUserAvatarTap: onUserAvatarTap,
                           userAvatarBuilder: userAvatarBuilder,
-                          translateUserAvatar:
-                          showTopUserAvatar == false && translateUserAvatar,
+                          translateUserAvatar: showTopUserAvatar == false &&
+                              translateUserAvatar,
                           messageTheme: messageTheme,
                           message: message,
                         ),
@@ -367,7 +367,8 @@ class MessageWidgetContent extends StatelessWidget {
                         UserAvatarTransform(
                           onUserAvatarTap: onUserAvatarTap,
                           userAvatarBuilder: userAvatarBuilder,
-                          translateUserAvatar: translateUserAvatar,
+                          translateUserAvatar: showTopUserAvatar == false &&
+                              translateUserAvatar,
                           messageTheme: messageTheme,
                           message: message,
                         ),

@@ -125,6 +125,7 @@ class StreamMessageListView extends StatefulWidget {
     this.paginationLoadingIndicatorBuilder,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.spacingWidgetBuilder = _defaultSpacingWidgetBuilder,
+    this.showTopUserAvatar = false,
   });
 
   /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
@@ -317,6 +318,11 @@ class StreamMessageListView extends StatefulWidget {
 
   /// {@macro spacingWidgetBuilder}
   final SpacingWidgetBuilder spacingWidgetBuilder;
+
+  /// Whether to show user avatars at the top of message bubbles instead of bottom
+  /// When true, avatars will align with the top of messages and avatar visibility
+  /// logic for consecutive messages will be reversed
+  final bool showTopUserAvatar;
 
   static Widget _defaultSpacingWidgetBuilder(
     BuildContext context,
@@ -1052,6 +1058,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showUsername: !isMyMessage,
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
+      showTopUserAvatar: widget.showTopUserAvatar,
       attachmentPadding: EdgeInsets.all(
         hasUrlAttachment
             ? 8
@@ -1256,6 +1263,58 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
+  /// Helper method to determine if avatar should be shown based on positioning preference
+  DisplayWidget _shouldShowAvatar({
+    required Message currentMessage,
+    required List<Message> messages,
+    required int index,
+    required bool showTopUserAvatar,
+  }) {
+    // Check previous message (above in UI due to reverse order)
+    final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
+    final isPrevUserSame = prevMessage != null && 
+        currentMessage.user!.id == prevMessage.user!.id;
+    
+    var hasPrevTimeDiff = false;
+    if (prevMessage != null) {
+      final currentCreatedAt = Jiffy.parseFromDateTime(currentMessage.createdAt.toLocal());
+      final prevCreatedAt = Jiffy.parseFromDateTime(prevMessage.createdAt.toLocal());
+      hasPrevTimeDiff = !currentCreatedAt.isSame(prevCreatedAt, unit: Unit.minute);
+    }
+
+    // Check next message (below in UI due to reverse order) 
+    final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
+    final isNextUserSame = nextMessage != null &&
+        currentMessage.user!.id == nextMessage.user!.id;
+    
+    var hasNextTimeDiff = false;
+    if (nextMessage != null) {
+      final currentCreatedAt = Jiffy.parseFromDateTime(currentMessage.createdAt.toLocal());
+      final nextCreatedAt = Jiffy.parseFromDateTime(nextMessage.createdAt.toLocal());
+      hasNextTimeDiff = !currentCreatedAt.isSame(nextCreatedAt, unit: Unit.minute);
+    }
+
+    if (showTopUserAvatar) {
+      // For top avatars: show avatar on the LAST message of consecutive group
+      // Show avatar when:
+      // 1. No next message (last message overall)
+      // 2. Next message has time difference 
+      // 3. Next message is from different user
+      return (nextMessage == null || hasNextTimeDiff || !isNextUserSame)
+          ? DisplayWidget.show 
+          : DisplayWidget.hide;
+    } else {
+      // For bottom avatars (default): show avatar on the FIRST message of consecutive group  
+      // Show avatar when:
+      // 1. No previous message (first message overall)
+      // 2. Previous message has time difference
+      // 3. Previous message is from different user
+      return (prevMessage == null || hasPrevTimeDiff || !isPrevUserSame)
+          ? DisplayWidget.show
+          : DisplayWidget.hide;
+    }
+  }
+
   Widget buildMessage(Message message, List<Message> messages, int index) {
     if ((message.isSystem || message.isError) &&
         message.text?.isNotEmpty == true) {
@@ -1323,11 +1382,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         !isMyMessage &&
         (!isThreadMessage || _isThreadConversation);
 
+    // Determine if we should show the user avatar based on position preference
     final showUserAvatar = isMyMessage
         ? DisplayWidget.gone
-        : (hasTimeDiff || !isNextUserSame)
-            ? DisplayWidget.show
-            : DisplayWidget.hide;
+        : _shouldShowAvatar(
+            currentMessage: message,
+            messages: messages,
+            index: index,
+            showTopUserAvatar: widget.showTopUserAvatar,
+          );
 
     final showSendingIndicator =
         isMyMessage && (index == 0 || hasTimeDiff || !isNextUserSame);
@@ -1355,6 +1418,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showSendingIndicator: showSendingIndicator,
       showUserAvatar: showUserAvatar,
       showMarkUnreadMessage: showMarkUnread,
+      showTopUserAvatar: widget.showTopUserAvatar,
       onQuotedMessageTap: (quotedMessageId) async {
         if (messages.map((e) => e.id).contains(quotedMessageId)) {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
