@@ -441,7 +441,7 @@ class StreamChatClient {
       throw StreamChatError('Connection already available for ${user.id}');
     }
 
-    _connectionStatusSubscription = _ws.connectionStatusStream.listen(
+    _connectionStatusSubscription = wsConnectionStatusStream.listen(
       _connectionStatusHandler,
     );
 
