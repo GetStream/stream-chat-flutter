@@ -278,10 +278,6 @@ class LeftDrawer extends StatelessWidget {
                         }
 
                         await client.disconnectUser(flushChatPersistence: true);
-                        await client.dispose();
-                        initNotifier.initData = initNotifier.initData!.copyWith(
-                            client:
-                                buildStreamChatClient(kDefaultStreamApiKey));
 
                         router.goNamed(Routes.CHOOSE_USER.name);
                       },

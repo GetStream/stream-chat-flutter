@@ -238,20 +238,14 @@ class StreamChatClient {
         },
       );
 
-  final _wsConnectionStatusController =
-      BehaviorSubject.seeded(ConnectionStatus.disconnected);
-
-  set _wsConnectionStatus(ConnectionStatus status) =>
-      _wsConnectionStatusController.add(status);
-
   /// The current status value of the [_ws] connection
-  ConnectionStatus get wsConnectionStatus =>
-      _wsConnectionStatusController.value;
+  ConnectionStatus get wsConnectionStatus => _ws.connectionStatus;
 
   /// This notifies the connection status of the [_ws] connection.
   /// Listen to this to get notified when the [_ws] tries to reconnect.
-  Stream<ConnectionStatus> get wsConnectionStatusStream =>
-      _wsConnectionStatusController.stream.distinct();
+  Stream<ConnectionStatus> get wsConnectionStatusStream {
+    return _ws.connectionStatusStream;
+  }
 
   /// Default log handler function for the [StreamChatClient] logger.
   static void defaultLogHandler(LogRecord record) {
@@ -447,15 +441,9 @@ class StreamChatClient {
       throw StreamChatError('Connection already available for ${user.id}');
     }
 
-    _wsConnectionStatus = ConnectionStatus.connecting;
-
-    // skipping `ws` seed connection status -> ConnectionStatus.disconnected
-    // otherwise `client.wsConnectionStatusStream` will emit in order
-    // 1. ConnectionStatus.disconnected -> client seed status
-    // 2. ConnectionStatus.connecting -> client connecting status
-    // 3. ConnectionStatus.disconnected -> ws seed status
-    _connectionStatusSubscription =
-        _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
+    _connectionStatusSubscription = _ws.connectionStatusStream.listen(
+      _connectionStatusHandler,
+    );
 
     try {
       final event = await _ws.connect(
@@ -479,10 +467,7 @@ class StreamChatClient {
   /// This will not trigger default auto-retry mechanism for reconnection.
   /// You need to call [openConnection] to reconnect to [_ws].
   void closeConnection() {
-    if (wsConnectionStatus == ConnectionStatus.disconnected) return;
-
     logger.info('Closing web-socket connection for ${state.currentUser?.id}');
-    _wsConnectionStatus = ConnectionStatus.disconnected;
 
     _connectionStatusSubscription?.cancel();
     _connectionStatusSubscription = null;
@@ -515,16 +500,15 @@ class StreamChatClient {
 
   void _connectionStatusHandler(ConnectionStatus status) async {
     final previousState = wsConnectionStatus;
-    final currentState = _wsConnectionStatus = status;
 
-    if (previousState != currentState) {
+    if (previousState != status) {
       handleEvent(Event(
         type: EventType.connectionChanged,
         online: status == ConnectionStatus.connected,
       ));
     }
 
-    if (currentState == ConnectionStatus.connected &&
+    if (status == ConnectionStatus.connected &&
         previousState != ConnectionStatus.connected) {
       // connection recovered
       final cids = state.channels.keys.toList(growable: false);
@@ -2025,6 +2009,9 @@ class StreamChatClient {
   Future<void> disconnectUser({bool flushChatPersistence = false}) async {
     logger.info('Disconnecting user : ${state.currentUser?.id}');
 
+    // closing web-socket connection
+    closeConnection();
+
     // resetting state.
     state.dispose();
     state = ClientState(this);
@@ -2035,27 +2022,16 @@ class StreamChatClient {
     _connectionIdManager.reset();
 
     // closing persistence connection.
-    await closePersistenceConnection(flush: flushChatPersistence);
-
-    // closing web-socket connection
-    return closeConnection();
+    return closePersistenceConnection(flush: flushChatPersistence);
   }
 
   /// Call this function to dispose the client
   Future<void> dispose() async {
-    logger.info('Disposing new StreamChatClient');
+    logger.info('Disposing StreamChatClient');
 
-    // disposing state.
-    state.dispose();
-
-    // closing persistence connection.
-    await closePersistenceConnection();
-
-    // closing web-socket connection.
-    closeConnection();
-
+    await disconnectUser();
+    await _ws.dispose();
     await _eventController.close();
-    await _wsConnectionStatusController.close();
   }
 }
 

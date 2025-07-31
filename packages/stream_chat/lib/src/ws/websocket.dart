@@ -105,18 +105,20 @@ class WebSocket with TimerHelper {
   ///
   String? get connectionId => _connectionId;
 
-  final _connectionStatusController =
-      BehaviorSubject.seeded(ConnectionStatus.disconnected);
-
-  set _connectionStatus(ConnectionStatus status) =>
-      _connectionStatusController.safeAdd(status);
+  final _connectionStatusController = BehaviorSubject.seeded(
+    ConnectionStatus.disconnected,
+  );
 
   /// The current connection status value
   ConnectionStatus get connectionStatus => _connectionStatusController.value;
+  set _connectionStatus(ConnectionStatus status) {
+    _connectionStatusController.safeAdd(status);
+  }
 
   /// This notifies of connection status changes
-  Stream<ConnectionStatus> get connectionStatusStream =>
-      _connectionStatusController.stream.distinct();
+  Stream<ConnectionStatus> get connectionStatusStream {
+    return _connectionStatusController.stream.distinct();
+  }
 
   void _initWebSocketChannel(Uri uri) {
     _logger?.info('Initiating connection with $baseUrl');
@@ -494,5 +496,15 @@ class WebSocket with TimerHelper {
     connectionCompleter = null;
 
     _closeWebSocketChannel();
+  }
+
+  /// Disposes the web-socket connection and releases resources
+  Future<void> dispose() async {
+    _logger?.info('Disposing web-socket connection');
+
+    _stopMonitoringEvents();
+    _unsubscribeFromWebSocketChannel();
+    _closeWebSocketChannel();
+    _connectionStatusController.close();
   }
 }
