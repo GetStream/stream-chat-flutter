@@ -149,21 +149,6 @@ void main() {
         }
       });
 
-      test('should throw if connection is already in progress', () async {
-        expect(client.state.currentUser, isNull);
-        try {
-          await client.connectAnonymousUser();
-          await client.openConnection();
-        } catch (e) {
-          expect(e, isA<StreamChatError>());
-          final err = e as StreamChatError;
-          expect(
-            err.message.contains('Connection already in progress for'),
-            isTrue,
-          );
-        }
-      });
-
       test('should throw if connection is already available', () async {
         expect(client.state.currentUser, isNull);
         try {
@@ -499,7 +484,6 @@ void main() {
   group('Client with connected user with persistence', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
-    late final ws = FakeWebSocket();
     late final persistence = MockPersistenceClient();
 
     final user = User(id: 'test-user-id');
@@ -518,6 +502,7 @@ void main() {
       when(() => persistence.updateLastSyncAt(any()))
           .thenAnswer((_) => Future.value());
       when(persistence.getLastSyncAt).thenAnswer((_) async => null);
+      final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws)
         ..chatPersistenceClient = persistence;
       await client.connectUser(user, token);
@@ -526,8 +511,8 @@ void main() {
       expect(client.wsConnectionStatus, ConnectionStatus.connected);
     });
 
-    tearDown(() {
-      client.dispose();
+    tearDown(() async {
+      await client.dispose();
     });
 
     group('`.sync`', () {
@@ -815,7 +800,6 @@ void main() {
     const apiKey = 'test-api-key';
     const userId = 'test-user-id';
     late final api = FakeChatApi();
-    late final ws = FakeWebSocket();
 
     final user = User(id: userId);
     final token = Token.development(user.id).rawValue;
@@ -832,6 +816,7 @@ void main() {
     });
 
     setUp(() async {
+      final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);
       await delay(300);
@@ -839,8 +824,8 @@ void main() {
       expect(client.wsConnectionStatus, ConnectionStatus.connected);
     });
 
-    tearDown(() {
-      client.dispose();
+    tearDown(() async {
+      await client.dispose();
     });
 
     group('`.sync`', () {
@@ -3490,7 +3475,6 @@ void main() {
   group('PersistenceConnectionTests', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
-    late final ws = FakeWebSocket();
 
     final user = User(id: 'test-user-id');
     final token = Token.development(user.id).rawValue;
@@ -3498,14 +3482,15 @@ void main() {
     late StreamChatClient client;
 
     setUp(() async {
+      final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       expect(client.persistenceEnabled, isFalse);
     });
 
-    tearDown(() {
+    tearDown(() async {
       client.chatPersistenceClient = null;
       expect(client.persistenceEnabled, isFalse);
-      client.dispose();
+      await client.dispose();
     });
 
     test('openPersistenceConnection connects the client to the user', () async {

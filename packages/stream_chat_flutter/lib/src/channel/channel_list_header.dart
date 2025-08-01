@@ -270,9 +270,7 @@ class _DisconnectedTitleState extends StatelessWidget {
           ),
         ),
         TextButton(
-          onPressed: () => client
-            ..closeConnection()
-            ..openConnection(),
+          onPressed: client.maybeReconnect,
           child: Text(
             context.translations.tryAgainLabel,
             style: channelListHeaderTheme.titleStyle?.copyWith(

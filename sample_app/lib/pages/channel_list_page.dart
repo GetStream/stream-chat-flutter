@@ -7,15 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:sample_app/app.dart';
 import 'package:sample_app/pages/draft_list_page.dart';
 import 'package:sample_app/pages/reminders_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/pages/user_mentions_page.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/state/init_data.dart';
-import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/channel_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -270,7 +266,6 @@ class LeftDrawer extends StatelessWidget {
                       onTap: () async {
                         final client = StreamChat.of(context).client;
                         final router = GoRouter.of(context);
-                        final initNotifier = context.read<InitNotifier>();
 
                         if (!kIsWeb) {
                           const secureStorage = FlutterSecureStorage();
@@ -278,10 +273,6 @@ class LeftDrawer extends StatelessWidget {
                         }
 
                         await client.disconnectUser(flushChatPersistence: true);
-                        await client.dispose();
-                        initNotifier.initData = initNotifier.initData!.copyWith(
-                            client:
-                                buildStreamChatClient(kDefaultStreamApiKey));
 
                         router.goNamed(Routes.CHOOSE_USER.name);
                       },
