@@ -151,9 +151,17 @@ class _QuotedMessage extends StatelessWidget {
         Flexible(
           child: Text(
             '📊 ${message.poll?.name}',
-            style: messageTheme.messageTextStyle?.copyWith(
-              fontSize: 12,
-            ),
+            style: messageTheme.messageTextStyle?.copyWith(fontSize: 12),
+          ),
+        ),
+      ];
+    } else if (message.sharedLocation case final location?) {
+      // Show shared location message
+      children = [
+        Flexible(
+          child: Text(
+            context.translations.locationLabel(isLive: location.isLive),
+            style: messageTheme.messageTextStyle?.copyWith(fontSize: 12),
           ),
         ),
       ];

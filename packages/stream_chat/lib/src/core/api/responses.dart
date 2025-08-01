@@ -1,14 +1,13 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
-import 'package:stream_chat/src/core/api/call_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
-import 'package:stream_chat/src/core/models/call_payload.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
@@ -514,36 +513,6 @@ class OGAttachmentResponse extends _BaseResponse {
       _$OGAttachmentResponseFromJson(json);
 }
 
-/// The response to [CallApi.getCallToken]
-@Deprecated('Will be removed in the next major version')
-@JsonSerializable(createToJson: false)
-class CallTokenPayload extends _BaseResponse {
-  /// Create a new instance from a [json].
-  static CallTokenPayload fromJson(Map<String, dynamic> json) =>
-      _$CallTokenPayloadFromJson(json);
-
-  /// The token to use for the call.
-  String? token;
-
-  /// The user id specific to Agora.
-  int? agoraUid;
-
-  /// The appId specific to Agora.
-  String? agoraAppId;
-}
-
-/// The response to [CallApi.createCall]
-@Deprecated('Will be removed in the next major version')
-@JsonSerializable(createToJson: false)
-class CreateCallPayload extends _BaseResponse {
-  /// Create a new instance from a [json].
-  static CreateCallPayload fromJson(Map<String, dynamic> json) =>
-      _$CreateCallPayloadFromJson(json);
-
-  /// The call object.
-  CallPayload? call;
-}
-
 /// Contains information about a [User] that was banned from a [Channel] or App.
 @JsonSerializable(createToJson: false)
 class UserBlockResponse extends _BaseResponse {
@@ -828,4 +797,15 @@ class GetUnreadCountResponse extends _BaseResponse {
   /// Create a new instance from a json
   static GetUnreadCountResponse fromJson(Map<String, dynamic> json) =>
       _$GetUnreadCountResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updateDraft] api call
+@JsonSerializable(createToJson: false)
+class GetActiveLiveLocationsResponse extends _BaseResponse {
+  /// List of active live locations returned by the api call
+  late List<Location> activeLiveLocations;
+
+  /// Create a new instance from a json
+  static GetActiveLiveLocationsResponse fromJson(Map<String, dynamic> json) =>
+      _$GetActiveLiveLocationsResponseFromJson(json);
 }

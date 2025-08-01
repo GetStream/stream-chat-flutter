@@ -71,4 +71,29 @@ void main() {
     },
     variant: const TargetPlatformVariant({TargetPlatform.fuchsia}), // hacky :/
   );
+
+  testWidgets(
+    'PlatformWidgetBuilder builds the correct widget for desktopOrWeb',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: PlatformWidgetBuilder(
+                desktopOrWeb: (context, child) => const Text('DesktopOrWeb'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('DesktopOrWeb'), findsOneWidget);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+      TargetPlatform.fuchsia, // Quick hack for web variant.
+    }),
+  );
 }
