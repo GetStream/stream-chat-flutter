@@ -13,6 +13,8 @@ class SeparatedReorderableListView extends ReorderableListView {
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
     required ReorderCallback onReorder,
+    super.onReorderStart,
+    super.onReorderEnd,
     super.itemExtent,
     super.prototypeItem,
     super.proxyDecorator,
