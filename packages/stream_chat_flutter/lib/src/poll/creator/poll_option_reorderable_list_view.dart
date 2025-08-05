@@ -277,8 +277,10 @@ class _PollOptionReorderableListViewState
 
         return value.copyWith(error: _validateOption(value));
       });
+    });
 
-      // Notify the parent widget about the change
+    // Notify the parent widget about the change
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onOptionsChanged?.call([..._options.values]);
     });
   }
@@ -295,8 +297,10 @@ class _PollOptionReorderableListViewState
       _options = <String, PollOptionItem>{
         for (final option in options) option.id: option,
       };
+    });
 
-      // Notify the parent widget about the change
+    // Notify the parent widget about the change
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onOptionsChanged?.call([..._options.values]);
     });
   }
@@ -308,22 +312,20 @@ class _PollOptionReorderableListViewState
       if (_options.length >= maxOptions) return;
     }
 
+    // Create a new option item
+    final option = PollOptionItem();
+
     setState(() {
-      // Create a new option and add it to the map.
-      final option = PollOptionItem();
       _options[option.id] = option;
-
-      // Create focus node for the new option
       _focusNodes[option.id] = FocusNode();
-
-      // Notify the parent widget about the change
-      widget.onOptionsChanged?.call([..._options.values]);
     });
 
-    // Focus on the newly created option after the widget rebuilds
-
-    final newOption = _options.values.last;
-    _focusNodes[newOption.id]?.requestFocus();
+    // Notify the parent widget about the change and request focus on the
+    // newly added option text field.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onOptionsChanged?.call([..._options.values]);
+      _focusNodes[option.id]?.requestFocus();
+    });
   }
 
   bool get _canAddMoreOptions {
