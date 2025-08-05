@@ -4,6 +4,8 @@
 
 - Fixed context menu being truncated and scrollable on web when there was enough space to display it
   fully. [[#2317]](https://github.com/GetStream/stream-chat-flutter/issues/2317)
+- Fixed `StreamMessageInput` cooldown resume error if channel state is not yet initialized.
+  [[#2338]](https://github.com/GetStream/stream-chat-flutter/issues/2338)
 
 ✅ Added
 
