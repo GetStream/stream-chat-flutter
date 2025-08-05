@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `Channel` methods to throw proper `StateError` exceptions instead of relying on assertions
+  for state validation.
+
 ## 9.15.0
 
 ✅ Added
