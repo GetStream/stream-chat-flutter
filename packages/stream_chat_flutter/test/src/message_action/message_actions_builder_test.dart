@@ -18,7 +18,7 @@ Message createTestMessage({
   MessageType type = MessageType.regular,
   int? replyCount,
 }) {
-  return Message(
+  final message = Message(
     id: id,
     text: text,
     user: User(id: userId),
@@ -36,6 +36,15 @@ Message createTestMessage({
       _ => null,
     },
   );
+
+  var state = MessageState.sent;
+  if (message.deletedAt != null) {
+    state = MessageState.softDeleted;
+  } else if (message.updatedAt.isAfter(message.createdAt)) {
+    state = MessageState.updated;
+  }
+
+  return message.copyWith(state: state);
 }
 
 const allChannelCapabilities = [

@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// 2. The original message widget
 /// 3. A display of all current reactions with user avatars
 ///
-/// The modal uses [StreamMessageModal] as its base layout and customizes
+/// The modal uses [StreamMessageDialog] as its base layout and customizes
 /// both the header and content sections to display reaction-specific
 /// information.
 /// {@endtemplate}
@@ -78,18 +78,25 @@ class StreamMessageReactionsModal extends StatelessWidget {
         },
     };
 
-    return StreamMessageModal(
+    return StreamMessageDialog(
       spacing: 4,
       alignment: alignment,
-      headerBuilder: (context) => ReactionPickerBubbleOverlay(
-        message: message,
-        reverse: reverse,
-        visible: showReactionPicker,
-        anchorOffset: const Offset(0, -8),
-        onReactionPicked: onReactionPicked,
-        reactionPickerBuilder: reactionPickerBuilder,
-        child: IgnorePointer(child: messageWidget),
-      ),
+      headerBuilder: (context) {
+        final safeArea = MediaQuery.paddingOf(context);
+
+        return Padding(
+          padding: EdgeInsets.only(top: safeArea.top),
+          child: ReactionPickerBubbleOverlay(
+            message: message,
+            reverse: reverse,
+            visible: showReactionPicker,
+            anchorOffset: const Offset(0, -8),
+            onReactionPicked: onReactionPicked,
+            reactionPickerBuilder: reactionPickerBuilder,
+            child: IgnorePointer(child: messageWidget),
+          ),
+        );
+      },
       contentBuilder: (context) {
         final reactions = message.latestReactions;
         final hasReactions = reactions != null && reactions.isNotEmpty;

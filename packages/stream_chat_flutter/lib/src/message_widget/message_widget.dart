@@ -897,7 +897,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       if (popped) return _onActionTap(context, channel, action).ignore();
     }
 
-    return showStreamMessageModal(
+    return showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
@@ -972,7 +972,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       if (popped) return _onActionTap(context, channel, action).ignore();
     }
 
-    return showStreamMessageModal(
+    return showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => ModeratedMessageActionsModal(
@@ -1015,7 +1015,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       if (popped) return _onActionTap(context, channel, action).ignore();
     }
 
-    return showStreamMessageModal(
+    return showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
@@ -1094,7 +1094,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     Message message,
     Channel channel,
   ) async {
-    final confirmDelete = await showStreamMessageModal<bool>(
+    final confirmDelete = await showStreamDialog<bool>(
       context: context,
       builder: (context) => StreamMessageActionConfirmationModal(
         title: Text(context.translations.deleteMessageLabel),
@@ -1128,7 +1128,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     Message message,
     Channel channel,
   ) async {
-    final confirmFlag = await showStreamMessageModal<bool>(
+    final confirmFlag = await showStreamDialog<bool>(
       context: context,
       builder: (context) => StreamMessageActionConfirmationModal(
         title: Text(context.translations.flagMessageLabel),
@@ -1171,11 +1171,27 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
 
 extension on Message {
   Message get trimmed {
-    if (text case final messageText? when messageText.length > 200) {
-      return copyWith(text: '${messageText.substring(0, 200)}...');
-    }
+    final trimmedText = switch (text) {
+      final text? when text.length > 100 => '${text.substring(0, 100)}...',
+      _ => text,
+    };
 
-    return this;
+    return copyWith(
+      text: trimmedText,
+      poll: poll?.trimmed,
+      quotedMessage: quotedMessage?.trimmed,
+    );
+  }
+}
+
+extension on Poll {
+  Poll get trimmed {
+    final trimmedName = switch (name) {
+      final name when name.length > 100 => '${name.substring(0, 100)}...',
+      _ => name,
+    };
+
+    return copyWith(name: trimmedName);
   }
 }
 
