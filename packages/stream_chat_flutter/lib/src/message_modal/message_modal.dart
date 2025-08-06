@@ -109,16 +109,8 @@ class StreamMessageModal extends StatelessWidget {
       modal = Align(
         alignment: alignment,
         child: SingleChildScrollView(
-          padding: MediaQuery.paddingOf(context),
           hitTestBehavior: HitTestBehavior.translucent,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeLeft: true,
-            removeTop: true,
-            removeRight: true,
-            removeBottom: true,
-            child: modal,
-          ),
+          child: SafeArea(child: modal),
         ),
       );
     }
