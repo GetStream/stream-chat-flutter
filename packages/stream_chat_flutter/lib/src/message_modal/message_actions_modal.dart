@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/reactions/picker/reaction_picker_bubble_overlay.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';

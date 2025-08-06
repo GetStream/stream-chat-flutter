@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 /// A simple wrapper around Flutter's [SafeArea] widget.
 ///
 /// [SimpleSafeArea] provides a convenient way to avoid system intrusions
-/// (such as notches, status bars, and navigation bars) on all or specific sides.
-/// By default, all sides are enabled. Use [SimpleSafeArea.only] to specify sides.
+/// (such as notches, status, and navigation bars) on all or specific sides.
+///
+/// By default, all sides are enabled. Use [SimpleSafeArea.only] to specify
+/// specific sides to avoid.
 ///
 /// See also:
 ///  - [SafeArea], which this widget wraps.
@@ -55,8 +57,8 @@ class SimpleSafeArea extends StatelessWidget {
   final EdgeInsets minimum;
 
   /// Specifies whether the [SafeArea] should maintain the bottom
-  /// [MediaQueryData.viewPadding] instead of the bottom [MediaQueryData.padding],
-  /// defaults to false.
+  /// [MediaQueryData.viewPadding] instead of the bottom
+  /// [MediaQueryData.padding], defaults to false.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// SafeArea, the padding can be maintained below the obstruction rather than
