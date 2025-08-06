@@ -6612,19 +6612,19 @@ void main() {
     group('retryMessage method', () {
       test(
           'should call sendMessage with preserved skipPush and skipEnrichUrl parameters',
-              () async {
-            final message = Message(
-              id: 'test-message-id',
-              state: MessageState.sendingFailed(
-                skipPush: true,
-                skipEnrichUrl: true,
-              ),
-            );
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sendingFailed(
+            skipPush: true,
+            skipEnrichUrl: true,
+          ),
+        );
 
-            final sendMessageResponse = SendMessageResponse()
-              ..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(state: MessageState.sent);
 
-            when(() => client.sendMessage(
+        when(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
               channelType,
@@ -6632,177 +6632,177 @@ void main() {
               skipEnrichUrl: true,
             )).thenAnswer((_) async => sendMessageResponse);
 
-            final result = await channel.retryMessage(message);
+        final result = await channel.retryMessage(message);
 
-            expect(result, isNotNull);
-            expect(result, isA<SendMessageResponse>());
+        expect(result, isNotNull);
+        expect(result, isA<SendMessageResponse>());
 
-            verify(() => client.sendMessage(
+        verify(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
               channelType,
               skipPush: true,
               skipEnrichUrl: true,
             )).called(1);
-          });
+      });
 
       test('should call sendMessage with preserved skipPush parameter',
-              () async {
-            final message = Message(
-              id: 'test-message-id',
-              state: MessageState.sendingFailed(
-                skipPush: true,
-                skipEnrichUrl: false,
-              ),
-            );
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sendingFailed(
+            skipPush: true,
+            skipEnrichUrl: false,
+          ),
+        );
 
-            final sendMessageResponse = SendMessageResponse()
-              ..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(state: MessageState.sent);
 
-            when(() => client.sendMessage(
+        when(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
               channelType,
               skipPush: true,
             )).thenAnswer((_) async => sendMessageResponse);
 
-            final result = await channel.retryMessage(message);
+        final result = await channel.retryMessage(message);
 
-            expect(result, isNotNull);
-            expect(result, isA<SendMessageResponse>());
+        expect(result, isNotNull);
+        expect(result, isA<SendMessageResponse>());
 
-            verify(() => client.sendMessage(
+        verify(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
               channelType,
               skipPush: true,
             )).called(1);
-          });
+      });
 
       test('should call sendMessage with preserved skipEnrichUrl parameter',
-              () async {
-            final message = Message(
-              id: 'test-message-id',
-              state: MessageState.sendingFailed(
-                skipPush: false,
-                skipEnrichUrl: true,
-              ),
-            );
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sendingFailed(
+            skipPush: false,
+            skipEnrichUrl: true,
+          ),
+        );
 
-            final sendMessageResponse = SendMessageResponse()
-              ..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(state: MessageState.sent);
 
-            when(() => client.sendMessage(
+        when(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
               channelType,
               skipEnrichUrl: true,
             )).thenAnswer((_) async => sendMessageResponse);
 
-            final result = await channel.retryMessage(message);
+        final result = await channel.retryMessage(message);
 
-            expect(result, isNotNull);
-            expect(result, isA<SendMessageResponse>());
+        expect(result, isNotNull);
+        expect(result, isA<SendMessageResponse>());
 
-            verify(() => client.sendMessage(
+        verify(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
               channelType,
               skipEnrichUrl: true,
             )).called(1);
-          });
+      });
 
       test(
           'should call sendMessage with preserved false skipPush and skipEnrichUrl parameters',
-              () async {
-            final message = Message(
-              id: 'test-message-id',
-              state: MessageState.sendingFailed(
-                skipPush: false,
-                skipEnrichUrl: false,
-              ),
-            );
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sendingFailed(
+            skipPush: false,
+            skipEnrichUrl: false,
+          ),
+        );
 
-            final sendMessageResponse = SendMessageResponse()
-              ..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse()
+          ..message = message.copyWith(state: MessageState.sent);
 
-            when(() => client.sendMessage(
+        when(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
               channelType,
             )).thenAnswer((_) async => sendMessageResponse);
 
-            final result = await channel.retryMessage(message);
+        final result = await channel.retryMessage(message);
 
-            expect(result, isNotNull);
-            expect(result, isA<SendMessageResponse>());
+        expect(result, isNotNull);
+        expect(result, isA<SendMessageResponse>());
 
-            verify(() => client.sendMessage(
+        verify(() => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
               channelType,
             )).called(1);
-          });
+      });
 
       test(
           'should call updateMessage with preserved skipPush, skipEnrichUrl parameter',
-              () async {
-            final message = Message(
-              id: 'test-message-id',
-              state: MessageState.updatingFailed(
-                skipPush: true,
-                skipEnrichUrl: true,
-              ),
-            );
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.updatingFailed(
+            skipPush: true,
+            skipEnrichUrl: true,
+          ),
+        );
 
-            final updateMessageResponse = UpdateMessageResponse()
-              ..message = message.copyWith(state: MessageState.updated);
+        final updateMessageResponse = UpdateMessageResponse()
+          ..message = message.copyWith(state: MessageState.updated);
 
-            when(() => client.updateMessage(
+        when(() => client.updateMessage(
               any(that: isSameMessageAs(message)),
               skipPush: true,
               skipEnrichUrl: true,
             )).thenAnswer((_) async => updateMessageResponse);
 
-            final result = await channel.retryMessage(message);
+        final result = await channel.retryMessage(message);
 
-            expect(result, isNotNull);
-            expect(result, isA<UpdateMessageResponse>());
+        expect(result, isNotNull);
+        expect(result, isA<UpdateMessageResponse>());
 
-            verify(() => client.updateMessage(
+        verify(() => client.updateMessage(
               any(that: isSameMessageAs(message)),
               skipPush: true,
               skipEnrichUrl: true,
             )).called(1);
-          });
+      });
 
       test(
           'should call updateMessage with preserved false skipPush, skipEnrichUrl parameter',
-              () async {
-            final message = Message(
-              id: 'test-message-id',
-              state: MessageState.updatingFailed(
-                skipPush: false,
-                skipEnrichUrl: false,
-              ),
-            );
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.updatingFailed(
+            skipPush: false,
+            skipEnrichUrl: false,
+          ),
+        );
 
-            final updateMessageResponse = UpdateMessageResponse()
-              ..message = message.copyWith(state: MessageState.updated);
+        final updateMessageResponse = UpdateMessageResponse()
+          ..message = message.copyWith(state: MessageState.updated);
 
-            when(() => client.updateMessage(
+        when(() => client.updateMessage(
               any(that: isSameMessageAs(message)),
             )).thenAnswer((_) async => updateMessageResponse);
 
-            final result = await channel.retryMessage(message);
+        final result = await channel.retryMessage(message);
 
-            expect(result, isNotNull);
-            expect(result, isA<UpdateMessageResponse>());
+        expect(result, isNotNull);
+        expect(result, isA<UpdateMessageResponse>());
 
-            verify(() => client.updateMessage(
+        verify(() => client.updateMessage(
               any(that: isSameMessageAs(message)),
             )).called(1);
-          });
+      });
 
       test('should call deleteMessage with preserved hard parameter', () async {
         final message = Message(
@@ -6812,9 +6812,9 @@ void main() {
         );
 
         when(() => client.deleteMessage(
-          message.id,
-          hard: true,
-        )).thenAnswer((_) async => EmptyResponse());
+              message.id,
+              hard: true,
+            )).thenAnswer((_) async => EmptyResponse());
 
         final result = await channel.retryMessage(message);
 
@@ -6822,43 +6822,43 @@ void main() {
         expect(result, isA<EmptyResponse>());
 
         verify(() => client.deleteMessage(
-          message.id,
-          hard: true,
-        )).called(1);
+              message.id,
+              hard: true,
+            )).called(1);
       });
 
       test('should call deleteMessage with preserved false hard parameter',
-              () async {
-            final message = Message(
-              id: 'test-message-id',
-              createdAt: DateTime.now(),
-              state: MessageState.deletingFailed(hard: false),
-            );
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          createdAt: DateTime.now(),
+          state: MessageState.deletingFailed(hard: false),
+        );
 
-            when(() => client.deleteMessage(
+        when(() => client.deleteMessage(
               message.id,
             )).thenAnswer((_) async => EmptyResponse());
 
-            final result = await channel.retryMessage(message);
+        final result = await channel.retryMessage(message);
 
-            expect(result, isNotNull);
-            expect(result, isA<EmptyResponse>());
+        expect(result, isNotNull);
+        expect(result, isA<EmptyResponse>());
 
-            verify(() => client.deleteMessage(
+        verify(() => client.deleteMessage(
               message.id,
             )).called(1);
-          });
+      });
 
       test('should throw AssertionError when message state is not failed',
-              () async {
-            final message = Message(
-              id: 'test-message-id',
-              state: MessageState.sent,
-            );
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sent,
+        );
 
-            expect(() => channel.retryMessage(message),
-                throwsA(isA<AssertionError>()));
-          });
+        expect(() => channel.retryMessage(message),
+            throwsA(isA<AssertionError>()));
+      });
     });
   });
 }
