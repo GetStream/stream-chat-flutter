@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/flexible_fractionally_sized_box.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
 /// {@template streamMessageModal}
@@ -22,6 +23,7 @@ class StreamMessageModal extends StatelessWidget {
     this.spacing = 8.0,
     this.headerBuilder,
     required this.contentBuilder,
+    this.useSafeArea = true,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
     this.insetPadding = const EdgeInsets.all(8),
@@ -36,6 +38,11 @@ class StreamMessageModal extends StatelessWidget {
 
   /// Required builder for the main content of the modal.
   final WidgetBuilder contentBuilder;
+
+  /// Whether to use a [SafeArea] to avoid system UI intrusions.
+  ///
+  /// Defaults to `true`.
+  final bool useSafeArea;
 
   /// The duration of the animation to show when the system keyboard intrudes
   /// into the space that the modal is placed in.
@@ -65,7 +72,7 @@ class StreamMessageModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectivePadding = MediaQuery.viewInsetsOf(context) + insetPadding;
 
-    final child = Align(
+    final modalChild = Align(
       alignment: alignment,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 280),
@@ -84,7 +91,7 @@ class StreamMessageModal extends StatelessWidget {
       ),
     );
 
-    return AnimatedPadding(
+    Widget modal = AnimatedPadding(
       padding: effectivePadding,
       duration: insetAnimationDuration,
       curve: insetAnimationCurve,
@@ -94,8 +101,28 @@ class StreamMessageModal extends StatelessWidget {
         removeRight: true,
         removeBottom: true,
         context: context,
-        child: child,
+        child: modalChild,
       ),
     );
+
+    if (useSafeArea) {
+      modal = Align(
+        alignment: alignment,
+        child: SingleChildScrollView(
+          padding: MediaQuery.paddingOf(context),
+          hitTestBehavior: HitTestBehavior.translucent,
+          child: MediaQuery.removePadding(
+            context: context,
+            removeLeft: true,
+            removeTop: true,
+            removeRight: true,
+            removeBottom: true,
+            child: modal,
+          ),
+        ),
+      );
+    }
+
+    return modal;
   }
 }

@@ -13,7 +13,6 @@ import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 Future<T?> showStreamDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
-  bool useSafeArea = true,
   bool barrierDismissible = true,
   String? barrierLabel,
   Color? barrierColor,
@@ -56,27 +55,7 @@ Future<T?> showStreamDialog<T>({
     },
     pageBuilder: (context, animation, secondaryAnimation) {
       final pageChild = Builder(builder: builder);
-
-      var dialog = capturedThemes.wrap(pageChild);
-
-      if (useSafeArea) {
-        dialog = Center(
-          child: SingleChildScrollView(
-            padding: MediaQuery.paddingOf(context),
-            hitTestBehavior: HitTestBehavior.translucent,
-            child: MediaQuery.removePadding(
-              context: context,
-              removeLeft: true,
-              removeTop: true,
-              removeRight: true,
-              removeBottom: true,
-              child: dialog,
-            ),
-          ),
-        );
-      }
-
-      return dialog;
+      return capturedThemes.wrap(pageChild);
     },
   );
 }

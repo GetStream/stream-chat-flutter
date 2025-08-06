@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/simple_safe_area.dart';
 import 'package:stream_chat_flutter/src/reactions/picker/reaction_picker_bubble_overlay.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -86,15 +87,22 @@ class StreamMessageActionsModal extends StatelessWidget {
     return StreamMessageModal(
       spacing: 4,
       alignment: alignment,
-      headerBuilder: (context) => ReactionPickerBubbleOverlay(
-        message: message,
-        reverse: reverse,
-        visible: showReactionPicker,
-        anchorOffset: const Offset(0, -8),
-        onReactionPicked: onReactionPicked,
-        reactionPickerBuilder: reactionPickerBuilder,
-        child: IgnorePointer(child: messageWidget),
-      ),
+      headerBuilder: (context) {
+        final safeArea = MediaQuery.paddingOf(context);
+
+        return Padding(
+          padding: EdgeInsets.only(top: safeArea.top),
+          child: ReactionPickerBubbleOverlay(
+            message: message,
+            reverse: reverse,
+            visible: showReactionPicker,
+            anchorOffset: const Offset(0, -8),
+            onReactionPicked: onReactionPicked,
+            reactionPickerBuilder: reactionPickerBuilder,
+            child: IgnorePointer(child: messageWidget),
+          ),
+        );
+      },
       contentBuilder: (context) {
         final actions = Column(
           mainAxisSize: MainAxisSize.min,

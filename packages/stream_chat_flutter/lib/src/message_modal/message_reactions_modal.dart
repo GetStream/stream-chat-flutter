@@ -81,15 +81,22 @@ class StreamMessageReactionsModal extends StatelessWidget {
     return StreamMessageModal(
       spacing: 4,
       alignment: alignment,
-      headerBuilder: (context) => ReactionPickerBubbleOverlay(
-        message: message,
-        reverse: reverse,
-        visible: showReactionPicker,
-        anchorOffset: const Offset(0, -8),
-        onReactionPicked: onReactionPicked,
-        reactionPickerBuilder: reactionPickerBuilder,
-        child: IgnorePointer(child: messageWidget),
-      ),
+      headerBuilder: (context) {
+        final safeArea = MediaQuery.paddingOf(context);
+
+        return Padding(
+          padding: EdgeInsets.only(top: safeArea.top),
+          child: ReactionPickerBubbleOverlay(
+            message: message,
+            reverse: reverse,
+            visible: showReactionPicker,
+            anchorOffset: const Offset(0, -8),
+            onReactionPicked: onReactionPicked,
+            reactionPickerBuilder: reactionPickerBuilder,
+            child: IgnorePointer(child: messageWidget),
+          ),
+        );
+      },
       contentBuilder: (context) {
         final reactions = message.latestReactions;
         final hasReactions = reactions != null && reactions.isNotEmpty;
