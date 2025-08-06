@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -141,6 +142,7 @@ class _StreamPollTextFieldState extends State<StreamPollTextField> {
           style: widget.style ?? theme.textTheme.headline,
           keyboardType: widget.keyboardType,
           autofocus: widget.autoFocus,
+          inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'^\s'))],
           decoration: InputDecoration(
             filled: true,
             isCollapsed: true,
