@@ -3,6 +3,8 @@
 🐞 Fixed
 
 - Fixed `skipPush` and `skipEnrichUrl` not preserving during message send or update retry
+- Fixed `Channel` methods to throw proper `StateError` exceptions instead of relying on assertions
+  for state validation.
 
 ## 10.0.0-beta.4
 

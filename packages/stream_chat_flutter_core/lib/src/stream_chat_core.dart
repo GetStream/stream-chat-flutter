@@ -139,24 +139,14 @@ class StreamChatCore extends StatefulWidget {
 /// State class associated with [StreamChatCore].
 class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
-  /// Initialized client used throughout the application.
-  StreamChatClient get client => widget.client;
-
-  Timer? _disconnectTimer;
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-
   /// The current user
   User? get currentUser => client.state.currentUser;
 
   /// The current user as a stream
   Stream<User?> get currentUserStream => client.state.currentUserStream;
 
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
-
-  var _isInForeground = true;
-  var _isConnectionAvailable = true;
+  /// Initialized client used throughout the application.
+  StreamChatClient get client => widget.client;
 
   Future<SystemEnvironment> get _getSystemEnvironment async {
     String? osVersion;
@@ -224,6 +214,12 @@ class StreamChatCoreState extends State<StreamChatCore>
     );
   }
 
+  late final _lifecycleManager = _ChatLifecycleManager(
+    client: client,
+    backgroundKeepAlive: widget.backgroundKeepAlive,
+    onBackgroundEvent: widget.onBackgroundEventReceived,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -234,34 +230,21 @@ class StreamChatCoreState extends State<StreamChatCore>
     unawaited(_getSystemEnvironment.then(client.updateSystemEnvironment));
   }
 
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   void _subscribeToConnectivityChange([
     Stream<List<ConnectivityResult>>? connectivityStream,
   ]) {
-    if (_connectivitySubscription == null) {
-      connectivityStream ??= Connectivity().onConnectivityChanged;
-      _connectivitySubscription =
-          connectivityStream.distinct().listen((result) {
-        _isConnectionAvailable = !result.contains(ConnectivityResult.none);
-        if (!_isInForeground) return;
-        if (_isConnectionAvailable) {
-          if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
-              currentUser != null) {
-            client.openConnection();
-          }
-        } else {
-          if (client.wsConnectionStatus == ConnectionStatus.connected) {
-            client.closeConnection();
-          }
-        }
-      });
-    }
+    _unsubscribeFromConnectivityChange();
+
+    final stream = connectivityStream ?? Connectivity().onConnectivityChanged;
+    _connectivitySubscription = stream.listen(
+      _lifecycleManager.onConnectivityChanged,
+    );
   }
 
   void _unsubscribeFromConnectivityChange() {
-    if (_connectivitySubscription != null) {
-      _connectivitySubscription?.cancel();
-      _connectivitySubscription = null;
-    }
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription = null;
   }
 
   @override
@@ -274,60 +257,131 @@ class StreamChatCoreState extends State<StreamChatCore>
     }
   }
 
-  StreamSubscription? _eventSubscription;
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _isInForeground = [
-      AppLifecycleState.resumed,
-      AppLifecycleState.inactive,
-    ].contains(state);
-    if (currentUser != null) {
-      if (_isInForeground) {
-        _onForeground();
-      } else {
-        _onBackground();
-      }
-    }
-  }
-
-  void _onForeground() {
-    if (_disconnectTimer?.isActive == true) {
-      _eventSubscription?.cancel();
-      _disconnectTimer?.cancel();
-    } else if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
-        _isConnectionAvailable) {
-      client.openConnection();
-    }
-  }
-
-  void _onBackground() {
-    if (widget.onBackgroundEventReceived == null) {
-      if (client.wsConnectionStatus != ConnectionStatus.disconnected) {
-        client.closeConnection();
-      }
-      return;
-    }
-
-    _eventSubscription?.cancel();
-    _eventSubscription = client.on().listen(widget.onBackgroundEventReceived);
-
-    void onTimerComplete() {
-      _eventSubscription?.cancel();
-      client.closeConnection();
-    }
-
-    _disconnectTimer?.cancel();
-    _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
-    return;
+    _lifecycleManager.onAppLifecycleChanged(state);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _unsubscribeFromConnectivityChange();
-    _eventSubscription?.cancel();
-    _disconnectTimer?.cancel();
+    _lifecycleManager.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+final class _ChatLifecycleManager {
+  _ChatLifecycleManager({
+    required this.client,
+    this.onBackgroundEvent,
+    this.backgroundKeepAlive = const Duration(minutes: 1),
+  });
+
+  final StreamChatClient client;
+  final EventHandler? onBackgroundEvent;
+  final Duration backgroundKeepAlive;
+
+  bool _isInBackground = false;
+  void onAppLifecycleChanged(AppLifecycleState lifecycle) {
+    final wasInBackground = _isInBackground;
+    _isInBackground = !_isAppInForeground(lifecycle);
+
+    if (wasInBackground && !_isInBackground) return _onForeground();
+    if (!wasInBackground && _isInBackground) return _onBackground();
+  }
+
+  bool _isAppInForeground(AppLifecycleState state) {
+    return switch (state) {
+      AppLifecycleState.resumed || AppLifecycleState.inactive => true,
+      _ => false,
+    };
+  }
+
+  void _onForeground() {
+    _cancelBackgroundTimer();
+    _cancelEventSubscription();
+
+    return client.maybeReconnect().ignore();
+  }
+
+  void _onBackground() {
+    _cancelBackgroundTimer();
+
+    final handler = onBackgroundEvent;
+    if (handler == null) return client.maybeDisconnect();
+
+    return _startBackgroundEventListening(handler);
+  }
+
+  Timer? _backgroundTimer;
+  StreamSubscription? _eventSubscription;
+
+  void _startBackgroundEventListening(EventHandler handler) {
+    _cancelEventSubscription();
+    _eventSubscription = client.on().listen(handler);
+
+    _backgroundTimer = Timer(backgroundKeepAlive, () {
+      _cancelEventSubscription();
+      client.maybeDisconnect();
+    });
+  }
+
+  void onConnectivityChanged(List<ConnectivityResult> results) {
+    if (_isInBackground) return;
+
+    final hasConnectivity = !results.contains(ConnectivityResult.none);
+
+    if (hasConnectivity) return client.maybeReconnect().ignore();
+    return client.maybeDisconnect();
+  }
+
+  void _cancelBackgroundTimer() {
+    _backgroundTimer?.cancel();
+    _backgroundTimer = null;
+  }
+
+  void _cancelEventSubscription() {
+    _eventSubscription?.cancel();
+    _eventSubscription = null;
+  }
+
+  void dispose() {
+    _cancelBackgroundTimer();
+    _cancelEventSubscription();
+  }
+}
+
+/// Extension on [StreamChatClient] to provide a convenient method for
+/// conditionally reconnecting the client if the user is logged in and
+/// the connection is not yet established.
+///
+/// This helps ensure the client attempts to reconnect immediately
+/// (bypassing any retry delays) when the app returns to the foreground
+/// or when connectivity is restored.
+extension MaybeReconnect on StreamChatClient {
+  /// Optionally trigger a reconnect if the user is already logged in and the
+  /// client is not yet connected.
+  Future<void> maybeReconnect() async {
+    if (state.currentUser == null) return;
+    if (wsConnectionStatus == ConnectionStatus.connected) return;
+
+    // Force immediate reconnection by resetting any ongoing retry delays
+    // This ensures we don't wait up to 25s when user foregrounds the app
+    closeConnection();
+    await openConnection();
+  }
+
+  /// Optionally disconnect the client if the user is logged in and the
+  /// connection is currently established.
+  void maybeDisconnect() {
+    if (state.currentUser == null) return;
+    if (wsConnectionStatus == ConnectionStatus.disconnected) return;
+
+    // Close the connection immediately
+    return closeConnection();
   }
 }

@@ -128,585 +128,204 @@ void main() {
     },
   );
 
-  testWidgets(
-    'should render StreamChatCore if both client and child is provided',
-    (tester) async {
-      final mockClient = MockClient();
-      const streamChatCoreKey = Key('streamChatCore');
-      const childKey = Key('child');
-      final streamChatCore = StreamChatCore(
-        key: streamChatCoreKey,
-        client: mockClient,
-        child: const Offstage(key: childKey),
+  group('StreamChatCore lifecycle behavior', () {
+    late MockClient mockClient;
+    late MockOnBackgroundEventReceived mockOnBackgroundEventReceived;
+    late BehaviorSubject<List<ConnectivityResult>> connectivityController;
+
+    setUp(() {
+      mockClient = MockClient();
+      mockOnBackgroundEventReceived = MockOnBackgroundEventReceived();
+      connectivityController = BehaviorSubject.seeded(
+        [ConnectivityResult.mobile],
       );
 
-      await tester.pumpWidget(streamChatCore);
+      // Setup the mock client
+      when(mockClient.closeConnection).thenAnswer((_) async {});
+      when(
+        mockClient.openConnection,
+      ).thenAnswer((_) async => OwnUser(id: 'test-user'));
+      when(() => mockClient.wsConnectionStatus)
+          .thenReturn(ConnectionStatus.connected);
+    });
 
-      expect(find.byKey(streamChatCoreKey), findsOneWidget);
-      expect(find.byKey(childKey), findsOneWidget);
-    },
-  );
+    tearDown(() {
+      connectivityController.close();
+    });
 
-  testWidgets(
-    'didChangeAppLifecycleState should call client.closeConnection and return '
-    'if onBackgroundEventReceived is null and the widget lifestyle changes to '
-    'AppLifecycleState.paused',
-    (tester) async {
-      final mockClient = MockClient();
-      const streamChatCoreKey = Key('streamChatCore');
-      const childKey = Key('child');
-      final streamChatCore = StreamChatCore(
-        key: streamChatCoreKey,
-        client: mockClient,
-        child: const Offstage(key: childKey),
+    Future<void> pumpStreamChatCore(
+      WidgetTester tester, {
+      void Function(Event)? onBackgroundEventReceived,
+      Duration backgroundKeepAlive = const Duration(minutes: 1),
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChatCore(
+            client: mockClient,
+            backgroundKeepAlive: backgroundKeepAlive,
+            onBackgroundEventReceived: onBackgroundEventReceived,
+            connectivityStream: connectivityController.stream,
+            child: const SizedBox(),
+          ),
+        ),
       );
+    }
 
-      await tester.pumpWidget(streamChatCore);
+    testWidgets(
+      'should close connection when app goes to background without handler',
+      (tester) async {
+        // Arrange
+        await pumpStreamChatCore(tester);
 
-      expect(find.byKey(streamChatCoreKey), findsOneWidget);
-      expect(find.byKey(childKey), findsOneWidget);
+        // Act
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pumpAndSettle();
 
-      // ignore: prefer_expression_function_bodies
-      when(mockClient.closeConnection).thenAnswer((_) async {
-        return;
-      });
-
-      final streamChatCoreState = tester.state<StreamChatCoreState>(
-        find.byKey(streamChatCoreKey),
-      );
-
-      // ignore: cascade_invocations
-      streamChatCoreState.didChangeAppLifecycleState(AppLifecycleState.paused);
-
-      verify(mockClient.closeConnection).called(1);
-    },
-  );
-
-  testWidgets(
-    'didChangeAppLifecycleState should subscribe to client events for '
-    'backgroundKeepAlive duration if onBackgroundEventReceived is provided '
-    'and the widget lifestyle changes to AppLifecycleState.paused',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        final mockOnBackgroundEventReceived = MockOnBackgroundEventReceived();
-        const backgroundKeepAlive = Duration(seconds: 3);
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          onBackgroundEventReceived: mockOnBackgroundEventReceived,
-          backgroundKeepAlive: backgroundKeepAlive,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        final event = Event(type: EventType.any);
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-        // ignore: prefer_expression_function_bodies
-        when(mockClient.closeConnection).thenAnswer((_) async {
-          return;
-        });
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        // ignore: cascade_invocations
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.paused);
-
-        await untilCalled(() => mockOnBackgroundEventReceived.call(event));
-
-        verify(() => mockOnBackgroundEventReceived.call(event)).called(1);
-
-        await Future.delayed(backgroundKeepAlive);
-
+        // Assert
         verify(mockClient.closeConnection).called(1);
-        verifyNever(() => mockOnBackgroundEventReceived.call(event));
-      });
-    },
-  );
+      },
+    );
 
-  testWidgets(
-    'didChangeAppLifecycleState should cancel the backgroundKeepAlive timer '
-    'if it is currently running in case the widget lifestyle changes to '
-    'AppLifecycleState.resume',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        final mockOnBackgroundEventReceived = MockOnBackgroundEventReceived();
-        const backgroundKeepAlive = Duration(seconds: 3);
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
+    testWidgets(
+      'should open connection when app comes to foreground',
+      (tester) async {
+        // Arrange
+        await pumpStreamChatCore(tester);
+
+        // Put app in background
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pumpAndSettle();
+
+        // Reset connection status to disconnected
+        when(
+          () => mockClient.wsConnectionStatus,
+        ).thenReturn(ConnectionStatus.disconnected);
+
+        // Act - bring app to foreground
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        // Assert
+        verify(mockClient.openConnection).called(1);
+      },
+    );
+
+    testWidgets(
+      'should listen for events when app goes to background with handler',
+      (tester) async {
+        // Arrange
+        final event = Event(type: EventType.any);
+        when(mockClient.on).thenAnswer((_) => Stream.value(event));
+
+        await pumpStreamChatCore(
+          tester,
           onBackgroundEventReceived: mockOnBackgroundEventReceived,
-          backgroundKeepAlive: backgroundKeepAlive,
-          child: const Offstage(key: childKey),
         );
 
-        await tester.pumpWidget(streamChatCore);
+        // Act
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pumpAndSettle();
 
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
+        // Wait for event to be processed
+        await tester.pump(const Duration(milliseconds: 100));
 
-        final event = Event(type: EventType.any);
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        // ignore: cascade_invocations
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.paused);
-
-        await untilCalled(() => mockOnBackgroundEventReceived.call(event));
-
+        // Assert
         verify(() => mockOnBackgroundEventReceived.call(event)).called(1);
-
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.resumed);
-
-        verifyNever(() => mockOnBackgroundEventReceived.call(event));
-      });
-    },
-  );
-
-  testWidgets(
-    'didChangeAppLifecycleState should call client.connect() '
-    'if the connectionStatus is ConnectionStatus.disconnected in case the '
-    'widget lifestyle changes to AppLifecycleState.resume',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        final event = Event(type: EventType.any);
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-        when(mockClient.openConnection)
-            .thenAnswer((_) async => OwnUser(id: 'test'));
-
-        // ignore: prefer_expression_function_bodies
-        when(mockClient.closeConnection).thenAnswer((_) async {
-          return;
-        });
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        // ignore: cascade_invocations
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.paused);
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.resumed);
-
-        verify(mockClient.openConnection).called(1);
-      });
-    },
-  );
-
-  testWidgets(
-    'didChangeAppLifecycleState should not call client.openConnection() '
-    'if connection is not available in case the '
-    'widget lifestyle changes to AppLifecycleState.resume',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-
-        final event = Event();
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-        when(mockClient.openConnection)
-            .thenAnswer((_) async => OwnUser(id: 'test'));
-
-        // ignore: prefer_expression_function_bodies
-        when(mockClient.closeConnection).thenAnswer((_) async {
-          return;
-        });
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
-
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          connectivityStream: Stream.value([ConnectivityResult.none]),
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        // ignore: cascade_invocations
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.paused);
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.resumed);
-
-        verifyNever(mockClient.openConnection);
-      });
-    },
-  );
-  testWidgets(
-    'didChangeAppLifecycleState should cancel the backgroundKeepAlive timer '
-    'if it is currently running in case the widget lifestyle changes to '
-    'AppLifecycleState.inactive',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        final mockOnBackgroundEventReceived = MockOnBackgroundEventReceived();
-        const backgroundKeepAlive = Duration(seconds: 3);
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          onBackgroundEventReceived: mockOnBackgroundEventReceived,
-          backgroundKeepAlive: backgroundKeepAlive,
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        final event = Event(type: EventType.any);
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        // ignore: cascade_invocations
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.paused);
-
-        await untilCalled(() => mockOnBackgroundEventReceived.call(event));
-
-        verify(() => mockOnBackgroundEventReceived.call(event)).called(1);
-
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.inactive);
-
-        verifyNever(() => mockOnBackgroundEventReceived.call(event));
-      });
-    },
-  );
-
-  testWidgets(
-    'didChangeAppLifecycleState should call client.connect() '
-    'if the connectionStatus is ConnectionStatus.disconnected in case the '
-    'widget lifestyle changes to AppLifecycleState.inactive',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        final event = Event(type: EventType.any);
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-        when(mockClient.openConnection)
-            .thenAnswer((_) async => OwnUser(id: 'test'));
-        when(mockClient.closeConnection).thenAnswer((_) async {});
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        // ignore: cascade_invocations
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.paused);
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.inactive);
-
-        verify(mockClient.openConnection).called(1);
-      });
-    },
-  );
-
-  testWidgets(
-    'didChangeAppLifecycleState should not call client.openConnection() '
-    'if connection is not available in case the '
-    'widget lifestyle changes to AppLifecycleState.inactive',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-
-        final event = Event();
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-        when(mockClient.openConnection)
-            .thenAnswer((_) async => OwnUser(id: 'test'));
-        when(mockClient.closeConnection).thenAnswer((_) async {});
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
-
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          connectivityStream: Stream.value([ConnectivityResult.none]),
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        // ignore: cascade_invocations
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.paused);
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.inactive);
-
-        verifyNever(mockClient.openConnection);
-      });
-    },
-  );
-
-  testWidgets(
-    'streamChatCoreState.currentUserStream should emit all the user events '
-    'provided by client',
-    (tester) async {
-      await tester.runAsync(() async {
-        final userController = StreamController<OwnUser>();
-
-        final mockClient = MockClient();
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        when(() => mockClient.state.currentUserStream)
-            .thenAnswer((_) => userController.stream);
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        final ownUser = OwnUser(id: 'testUserId');
-        userController.add(ownUser);
-
-        await expectLater(
-          streamChatCoreState.currentUserStream,
-          emits(ownUser),
-        );
-
-        addTearDown(userController.close);
-      });
-    },
-  );
-
-  testWidgets(
-    'should call connect if in foreground and connection is back',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final _connectivityController =
-            BehaviorSubject.seeded([ConnectivityResult.none]);
-
-        final event = Event();
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-        when(mockClient.openConnection)
-            .thenAnswer((_) async => OwnUser(id: 'test'));
-
-        // ignore: prefer_expression_function_bodies
-        when(mockClient.closeConnection).thenAnswer((_) async {
-          return;
-        });
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
-
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          connectivityStream: _connectivityController.stream,
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        _connectivityController.add([ConnectivityResult.mobile]);
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(mockClient.openConnection).called(1);
-
-        addTearDown(_connectivityController.close);
-      });
-    },
-  );
-
-  testWidgets(
-    'should call disconnect if in foreground and connection goes away',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final _connectivityController =
-            BehaviorSubject.seeded([ConnectivityResult.mobile]);
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          connectivityStream: _connectivityController.stream,
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        final event = Event();
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-        when(mockClient.openConnection)
-            .thenAnswer((_) async => OwnUser(id: 'test'));
-
-        // ignore: prefer_expression_function_bodies
-        when(mockClient.closeConnection).thenAnswer((_) async {
-          return;
-        });
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.connected);
-
-        _connectivityController.add([ConnectivityResult.none]);
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(mockClient.closeConnection).called(1);
-
-        addTearDown(_connectivityController.close);
-      });
-    },
-  );
-
-  testWidgets(
-    'should ignore connectivity in background',
-    (tester) async {
-      await tester.runAsync(() async {
-        final mockClient = MockClient();
-        const streamChatCoreKey = Key('streamChatCore');
-        const childKey = Key('child');
-        final _connectivityController =
-            BehaviorSubject.seeded([ConnectivityResult.none]);
-
-        final event = Event();
-        when(mockClient.on).thenAnswer((_) => Stream.value(event));
-        when(mockClient.openConnection)
-            .thenAnswer((_) async => OwnUser(id: 'test'));
-
-        // ignore: prefer_expression_function_bodies
-        when(mockClient.closeConnection).thenAnswer((_) async {
-          return;
-        });
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
-
-        final streamChatCore = StreamChatCore(
-          key: streamChatCoreKey,
-          client: mockClient,
-          connectivityStream: _connectivityController.stream,
-          child: const Offstage(key: childKey),
-        );
-
-        await tester.pumpWidget(streamChatCore);
-
-        expect(find.byKey(streamChatCoreKey), findsOneWidget);
-        expect(find.byKey(childKey), findsOneWidget);
-
-        final streamChatCoreState = tester.state<StreamChatCoreState>(
-          find.byKey(streamChatCoreKey),
-        );
-
-        // ignore: cascade_invocations
-        streamChatCoreState
-            .didChangeAppLifecycleState(AppLifecycleState.paused);
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        _connectivityController.add([ConnectivityResult.mobile]);
-
-        await Future.delayed(const Duration(seconds: 1));
-
         verifyNever(mockClient.closeConnection);
+      },
+    );
 
-        addTearDown(_connectivityController.close);
-      });
-    },
-  );
+    testWidgets(
+      'should close connection after background timer expires',
+      (tester) async {
+        await tester.runAsync(() async {
+          // Arrange
+          final event = Event(type: EventType.any);
+          when(mockClient.on).thenAnswer((_) => Stream.value(event));
+
+          await pumpStreamChatCore(
+            tester,
+            onBackgroundEventReceived: mockOnBackgroundEventReceived,
+            backgroundKeepAlive: const Duration(milliseconds: 100),
+          );
+
+          // Act
+          tester.binding
+              .handleAppLifecycleStateChanged(AppLifecycleState.paused);
+          await tester.pumpAndSettle();
+
+          // Wait for timer to expire
+          await Future.delayed(const Duration(milliseconds: 200));
+
+          // Assert
+          verify(() => mockOnBackgroundEventReceived.call(event)).called(1);
+          verify(mockClient.closeConnection).called(1);
+        });
+      },
+    );
+
+    testWidgets(
+      'should open connection when connectivity is restored',
+      (tester) async {
+        // Arrange
+        await pumpStreamChatCore(tester);
+
+        // Set connection status to disconnected
+        when(
+          () => mockClient.wsConnectionStatus,
+        ).thenReturn(ConnectionStatus.disconnected);
+
+        // Act - restore connectivity
+        connectivityController.add([ConnectivityResult.mobile]);
+        await tester.pumpAndSettle();
+
+        // Assert
+        verify(mockClient.openConnection).called(1);
+      },
+    );
+
+    testWidgets(
+      'should close connection when connectivity is lost',
+      (tester) async {
+        // Arrange
+        await pumpStreamChatCore(tester);
+
+        // Set connection status to connected
+        when(
+          () => mockClient.wsConnectionStatus,
+        ).thenReturn(ConnectionStatus.connected);
+
+        // Act - lose connectivity
+        connectivityController.add([ConnectivityResult.none]);
+        await tester.pumpAndSettle();
+
+        // Assert
+        verify(mockClient.closeConnection).called(1);
+      },
+    );
+
+    testWidgets(
+      'should ignore connectivity changes when app is in background',
+      (tester) async {
+        // Arrange
+        await pumpStreamChatCore(tester);
+
+        // Put app in background
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pumpAndSettle();
+
+        // Reset the mock to clear previous calls
+        clearInteractions(mockClient);
+
+        // Act - connectivity changes while in background
+        connectivityController.add([ConnectivityResult.mobile]);
+        await tester.pumpAndSettle();
+
+        // Assert
+        verifyNever(mockClient.openConnection);
+        verifyNever(mockClient.closeConnection);
+      },
+    );
+  });
 }

@@ -435,6 +435,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     super.dispose();
     userIdSubscription?.cancel();
     firebaseSubscriptions.cancelAll();
+    _initNotifier.initData?.client.dispose();
   }
 
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();

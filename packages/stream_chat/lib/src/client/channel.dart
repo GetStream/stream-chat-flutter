@@ -2132,15 +2132,18 @@ class Channel {
   void dispose() {
     client.state.removeChannel('$cid');
     state?.dispose();
+    state = null;
     _muteExpirationTimer?.cancel();
     _keyStrokeHandler.cancel();
   }
 
   void _checkInitialized() {
-    assert(
-      _initializedCompleter.isCompleted,
-      "Channel $cid hasn't been initialized yet. Make sure to call .watch()"
-      ' or to instantiate the client using [Channel.fromState]',
+    if (_initializedCompleter.isCompleted && state != null) return;
+
+    throw StateError(
+      "Channel $cid hasn't been initialized yet or has been disposed. "
+      'Make sure to call .watch() or instantiate the client using '
+      '[Channel.fromState]',
     );
   }
 }

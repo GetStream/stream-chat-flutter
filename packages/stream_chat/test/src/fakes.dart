@@ -117,22 +117,20 @@ class FakeUser extends Fake implements User {}
 class FakePollVote extends Fake implements PollVote {}
 
 class FakeWebSocket extends Fake implements WebSocket {
-  BehaviorSubject<ConnectionStatus>? _connectionStatusController;
-
-  BehaviorSubject<ConnectionStatus> get connectionStatusController =>
-      _connectionStatusController ??=
-          BehaviorSubject.seeded(ConnectionStatus.disconnected);
+  late final _connectionStatusController = BehaviorSubject.seeded(
+    ConnectionStatus.disconnected,
+  );
 
   set connectionStatus(ConnectionStatus value) {
-    connectionStatusController.add(value);
+    _connectionStatusController.add(value);
   }
 
   @override
-  ConnectionStatus get connectionStatus => connectionStatusController.value;
+  ConnectionStatus get connectionStatus => _connectionStatusController.value;
 
   @override
   Stream<ConnectionStatus> get connectionStatusStream =>
-      connectionStatusController.stream;
+      _connectionStatusController.stream;
 
   @override
   Completer<Event>? connectionCompleter;
@@ -157,28 +155,29 @@ class FakeWebSocket extends Fake implements WebSocket {
   void disconnect() {
     connectionStatus = ConnectionStatus.disconnected;
     connectionCompleter = null;
-    _connectionStatusController?.close();
-    _connectionStatusController = null;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _connectionStatusController.close();
   }
 }
 
 class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
-  BehaviorSubject<ConnectionStatus>? _connectionStatusController;
-
-  BehaviorSubject<ConnectionStatus> get connectionStatusController =>
-      _connectionStatusController ??=
-          BehaviorSubject.seeded(ConnectionStatus.disconnected);
+  late final _connectionStatusController = BehaviorSubject.seeded(
+    ConnectionStatus.disconnected,
+  );
 
   set connectionStatus(ConnectionStatus value) {
-    connectionStatusController.add(value);
+    _connectionStatusController.add(value);
   }
 
   @override
-  ConnectionStatus get connectionStatus => connectionStatusController.value;
+  ConnectionStatus get connectionStatus => _connectionStatusController.value;
 
   @override
   Stream<ConnectionStatus> get connectionStatusStream =>
-      connectionStatusController.stream;
+      _connectionStatusController.stream;
 
   @override
   Completer<Event>? connectionCompleter;
@@ -198,8 +197,11 @@ class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
   void disconnect() {
     connectionStatus = ConnectionStatus.disconnected;
     connectionCompleter = null;
-    _connectionStatusController?.close();
-    _connectionStatusController = null;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _connectionStatusController.close();
   }
 }
 

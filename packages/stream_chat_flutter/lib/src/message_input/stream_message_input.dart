@@ -549,7 +549,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final config = StreamChatConfiguration.of(context);
 
     // Resumes the cooldown if the channel has currently an active cooldown.
-    if (!_isEditing) {
+    if (!_isEditing && channel.state != null) {
       _effectiveController.startCooldown(channel.getRemainingCooldown());
     }
 
