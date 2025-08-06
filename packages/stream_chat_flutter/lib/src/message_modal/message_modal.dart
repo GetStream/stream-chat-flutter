@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/flexible_fractionally_sized_box.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
-/// {@template streamMessageModal}
-/// A customizable modal widget for displaying message-related content.
+/// {@template streamMessageDialog}
+/// A customizable modal dialog for displaying message-related content.
 ///
 /// This widget provides a consistent container for message actions and other
-/// message-related modal content. It handles layout, animation, and keyboard
+/// message-related dialog content. It handles layout, animation, and keyboard
 /// adjustments automatically.
 ///
-/// The modal can contain a header (optional) and content section (required),
+/// The dialog can contain a header (optional) and content section (required),
 /// and will adjust its position when the keyboard appears.
 /// {@endtemplate}
-class StreamMessageModal extends StatelessWidget {
-  /// Creates a Stream message modal.
+class StreamMessageDialog extends StatelessWidget {
+  /// Creates a Stream message dialog.
   ///
   /// The [contentBuilder] parameter is required to build the main content
-  /// of the modal. The [headerBuilder] is optional and can be used to add
+  /// of the dialog. The [headerBuilder] is optional and can be used to add
   /// a header above the main content.
-  const StreamMessageModal({
+  const StreamMessageDialog({
     super.key,
     this.spacing = 8.0,
     this.headerBuilder,
@@ -33,10 +32,10 @@ class StreamMessageModal extends StatelessWidget {
   /// Vertical spacing between header and content sections.
   final double spacing;
 
-  /// Optional builder for the header section of the modal.
+  /// Optional builder for the header section of the dialog.
   final WidgetBuilder? headerBuilder;
 
-  /// Required builder for the main content of the modal.
+  /// Required builder for the main content of the dialog.
   final WidgetBuilder contentBuilder;
 
   /// Whether to use a [SafeArea] to avoid system UI intrusions.
@@ -45,25 +44,25 @@ class StreamMessageModal extends StatelessWidget {
   final bool useSafeArea;
 
   /// The duration of the animation to show when the system keyboard intrudes
-  /// into the space that the modal is placed in.
+  /// into the space that the dialog is placed in.
   ///
   /// Defaults to 100 milliseconds.
   final Duration insetAnimationDuration;
 
   /// The curve to use for the animation shown when the system keyboard intrudes
-  /// into the space that the modal is placed in.
+  /// into the space that the dialog is placed in.
   ///
   /// Defaults to [Curves.decelerate].
   final Curve insetAnimationCurve;
 
   /// The amount of padding added to [MediaQueryData.viewInsets] on the outside
-  /// of the modal. This defines the minimum space between the screen's edges
-  /// and the modal.
+  /// of the dialog. This defines the minimum space between the screen's edges
+  /// and the dialog.
   ///
   /// Defaults to `EdgeInsets.zero`.
   final EdgeInsets insetPadding;
 
-  /// How to align the [StreamMessageModal].
+  /// How to align the [StreamMessageDialog].
   ///
   /// Defaults to [Alignment.center].
   final AlignmentGeometry alignment;
@@ -72,7 +71,7 @@ class StreamMessageModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectivePadding = MediaQuery.viewInsetsOf(context) + insetPadding;
 
-    final modalChild = Align(
+    final dialogChild = Align(
       alignment: alignment,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 280),
@@ -91,7 +90,7 @@ class StreamMessageModal extends StatelessWidget {
       ),
     );
 
-    Widget modal = AnimatedPadding(
+    Widget dialog = AnimatedPadding(
       padding: effectivePadding,
       duration: insetAnimationDuration,
       curve: insetAnimationCurve,
@@ -101,20 +100,20 @@ class StreamMessageModal extends StatelessWidget {
         removeRight: true,
         removeBottom: true,
         context: context,
-        child: modalChild,
+        child: dialogChild,
       ),
     );
 
     if (useSafeArea) {
-      modal = Align(
+      dialog = Align(
         alignment: alignment,
         child: SingleChildScrollView(
           hitTestBehavior: HitTestBehavior.translucent,
-          child: SafeArea(child: modal),
+          child: SafeArea(child: dialog),
         ),
       );
     }
 
-    return modal;
+    return dialog;
   }
 }

@@ -84,7 +84,7 @@ class StreamMessageActionsModal extends StatelessWidget {
           ),
     };
 
-    return StreamMessageModal(
+    return StreamMessageDialog(
       spacing: 4,
       alignment: alignment,
       headerBuilder: (context) {
