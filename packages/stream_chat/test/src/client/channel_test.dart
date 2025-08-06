@@ -497,7 +497,7 @@ void main() {
         }
       });
 
-      test('should not update message state when non-retriable error occurs',
+      test('should update message state even when non-retriable error occurs',
           () async {
         final message = Message(
           id: 'test-message-id',
@@ -527,6 +527,17 @@ void main() {
                 matchMessageState: true,
               ),
             ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.sendingFailed(
+                    skipPush: false,
+                    skipEnrichUrl: false,
+                  ),
+                ),
+                matchMessageState: true,
+              ),
+            ]
           ]),
         );
 
@@ -535,21 +546,6 @@ void main() {
         } catch (e) {
           expect(e, isA<StreamChatNetworkError>());
         }
-
-        final updatedMessage =
-            channel.state!.messages.firstWhere((m) => m.id == message.id);
-        expect(updatedMessage.state, isA<MessageState>());
-        expect(
-            updatedMessage.state.maybeWhen(
-              failed: (state, _) => state.map(
-                sendingFailed: (_) => false,
-                updatingFailed: (_) => false,
-                partialUpdatingFailed: (_) => false,
-                deletingFailed: (_) => false,
-              ),
-              orElse: () => true,
-            ),
-            isTrue);
       });
 
       test('with attachments should work just fine', () async {
@@ -1256,7 +1252,7 @@ void main() {
       });
 
       test(
-          'should not update message state when error is not StreamChatNetworkError',
+          'should update message state even when error is not StreamChatNetworkError',
           () async {
         final message = Message(
           id: 'test-message-id-error-1',
@@ -1278,6 +1274,17 @@ void main() {
                 matchMessageState: true,
               ),
             ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.updatingFailed(
+                    skipPush: false,
+                    skipEnrichUrl: true,
+                  ),
+                ),
+                matchMessageState: true,
+              ),
+            ]
           ]),
         );
 
@@ -1552,7 +1559,7 @@ void main() {
 
     group('`.partialUpdateMessage` error handling', () {
       test(
-          'should not update message state when error is not StreamChatNetworkError',
+          'should update message state even when error is not StreamChatNetworkError',
           () async {
         final message = Message(
           id: 'test-message-id-error-partial-1',
@@ -1586,6 +1593,19 @@ void main() {
                 matchMessageState: true,
               ),
             ],
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.partialUpdatingFailed(
+                    set: set,
+                    unset: unset,
+                    skipEnrichUrl: false,
+                  ),
+                ),
+                matchText: true,
+                matchMessageState: true,
+              ),
+            ]
           ]),
         );
 
