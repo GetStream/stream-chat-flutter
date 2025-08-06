@@ -897,7 +897,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       if (popped) return _onActionTap(context, channel, action).ignore();
     }
 
-    return showStreamMessageModal(
+    return showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
@@ -972,7 +972,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       if (popped) return _onActionTap(context, channel, action).ignore();
     }
 
-    return showStreamMessageModal(
+    return showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => ModeratedMessageActionsModal(
@@ -1015,7 +1015,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       if (popped) return _onActionTap(context, channel, action).ignore();
     }
 
-    return showStreamMessageModal(
+    return showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
@@ -1094,7 +1094,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     Message message,
     Channel channel,
   ) async {
-    final confirmDelete = await showStreamMessageModal<bool>(
+    final confirmDelete = await showStreamDialog<bool>(
       context: context,
       builder: (context) => StreamMessageActionConfirmationModal(
         title: Text(context.translations.deleteMessageLabel),
@@ -1128,7 +1128,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     Message message,
     Channel channel,
   ) async {
-    final confirmFlag = await showStreamMessageModal<bool>(
+    final confirmFlag = await showStreamDialog<bool>(
       context: context,
       builder: (context) => StreamMessageActionConfirmationModal(
         title: Text(context.translations.flagMessageLabel),
