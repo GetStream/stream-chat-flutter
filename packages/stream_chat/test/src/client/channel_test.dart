@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: lines_longer_than_80_chars, cascade_invocations
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -5093,6 +5093,168 @@ void main() {
       expect(channel.canDeleteOwnMessage, true);
       expect(channel.canDeleteAnyMessage, false);
       expect(channel.canUpdateChannel, false);
+    });
+  });
+
+  group('Channel State Validation and Cooldown', () {
+    late final client = MockStreamChatClient();
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    setUpAll(() {
+      // detached loggers
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+
+      final retryPolicy = RetryPolicy(
+        shouldRetry: (_, __, ___) => false,
+        delayFactor: Duration.zero,
+      );
+      when(() => client.retryPolicy).thenReturn(retryPolicy);
+
+      // fake clientState
+      final clientState = FakeClientState();
+      when(() => client.state).thenReturn(clientState);
+
+      // client logger
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+    });
+
+    group('Non-initialized channel state validation', () {
+      test(
+        'should throw StateError when accessing cooldown on non-initialized channel',
+        () {
+          final channel = Channel(client, channelType, channelId);
+          expect(() => channel.cooldown, throwsA(isA<StateError>()));
+        },
+      );
+
+      test(
+        'should throw StateError when accessing getRemainingCooldown on non-initialized channel',
+        () {
+          final channel = Channel(client, channelType, channelId);
+          expect(channel.getRemainingCooldown, throwsA(isA<StateError>()));
+        },
+      );
+
+      test(
+        'should throw StateError when accessing cooldownStream on non-initialized channel',
+        () {
+          final channel = Channel(client, channelType, channelId);
+          expect(() => channel.cooldownStream, throwsA(isA<StateError>()));
+        },
+      );
+    });
+
+    group('Initialized channel cooldown functionality', () {
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() => channel.dispose());
+
+      test(
+        'should return default cooldown value of 0 for initialized channel',
+        () => expect(channel.cooldown, equals(0)),
+      );
+
+      test('should return custom cooldown value when set in channel model', () {
+        final channelWithCooldown = ChannelModel(
+          id: channelId,
+          type: channelType,
+          cooldown: 30,
+        );
+
+        final stateWithCooldown = ChannelState(channel: channelWithCooldown);
+        final testChannel = Channel.fromState(client, stateWithCooldown);
+        addTearDown(testChannel.dispose);
+
+        expect(testChannel.cooldown, equals(30));
+      });
+
+      test('should return 0 remaining cooldown when no cooldown is set', () {
+        expect(channel.getRemainingCooldown(), equals(0));
+      });
+
+      test('should return cooldown stream with default value', () {
+        expectLater(channel.cooldownStream.take(1), emits(0));
+      });
+    });
+
+    group('Disposed channel state validation', () {
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      test(
+        'should throw StateError when accessing cooldown after disposal',
+        () {
+          // First verify it works when initialized
+          expect(channel.cooldown, equals(0));
+
+          // Dispose the channel
+          channel.dispose();
+
+          // Now accessing cooldown should throw
+          expect(() => channel.cooldown, throwsA(isA<StateError>()));
+        },
+      );
+
+      test(
+        'should throw StateError when accessing getRemainingCooldown after disposal',
+        () {
+          // First verify it works when initialized
+          expect(channel.getRemainingCooldown(), equals(0));
+
+          // Dispose the channel
+          channel.dispose();
+
+          // Now accessing getRemainingCooldown should throw
+          expect(channel.getRemainingCooldown, throwsA(isA<StateError>()));
+        },
+      );
+
+      test(
+        'should throw StateError when accessing cooldownStream after disposal',
+        () {
+          // First verify it works when initialized
+          expectLater(channel.cooldownStream.take(1), emits(0));
+
+          // Dispose the channel
+          channel.dispose();
+
+          // Now accessing cooldownStream should throw
+          expect(() => channel.cooldownStream, throwsA(isA<StateError>()));
+        },
+      );
+
+      test(
+        'should handle race condition scenario - initialization then quick disposal',
+        () {
+          // This test simulates the race condition that was causing the production crash
+          final channelState = _generateChannelState(channelId, channelType);
+          final raceChannel = Channel.fromState(client, channelState);
+
+          // Verify it works initially
+          expect(raceChannel.cooldown, equals(0));
+
+          // Simulate quick disposal (like what happens with rapid navigation)
+          raceChannel.dispose();
+
+          // This should throw StateError instead of crashing with null check operator
+          expect(() => raceChannel.cooldown, throwsA(isA<StateError>()));
+
+          expect(raceChannel.getRemainingCooldown, throwsA(isA<StateError>()));
+        },
+      );
     });
   });
 }
