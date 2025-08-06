@@ -39,6 +39,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<Message> _messageFromJoinRow(
     TypedResult rows, {
     bool fetchDraft = false,
+    bool fetchSharedLocation = false,
   }) async {
     final userEntity = rows.readTableOrNull(_users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
@@ -67,6 +68,11 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       _ => null,
     };
 
+    final sharedLocation = await switch (fetchSharedLocation) {
+      true => _db.locationDao.getLocationByMessageId(msgEntity.id),
+      _ => null,
+    };
+
     return msgEntity.toMessage(
       user: userEntity?.toUser(),
       pinnedBy: pinnedByEntity?.toUser(),
@@ -75,6 +81,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       quotedMessage: quotedMessage,
       poll: poll,
       draft: draft,
+      sharedLocation: sharedLocation,
     );
   }
 
@@ -85,6 +92,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<Message?> getMessageById(
     String id, {
     bool fetchDraft = true,
+    bool fetchSharedLocation = true,
   }) async {
     final query = select(messages).join([
       leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
@@ -101,6 +109,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     return _messageFromJoinRow(
       result,
       fetchDraft: fetchDraft,
+      fetchSharedLocation: fetchSharedLocation,
     );
   }
 
@@ -169,6 +178,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<List<Message>> getMessagesByCid(
     String cid, {
     bool fetchDraft = true,
+    bool fetchSharedLocation = true,
     PaginationParams? messagePagination,
   }) async {
     final query = select(messages).join([
@@ -190,6 +200,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
         (row) => _messageFromJoinRow(
           row,
           fetchDraft: fetchDraft,
+          fetchSharedLocation: fetchSharedLocation,
         ),
       ),
     );
