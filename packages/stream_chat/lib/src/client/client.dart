@@ -2125,10 +2125,24 @@ class ClientState {
   void _listenUserUpdated() {
     _eventsSubscription?.add(
       _client.on(EventType.userUpdated).listen((event) {
-        if (event.user!.id == currentUser!.id) {
-          currentUser = OwnUser.fromUser(event.user!);
+        var user = event.user;
+        if (user == null) return;
+
+        if (user.id == currentUser?.id) {
+          final updatedUser = OwnUser.fromUser(user);
+          currentUser = user = updatedUser.copyWith(
+            // PRESERVE these fields (we don't get them in user.updated events)
+            devices: currentUser?.devices,
+            mutes: currentUser?.mutes,
+            channelMutes: currentUser?.channelMutes,
+            totalUnreadCount: currentUser?.totalUnreadCount,
+            unreadChannels: currentUser?.unreadChannels,
+            unreadThreads: currentUser?.unreadThreads,
+            blockedUserIds: currentUser?.blockedUserIds,
+          );
         }
-        updateUser(event.user);
+
+        updateUser(user);
       }),
     );
   }
