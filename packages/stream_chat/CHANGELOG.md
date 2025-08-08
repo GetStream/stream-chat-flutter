@@ -5,6 +5,11 @@
 - Fixed `Channel` methods to throw proper `StateError` exceptions instead of relying on assertions
   for state validation.
 
+✅ Added
+
+- Added support for `Client.setPushPreferences` which allows setting PushPreferences for the
+  current user or for a specific channel.
+
 ## 9.15.0
 
 ✅ Added
