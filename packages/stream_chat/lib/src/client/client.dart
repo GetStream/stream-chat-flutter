@@ -31,6 +31,7 @@ import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
@@ -988,6 +989,54 @@ class StreamChatClient {
   /// Remove a user's device.
   Future<EmptyResponse> removeDevice(String id) =>
       _chatApi.device.removeDevice(id);
+
+  /// Set push preferences for the current user.
+  ///
+  /// This method allows you to configure push notification settings
+  /// at both global and channel-specific levels.
+  ///
+  /// [preferences] - List of push preferences to apply
+  ///
+  /// Returns [UpsertPushPreferencesResponse] with the updated preferences.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Set global push preferences
+  /// await client.setPushPreferences([
+  ///   const PushPreferenceInput(
+  ///     chatLevel: ChatLevelPushPreference.mentions,
+  ///     callLevel: CallLevelPushPreference.all,
+  ///   ),
+  /// ]);
+  ///
+  /// // Set channel-specific preferences
+  /// await client.setPushPreferences([
+  ///   const PushPreferenceInput.channel(
+  ///     channelCid: 'messaging:general',
+  ///     chatLevel: ChatLevelPushPreference.none,
+  ///   ),
+  ///   const PushPreferenceInput.channel(
+  ///     channelCid: 'messaging:support',
+  ///     chatLevel: ChatLevelPushPreference.mentions,
+  ///   ),
+  /// ]);
+  ///
+  /// // Mix global and channel-specific preferences
+  /// await client.setPushPreferences([
+  ///   const PushPreferenceInput(
+  ///     chatLevel: ChatLevelPushPreference.all,
+  ///   ), // Global default
+  ///   const PushPreferenceInput.channel(
+  ///     channelCid: 'messaging:spam',
+  ///     chatLevel: ChatLevelPushPreference.none,
+  ///   ),
+  /// ]);
+  /// ```
+  Future<UpsertPushPreferencesResponse> setPushPreferences(
+    List<PushPreferenceInput> preferences,
+  ) {
+    return _chatApi.device.setPushPreferences(preferences);
+  }
 
   /// Get a development token
   Token devToken(String userId) => Token.development(userId);

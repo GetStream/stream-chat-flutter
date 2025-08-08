@@ -26,6 +26,10 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      pushPreferences: json['push_preferences'] == null
+          ? null
+          : PushPreference.fromJson(
+              json['push_preferences'] as Map<String, dynamic>),
       id: json['id'] as String,
       role: json['role'] as String?,
       createdAt: json['created_at'] == null
