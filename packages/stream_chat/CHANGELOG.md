@@ -8,6 +8,11 @@
   an `User` instance.
 - Fixed `Client.currentUser` specific fields getting reset on `user.updated` events.
 
+✅ Added
+
+- Added support for `Client.setPushPreferences` which allows setting PushPreferences for the
+  current user or for a specific channel.
+
 ## 9.15.0
 
 ✅ Added
