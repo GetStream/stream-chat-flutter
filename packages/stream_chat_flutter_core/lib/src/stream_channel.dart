@@ -281,8 +281,7 @@ class StreamChannelState extends State<StreamChannel> {
     return _queryBottomMessages(limit: limit);
   }
 
-  /// Calls [channel.getReplies] updating [queryMessage] stream
-  Future<void> getReplies(
+  Future<void> _queryTopReplies(
     String parentId, {
     int limit = 30,
     bool preferOffline = false,
@@ -293,18 +292,17 @@ class StreamChannelState extends State<StreamChannel> {
 
     _queryTopMessagesController.safeAdd(true);
 
-    Message? message;
-    if (channel.state!.threads.containsKey(parentId)) {
-      final thread = channel.state!.threads[parentId]!;
-      if (thread.isNotEmpty) {
-        message = thread.first;
-      }
+    final threadReplies = channel.state!.threads[parentId];
+    if (threadReplies == null || threadReplies.isEmpty) {
+      return _queryTopMessagesController.safeAdd(false);
     }
+
+    final oldestReply = threadReplies.first;
 
     try {
       final pagination = PaginationParams(
         limit: limit,
-        lessThan: message?.id,
+        lessThan: oldestReply.id,
       );
 
       final response = await channel.getReplies(
@@ -316,14 +314,95 @@ class StreamChannelState extends State<StreamChannel> {
       final messages = response.messages;
       final limitNotMatched = messages.length < pagination.limit;
 
-      // If we didn't get enough messages before the parent message, that means
-      // there are no more messages before the parent message.
+      // If we didn't get enough messages in the response, that means there are
+      // no more messages before the oldest reply.
       if (limitNotMatched) _topPaginationEnded = true;
 
       _queryTopMessagesController.safeAdd(false);
     } catch (e, stk) {
       _queryTopMessagesController.safeAddError(e, stk);
     }
+  }
+
+  Future<void> _queryBottomReplies(
+    String parentId, {
+    int limit = 30,
+    bool preferOffline = false,
+  }) async {
+    if (channel.state == null) return;
+    if (_bottomPaginationEnded) return;
+    if (_queryBottomMessagesController.value) return;
+
+    _queryBottomMessagesController.safeAdd(true);
+
+    final threadReplies = channel.state!.threads[parentId];
+    if (threadReplies == null || threadReplies.isEmpty) {
+      return _queryBottomMessagesController.safeAdd(false);
+    }
+
+    final recentReply = threadReplies.last;
+
+    try {
+      final pagination = PaginationParams(
+        limit: limit,
+        greaterThanOrEqual: recentReply.id,
+      );
+
+      final response = await channel.getReplies(
+        parentId,
+        options: pagination,
+        preferOffline: preferOffline,
+      );
+
+      final messages = response.messages;
+      final limitNotMatched = messages.length < pagination.limit;
+
+      // If we didn't get enough messages in the response, that means there are
+      // no more messages after the recent reply.
+      if (limitNotMatched) _bottomPaginationEnded = true;
+
+      _queryBottomMessagesController.safeAdd(false);
+    } catch (e, stk) {
+      _queryBottomMessagesController.safeAddError(e, stk);
+    }
+  }
+
+  /// Calls [channel.getReplies] updating [queryMessage] stream
+  Future<void> queryReplies(
+    String parentId, {
+    int limit = 30,
+    QueryDirection direction = QueryDirection.top,
+  }) async {
+    if (direction == QueryDirection.top) {
+      return _queryTopReplies(parentId, limit: limit);
+    }
+    return _queryBottomReplies(parentId, limit: limit);
+  }
+
+  /// Calls [channel.getReplies] updating [queryMessage] stream
+  Future<void> getReplies(
+    String parentId, {
+    int limit = 30,
+    bool preferOffline = false,
+  }) async {
+    if (channel.state == null) return;
+
+    final pagination = PaginationParams(limit: limit);
+
+    final response = await channel.getReplies(
+      parentId,
+      options: pagination,
+      preferOffline: preferOffline,
+    );
+
+    final messages = response.messages;
+    final limitNotMatched = messages.length < pagination.limit;
+
+    // We can assume that the bottom pagination is ended as we are querying
+    // latest replies, and if we didn't get enough messages, that means
+    // there are no more messages to load in the top direction.
+    _bottomPaginationEnded = true;
+    _topPaginationEnded = limitNotMatched;
   }
 
   /// Query the channel members and watchers
@@ -428,25 +507,17 @@ class StreamChannelState extends State<StreamChannel> {
       messagesPagination: pagination,
     );
 
-    // If the messageId is null, it means we are loading the latest messages
-    // and the bottom pagination is ended.
-    if (messageId == null) {
-      _bottomPaginationEnded = true;
-      channel.state?.isUpToDate = _bottomPaginationEnded;
-
-      return state;
-    }
-
     final messages = state.messages ?? [];
     final limitNotMatched = messages.length < pagination.limit;
 
-    // Otherwise, if we are loading messages around a specific messageId
-    // and we didn't get enough messages, that means there are no more
-    // messages around that messageId.
-    if (limitNotMatched) {
-      _topPaginationEnded = true;
+    // If the messageId is null, it means we are loading the latest messages
+    // therefore we can assume that the bottom pagination is ended, and if we
+    // didn't get enough messages, that means there are no more messages
+    // to load in the top direction.
+    if (messageId == null || limitNotMatched) {
       _bottomPaginationEnded = true;
       channel.state?.isUpToDate = _bottomPaginationEnded;
+      _topPaginationEnded = limitNotMatched;
 
       return state;
     }
