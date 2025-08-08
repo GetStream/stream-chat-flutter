@@ -35,7 +35,7 @@ void main() {
     });
 
     test('should include default enum value', () {
-      final input = PushPreferenceInput(
+      const input = PushPreferenceInput(
         chatLevel: ChatLevelPushPreference.defaultValue,
         callLevel: CallLevelPushPreference.defaultValue,
       );
