@@ -1671,22 +1671,29 @@ class Channel {
     PaginationParams? options,
     bool preferOffline = false,
   }) async {
-    final cachedReplies = await _client.chatPersistenceClient?.getReplies(
-      parentId,
-      options: options,
-    );
-    if (cachedReplies != null && cachedReplies.isNotEmpty) {
-      state?.updateThreadInfo(parentId, cachedReplies);
-      if (preferOffline) {
-        return QueryRepliesResponse()..messages = cachedReplies;
+    QueryRepliesResponse? response;
+
+    // If we prefer offline, we first try to get the replies from the
+    // offline storage.
+    if (preferOffline) {
+      if (_client.chatPersistenceClient case final persistenceClient?) {
+        final cachedReplies = await persistenceClient.getReplies(
+          parentId,
+          options: options,
+        );
+
+        // If the cached replies are not empty, we can use them.
+        if (cachedReplies.isNotEmpty) {
+          response = QueryRepliesResponse()..messages = cachedReplies;
+        }
       }
     }
-    final repliesResponse = await _client.getReplies(
-      parentId,
-      options: options,
-    );
-    state?.updateThreadInfo(parentId, repliesResponse.messages);
-    return repliesResponse;
+
+    // If we still don't have the replies, we try to get them from the API.
+    response ??= await _client.getReplies(parentId, options: options);
+    state?.updateThreadInfo(parentId, response.messages);
+
+    return response;
   }
 
   /// List the reactions for a message in the channel.
