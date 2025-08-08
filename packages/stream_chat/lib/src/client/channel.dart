@@ -3320,6 +3320,7 @@ class ChannelClientState {
       read: newReads,
       draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
+      pushPreferences: updatedState.pushPreferences,
     );
   }
 

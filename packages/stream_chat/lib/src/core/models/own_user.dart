@@ -19,6 +19,7 @@ class OwnUser extends User {
     this.channelMutes = const [],
     this.unreadThreads = 0,
     this.blockedUserIds = const [],
+    this.pushPreferences,
     required super.id,
     super.role,
     super.name,
@@ -112,6 +113,7 @@ class OwnUser extends User {
     String? language,
     Map<String, String>? teamsRole,
     int? avgResponseTime,
+    PushPreference? pushPreferences,
   }) =>
       OwnUser(
         id: id ?? this.id,
@@ -139,6 +141,7 @@ class OwnUser extends User {
         language: language ?? this.language,
         teamsRole: teamsRole ?? this.teamsRole,
         avgResponseTime: avgResponseTime ?? this.avgResponseTime,
+        pushPreferences: pushPreferences ?? this.pushPreferences,
       );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
@@ -168,6 +171,7 @@ class OwnUser extends User {
       language: other.language,
       teamsRole: other.teamsRole,
       avgResponseTime: other.avgResponseTime,
+      pushPreferences: other.pushPreferences,
     );
   }
 
@@ -199,6 +203,10 @@ class OwnUser extends User {
   @JsonKey(includeIfNull: false)
   final List<String> blockedUserIds;
 
+  /// Push preferences for the user if set.
+  @JsonKey(includeIfNull: false)
+  final PushPreference? pushPreferences;
+
   /// Known top level fields.
   ///
   /// Useful for [Serializer] methods.
@@ -210,6 +218,7 @@ class OwnUser extends User {
     'channel_mutes',
     'unread_threads',
     'blocked_user_ids',
+    'push_preferences',
     ...User.topLevelFields,
   ];
 }

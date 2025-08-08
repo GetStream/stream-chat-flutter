@@ -32,6 +32,10 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) => ChannelState(
       draft: json['draft'] == null
           ? null
           : Draft.fromJson(json['draft'] as Map<String, dynamic>),
+      pushPreferences: json['push_preferences'] == null
+          ? null
+          : ChannelPushPreference.fromJson(
+              json['push_preferences'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ChannelStateToJson(ChannelState instance) =>
@@ -46,4 +50,5 @@ Map<String, dynamic> _$ChannelStateToJson(ChannelState instance) =>
       'read': instance.read?.map((e) => e.toJson()).toList(),
       'membership': instance.membership?.toJson(),
       'draft': instance.draft?.toJson(),
+      'push_preferences': instance.pushPreferences?.toJson(),
     };

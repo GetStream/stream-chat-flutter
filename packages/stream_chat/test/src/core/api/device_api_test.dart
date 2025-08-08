@@ -132,4 +132,80 @@ void main() {
     ).called(1);
     verifyNoMoreInteractions(client);
   });
+
+  test('setPushPreferences', () async {
+    const path = '/push_preferences';
+
+    const preferences = [
+      PushPreferenceInput(chatLevel: ChatLevelPushPreference.mentions),
+    ];
+
+    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
+      (_) async => successResponse(path, data: {
+        'user_preferences': <String, dynamic>{},
+        'user_channel_preferences': <String, dynamic>{},
+      }),
+    );
+
+    final res = await deviceApi.setPushPreferences(preferences);
+
+    expect(res, isNotNull);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('setPushPreferences throws on empty list', () async {
+    expect(
+      () => deviceApi.setPushPreferences([]),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
+  test('setPushPreferences allows removeDisable as only field', () async {
+    const path = '/push_preferences';
+
+    const preferences = [
+      PushPreferenceInput(removeDisable: true),
+    ];
+
+    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
+      (_) async => successResponse(path, data: {
+        'user_preferences': <String, dynamic>{},
+        'user_channel_preferences': <String, dynamic>{},
+      }),
+    );
+
+    final res = await deviceApi.setPushPreferences(preferences);
+
+    expect(res, isNotNull);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('setPushPreferences with channel-specific preference', () async {
+    const path = '/push_preferences';
+
+    const preferences = [
+      PushPreferenceInput.channel(
+        channelCid: 'messaging:general',
+        chatLevel: ChatLevelPushPreference.none,
+      ),
+    ];
+
+    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
+      (_) async => successResponse(path, data: {
+        'user_preferences': <String, dynamic>{},
+        'user_channel_preferences': <String, dynamic>{},
+      }),
+    );
+
+    final res = await deviceApi.setPushPreferences(preferences);
+
+    expect(res, isNotNull);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
 }
