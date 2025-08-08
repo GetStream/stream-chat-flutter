@@ -81,6 +81,7 @@ class PushPreferenceInput {
 /// The class that contains push preferences for a user
 @JsonSerializable(includeIfNull: false)
 class PushPreference extends Equatable {
+  /// Creates a new push preference instance
   const PushPreference({
     this.callLevel,
     this.chatLevel,
@@ -110,6 +111,7 @@ class PushPreference extends Equatable {
 /// The class that contains push preferences for a specific channel
 @JsonSerializable(includeIfNull: false)
 class ChannelPushPreference extends Equatable {
+  /// Creates a new channel push preference instance
   const ChannelPushPreference({
     this.chatLevel,
     this.disabledUntil,
