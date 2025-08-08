@@ -4,6 +4,9 @@
 
 - Fixed `Channel` methods to throw proper `StateError` exceptions instead of relying on assertions
   for state validation.
+- Fixed `OwnUser` specific fields getting lost when creating a new `OwnUser` instance from
+  an `User` instance.
+- Fixed `Client.currentUser` specific fields getting reset on `user.updated` events.
 
 ## 9.15.0
 
