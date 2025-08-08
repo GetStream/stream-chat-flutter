@@ -831,7 +831,7 @@ class GetUnreadCountResponse extends _BaseResponse {
       _$GetUnreadCountResponseFromJson(json);
 }
 
-/// Model response for [DeviceApi.setPushPreferences] api call
+/// Model response for [StreamChatClient.setPushPreferences] api call
 @JsonSerializable(createToJson: false)
 class UpsertPushPreferencesResponse extends _BaseResponse {
   /// Mapping of user IDs to their push preferences
