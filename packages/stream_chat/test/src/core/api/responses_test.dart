@@ -4486,13 +4486,13 @@ void main() {
 
       // Test user1 preferences
       final user1Prefs = response.userPreferences['user1']!;
-      expect(user1Prefs.chatLevel, ChatLevelPushPreference.mentions);
-      expect(user1Prefs.callLevel, CallLevelPushPreference.all);
+      expect(user1Prefs.chatLevel, ChatLevel.mentions);
+      expect(user1Prefs.callLevel, CallLevel.all);
       expect(user1Prefs.disabledUntil, DateTime.parse('2024-12-31T23:59:59Z'));
 
       // Test user2 preferences
       final user2Prefs = response.userPreferences['user2']!;
-      expect(user2Prefs.chatLevel, ChatLevelPushPreference.none);
+      expect(user2Prefs.chatLevel, ChatLevel.none);
 
       expect(
         response.userChannelPreferences,
@@ -4505,19 +4505,19 @@ void main() {
       expect(user1ChannelPrefs, hasLength(2));
 
       final channel1Prefs = user1ChannelPrefs['channel1']!;
-      expect(channel1Prefs.chatLevel, ChatLevelPushPreference.all);
+      expect(channel1Prefs.chatLevel, ChatLevel.all);
       expect(
           channel1Prefs.disabledUntil, DateTime.parse('2024-12-31T23:59:59Z'));
 
       final channel2Prefs = user1ChannelPrefs['channel2']!;
-      expect(channel2Prefs.chatLevel, ChatLevelPushPreference.none);
+      expect(channel2Prefs.chatLevel, ChatLevel.none);
 
       // Test user2 channel preferences
       final user2ChannelPrefs = response.userChannelPreferences['user2']!;
       expect(user2ChannelPrefs, hasLength(1));
 
       final channel3Prefs = user2ChannelPrefs['channel3']!;
-      expect(channel3Prefs.chatLevel, ChatLevelPushPreference.mentions);
+      expect(channel3Prefs.chatLevel, ChatLevel.mentions);
     });
   });
 }
