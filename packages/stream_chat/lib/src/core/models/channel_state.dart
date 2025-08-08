@@ -4,6 +4,7 @@ import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 
@@ -19,7 +20,7 @@ const _nullConst = _NullConst();
 @JsonSerializable()
 class ChannelState implements ComparableFieldProvider {
   /// Constructor used for json serialization
-  ChannelState({
+  const ChannelState({
     this.channel,
     this.messages,
     this.members,
@@ -29,6 +30,7 @@ class ChannelState implements ComparableFieldProvider {
     this.read,
     this.membership,
     this.draft,
+    this.pushPreferences,
   });
 
   /// The channel to which this state belongs
@@ -58,6 +60,9 @@ class ChannelState implements ComparableFieldProvider {
   /// The draft message for this channel if it exists.
   final Draft? draft;
 
+  /// The push preferences for this channel if it exists.
+  final ChannelPushPreference? pushPreferences;
+
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) =>
       _$ChannelStateFromJson(json);
@@ -76,6 +81,7 @@ class ChannelState implements ComparableFieldProvider {
     List<Read>? read,
     Member? membership,
     Object? draft = _nullConst,
+    ChannelPushPreference? pushPreferences,
   }) =>
       ChannelState(
         channel: channel ?? this.channel,
@@ -87,6 +93,7 @@ class ChannelState implements ComparableFieldProvider {
         read: read ?? this.read,
         membership: membership ?? this.membership,
         draft: draft == _nullConst ? this.draft : draft as Draft?,
+        pushPreferences: pushPreferences ?? this.pushPreferences,
       );
 
   @override

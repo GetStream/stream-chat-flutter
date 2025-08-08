@@ -489,3 +489,26 @@ GetUnreadCountResponse _$GetUnreadCountResponseFromJson(
       ..threads = (json['threads'] as List<dynamic>)
           .map((e) => UnreadCountsThread.fromJson(e as Map<String, dynamic>))
           .toList();
+
+UpsertPushPreferencesResponse _$UpsertPushPreferencesResponseFromJson(
+        Map<String, dynamic> json) =>
+    UpsertPushPreferencesResponse()
+      ..duration = json['duration'] as String?
+      ..userPreferences = (json['user_preferences'] as Map<String, dynamic>?)
+              ?.map(
+            (k, e) =>
+                MapEntry(k, PushPreference.fromJson(e as Map<String, dynamic>)),
+          ) ??
+          {}
+      ..userChannelPreferences =
+          (json['user_channel_preferences'] as Map<String, dynamic>?)?.map(
+                (k, e) => MapEntry(
+                    k,
+                    (e as Map<String, dynamic>).map(
+                      (k, e) => MapEntry(
+                          k,
+                          ChannelPushPreference.fromJson(
+                              e as Map<String, dynamic>)),
+                    )),
+              ) ??
+              {};

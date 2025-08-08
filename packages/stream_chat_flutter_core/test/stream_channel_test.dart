@@ -184,7 +184,7 @@ void main() {
       final nonInitializedMockChannel = NonInitializedMockChannel();
       when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
       when(nonInitializedMockChannel.watch).thenAnswer(
-        (_) async => ChannelState(),
+        (_) async => const ChannelState(),
       );
 
       // A simple widget that provides StreamChannel
@@ -221,7 +221,7 @@ void main() {
       final nonInitializedMockChannel = NonInitializedMockChannel();
       when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
       when(nonInitializedMockChannel.watch).thenAnswer(
-        (_) async => ChannelState(),
+        (_) async => const ChannelState(),
       );
 
       // A simple widget that provides StreamChannel
@@ -362,7 +362,7 @@ void main() {
           messagesPagination: any(named: 'messagesPagination'),
           preferOffline: any(named: 'preferOffline'),
         ),
-      ).thenAnswer((_) async => ChannelState());
+      ).thenAnswer((_) async => const ChannelState());
 
       // Build a widget with initialMessageId
       final testWidget = MaterialApp(
@@ -411,7 +411,7 @@ void main() {
       // Second channel
       final mockChannel2 = NonInitializedMockChannel();
       when(() => mockChannel2.cid).thenReturn('test:channel2');
-      when(mockChannel2.watch).thenAnswer((_) async => ChannelState());
+      when(mockChannel2.watch).thenAnswer((_) async => const ChannelState());
 
       // Update widget with second channel
       await tester.pumpWidget(
@@ -448,7 +448,7 @@ void main() {
           messagesPagination: any(named: 'messagesPagination'),
           preferOffline: any(named: 'preferOffline'),
         ),
-      ).thenAnswer((_) async => ChannelState());
+      ).thenAnswer((_) async => const ChannelState());
 
       // First initial message ID
       const initialMessageId1 = 'test-message-id-1';
@@ -510,7 +510,7 @@ void main() {
           preferOffline: any(named: 'preferOffline'),
           messagesPagination: any(named: 'messagesPagination'),
         ),
-      ).thenAnswer((_) async => ChannelState());
+      ).thenAnswer((_) async => const ChannelState());
     });
 
     tearDown(() => reset(mockChannel));

@@ -310,7 +310,7 @@ void main() {
             messagesPagination: any(named: 'messagesPagination'),
             preferOffline: any(named: 'preferOffline'),
             watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => ChannelState());
+          )).thenAnswer((_) async => const ChannelState());
 
       const messages = <Message>[];
       when(() => mockChannel.state.messagesStream)
