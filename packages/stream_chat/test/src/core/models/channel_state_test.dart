@@ -60,7 +60,7 @@ void main() {
         pinnedMessages: [],
         watchers: [],
         pushPreferences: ChannelPushPreference(
-          chatLevel: ChatLevelPushPreference.all,
+          chatLevel: ChatLevel.all,
           disabledUntil: DateTime.parse('2020-01-30T13:43:41.062362Z'),
         ),
       );

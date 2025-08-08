@@ -137,7 +137,7 @@ void main() {
     const path = '/push_preferences';
 
     const preferences = [
-      PushPreferenceInput(chatLevel: ChatLevelPushPreference.mentions),
+      PushPreferenceInput(chatLevel: ChatLevel.mentions),
     ];
 
     when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
@@ -190,7 +190,7 @@ void main() {
     const preferences = [
       PushPreferenceInput.channel(
         channelCid: 'messaging:general',
-        chatLevel: ChatLevelPushPreference.none,
+        chatLevel: ChatLevel.none,
       ),
     ];
 

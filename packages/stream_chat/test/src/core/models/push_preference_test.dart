@@ -5,8 +5,8 @@ void main() {
   group('src/models/push_preference_input', () {
     test('should serialize to json correctly for user-level preferences', () {
       final input = PushPreferenceInput(
-        callLevel: CallLevelPushPreference.all,
-        chatLevel: ChatLevelPushPreference.mentions,
+        callLevel: CallLevel.all,
+        chatLevel: ChatLevel.mentions,
         disabledUntil: DateTime.parse('2024-12-31T23:59:59Z'),
         removeDisable: true,
       );
@@ -22,7 +22,7 @@ void main() {
     test('should serialize to json correctly for channel preferences', () {
       final input = PushPreferenceInput.channel(
         channelCid: 'messaging:general',
-        chatLevel: ChatLevelPushPreference.none,
+        chatLevel: ChatLevel.none,
         disabledUntil: DateTime.parse('2024-12-31T23:59:59Z'),
       );
 
@@ -36,8 +36,8 @@ void main() {
 
     test('should include default enum value', () {
       const input = PushPreferenceInput(
-        chatLevel: ChatLevelPushPreference.defaultValue,
-        callLevel: CallLevelPushPreference.defaultValue,
+        chatLevel: ChatLevel.defaultValue,
+        callLevel: CallLevel.defaultValue,
       );
 
       final json = input.toJson();
@@ -54,8 +54,8 @@ void main() {
         'disabled_until': '2024-12-31T23:59:59Z',
       });
 
-      expect(pushPreference.callLevel, CallLevelPushPreference.all);
-      expect(pushPreference.chatLevel, ChatLevelPushPreference.mentions);
+      expect(pushPreference.callLevel, CallLevel.all);
+      expect(pushPreference.chatLevel, ChatLevel.mentions);
       expect(
         pushPreference.disabledUntil,
         DateTime.parse('2024-12-31T23:59:59Z'),
@@ -68,8 +68,8 @@ void main() {
         'chat_level': 'default',
       });
 
-      expect(pushPreference.callLevel, CallLevelPushPreference.defaultValue);
-      expect(pushPreference.chatLevel, ChatLevelPushPreference.defaultValue);
+      expect(pushPreference.callLevel, CallLevel.defaultValue);
+      expect(pushPreference.chatLevel, ChatLevel.defaultValue);
     });
   });
 
@@ -80,7 +80,7 @@ void main() {
         'disabled_until': '2024-12-31T23:59:59Z',
       });
 
-      expect(channelPushPreference.chatLevel, ChatLevelPushPreference.none);
+      expect(channelPushPreference.chatLevel, ChatLevel.none);
       expect(
         channelPushPreference.disabledUntil,
         DateTime.parse('2024-12-31T23:59:59Z'),
@@ -89,11 +89,11 @@ void main() {
 
     test('should create correctly', () {
       final channelPushPreference = ChannelPushPreference(
-        chatLevel: ChatLevelPushPreference.all,
+        chatLevel: ChatLevel.all,
         disabledUntil: DateTime.parse('2024-12-31T23:59:59Z'),
       );
 
-      expect(channelPushPreference.chatLevel, ChatLevelPushPreference.all);
+      expect(channelPushPreference.chatLevel, ChatLevel.all);
       expect(
         channelPushPreference.disabledUntil,
         DateTime.parse('2024-12-31T23:59:59Z'),

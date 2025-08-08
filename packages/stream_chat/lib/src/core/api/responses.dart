@@ -835,9 +835,11 @@ class GetUnreadCountResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class UpsertPushPreferencesResponse extends _BaseResponse {
   /// Mapping of user IDs to their push preferences
+  @JsonKey(defaultValue: {})
   late Map<String, PushPreference> userPreferences;
 
   /// Mapping of user IDs to their channel-specific push preferences
+  @JsonKey(defaultValue: {})
   late Map<String, Map<String, ChannelPushPreference>> userChannelPreferences;
 
   /// Create a new instance from a json

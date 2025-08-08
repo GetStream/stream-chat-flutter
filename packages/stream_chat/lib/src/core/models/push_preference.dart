@@ -4,37 +4,30 @@ import 'package:json_annotation/json_annotation.dart';
 part 'push_preference.g.dart';
 
 /// Chat level push preference type
-enum ChatLevelPushPreference {
+extension type const ChatLevel(String rawType) implements String {
   /// All messages
-  @JsonValue('all')
-  all,
+  static const all = ChatLevel('all');
 
   /// No messages
-  @JsonValue('none')
-  none,
+  static const none = ChatLevel('none');
 
   /// Only mentions
-  @JsonValue('mentions')
-  mentions,
+  static const mentions = ChatLevel('mentions');
 
   /// Use default system setting
-  @JsonValue('default')
-  defaultValue,
+  static const defaultValue = ChatLevel('default');
 }
 
 /// Call level push preference type
-enum CallLevelPushPreference {
+extension type const CallLevel(String rawType) implements String {
   /// All calls
-  @JsonValue('all')
-  all,
+  static const all = CallLevel('all');
 
   /// No calls
-  @JsonValue('none')
-  none,
+  static const none = CallLevel('none');
 
   /// Use default system setting
-  @JsonValue('default')
-  defaultValue,
+  static const defaultValue = CallLevel('default');
 }
 
 /// Input for push preferences, used for creating or updating preferences
@@ -63,10 +56,10 @@ class PushPreferenceInput {
   final String? channelCid;
 
   /// Push preference for calls
-  final CallLevelPushPreference? callLevel;
+  final CallLevel? callLevel;
 
   /// Push preference for chat messages
-  final ChatLevelPushPreference? chatLevel;
+  final ChatLevel? chatLevel;
 
   /// Disabled until this date (snooze functionality)
   final DateTime? disabledUntil;
@@ -93,10 +86,10 @@ class PushPreference extends Equatable {
       _$PushPreferenceFromJson(json);
 
   /// Push preference for calls
-  final CallLevelPushPreference? callLevel;
+  final CallLevel? callLevel;
 
   /// Push preference for chat messages
-  final ChatLevelPushPreference? chatLevel;
+  final ChatLevel? chatLevel;
 
   /// Disabled until this date (snooze functionality)
   final DateTime? disabledUntil;
@@ -122,7 +115,7 @@ class ChannelPushPreference extends Equatable {
       _$ChannelPushPreferenceFromJson(json);
 
   /// Push preference for chat messages
-  final ChatLevelPushPreference? chatLevel;
+  final ChatLevel? chatLevel;
 
   /// Disabled until this date (snooze functionality)
   final DateTime? disabledUntil;
