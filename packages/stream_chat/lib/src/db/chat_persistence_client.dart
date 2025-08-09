@@ -257,12 +257,17 @@ abstract class ChatPersistenceClient {
     // Adding new reactions and users data
     final reactions = messages.expand(_expandReactions).toList();
     final users = messages.map((it) => it.user).withNullifyer.toList();
+    await updateUsers(users);
 
-    await Future.wait([
-      updateMessages(cid, messages),
-      updateReactions(reactions),
-      updateUsers(users),
-    ]);
+    final channel = await getChannelByCid(cid);
+    if (channel == null) {
+      // If the channel does not yet exist, we create a new one otherwise
+      // the db will throw an error due to foreign key constraint.
+      await updateChannels([ChannelModel(cid: cid)]);
+    }
+
+    await updateMessages(cid, messages);
+    await updateReactions(reactions);
   }
 
   /// Update the channel state data using [channelState]
