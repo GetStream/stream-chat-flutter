@@ -412,6 +412,13 @@ void main() {
           .thenAnswer((_) => Stream.value(threads));
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
+      when(
+        () => mockChannel.getReplies(
+          parentMessage.id,
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
