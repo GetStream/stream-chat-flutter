@@ -345,7 +345,7 @@ class StreamChannelState extends State<StreamChannel> {
     try {
       final pagination = PaginationParams(
         limit: limit,
-        greaterThanOrEqual: recentReply.id,
+        greaterThan: recentReply.id,
       );
 
       final response = await channel.getReplies(
@@ -651,7 +651,7 @@ class StreamChannelState extends State<StreamChannel> {
   }) {
     final pagination = PaginationParams(
       limit: limit,
-      greaterThanOrEqual: messageId,
+      greaterThan: messageId,
     );
 
     return channel.query(

@@ -1691,6 +1691,17 @@ class Channel {
 
     // If we still don't have the replies, we try to get them from the API.
     response ??= await _client.getReplies(parentId, options: options);
+
+    // Before updating the state, we check if we are querying around a
+    // reply, If we are, we have to clear the state to avoid potential
+    // gaps in the message sequence.
+    final isQueryingAround = switch (options) {
+      PaginationParams(idAround: _?) => true,
+      PaginationParams(createdAtAround: _?) => true,
+      _ => false,
+    };
+
+    if (isQueryingAround) state?.clearThread(parentId);
     state?.updateThreadInfo(parentId, response.messages);
 
     return response;
@@ -3344,6 +3355,16 @@ class ChannelClientState {
       _channel.cid!,
       threads,
     );
+  }
+
+  /// Clears all the replies in the thread identified by [parentId].
+  void clearThread(String parentId) {
+    final updatedThreads = {
+      ...threads,
+      parentId: <Message>[],
+    };
+
+    _threads = updatedThreads;
   }
 
   /// Update threads with updated information about messages.
