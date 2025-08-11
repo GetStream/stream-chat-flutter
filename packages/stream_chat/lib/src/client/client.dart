@@ -2188,6 +2188,7 @@ class ClientState {
             unreadChannels: currentUser?.unreadChannels,
             unreadThreads: currentUser?.unreadThreads,
             blockedUserIds: currentUser?.blockedUserIds,
+            pushPreferences: currentUser?.pushPreferences,
           );
         }
 

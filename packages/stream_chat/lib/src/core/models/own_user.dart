@@ -69,6 +69,7 @@ class OwnUser extends User {
       unreadChannels: user.extraData['unread_channels'].safeCast(),
       unreadThreads: user.extraData['unread_threads'].safeCast(),
       blockedUserIds: user.extraData['blocked_user_ids'].safeCast(),
+      pushPreferences: user.extraData['push_preferences'].safeCast(),
     );
 
     // Once we are done working with the extraData, we have to clean it up
