@@ -251,7 +251,7 @@ void main() {
     });
 
     test('updateChannelState', () async {
-      final channelState = ChannelState();
+      const channelState = ChannelState();
       persistenceClient.updateChannelState(channelState);
     });
 

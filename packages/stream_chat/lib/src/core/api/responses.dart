@@ -15,6 +15,7 @@ import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
@@ -828,4 +829,20 @@ class GetUnreadCountResponse extends _BaseResponse {
   /// Create a new instance from a json
   static GetUnreadCountResponse fromJson(Map<String, dynamic> json) =>
       _$GetUnreadCountResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.setPushPreferences] api call
+@JsonSerializable(createToJson: false)
+class UpsertPushPreferencesResponse extends _BaseResponse {
+  /// Mapping of user IDs to their push preferences
+  @JsonKey(defaultValue: {})
+  late Map<String, PushPreference> userPreferences;
+
+  /// Mapping of user IDs to their channel-specific push preferences
+  @JsonKey(defaultValue: {})
+  late Map<String, Map<String, ChannelPushPreference>> userChannelPreferences;
+
+  /// Create a new instance from a json
+  static UpsertPushPreferencesResponse fromJson(Map<String, dynamic> json) =>
+      _$UpsertPushPreferencesResponseFromJson(json);
 }

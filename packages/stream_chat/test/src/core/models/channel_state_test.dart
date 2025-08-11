@@ -59,6 +59,10 @@ void main() {
         watcherCount: 5,
         pinnedMessages: [],
         watchers: [],
+        pushPreferences: ChannelPushPreference(
+          chatLevel: ChatLevel.all,
+          disabledUntil: DateTime.parse('2020-01-30T13:43:41.062362Z'),
+        ),
       );
 
       expect(
