@@ -270,7 +270,10 @@ void main() {
     test(
       'MessageState.sendingFailed should create a MessageFailed instance with SendingFailed state',
       () {
-        const messageState = MessageState.sendingFailed;
+        final messageState = MessageState.sendingFailed(
+          skipPush: false,
+          skipEnrichUrl: false,
+        );
         expect(messageState, isA<MessageFailed>());
         expect((messageState as MessageFailed).state, isA<SendingFailed>());
       },
@@ -279,9 +282,26 @@ void main() {
     test(
       'MessageState.updatingFailed should create a MessageFailed instance with UpdatingFailed state',
       () {
-        const messageState = MessageState.updatingFailed;
+        final messageState = MessageState.updatingFailed(
+          skipPush: false,
+          skipEnrichUrl: false,
+        );
         expect(messageState, isA<MessageFailed>());
         expect((messageState as MessageFailed).state, isA<UpdatingFailed>());
+      },
+    );
+
+    test(
+      'MessageState.partialUpdatingFailed should create a MessageFailed instance with UpdatingFailed state',
+      () {
+        final messageState = MessageState.partialUpdatingFailed(
+          skipEnrichUrl: false,
+        );
+        expect(messageState, isA<MessageFailed>());
+        expect(
+          (messageState as MessageFailed).state,
+          isA<PartialUpdatingFailed>(),
+        );
       },
     );
 

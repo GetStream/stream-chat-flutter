@@ -699,6 +699,98 @@ void main() {
           .deleteDraftMessageByCid(cid, parentId: parentId)).called(1);
     });
 
+    test('getLocationsByCid', () async {
+      const cid = 'testCid';
+      final locations = List.generate(
+        3,
+        (index) => Location(
+          channelCid: cid,
+          messageId: 'testMessageId$index',
+          userId: 'testUserId$index',
+          latitude: 37.7749 + index * 0.001,
+          longitude: -122.4194 + index * 0.001,
+          createdByDeviceId: 'testDevice$index',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      when(() => mockDatabase.locationDao.getLocationsByCid(cid))
+          .thenAnswer((_) async => locations);
+
+      final fetchedLocations = await client.getLocationsByCid(cid);
+      expect(fetchedLocations.length, locations.length);
+      verify(() => mockDatabase.locationDao.getLocationsByCid(cid)).called(1);
+    });
+
+    test('getLocationByMessageId', () async {
+      const messageId = 'testMessageId';
+      final location = Location(
+        channelCid: 'testCid',
+        messageId: messageId,
+        userId: 'testUserId',
+        latitude: 37.7749,
+        longitude: -122.4194,
+        createdByDeviceId: 'testDevice',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      when(() => mockDatabase.locationDao.getLocationByMessageId(messageId))
+          .thenAnswer((_) async => location);
+
+      final fetchedLocation = await client.getLocationByMessageId(messageId);
+      expect(fetchedLocation, isNotNull);
+      expect(fetchedLocation!.messageId, messageId);
+      verify(() => mockDatabase.locationDao.getLocationByMessageId(messageId))
+          .called(1);
+    });
+
+    test('updateLocations', () async {
+      final locations = List.generate(
+        3,
+        (index) => Location(
+          channelCid: 'testCid$index',
+          messageId: 'testMessageId$index',
+          userId: 'testUserId$index',
+          latitude: 37.7749 + index * 0.001,
+          longitude: -122.4194 + index * 0.001,
+          createdByDeviceId: 'testDevice$index',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      when(() => mockDatabase.locationDao.updateLocations(locations))
+          .thenAnswer((_) async {});
+
+      await client.updateLocations(locations);
+      verify(() => mockDatabase.locationDao.updateLocations(locations))
+          .called(1);
+    });
+
+    test('deleteLocationsByCid', () async {
+      const cid = 'testCid';
+      when(() => mockDatabase.locationDao.deleteLocationsByCid(cid))
+          .thenAnswer((_) async {});
+
+      await client.deleteLocationsByCid(cid);
+      verify(() => mockDatabase.locationDao.deleteLocationsByCid(cid))
+          .called(1);
+    });
+
+    test('deleteLocationsByMessageIds', () async {
+      final messageIds = <String>['testMessageId1', 'testMessageId2'];
+      when(
+        () => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds),
+      ).thenAnswer((_) async {});
+
+      await client.deleteLocationsByMessageIds(messageIds);
+      verify(
+        () => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds),
+      ).called(1);
+    });
+
     tearDown(() async {
       await client.disconnect(flush: true);
     });
