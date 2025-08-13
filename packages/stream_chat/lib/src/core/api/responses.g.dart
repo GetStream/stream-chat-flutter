@@ -500,7 +500,7 @@ UpsertPushPreferencesResponse _$UpsertPushPreferencesResponseFromJson(
               {};
 
 GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
-    Map<String, dynamic> json) =>
+        Map<String, dynamic> json) =>
     GetActiveLiveLocationsResponse()
       ..duration = json['duration'] as String?
       ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
