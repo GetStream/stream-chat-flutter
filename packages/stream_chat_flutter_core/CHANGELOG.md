@@ -1,3 +1,13 @@
+## 9.16.0
+
+🐞 Fixed
+
+- Fixed `MessageListCore` not properly loading and paginating thread replies.
+
+✅ Added
+
+- Added methods for paginating thread replies in `StreamChannel`.
+
 ## 10.0.0-beta.4
 
 - Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).

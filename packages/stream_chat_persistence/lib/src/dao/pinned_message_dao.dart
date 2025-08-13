@@ -155,9 +155,9 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
           msgList.removeRange(lessThanIndex, msgList.length);
         }
       }
-      if (options?.greaterThanOrEqual != null) {
+      if (options?.greaterThan != null) {
         final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == options!.greaterThanOrEqual,
+          (m) => m.id == options!.greaterThan,
         );
         if (greaterThanIndex != -1) {
           msgList.removeRange(0, greaterThanIndex);
@@ -212,9 +212,9 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
           msgList.removeRange(lessThanIndex, msgList.length);
         }
       }
-      if (messagePagination?.greaterThanOrEqual != null) {
+      if (messagePagination?.greaterThan != null) {
         final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination!.greaterThanOrEqual,
+          (m) => m.id == messagePagination!.greaterThan,
         );
         if (greaterThanIndex != -1) {
           msgList.removeRange(0, greaterThanIndex);

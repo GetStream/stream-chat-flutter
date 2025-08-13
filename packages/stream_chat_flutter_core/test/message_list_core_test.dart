@@ -310,7 +310,7 @@ void main() {
             messagesPagination: any(named: 'messagesPagination'),
             preferOffline: any(named: 'preferOffline'),
             watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => ChannelState());
+          )).thenAnswer((_) async => const ChannelState());
 
       const messages = <Message>[];
       when(() => mockChannel.state.messagesStream)
@@ -411,6 +411,13 @@ void main() {
       when(() => mockChannel.state.threadsStream)
           .thenAnswer((_) => Stream.value(threads));
       when(() => mockChannel.state.unreadCount).thenReturn(0);
+
+      when(
+        () => mockChannel.getReplies(
+          parentMessage.id,
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
 
       await tester.pumpWidget(
         Directionality(

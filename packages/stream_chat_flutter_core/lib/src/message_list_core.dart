@@ -178,8 +178,9 @@ class MessageListCoreState extends State<MessageListCore> {
         limit: widget.paginationLimit,
       );
     } else {
-      return _streamChannel!.getReplies(
+      return _streamChannel!.queryReplies(
         widget.parentMessage!.id,
+        direction: direction,
         limit: widget.paginationLimit,
       );
     }

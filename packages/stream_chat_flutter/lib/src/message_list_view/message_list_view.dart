@@ -462,10 +462,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
         }),
       );
-
-      if (_isThreadConversation) {
-        streamChannel!.getReplies(widget.parentMessage!.id);
-      }
     }
   }
 

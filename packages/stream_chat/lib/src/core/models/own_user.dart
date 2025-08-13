@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -18,6 +19,7 @@ class OwnUser extends User {
     this.channelMutes = const [],
     this.unreadThreads = 0,
     this.blockedUserIds = const [],
+    this.pushPreferences,
     required super.id,
     super.role,
     super.name,
@@ -41,23 +43,51 @@ class OwnUser extends User {
       );
 
   /// Create a new instance from [User] object.
-  factory OwnUser.fromUser(User user) => OwnUser(
-        id: user.id,
-        role: user.role,
-        // Using extraData value in order to not use id as name.
-        name: user.extraData['name'] as String?,
-        image: user.image,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        lastActive: user.lastActive,
-        online: user.online,
-        banned: user.banned,
-        extraData: user.extraData,
-        teams: user.teams,
-        language: user.language,
-        teamsRole: user.teamsRole,
-        avgResponseTime: user.avgResponseTime,
-      );
+  factory OwnUser.fromUser(User user) {
+    final ownUser = OwnUser(
+      id: user.id,
+      role: user.role,
+      // Using extraData value in order to not use id as name.
+      name: user.extraData['name'] as String?,
+      image: user.image,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      lastActive: user.lastActive,
+      online: user.online,
+      banned: user.banned,
+      teams: user.teams,
+      language: user.language,
+      teamsRole: user.teamsRole,
+      avgResponseTime: user.avgResponseTime,
+    ).copyWith(
+      // The OwnUser specific fields are not directly available in the User
+      // object, so we need to extract them from extraData if they exist.
+      devices: user.extraData['devices'].safeCast(),
+      mutes: user.extraData['mutes'].safeCast(),
+      channelMutes: user.extraData['channel_mutes'].safeCast(),
+      totalUnreadCount: user.extraData['total_unread_count'].safeCast(),
+      unreadChannels: user.extraData['unread_channels'].safeCast(),
+      unreadThreads: user.extraData['unread_threads'].safeCast(),
+      blockedUserIds: user.extraData['blocked_user_ids'].safeCast(),
+      pushPreferences: user.extraData['push_preferences'].safeCast(),
+    );
+
+    // Once we are done working with the extraData, we have to clean it up
+    // and remove the fields that are specific to OwnUser.
+
+    final ownUserSpecificFields = topLevelFields.whereNot(
+      User.topLevelFields.contains,
+    );
+
+    final sanitizedExtraData = {
+      for (final MapEntry(:key, :value) in user.extraData.entries)
+        if (!ownUserSpecificFields.contains(key)) key: value,
+      // Ensure that the OwnUser specific extraData fields are included.
+      ...ownUser.extraData,
+    };
+
+    return ownUser.copyWith(extraData: sanitizedExtraData);
+  }
 
   /// Creates a copy of [OwnUser] with specified attributes overridden.
   @override
@@ -84,6 +114,7 @@ class OwnUser extends User {
     String? language,
     Map<String, String>? teamsRole,
     int? avgResponseTime,
+    PushPreference? pushPreferences,
   }) =>
       OwnUser(
         id: id ?? this.id,
@@ -111,6 +142,7 @@ class OwnUser extends User {
         language: language ?? this.language,
         teamsRole: teamsRole ?? this.teamsRole,
         avgResponseTime: avgResponseTime ?? this.avgResponseTime,
+        pushPreferences: pushPreferences ?? this.pushPreferences,
       );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
@@ -140,6 +172,7 @@ class OwnUser extends User {
       language: other.language,
       teamsRole: other.teamsRole,
       avgResponseTime: other.avgResponseTime,
+      pushPreferences: other.pushPreferences,
     );
   }
 
@@ -171,6 +204,10 @@ class OwnUser extends User {
   @JsonKey(includeIfNull: false)
   final List<String> blockedUserIds;
 
+  /// Push preferences for the user if set.
+  @JsonKey(includeIfNull: false)
+  final PushPreference? pushPreferences;
+
   /// Known top level fields.
   ///
   /// Useful for [Serializer] methods.
@@ -182,6 +219,7 @@ class OwnUser extends User {
     'channel_mutes',
     'unread_threads',
     'blocked_user_ids',
+    'push_preferences',
     ...User.topLevelFields,
   ];
 }
