@@ -225,6 +225,20 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<List<Location>> getLocationsByCid(String cid) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getLocationsByCid');
+    return db!.locationDao.getLocationsByCid(cid);
+  }
+
+  @override
+  Future<Location?> getLocationByMessageId(String messageId) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getLocationByMessageId');
+    return db!.locationDao.getLocationByMessageId(messageId);
+  }
+
+  @override
   Future<List<Read>> getReadsByCid(String cid) async {
     assert(_debugIsConnected, '');
     _logger.info('getReadsByCid');
@@ -395,6 +409,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> updateLocations(List<Location> locations) async {
+    assert(_debugIsConnected, '');
+    _logger.info('updateLocations');
+    return db!.locationDao.updateLocations(locations);
+  }
+
+  @override
   Future<void> deletePinnedMessageReactionsByMessageId(
     List<String> messageIds,
   ) {
@@ -442,6 +463,20 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       cid,
       parentId: parentId,
     );
+  }
+
+  @override
+  Future<void> deleteLocationsByCid(String cid) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteLocationsByCid');
+    return db!.locationDao.deleteLocationsByCid(cid);
+  }
+
+  @override
+  Future<void> deleteLocationsByMessageIds(List<String> messageIds) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteLocationsByMessageIds');
+    return db!.locationDao.deleteLocationsByMessageIds(messageIds);
   }
 
   @override
