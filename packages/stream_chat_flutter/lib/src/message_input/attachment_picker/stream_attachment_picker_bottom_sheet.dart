@@ -65,6 +65,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   required BuildContext context,
   Iterable<AttachmentPickerOption>? customOptions,
+  AttachmentPickerOptionsBuilder? optionsBuilder,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   Poll? initialPoll,
   PollConfig? pollConfig,
@@ -91,6 +92,13 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   int attachmentThumbnailQuality = 100,
   double attachmentThumbnailScale = 1,
 }) {
+  assert(
+    optionsBuilder == null || customOptions == null,
+    'Cannot use both optionsBuilder and customOptions. '
+    'Use optionsBuilder for full control over options, '
+    'or customOptions for simple prepending of options.',
+  );
+
   final colorTheme = StreamChatTheme.of(context).colorTheme;
   final color = backgroundColor ?? colorTheme.inputBg;
 
@@ -135,6 +143,22 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
               customOptions: customOptions?.map(
                 WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption,
               ),
+              optionsBuilder: optionsBuilder == null
+                  ? null
+                  : (context, defaultOptions) {
+                      final attachmentOptions = defaultOptions
+                          .map((option) => AttachmentPickerOption(
+                                key: option.key,
+                                icon: option.icon,
+                                title: option.title,
+                                supportedTypes: option.supportedTypes,
+                              ))
+                          .toList();
+                      return optionsBuilder(context, attachmentOptions)
+                          .map(WebOrDesktopAttachmentPickerOption
+                              .fromAttachmentPickerOption)
+                          .toList();
+                    },
               initialPoll: initialPoll,
               pollConfig: pollConfig,
               attachmentThumbnailSize: attachmentThumbnailSize,
@@ -150,6 +174,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
             controller: controller,
             allowedTypes: allowedTypes,
             customOptions: customOptions,
+            optionsBuilder: optionsBuilder,
             initialPoll: initialPoll,
             pollConfig: pollConfig,
             attachmentThumbnailSize: attachmentThumbnailSize,
