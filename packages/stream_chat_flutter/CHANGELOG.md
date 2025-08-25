@@ -4,6 +4,12 @@
 
 - Fixed `.replaceMentions` not escaping special characters in the username.
 
+✅ Added
+
+- Added `optionsBuilder` to `showStreamAttachmentPickerModalBottomSheet`, 
+  `mobileAttachmentPickerBuilder`, and `webOrDesktopAttachmentPickerBuilder` 
+  to allow full control over the attachment picker options ordering / display.
+
 ## 9.16.0
 
 🐞 Fixed
