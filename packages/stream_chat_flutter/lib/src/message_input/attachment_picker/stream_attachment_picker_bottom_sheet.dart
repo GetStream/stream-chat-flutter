@@ -146,15 +146,7 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
               optionsBuilder: optionsBuilder == null
                   ? null
                   : (context, defaultOptions) {
-                      final attachmentOptions = defaultOptions
-                          .map((option) => AttachmentPickerOption(
-                                key: option.key,
-                                icon: option.icon,
-                                title: option.title,
-                                supportedTypes: option.supportedTypes,
-                              ))
-                          .toList();
-                      return optionsBuilder(context, attachmentOptions)
+                      return optionsBuilder(context, defaultOptions)
                           .map(WebOrDesktopAttachmentPickerOption
                               .fromAttachmentPickerOption)
                           .toList();
