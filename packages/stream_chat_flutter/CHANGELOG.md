@@ -1,3 +1,11 @@
+## Upcoming
+
+✅ Added
+
+- Added `optionsBuilder` to `showStreamAttachmentPickerModalBottomSheet`, 
+  `mobileAttachmentPickerBuilder`, and `webOrDesktopAttachmentPickerBuilder` 
+  to allow full control over the attachment picker options ordering / display.
+
 ## 9.16.0
 
 🐞 Fixed
