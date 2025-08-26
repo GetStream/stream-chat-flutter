@@ -388,12 +388,12 @@ extension MessageX on Message {
       final userName = user.name;
       if (linkify) {
         messageTextToRender = messageTextToRender?.replaceAll(
-          RegExp('@($userId|$userName)'),
+          RegExp('@($userId|${RegExp.escape(userName ?? '')})'),
           '[@$userName]($userId)',
         );
       } else {
         messageTextToRender = messageTextToRender?.replaceAll(
-          RegExp('@($userId|$userName)'),
+          RegExp('@($userId|${RegExp.escape(userName ?? '')})'),
           '@$userName',
         );
       }
