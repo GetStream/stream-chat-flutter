@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/location.dart';
+import 'package:stream_chat/src/core/models/location_coordinates.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 
 /// Defines the api dedicated to users operations
@@ -17,7 +20,7 @@ class UserApi {
   Future<QueryUsersResponse> queryUsers({
     bool presence = false,
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<User>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(
@@ -86,5 +89,43 @@ class UserApi {
     );
 
     return BlockedUsersResponse.fromJson(response.data);
+  }
+
+  /// Requests the unread count information for the current user.
+  Future<GetUnreadCountResponse> getUnreadCount() async {
+    final response = await _client.get('/unread');
+
+    return GetUnreadCountResponse.fromJson(response.data);
+  }
+
+  /// Retrieves all the active live locations of the current user.
+  Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
+    final response = await _client.get(
+      '/users/live_locations',
+    );
+
+    return GetActiveLiveLocationsResponse.fromJson(response.data);
+  }
+
+  /// Updates an existing live location created by the current user.
+  Future<Location> updateLiveLocation({
+    required String messageId,
+    String? createdByDeviceId,
+    LocationCoordinates? location,
+    DateTime? endAt,
+  }) async {
+    final response = await _client.put(
+      '/users/live_locations',
+      data: json.encode({
+        'message_id': messageId,
+        if (createdByDeviceId != null)
+          'created_by_device_id': createdByDeviceId,
+        if (location?.latitude case final latitude) 'latitude': latitude,
+        if (location?.longitude case final longitude) 'longitude': longitude,
+        if (endAt != null) 'end_at': endAt.toIso8601String(),
+      }),
+    );
+
+    return Location.fromJson(response.data);
   }
 }

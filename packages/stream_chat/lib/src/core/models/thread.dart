@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/thread_participant.dart';
@@ -9,12 +11,18 @@ import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'thread.g.dart';
 
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
+
 /// {@template streamThread}
 /// A model class representing a thread. Threads are a way to group replies
 /// to a message in a channel.
 /// {@endtemplate}
 @JsonSerializable()
-class Thread extends Equatable {
+class Thread extends Equatable implements ComparableFieldProvider {
   /// {@macro streamThread}
   Thread({
     this.activeParticipantCount,
@@ -34,6 +42,7 @@ class Thread extends Equatable {
     this.title,
     this.latestReplies = const [],
     this.read = const [],
+    this.draft,
     this.extraData = const {},
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
@@ -93,6 +102,9 @@ class Thread extends Equatable {
   /// The list of reads in the thread.
   final List<Read>? read;
 
+  /// The draft message in the thread.
+  final Draft? draft;
+
   /// Map of custom thread extraData
   final Map<String, Object?> extraData;
 
@@ -119,6 +131,7 @@ class Thread extends Equatable {
     DateTime? lastMessageAt,
     List<Message>? latestReplies,
     List<Read>? read,
+    Object? draft = _nullConst,
     Map<String, Object?>? extraData,
   }) =>
       Thread(
@@ -140,6 +153,7 @@ class Thread extends Equatable {
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         latestReplies: latestReplies ?? this.latestReplies,
         read: read ?? this.read,
+        draft: draft == _nullConst ? this.draft : draft as Draft?,
         extraData: extraData ?? this.extraData,
       );
 
@@ -164,6 +178,7 @@ class Thread extends Equatable {
       lastMessageAt: other.lastMessageAt,
       latestReplies: other.latestReplies,
       read: other.read,
+      draft: other.draft,
       extraData: other.extraData,
     );
   }
@@ -189,6 +204,7 @@ class Thread extends Equatable {
     'last_message_at',
     'latest_replies',
     'read',
+    'draft',
   ];
 
   @override
@@ -210,5 +226,55 @@ class Thread extends Equatable {
         lastMessageAt,
         latestReplies,
         read,
+        draft,
       ];
+
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      ThreadSortKey.lastMessageAt => lastMessageAt,
+      ThreadSortKey.createdAt => createdAt,
+      ThreadSortKey.updatedAt => updatedAt,
+      ThreadSortKey.replyCount => replyCount,
+      ThreadSortKey.participantCount => participantCount,
+      ThreadSortKey.activeParticipantCount => activeParticipantCount,
+      ThreadSortKey.parentMessageId => parentMessageId,
+      // TODO: Support providing default value for hasUnread
+      ThreadSortKey.hasUnread => null,
+      _ => null,
+    };
+
+    return ComparableField.fromValue(value);
+  }
+}
+
+/// Extension type representing sortable fields for [Thread].
+///
+/// This type provides type-safe keys that can be used for sorting threads
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const ThreadSortKey(String key) implements String {
+  /// Sort threads by their last message date.
+  static const lastMessageAt = ThreadSortKey('last_message_at');
+
+  /// Sort threads by their creation date.
+  static const createdAt = ThreadSortKey('created_at');
+
+  /// Sort threads by their last update date.
+  static const updatedAt = ThreadSortKey('updated_at');
+
+  /// Sort threads by their reply count.
+  static const replyCount = ThreadSortKey('reply_count');
+
+  /// Sort threads by their participant count.
+  static const participantCount = ThreadSortKey('participant_count');
+
+  /// Sort threads by their active participant count.
+  static const activeParticipantCount =
+      ThreadSortKey('active_participant_count');
+
+  /// Sort threads by their parent message id.
+  static const parentMessageId = ThreadSortKey('parent_message_id');
+
+  /// Sort threads by their has unread.
+  static const hasUnread = ThreadSortKey('has_unread');
 }

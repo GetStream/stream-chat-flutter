@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template quotingMessageTopArea}
@@ -29,7 +30,7 @@ class QuotingMessageTopArea extends StatelessWidget {
     final _streamChatTheme = StreamChatTheme.of(context);
     if (hasQuotedMessage) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -53,7 +54,7 @@ class QuotingMessageTopArea extends StatelessWidget {
         ),
       );
     } else {
-      return const SizedBox.shrink();
+      return const Empty();
     }
   }
 }

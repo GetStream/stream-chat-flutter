@@ -31,6 +31,10 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) =>
       typingEvents: json['typing_events'] as bool? ?? false,
       uploads: json['uploads'] as bool? ?? false,
       urlEnrichment: json['url_enrichment'] as bool? ?? false,
+      skipLastMsgUpdateForSystemMsgs:
+          json['skip_last_msg_update_for_system_msgs'] as bool? ?? false,
+      userMessageReminders: json['user_message_reminders'] as bool? ?? false,
+      sharedLocations: json['shared_locations'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) =>
@@ -51,4 +55,8 @@ Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) =>
       'typing_events': instance.typingEvents,
       'uploads': instance.uploads,
       'url_enrichment': instance.urlEnrichment,
+      'skip_last_msg_update_for_system_msgs':
+          instance.skipLastMsgUpdateForSystemMsgs,
+      'user_message_reminders': instance.userMessageReminders,
+      'shared_locations': instance.sharedLocations,
     };

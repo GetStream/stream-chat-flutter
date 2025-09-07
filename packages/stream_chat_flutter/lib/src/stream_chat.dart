@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -65,24 +66,72 @@ class StreamChat extends StatefulWidget {
   /// Stream of connectivity result
   /// Visible for testing
   @visibleForTesting
-  final Stream<InternetStatus>? connectivityStream;
+  final Stream<List<ConnectivityResult>>? connectivityStream;
 
   @override
   StreamChatState createState() => StreamChatState();
 
-  /// Use this method to get the current [StreamChatState] instance
+  /// Finds the [StreamChatState] from the closest [StreamChat] ancestor
+  /// that encloses the given [context].
+  ///
+  /// This will throw a [FlutterError] if no [StreamChat] is found in the
+  /// widget tree above the given context.
+  ///
+  /// Typical usage:
+  ///
+  /// ```dart
+  /// final chatState = StreamChat.of(context);
+  /// ```
+  ///
+  /// If you're calling this in the same `build()` method that creates the
+  /// `StreamChat`, consider using a `Builder` or refactoring into a
+  /// separate widget to obtain a context below the [StreamChat].
+  ///
+  /// If you want to return null instead of throwing, use [maybeOf].
   static StreamChatState of(BuildContext context) {
-    StreamChatState? streamChatState;
+    final result = maybeOf(context);
+    if (result != null) return result;
 
-    streamChatState = context.findAncestorStateOfType<StreamChatState>();
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'StreamChat.of() called with a context that does not contain a '
+        'StreamChat.',
+      ),
+      ErrorDescription(
+        'No StreamChat ancestor could be found starting from the context '
+        'that was passed to StreamChat.of(). This usually happens when the '
+        'context used comes from the widget that creates the StreamChat '
+        'itself.',
+      ),
+      ErrorHint(
+        'To fix this, ensure that you are using a context that is a descendant '
+        'of the StreamChat. You can use a Builder to get a new context that '
+        'is under the StreamChat:\n\n'
+        '  Builder(\n'
+        '    builder: (context) {\n'
+        '      final chatState = StreamChat.of(context);\n'
+        '      ...\n'
+        '    },\n'
+        '  )',
+      ),
+      ErrorHint(
+        'Alternatively, split your build method into smaller widgets so that '
+        'you get a new BuildContext that is below the StreamChat in the '
+        'widget tree.',
+      ),
+      context.describeElement('The context used was'),
+    ]);
+  }
 
-    if (streamChatState == null) {
-      throw Exception(
-        'You must have a StreamChat widget at the top of your widget tree',
-      );
-    }
-
-    return streamChatState;
+  /// Finds the [StreamChatState] from the closest [StreamChat] ancestor
+  /// that encloses the given context.
+  ///
+  /// Returns null if no such ancestor exists.
+  ///
+  /// See also:
+  ///  * [of], which throws if no [StreamChat] is found.
+  static StreamChatState? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<StreamChatState>();
   }
 }
 
@@ -130,12 +179,7 @@ class StreamChatState extends State<StreamChat> {
                   connectivityStream: widget.connectivityStream,
                   child: Builder(
                     builder: (context) {
-                      StreamChatClient.additionalHeaders = {
-                        'X-Stream-Client':
-                            '${StreamChatClient.defaultUserAgent}-'
-                                'ui-${StreamChatClient.packageVersion}',
-                      };
-                      return widget.child ?? const Offstage();
+                      return widget.child ?? const Empty();
                     },
                   ),
                 ),
@@ -164,8 +208,7 @@ class StreamChatState extends State<StreamChat> {
 
   @override
   void didChangeDependencies() {
-    final currentLocale =
-        Localizations.localeOf(context).toString().toLowerCase();
+    final currentLocale = Localizations.localeOf(context).toString().toLowerCase();
     final availableLocales = Jiffy.getSupportedLocales();
     if (availableLocales.contains(currentLocale)) {
       Jiffy.setLocale(currentLocale);

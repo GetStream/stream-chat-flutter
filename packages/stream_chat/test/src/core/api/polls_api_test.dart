@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
@@ -330,7 +331,7 @@ void main() {
   test('queryPolls', () async {
     const path = '/polls/query';
     final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-    const sort = [SortOption<Poll>('test-field')];
+    const sort = [SortOption<Poll>.desc('test-field')];
     const pagination = PaginationParams(limit: 20);
 
     final payload = jsonEncode({
@@ -380,7 +381,7 @@ void main() {
   test('queryPollVotes', () async {
     const pollId = 'test-poll-id';
     final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-    const sort = [SortOption<PollVote>('test-field')];
+    const sort = [SortOption<PollVote>.desc('test-field')];
     const pagination = PaginationParams(limit: 20);
 
     const path = '/polls/$pollId/votes';

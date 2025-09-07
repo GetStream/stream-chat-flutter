@@ -65,6 +65,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
                 title: translations.optionLabel(isPlural: true),
                 itemHintText: translations.optionLabel(),
                 allowDuplicate: config.allowDuplicateOptions,
+                optionsRange: config.optionsRange,
                 initialOptions: [
                   for (final option in poll.options)
                     PollOptionItem(id: option.id, text: option.text),

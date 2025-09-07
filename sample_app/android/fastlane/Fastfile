@@ -1,0 +1,77 @@
+skip_docs
+import '../../Fastfile'
+default_platform(:android)
+
+before_all do
+  if is_ci
+    setup_git_config
+  end
+end
+
+platform :android do
+  app_id = "1:674907137625:android:f4033353c54985b0d7f348" # The Firebase app ID
+
+  ### Build lanes
+
+  desc "Build APK file with specified parameters"
+  # Usage: bundle exec fastlane android build_apk build_number:123 build_name:"1.0.0"
+  lane :build_apk do |options|
+    # Fetch dependencies
+    fetch_dependencies
+
+    build_name = options[:build_name]
+    build_number = options[:build_number]
+
+    # Generate the full command
+    command = "flutter build apk --suppress-analytics"
+    command += " --build-name=#{build_name}" if build_name.to_s != ""
+    command += " --build-number=#{build_number}" if build_number.to_s != ""
+
+    # Build the app
+    sh_on_root(command: command)
+  end
+
+  desc "Build and distribute app to Firebase App Distribution with auto-incrementing build number"
+  # Usage: bundle exec fastlane android distribute_to_firebase
+  lane :distribute_to_firebase do
+    latest_release = firebase_app_distribution_get_latest_release(
+      app: app_id,
+      service_credentials_file: "#{root_path}/android/firebase-service-account.json"
+    )
+
+    build_number = (latest_release&.dig(:buildVersion) || 0).to_i + 1
+    build_apk(build_number: build_number)
+
+    firebase_app_distribution(
+      app: app_id,
+      android_artifact_type: "APK",
+      android_artifact_path: "#{root_path}/build/app/outputs/apk/release/flutter-sample-app.apk",
+      groups: "stream-testers, ios-stream-testers",
+      release_notes: "Lots of amazing new features to test out!",
+      service_credentials_file: "#{root_path}/android/firebase-service-account.json"
+    )
+  end
+
+  desc "Build and distribute app to S3"
+  # Usage: bundle exec fastlane android distribute_to_s3
+  lane :distribute_to_s3 do |options|
+    build_apk
+    
+    bucket_with_path = ENV.fetch("AWS_S3_BUCKET")
+    bucket_name, upload_path = bucket_with_path.chomp('/').split('/', 2)
+
+    # Validate that we have both bucket and path
+    UI.user_error!("AWS_S3_BUCKET must include path (e.g., 'bucket-name/downloads')") if upload_path.nil? || upload_path.empty?
+
+    aws_s3(
+      access_key: ENV.fetch("AWS_ACCESS_KEY_ID"),
+      secret_access_key: ENV.fetch("AWS_SECRET_ACCESS_KEY"),
+      region: ENV.fetch("AWS_REGION", "us-east-1"),
+      bucket: bucket_name,
+      path: upload_path,
+      acl: "private",
+      server_side_encryption: "AES256",
+      files: ["#{root_path}/build/app/outputs/apk/release/flutter-sample-app.apk"]
+    )
+  end
+end

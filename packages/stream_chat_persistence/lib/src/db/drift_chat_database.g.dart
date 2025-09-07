@@ -24,8 +24,6 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String> cid = GeneratedColumn<String>(
       'cid', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _ownCapabilitiesMeta =
-      const VerificationMeta('ownCapabilities');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       ownCapabilities = GeneratedColumn<String>(
@@ -33,7 +31,6 @@ class $ChannelsTable extends Channels
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>(
               $ChannelsTable.$converterownCapabilitiesn);
-  static const VerificationMeta _configMeta = const VerificationMeta('config');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       config = GeneratedColumn<String>('config', aliasedName, false,
@@ -90,8 +87,6 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String> createdById = GeneratedColumn<String>(
       'created_by_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -141,8 +136,6 @@ class $ChannelsTable extends Channels
     } else if (isInserting) {
       context.missing(_cidMeta);
     }
-    context.handle(_ownCapabilitiesMeta, const VerificationResult.success());
-    context.handle(_configMeta, const VerificationResult.success());
     if (data.containsKey('frozen')) {
       context.handle(_frozenMeta,
           frozen.isAcceptableOrUnknown(data['frozen']!, _frozenMeta));
@@ -177,7 +170,6 @@ class $ChannelsTable extends Channels
           createdById.isAcceptableOrUnknown(
               data['created_by_id']!, _createdByIdMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -681,8 +673,6 @@ class $MessagesTable extends Messages
   late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _attachmentsMeta =
-      const VerificationMeta('attachments');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
@@ -700,32 +690,19 @@ class $MessagesTable extends Messages
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
-  static const VerificationMeta _mentionedUsersMeta =
-      const VerificationMeta('mentionedUsers');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       mentionedUsers = GeneratedColumn<String>(
               'mentioned_users', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($MessagesTable.$convertermentionedUsers);
-  static const VerificationMeta _reactionCountsMeta =
-      const VerificationMeta('reactionCounts');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      reactionCounts = GeneratedColumn<String>(
-              'reaction_counts', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<Map<String, int>?>(
-              $MessagesTable.$converterreactionCountsn);
-  static const VerificationMeta _reactionScoresMeta =
-      const VerificationMeta('reactionScores');
-  @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      reactionScores = GeneratedColumn<String>(
-              'reaction_scores', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<Map<String, int>?>(
-              $MessagesTable.$converterreactionScoresn);
+  late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?,
+      String> reactionGroups = GeneratedColumn<String>(
+          'reaction_groups', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false)
+      .withConverter<Map<String, ReactionGroup>?>(
+          $MessagesTable.$converterreactionGroupsn);
   static const VerificationMeta _parentIdMeta =
       const VerificationMeta('parentId');
   @override
@@ -857,14 +834,18 @@ class $MessagesTable extends Messages
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES channels (cid) ON DELETE CASCADE'));
-  static const VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
       i18n = GeneratedColumn<String>('i18n', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<Map<String, String>?>($MessagesTable.$converteri18n);
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+      restrictedVisibility = GeneratedColumn<String>(
+              'restricted_visibility', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>(
+              $MessagesTable.$converterrestrictedVisibilityn);
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -879,8 +860,7 @@ class $MessagesTable extends Messages
         state,
         type,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         parentId,
         quotedMessageId,
         pollId,
@@ -902,6 +882,7 @@ class $MessagesTable extends Messages
         pinnedByUserId,
         channelCid,
         i18n,
+        restrictedVisibility,
         extraData
       ];
   @override
@@ -925,7 +906,6 @@ class $MessagesTable extends Messages
           messageText.isAcceptableOrUnknown(
               data['message_text']!, _messageTextMeta));
     }
-    context.handle(_attachmentsMeta, const VerificationResult.success());
     if (data.containsKey('state')) {
       context.handle(
           _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
@@ -936,9 +916,6 @@ class $MessagesTable extends Messages
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     }
-    context.handle(_mentionedUsersMeta, const VerificationResult.success());
-    context.handle(_reactionCountsMeta, const VerificationResult.success());
-    context.handle(_reactionScoresMeta, const VerificationResult.success());
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
@@ -1047,8 +1024,6 @@ class $MessagesTable extends Messages
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
-    context.handle(_i18nMeta, const VerificationResult.success());
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -1072,12 +1047,9 @@ class $MessagesTable extends Messages
       mentionedUsers: $MessagesTable.$convertermentionedUsers.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}mentioned_users'])!),
-      reactionCounts: $MessagesTable.$converterreactionCountsn.fromSql(
+      reactionGroups: $MessagesTable.$converterreactionGroupsn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $MessagesTable.$converterreactionScoresn.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}reaction_scores'])),
+              DriftSqlType.string, data['${effectivePrefix}reaction_groups'])),
       parentId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
       quotedMessageId: attachedDatabase.typeMapping.read(
@@ -1121,6 +1093,9 @@ class $MessagesTable extends Messages
           .read(DriftSqlType.string, data['${effectivePrefix}channel_cid'])!,
       i18n: $MessagesTable.$converteri18n.fromSql(attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}i18n'])),
+      restrictedVisibility: $MessagesTable.$converterrestrictedVisibilityn
+          .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}restricted_visibility'])),
       extraData: $MessagesTable.$converterextraDatan.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
@@ -1136,16 +1111,17 @@ class $MessagesTable extends Messages
       ListConverter<String>();
   static TypeConverter<List<String>, String> $convertermentionedUsers =
       ListConverter<String>();
-  static TypeConverter<Map<String, int>, String> $converterreactionCounts =
-      MapConverter<int>();
-  static TypeConverter<Map<String, int>?, String?> $converterreactionCountsn =
-      NullAwareTypeConverter.wrap($converterreactionCounts);
-  static TypeConverter<Map<String, int>, String> $converterreactionScores =
-      MapConverter<int>();
-  static TypeConverter<Map<String, int>?, String?> $converterreactionScoresn =
-      NullAwareTypeConverter.wrap($converterreactionScores);
+  static TypeConverter<Map<String, ReactionGroup>, String>
+      $converterreactionGroups = ReactionGroupsConverter();
+  static TypeConverter<Map<String, ReactionGroup>?, String?>
+      $converterreactionGroupsn =
+      NullAwareTypeConverter.wrap($converterreactionGroups);
   static TypeConverter<Map<String, String>?, String?> $converteri18n =
       NullableMapConverter<String>();
+  static TypeConverter<List<String>, String> $converterrestrictedVisibility =
+      ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $converterrestrictedVisibilityn =
+      NullAwareTypeConverter.wrap($converterrestrictedVisibility);
   static TypeConverter<Map<String, dynamic>, String> $converterextraData =
       MapConverter();
   static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
@@ -1172,11 +1148,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   /// The list of user mentioned in the message
   final List<String> mentionedUsers;
 
-  /// A map describing the count of number of every reaction
-  final Map<String, int>? reactionCounts;
-
-  /// A map describing the count of score of every reaction
-  final Map<String, int>? reactionScores;
+  /// A map describing the reaction group for every reaction
+  final Map<String, ReactionGroup>? reactionGroups;
 
   /// The ID of the parent message, if the message is a thread reply.
   final String? parentId;
@@ -1241,6 +1214,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   /// A Map of [messageText] translations.
   final Map<String, String>? i18n;
 
+  /// The list of user ids that should be able to see the message.
+  final List<String>? restrictedVisibility;
+
   /// Message custom extraData
   final Map<String, dynamic>? extraData;
   const MessageEntity(
@@ -1250,8 +1226,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       required this.state,
       required this.type,
       required this.mentionedUsers,
-      this.reactionCounts,
-      this.reactionScores,
+      this.reactionGroups,
       this.parentId,
       this.quotedMessageId,
       this.pollId,
@@ -1273,6 +1248,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       this.pinnedByUserId,
       required this.channelCid,
       this.i18n,
+      this.restrictedVisibility,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1291,13 +1267,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       map['mentioned_users'] = Variable<String>(
           $MessagesTable.$convertermentionedUsers.toSql(mentionedUsers));
     }
-    if (!nullToAbsent || reactionCounts != null) {
-      map['reaction_counts'] = Variable<String>(
-          $MessagesTable.$converterreactionCountsn.toSql(reactionCounts));
-    }
-    if (!nullToAbsent || reactionScores != null) {
-      map['reaction_scores'] = Variable<String>(
-          $MessagesTable.$converterreactionScoresn.toSql(reactionScores));
+    if (!nullToAbsent || reactionGroups != null) {
+      map['reaction_groups'] = Variable<String>(
+          $MessagesTable.$converterreactionGroupsn.toSql(reactionGroups));
     }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
@@ -1356,6 +1328,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     if (!nullToAbsent || i18n != null) {
       map['i18n'] = Variable<String>($MessagesTable.$converteri18n.toSql(i18n));
     }
+    if (!nullToAbsent || restrictedVisibility != null) {
+      map['restricted_visibility'] = Variable<String>($MessagesTable
+          .$converterrestrictedVisibilityn
+          .toSql(restrictedVisibility));
+    }
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
           $MessagesTable.$converterextraDatan.toSql(extraData));
@@ -1373,10 +1350,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       state: serializer.fromJson<String>(json['state']),
       type: serializer.fromJson<String>(json['type']),
       mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
-      reactionCounts:
-          serializer.fromJson<Map<String, int>?>(json['reactionCounts']),
-      reactionScores:
-          serializer.fromJson<Map<String, int>?>(json['reactionScores']),
+      reactionGroups: serializer
+          .fromJson<Map<String, ReactionGroup>?>(json['reactionGroups']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       quotedMessageId: serializer.fromJson<String?>(json['quotedMessageId']),
       pollId: serializer.fromJson<String?>(json['pollId']),
@@ -1399,6 +1374,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       pinnedByUserId: serializer.fromJson<String?>(json['pinnedByUserId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
       i18n: serializer.fromJson<Map<String, String>?>(json['i18n']),
+      restrictedVisibility:
+          serializer.fromJson<List<String>?>(json['restrictedVisibility']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
   }
@@ -1412,8 +1389,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'state': serializer.toJson<String>(state),
       'type': serializer.toJson<String>(type),
       'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
-      'reactionCounts': serializer.toJson<Map<String, int>?>(reactionCounts),
-      'reactionScores': serializer.toJson<Map<String, int>?>(reactionScores),
+      'reactionGroups':
+          serializer.toJson<Map<String, ReactionGroup>?>(reactionGroups),
       'parentId': serializer.toJson<String?>(parentId),
       'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
       'pollId': serializer.toJson<String?>(pollId),
@@ -1436,6 +1413,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'pinnedByUserId': serializer.toJson<String?>(pinnedByUserId),
       'channelCid': serializer.toJson<String>(channelCid),
       'i18n': serializer.toJson<Map<String, String>?>(i18n),
+      'restrictedVisibility':
+          serializer.toJson<List<String>?>(restrictedVisibility),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
@@ -1447,8 +1426,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           String? state,
           String? type,
           List<String>? mentionedUsers,
-          Value<Map<String, int>?> reactionCounts = const Value.absent(),
-          Value<Map<String, int>?> reactionScores = const Value.absent(),
+          Value<Map<String, ReactionGroup>?> reactionGroups =
+              const Value.absent(),
           Value<String?> parentId = const Value.absent(),
           Value<String?> quotedMessageId = const Value.absent(),
           Value<String?> pollId = const Value.absent(),
@@ -1470,6 +1449,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           Value<String?> pinnedByUserId = const Value.absent(),
           String? channelCid,
           Value<Map<String, String>?> i18n = const Value.absent(),
+          Value<List<String>?> restrictedVisibility = const Value.absent(),
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       MessageEntity(
         id: id ?? this.id,
@@ -1478,10 +1458,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         state: state ?? this.state,
         type: type ?? this.type,
         mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-        reactionCounts:
-            reactionCounts.present ? reactionCounts.value : this.reactionCounts,
-        reactionScores:
-            reactionScores.present ? reactionScores.value : this.reactionScores,
+        reactionGroups:
+            reactionGroups.present ? reactionGroups.value : this.reactionGroups,
         parentId: parentId.present ? parentId.value : this.parentId,
         quotedMessageId: quotedMessageId.present
             ? quotedMessageId.value
@@ -1518,6 +1496,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
             pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
         channelCid: channelCid ?? this.channelCid,
         i18n: i18n.present ? i18n.value : this.i18n,
+        restrictedVisibility: restrictedVisibility.present
+            ? restrictedVisibility.value
+            : this.restrictedVisibility,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
   MessageEntity copyWithCompanion(MessagesCompanion data) {
@@ -1532,12 +1513,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       mentionedUsers: data.mentionedUsers.present
           ? data.mentionedUsers.value
           : this.mentionedUsers,
-      reactionCounts: data.reactionCounts.present
-          ? data.reactionCounts.value
-          : this.reactionCounts,
-      reactionScores: data.reactionScores.present
-          ? data.reactionScores.value
-          : this.reactionScores,
+      reactionGroups: data.reactionGroups.present
+          ? data.reactionGroups.value
+          : this.reactionGroups,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       quotedMessageId: data.quotedMessageId.present
           ? data.quotedMessageId.value
@@ -1582,6 +1560,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       channelCid:
           data.channelCid.present ? data.channelCid.value : this.channelCid,
       i18n: data.i18n.present ? data.i18n.value : this.i18n,
+      restrictedVisibility: data.restrictedVisibility.present
+          ? data.restrictedVisibility.value
+          : this.restrictedVisibility,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -1595,8 +1576,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
-          ..write('reactionCounts: $reactionCounts, ')
-          ..write('reactionScores: $reactionScores, ')
+          ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
           ..write('pollId: $pollId, ')
@@ -1618,6 +1598,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
           ..write('i18n: $i18n, ')
+          ..write('restrictedVisibility: $restrictedVisibility, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -1631,8 +1612,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         state,
         type,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         parentId,
         quotedMessageId,
         pollId,
@@ -1654,6 +1634,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         pinnedByUserId,
         channelCid,
         i18n,
+        restrictedVisibility,
         extraData
       ]);
   @override
@@ -1666,8 +1647,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.state == this.state &&
           other.type == this.type &&
           other.mentionedUsers == this.mentionedUsers &&
-          other.reactionCounts == this.reactionCounts &&
-          other.reactionScores == this.reactionScores &&
+          other.reactionGroups == this.reactionGroups &&
           other.parentId == this.parentId &&
           other.quotedMessageId == this.quotedMessageId &&
           other.pollId == this.pollId &&
@@ -1689,6 +1669,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.pinnedByUserId == this.pinnedByUserId &&
           other.channelCid == this.channelCid &&
           other.i18n == this.i18n &&
+          other.restrictedVisibility == this.restrictedVisibility &&
           other.extraData == this.extraData);
 }
 
@@ -1699,8 +1680,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<String> state;
   final Value<String> type;
   final Value<List<String>> mentionedUsers;
-  final Value<Map<String, int>?> reactionCounts;
-  final Value<Map<String, int>?> reactionScores;
+  final Value<Map<String, ReactionGroup>?> reactionGroups;
   final Value<String?> parentId;
   final Value<String?> quotedMessageId;
   final Value<String?> pollId;
@@ -1722,6 +1702,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<String?> pinnedByUserId;
   final Value<String> channelCid;
   final Value<Map<String, String>?> i18n;
+  final Value<List<String>?> restrictedVisibility;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
   const MessagesCompanion({
@@ -1731,8 +1712,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.state = const Value.absent(),
     this.type = const Value.absent(),
     this.mentionedUsers = const Value.absent(),
-    this.reactionCounts = const Value.absent(),
-    this.reactionScores = const Value.absent(),
+    this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
     this.pollId = const Value.absent(),
@@ -1754,6 +1734,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.pinnedByUserId = const Value.absent(),
     this.channelCid = const Value.absent(),
     this.i18n = const Value.absent(),
+    this.restrictedVisibility = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1764,8 +1745,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     required String state,
     this.type = const Value.absent(),
     required List<String> mentionedUsers,
-    this.reactionCounts = const Value.absent(),
-    this.reactionScores = const Value.absent(),
+    this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
     this.pollId = const Value.absent(),
@@ -1787,6 +1767,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.pinnedByUserId = const Value.absent(),
     required String channelCid,
     this.i18n = const Value.absent(),
+    this.restrictedVisibility = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -1801,8 +1782,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<String>? state,
     Expression<String>? type,
     Expression<String>? mentionedUsers,
-    Expression<String>? reactionCounts,
-    Expression<String>? reactionScores,
+    Expression<String>? reactionGroups,
     Expression<String>? parentId,
     Expression<String>? quotedMessageId,
     Expression<String>? pollId,
@@ -1824,6 +1804,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<String>? pinnedByUserId,
     Expression<String>? channelCid,
     Expression<String>? i18n,
+    Expression<String>? restrictedVisibility,
     Expression<String>? extraData,
     Expression<int>? rowid,
   }) {
@@ -1834,8 +1815,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (state != null) 'state': state,
       if (type != null) 'type': type,
       if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
-      if (reactionCounts != null) 'reaction_counts': reactionCounts,
-      if (reactionScores != null) 'reaction_scores': reactionScores,
+      if (reactionGroups != null) 'reaction_groups': reactionGroups,
       if (parentId != null) 'parent_id': parentId,
       if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
       if (pollId != null) 'poll_id': pollId,
@@ -1858,6 +1838,8 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (pinnedByUserId != null) 'pinned_by_user_id': pinnedByUserId,
       if (channelCid != null) 'channel_cid': channelCid,
       if (i18n != null) 'i18n': i18n,
+      if (restrictedVisibility != null)
+        'restricted_visibility': restrictedVisibility,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1870,8 +1852,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<String>? state,
       Value<String>? type,
       Value<List<String>>? mentionedUsers,
-      Value<Map<String, int>?>? reactionCounts,
-      Value<Map<String, int>?>? reactionScores,
+      Value<Map<String, ReactionGroup>?>? reactionGroups,
       Value<String?>? parentId,
       Value<String?>? quotedMessageId,
       Value<String?>? pollId,
@@ -1893,6 +1874,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<String?>? pinnedByUserId,
       Value<String>? channelCid,
       Value<Map<String, String>?>? i18n,
+      Value<List<String>?>? restrictedVisibility,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
     return MessagesCompanion(
@@ -1902,8 +1884,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       state: state ?? this.state,
       type: type ?? this.type,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-      reactionCounts: reactionCounts ?? this.reactionCounts,
-      reactionScores: reactionScores ?? this.reactionScores,
+      reactionGroups: reactionGroups ?? this.reactionGroups,
       parentId: parentId ?? this.parentId,
       quotedMessageId: quotedMessageId ?? this.quotedMessageId,
       pollId: pollId ?? this.pollId,
@@ -1925,6 +1906,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       pinnedByUserId: pinnedByUserId ?? this.pinnedByUserId,
       channelCid: channelCid ?? this.channelCid,
       i18n: i18n ?? this.i18n,
+      restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
     );
@@ -1953,13 +1935,9 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       map['mentioned_users'] = Variable<String>(
           $MessagesTable.$convertermentionedUsers.toSql(mentionedUsers.value));
     }
-    if (reactionCounts.present) {
-      map['reaction_counts'] = Variable<String>(
-          $MessagesTable.$converterreactionCountsn.toSql(reactionCounts.value));
-    }
-    if (reactionScores.present) {
-      map['reaction_scores'] = Variable<String>(
-          $MessagesTable.$converterreactionScoresn.toSql(reactionScores.value));
+    if (reactionGroups.present) {
+      map['reaction_groups'] = Variable<String>(
+          $MessagesTable.$converterreactionGroupsn.toSql(reactionGroups.value));
     }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
@@ -2026,6 +2004,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       map['i18n'] =
           Variable<String>($MessagesTable.$converteri18n.toSql(i18n.value));
     }
+    if (restrictedVisibility.present) {
+      map['restricted_visibility'] = Variable<String>($MessagesTable
+          .$converterrestrictedVisibilityn
+          .toSql(restrictedVisibility.value));
+    }
     if (extraData.present) {
       map['extra_data'] = Variable<String>(
           $MessagesTable.$converterextraDatan.toSql(extraData.value));
@@ -2045,8 +2028,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
-          ..write('reactionCounts: $reactionCounts, ')
-          ..write('reactionScores: $reactionScores, ')
+          ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
           ..write('pollId: $pollId, ')
@@ -2068,7 +2050,1194 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
           ..write('i18n: $i18n, ')
+          ..write('restrictedVisibility: $restrictedVisibility, ')
           ..write('extraData: $extraData, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DraftMessagesTable extends DraftMessages
+    with TableInfo<$DraftMessagesTable, DraftMessageEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DraftMessagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _messageTextMeta =
+      const VerificationMeta('messageText');
+  @override
+  late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
+      'message_text', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      attachments = GeneratedColumn<String>('attachments', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>(
+              $DraftMessagesTable.$converterattachments);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('regular'));
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      mentionedUsers = GeneratedColumn<String>(
+              'mentioned_users', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>(
+              $DraftMessagesTable.$convertermentionedUsers);
+  static const VerificationMeta _parentIdMeta =
+      const VerificationMeta('parentId');
+  @override
+  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
+      'parent_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES messages (id) ON DELETE CASCADE'));
+  static const VerificationMeta _quotedMessageIdMeta =
+      const VerificationMeta('quotedMessageId');
+  @override
+  late final GeneratedColumn<String> quotedMessageId = GeneratedColumn<String>(
+      'quoted_message_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _pollIdMeta = const VerificationMeta('pollId');
+  @override
+  late final GeneratedColumn<String> pollId = GeneratedColumn<String>(
+      'poll_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _showInChannelMeta =
+      const VerificationMeta('showInChannel');
+  @override
+  late final GeneratedColumn<bool> showInChannel = GeneratedColumn<bool>(
+      'show_in_channel', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("show_in_channel" IN (0, 1))'));
+  static const VerificationMeta _commandMeta =
+      const VerificationMeta('command');
+  @override
+  late final GeneratedColumn<String> command = GeneratedColumn<String>(
+      'command', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _silentMeta = const VerificationMeta('silent');
+  @override
+  late final GeneratedColumn<bool> silent = GeneratedColumn<bool>(
+      'silent', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("silent" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _channelCidMeta =
+      const VerificationMeta('channelCid');
+  @override
+  late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
+      'channel_cid', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES channels (cid) ON DELETE CASCADE'));
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, dynamic>?>(
+              $DraftMessagesTable.$converterextraDatan);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        messageText,
+        attachments,
+        type,
+        mentionedUsers,
+        parentId,
+        quotedMessageId,
+        pollId,
+        showInChannel,
+        command,
+        silent,
+        createdAt,
+        channelCid,
+        extraData
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'draft_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<DraftMessageEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('message_text')) {
+      context.handle(
+          _messageTextMeta,
+          messageText.isAcceptableOrUnknown(
+              data['message_text']!, _messageTextMeta));
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    }
+    if (data.containsKey('parent_id')) {
+      context.handle(_parentIdMeta,
+          parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
+    }
+    if (data.containsKey('quoted_message_id')) {
+      context.handle(
+          _quotedMessageIdMeta,
+          quotedMessageId.isAcceptableOrUnknown(
+              data['quoted_message_id']!, _quotedMessageIdMeta));
+    }
+    if (data.containsKey('poll_id')) {
+      context.handle(_pollIdMeta,
+          pollId.isAcceptableOrUnknown(data['poll_id']!, _pollIdMeta));
+    }
+    if (data.containsKey('show_in_channel')) {
+      context.handle(
+          _showInChannelMeta,
+          showInChannel.isAcceptableOrUnknown(
+              data['show_in_channel']!, _showInChannelMeta));
+    }
+    if (data.containsKey('command')) {
+      context.handle(_commandMeta,
+          command.isAcceptableOrUnknown(data['command']!, _commandMeta));
+    }
+    if (data.containsKey('silent')) {
+      context.handle(_silentMeta,
+          silent.isAcceptableOrUnknown(data['silent']!, _silentMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('channel_cid')) {
+      context.handle(
+          _channelCidMeta,
+          channelCid.isAcceptableOrUnknown(
+              data['channel_cid']!, _channelCidMeta));
+    } else if (isInserting) {
+      context.missing(_channelCidMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DraftMessageEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DraftMessageEntity(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      messageText: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_text']),
+      attachments: $DraftMessagesTable.$converterattachments.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}attachments'])!),
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      mentionedUsers: $DraftMessagesTable.$convertermentionedUsers.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}mentioned_users'])!),
+      parentId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
+      quotedMessageId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}quoted_message_id']),
+      pollId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}poll_id']),
+      showInChannel: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}show_in_channel']),
+      command: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}command']),
+      silent: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}silent'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      channelCid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}channel_cid'])!,
+      extraData: $DraftMessagesTable.$converterextraDatan.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
+    );
+  }
+
+  @override
+  $DraftMessagesTable createAlias(String alias) {
+    return $DraftMessagesTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $converterattachments =
+      ListConverter<String>();
+  static TypeConverter<List<String>, String> $convertermentionedUsers =
+      ListConverter<String>();
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
+      MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
+      NullAwareTypeConverter.wrap($converterextraData);
+}
+
+class DraftMessageEntity extends DataClass
+    implements Insertable<DraftMessageEntity> {
+  /// The message id
+  final String id;
+
+  /// The text of this message
+  final String? messageText;
+
+  /// The list of attachments, either provided by the user
+  /// or generated from a command or as a result of URL scraping.
+  final List<String> attachments;
+
+  /// The message type
+  final String type;
+
+  /// The list of user mentioned in the message
+  final List<String> mentionedUsers;
+
+  /// The ID of the parent message, if the message is a thread reply.
+  final String? parentId;
+
+  /// The ID of the quoted message, if the message is a quoted reply.
+  final String? quotedMessageId;
+
+  /// The ID of the poll, if the message is a poll.
+  final String? pollId;
+
+  /// Check if this message needs to show in the channel.
+  final bool? showInChannel;
+
+  /// A used command name.
+  final String? command;
+
+  /// If true the message is silent
+  final bool silent;
+
+  /// The DateTime on which the message was created.
+  final DateTime createdAt;
+
+  /// The channel cid of which this message is part of
+  final String channelCid;
+
+  /// Message custom extraData
+  final Map<String, dynamic>? extraData;
+  const DraftMessageEntity(
+      {required this.id,
+      this.messageText,
+      required this.attachments,
+      required this.type,
+      required this.mentionedUsers,
+      this.parentId,
+      this.quotedMessageId,
+      this.pollId,
+      this.showInChannel,
+      this.command,
+      required this.silent,
+      required this.createdAt,
+      required this.channelCid,
+      this.extraData});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || messageText != null) {
+      map['message_text'] = Variable<String>(messageText);
+    }
+    {
+      map['attachments'] = Variable<String>(
+          $DraftMessagesTable.$converterattachments.toSql(attachments));
+    }
+    map['type'] = Variable<String>(type);
+    {
+      map['mentioned_users'] = Variable<String>(
+          $DraftMessagesTable.$convertermentionedUsers.toSql(mentionedUsers));
+    }
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<String>(parentId);
+    }
+    if (!nullToAbsent || quotedMessageId != null) {
+      map['quoted_message_id'] = Variable<String>(quotedMessageId);
+    }
+    if (!nullToAbsent || pollId != null) {
+      map['poll_id'] = Variable<String>(pollId);
+    }
+    if (!nullToAbsent || showInChannel != null) {
+      map['show_in_channel'] = Variable<bool>(showInChannel);
+    }
+    if (!nullToAbsent || command != null) {
+      map['command'] = Variable<String>(command);
+    }
+    map['silent'] = Variable<bool>(silent);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['channel_cid'] = Variable<String>(channelCid);
+    if (!nullToAbsent || extraData != null) {
+      map['extra_data'] = Variable<String>(
+          $DraftMessagesTable.$converterextraDatan.toSql(extraData));
+    }
+    return map;
+  }
+
+  factory DraftMessageEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DraftMessageEntity(
+      id: serializer.fromJson<String>(json['id']),
+      messageText: serializer.fromJson<String?>(json['messageText']),
+      attachments: serializer.fromJson<List<String>>(json['attachments']),
+      type: serializer.fromJson<String>(json['type']),
+      mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
+      parentId: serializer.fromJson<String?>(json['parentId']),
+      quotedMessageId: serializer.fromJson<String?>(json['quotedMessageId']),
+      pollId: serializer.fromJson<String?>(json['pollId']),
+      showInChannel: serializer.fromJson<bool?>(json['showInChannel']),
+      command: serializer.fromJson<String?>(json['command']),
+      silent: serializer.fromJson<bool>(json['silent']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      channelCid: serializer.fromJson<String>(json['channelCid']),
+      extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'messageText': serializer.toJson<String?>(messageText),
+      'attachments': serializer.toJson<List<String>>(attachments),
+      'type': serializer.toJson<String>(type),
+      'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
+      'parentId': serializer.toJson<String?>(parentId),
+      'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
+      'pollId': serializer.toJson<String?>(pollId),
+      'showInChannel': serializer.toJson<bool?>(showInChannel),
+      'command': serializer.toJson<String?>(command),
+      'silent': serializer.toJson<bool>(silent),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'channelCid': serializer.toJson<String>(channelCid),
+      'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
+    };
+  }
+
+  DraftMessageEntity copyWith(
+          {String? id,
+          Value<String?> messageText = const Value.absent(),
+          List<String>? attachments,
+          String? type,
+          List<String>? mentionedUsers,
+          Value<String?> parentId = const Value.absent(),
+          Value<String?> quotedMessageId = const Value.absent(),
+          Value<String?> pollId = const Value.absent(),
+          Value<bool?> showInChannel = const Value.absent(),
+          Value<String?> command = const Value.absent(),
+          bool? silent,
+          DateTime? createdAt,
+          String? channelCid,
+          Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
+      DraftMessageEntity(
+        id: id ?? this.id,
+        messageText: messageText.present ? messageText.value : this.messageText,
+        attachments: attachments ?? this.attachments,
+        type: type ?? this.type,
+        mentionedUsers: mentionedUsers ?? this.mentionedUsers,
+        parentId: parentId.present ? parentId.value : this.parentId,
+        quotedMessageId: quotedMessageId.present
+            ? quotedMessageId.value
+            : this.quotedMessageId,
+        pollId: pollId.present ? pollId.value : this.pollId,
+        showInChannel:
+            showInChannel.present ? showInChannel.value : this.showInChannel,
+        command: command.present ? command.value : this.command,
+        silent: silent ?? this.silent,
+        createdAt: createdAt ?? this.createdAt,
+        channelCid: channelCid ?? this.channelCid,
+        extraData: extraData.present ? extraData.value : this.extraData,
+      );
+  DraftMessageEntity copyWithCompanion(DraftMessagesCompanion data) {
+    return DraftMessageEntity(
+      id: data.id.present ? data.id.value : this.id,
+      messageText:
+          data.messageText.present ? data.messageText.value : this.messageText,
+      attachments:
+          data.attachments.present ? data.attachments.value : this.attachments,
+      type: data.type.present ? data.type.value : this.type,
+      mentionedUsers: data.mentionedUsers.present
+          ? data.mentionedUsers.value
+          : this.mentionedUsers,
+      parentId: data.parentId.present ? data.parentId.value : this.parentId,
+      quotedMessageId: data.quotedMessageId.present
+          ? data.quotedMessageId.value
+          : this.quotedMessageId,
+      pollId: data.pollId.present ? data.pollId.value : this.pollId,
+      showInChannel: data.showInChannel.present
+          ? data.showInChannel.value
+          : this.showInChannel,
+      command: data.command.present ? data.command.value : this.command,
+      silent: data.silent.present ? data.silent.value : this.silent,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      channelCid:
+          data.channelCid.present ? data.channelCid.value : this.channelCid,
+      extraData: data.extraData.present ? data.extraData.value : this.extraData,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DraftMessageEntity(')
+          ..write('id: $id, ')
+          ..write('messageText: $messageText, ')
+          ..write('attachments: $attachments, ')
+          ..write('type: $type, ')
+          ..write('mentionedUsers: $mentionedUsers, ')
+          ..write('parentId: $parentId, ')
+          ..write('quotedMessageId: $quotedMessageId, ')
+          ..write('pollId: $pollId, ')
+          ..write('showInChannel: $showInChannel, ')
+          ..write('command: $command, ')
+          ..write('silent: $silent, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('channelCid: $channelCid, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      messageText,
+      attachments,
+      type,
+      mentionedUsers,
+      parentId,
+      quotedMessageId,
+      pollId,
+      showInChannel,
+      command,
+      silent,
+      createdAt,
+      channelCid,
+      extraData);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DraftMessageEntity &&
+          other.id == this.id &&
+          other.messageText == this.messageText &&
+          other.attachments == this.attachments &&
+          other.type == this.type &&
+          other.mentionedUsers == this.mentionedUsers &&
+          other.parentId == this.parentId &&
+          other.quotedMessageId == this.quotedMessageId &&
+          other.pollId == this.pollId &&
+          other.showInChannel == this.showInChannel &&
+          other.command == this.command &&
+          other.silent == this.silent &&
+          other.createdAt == this.createdAt &&
+          other.channelCid == this.channelCid &&
+          other.extraData == this.extraData);
+}
+
+class DraftMessagesCompanion extends UpdateCompanion<DraftMessageEntity> {
+  final Value<String> id;
+  final Value<String?> messageText;
+  final Value<List<String>> attachments;
+  final Value<String> type;
+  final Value<List<String>> mentionedUsers;
+  final Value<String?> parentId;
+  final Value<String?> quotedMessageId;
+  final Value<String?> pollId;
+  final Value<bool?> showInChannel;
+  final Value<String?> command;
+  final Value<bool> silent;
+  final Value<DateTime> createdAt;
+  final Value<String> channelCid;
+  final Value<Map<String, dynamic>?> extraData;
+  final Value<int> rowid;
+  const DraftMessagesCompanion({
+    this.id = const Value.absent(),
+    this.messageText = const Value.absent(),
+    this.attachments = const Value.absent(),
+    this.type = const Value.absent(),
+    this.mentionedUsers = const Value.absent(),
+    this.parentId = const Value.absent(),
+    this.quotedMessageId = const Value.absent(),
+    this.pollId = const Value.absent(),
+    this.showInChannel = const Value.absent(),
+    this.command = const Value.absent(),
+    this.silent = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.channelCid = const Value.absent(),
+    this.extraData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DraftMessagesCompanion.insert({
+    required String id,
+    this.messageText = const Value.absent(),
+    required List<String> attachments,
+    this.type = const Value.absent(),
+    required List<String> mentionedUsers,
+    this.parentId = const Value.absent(),
+    this.quotedMessageId = const Value.absent(),
+    this.pollId = const Value.absent(),
+    this.showInChannel = const Value.absent(),
+    this.command = const Value.absent(),
+    this.silent = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    required String channelCid,
+    this.extraData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        attachments = Value(attachments),
+        mentionedUsers = Value(mentionedUsers),
+        channelCid = Value(channelCid);
+  static Insertable<DraftMessageEntity> custom({
+    Expression<String>? id,
+    Expression<String>? messageText,
+    Expression<String>? attachments,
+    Expression<String>? type,
+    Expression<String>? mentionedUsers,
+    Expression<String>? parentId,
+    Expression<String>? quotedMessageId,
+    Expression<String>? pollId,
+    Expression<bool>? showInChannel,
+    Expression<String>? command,
+    Expression<bool>? silent,
+    Expression<DateTime>? createdAt,
+    Expression<String>? channelCid,
+    Expression<String>? extraData,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (messageText != null) 'message_text': messageText,
+      if (attachments != null) 'attachments': attachments,
+      if (type != null) 'type': type,
+      if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
+      if (parentId != null) 'parent_id': parentId,
+      if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
+      if (pollId != null) 'poll_id': pollId,
+      if (showInChannel != null) 'show_in_channel': showInChannel,
+      if (command != null) 'command': command,
+      if (silent != null) 'silent': silent,
+      if (createdAt != null) 'created_at': createdAt,
+      if (channelCid != null) 'channel_cid': channelCid,
+      if (extraData != null) 'extra_data': extraData,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DraftMessagesCompanion copyWith(
+      {Value<String>? id,
+      Value<String?>? messageText,
+      Value<List<String>>? attachments,
+      Value<String>? type,
+      Value<List<String>>? mentionedUsers,
+      Value<String?>? parentId,
+      Value<String?>? quotedMessageId,
+      Value<String?>? pollId,
+      Value<bool?>? showInChannel,
+      Value<String?>? command,
+      Value<bool>? silent,
+      Value<DateTime>? createdAt,
+      Value<String>? channelCid,
+      Value<Map<String, dynamic>?>? extraData,
+      Value<int>? rowid}) {
+    return DraftMessagesCompanion(
+      id: id ?? this.id,
+      messageText: messageText ?? this.messageText,
+      attachments: attachments ?? this.attachments,
+      type: type ?? this.type,
+      mentionedUsers: mentionedUsers ?? this.mentionedUsers,
+      parentId: parentId ?? this.parentId,
+      quotedMessageId: quotedMessageId ?? this.quotedMessageId,
+      pollId: pollId ?? this.pollId,
+      showInChannel: showInChannel ?? this.showInChannel,
+      command: command ?? this.command,
+      silent: silent ?? this.silent,
+      createdAt: createdAt ?? this.createdAt,
+      channelCid: channelCid ?? this.channelCid,
+      extraData: extraData ?? this.extraData,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (messageText.present) {
+      map['message_text'] = Variable<String>(messageText.value);
+    }
+    if (attachments.present) {
+      map['attachments'] = Variable<String>(
+          $DraftMessagesTable.$converterattachments.toSql(attachments.value));
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (mentionedUsers.present) {
+      map['mentioned_users'] = Variable<String>($DraftMessagesTable
+          .$convertermentionedUsers
+          .toSql(mentionedUsers.value));
+    }
+    if (parentId.present) {
+      map['parent_id'] = Variable<String>(parentId.value);
+    }
+    if (quotedMessageId.present) {
+      map['quoted_message_id'] = Variable<String>(quotedMessageId.value);
+    }
+    if (pollId.present) {
+      map['poll_id'] = Variable<String>(pollId.value);
+    }
+    if (showInChannel.present) {
+      map['show_in_channel'] = Variable<bool>(showInChannel.value);
+    }
+    if (command.present) {
+      map['command'] = Variable<String>(command.value);
+    }
+    if (silent.present) {
+      map['silent'] = Variable<bool>(silent.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (channelCid.present) {
+      map['channel_cid'] = Variable<String>(channelCid.value);
+    }
+    if (extraData.present) {
+      map['extra_data'] = Variable<String>(
+          $DraftMessagesTable.$converterextraDatan.toSql(extraData.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DraftMessagesCompanion(')
+          ..write('id: $id, ')
+          ..write('messageText: $messageText, ')
+          ..write('attachments: $attachments, ')
+          ..write('type: $type, ')
+          ..write('mentionedUsers: $mentionedUsers, ')
+          ..write('parentId: $parentId, ')
+          ..write('quotedMessageId: $quotedMessageId, ')
+          ..write('pollId: $pollId, ')
+          ..write('showInChannel: $showInChannel, ')
+          ..write('command: $command, ')
+          ..write('silent: $silent, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('channelCid: $channelCid, ')
+          ..write('extraData: $extraData, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocationsTable extends Locations
+    with TableInfo<$LocationsTable, LocationEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _channelCidMeta =
+      const VerificationMeta('channelCid');
+  @override
+  late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
+      'channel_cid', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES channels (cid) ON DELETE CASCADE'));
+  static const VerificationMeta _messageIdMeta =
+      const VerificationMeta('messageId');
+  @override
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+      'message_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES messages (id) ON DELETE CASCADE'));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _latitudeMeta =
+      const VerificationMeta('latitude');
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+      'latitude', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _longitudeMeta =
+      const VerificationMeta('longitude');
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+      'longitude', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _createdByDeviceIdMeta =
+      const VerificationMeta('createdByDeviceId');
+  @override
+  late final GeneratedColumn<String> createdByDeviceId =
+      GeneratedColumn<String>('created_by_device_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _endAtMeta = const VerificationMeta('endAt');
+  @override
+  late final GeneratedColumn<DateTime> endAt = GeneratedColumn<DateTime>(
+      'end_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [
+        channelCid,
+        messageId,
+        userId,
+        latitude,
+        longitude,
+        createdByDeviceId,
+        endAt,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'locations';
+  @override
+  VerificationContext validateIntegrity(Insertable<LocationEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('channel_cid')) {
+      context.handle(
+          _channelCidMeta,
+          channelCid.isAcceptableOrUnknown(
+              data['channel_cid']!, _channelCidMeta));
+    }
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(_latitudeMeta,
+          latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta));
+    } else if (isInserting) {
+      context.missing(_latitudeMeta);
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(_longitudeMeta,
+          longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta));
+    } else if (isInserting) {
+      context.missing(_longitudeMeta);
+    }
+    if (data.containsKey('created_by_device_id')) {
+      context.handle(
+          _createdByDeviceIdMeta,
+          createdByDeviceId.isAcceptableOrUnknown(
+              data['created_by_device_id']!, _createdByDeviceIdMeta));
+    }
+    if (data.containsKey('end_at')) {
+      context.handle(
+          _endAtMeta, endAt.isAcceptableOrUnknown(data['end_at']!, _endAtMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  LocationEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocationEntity(
+      channelCid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}channel_cid']),
+      messageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id']),
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
+      latitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}latitude'])!,
+      longitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}longitude'])!,
+      createdByDeviceId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}created_by_device_id']),
+      endAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}end_at']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $LocationsTable createAlias(String alias) {
+    return $LocationsTable(attachedDatabase, alias);
+  }
+}
+
+class LocationEntity extends DataClass implements Insertable<LocationEntity> {
+  /// The channel CID where the location is shared
+  final String? channelCid;
+
+  /// The ID of the message that contains this shared location
+  final String? messageId;
+
+  /// The ID of the user who shared the location
+  final String? userId;
+
+  /// The latitude of the shared location
+  final double latitude;
+
+  /// The longitude of the shared location
+  final double longitude;
+
+  /// The ID of the device that created the location
+  final String? createdByDeviceId;
+
+  /// The date at which the shared location will end (for live locations)
+  /// If null, this is a static location
+  final DateTime? endAt;
+
+  /// The date at which the location was created
+  final DateTime createdAt;
+
+  /// The date at which the location was last updated
+  final DateTime updatedAt;
+  const LocationEntity(
+      {this.channelCid,
+      this.messageId,
+      this.userId,
+      required this.latitude,
+      required this.longitude,
+      this.createdByDeviceId,
+      this.endAt,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || channelCid != null) {
+      map['channel_cid'] = Variable<String>(channelCid);
+    }
+    if (!nullToAbsent || messageId != null) {
+      map['message_id'] = Variable<String>(messageId);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    map['latitude'] = Variable<double>(latitude);
+    map['longitude'] = Variable<double>(longitude);
+    if (!nullToAbsent || createdByDeviceId != null) {
+      map['created_by_device_id'] = Variable<String>(createdByDeviceId);
+    }
+    if (!nullToAbsent || endAt != null) {
+      map['end_at'] = Variable<DateTime>(endAt);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  factory LocationEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocationEntity(
+      channelCid: serializer.fromJson<String?>(json['channelCid']),
+      messageId: serializer.fromJson<String?>(json['messageId']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      latitude: serializer.fromJson<double>(json['latitude']),
+      longitude: serializer.fromJson<double>(json['longitude']),
+      createdByDeviceId:
+          serializer.fromJson<String?>(json['createdByDeviceId']),
+      endAt: serializer.fromJson<DateTime?>(json['endAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'channelCid': serializer.toJson<String?>(channelCid),
+      'messageId': serializer.toJson<String?>(messageId),
+      'userId': serializer.toJson<String?>(userId),
+      'latitude': serializer.toJson<double>(latitude),
+      'longitude': serializer.toJson<double>(longitude),
+      'createdByDeviceId': serializer.toJson<String?>(createdByDeviceId),
+      'endAt': serializer.toJson<DateTime?>(endAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  LocationEntity copyWith(
+          {Value<String?> channelCid = const Value.absent(),
+          Value<String?> messageId = const Value.absent(),
+          Value<String?> userId = const Value.absent(),
+          double? latitude,
+          double? longitude,
+          Value<String?> createdByDeviceId = const Value.absent(),
+          Value<DateTime?> endAt = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      LocationEntity(
+        channelCid: channelCid.present ? channelCid.value : this.channelCid,
+        messageId: messageId.present ? messageId.value : this.messageId,
+        userId: userId.present ? userId.value : this.userId,
+        latitude: latitude ?? this.latitude,
+        longitude: longitude ?? this.longitude,
+        createdByDeviceId: createdByDeviceId.present
+            ? createdByDeviceId.value
+            : this.createdByDeviceId,
+        endAt: endAt.present ? endAt.value : this.endAt,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  LocationEntity copyWithCompanion(LocationsCompanion data) {
+    return LocationEntity(
+      channelCid:
+          data.channelCid.present ? data.channelCid.value : this.channelCid,
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      createdByDeviceId: data.createdByDeviceId.present
+          ? data.createdByDeviceId.value
+          : this.createdByDeviceId,
+      endAt: data.endAt.present ? data.endAt.value : this.endAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocationEntity(')
+          ..write('channelCid: $channelCid, ')
+          ..write('messageId: $messageId, ')
+          ..write('userId: $userId, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('createdByDeviceId: $createdByDeviceId, ')
+          ..write('endAt: $endAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(channelCid, messageId, userId, latitude,
+      longitude, createdByDeviceId, endAt, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocationEntity &&
+          other.channelCid == this.channelCid &&
+          other.messageId == this.messageId &&
+          other.userId == this.userId &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.createdByDeviceId == this.createdByDeviceId &&
+          other.endAt == this.endAt &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class LocationsCompanion extends UpdateCompanion<LocationEntity> {
+  final Value<String?> channelCid;
+  final Value<String?> messageId;
+  final Value<String?> userId;
+  final Value<double> latitude;
+  final Value<double> longitude;
+  final Value<String?> createdByDeviceId;
+  final Value<DateTime?> endAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const LocationsCompanion({
+    this.channelCid = const Value.absent(),
+    this.messageId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.createdByDeviceId = const Value.absent(),
+    this.endAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocationsCompanion.insert({
+    this.channelCid = const Value.absent(),
+    this.messageId = const Value.absent(),
+    this.userId = const Value.absent(),
+    required double latitude,
+    required double longitude,
+    this.createdByDeviceId = const Value.absent(),
+    this.endAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : latitude = Value(latitude),
+        longitude = Value(longitude);
+  static Insertable<LocationEntity> custom({
+    Expression<String>? channelCid,
+    Expression<String>? messageId,
+    Expression<String>? userId,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<String>? createdByDeviceId,
+    Expression<DateTime>? endAt,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (channelCid != null) 'channel_cid': channelCid,
+      if (messageId != null) 'message_id': messageId,
+      if (userId != null) 'user_id': userId,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (createdByDeviceId != null) 'created_by_device_id': createdByDeviceId,
+      if (endAt != null) 'end_at': endAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocationsCompanion copyWith(
+      {Value<String?>? channelCid,
+      Value<String?>? messageId,
+      Value<String?>? userId,
+      Value<double>? latitude,
+      Value<double>? longitude,
+      Value<String?>? createdByDeviceId,
+      Value<DateTime?>? endAt,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return LocationsCompanion(
+      channelCid: channelCid ?? this.channelCid,
+      messageId: messageId ?? this.messageId,
+      userId: userId ?? this.userId,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      createdByDeviceId: createdByDeviceId ?? this.createdByDeviceId,
+      endAt: endAt ?? this.endAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (channelCid.present) {
+      map['channel_cid'] = Variable<String>(channelCid.value);
+    }
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (createdByDeviceId.present) {
+      map['created_by_device_id'] = Variable<String>(createdByDeviceId.value);
+    }
+    if (endAt.present) {
+      map['end_at'] = Variable<DateTime>(endAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocationsCompanion(')
+          ..write('channelCid: $channelCid, ')
+          ..write('messageId: $messageId, ')
+          ..write('userId: $userId, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('createdByDeviceId: $createdByDeviceId, ')
+          ..write('endAt: $endAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2092,8 +3261,6 @@ class $PinnedMessagesTable extends PinnedMessages
   late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _attachmentsMeta =
-      const VerificationMeta('attachments');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
@@ -2112,8 +3279,6 @@ class $PinnedMessagesTable extends PinnedMessages
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
-  static const VerificationMeta _mentionedUsersMeta =
-      const VerificationMeta('mentionedUsers');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       mentionedUsers = GeneratedColumn<String>(
@@ -2121,24 +3286,13 @@ class $PinnedMessagesTable extends PinnedMessages
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>(
               $PinnedMessagesTable.$convertermentionedUsers);
-  static const VerificationMeta _reactionCountsMeta =
-      const VerificationMeta('reactionCounts');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      reactionCounts = GeneratedColumn<String>(
-              'reaction_counts', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<Map<String, int>?>(
-              $PinnedMessagesTable.$converterreactionCountsn);
-  static const VerificationMeta _reactionScoresMeta =
-      const VerificationMeta('reactionScores');
-  @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      reactionScores = GeneratedColumn<String>(
-              'reaction_scores', aliasedName, true,
-              type: DriftSqlType.string, requiredDuringInsert: false)
-          .withConverter<Map<String, int>?>(
-              $PinnedMessagesTable.$converterreactionScoresn);
+  late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?,
+      String> reactionGroups = GeneratedColumn<String>(
+          'reaction_groups', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false)
+      .withConverter<Map<String, ReactionGroup>?>(
+          $PinnedMessagesTable.$converterreactionGroupsn);
   static const VerificationMeta _parentIdMeta =
       const VerificationMeta('parentId');
   @override
@@ -2267,15 +3421,19 @@ class $PinnedMessagesTable extends PinnedMessages
   late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
       i18n = GeneratedColumn<String>('i18n', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<Map<String, String>?>(
               $PinnedMessagesTable.$converteri18n);
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+      restrictedVisibility = GeneratedColumn<String>(
+              'restricted_visibility', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>(
+              $PinnedMessagesTable.$converterrestrictedVisibilityn);
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -2290,8 +3448,7 @@ class $PinnedMessagesTable extends PinnedMessages
         state,
         type,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         parentId,
         quotedMessageId,
         pollId,
@@ -2313,6 +3470,7 @@ class $PinnedMessagesTable extends PinnedMessages
         pinnedByUserId,
         channelCid,
         i18n,
+        restrictedVisibility,
         extraData
       ];
   @override
@@ -2337,7 +3495,6 @@ class $PinnedMessagesTable extends PinnedMessages
           messageText.isAcceptableOrUnknown(
               data['message_text']!, _messageTextMeta));
     }
-    context.handle(_attachmentsMeta, const VerificationResult.success());
     if (data.containsKey('state')) {
       context.handle(
           _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
@@ -2348,9 +3505,6 @@ class $PinnedMessagesTable extends PinnedMessages
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     }
-    context.handle(_mentionedUsersMeta, const VerificationResult.success());
-    context.handle(_reactionCountsMeta, const VerificationResult.success());
-    context.handle(_reactionScoresMeta, const VerificationResult.success());
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
@@ -2459,8 +3613,6 @@ class $PinnedMessagesTable extends PinnedMessages
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
-    context.handle(_i18nMeta, const VerificationResult.success());
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -2484,12 +3636,9 @@ class $PinnedMessagesTable extends PinnedMessages
       mentionedUsers: $PinnedMessagesTable.$convertermentionedUsers.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}mentioned_users'])!),
-      reactionCounts: $PinnedMessagesTable.$converterreactionCountsn.fromSql(
+      reactionGroups: $PinnedMessagesTable.$converterreactionGroupsn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $PinnedMessagesTable.$converterreactionScoresn.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}reaction_scores'])),
+              DriftSqlType.string, data['${effectivePrefix}reaction_groups'])),
       parentId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
       quotedMessageId: attachedDatabase.typeMapping.read(
@@ -2534,6 +3683,9 @@ class $PinnedMessagesTable extends PinnedMessages
       i18n: $PinnedMessagesTable.$converteri18n.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}i18n'])),
+      restrictedVisibility: $PinnedMessagesTable.$converterrestrictedVisibilityn
+          .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}restricted_visibility'])),
       extraData: $PinnedMessagesTable.$converterextraDatan.fromSql(
           attachedDatabase.typeMapping
               .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
@@ -2549,16 +3701,17 @@ class $PinnedMessagesTable extends PinnedMessages
       ListConverter<String>();
   static TypeConverter<List<String>, String> $convertermentionedUsers =
       ListConverter<String>();
-  static TypeConverter<Map<String, int>, String> $converterreactionCounts =
-      MapConverter<int>();
-  static TypeConverter<Map<String, int>?, String?> $converterreactionCountsn =
-      NullAwareTypeConverter.wrap($converterreactionCounts);
-  static TypeConverter<Map<String, int>, String> $converterreactionScores =
-      MapConverter<int>();
-  static TypeConverter<Map<String, int>?, String?> $converterreactionScoresn =
-      NullAwareTypeConverter.wrap($converterreactionScores);
+  static TypeConverter<Map<String, ReactionGroup>, String>
+      $converterreactionGroups = ReactionGroupsConverter();
+  static TypeConverter<Map<String, ReactionGroup>?, String?>
+      $converterreactionGroupsn =
+      NullAwareTypeConverter.wrap($converterreactionGroups);
   static TypeConverter<Map<String, String>?, String?> $converteri18n =
       NullableMapConverter<String>();
+  static TypeConverter<List<String>, String> $converterrestrictedVisibility =
+      ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $converterrestrictedVisibilityn =
+      NullAwareTypeConverter.wrap($converterrestrictedVisibility);
   static TypeConverter<Map<String, dynamic>, String> $converterextraData =
       MapConverter();
   static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
@@ -2586,11 +3739,8 @@ class PinnedMessageEntity extends DataClass
   /// The list of user mentioned in the message
   final List<String> mentionedUsers;
 
-  /// A map describing the count of number of every reaction
-  final Map<String, int>? reactionCounts;
-
-  /// A map describing the count of score of every reaction
-  final Map<String, int>? reactionScores;
+  /// A map describing the reaction group for every reaction
+  final Map<String, ReactionGroup>? reactionGroups;
 
   /// The ID of the parent message, if the message is a thread reply.
   final String? parentId;
@@ -2655,6 +3805,9 @@ class PinnedMessageEntity extends DataClass
   /// A Map of [messageText] translations.
   final Map<String, String>? i18n;
 
+  /// The list of user ids that should be able to see the message.
+  final List<String>? restrictedVisibility;
+
   /// Message custom extraData
   final Map<String, dynamic>? extraData;
   const PinnedMessageEntity(
@@ -2664,8 +3817,7 @@ class PinnedMessageEntity extends DataClass
       required this.state,
       required this.type,
       required this.mentionedUsers,
-      this.reactionCounts,
-      this.reactionScores,
+      this.reactionGroups,
       this.parentId,
       this.quotedMessageId,
       this.pollId,
@@ -2687,6 +3839,7 @@ class PinnedMessageEntity extends DataClass
       this.pinnedByUserId,
       required this.channelCid,
       this.i18n,
+      this.restrictedVisibility,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2705,13 +3858,9 @@ class PinnedMessageEntity extends DataClass
       map['mentioned_users'] = Variable<String>(
           $PinnedMessagesTable.$convertermentionedUsers.toSql(mentionedUsers));
     }
-    if (!nullToAbsent || reactionCounts != null) {
-      map['reaction_counts'] = Variable<String>(
-          $PinnedMessagesTable.$converterreactionCountsn.toSql(reactionCounts));
-    }
-    if (!nullToAbsent || reactionScores != null) {
-      map['reaction_scores'] = Variable<String>(
-          $PinnedMessagesTable.$converterreactionScoresn.toSql(reactionScores));
+    if (!nullToAbsent || reactionGroups != null) {
+      map['reaction_groups'] = Variable<String>(
+          $PinnedMessagesTable.$converterreactionGroupsn.toSql(reactionGroups));
     }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
@@ -2771,6 +3920,11 @@ class PinnedMessageEntity extends DataClass
       map['i18n'] =
           Variable<String>($PinnedMessagesTable.$converteri18n.toSql(i18n));
     }
+    if (!nullToAbsent || restrictedVisibility != null) {
+      map['restricted_visibility'] = Variable<String>($PinnedMessagesTable
+          .$converterrestrictedVisibilityn
+          .toSql(restrictedVisibility));
+    }
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
           $PinnedMessagesTable.$converterextraDatan.toSql(extraData));
@@ -2788,10 +3942,8 @@ class PinnedMessageEntity extends DataClass
       state: serializer.fromJson<String>(json['state']),
       type: serializer.fromJson<String>(json['type']),
       mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
-      reactionCounts:
-          serializer.fromJson<Map<String, int>?>(json['reactionCounts']),
-      reactionScores:
-          serializer.fromJson<Map<String, int>?>(json['reactionScores']),
+      reactionGroups: serializer
+          .fromJson<Map<String, ReactionGroup>?>(json['reactionGroups']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       quotedMessageId: serializer.fromJson<String?>(json['quotedMessageId']),
       pollId: serializer.fromJson<String?>(json['pollId']),
@@ -2814,6 +3966,8 @@ class PinnedMessageEntity extends DataClass
       pinnedByUserId: serializer.fromJson<String?>(json['pinnedByUserId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
       i18n: serializer.fromJson<Map<String, String>?>(json['i18n']),
+      restrictedVisibility:
+          serializer.fromJson<List<String>?>(json['restrictedVisibility']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
   }
@@ -2827,8 +3981,8 @@ class PinnedMessageEntity extends DataClass
       'state': serializer.toJson<String>(state),
       'type': serializer.toJson<String>(type),
       'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
-      'reactionCounts': serializer.toJson<Map<String, int>?>(reactionCounts),
-      'reactionScores': serializer.toJson<Map<String, int>?>(reactionScores),
+      'reactionGroups':
+          serializer.toJson<Map<String, ReactionGroup>?>(reactionGroups),
       'parentId': serializer.toJson<String?>(parentId),
       'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
       'pollId': serializer.toJson<String?>(pollId),
@@ -2851,6 +4005,8 @@ class PinnedMessageEntity extends DataClass
       'pinnedByUserId': serializer.toJson<String?>(pinnedByUserId),
       'channelCid': serializer.toJson<String>(channelCid),
       'i18n': serializer.toJson<Map<String, String>?>(i18n),
+      'restrictedVisibility':
+          serializer.toJson<List<String>?>(restrictedVisibility),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
@@ -2862,8 +4018,8 @@ class PinnedMessageEntity extends DataClass
           String? state,
           String? type,
           List<String>? mentionedUsers,
-          Value<Map<String, int>?> reactionCounts = const Value.absent(),
-          Value<Map<String, int>?> reactionScores = const Value.absent(),
+          Value<Map<String, ReactionGroup>?> reactionGroups =
+              const Value.absent(),
           Value<String?> parentId = const Value.absent(),
           Value<String?> quotedMessageId = const Value.absent(),
           Value<String?> pollId = const Value.absent(),
@@ -2885,6 +4041,7 @@ class PinnedMessageEntity extends DataClass
           Value<String?> pinnedByUserId = const Value.absent(),
           String? channelCid,
           Value<Map<String, String>?> i18n = const Value.absent(),
+          Value<List<String>?> restrictedVisibility = const Value.absent(),
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       PinnedMessageEntity(
         id: id ?? this.id,
@@ -2893,10 +4050,8 @@ class PinnedMessageEntity extends DataClass
         state: state ?? this.state,
         type: type ?? this.type,
         mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-        reactionCounts:
-            reactionCounts.present ? reactionCounts.value : this.reactionCounts,
-        reactionScores:
-            reactionScores.present ? reactionScores.value : this.reactionScores,
+        reactionGroups:
+            reactionGroups.present ? reactionGroups.value : this.reactionGroups,
         parentId: parentId.present ? parentId.value : this.parentId,
         quotedMessageId: quotedMessageId.present
             ? quotedMessageId.value
@@ -2933,6 +4088,9 @@ class PinnedMessageEntity extends DataClass
             pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
         channelCid: channelCid ?? this.channelCid,
         i18n: i18n.present ? i18n.value : this.i18n,
+        restrictedVisibility: restrictedVisibility.present
+            ? restrictedVisibility.value
+            : this.restrictedVisibility,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
   PinnedMessageEntity copyWithCompanion(PinnedMessagesCompanion data) {
@@ -2947,12 +4105,9 @@ class PinnedMessageEntity extends DataClass
       mentionedUsers: data.mentionedUsers.present
           ? data.mentionedUsers.value
           : this.mentionedUsers,
-      reactionCounts: data.reactionCounts.present
-          ? data.reactionCounts.value
-          : this.reactionCounts,
-      reactionScores: data.reactionScores.present
-          ? data.reactionScores.value
-          : this.reactionScores,
+      reactionGroups: data.reactionGroups.present
+          ? data.reactionGroups.value
+          : this.reactionGroups,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       quotedMessageId: data.quotedMessageId.present
           ? data.quotedMessageId.value
@@ -2997,6 +4152,9 @@ class PinnedMessageEntity extends DataClass
       channelCid:
           data.channelCid.present ? data.channelCid.value : this.channelCid,
       i18n: data.i18n.present ? data.i18n.value : this.i18n,
+      restrictedVisibility: data.restrictedVisibility.present
+          ? data.restrictedVisibility.value
+          : this.restrictedVisibility,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -3010,8 +4168,7 @@ class PinnedMessageEntity extends DataClass
           ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
-          ..write('reactionCounts: $reactionCounts, ')
-          ..write('reactionScores: $reactionScores, ')
+          ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
           ..write('pollId: $pollId, ')
@@ -3033,6 +4190,7 @@ class PinnedMessageEntity extends DataClass
           ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
           ..write('i18n: $i18n, ')
+          ..write('restrictedVisibility: $restrictedVisibility, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -3046,8 +4204,7 @@ class PinnedMessageEntity extends DataClass
         state,
         type,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         parentId,
         quotedMessageId,
         pollId,
@@ -3069,6 +4226,7 @@ class PinnedMessageEntity extends DataClass
         pinnedByUserId,
         channelCid,
         i18n,
+        restrictedVisibility,
         extraData
       ]);
   @override
@@ -3081,8 +4239,7 @@ class PinnedMessageEntity extends DataClass
           other.state == this.state &&
           other.type == this.type &&
           other.mentionedUsers == this.mentionedUsers &&
-          other.reactionCounts == this.reactionCounts &&
-          other.reactionScores == this.reactionScores &&
+          other.reactionGroups == this.reactionGroups &&
           other.parentId == this.parentId &&
           other.quotedMessageId == this.quotedMessageId &&
           other.pollId == this.pollId &&
@@ -3104,6 +4261,7 @@ class PinnedMessageEntity extends DataClass
           other.pinnedByUserId == this.pinnedByUserId &&
           other.channelCid == this.channelCid &&
           other.i18n == this.i18n &&
+          other.restrictedVisibility == this.restrictedVisibility &&
           other.extraData == this.extraData);
 }
 
@@ -3114,8 +4272,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<String> state;
   final Value<String> type;
   final Value<List<String>> mentionedUsers;
-  final Value<Map<String, int>?> reactionCounts;
-  final Value<Map<String, int>?> reactionScores;
+  final Value<Map<String, ReactionGroup>?> reactionGroups;
   final Value<String?> parentId;
   final Value<String?> quotedMessageId;
   final Value<String?> pollId;
@@ -3137,6 +4294,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<String?> pinnedByUserId;
   final Value<String> channelCid;
   final Value<Map<String, String>?> i18n;
+  final Value<List<String>?> restrictedVisibility;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
   const PinnedMessagesCompanion({
@@ -3146,8 +4304,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.state = const Value.absent(),
     this.type = const Value.absent(),
     this.mentionedUsers = const Value.absent(),
-    this.reactionCounts = const Value.absent(),
-    this.reactionScores = const Value.absent(),
+    this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
     this.pollId = const Value.absent(),
@@ -3169,6 +4326,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.pinnedByUserId = const Value.absent(),
     this.channelCid = const Value.absent(),
     this.i18n = const Value.absent(),
+    this.restrictedVisibility = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -3179,8 +4337,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     required String state,
     this.type = const Value.absent(),
     required List<String> mentionedUsers,
-    this.reactionCounts = const Value.absent(),
-    this.reactionScores = const Value.absent(),
+    this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
     this.quotedMessageId = const Value.absent(),
     this.pollId = const Value.absent(),
@@ -3202,6 +4359,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.pinnedByUserId = const Value.absent(),
     required String channelCid,
     this.i18n = const Value.absent(),
+    this.restrictedVisibility = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -3216,8 +4374,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Expression<String>? state,
     Expression<String>? type,
     Expression<String>? mentionedUsers,
-    Expression<String>? reactionCounts,
-    Expression<String>? reactionScores,
+    Expression<String>? reactionGroups,
     Expression<String>? parentId,
     Expression<String>? quotedMessageId,
     Expression<String>? pollId,
@@ -3239,6 +4396,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Expression<String>? pinnedByUserId,
     Expression<String>? channelCid,
     Expression<String>? i18n,
+    Expression<String>? restrictedVisibility,
     Expression<String>? extraData,
     Expression<int>? rowid,
   }) {
@@ -3249,8 +4407,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (state != null) 'state': state,
       if (type != null) 'type': type,
       if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
-      if (reactionCounts != null) 'reaction_counts': reactionCounts,
-      if (reactionScores != null) 'reaction_scores': reactionScores,
+      if (reactionGroups != null) 'reaction_groups': reactionGroups,
       if (parentId != null) 'parent_id': parentId,
       if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
       if (pollId != null) 'poll_id': pollId,
@@ -3273,6 +4430,8 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (pinnedByUserId != null) 'pinned_by_user_id': pinnedByUserId,
       if (channelCid != null) 'channel_cid': channelCid,
       if (i18n != null) 'i18n': i18n,
+      if (restrictedVisibility != null)
+        'restricted_visibility': restrictedVisibility,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -3285,8 +4444,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       Value<String>? state,
       Value<String>? type,
       Value<List<String>>? mentionedUsers,
-      Value<Map<String, int>?>? reactionCounts,
-      Value<Map<String, int>?>? reactionScores,
+      Value<Map<String, ReactionGroup>?>? reactionGroups,
       Value<String?>? parentId,
       Value<String?>? quotedMessageId,
       Value<String?>? pollId,
@@ -3308,6 +4466,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       Value<String?>? pinnedByUserId,
       Value<String>? channelCid,
       Value<Map<String, String>?>? i18n,
+      Value<List<String>?>? restrictedVisibility,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
     return PinnedMessagesCompanion(
@@ -3317,8 +4476,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       state: state ?? this.state,
       type: type ?? this.type,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-      reactionCounts: reactionCounts ?? this.reactionCounts,
-      reactionScores: reactionScores ?? this.reactionScores,
+      reactionGroups: reactionGroups ?? this.reactionGroups,
       parentId: parentId ?? this.parentId,
       quotedMessageId: quotedMessageId ?? this.quotedMessageId,
       pollId: pollId ?? this.pollId,
@@ -3340,6 +4498,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       pinnedByUserId: pinnedByUserId ?? this.pinnedByUserId,
       channelCid: channelCid ?? this.channelCid,
       i18n: i18n ?? this.i18n,
+      restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
     );
@@ -3369,15 +4528,10 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           .$convertermentionedUsers
           .toSql(mentionedUsers.value));
     }
-    if (reactionCounts.present) {
-      map['reaction_counts'] = Variable<String>($PinnedMessagesTable
-          .$converterreactionCountsn
-          .toSql(reactionCounts.value));
-    }
-    if (reactionScores.present) {
-      map['reaction_scores'] = Variable<String>($PinnedMessagesTable
-          .$converterreactionScoresn
-          .toSql(reactionScores.value));
+    if (reactionGroups.present) {
+      map['reaction_groups'] = Variable<String>($PinnedMessagesTable
+          .$converterreactionGroupsn
+          .toSql(reactionGroups.value));
     }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
@@ -3444,6 +4598,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       map['i18n'] = Variable<String>(
           $PinnedMessagesTable.$converteri18n.toSql(i18n.value));
     }
+    if (restrictedVisibility.present) {
+      map['restricted_visibility'] = Variable<String>($PinnedMessagesTable
+          .$converterrestrictedVisibilityn
+          .toSql(restrictedVisibility.value));
+    }
     if (extraData.present) {
       map['extra_data'] = Variable<String>(
           $PinnedMessagesTable.$converterextraDatan.toSql(extraData.value));
@@ -3463,8 +4622,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('state: $state, ')
           ..write('type: $type, ')
           ..write('mentionedUsers: $mentionedUsers, ')
-          ..write('reactionCounts: $reactionCounts, ')
-          ..write('reactionScores: $reactionScores, ')
+          ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
           ..write('quotedMessageId: $quotedMessageId, ')
           ..write('pollId: $pollId, ')
@@ -3486,6 +4644,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
           ..write('i18n: $i18n, ')
+          ..write('restrictedVisibility: $restrictedVisibility, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3514,15 +4673,11 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _optionsMeta =
-      const VerificationMeta('options');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String> options =
       GeneratedColumn<String>('options', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($PollsTable.$converteroptions);
-  static const VerificationMeta _votingVisibilityMeta =
-      const VerificationMeta('votingVisibility');
   @override
   late final GeneratedColumnWithTypeConverter<VotingVisibility, String>
       votingVisibility = GeneratedColumn<String>(
@@ -3586,8 +4741,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
-  static const VerificationMeta _voteCountsByOptionMeta =
-      const VerificationMeta('voteCountsByOption');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, int>, String>
       voteCountsByOption = GeneratedColumn<String>(
@@ -3625,8 +4778,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -3680,8 +4831,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
           description.isAcceptableOrUnknown(
               data['description']!, _descriptionMeta));
     }
-    context.handle(_optionsMeta, const VerificationResult.success());
-    context.handle(_votingVisibilityMeta, const VerificationResult.success());
     if (data.containsKey('enforce_unique_vote')) {
       context.handle(
           _enforceUniqueVoteMeta,
@@ -3717,7 +4866,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
           answersCount.isAcceptableOrUnknown(
               data['answers_count']!, _answersCountMeta));
     }
-    context.handle(_voteCountsByOptionMeta, const VerificationResult.success());
     if (data.containsKey('vote_count')) {
       context.handle(_voteCountMeta,
           voteCount.isAcceptableOrUnknown(data['vote_count']!, _voteCountMeta));
@@ -3736,7 +4884,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -4758,15 +5905,15 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _messageIdMeta =
       const VerificationMeta('messageId');
   @override
   late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
+      'message_id', aliasedName, true,
       type: DriftSqlType.string,
-      requiredDuringInsert: true,
+      requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES pinned_messages (id) ON DELETE CASCADE'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -4774,11 +5921,25 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _emojiCodeMeta =
+      const VerificationMeta('emojiCode');
+  @override
+  late final GeneratedColumn<String> emojiCode = GeneratedColumn<String>(
+      'emoji_code', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
@@ -4789,8 +5950,6 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -4798,8 +5957,16 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
           .withConverter<Map<String, dynamic>?>(
               $PinnedMessageReactionsTable.$converterextraDatan);
   @override
-  List<GeneratedColumn> get $columns =>
-      [userId, messageId, type, createdAt, score, extraData];
+  List<GeneratedColumn> get $columns => [
+        userId,
+        messageId,
+        type,
+        emojiCode,
+        createdAt,
+        updatedAt,
+        score,
+        extraData
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4814,14 +5981,10 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('message_id')) {
       context.handle(_messageIdMeta,
           messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -4829,15 +5992,22 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    if (data.containsKey('emoji_code')) {
+      context.handle(_emojiCodeMeta,
+          emojiCode.isAcceptableOrUnknown(data['emoji_code']!, _emojiCodeMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
     if (data.containsKey('score')) {
       context.handle(
           _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -4849,13 +6019,17 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PinnedMessageReactionEntity(
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id']),
       type: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      emojiCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}emoji_code']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
       score: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}score'])!,
       extraData: $PinnedMessageReactionsTable.$converterextraDatan.fromSql(
@@ -4878,16 +6052,22 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
 class PinnedMessageReactionEntity extends DataClass
     implements Insertable<PinnedMessageReactionEntity> {
   /// The id of the user that sent the reaction
-  final String userId;
+  final String? userId;
 
   /// The messageId to which the reaction belongs
-  final String messageId;
+  final String? messageId;
 
   /// The type of the reaction
   final String type;
 
+  /// The emoji code for the reaction
+  final String? emojiCode;
+
   /// The DateTime on which the reaction is created
   final DateTime createdAt;
+
+  /// The DateTime on which the reaction was last updated
+  final DateTime updatedAt;
 
   /// The score of the reaction (ie. number of reactions sent)
   final int score;
@@ -4895,19 +6075,29 @@ class PinnedMessageReactionEntity extends DataClass
   /// Reaction custom extraData
   final Map<String, dynamic>? extraData;
   const PinnedMessageReactionEntity(
-      {required this.userId,
-      required this.messageId,
+      {this.userId,
+      this.messageId,
       required this.type,
+      this.emojiCode,
       required this.createdAt,
+      required this.updatedAt,
       required this.score,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['user_id'] = Variable<String>(userId);
-    map['message_id'] = Variable<String>(messageId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || messageId != null) {
+      map['message_id'] = Variable<String>(messageId);
+    }
     map['type'] = Variable<String>(type);
+    if (!nullToAbsent || emojiCode != null) {
+      map['emoji_code'] = Variable<String>(emojiCode);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     map['score'] = Variable<int>(score);
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
@@ -4920,10 +6110,12 @@ class PinnedMessageReactionEntity extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PinnedMessageReactionEntity(
-      userId: serializer.fromJson<String>(json['userId']),
-      messageId: serializer.fromJson<String>(json['messageId']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      messageId: serializer.fromJson<String?>(json['messageId']),
       type: serializer.fromJson<String>(json['type']),
+      emojiCode: serializer.fromJson<String?>(json['emojiCode']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       score: serializer.fromJson<int>(json['score']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
@@ -4932,27 +6124,33 @@ class PinnedMessageReactionEntity extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'userId': serializer.toJson<String>(userId),
-      'messageId': serializer.toJson<String>(messageId),
+      'userId': serializer.toJson<String?>(userId),
+      'messageId': serializer.toJson<String?>(messageId),
       'type': serializer.toJson<String>(type),
+      'emojiCode': serializer.toJson<String?>(emojiCode),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'score': serializer.toJson<int>(score),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
 
   PinnedMessageReactionEntity copyWith(
-          {String? userId,
-          String? messageId,
+          {Value<String?> userId = const Value.absent(),
+          Value<String?> messageId = const Value.absent(),
           String? type,
+          Value<String?> emojiCode = const Value.absent(),
           DateTime? createdAt,
+          DateTime? updatedAt,
           int? score,
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       PinnedMessageReactionEntity(
-        userId: userId ?? this.userId,
-        messageId: messageId ?? this.messageId,
+        userId: userId.present ? userId.value : this.userId,
+        messageId: messageId.present ? messageId.value : this.messageId,
         type: type ?? this.type,
+        emojiCode: emojiCode.present ? emojiCode.value : this.emojiCode,
         createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
         score: score ?? this.score,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
@@ -4962,7 +6160,9 @@ class PinnedMessageReactionEntity extends DataClass
       userId: data.userId.present ? data.userId.value : this.userId,
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
       type: data.type.present ? data.type.value : this.type,
+      emojiCode: data.emojiCode.present ? data.emojiCode.value : this.emojiCode,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       score: data.score.present ? data.score.value : this.score,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
@@ -4974,7 +6174,9 @@ class PinnedMessageReactionEntity extends DataClass
           ..write('userId: $userId, ')
           ..write('messageId: $messageId, ')
           ..write('type: $type, ')
+          ..write('emojiCode: $emojiCode, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('score: $score, ')
           ..write('extraData: $extraData')
           ..write(')'))
@@ -4982,8 +6184,8 @@ class PinnedMessageReactionEntity extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(userId, messageId, type, createdAt, score, extraData);
+  int get hashCode => Object.hash(userId, messageId, type, emojiCode, createdAt,
+      updatedAt, score, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4991,17 +6193,21 @@ class PinnedMessageReactionEntity extends DataClass
           other.userId == this.userId &&
           other.messageId == this.messageId &&
           other.type == this.type &&
+          other.emojiCode == this.emojiCode &&
           other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
           other.score == this.score &&
           other.extraData == this.extraData);
 }
 
 class PinnedMessageReactionsCompanion
     extends UpdateCompanion<PinnedMessageReactionEntity> {
-  final Value<String> userId;
-  final Value<String> messageId;
+  final Value<String?> userId;
+  final Value<String?> messageId;
   final Value<String> type;
+  final Value<String?> emojiCode;
   final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
   final Value<int> score;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
@@ -5009,27 +6215,31 @@ class PinnedMessageReactionsCompanion
     this.userId = const Value.absent(),
     this.messageId = const Value.absent(),
     this.type = const Value.absent(),
+    this.emojiCode = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.score = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PinnedMessageReactionsCompanion.insert({
-    required String userId,
-    required String messageId,
+    this.userId = const Value.absent(),
+    this.messageId = const Value.absent(),
     required String type,
+    this.emojiCode = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.score = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : userId = Value(userId),
-        messageId = Value(messageId),
-        type = Value(type);
+  }) : type = Value(type);
   static Insertable<PinnedMessageReactionEntity> custom({
     Expression<String>? userId,
     Expression<String>? messageId,
     Expression<String>? type,
+    Expression<String>? emojiCode,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? score,
     Expression<String>? extraData,
     Expression<int>? rowid,
@@ -5038,7 +6248,9 @@ class PinnedMessageReactionsCompanion
       if (userId != null) 'user_id': userId,
       if (messageId != null) 'message_id': messageId,
       if (type != null) 'type': type,
+      if (emojiCode != null) 'emoji_code': emojiCode,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (score != null) 'score': score,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
@@ -5046,10 +6258,12 @@ class PinnedMessageReactionsCompanion
   }
 
   PinnedMessageReactionsCompanion copyWith(
-      {Value<String>? userId,
-      Value<String>? messageId,
+      {Value<String?>? userId,
+      Value<String?>? messageId,
       Value<String>? type,
+      Value<String?>? emojiCode,
       Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
       Value<int>? score,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
@@ -5057,7 +6271,9 @@ class PinnedMessageReactionsCompanion
       userId: userId ?? this.userId,
       messageId: messageId ?? this.messageId,
       type: type ?? this.type,
+      emojiCode: emojiCode ?? this.emojiCode,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       score: score ?? this.score,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
@@ -5076,8 +6292,14 @@ class PinnedMessageReactionsCompanion
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
+    if (emojiCode.present) {
+      map['emoji_code'] = Variable<String>(emojiCode.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (score.present) {
       map['score'] = Variable<int>(score.value);
@@ -5099,7 +6321,9 @@ class PinnedMessageReactionsCompanion
           ..write('userId: $userId, ')
           ..write('messageId: $messageId, ')
           ..write('type: $type, ')
+          ..write('emojiCode: $emojiCode, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('score: $score, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
@@ -5117,15 +6341,15 @@ class $ReactionsTable extends Reactions
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _messageIdMeta =
       const VerificationMeta('messageId');
   @override
   late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
+      'message_id', aliasedName, true,
       type: DriftSqlType.string,
-      requiredDuringInsert: true,
+      requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES messages (id) ON DELETE CASCADE'));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -5133,11 +6357,25 @@ class $ReactionsTable extends Reactions
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _emojiCodeMeta =
+      const VerificationMeta('emojiCode');
+  @override
+  late final GeneratedColumn<String> emojiCode = GeneratedColumn<String>(
+      'emoji_code', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
@@ -5148,8 +6386,6 @@ class $ReactionsTable extends Reactions
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -5157,8 +6393,16 @@ class $ReactionsTable extends Reactions
           .withConverter<Map<String, dynamic>?>(
               $ReactionsTable.$converterextraDatan);
   @override
-  List<GeneratedColumn> get $columns =>
-      [userId, messageId, type, createdAt, score, extraData];
+  List<GeneratedColumn> get $columns => [
+        userId,
+        messageId,
+        type,
+        emojiCode,
+        createdAt,
+        updatedAt,
+        score,
+        extraData
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -5172,14 +6416,10 @@ class $ReactionsTable extends Reactions
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('message_id')) {
       context.handle(_messageIdMeta,
           messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -5187,15 +6427,22 @@ class $ReactionsTable extends Reactions
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    if (data.containsKey('emoji_code')) {
+      context.handle(_emojiCodeMeta,
+          emojiCode.isAcceptableOrUnknown(data['emoji_code']!, _emojiCodeMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
     if (data.containsKey('score')) {
       context.handle(
           _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -5206,13 +6453,17 @@ class $ReactionsTable extends Reactions
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ReactionEntity(
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id']),
       messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id']),
       type: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      emojiCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}emoji_code']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
       score: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}score'])!,
       extraData: $ReactionsTable.$converterextraDatan.fromSql(attachedDatabase
@@ -5234,16 +6485,22 @@ class $ReactionsTable extends Reactions
 
 class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   /// The id of the user that sent the reaction
-  final String userId;
+  final String? userId;
 
   /// The messageId to which the reaction belongs
-  final String messageId;
+  final String? messageId;
 
   /// The type of the reaction
   final String type;
 
+  /// The emoji code for the reaction
+  final String? emojiCode;
+
   /// The DateTime on which the reaction is created
   final DateTime createdAt;
+
+  /// The DateTime on which the reaction was last updated
+  final DateTime updatedAt;
 
   /// The score of the reaction (ie. number of reactions sent)
   final int score;
@@ -5251,19 +6508,29 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   /// Reaction custom extraData
   final Map<String, dynamic>? extraData;
   const ReactionEntity(
-      {required this.userId,
-      required this.messageId,
+      {this.userId,
+      this.messageId,
       required this.type,
+      this.emojiCode,
       required this.createdAt,
+      required this.updatedAt,
       required this.score,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['user_id'] = Variable<String>(userId);
-    map['message_id'] = Variable<String>(messageId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || messageId != null) {
+      map['message_id'] = Variable<String>(messageId);
+    }
     map['type'] = Variable<String>(type);
+    if (!nullToAbsent || emojiCode != null) {
+      map['emoji_code'] = Variable<String>(emojiCode);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     map['score'] = Variable<int>(score);
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
@@ -5276,10 +6543,12 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ReactionEntity(
-      userId: serializer.fromJson<String>(json['userId']),
-      messageId: serializer.fromJson<String>(json['messageId']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      messageId: serializer.fromJson<String?>(json['messageId']),
       type: serializer.fromJson<String>(json['type']),
+      emojiCode: serializer.fromJson<String?>(json['emojiCode']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       score: serializer.fromJson<int>(json['score']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
@@ -5288,27 +6557,33 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'userId': serializer.toJson<String>(userId),
-      'messageId': serializer.toJson<String>(messageId),
+      'userId': serializer.toJson<String?>(userId),
+      'messageId': serializer.toJson<String?>(messageId),
       'type': serializer.toJson<String>(type),
+      'emojiCode': serializer.toJson<String?>(emojiCode),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'score': serializer.toJson<int>(score),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
 
   ReactionEntity copyWith(
-          {String? userId,
-          String? messageId,
+          {Value<String?> userId = const Value.absent(),
+          Value<String?> messageId = const Value.absent(),
           String? type,
+          Value<String?> emojiCode = const Value.absent(),
           DateTime? createdAt,
+          DateTime? updatedAt,
           int? score,
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       ReactionEntity(
-        userId: userId ?? this.userId,
-        messageId: messageId ?? this.messageId,
+        userId: userId.present ? userId.value : this.userId,
+        messageId: messageId.present ? messageId.value : this.messageId,
         type: type ?? this.type,
+        emojiCode: emojiCode.present ? emojiCode.value : this.emojiCode,
         createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
         score: score ?? this.score,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
@@ -5317,7 +6592,9 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
       userId: data.userId.present ? data.userId.value : this.userId,
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
       type: data.type.present ? data.type.value : this.type,
+      emojiCode: data.emojiCode.present ? data.emojiCode.value : this.emojiCode,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       score: data.score.present ? data.score.value : this.score,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
@@ -5329,7 +6606,9 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
           ..write('userId: $userId, ')
           ..write('messageId: $messageId, ')
           ..write('type: $type, ')
+          ..write('emojiCode: $emojiCode, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('score: $score, ')
           ..write('extraData: $extraData')
           ..write(')'))
@@ -5337,8 +6616,8 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(userId, messageId, type, createdAt, score, extraData);
+  int get hashCode => Object.hash(userId, messageId, type, emojiCode, createdAt,
+      updatedAt, score, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5346,16 +6625,20 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
           other.userId == this.userId &&
           other.messageId == this.messageId &&
           other.type == this.type &&
+          other.emojiCode == this.emojiCode &&
           other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
           other.score == this.score &&
           other.extraData == this.extraData);
 }
 
 class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
-  final Value<String> userId;
-  final Value<String> messageId;
+  final Value<String?> userId;
+  final Value<String?> messageId;
   final Value<String> type;
+  final Value<String?> emojiCode;
   final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
   final Value<int> score;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
@@ -5363,27 +6646,31 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
     this.userId = const Value.absent(),
     this.messageId = const Value.absent(),
     this.type = const Value.absent(),
+    this.emojiCode = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.score = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReactionsCompanion.insert({
-    required String userId,
-    required String messageId,
+    this.userId = const Value.absent(),
+    this.messageId = const Value.absent(),
     required String type,
+    this.emojiCode = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.score = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : userId = Value(userId),
-        messageId = Value(messageId),
-        type = Value(type);
+  }) : type = Value(type);
   static Insertable<ReactionEntity> custom({
     Expression<String>? userId,
     Expression<String>? messageId,
     Expression<String>? type,
+    Expression<String>? emojiCode,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? score,
     Expression<String>? extraData,
     Expression<int>? rowid,
@@ -5392,7 +6679,9 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
       if (userId != null) 'user_id': userId,
       if (messageId != null) 'message_id': messageId,
       if (type != null) 'type': type,
+      if (emojiCode != null) 'emoji_code': emojiCode,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (score != null) 'score': score,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
@@ -5400,10 +6689,12 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
   }
 
   ReactionsCompanion copyWith(
-      {Value<String>? userId,
-      Value<String>? messageId,
+      {Value<String?>? userId,
+      Value<String?>? messageId,
       Value<String>? type,
+      Value<String?>? emojiCode,
       Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
       Value<int>? score,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
@@ -5411,7 +6702,9 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
       userId: userId ?? this.userId,
       messageId: messageId ?? this.messageId,
       type: type ?? this.type,
+      emojiCode: emojiCode ?? this.emojiCode,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       score: score ?? this.score,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
@@ -5430,8 +6723,14 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
+    if (emojiCode.present) {
+      map['emoji_code'] = Variable<String>(emojiCode.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (score.present) {
       map['score'] = Variable<int>(score.value);
@@ -5452,7 +6751,9 @@ class ReactionsCompanion extends UpdateCompanion<ReactionEntity> {
           ..write('userId: $userId, ')
           ..write('messageId: $messageId, ')
           ..write('type: $type, ')
+          ..write('emojiCode: $emojiCode, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('score: $score, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
@@ -5518,8 +6819,18 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("banned" IN (0, 1))'),
       defaultValue: const Constant(false));
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
+      teamsRole = GeneratedColumn<String>('teams_role', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, String>?>(
+              $UsersTable.$converterteamsRolen);
+  static const VerificationMeta _avgResponseTimeMeta =
+      const VerificationMeta('avgResponseTime');
+  @override
+  late final GeneratedColumn<int> avgResponseTime = GeneratedColumn<int>(
+      'avg_response_time', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, false,
@@ -5535,6 +6846,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
         lastActive,
         online,
         banned,
+        teamsRole,
+        avgResponseTime,
         extraData
       ];
   @override
@@ -5582,7 +6895,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       context.handle(_bannedMeta,
           banned.isAcceptableOrUnknown(data['banned']!, _bannedMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
+    if (data.containsKey('avg_response_time')) {
+      context.handle(
+          _avgResponseTimeMeta,
+          avgResponseTime.isAcceptableOrUnknown(
+              data['avg_response_time']!, _avgResponseTimeMeta));
+    }
     return context;
   }
 
@@ -5608,6 +6926,11 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
           .read(DriftSqlType.bool, data['${effectivePrefix}online'])!,
       banned: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}banned'])!,
+      teamsRole: $UsersTable.$converterteamsRolen.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}teams_role'])),
+      avgResponseTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}avg_response_time']),
       extraData: $UsersTable.$converterextraData.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])!),
@@ -5619,6 +6942,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     return $UsersTable(attachedDatabase, alias);
   }
 
+  static TypeConverter<Map<String, String>, String> $converterteamsRole =
+      MapConverter<String>();
+  static TypeConverter<Map<String, String>?, String?> $converterteamsRolen =
+      NullAwareTypeConverter.wrap($converterteamsRole);
   static TypeConverter<Map<String, dynamic>, String> $converterextraData =
       MapConverter();
 }
@@ -5648,6 +6975,14 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   /// True if user is banned from the chat
   final bool banned;
 
+  /// The roles for the user in the teams.
+  ///
+  /// eg: `{'teamId': 'role', 'teamId2': 'role2'}`
+  final Map<String, String>? teamsRole;
+
+  /// The average response time for the user in seconds.
+  final int? avgResponseTime;
+
   /// Map of custom user extraData
   final Map<String, dynamic> extraData;
   const UserEntity(
@@ -5659,6 +6994,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       this.lastActive,
       required this.online,
       required this.banned,
+      this.teamsRole,
+      this.avgResponseTime,
       required this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5681,6 +7018,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     }
     map['online'] = Variable<bool>(online);
     map['banned'] = Variable<bool>(banned);
+    if (!nullToAbsent || teamsRole != null) {
+      map['teams_role'] =
+          Variable<String>($UsersTable.$converterteamsRolen.toSql(teamsRole));
+    }
+    if (!nullToAbsent || avgResponseTime != null) {
+      map['avg_response_time'] = Variable<int>(avgResponseTime);
+    }
     {
       map['extra_data'] =
           Variable<String>($UsersTable.$converterextraData.toSql(extraData));
@@ -5700,6 +7044,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       lastActive: serializer.fromJson<DateTime?>(json['lastActive']),
       online: serializer.fromJson<bool>(json['online']),
       banned: serializer.fromJson<bool>(json['banned']),
+      teamsRole: serializer.fromJson<Map<String, String>?>(json['teamsRole']),
+      avgResponseTime: serializer.fromJson<int?>(json['avgResponseTime']),
       extraData: serializer.fromJson<Map<String, dynamic>>(json['extraData']),
     );
   }
@@ -5715,6 +7061,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       'lastActive': serializer.toJson<DateTime?>(lastActive),
       'online': serializer.toJson<bool>(online),
       'banned': serializer.toJson<bool>(banned),
+      'teamsRole': serializer.toJson<Map<String, String>?>(teamsRole),
+      'avgResponseTime': serializer.toJson<int?>(avgResponseTime),
       'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
     };
   }
@@ -5728,6 +7076,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           Value<DateTime?> lastActive = const Value.absent(),
           bool? online,
           bool? banned,
+          Value<Map<String, String>?> teamsRole = const Value.absent(),
+          Value<int?> avgResponseTime = const Value.absent(),
           Map<String, dynamic>? extraData}) =>
       UserEntity(
         id: id ?? this.id,
@@ -5738,6 +7088,10 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
         lastActive: lastActive.present ? lastActive.value : this.lastActive,
         online: online ?? this.online,
         banned: banned ?? this.banned,
+        teamsRole: teamsRole.present ? teamsRole.value : this.teamsRole,
+        avgResponseTime: avgResponseTime.present
+            ? avgResponseTime.value
+            : this.avgResponseTime,
         extraData: extraData ?? this.extraData,
       );
   UserEntity copyWithCompanion(UsersCompanion data) {
@@ -5751,6 +7105,10 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           data.lastActive.present ? data.lastActive.value : this.lastActive,
       online: data.online.present ? data.online.value : this.online,
       banned: data.banned.present ? data.banned.value : this.banned,
+      teamsRole: data.teamsRole.present ? data.teamsRole.value : this.teamsRole,
+      avgResponseTime: data.avgResponseTime.present
+          ? data.avgResponseTime.value
+          : this.avgResponseTime,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -5766,6 +7124,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           ..write('lastActive: $lastActive, ')
           ..write('online: $online, ')
           ..write('banned: $banned, ')
+          ..write('teamsRole: $teamsRole, ')
+          ..write('avgResponseTime: $avgResponseTime, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -5773,7 +7133,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
 
   @override
   int get hashCode => Object.hash(id, role, language, createdAt, updatedAt,
-      lastActive, online, banned, extraData);
+      lastActive, online, banned, teamsRole, avgResponseTime, extraData);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5786,6 +7146,8 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           other.lastActive == this.lastActive &&
           other.online == this.online &&
           other.banned == this.banned &&
+          other.teamsRole == this.teamsRole &&
+          other.avgResponseTime == this.avgResponseTime &&
           other.extraData == this.extraData);
 }
 
@@ -5798,6 +7160,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<DateTime?> lastActive;
   final Value<bool> online;
   final Value<bool> banned;
+  final Value<Map<String, String>?> teamsRole;
+  final Value<int?> avgResponseTime;
   final Value<Map<String, dynamic>> extraData;
   final Value<int> rowid;
   const UsersCompanion({
@@ -5809,6 +7173,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.lastActive = const Value.absent(),
     this.online = const Value.absent(),
     this.banned = const Value.absent(),
+    this.teamsRole = const Value.absent(),
+    this.avgResponseTime = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -5821,6 +7187,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.lastActive = const Value.absent(),
     this.online = const Value.absent(),
     this.banned = const Value.absent(),
+    this.teamsRole = const Value.absent(),
+    this.avgResponseTime = const Value.absent(),
     required Map<String, dynamic> extraData,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -5834,6 +7202,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     Expression<DateTime>? lastActive,
     Expression<bool>? online,
     Expression<bool>? banned,
+    Expression<String>? teamsRole,
+    Expression<int>? avgResponseTime,
     Expression<String>? extraData,
     Expression<int>? rowid,
   }) {
@@ -5846,6 +7216,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       if (lastActive != null) 'last_active': lastActive,
       if (online != null) 'online': online,
       if (banned != null) 'banned': banned,
+      if (teamsRole != null) 'teams_role': teamsRole,
+      if (avgResponseTime != null) 'avg_response_time': avgResponseTime,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -5860,6 +7232,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       Value<DateTime?>? lastActive,
       Value<bool>? online,
       Value<bool>? banned,
+      Value<Map<String, String>?>? teamsRole,
+      Value<int?>? avgResponseTime,
       Value<Map<String, dynamic>>? extraData,
       Value<int>? rowid}) {
     return UsersCompanion(
@@ -5871,6 +7245,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       lastActive: lastActive ?? this.lastActive,
       online: online ?? this.online,
       banned: banned ?? this.banned,
+      teamsRole: teamsRole ?? this.teamsRole,
+      avgResponseTime: avgResponseTime ?? this.avgResponseTime,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
     );
@@ -5903,6 +7279,13 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     if (banned.present) {
       map['banned'] = Variable<bool>(banned.value);
     }
+    if (teamsRole.present) {
+      map['teams_role'] = Variable<String>(
+          $UsersTable.$converterteamsRolen.toSql(teamsRole.value));
+    }
+    if (avgResponseTime.present) {
+      map['avg_response_time'] = Variable<int>(avgResponseTime.value);
+    }
     if (extraData.present) {
       map['extra_data'] = Variable<String>(
           $UsersTable.$converterextraData.toSql(extraData.value));
@@ -5924,6 +7307,8 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
           ..write('lastActive: $lastActive, ')
           ..write('online: $online, ')
           ..write('banned: $banned, ')
+          ..write('teamsRole: $teamsRole, ')
+          ..write('avgResponseTime: $avgResponseTime, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -5998,6 +7383,22 @@ class $MembersTable extends Members
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("shadow_banned" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _pinnedAtMeta =
+      const VerificationMeta('pinnedAt');
+  @override
+  late final GeneratedColumn<DateTime> pinnedAt = GeneratedColumn<DateTime>(
+      'pinned_at', aliasedName, true,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(null));
+  static const VerificationMeta _archivedAtMeta =
+      const VerificationMeta('archivedAt');
+  @override
+  late final GeneratedColumn<DateTime> archivedAt = GeneratedColumn<DateTime>(
+      'archived_at', aliasedName, true,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(null));
   static const VerificationMeta _isModeratorMeta =
       const VerificationMeta('isModerator');
   @override
@@ -6008,6 +7409,12 @@ class $MembersTable extends Members
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("is_moderator" IN (0, 1))'),
       defaultValue: const Constant(false));
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, dynamic>?>(
+              $MembersTable.$converterextraDatan);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -6034,7 +7441,10 @@ class $MembersTable extends Members
         invited,
         banned,
         shadowBanned,
+        pinnedAt,
+        archivedAt,
         isModerator,
+        extraData,
         createdAt,
         updatedAt
       ];
@@ -6094,6 +7504,16 @@ class $MembersTable extends Members
           shadowBanned.isAcceptableOrUnknown(
               data['shadow_banned']!, _shadowBannedMeta));
     }
+    if (data.containsKey('pinned_at')) {
+      context.handle(_pinnedAtMeta,
+          pinnedAt.isAcceptableOrUnknown(data['pinned_at']!, _pinnedAtMeta));
+    }
+    if (data.containsKey('archived_at')) {
+      context.handle(
+          _archivedAtMeta,
+          archivedAt.isAcceptableOrUnknown(
+              data['archived_at']!, _archivedAtMeta));
+    }
     if (data.containsKey('is_moderator')) {
       context.handle(
           _isModeratorMeta,
@@ -6133,8 +7553,15 @@ class $MembersTable extends Members
           .read(DriftSqlType.bool, data['${effectivePrefix}banned'])!,
       shadowBanned: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}shadow_banned'])!,
+      pinnedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}pinned_at']),
+      archivedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}archived_at']),
       isModerator: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_moderator'])!,
+      extraData: $MembersTable.$converterextraDatan.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
@@ -6146,6 +7573,11 @@ class $MembersTable extends Members
   $MembersTable createAlias(String alias) {
     return $MembersTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
+      MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
+      NullAwareTypeConverter.wrap($converterextraData);
 }
 
 class MemberEntity extends DataClass implements Insertable<MemberEntity> {
@@ -6173,8 +7605,17 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   /// True if the member is shadow banned from the channel
   final bool shadowBanned;
 
+  /// The date at which the channel was pinned by the member
+  final DateTime? pinnedAt;
+
+  /// The date at which the channel was archived by the member
+  final DateTime? archivedAt;
+
   /// True if the user is a moderator of the channel
   final bool isModerator;
+
+  /// Map of custom member extraData
+  final Map<String, dynamic>? extraData;
 
   /// The date of creation
   final DateTime createdAt;
@@ -6190,7 +7631,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       required this.invited,
       required this.banned,
       required this.shadowBanned,
+      this.pinnedAt,
+      this.archivedAt,
       required this.isModerator,
+      this.extraData,
       required this.createdAt,
       required this.updatedAt});
   @override
@@ -6210,7 +7654,17 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     map['invited'] = Variable<bool>(invited);
     map['banned'] = Variable<bool>(banned);
     map['shadow_banned'] = Variable<bool>(shadowBanned);
+    if (!nullToAbsent || pinnedAt != null) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt);
+    }
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<DateTime>(archivedAt);
+    }
     map['is_moderator'] = Variable<bool>(isModerator);
+    if (!nullToAbsent || extraData != null) {
+      map['extra_data'] =
+          Variable<String>($MembersTable.$converterextraDatan.toSql(extraData));
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -6230,7 +7684,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       invited: serializer.fromJson<bool>(json['invited']),
       banned: serializer.fromJson<bool>(json['banned']),
       shadowBanned: serializer.fromJson<bool>(json['shadowBanned']),
+      pinnedAt: serializer.fromJson<DateTime?>(json['pinnedAt']),
+      archivedAt: serializer.fromJson<DateTime?>(json['archivedAt']),
       isModerator: serializer.fromJson<bool>(json['isModerator']),
+      extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -6247,7 +7704,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       'invited': serializer.toJson<bool>(invited),
       'banned': serializer.toJson<bool>(banned),
       'shadowBanned': serializer.toJson<bool>(shadowBanned),
+      'pinnedAt': serializer.toJson<DateTime?>(pinnedAt),
+      'archivedAt': serializer.toJson<DateTime?>(archivedAt),
       'isModerator': serializer.toJson<bool>(isModerator),
+      'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -6262,7 +7722,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           bool? invited,
           bool? banned,
           bool? shadowBanned,
+          Value<DateTime?> pinnedAt = const Value.absent(),
+          Value<DateTime?> archivedAt = const Value.absent(),
           bool? isModerator,
+          Value<Map<String, dynamic>?> extraData = const Value.absent(),
           DateTime? createdAt,
           DateTime? updatedAt}) =>
       MemberEntity(
@@ -6278,7 +7741,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
         invited: invited ?? this.invited,
         banned: banned ?? this.banned,
         shadowBanned: shadowBanned ?? this.shadowBanned,
+        pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
+        archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
         isModerator: isModerator ?? this.isModerator,
+        extraData: extraData.present ? extraData.value : this.extraData,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -6300,8 +7766,12 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       shadowBanned: data.shadowBanned.present
           ? data.shadowBanned.value
           : this.shadowBanned,
+      pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
+      archivedAt:
+          data.archivedAt.present ? data.archivedAt.value : this.archivedAt,
       isModerator:
           data.isModerator.present ? data.isModerator.value : this.isModerator,
+      extraData: data.extraData.present ? data.extraData.value : this.extraData,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -6318,7 +7788,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           ..write('invited: $invited, ')
           ..write('banned: $banned, ')
           ..write('shadowBanned: $shadowBanned, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('archivedAt: $archivedAt, ')
           ..write('isModerator: $isModerator, ')
+          ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -6335,7 +7808,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       invited,
       banned,
       shadowBanned,
+      pinnedAt,
+      archivedAt,
       isModerator,
+      extraData,
       createdAt,
       updatedAt);
   @override
@@ -6350,7 +7826,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           other.invited == this.invited &&
           other.banned == this.banned &&
           other.shadowBanned == this.shadowBanned &&
+          other.pinnedAt == this.pinnedAt &&
+          other.archivedAt == this.archivedAt &&
           other.isModerator == this.isModerator &&
+          other.extraData == this.extraData &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -6364,7 +7843,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   final Value<bool> invited;
   final Value<bool> banned;
   final Value<bool> shadowBanned;
+  final Value<DateTime?> pinnedAt;
+  final Value<DateTime?> archivedAt;
   final Value<bool> isModerator;
+  final Value<Map<String, dynamic>?> extraData;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -6377,7 +7859,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.invited = const Value.absent(),
     this.banned = const Value.absent(),
     this.shadowBanned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
     this.isModerator = const Value.absent(),
+    this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -6391,7 +7876,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.invited = const Value.absent(),
     this.banned = const Value.absent(),
     this.shadowBanned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
     this.isModerator = const Value.absent(),
+    this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -6406,7 +7894,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     Expression<bool>? invited,
     Expression<bool>? banned,
     Expression<bool>? shadowBanned,
+    Expression<DateTime>? pinnedAt,
+    Expression<DateTime>? archivedAt,
     Expression<bool>? isModerator,
+    Expression<String>? extraData,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -6420,7 +7911,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       if (invited != null) 'invited': invited,
       if (banned != null) 'banned': banned,
       if (shadowBanned != null) 'shadow_banned': shadowBanned,
+      if (pinnedAt != null) 'pinned_at': pinnedAt,
+      if (archivedAt != null) 'archived_at': archivedAt,
       if (isModerator != null) 'is_moderator': isModerator,
+      if (extraData != null) 'extra_data': extraData,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -6436,7 +7930,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       Value<bool>? invited,
       Value<bool>? banned,
       Value<bool>? shadowBanned,
+      Value<DateTime?>? pinnedAt,
+      Value<DateTime?>? archivedAt,
       Value<bool>? isModerator,
+      Value<Map<String, dynamic>?>? extraData,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<int>? rowid}) {
@@ -6449,7 +7946,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       invited: invited ?? this.invited,
       banned: banned ?? this.banned,
       shadowBanned: shadowBanned ?? this.shadowBanned,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
+      archivedAt: archivedAt ?? this.archivedAt,
       isModerator: isModerator ?? this.isModerator,
+      extraData: extraData ?? this.extraData,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -6483,8 +7983,18 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     if (shadowBanned.present) {
       map['shadow_banned'] = Variable<bool>(shadowBanned.value);
     }
+    if (pinnedAt.present) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<DateTime>(archivedAt.value);
+    }
     if (isModerator.present) {
       map['is_moderator'] = Variable<bool>(isModerator.value);
+    }
+    if (extraData.present) {
+      map['extra_data'] = Variable<String>(
+          $MembersTable.$converterextraDatan.toSql(extraData.value));
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -6509,7 +8019,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
           ..write('invited: $invited, ')
           ..write('banned: $banned, ')
           ..write('shadowBanned: $shadowBanned, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('archivedAt: $archivedAt, ')
           ..write('isModerator: $isModerator, ')
+          ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -7053,8 +8566,6 @@ class $ConnectionEventsTable extends ConnectionEvents
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _ownUserMeta =
-      const VerificationMeta('ownUser');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       ownUser = GeneratedColumn<String>('own_user', aliasedName, true,
@@ -7115,7 +8626,6 @@ class $ConnectionEventsTable extends ConnectionEvents
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
-    context.handle(_ownUserMeta, const VerificationResult.success());
     if (data.containsKey('total_unread_count')) {
       context.handle(
           _totalUnreadCountMeta,
@@ -7440,6 +8950,8 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   $DriftChatDatabaseManager get managers => $DriftChatDatabaseManager(this);
   late final $ChannelsTable channels = $ChannelsTable(this);
   late final $MessagesTable messages = $MessagesTable(this);
+  late final $DraftMessagesTable draftMessages = $DraftMessagesTable(this);
+  late final $LocationsTable locations = $LocationsTable(this);
   late final $PinnedMessagesTable pinnedMessages = $PinnedMessagesTable(this);
   late final $PollsTable polls = $PollsTable(this);
   late final $PollVotesTable pollVotes = $PollVotesTable(this);
@@ -7455,6 +8967,9 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final UserDao userDao = UserDao(this as DriftChatDatabase);
   late final ChannelDao channelDao = ChannelDao(this as DriftChatDatabase);
   late final MessageDao messageDao = MessageDao(this as DriftChatDatabase);
+  late final DraftMessageDao draftMessageDao =
+      DraftMessageDao(this as DriftChatDatabase);
+  late final LocationDao locationDao = LocationDao(this as DriftChatDatabase);
   late final PinnedMessageDao pinnedMessageDao =
       PinnedMessageDao(this as DriftChatDatabase);
   late final PinnedMessageReactionDao pinnedMessageReactionDao =
@@ -7475,6 +8990,8 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         channels,
         messages,
+        draftMessages,
+        locations,
         pinnedMessages,
         polls,
         pollVotes,
@@ -7494,6 +9011,34 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('messages', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('draft_messages', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('channels',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('draft_messages', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('channels',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('locations', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('locations', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
@@ -7579,10 +9124,41 @@ final class $$ChannelsTableReferences
                   db.channels.cid, db.messages.channelCid));
 
   $$MessagesTableProcessedTableManager get messagesRefs {
-    final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$MessagesTableTableManager($_db, $_db.messages).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_messagesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$DraftMessagesTable, List<DraftMessageEntity>>
+      _draftMessagesRefsTable(_$DriftChatDatabase db) =>
+          MultiTypedResultKey.fromTable(db.draftMessages,
+              aliasName: $_aliasNameGenerator(
+                  db.channels.cid, db.draftMessages.channelCid));
+
+  $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
+    final manager = $$DraftMessagesTableTableManager($_db, $_db.draftMessages)
+        .filter(
+            (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+
+    final cache = $_typedResult.readTableOrNull(_draftMessagesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$LocationsTable, List<LocationEntity>>
+      _locationsRefsTable(_$DriftChatDatabase db) =>
+          MultiTypedResultKey.fromTable(db.locations,
+              aliasName: $_aliasNameGenerator(
+                  db.channels.cid, db.locations.channelCid));
+
+  $$LocationsTableProcessedTableManager get locationsRefs {
+    final manager = $$LocationsTableTableManager($_db, $_db.locations).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+
+    final cache = $_typedResult.readTableOrNull(_locationsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -7594,8 +9170,8 @@ final class $$ChannelsTableReferences
                   $_aliasNameGenerator(db.channels.cid, db.members.channelCid));
 
   $$MembersTableProcessedTableManager get membersRefs {
-    final manager = $$MembersTableTableManager($_db, $_db.members)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$MembersTableTableManager($_db, $_db.members).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_membersRefsTable($_db));
     return ProcessedTableManager(
@@ -7609,8 +9185,8 @@ final class $$ChannelsTableReferences
               $_aliasNameGenerator(db.channels.cid, db.reads.channelCid));
 
   $$ReadsTableProcessedTableManager get readsRefs {
-    final manager = $$ReadsTableTableManager($_db, $_db.reads)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$ReadsTableTableManager($_db, $_db.reads).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_readsRefsTable($_db));
     return ProcessedTableManager(
@@ -7687,6 +9263,48 @@ class $$ChannelsTableFilterComposer
             $$MessagesTableFilterComposer(
               $db: $db,
               $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> draftMessagesRefs(
+      Expression<bool> Function($$DraftMessagesTableFilterComposer f) f) {
+    final $$DraftMessagesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.cid,
+        referencedTable: $db.draftMessages,
+        getReferencedColumn: (t) => t.channelCid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DraftMessagesTableFilterComposer(
+              $db: $db,
+              $table: $db.draftMessages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> locationsRefs(
+      Expression<bool> Function($$LocationsTableFilterComposer f) f) {
+    final $$LocationsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.cid,
+        referencedTable: $db.locations,
+        getReferencedColumn: (t) => t.channelCid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableFilterComposer(
+              $db: $db,
+              $table: $db.locations,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -7860,6 +9478,48 @@ class $$ChannelsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> draftMessagesRefs<T extends Object>(
+      Expression<T> Function($$DraftMessagesTableAnnotationComposer a) f) {
+    final $$DraftMessagesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.cid,
+        referencedTable: $db.draftMessages,
+        getReferencedColumn: (t) => t.channelCid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DraftMessagesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.draftMessages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> locationsRefs<T extends Object>(
+      Expression<T> Function($$LocationsTableAnnotationComposer a) f) {
+    final $$LocationsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.cid,
+        referencedTable: $db.locations,
+        getReferencedColumn: (t) => t.channelCid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.locations,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
   Expression<T> membersRefs<T extends Object>(
       Expression<T> Function($$MembersTableAnnotationComposer a) f) {
     final $$MembersTableAnnotationComposer composer = $composerBuilder(
@@ -7915,7 +9575,11 @@ class $$ChannelsTableTableManager extends RootTableManager<
     (ChannelEntity, $$ChannelsTableReferences),
     ChannelEntity,
     PrefetchHooks Function(
-        {bool messagesRefs, bool membersRefs, bool readsRefs})> {
+        {bool messagesRefs,
+        bool draftMessagesRefs,
+        bool locationsRefs,
+        bool membersRefs,
+        bool readsRefs})> {
   $$ChannelsTableTableManager(_$DriftChatDatabase db, $ChannelsTable table)
       : super(TableManagerState(
           db: db,
@@ -7995,11 +9659,17 @@ class $$ChannelsTableTableManager extends RootTableManager<
                   (e.readTable(table), $$ChannelsTableReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: (
-              {messagesRefs = false, membersRefs = false, readsRefs = false}) {
+              {messagesRefs = false,
+              draftMessagesRefs = false,
+              locationsRefs = false,
+              membersRefs = false,
+              readsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (messagesRefs) db.messages,
+                if (draftMessagesRefs) db.draftMessages,
+                if (locationsRefs) db.locations,
                 if (membersRefs) db.members,
                 if (readsRefs) db.reads
               ],
@@ -8007,7 +9677,8 @@ class $$ChannelsTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (messagesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            MessageEntity>(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._messagesRefsTable(db),
@@ -8018,8 +9689,35 @@ class $$ChannelsTableTableManager extends RootTableManager<
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.channelCid == item.cid),
                         typedResults: items),
+                  if (draftMessagesRefs)
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            DraftMessageEntity>(
+                        currentTable: table,
+                        referencedTable: $$ChannelsTableReferences
+                            ._draftMessagesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ChannelsTableReferences(db, table, p0)
+                                .draftMessagesRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.channelCid == item.cid),
+                        typedResults: items),
+                  if (locationsRefs)
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            LocationEntity>(
+                        currentTable: table,
+                        referencedTable:
+                            $$ChannelsTableReferences._locationsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ChannelsTableReferences(db, table, p0)
+                                .locationsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.channelCid == item.cid),
+                        typedResults: items),
                   if (membersRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            MemberEntity>(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._membersRefsTable(db),
@@ -8031,7 +9729,8 @@ class $$ChannelsTableTableManager extends RootTableManager<
                                 .where((e) => e.channelCid == item.cid),
                         typedResults: items),
                   if (readsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            ReadEntity>(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._readsRefsTable(db),
@@ -8060,7 +9759,11 @@ typedef $$ChannelsTableProcessedTableManager = ProcessedTableManager<
     (ChannelEntity, $$ChannelsTableReferences),
     ChannelEntity,
     PrefetchHooks Function(
-        {bool messagesRefs, bool membersRefs, bool readsRefs})>;
+        {bool messagesRefs,
+        bool draftMessagesRefs,
+        bool locationsRefs,
+        bool membersRefs,
+        bool readsRefs})>;
 typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   required String id,
   Value<String?> messageText,
@@ -8068,8 +9771,7 @@ typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   required String state,
   Value<String> type,
   required List<String> mentionedUsers,
-  Value<Map<String, int>?> reactionCounts,
-  Value<Map<String, int>?> reactionScores,
+  Value<Map<String, ReactionGroup>?> reactionGroups,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
   Value<String?> pollId,
@@ -8091,6 +9793,7 @@ typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   Value<String?> pinnedByUserId,
   required String channelCid,
   Value<Map<String, String>?> i18n,
+  Value<List<String>?> restrictedVisibility,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -8101,8 +9804,7 @@ typedef $$MessagesTableUpdateCompanionBuilder = MessagesCompanion Function({
   Value<String> state,
   Value<String> type,
   Value<List<String>> mentionedUsers,
-  Value<Map<String, int>?> reactionCounts,
-  Value<Map<String, int>?> reactionScores,
+  Value<Map<String, ReactionGroup>?> reactionGroups,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
   Value<String?> pollId,
@@ -8124,6 +9826,7 @@ typedef $$MessagesTableUpdateCompanionBuilder = MessagesCompanion Function({
   Value<String?> pinnedByUserId,
   Value<String> channelCid,
   Value<Map<String, String>?> i18n,
+  Value<List<String>?> restrictedVisibility,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -8137,12 +9840,44 @@ final class $$MessagesTableReferences
           $_aliasNameGenerator(db.messages.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$DraftMessagesTable, List<DraftMessageEntity>>
+      _draftMessagesRefsTable(_$DriftChatDatabase db) =>
+          MultiTypedResultKey.fromTable(db.draftMessages,
+              aliasName: $_aliasNameGenerator(
+                  db.messages.id, db.draftMessages.parentId));
+
+  $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
+    final manager = $$DraftMessagesTableTableManager($_db, $_db.draftMessages)
+        .filter((f) => f.parentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_draftMessagesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$LocationsTable, List<LocationEntity>>
+      _locationsRefsTable(_$DriftChatDatabase db) =>
+          MultiTypedResultKey.fromTable(db.locations,
+              aliasName:
+                  $_aliasNameGenerator(db.messages.id, db.locations.messageId));
+
+  $$LocationsTableProcessedTableManager get locationsRefs {
+    final manager = $$LocationsTableTableManager($_db, $_db.locations)
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_locationsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
   }
 
   static MultiTypedResultKey<$ReactionsTable, List<ReactionEntity>>
@@ -8153,7 +9888,7 @@ final class $$MessagesTableReferences
 
   $$ReactionsTableProcessedTableManager get reactionsRefs {
     final manager = $$ReactionsTableTableManager($_db, $_db.reactions)
-        .filter((f) => f.messageId.id($_item.id));
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_reactionsRefsTable($_db));
     return ProcessedTableManager(
@@ -8192,14 +9927,10 @@ class $$MessagesTableFilterComposer
           column: $table.mentionedUsers,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<Map<String, int>?, Map<String, int>, String>
-      get reactionCounts => $composableBuilder(
-          column: $table.reactionCounts,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-
-  ColumnWithTypeConverterFilters<Map<String, int>?, Map<String, int>, String>
-      get reactionScores => $composableBuilder(
-          column: $table.reactionScores,
+  ColumnWithTypeConverterFilters<Map<String, ReactionGroup>?,
+          Map<String, ReactionGroup>, String>
+      get reactionGroups => $composableBuilder(
+          column: $table.reactionGroups,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<String> get parentId => $composableBuilder(
@@ -8274,6 +10005,11 @@ class $$MessagesTableFilterComposer
           column: $table.i18n,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get restrictedVisibility => $composableBuilder(
+          column: $table.restrictedVisibility,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
   ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
           String>
       get extraData => $composableBuilder(
@@ -8298,6 +10034,48 @@ class $$MessagesTableFilterComposer
                   $removeJoinBuilderFromRootComposer,
             ));
     return composer;
+  }
+
+  Expression<bool> draftMessagesRefs(
+      Expression<bool> Function($$DraftMessagesTableFilterComposer f) f) {
+    final $$DraftMessagesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.draftMessages,
+        getReferencedColumn: (t) => t.parentId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DraftMessagesTableFilterComposer(
+              $db: $db,
+              $table: $db.draftMessages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> locationsRefs(
+      Expression<bool> Function($$LocationsTableFilterComposer f) f) {
+    final $$LocationsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.locations,
+        getReferencedColumn: (t) => t.messageId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableFilterComposer(
+              $db: $db,
+              $table: $db.locations,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
   }
 
   Expression<bool> reactionsRefs(
@@ -8350,12 +10128,8 @@ class $$MessagesTableOrderingComposer
       column: $table.mentionedUsers,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get reactionCounts => $composableBuilder(
-      column: $table.reactionCounts,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get reactionScores => $composableBuilder(
-      column: $table.reactionScores,
+  ColumnOrderings<String> get reactionGroups => $composableBuilder(
+      column: $table.reactionGroups,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get parentId => $composableBuilder(
@@ -8428,6 +10202,10 @@ class $$MessagesTableOrderingComposer
   ColumnOrderings<String> get i18n => $composableBuilder(
       column: $table.i18n, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get restrictedVisibility => $composableBuilder(
+      column: $table.restrictedVisibility,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get extraData => $composableBuilder(
       column: $table.extraData, builder: (column) => ColumnOrderings(column));
 
@@ -8481,13 +10259,9 @@ class $$MessagesTableAnnotationComposer
       $composableBuilder(
           column: $table.mentionedUsers, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      get reactionCounts => $composableBuilder(
-          column: $table.reactionCounts, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      get reactionScores => $composableBuilder(
-          column: $table.reactionScores, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String>
+      get reactionGroups => $composableBuilder(
+          column: $table.reactionGroups, builder: (column) => column);
 
   GeneratedColumn<String> get parentId =>
       $composableBuilder(column: $table.parentId, builder: (column) => column);
@@ -8549,6 +10323,10 @@ class $$MessagesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<Map<String, String>?, String> get i18n =>
       $composableBuilder(column: $table.i18n, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<List<String>?, String>
+      get restrictedVisibility => $composableBuilder(
+          column: $table.restrictedVisibility, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       get extraData => $composableBuilder(
           column: $table.extraData, builder: (column) => column);
@@ -8571,6 +10349,48 @@ class $$MessagesTableAnnotationComposer
                   $removeJoinBuilderFromRootComposer,
             ));
     return composer;
+  }
+
+  Expression<T> draftMessagesRefs<T extends Object>(
+      Expression<T> Function($$DraftMessagesTableAnnotationComposer a) f) {
+    final $$DraftMessagesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.draftMessages,
+        getReferencedColumn: (t) => t.parentId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$DraftMessagesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.draftMessages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<T> locationsRefs<T extends Object>(
+      Expression<T> Function($$LocationsTableAnnotationComposer a) f) {
+    final $$LocationsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.locations,
+        getReferencedColumn: (t) => t.messageId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocationsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.locations,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
   }
 
   Expression<T> reactionsRefs<T extends Object>(
@@ -8606,7 +10426,11 @@ class $$MessagesTableTableManager extends RootTableManager<
     $$MessagesTableUpdateCompanionBuilder,
     (MessageEntity, $$MessagesTableReferences),
     MessageEntity,
-    PrefetchHooks Function({bool channelCid, bool reactionsRefs})> {
+    PrefetchHooks Function(
+        {bool channelCid,
+        bool draftMessagesRefs,
+        bool locationsRefs,
+        bool reactionsRefs})> {
   $$MessagesTableTableManager(_$DriftChatDatabase db, $MessagesTable table)
       : super(TableManagerState(
           db: db,
@@ -8624,8 +10448,8 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<String> state = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<List<String>> mentionedUsers = const Value.absent(),
-            Value<Map<String, int>?> reactionCounts = const Value.absent(),
-            Value<Map<String, int>?> reactionScores = const Value.absent(),
+            Value<Map<String, ReactionGroup>?> reactionGroups =
+                const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
             Value<String?> pollId = const Value.absent(),
@@ -8647,6 +10471,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<String?> pinnedByUserId = const Value.absent(),
             Value<String> channelCid = const Value.absent(),
             Value<Map<String, String>?> i18n = const Value.absent(),
+            Value<List<String>?> restrictedVisibility = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -8657,8 +10482,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             state: state,
             type: type,
             mentionedUsers: mentionedUsers,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
+            reactionGroups: reactionGroups,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
             pollId: pollId,
@@ -8680,6 +10504,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             pinnedByUserId: pinnedByUserId,
             channelCid: channelCid,
             i18n: i18n,
+            restrictedVisibility: restrictedVisibility,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -8690,8 +10515,8 @@ class $$MessagesTableTableManager extends RootTableManager<
             required String state,
             Value<String> type = const Value.absent(),
             required List<String> mentionedUsers,
-            Value<Map<String, int>?> reactionCounts = const Value.absent(),
-            Value<Map<String, int>?> reactionScores = const Value.absent(),
+            Value<Map<String, ReactionGroup>?> reactionGroups =
+                const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
             Value<String?> pollId = const Value.absent(),
@@ -8713,6 +10538,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<String?> pinnedByUserId = const Value.absent(),
             required String channelCid,
             Value<Map<String, String>?> i18n = const Value.absent(),
+            Value<List<String>?> restrictedVisibility = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -8723,8 +10549,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             state: state,
             type: type,
             mentionedUsers: mentionedUsers,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
+            reactionGroups: reactionGroups,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
             pollId: pollId,
@@ -8746,6 +10571,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             pinnedByUserId: pinnedByUserId,
             channelCid: channelCid,
             i18n: i18n,
+            restrictedVisibility: restrictedVisibility,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -8753,10 +10579,18 @@ class $$MessagesTableTableManager extends RootTableManager<
               .map((e) =>
                   (e.readTable(table), $$MessagesTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({channelCid = false, reactionsRefs = false}) {
+          prefetchHooksCallback: (
+              {channelCid = false,
+              draftMessagesRefs = false,
+              locationsRefs = false,
+              reactionsRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (reactionsRefs) db.reactions],
+              explicitlyWatchedTables: [
+                if (draftMessagesRefs) db.draftMessages,
+                if (locationsRefs) db.locations,
+                if (reactionsRefs) db.reactions
+              ],
               addJoins: <
                   T extends TableManagerState<
                       dynamic,
@@ -8785,8 +10619,35 @@ class $$MessagesTableTableManager extends RootTableManager<
               },
               getPrefetchedDataCallback: (items) async {
                 return [
+                  if (draftMessagesRefs)
+                    await $_getPrefetchedData<MessageEntity, $MessagesTable,
+                            DraftMessageEntity>(
+                        currentTable: table,
+                        referencedTable: $$MessagesTableReferences
+                            ._draftMessagesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$MessagesTableReferences(db, table, p0)
+                                .draftMessagesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.parentId == item.id),
+                        typedResults: items),
+                  if (locationsRefs)
+                    await $_getPrefetchedData<MessageEntity, $MessagesTable,
+                            LocationEntity>(
+                        currentTable: table,
+                        referencedTable:
+                            $$MessagesTableReferences._locationsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$MessagesTableReferences(db, table, p0)
+                                .locationsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.messageId == item.id),
+                        typedResults: items),
                   if (reactionsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<MessageEntity, $MessagesTable,
+                            ReactionEntity>(
                         currentTable: table,
                         referencedTable:
                             $$MessagesTableReferences._reactionsRefsTable(db),
@@ -8815,7 +10676,924 @@ typedef $$MessagesTableProcessedTableManager = ProcessedTableManager<
     $$MessagesTableUpdateCompanionBuilder,
     (MessageEntity, $$MessagesTableReferences),
     MessageEntity,
-    PrefetchHooks Function({bool channelCid, bool reactionsRefs})>;
+    PrefetchHooks Function(
+        {bool channelCid,
+        bool draftMessagesRefs,
+        bool locationsRefs,
+        bool reactionsRefs})>;
+typedef $$DraftMessagesTableCreateCompanionBuilder = DraftMessagesCompanion
+    Function({
+  required String id,
+  Value<String?> messageText,
+  required List<String> attachments,
+  Value<String> type,
+  required List<String> mentionedUsers,
+  Value<String?> parentId,
+  Value<String?> quotedMessageId,
+  Value<String?> pollId,
+  Value<bool?> showInChannel,
+  Value<String?> command,
+  Value<bool> silent,
+  Value<DateTime> createdAt,
+  required String channelCid,
+  Value<Map<String, dynamic>?> extraData,
+  Value<int> rowid,
+});
+typedef $$DraftMessagesTableUpdateCompanionBuilder = DraftMessagesCompanion
+    Function({
+  Value<String> id,
+  Value<String?> messageText,
+  Value<List<String>> attachments,
+  Value<String> type,
+  Value<List<String>> mentionedUsers,
+  Value<String?> parentId,
+  Value<String?> quotedMessageId,
+  Value<String?> pollId,
+  Value<bool?> showInChannel,
+  Value<String?> command,
+  Value<bool> silent,
+  Value<DateTime> createdAt,
+  Value<String> channelCid,
+  Value<Map<String, dynamic>?> extraData,
+  Value<int> rowid,
+});
+
+final class $$DraftMessagesTableReferences extends BaseReferences<
+    _$DriftChatDatabase, $DraftMessagesTable, DraftMessageEntity> {
+  $$DraftMessagesTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $MessagesTable _parentIdTable(_$DriftChatDatabase db) =>
+      db.messages.createAlias(
+          $_aliasNameGenerator(db.draftMessages.parentId, db.messages.id));
+
+  $$MessagesTableProcessedTableManager? get parentId {
+    final $_column = $_itemColumn<String>('parent_id');
+    if ($_column == null) return null;
+    final manager = $$MessagesTableTableManager($_db, $_db.messages)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
+      db.channels.createAlias(
+          $_aliasNameGenerator(db.draftMessages.channelCid, db.channels.cid));
+
+  $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
+    final manager = $$ChannelsTableTableManager($_db, $_db.channels)
+        .filter((f) => f.cid.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$DraftMessagesTableFilterComposer
+    extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
+  $$DraftMessagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get messageText => $composableBuilder(
+      column: $table.messageText, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get attachments => $composableBuilder(
+          column: $table.attachments,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get mentionedUsers => $composableBuilder(
+          column: $table.mentionedUsers,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get quotedMessageId => $composableBuilder(
+      column: $table.quotedMessageId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pollId => $composableBuilder(
+      column: $table.pollId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get showInChannel => $composableBuilder(
+      column: $table.showInChannel, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get command => $composableBuilder(
+      column: $table.command, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get silent => $composableBuilder(
+      column: $table.silent, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
+          String>
+      get extraData => $composableBuilder(
+          column: $table.extraData,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  $$MessagesTableFilterComposer get parentId {
+    final $$MessagesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableFilterComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChannelsTableFilterComposer get channelCid {
+    final $$ChannelsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.channelCid,
+        referencedTable: $db.channels,
+        getReferencedColumn: (t) => t.cid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChannelsTableFilterComposer(
+              $db: $db,
+              $table: $db.channels,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DraftMessagesTableOrderingComposer
+    extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
+  $$DraftMessagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get messageText => $composableBuilder(
+      column: $table.messageText, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get attachments => $composableBuilder(
+      column: $table.attachments, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mentionedUsers => $composableBuilder(
+      column: $table.mentionedUsers,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get quotedMessageId => $composableBuilder(
+      column: $table.quotedMessageId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pollId => $composableBuilder(
+      column: $table.pollId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get showInChannel => $composableBuilder(
+      column: $table.showInChannel,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get command => $composableBuilder(
+      column: $table.command, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get silent => $composableBuilder(
+      column: $table.silent, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get extraData => $composableBuilder(
+      column: $table.extraData, builder: (column) => ColumnOrderings(column));
+
+  $$MessagesTableOrderingComposer get parentId {
+    final $$MessagesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableOrderingComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChannelsTableOrderingComposer get channelCid {
+    final $$ChannelsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.channelCid,
+        referencedTable: $db.channels,
+        getReferencedColumn: (t) => t.cid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChannelsTableOrderingComposer(
+              $db: $db,
+              $table: $db.channels,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DraftMessagesTableAnnotationComposer
+    extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
+  $$DraftMessagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get messageText => $composableBuilder(
+      column: $table.messageText, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get attachments =>
+      $composableBuilder(
+          column: $table.attachments, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers =>
+      $composableBuilder(
+          column: $table.mentionedUsers, builder: (column) => column);
+
+  GeneratedColumn<String> get quotedMessageId => $composableBuilder(
+      column: $table.quotedMessageId, builder: (column) => column);
+
+  GeneratedColumn<String> get pollId =>
+      $composableBuilder(column: $table.pollId, builder: (column) => column);
+
+  GeneratedColumn<bool> get showInChannel => $composableBuilder(
+      column: $table.showInChannel, builder: (column) => column);
+
+  GeneratedColumn<String> get command =>
+      $composableBuilder(column: $table.command, builder: (column) => column);
+
+  GeneratedColumn<bool> get silent =>
+      $composableBuilder(column: $table.silent, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      get extraData => $composableBuilder(
+          column: $table.extraData, builder: (column) => column);
+
+  $$MessagesTableAnnotationComposer get parentId {
+    final $$MessagesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.parentId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ChannelsTableAnnotationComposer get channelCid {
+    final $$ChannelsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.channelCid,
+        referencedTable: $db.channels,
+        getReferencedColumn: (t) => t.cid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChannelsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.channels,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$DraftMessagesTableTableManager extends RootTableManager<
+    _$DriftChatDatabase,
+    $DraftMessagesTable,
+    DraftMessageEntity,
+    $$DraftMessagesTableFilterComposer,
+    $$DraftMessagesTableOrderingComposer,
+    $$DraftMessagesTableAnnotationComposer,
+    $$DraftMessagesTableCreateCompanionBuilder,
+    $$DraftMessagesTableUpdateCompanionBuilder,
+    (DraftMessageEntity, $$DraftMessagesTableReferences),
+    DraftMessageEntity,
+    PrefetchHooks Function({bool parentId, bool channelCid})> {
+  $$DraftMessagesTableTableManager(
+      _$DriftChatDatabase db, $DraftMessagesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DraftMessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DraftMessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DraftMessagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String?> messageText = const Value.absent(),
+            Value<List<String>> attachments = const Value.absent(),
+            Value<String> type = const Value.absent(),
+            Value<List<String>> mentionedUsers = const Value.absent(),
+            Value<String?> parentId = const Value.absent(),
+            Value<String?> quotedMessageId = const Value.absent(),
+            Value<String?> pollId = const Value.absent(),
+            Value<bool?> showInChannel = const Value.absent(),
+            Value<String?> command = const Value.absent(),
+            Value<bool> silent = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<String> channelCid = const Value.absent(),
+            Value<Map<String, dynamic>?> extraData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DraftMessagesCompanion(
+            id: id,
+            messageText: messageText,
+            attachments: attachments,
+            type: type,
+            mentionedUsers: mentionedUsers,
+            parentId: parentId,
+            quotedMessageId: quotedMessageId,
+            pollId: pollId,
+            showInChannel: showInChannel,
+            command: command,
+            silent: silent,
+            createdAt: createdAt,
+            channelCid: channelCid,
+            extraData: extraData,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            Value<String?> messageText = const Value.absent(),
+            required List<String> attachments,
+            Value<String> type = const Value.absent(),
+            required List<String> mentionedUsers,
+            Value<String?> parentId = const Value.absent(),
+            Value<String?> quotedMessageId = const Value.absent(),
+            Value<String?> pollId = const Value.absent(),
+            Value<bool?> showInChannel = const Value.absent(),
+            Value<String?> command = const Value.absent(),
+            Value<bool> silent = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            required String channelCid,
+            Value<Map<String, dynamic>?> extraData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DraftMessagesCompanion.insert(
+            id: id,
+            messageText: messageText,
+            attachments: attachments,
+            type: type,
+            mentionedUsers: mentionedUsers,
+            parentId: parentId,
+            quotedMessageId: quotedMessageId,
+            pollId: pollId,
+            showInChannel: showInChannel,
+            command: command,
+            silent: silent,
+            createdAt: createdAt,
+            channelCid: channelCid,
+            extraData: extraData,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$DraftMessagesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({parentId = false, channelCid = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (parentId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.parentId,
+                    referencedTable:
+                        $$DraftMessagesTableReferences._parentIdTable(db),
+                    referencedColumn:
+                        $$DraftMessagesTableReferences._parentIdTable(db).id,
+                  ) as T;
+                }
+                if (channelCid) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.channelCid,
+                    referencedTable:
+                        $$DraftMessagesTableReferences._channelCidTable(db),
+                    referencedColumn:
+                        $$DraftMessagesTableReferences._channelCidTable(db).cid,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$DraftMessagesTableProcessedTableManager = ProcessedTableManager<
+    _$DriftChatDatabase,
+    $DraftMessagesTable,
+    DraftMessageEntity,
+    $$DraftMessagesTableFilterComposer,
+    $$DraftMessagesTableOrderingComposer,
+    $$DraftMessagesTableAnnotationComposer,
+    $$DraftMessagesTableCreateCompanionBuilder,
+    $$DraftMessagesTableUpdateCompanionBuilder,
+    (DraftMessageEntity, $$DraftMessagesTableReferences),
+    DraftMessageEntity,
+    PrefetchHooks Function({bool parentId, bool channelCid})>;
+typedef $$LocationsTableCreateCompanionBuilder = LocationsCompanion Function({
+  Value<String?> channelCid,
+  Value<String?> messageId,
+  Value<String?> userId,
+  required double latitude,
+  required double longitude,
+  Value<String?> createdByDeviceId,
+  Value<DateTime?> endAt,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+typedef $$LocationsTableUpdateCompanionBuilder = LocationsCompanion Function({
+  Value<String?> channelCid,
+  Value<String?> messageId,
+  Value<String?> userId,
+  Value<double> latitude,
+  Value<double> longitude,
+  Value<String?> createdByDeviceId,
+  Value<DateTime?> endAt,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$LocationsTableReferences extends BaseReferences<
+    _$DriftChatDatabase, $LocationsTable, LocationEntity> {
+  $$LocationsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
+      db.channels.createAlias(
+          $_aliasNameGenerator(db.locations.channelCid, db.channels.cid));
+
+  $$ChannelsTableProcessedTableManager? get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid');
+    if ($_column == null) return null;
+    final manager = $$ChannelsTableTableManager($_db, $_db.channels)
+        .filter((f) => f.cid.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) =>
+      db.messages.createAlias(
+          $_aliasNameGenerator(db.locations.messageId, db.messages.id));
+
+  $$MessagesTableProcessedTableManager? get messageId {
+    final $_column = $_itemColumn<String>('message_id');
+    if ($_column == null) return null;
+    final manager = $$MessagesTableTableManager($_db, $_db.messages)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$LocationsTableFilterComposer
+    extends Composer<_$DriftChatDatabase, $LocationsTable> {
+  $$LocationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdByDeviceId => $composableBuilder(
+      column: $table.createdByDeviceId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get endAt => $composableBuilder(
+      column: $table.endAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  $$ChannelsTableFilterComposer get channelCid {
+    final $$ChannelsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.channelCid,
+        referencedTable: $db.channels,
+        getReferencedColumn: (t) => t.cid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChannelsTableFilterComposer(
+              $db: $db,
+              $table: $db.channels,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableFilterComposer get messageId {
+    final $$MessagesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.messageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableFilterComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LocationsTableOrderingComposer
+    extends Composer<_$DriftChatDatabase, $LocationsTable> {
+  $$LocationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdByDeviceId => $composableBuilder(
+      column: $table.createdByDeviceId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get endAt => $composableBuilder(
+      column: $table.endAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  $$ChannelsTableOrderingComposer get channelCid {
+    final $$ChannelsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.channelCid,
+        referencedTable: $db.channels,
+        getReferencedColumn: (t) => t.cid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChannelsTableOrderingComposer(
+              $db: $db,
+              $table: $db.channels,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableOrderingComposer get messageId {
+    final $$MessagesTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.messageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableOrderingComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LocationsTableAnnotationComposer
+    extends Composer<_$DriftChatDatabase, $LocationsTable> {
+  $$LocationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<String> get createdByDeviceId => $composableBuilder(
+      column: $table.createdByDeviceId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endAt =>
+      $composableBuilder(column: $table.endAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$ChannelsTableAnnotationComposer get channelCid {
+    final $$ChannelsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.channelCid,
+        referencedTable: $db.channels,
+        getReferencedColumn: (t) => t.cid,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ChannelsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.channels,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$MessagesTableAnnotationComposer get messageId {
+    final $$MessagesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.messageId,
+        referencedTable: $db.messages,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$MessagesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.messages,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LocationsTableTableManager extends RootTableManager<
+    _$DriftChatDatabase,
+    $LocationsTable,
+    LocationEntity,
+    $$LocationsTableFilterComposer,
+    $$LocationsTableOrderingComposer,
+    $$LocationsTableAnnotationComposer,
+    $$LocationsTableCreateCompanionBuilder,
+    $$LocationsTableUpdateCompanionBuilder,
+    (LocationEntity, $$LocationsTableReferences),
+    LocationEntity,
+    PrefetchHooks Function({bool channelCid, bool messageId})> {
+  $$LocationsTableTableManager(_$DriftChatDatabase db, $LocationsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String?> channelCid = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<double> latitude = const Value.absent(),
+            Value<double> longitude = const Value.absent(),
+            Value<String?> createdByDeviceId = const Value.absent(),
+            Value<DateTime?> endAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocationsCompanion(
+            channelCid: channelCid,
+            messageId: messageId,
+            userId: userId,
+            latitude: latitude,
+            longitude: longitude,
+            createdByDeviceId: createdByDeviceId,
+            endAt: endAt,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            Value<String?> channelCid = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            required double latitude,
+            required double longitude,
+            Value<String?> createdByDeviceId = const Value.absent(),
+            Value<DateTime?> endAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocationsCompanion.insert(
+            channelCid: channelCid,
+            messageId: messageId,
+            userId: userId,
+            latitude: latitude,
+            longitude: longitude,
+            createdByDeviceId: createdByDeviceId,
+            endAt: endAt,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocationsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({channelCid = false, messageId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (channelCid) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.channelCid,
+                    referencedTable:
+                        $$LocationsTableReferences._channelCidTable(db),
+                    referencedColumn:
+                        $$LocationsTableReferences._channelCidTable(db).cid,
+                  ) as T;
+                }
+                if (messageId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.messageId,
+                    referencedTable:
+                        $$LocationsTableReferences._messageIdTable(db),
+                    referencedColumn:
+                        $$LocationsTableReferences._messageIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LocationsTableProcessedTableManager = ProcessedTableManager<
+    _$DriftChatDatabase,
+    $LocationsTable,
+    LocationEntity,
+    $$LocationsTableFilterComposer,
+    $$LocationsTableOrderingComposer,
+    $$LocationsTableAnnotationComposer,
+    $$LocationsTableCreateCompanionBuilder,
+    $$LocationsTableUpdateCompanionBuilder,
+    (LocationEntity, $$LocationsTableReferences),
+    LocationEntity,
+    PrefetchHooks Function({bool channelCid, bool messageId})>;
 typedef $$PinnedMessagesTableCreateCompanionBuilder = PinnedMessagesCompanion
     Function({
   required String id,
@@ -8824,8 +11602,7 @@ typedef $$PinnedMessagesTableCreateCompanionBuilder = PinnedMessagesCompanion
   required String state,
   Value<String> type,
   required List<String> mentionedUsers,
-  Value<Map<String, int>?> reactionCounts,
-  Value<Map<String, int>?> reactionScores,
+  Value<Map<String, ReactionGroup>?> reactionGroups,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
   Value<String?> pollId,
@@ -8847,6 +11624,7 @@ typedef $$PinnedMessagesTableCreateCompanionBuilder = PinnedMessagesCompanion
   Value<String?> pinnedByUserId,
   required String channelCid,
   Value<Map<String, String>?> i18n,
+  Value<List<String>?> restrictedVisibility,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -8858,8 +11636,7 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder = PinnedMessagesCompanion
   Value<String> state,
   Value<String> type,
   Value<List<String>> mentionedUsers,
-  Value<Map<String, int>?> reactionCounts,
-  Value<Map<String, int>?> reactionScores,
+  Value<Map<String, ReactionGroup>?> reactionGroups,
   Value<String?> parentId,
   Value<String?> quotedMessageId,
   Value<String?> pollId,
@@ -8881,6 +11658,7 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder = PinnedMessagesCompanion
   Value<String?> pinnedByUserId,
   Value<String> channelCid,
   Value<Map<String, String>?> i18n,
+  Value<List<String>?> restrictedVisibility,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -8901,7 +11679,7 @@ final class $$PinnedMessagesTableReferences extends BaseReferences<
       get pinnedMessageReactionsRefs {
     final manager = $$PinnedMessageReactionsTableTableManager(
             $_db, $_db.pinnedMessageReactions)
-        .filter((f) => f.messageId.id($_item.id));
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache =
         $_typedResult.readTableOrNull(_pinnedMessageReactionsRefsTable($_db));
@@ -8941,14 +11719,10 @@ class $$PinnedMessagesTableFilterComposer
           column: $table.mentionedUsers,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<Map<String, int>?, Map<String, int>, String>
-      get reactionCounts => $composableBuilder(
-          column: $table.reactionCounts,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-
-  ColumnWithTypeConverterFilters<Map<String, int>?, Map<String, int>, String>
-      get reactionScores => $composableBuilder(
-          column: $table.reactionScores,
+  ColumnWithTypeConverterFilters<Map<String, ReactionGroup>?,
+          Map<String, ReactionGroup>, String>
+      get reactionGroups => $composableBuilder(
+          column: $table.reactionGroups,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<String> get parentId => $composableBuilder(
@@ -9026,6 +11800,11 @@ class $$PinnedMessagesTableFilterComposer
           column: $table.i18n,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get restrictedVisibility => $composableBuilder(
+          column: $table.restrictedVisibility,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
   ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
           String>
       get extraData => $composableBuilder(
@@ -9084,12 +11863,8 @@ class $$PinnedMessagesTableOrderingComposer
       column: $table.mentionedUsers,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get reactionCounts => $composableBuilder(
-      column: $table.reactionCounts,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get reactionScores => $composableBuilder(
-      column: $table.reactionScores,
+  ColumnOrderings<String> get reactionGroups => $composableBuilder(
+      column: $table.reactionGroups,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get parentId => $composableBuilder(
@@ -9165,6 +11940,10 @@ class $$PinnedMessagesTableOrderingComposer
   ColumnOrderings<String> get i18n => $composableBuilder(
       column: $table.i18n, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get restrictedVisibility => $composableBuilder(
+      column: $table.restrictedVisibility,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get extraData => $composableBuilder(
       column: $table.extraData, builder: (column) => ColumnOrderings(column));
 }
@@ -9198,13 +11977,9 @@ class $$PinnedMessagesTableAnnotationComposer
       $composableBuilder(
           column: $table.mentionedUsers, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      get reactionCounts => $composableBuilder(
-          column: $table.reactionCounts, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<Map<String, int>?, String>
-      get reactionScores => $composableBuilder(
-          column: $table.reactionScores, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String>
+      get reactionGroups => $composableBuilder(
+          column: $table.reactionGroups, builder: (column) => column);
 
   GeneratedColumn<String> get parentId =>
       $composableBuilder(column: $table.parentId, builder: (column) => column);
@@ -9269,6 +12044,10 @@ class $$PinnedMessagesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<Map<String, String>?, String> get i18n =>
       $composableBuilder(column: $table.i18n, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<List<String>?, String>
+      get restrictedVisibility => $composableBuilder(
+          column: $table.restrictedVisibility, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       get extraData => $composableBuilder(
           column: $table.extraData, builder: (column) => column);
@@ -9327,8 +12106,8 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<String> state = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<List<String>> mentionedUsers = const Value.absent(),
-            Value<Map<String, int>?> reactionCounts = const Value.absent(),
-            Value<Map<String, int>?> reactionScores = const Value.absent(),
+            Value<Map<String, ReactionGroup>?> reactionGroups =
+                const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
             Value<String?> pollId = const Value.absent(),
@@ -9350,6 +12129,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<String?> pinnedByUserId = const Value.absent(),
             Value<String> channelCid = const Value.absent(),
             Value<Map<String, String>?> i18n = const Value.absent(),
+            Value<List<String>?> restrictedVisibility = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -9360,8 +12140,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             state: state,
             type: type,
             mentionedUsers: mentionedUsers,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
+            reactionGroups: reactionGroups,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
             pollId: pollId,
@@ -9383,6 +12162,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             pinnedByUserId: pinnedByUserId,
             channelCid: channelCid,
             i18n: i18n,
+            restrictedVisibility: restrictedVisibility,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -9393,8 +12173,8 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             required String state,
             Value<String> type = const Value.absent(),
             required List<String> mentionedUsers,
-            Value<Map<String, int>?> reactionCounts = const Value.absent(),
-            Value<Map<String, int>?> reactionScores = const Value.absent(),
+            Value<Map<String, ReactionGroup>?> reactionGroups =
+                const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<String?> quotedMessageId = const Value.absent(),
             Value<String?> pollId = const Value.absent(),
@@ -9416,6 +12196,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<String?> pinnedByUserId = const Value.absent(),
             required String channelCid,
             Value<Map<String, String>?> i18n = const Value.absent(),
+            Value<List<String>?> restrictedVisibility = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -9426,8 +12207,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             state: state,
             type: type,
             mentionedUsers: mentionedUsers,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
+            reactionGroups: reactionGroups,
             parentId: parentId,
             quotedMessageId: quotedMessageId,
             pollId: pollId,
@@ -9449,6 +12229,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             pinnedByUserId: pinnedByUserId,
             channelCid: channelCid,
             i18n: i18n,
+            restrictedVisibility: restrictedVisibility,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -9468,7 +12249,8 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (pinnedMessageReactionsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<PinnedMessageEntity,
+                            $PinnedMessagesTable, PinnedMessageReactionEntity>(
                         currentTable: table,
                         referencedTable: $$PinnedMessagesTableReferences
                             ._pinnedMessageReactionsRefsTable(db),
@@ -9551,7 +12333,7 @@ final class $$PollsTableReferences
 
   $$PollVotesTableProcessedTableManager get pollVotesRefs {
     final manager = $$PollVotesTableTableManager($_db, $_db.pollVotes)
-        .filter((f) => f.pollId.id($_item.id));
+        .filter((f) => f.pollId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_pollVotesRefsTable($_db));
     return ProcessedTableManager(
@@ -9920,7 +12702,8 @@ class $$PollsTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (pollVotesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<PollEntity, $PollsTable,
+                            PollVoteEntity>(
                         currentTable: table,
                         referencedTable:
                             $$PollsTableReferences._pollVotesRefsTable(db),
@@ -9978,9 +12761,10 @@ final class $$PollVotesTableReferences extends BaseReferences<
       .createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
 
   $$PollsTableProcessedTableManager? get pollId {
-    if ($_item.pollId == null) return null;
+    final $_column = $_itemColumn<String>('poll_id');
+    if ($_column == null) return null;
     final manager = $$PollsTableTableManager($_db, $_db.polls)
-        .filter((f) => f.id($_item.pollId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_pollIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10252,20 +13036,24 @@ typedef $$PollVotesTableProcessedTableManager = ProcessedTableManager<
     PrefetchHooks Function({bool pollId})>;
 typedef $$PinnedMessageReactionsTableCreateCompanionBuilder
     = PinnedMessageReactionsCompanion Function({
-  required String userId,
-  required String messageId,
+  Value<String?> userId,
+  Value<String?> messageId,
   required String type,
+  Value<String?> emojiCode,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
   Value<int> score,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
 typedef $$PinnedMessageReactionsTableUpdateCompanionBuilder
     = PinnedMessageReactionsCompanion Function({
-  Value<String> userId,
-  Value<String> messageId,
+  Value<String?> userId,
+  Value<String?> messageId,
   Value<String> type,
+  Value<String?> emojiCode,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
   Value<int> score,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
@@ -10282,9 +13070,11 @@ final class $$PinnedMessageReactionsTableReferences extends BaseReferences<
       db.pinnedMessages.createAlias($_aliasNameGenerator(
           db.pinnedMessageReactions.messageId, db.pinnedMessages.id));
 
-  $$PinnedMessagesTableProcessedTableManager get messageId {
+  $$PinnedMessagesTableProcessedTableManager? get messageId {
+    final $_column = $_itemColumn<String>('message_id');
+    if ($_column == null) return null;
     final manager = $$PinnedMessagesTableTableManager($_db, $_db.pinnedMessages)
-        .filter((f) => f.id($_item.messageId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10307,8 +13097,14 @@ class $$PinnedMessageReactionsTableFilterComposer
   ColumnFilters<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get emojiCode => $composableBuilder(
+      column: $table.emojiCode, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnFilters(column));
@@ -10355,8 +13151,14 @@ class $$PinnedMessageReactionsTableOrderingComposer
   ColumnOrderings<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get emojiCode => $composableBuilder(
+      column: $table.emojiCode, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnOrderings(column));
@@ -10400,8 +13202,14 @@ class $$PinnedMessageReactionsTableAnnotationComposer
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
+  GeneratedColumn<String> get emojiCode =>
+      $composableBuilder(column: $table.emojiCode, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<int> get score =>
       $composableBuilder(column: $table.score, builder: (column) => column);
@@ -10458,10 +13266,12 @@ class $$PinnedMessageReactionsTableTableManager extends RootTableManager<
               $$PinnedMessageReactionsTableAnnotationComposer(
                   $db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> userId = const Value.absent(),
-            Value<String> messageId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
             Value<String> type = const Value.absent(),
+            Value<String?> emojiCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
             Value<int> score = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -10470,16 +13280,20 @@ class $$PinnedMessageReactionsTableTableManager extends RootTableManager<
             userId: userId,
             messageId: messageId,
             type: type,
+            emojiCode: emojiCode,
             createdAt: createdAt,
+            updatedAt: updatedAt,
             score: score,
             extraData: extraData,
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String userId,
-            required String messageId,
+            Value<String?> userId = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
             required String type,
+            Value<String?> emojiCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
             Value<int> score = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -10488,7 +13302,9 @@ class $$PinnedMessageReactionsTableTableManager extends RootTableManager<
             userId: userId,
             messageId: messageId,
             type: type,
+            emojiCode: emojiCode,
             createdAt: createdAt,
+            updatedAt: updatedAt,
             score: score,
             extraData: extraData,
             rowid: rowid,
@@ -10552,19 +13368,23 @@ typedef $$PinnedMessageReactionsTableProcessedTableManager
         PinnedMessageReactionEntity,
         PrefetchHooks Function({bool messageId})>;
 typedef $$ReactionsTableCreateCompanionBuilder = ReactionsCompanion Function({
-  required String userId,
-  required String messageId,
+  Value<String?> userId,
+  Value<String?> messageId,
   required String type,
+  Value<String?> emojiCode,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
   Value<int> score,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
 typedef $$ReactionsTableUpdateCompanionBuilder = ReactionsCompanion Function({
-  Value<String> userId,
-  Value<String> messageId,
+  Value<String?> userId,
+  Value<String?> messageId,
   Value<String> type,
+  Value<String?> emojiCode,
   Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
   Value<int> score,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
@@ -10578,9 +13398,11 @@ final class $$ReactionsTableReferences extends BaseReferences<
       db.messages.createAlias(
           $_aliasNameGenerator(db.reactions.messageId, db.messages.id));
 
-  $$MessagesTableProcessedTableManager get messageId {
+  $$MessagesTableProcessedTableManager? get messageId {
+    final $_column = $_itemColumn<String>('message_id');
+    if ($_column == null) return null;
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.id($_item.messageId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10603,8 +13425,14 @@ class $$ReactionsTableFilterComposer
   ColumnFilters<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get emojiCode => $composableBuilder(
+      column: $table.emojiCode, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnFilters(column));
@@ -10651,8 +13479,14 @@ class $$ReactionsTableOrderingComposer
   ColumnOrderings<String> get type => $composableBuilder(
       column: $table.type, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get emojiCode => $composableBuilder(
+      column: $table.emojiCode, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get score => $composableBuilder(
       column: $table.score, builder: (column) => ColumnOrderings(column));
@@ -10696,8 +13530,14 @@ class $$ReactionsTableAnnotationComposer
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
+  GeneratedColumn<String> get emojiCode =>
+      $composableBuilder(column: $table.emojiCode, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<int> get score =>
       $composableBuilder(column: $table.score, builder: (column) => column);
@@ -10750,10 +13590,12 @@ class $$ReactionsTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$ReactionsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> userId = const Value.absent(),
-            Value<String> messageId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
             Value<String> type = const Value.absent(),
+            Value<String?> emojiCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
             Value<int> score = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -10762,16 +13604,20 @@ class $$ReactionsTableTableManager extends RootTableManager<
             userId: userId,
             messageId: messageId,
             type: type,
+            emojiCode: emojiCode,
             createdAt: createdAt,
+            updatedAt: updatedAt,
             score: score,
             extraData: extraData,
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String userId,
-            required String messageId,
+            Value<String?> userId = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
             required String type,
+            Value<String?> emojiCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
             Value<int> score = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -10780,7 +13626,9 @@ class $$ReactionsTableTableManager extends RootTableManager<
             userId: userId,
             messageId: messageId,
             type: type,
+            emojiCode: emojiCode,
             createdAt: createdAt,
+            updatedAt: updatedAt,
             score: score,
             extraData: extraData,
             rowid: rowid,
@@ -10850,6 +13698,8 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<DateTime?> lastActive,
   Value<bool> online,
   Value<bool> banned,
+  Value<Map<String, String>?> teamsRole,
+  Value<int?> avgResponseTime,
   required Map<String, dynamic> extraData,
   Value<int> rowid,
 });
@@ -10862,6 +13712,8 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<DateTime?> lastActive,
   Value<bool> online,
   Value<bool> banned,
+  Value<Map<String, String>?> teamsRole,
+  Value<int?> avgResponseTime,
   Value<Map<String, dynamic>> extraData,
   Value<int> rowid,
 });
@@ -10898,6 +13750,16 @@ class $$UsersTableFilterComposer
 
   ColumnFilters<bool> get banned => $composableBuilder(
       column: $table.banned, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, String>?, Map<String, String>,
+          String>
+      get teamsRole => $composableBuilder(
+          column: $table.teamsRole,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<int> get avgResponseTime => $composableBuilder(
+      column: $table.avgResponseTime,
+      builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<Map<String, dynamic>, Map<String, dynamic>,
           String>
@@ -10939,6 +13801,13 @@ class $$UsersTableOrderingComposer
   ColumnOrderings<bool> get banned => $composableBuilder(
       column: $table.banned, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get teamsRole => $composableBuilder(
+      column: $table.teamsRole, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get avgResponseTime => $composableBuilder(
+      column: $table.avgResponseTime,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get extraData => $composableBuilder(
       column: $table.extraData, builder: (column) => ColumnOrderings(column));
 }
@@ -10976,6 +13845,13 @@ class $$UsersTableAnnotationComposer
   GeneratedColumn<bool> get banned =>
       $composableBuilder(column: $table.banned, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<Map<String, String>?, String>
+      get teamsRole => $composableBuilder(
+          column: $table.teamsRole, builder: (column) => column);
+
+  GeneratedColumn<int> get avgResponseTime => $composableBuilder(
+      column: $table.avgResponseTime, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       get extraData => $composableBuilder(
           column: $table.extraData, builder: (column) => column);
@@ -11012,6 +13888,8 @@ class $$UsersTableTableManager extends RootTableManager<
             Value<DateTime?> lastActive = const Value.absent(),
             Value<bool> online = const Value.absent(),
             Value<bool> banned = const Value.absent(),
+            Value<Map<String, String>?> teamsRole = const Value.absent(),
+            Value<int?> avgResponseTime = const Value.absent(),
             Value<Map<String, dynamic>> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -11024,6 +13902,8 @@ class $$UsersTableTableManager extends RootTableManager<
             lastActive: lastActive,
             online: online,
             banned: banned,
+            teamsRole: teamsRole,
+            avgResponseTime: avgResponseTime,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -11036,6 +13916,8 @@ class $$UsersTableTableManager extends RootTableManager<
             Value<DateTime?> lastActive = const Value.absent(),
             Value<bool> online = const Value.absent(),
             Value<bool> banned = const Value.absent(),
+            Value<Map<String, String>?> teamsRole = const Value.absent(),
+            Value<int?> avgResponseTime = const Value.absent(),
             required Map<String, dynamic> extraData,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -11048,6 +13930,8 @@ class $$UsersTableTableManager extends RootTableManager<
             lastActive: lastActive,
             online: online,
             banned: banned,
+            teamsRole: teamsRole,
+            avgResponseTime: avgResponseTime,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -11079,7 +13963,10 @@ typedef $$MembersTableCreateCompanionBuilder = MembersCompanion Function({
   Value<bool> invited,
   Value<bool> banned,
   Value<bool> shadowBanned,
+  Value<DateTime?> pinnedAt,
+  Value<DateTime?> archivedAt,
   Value<bool> isModerator,
+  Value<Map<String, dynamic>?> extraData,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -11093,7 +13980,10 @@ typedef $$MembersTableUpdateCompanionBuilder = MembersCompanion Function({
   Value<bool> invited,
   Value<bool> banned,
   Value<bool> shadowBanned,
+  Value<DateTime?> pinnedAt,
+  Value<DateTime?> archivedAt,
   Value<bool> isModerator,
+  Value<Map<String, dynamic>?> extraData,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -11108,8 +13998,10 @@ final class $$MembersTableReferences
           $_aliasNameGenerator(db.members.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -11149,8 +14041,20 @@ class $$MembersTableFilterComposer
   ColumnFilters<bool> get shadowBanned => $composableBuilder(
       column: $table.shadowBanned, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<DateTime> get pinnedAt => $composableBuilder(
+      column: $table.pinnedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
+          String>
+      get extraData => $composableBuilder(
+          column: $table.extraData,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -11212,8 +14116,17 @@ class $$MembersTableOrderingComposer
       column: $table.shadowBanned,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get pinnedAt => $composableBuilder(
+      column: $table.pinnedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get extraData => $composableBuilder(
+      column: $table.extraData, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
@@ -11272,8 +14185,18 @@ class $$MembersTableAnnotationComposer
   GeneratedColumn<bool> get shadowBanned => $composableBuilder(
       column: $table.shadowBanned, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get pinnedAt =>
+      $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get archivedAt => $composableBuilder(
+      column: $table.archivedAt, builder: (column) => column);
+
   GeneratedColumn<bool> get isModerator => $composableBuilder(
       column: $table.isModerator, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      get extraData => $composableBuilder(
+          column: $table.extraData, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -11333,7 +14256,10 @@ class $$MembersTableTableManager extends RootTableManager<
             Value<bool> invited = const Value.absent(),
             Value<bool> banned = const Value.absent(),
             Value<bool> shadowBanned = const Value.absent(),
+            Value<DateTime?> pinnedAt = const Value.absent(),
+            Value<DateTime?> archivedAt = const Value.absent(),
             Value<bool> isModerator = const Value.absent(),
+            Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -11347,7 +14273,10 @@ class $$MembersTableTableManager extends RootTableManager<
             invited: invited,
             banned: banned,
             shadowBanned: shadowBanned,
+            pinnedAt: pinnedAt,
+            archivedAt: archivedAt,
             isModerator: isModerator,
+            extraData: extraData,
             createdAt: createdAt,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -11361,7 +14290,10 @@ class $$MembersTableTableManager extends RootTableManager<
             Value<bool> invited = const Value.absent(),
             Value<bool> banned = const Value.absent(),
             Value<bool> shadowBanned = const Value.absent(),
+            Value<DateTime?> pinnedAt = const Value.absent(),
+            Value<DateTime?> archivedAt = const Value.absent(),
             Value<bool> isModerator = const Value.absent(),
+            Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -11375,7 +14307,10 @@ class $$MembersTableTableManager extends RootTableManager<
             invited: invited,
             banned: banned,
             shadowBanned: shadowBanned,
+            pinnedAt: pinnedAt,
+            archivedAt: archivedAt,
             isModerator: isModerator,
+            extraData: extraData,
             createdAt: createdAt,
             updatedAt: updatedAt,
             rowid: rowid,
@@ -11459,8 +14394,10 @@ final class $$ReadsTableReferences
       .createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -12052,6 +14989,10 @@ class $DriftChatDatabaseManager {
       $$ChannelsTableTableManager(_db, _db.channels);
   $$MessagesTableTableManager get messages =>
       $$MessagesTableTableManager(_db, _db.messages);
+  $$DraftMessagesTableTableManager get draftMessages =>
+      $$DraftMessagesTableTableManager(_db, _db.draftMessages);
+  $$LocationsTableTableManager get locations =>
+      $$LocationsTableTableManager(_db, _db.locations);
   $$PinnedMessagesTableTableManager get pinnedMessages =>
       $$PinnedMessagesTableTableManager(_db, _db.pinnedMessages);
   $$PollsTableTableManager get polls =>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamSendingIndicator}
@@ -45,6 +46,6 @@ class StreamSendingIndicator extends StatelessWidget {
         color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
       );
     }
-    return const SizedBox();
+    return const Empty();
   }
 }

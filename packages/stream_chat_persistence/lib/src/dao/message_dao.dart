@@ -36,7 +36,11 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<void> deleteMessageByCids(List<String> cids) async =>
       (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
-  Future<Message> _messageFromJoinRow(TypedResult rows) async {
+  Future<Message> _messageFromJoinRow(
+    TypedResult rows, {
+    bool fetchDraft = false,
+    bool fetchSharedLocation = false,
+  }) async {
     final userEntity = rows.readTableOrNull(_users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
     final msgEntity = rows.readTable(messages);
@@ -45,16 +49,30 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       msgEntity.id,
       _db.userId,
     );
-    Message? quotedMessage;
-    final quotedMessageId = msgEntity.quotedMessageId;
-    if (quotedMessageId != null) {
-      quotedMessage = await getMessageById(quotedMessageId);
-    }
-    Poll? poll;
-    final pollId = msgEntity.pollId;
-    if (pollId != null) {
-      poll = await _db.pollDao.getPollById(pollId);
-    }
+
+    final quotedMessage = await switch (msgEntity.quotedMessageId) {
+      final id? => getMessageById(id),
+      _ => null,
+    };
+
+    final poll = await switch (msgEntity.pollId) {
+      final id? => _db.pollDao.getPollById(id),
+      _ => null,
+    };
+
+    final draft = await switch (fetchDraft) {
+      true => _db.draftMessageDao.getDraftMessageByCid(
+          msgEntity.channelCid,
+          parentId: msgEntity.id,
+        ),
+      _ => null,
+    };
+
+    final sharedLocation = await switch (fetchSharedLocation) {
+      true => _db.locationDao.getLocationByMessageId(msgEntity.id),
+      _ => null,
+    };
+
     return msgEntity.toMessage(
       user: userEntity?.toUser(),
       pinnedBy: pinnedByEntity?.toUser(),
@@ -62,21 +80,38 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       ownReactions: ownReactions,
       quotedMessage: quotedMessage,
       poll: poll,
+      draft: draft,
+      sharedLocation: sharedLocation,
     );
   }
 
-  /// Returns a single message by matching the [Messages.id] with [id]
-  Future<Message?> getMessageById(String id) async =>
-      await (select(messages).join([
-        leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-        leftOuterJoin(
-          _pinnedByUsers,
-          messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-        ),
-      ])
-            ..where(messages.id.equals(id)))
-          .map(_messageFromJoinRow)
-          .getSingleOrNull();
+  /// Returns a single message by matching the [Messages.id] with [id].
+  ///
+  /// If [fetchDraft] is true, it will also fetch the draft message for the
+  /// message.
+  Future<Message?> getMessageById(
+    String id, {
+    bool fetchDraft = true,
+    bool fetchSharedLocation = true,
+  }) async {
+    final query = select(messages).join([
+      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+      leftOuterJoin(
+        _pinnedByUsers,
+        messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+      ),
+    ])
+      ..where(messages.id.equals(id));
+
+    final result = await query.getSingleOrNull();
+    if (result == null) return null;
+
+    return _messageFromJoinRow(
+      result,
+      fetchDraft: fetchDraft,
+      fetchSharedLocation: fetchSharedLocation,
+    );
+  }
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.channelCid] with [cid]
@@ -122,9 +157,9 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
           msgList.removeRange(lessThanIndex, msgList.length);
         }
       }
-      if (options?.greaterThanOrEqual != null) {
+      if (options?.greaterThan != null) {
         final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == options!.greaterThanOrEqual,
+          (m) => m.id == options!.greaterThan,
         );
         if (greaterThanIndex != -1) {
           msgList.removeRange(0, greaterThanIndex);
@@ -142,22 +177,33 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   /// [Messages.channelCid] with [parentId]
   Future<List<Message>> getMessagesByCid(
     String cid, {
+    bool fetchDraft = true,
+    bool fetchSharedLocation = true,
     PaginationParams? messagePagination,
   }) async {
-    final msgList = await Future.wait(await (select(messages).join([
+    final query = select(messages).join([
       leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
       leftOuterJoin(
         _pinnedByUsers,
         messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
       ),
     ])
-          ..where(messages.channelCid.equals(cid))
-          ..where(
-            messages.parentId.isNull() | messages.showInChannel.equals(true),
-          )
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
-        .map(_messageFromJoinRow)
-        .get());
+      ..where(messages.channelCid.equals(cid))
+      ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
+      ..orderBy([OrderingTerm.asc(messages.createdAt)]);
+
+    final result = await query.get();
+    if (result.isEmpty) return [];
+
+    final msgList = await Future.wait(
+      result.map(
+        (row) => _messageFromJoinRow(
+          row,
+          fetchDraft: fetchDraft,
+          fetchSharedLocation: fetchSharedLocation,
+        ),
+      ),
+    );
 
     if (msgList.isNotEmpty) {
       if (messagePagination?.lessThan != null) {
@@ -168,9 +214,9 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
           msgList.removeRange(lessThanIndex, msgList.length);
         }
       }
-      if (messagePagination?.greaterThanOrEqual != null) {
+      if (messagePagination?.greaterThan != null) {
         final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination!.greaterThanOrEqual,
+          (m) => m.id == messagePagination!.greaterThan,
         );
         if (greaterThanIndex != -1) {
           msgList.removeRange(0, greaterThanIndex);

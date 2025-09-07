@@ -2,4 +2,5 @@
 #
 # Ensure this file is checked in to source control!
 
+gem 'fastlane-plugin-stream_actions'
 gem 'fastlane-plugin-firebase_app_distribution'

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamTypingIndicator}
@@ -36,7 +37,7 @@ class StreamTypingIndicator extends StatelessWidget {
     final channelState =
         channel?.state ?? StreamChannel.of(context).channel.state!;
 
-    final altWidget = alternativeWidget ?? const Offstage();
+    final altWidget = alternativeWidget ?? const Empty();
 
     return BetterStreamBuilder<Iterable<User>>(
       initialData: channelState.typingEvents.keys,

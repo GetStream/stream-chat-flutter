@@ -18,6 +18,8 @@ void main() {
       lastActive: DateTime.now(),
       online: math.Random().nextBool(),
       banned: math.Random().nextBool(),
+      teamsRole: const {'teamId': 'role', 'teamId2': 'role2'},
+      avgResponseTime: 120,
       extraData: {'test_extra_data': 'extraData'},
     );
     final user = entity.toUser();
@@ -30,6 +32,8 @@ void main() {
     expect(user.lastActive, isSameDateAs(entity.lastActive));
     expect(user.online, entity.online);
     expect(user.banned, entity.banned);
+    expect(user.teamsRole, entity.teamsRole);
+    expect(user.avgResponseTime, entity.avgResponseTime);
     expect(user.extraData, entity.extraData);
   });
 
@@ -43,6 +47,8 @@ void main() {
       lastActive: DateTime.now(),
       online: math.Random().nextBool(),
       banned: math.Random().nextBool(),
+      teamsRole: const {'teamId': 'role', 'teamId2': 'role2'},
+      avgResponseTime: 120,
       extraData: const {'test_extra_data': 'extraData'},
     );
     final entity = user.toEntity();
@@ -55,6 +61,8 @@ void main() {
     expect(entity.lastActive, isSameDateAs(user.lastActive));
     expect(entity.online, user.online);
     expect(entity.banned, user.banned);
+    expect(entity.teamsRole, user.teamsRole);
+    expect(entity.avgResponseTime, user.avgResponseTime);
     expect(entity.extraData, user.extraData);
   });
 }

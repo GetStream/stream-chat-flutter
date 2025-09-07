@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Hindi (`hi`).
@@ -81,7 +83,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get messageDeletedText => 'यह संदेश हटा दिया गया है।';
 
   @override
-  String get messageDeletedLabel => 'संदेश हटाये';
+  String get messageDeletedLabel => 'संदेश हटा दिया गया';
+
+  @override
+  String get systemMessageLabel => 'सिस्टम संदेश';
 
   @override
   String get editedMessageLabel => 'संपादित';
@@ -164,8 +169,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'कृपया अपने फ़ोटो और वीडियो तक पहुंच सक्षम करें'
-      '\nताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
+      'कृपया अपने फ़ोटो और वीडियो तक पहुंच सक्षम करे ताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
 
   @override
   String get allowGalleryAccessMessage => 'अपनी गैलरी तक पहुंच की अनुमति दें';
@@ -174,8 +178,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get flagMessageLabel => 'फ्लैग संदेश';
 
   @override
-  String get flagMessageQuestion => 'क्या आप आगे की जांच के लिए इस संदेश की'
-      '\nएक प्रति मॉडरेटर को भेजना चाहते हैं?';
+  String get flagMessageQuestion =>
+      'क्या आप आगे की जांच के लिए इस संदेश की एक प्रति मॉडरेटर को भेजना चाहते हैं?';
 
   @override
   String get flagLabel => 'फ्लैग';
@@ -198,7 +202,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      'क्या आप वाकई इस संदेश को स्थायी रूप से\nहटाना चाहते हैं?';
+      'क्या आप वाकई इस संदेश को स्थायी रूप से हटाना चाहते हैं?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -441,8 +445,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'नए संदेश।';
 
   @override
-  String get enableFileAccessMessage => 'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि'
-      '\nआप उन्हें मित्रों के साथ साझा कर सकें।';
+  String get enableFileAccessMessage =>
+      'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
 
   @override
   String get allowFileAccessMessage => 'फाइलों तक पहुंच की अनुमति दें';
@@ -544,6 +548,13 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'अपनी टिप्पणी दर्ज करें';
 
   @override
+  String get endVoteConfirmationText =>
+      'क्या आप वाकई मतदान समाप्त करना चाहते हैं?';
+
+  @override
+  String get endLabel => 'समाप्त';
+
+  @override
   String get loadingPollVotesError => 'पोल वोट लोड करने में त्रुटि';
 
   @override
@@ -616,4 +627,54 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   @override
   String get holdToRecordLabel =>
       'रिकॉर्ड करने के लिए दबाए रखें, भेजने के लिए छोड़ें';
+
+  @override
+  String get sendAnywayLabel => 'फिर भी भेजें';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'मॉडरेशन नीतियों द्वारा संदेश अवरुद्ध किया गया';
+
+  @override
+  String get moderationReviewModalTitle => 'क्या आप निश्चित हैं?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''इस बात पर विचार करें कि आपकी टिप्पणी से दूसरों को कैसा महसूस हो सकता है और सुनिश्चित करें कि आप हमारे समुदाय दिशानिर्देशों का पालन करें।''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'ध्वनि रिकॉर्डिंग';
+
+  @override
+  String get audioAttachmentText => 'ऑडियो';
+
+  @override
+  String get imageAttachmentText => 'फोटो';
+
+  @override
+  String get videoAttachmentText => 'वीडियो';
+
+  @override
+  String get pollYouVotedText => 'आपने वोट दिया';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username ने वोट दिया';
+
+  @override
+  String get pollYouCreatedText => 'आपने बनाया';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username ने बनाया';
+
+  @override
+  String get draftLabel => 'ड्राफ्ट';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 लाइव लोकेशन';
+    return '📍 लोकेशन';
+  }
 }

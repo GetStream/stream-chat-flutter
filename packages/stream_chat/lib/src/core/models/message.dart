@@ -1,9 +1,16 @@
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/location.dart';
+import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
+import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
@@ -18,18 +25,17 @@ const _nullConst = _NullConst();
 
 /// The class that contains the information about a message.
 @JsonSerializable()
-class Message extends Equatable {
+class Message extends Equatable implements ComparableFieldProvider {
   /// Constructor used for json serialization.
   Message({
     String? id,
     this.text,
-    this.type = 'regular',
+    String type = MessageType.regular,
     this.attachments = const [],
     this.mentionedUsers = const [],
     this.silent = false,
     this.shadowed = false,
-    this.reactionCounts,
-    this.reactionScores,
+    this.reactionGroups,
     this.latestReactions,
     this.ownReactions,
     this.parentId,
@@ -56,7 +62,13 @@ class Message extends Equatable {
     this.extraData = const {},
     this.state = const MessageState.initial(),
     this.i18n,
+    this.restrictedVisibility,
+    this.moderation,
+    this.draft,
+    this.reminder,
+    this.sharedLocation,
   })  : id = id ?? const Uuid().v4(),
+        type = MessageType(type),
         pinExpires = pinExpires?.toUtc(),
         remoteCreatedAt = createdAt,
         remoteUpdatedAt = updatedAt,
@@ -92,15 +104,12 @@ class Message extends Equatable {
   final MessageState state;
 
   /// The message type.
-  @JsonKey(includeIfNull: false, toJson: _typeToJson)
-  final String type;
-
-  // We need to skip passing type if it's not regular or system as the API
-  // does not expect it.
-  static String? _typeToJson(String type) {
-    if (['regular', 'system'].contains(type)) return type;
-    return null;
-  }
+  @JsonKey(
+    includeIfNull: false,
+    toJson: MessageType.toJson,
+    fromJson: MessageType.fromJson,
+  )
+  final MessageType type;
 
   /// The list of attachments, either provided by the user or generated from a
   /// command or as a result of URL scraping.
@@ -111,13 +120,41 @@ class Message extends Equatable {
   @JsonKey(toJson: User.toIds)
   final List<User> mentionedUsers;
 
-  /// A map describing the count of number of every reaction.
-  @JsonKey(includeToJson: false)
-  final Map<String, int>? reactionCounts;
+  static Object? _reactionGroupsReadValue(
+    Map<Object?, Object?> json,
+    String key,
+  ) {
+    final reactionGroups = json[key] as Map<String, dynamic>?;
+    if (reactionGroups != null) return reactionGroups;
 
-  /// A map describing the count of score of every reaction.
-  @JsonKey(includeToJson: false)
-  final Map<String, int>? reactionScores;
+    final reactionCounts = json['reaction_counts'] as Map<String, dynamic>?;
+    final reactionScores = json['reaction_scores'] as Map<String, dynamic>?;
+    if (reactionCounts == null && reactionScores == null) return null;
+
+    final reactionTypes = {...?reactionCounts?.keys, ...?reactionScores?.keys};
+    if (reactionTypes.isEmpty) return null;
+
+    final groups = <String, dynamic>{};
+    for (final type in reactionTypes) {
+      final count = reactionCounts?[type] ?? 0;
+      final sumScores = reactionScores?[type] ?? 0;
+
+      if (count == 0 || sumScores == 0) continue;
+      final now = DateTime.timestamp();
+      groups[type] = {
+        'count': count,
+        'sum_scores': sumScores,
+        'first_reaction_at': now.toIso8601String(),
+        'last_reaction_at': now.toIso8601String(),
+      };
+    }
+
+    return groups;
+  }
+
+  /// A map of reaction types and their corresponding reaction groups.
+  @JsonKey(includeToJson: false, readValue: _reactionGroupsReadValue)
+  final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.
   @JsonKey(includeToJson: false)
@@ -166,7 +203,7 @@ class Message extends Equatable {
   /// Returns the latest between [localCreatedAt] and [remoteCreatedAt].
   /// If both are null, returns [DateTime.now].
   @JsonKey(includeToJson: false)
-  DateTime get createdAt => localCreatedAt ?? remoteCreatedAt ?? DateTime.now();
+  DateTime get createdAt => remoteCreatedAt ?? localCreatedAt ?? DateTime.now();
 
   /// Indicates when the message was created locally.
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -181,7 +218,7 @@ class Message extends Equatable {
   /// Returns the latest between [localUpdatedAt] and [remoteUpdatedAt].
   /// If both are null, returns [createdAt].
   @JsonKey(includeToJson: false)
-  DateTime get updatedAt => localUpdatedAt ?? remoteUpdatedAt ?? createdAt;
+  DateTime get updatedAt => remoteUpdatedAt ?? localUpdatedAt ?? createdAt;
 
   /// Indicates when the message was updated locally.
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -195,7 +232,7 @@ class Message extends Equatable {
   ///
   /// Returns the latest between [localDeletedAt] and [remoteDeletedAt].
   @JsonKey(includeToJson: false)
-  DateTime? get deletedAt => localDeletedAt ?? remoteDeletedAt;
+  DateTime? get deletedAt => remoteDeletedAt ?? localDeletedAt;
 
   /// Reserved field indicating when the message text was edited.
   @JsonKey(includeToJson: false)
@@ -237,20 +274,45 @@ class Message extends Equatable {
   String? get pollId => _pollId ?? poll?.id;
   final String? _pollId;
 
+  /// The list of user ids that should be able to see the message.
+  ///
+  /// If null or empty, the message is visible to all users.
+  /// If populated, only users whose ids are included in this list can see
+  /// the message.
+  @JsonKey(includeIfNull: false)
+  final List<String>? restrictedVisibility;
+
+  static Object? _moderationReadValue(Map<Object?, Object?> json, String key) {
+    // For backward compatibility, we fallback to 'moderation_details' key
+    // if 'moderation' key is not present.
+    return json[key] ?? json['moderation_details'];
+  }
+
+  /// The moderation details for this message.
+  @JsonKey(includeToJson: false, readValue: _moderationReadValue)
+  final Moderation? moderation;
+
+  /// Optional draft message linked to this message.
+  ///
+  /// This is present when the message is a thread i.e. contains replies.
+  @JsonKey(includeToJson: false)
+  final Draft? draft;
+
+  /// Optional reminder for this message.
+  ///
+  /// This is present when a user has set a reminder for this message.
+  @JsonKey(includeToJson: false)
+  final MessageReminder? reminder;
+
+  /// Optional shared location associated with this message.
+  ///
+  /// This is used to share a location in a message, allowing users to view the
+  /// location on a map.
+  @JsonKey(includeIfNull: false)
+  final Location? sharedLocation;
+
   /// Message custom extraData.
   final Map<String, Object?> extraData;
-
-  /// True if the message is a error.
-  bool get isError => type == 'error';
-
-  /// True if the message is a system info.
-  bool get isSystem => type == 'system';
-
-  /// True if the message has been deleted.
-  bool get isDeleted => type == 'deleted';
-
-  /// True if the message is ephemeral.
-  bool get isEphemeral => type == 'ephemeral';
 
   /// A Map of translations.
   @JsonKey(includeToJson: false)
@@ -271,6 +333,7 @@ class Message extends Equatable {
     'mentioned_users',
     'reaction_counts',
     'reaction_scores',
+    'reaction_groups',
     'silent',
     'parent_id',
     'quoted_message',
@@ -291,12 +354,29 @@ class Message extends Equatable {
     'i18n',
     'poll',
     'poll_id',
+    'restricted_visibility',
+    'moderation',
+    'moderation_details',
+    'draft',
+    'reminder',
+    'shared_location',
   ];
 
   /// Serialize to json.
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$MessageToJson(this),
-      );
+  Map<String, dynamic> toJson() {
+    final message = removeMentionsIfNotIncluded();
+    final json = Serializer.moveFromExtraDataToRoot(
+      _$MessageToJson(message),
+    );
+
+    // If the message contains command we should append it to the text
+    // before sending it.
+    if (command case final command? when command.isNotEmpty) {
+      json.update('text', (text) => '/$command $text', ifAbsent: () => null);
+    }
+
+    return json;
+  }
 
   /// Creates a copy of [Message] with specified attributes overridden.
   Message copyWith({
@@ -307,8 +387,7 @@ class Message extends Equatable {
     List<User>? mentionedUsers,
     bool? silent,
     bool? shadowed,
-    Map<String, int>? reactionCounts,
-    Map<String, int>? reactionScores,
+    Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
     String? parentId,
@@ -335,6 +414,11 @@ class Message extends Equatable {
     Map<String, Object?>? extraData,
     MessageState? state,
     Map<String, String>? i18n,
+    List<String>? restrictedVisibility,
+    Moderation? moderation,
+    Object? draft = _nullConst,
+    Object? reminder = _nullConst,
+    Location? sharedLocation,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -375,8 +459,7 @@ class Message extends Equatable {
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       silent: silent ?? this.silent,
       shadowed: shadowed ?? this.shadowed,
-      reactionCounts: reactionCounts ?? this.reactionCounts,
-      reactionScores: reactionScores ?? this.reactionScores,
+      reactionGroups: reactionGroups ?? this.reactionGroups,
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
@@ -408,6 +491,12 @@ class Message extends Equatable {
       extraData: extraData ?? this.extraData,
       state: state ?? this.state,
       i18n: i18n ?? this.i18n,
+      restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
+      moderation: moderation ?? this.moderation,
+      draft: draft == _nullConst ? this.draft : draft as Draft?,
+      reminder:
+          reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
+      sharedLocation: sharedLocation ?? this.sharedLocation,
     );
   }
 
@@ -422,8 +511,7 @@ class Message extends Equatable {
       mentionedUsers: other.mentionedUsers,
       silent: other.silent,
       shadowed: other.shadowed,
-      reactionCounts: other.reactionCounts,
-      reactionScores: other.reactionScores,
+      reactionGroups: other.reactionGroups,
       latestReactions: other.latestReactions,
       ownReactions: other.ownReactions,
       parentId: other.parentId,
@@ -450,6 +538,11 @@ class Message extends Equatable {
       extraData: other.extraData,
       state: other.state,
       i18n: other.i18n,
+      restrictedVisibility: other.restrictedVisibility,
+      moderation: other.moderation,
+      draft: other.draft,
+      reminder: other.reminder,
+      sharedLocation: other.sharedLocation,
     );
   }
 
@@ -482,8 +575,7 @@ class Message extends Equatable {
         type,
         attachments,
         mentionedUsers,
-        reactionCounts,
-        reactionScores,
+        reactionGroups,
         latestReactions,
         ownReactions,
         parentId,
@@ -512,5 +604,305 @@ class Message extends Equatable {
         extraData,
         state,
         i18n,
+        restrictedVisibility,
+        moderation,
+        draft,
+        reminder,
+        sharedLocation,
       ];
+
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      MessageSortKey.id => id,
+      MessageSortKey.createdAt => createdAt,
+      MessageSortKey.updatedAt => updatedAt,
+      _ => extraData[sortKey],
+    };
+
+    return ComparableField.fromValue(value);
+  }
+}
+
+/// Extension type representing sortable fields for [Message].
+///
+/// This type provides type-safe keys that can be used for sorting messages
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const MessageSortKey(String key) implements String {
+  /// Sort messages by their unique ID.
+  static const id = MessageSortKey('id');
+
+  /// Sort messages by their creation date.
+  ///
+  /// This is the default sort field (in descending order).
+  static const createdAt = MessageSortKey('created_at');
+
+  /// Sort messages by their last update date.
+  static const updatedAt = MessageSortKey('updated_at');
+}
+
+/// {@template messageType}
+/// A type of the message that determines how the message is displayed and
+/// handled by the system.
+/// {@endtemplate}
+extension type const MessageType(String rawType) implements String {
+  /// A regular message created in the channel.
+  static const regular = MessageType('regular');
+
+  /// A temporary message which is only delivered to one user and not stored in
+  /// the channel history.
+  ///
+  /// Ephemeral messages are normally used by commands (e.g. /giphy) to prompt
+  /// messages or request for actions.
+  static const ephemeral = MessageType('ephemeral');
+
+  /// An error message generated as a result of a failed command.
+  static const error = MessageType('error');
+
+  /// The message is a reply to another message.
+  static const reply = MessageType('reply');
+
+  /// A message generated by a system event.
+  static const system = MessageType('system');
+
+  /// A deleted message.
+  static const deleted = MessageType('deleted');
+
+  /// Create a new instance from a json string.
+  static MessageType fromJson(String rawType) => MessageType(rawType);
+
+  /// Serialize to json string.
+  static String? toJson(String type) {
+    // We need to skip passing type if it's not regular or system as the API
+    // does not expect it.
+    if ([MessageType.regular, MessageType.system].contains(type)) {
+      return type;
+    }
+
+    return null;
+  }
+}
+
+/// Extension that adds message type functionality to Message objects.
+///
+/// This extension provides methods to determine the type of a message based on
+/// the [Message.type] field.
+extension MessageTypeHelper on Message {
+  /// True if the message is a regular message.
+  bool get isRegular => type == MessageType.regular;
+
+  /// True if the message is ephemeral.
+  bool get isEphemeral => type == MessageType.ephemeral;
+
+  /// True if the message is a error.
+  bool get isError => type == MessageType.error;
+
+  /// True if the message is a reply to another message.
+  bool get isReply => type == MessageType.reply;
+
+  /// True if the message is a system info.
+  bool get isSystem => type == MessageType.system;
+
+  /// True if the message has been deleted.
+  bool get isDeleted => type == MessageType.deleted;
+}
+
+/// Extension that adds visibility control functionality to Message objects.
+///
+/// This extension provides methods to determine if a message is visible to a
+/// specific user based on the [Message.restrictedVisibility] list.
+extension MessageVisibility on Message {
+  /// Checks if this message has any visibility restrictions applied.
+  ///
+  /// Returns true if the restrictedVisibility list exists and contains at
+  /// least one entry, indicating that visibility of this message is restricted
+  /// to specific users.
+  ///
+  /// Returns false if the restrictedVisibility list is null or empty,
+  /// indicating that this message is visible to all users.
+  bool get hasRestrictedVisibility {
+    final visibility = restrictedVisibility;
+    if (visibility == null || visibility.isEmpty) return false;
+
+    return true;
+  }
+
+  /// Determines if a message is visible to a specific user based on
+  /// restricted visibility settings.
+  ///
+  /// Returns true in the following cases:
+  /// - The restrictedVisibility list is null or empty (visible to everyone)
+  /// - The provided userId is found in the restrictedVisibility list
+  ///
+  /// Returns false if the restrictedVisibility list exists and doesn't
+  /// contain the provided userId.
+  ///
+  /// [userId] The unique identifier of the user to check visibility for.
+  bool isVisibleTo(String userId) {
+    final visibility = restrictedVisibility;
+    if (visibility == null || visibility.isEmpty) return true;
+
+    return visibility.contains(userId);
+  }
+
+  /// Determines if a message is not visible to a specific user based on
+  /// restricted visibility settings.
+  ///
+  /// Returns true if the restrictedVisibility list exists and doesn't
+  /// contain the provided userId.
+  ///
+  /// Returns false in the following cases:
+  /// - The restrictedVisibility list is null or empty (visible to everyone)
+  /// - The provided userId is found in the restrictedVisibility list
+  ///
+  /// [userId] The unique identifier of the user to check visibility for.
+  bool isNotVisibleTo(String userId) => !isVisibleTo(userId);
+}
+
+/// Extension that adds moderation functionality to Message objects.
+///
+/// This extension provides methods to determine if a message is flagged,
+/// bounced, removed, or shadowed by the moderation system.
+extension MessageModerationHelper on Message {
+  /// True if the message is flagged by the moderation system.
+  bool get isFlagged => moderation?.action == ModerationAction.flag;
+
+  /// True if the message is bounced by the moderation system.
+  bool get isBounced => moderation?.action == ModerationAction.bounce;
+
+  /// True if the message is removed by the moderation system.
+  bool get isRemoved => moderation?.action == ModerationAction.remove;
+
+  /// True if the message is shadowed by the moderation system.
+  bool get isShadowed => moderation?.action == ModerationAction.shadow;
+
+  /// True if the message is bounced with an error by the moderation system.
+  bool get isBouncedWithError => isBounced && isError;
+}
+
+extension on Message {
+  /// Removes mentions from the message if they are not included in the text.
+  ///
+  /// This is useful for cleaning up the list of mentioned users before
+  /// sending the message.
+  Message removeMentionsIfNotIncluded() {
+    if (mentionedUsers.isEmpty) return this;
+
+    final messageTextToSend = text;
+    if (messageTextToSend == null) return this;
+
+    final updatedMentionedUsers = [...mentionedUsers];
+    for (final user in mentionedUsers.toSet()) {
+      if (messageTextToSend.contains('@${user.id}')) continue;
+      if (messageTextToSend.contains('@${user.name}')) continue;
+
+      updatedMentionedUsers.remove(user);
+    }
+
+    return copyWith(mentionedUsers: updatedMentionedUsers);
+  }
+}
+
+/// Extension that adds reaction manipulation functionality to Message objects.
+///
+/// This extension provides methods to add and delete reactions to/from messages,
+/// with proper handling of reaction counts, scores, and timestamps.
+extension MessageReactionHelper on Message {
+  /// Adds a new reaction to the message.
+  ///
+  /// If [enforceUnique] is set to true, it will remove the existing current
+  /// user's reaction before adding the new one.
+  Message addMyReaction(
+    Reaction reaction, {
+    bool enforceUnique = false,
+  }) {
+    var updatedMessage = this;
+
+    // If we are enforcing unique reactions, we need to delete the existing
+    // reaction before adding the new one.
+    if (enforceUnique) updatedMessage = updatedMessage.deleteMyReaction();
+
+    final ownReactions = <Reaction>[...?updatedMessage.ownReactions];
+    final latestReactions = <Reaction>[...?updatedMessage.latestReactions];
+    final reactionGroups = <String, ReactionGroup>{
+      ...?updatedMessage.reactionGroups,
+    };
+
+    // Add the new reaction to the own reactions and latest reactions.
+    ownReactions.insert(0, reaction);
+    latestReactions.insert(0, reaction);
+
+    // Update the reaction groups.
+    reactionGroups.update(
+      reaction.type,
+      (it) => it.copyWith(
+        count: it.count + 1,
+        sumScores: it.sumScores + reaction.score,
+        firstReactionAt: [it.firstReactionAt, reaction.createdAt].minOrNull,
+        lastReactionAt: [it.lastReactionAt, reaction.createdAt].maxOrNull,
+      ),
+      ifAbsent: () => ReactionGroup(
+        count: 1,
+        sumScores: reaction.score,
+        firstReactionAt: reaction.createdAt,
+        lastReactionAt: reaction.createdAt,
+      ),
+    );
+
+    return updatedMessage.copyWith(
+      ownReactions: ownReactions,
+      latestReactions: latestReactions,
+      reactionGroups: reactionGroups,
+    );
+  }
+
+  /// Deletes all the current user's reactions from the message.
+  ///
+  /// Optionally, you can specify a [reactionType] to delete only that specific
+  /// current user's reaction.
+  Message deleteMyReaction({
+    String? reactionType,
+  }) {
+    final reactionsToDelete = this.ownReactions?.where((it) {
+      if (reactionType != null) return it.type == reactionType;
+      return true;
+    });
+
+    // If there are no reactions to delete, we can return the message as is.
+    if (reactionsToDelete == null || reactionsToDelete.isEmpty) return this;
+
+    final ownReactions = <Reaction>[...?this.ownReactions];
+    final latestReactions = <Reaction>[...?this.latestReactions];
+    final reactionGroups = <String, ReactionGroup>{...?this.reactionGroups};
+
+    for (final reaction in reactionsToDelete) {
+      final type = reaction.type;
+
+      bool match(Reaction r) => r.type == type && r.userId == reaction.userId;
+
+      // Remove from own reactions and latest reactions.
+      ownReactions.removeWhere(match);
+      latestReactions.removeWhere(match);
+
+      final group = reactionGroups.remove(type);
+      if (group == null) continue;
+
+      // Update the reaction group.
+      final updatedCount = group.count - 1;
+      final updatedSumScores = group.sumScores - reaction.score;
+
+      if (updatedCount > 0 && updatedSumScores > 0) {
+        reactionGroups[type] = group.copyWith(
+          count: updatedCount,
+          sumScores: updatedSumScores,
+        );
+      }
+    }
+
+    return copyWith(
+      ownReactions: ownReactions,
+      latestReactions: latestReactions,
+      reactionGroups: reactionGroups,
+    );
+  }
 }

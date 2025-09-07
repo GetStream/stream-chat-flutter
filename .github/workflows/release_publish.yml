@@ -1,0 +1,68 @@
+name: release_publish
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+' # tag-pattern for regular releases
+      - 'v[0-9]+.[0-9]+.[0-9]+-*' # tag-pattern for pre-releases
+  workflow_dispatch: # Allow manual triggering of the workflow
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    permissions:
+      contents: write  # Required to creating release
+      id-token: write # Required for authentication using OIDC
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+
+      # Set up the Dart SDK and provision the OIDC token used for publishing.
+      - name: 🎯 Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: 🐦 Install Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: 📦 Install Tools
+        run: flutter pub global activate melos
+
+      - name: 🔧 Bootstrap Workspace
+        run: melos bootstrap --verbose
+
+      - name: 🌵 Dry Run
+        run: melos run lint:pub
+
+      - name: 📢 Release to pub.dev
+        run: melos run release:pub
+
+      - name: 🏷️ Extract Version Info
+        id: extract_version
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          tag_name="${{ github.ref_name }}"
+          echo "📦 Tag: $tag_name"
+          
+          # Check if this is a pre-release (contains hyphen after version)
+          is_prerelease=$([[ $tag_name == *-* ]] && echo true || echo false)
+          echo "ℹ️ Pre-release: $is_prerelease"
+          
+          echo "tag=$tag_name" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$is_prerelease" >> "$GITHUB_OUTPUT"
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          tag_name: ${{ steps.extract_version.outputs.tag }}
+          prerelease: ${{ steps.extract_version.outputs.prerelease }}
+          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}

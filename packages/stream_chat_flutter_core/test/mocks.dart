@@ -29,16 +29,27 @@ class MockClientState extends Mock implements ClientState {
       );
 }
 
-class MockChannel extends Mock implements Channel {
+class NonInitializedMockChannel extends Mock implements Channel {
+  StreamChatClient? _client;
+
+  @override
+  StreamChatClient get client => _client ??= MockClient();
+
+  @override
+  ChannelClientState? get state => null;
+
+  @override
+  Future<bool> get initialized async => false;
+}
+
+class MockChannel extends NonInitializedMockChannel {
   ChannelClientState? _state;
 
   @override
   ChannelClientState get state => _state ??= MockChannelState();
 
-  StreamChatClient? _client;
-
   @override
-  StreamChatClient get client => _client ??= MockClient();
+  Future<bool> get initialized async => true;
 }
 
 class MockChannelState extends Mock implements ChannelClientState {}

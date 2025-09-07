@@ -25,13 +25,14 @@ command:
     # List of all the dependencies used in the project.
     dependencies:
       async: ^2.11.0
+      avatar_glow: ^3.0.0
       cached_network_image: ^3.3.1
       chewie: ^1.8.1
       collection: ^1.17.2
       connectivity_plus: ^6.0.3
-      contextmenu: ^3.0.0
       cupertino_icons: ^1.0.3
-      desktop_drop: ^0.5.0
+      desktop_drop: '>=0.5.0 <0.7.0'
+      device_info_plus: '>=10.1.2 <12.0.0'
       diacritic: ^0.1.5
       dio: ^5.4.3+1
       drift: ^2.22.1
@@ -39,17 +40,20 @@ command:
       ezanimation: ^0.6.0
       firebase_core: ^3.0.0
       firebase_messaging: ^15.0.0
-      file_picker: ^10.0.0
+      file_picker: ^10.1.2
       file_selector: ^1.0.3
       flutter_app_badger: ^1.5.0
       flutter_local_notifications: ^18.0.1
+      flutter_map: ^8.1.1
+      flutter_map_animations: ^0.9.0
       flutter_markdown: ^0.7.2+1
       flutter_portal: ^1.1.4
       flutter_secure_storage: ^9.2.2
       flutter_slidable: ^3.1.1
       flutter_svg: ^2.0.10+1
-      freezed_annotation: ^2.4.1
+      freezed_annotation: ">=2.4.1 <4.0.0"
       gal: ^2.3.1
+      geolocator: ^13.0.0
       get_thumbnail_video: ^0.7.3
       go_router: ^14.6.2
       http_parser: ^4.0.2
@@ -58,24 +62,26 @@ command:
       jiffy: ^6.2.1
       jose: ^0.3.4
       json_annotation: ^4.9.0
-      just_audio: ^0.9.46
+      just_audio: ">=0.9.38 <0.11.0"
+      latlong2: ^0.9.1
       logging: ^1.2.0
       lottie: ^3.1.2
       media_kit: ^1.1.10+1
       media_kit_video: ^1.2.4
       meta: ^1.9.1
       mime: ^2.0.0
+      package_info_plus: ^8.3.0
       path: ^1.8.3
       path_provider: ^2.1.3
       photo_manager: ^3.2.0
       photo_view: ^0.15.0
       provider: ^6.0.5
       rate_limiter: ^1.0.0
-      record: ^5.2.0
+      record: ">=5.2.0 <7.0.0"
       responsive_builder: ^0.7.0
       rxdart: ^0.28.0
       sentry_flutter: ^8.3.0
-      share_plus: ^10.0.2
+      share_plus: ^11.0.0
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
       stream_chat:
@@ -88,7 +94,6 @@ command:
         path: ../stream_chat_localizations
       stream_chat_persistence:
         path: ../stream_chat_persistence
-      streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
@@ -99,19 +104,23 @@ command:
 
     # List of all the dev_dependencies used in the project.
     dev_dependencies:
-      alchemist: ^0.11.0
+      alchemist: ">=0.11.0 <0.13.0"
       build_runner: ^2.4.9
       drift_dev: ^2.22.1
       fake_async: ^1.3.1
       faker_dart: ^0.2.1
       flutter_launcher_icons: ^0.14.2
-      freezed: ^2.4.2
+      freezed: ">=2.4.2 <4.0.0"
       json_serializable: ^6.7.1
       mocktail: ^1.0.0
       path: ^1.8.3
       path_provider_platform_interface: ^2.0.0
       plugin_platform_interface: ^2.0.0
       test: ^1.24.6
+
+    hooks:
+      # Updates the version.dart file after bootstrapping with the current version from pubspec.yaml
+      post: melos run version:update
 
 scripts:
   postclean:
@@ -148,12 +157,8 @@ scripts:
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
   lint:pub:
-    run: |
-      melos exec -c 5 --no-private --ignore="*example*" -- \
-            flutter pub publish --dry-run
-    description: |
-      Run `pub publish --dry-run` in all packages.
-       - Note: you can also rely on your IDEs Dart Analysis / Issues window.
+    run: melos exec -c 1 --no-published --no-private --order-dependents -- "flutter pub publish -n"
+    description: Dry run `pub publish` in all packages.
 
   generate:all:
     run: melos run generate:dart && melos run generate:flutter
@@ -166,6 +171,10 @@ scripts:
   generate:flutter:
     run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
     description: Build all generated files for Flutter packages in this project.
+
+  version:update:
+    run: dart tools/generate_version.dart
+    description: Updates the version.dart file in stream_chat package based on pubspec.yaml version.
 
   test:all:
     run: melos run test:dart --no-select && melos run test:flutter --no-select
@@ -201,3 +210,7 @@ scripts:
     description: Removes all the ignored files from the coverage report.
     packageFilters:
       dirExists: coverage
+
+  release:pub:
+    run: melos exec -c 1 --no-published --no-private --order-dependents -- "flutter pub publish -f"
+    description: Publish all packages to pub.dev.

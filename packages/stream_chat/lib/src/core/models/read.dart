@@ -12,8 +12,8 @@ class Read extends Equatable {
     required this.lastRead,
     required this.user,
     this.lastReadMessageId,
-    this.unreadMessages = 0,
-  });
+    int? unreadMessages,
+  }) : unreadMessages = unreadMessages ?? 0;
 
   /// Create a new instance from a json
   factory Read.fromJson(Map<String, dynamic> json) => _$ReadFromJson(json);

@@ -1,12 +1,18 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/stream_channel_list_event_handler.dart';
 
 /// The default channel page limit to load.
 const defaultChannelPagedLimit = 10;
+
+/// The default sort used for the channel list.
+const defaultChannelListSort = [
+  SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated),
+];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -44,21 +50,21 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     required this.client,
     StreamChannelListEventHandler? eventHandler,
     this.filter,
-    this.channelStateSort,
+    this.channelStateSort = defaultChannelListSort,
     this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  })
-      : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
+  })  : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
         super(const PagedValue.loading());
 
   /// Creates a [StreamChannelListController] from the passed [value].
-  StreamChannelListController.fromValue(super.value, {
+  StreamChannelListController.fromValue(
+    super.value, {
     required this.client,
     StreamChannelListEventHandler? eventHandler,
     this.filter,
-    this.channelStateSort,
+    this.channelStateSort = defaultChannelListSort,
     this.presence = true,
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
@@ -87,7 +93,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// created_at or member_count.
   ///
   /// Direction can be ascending or descending.
-  final List<SortOption<ChannelState>>? channelStateSort;
+  final SortOrder<ChannelState>? channelStateSort;
 
   /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
@@ -101,6 +107,22 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
 
   /// Number of members to fetch in each channel.
   final int? memberLimit;
+
+  @override
+  set value(PagedValue<int, Channel> newValue) {
+    super.value = switch (channelStateSort) {
+      null => newValue,
+      final channelSort => newValue.maybeMap(
+          orElse: () => newValue,
+          (success) => success.copyWith(
+            items: success.items.sortedByCompare(
+              (it) => it.state!.channelState,
+              channelSort.compare,
+            ),
+          ),
+        ),
+    };
+  }
 
   @override
   Future<void> doInitialLoad() async {
@@ -234,7 +256,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       } else if (eventType == EventType.channelTruncated) {
         _eventHandler.onChannelTruncated(event, this);
       } else if (eventType == EventType.channelUpdated) {
-        _eventHandler.onChannelUpdated(event, this, filter: filter);
+        _eventHandler.onChannelUpdated(event, this);
       } else if (eventType == EventType.channelVisible) {
         _eventHandler.onChannelVisible(event, this);
       } else if (eventType == EventType.connectionRecovered) {
@@ -242,14 +264,15 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       } else if (eventType == EventType.messageNew) {
         _eventHandler.onMessageNew(event, this);
       } else if (eventType == EventType.notificationAddedToChannel) {
-        _eventHandler.onNotificationAddedToChannel(event, this, filter: filter);
+        _eventHandler.onNotificationAddedToChannel(event, this);
       } else if (eventType == EventType.notificationMessageNew) {
-        _eventHandler.onNotificationMessageNew(event, this, filter: filter);
+        _eventHandler.onNotificationMessageNew(event, this);
       } else if (eventType == EventType.notificationRemovedFromChannel) {
-        _eventHandler.onNotificationRemovedFromChannel(event, this, filter: filter);
-      } else if (eventType == 'user.presence.changed' ||
-          eventType == EventType.userUpdated) {
+        _eventHandler.onNotificationRemovedFromChannel(event, this);
+      } else if (eventType == 'user.presence.changed' || eventType == EventType.userUpdated) {
         _eventHandler.onUserPresenceChanged(event, this);
+      } else if (eventType == EventType.memberUpdated) {
+        _eventHandler.onMemberUpdated(event, this);
       }
     });
   }

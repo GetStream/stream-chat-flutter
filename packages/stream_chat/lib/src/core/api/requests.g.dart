@@ -6,18 +6,6 @@ part of 'requests.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SortOption<T> _$SortOptionFromJson<T>(Map<String, dynamic> json) =>
-    SortOption<T>(
-      json['field'] as String,
-      direction: (json['direction'] as num?)?.toInt() ?? SortOption.DESC,
-    );
-
-Map<String, dynamic> _$SortOptionToJson<T>(SortOption<T> instance) =>
-    <String, dynamic>{
-      'field': instance.field,
-      'direction': instance.direction,
-    };
-
 PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) =>
     PaginationParams(
       limit: (json['limit'] as num?)?.toInt() ?? 10,
@@ -87,4 +75,11 @@ Map<String, dynamic> _$ThreadOptionsToJson(ThreadOptions instance) =>
       'participant_limit': instance.participantLimit,
       'member_limit': instance.memberLimit,
       'props': instance.props,
+    };
+
+Map<String, dynamic> _$MemberUpdatePayloadToJson(
+        MemberUpdatePayload instance) =>
+    <String, dynamic>{
+      if (instance.archived case final value?) 'archived': value,
+      if (instance.pinned case final value?) 'pinned': value,
     };

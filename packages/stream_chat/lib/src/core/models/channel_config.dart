@@ -24,6 +24,9 @@ class ChannelConfig {
     this.typingEvents = false,
     this.uploads = false,
     this.urlEnrichment = false,
+    this.skipLastMsgUpdateForSystemMsgs = false,
+    this.userMessageReminders = false,
+    this.sharedLocations = false,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -78,6 +81,19 @@ class ChannelConfig {
 
   /// True if urls appears as attachments
   final bool urlEnrichment;
+
+  /// If true the last message at date will not be updated when a system message
+  /// is added.
+  ///
+  /// This is useful for scenarios where you want to track the last time a user
+  /// message was added to the channel.
+  final bool skipLastMsgUpdateForSystemMsgs;
+
+  /// True if the user can set reminders for messages in this channel.
+  final bool userMessageReminders;
+
+  /// True if shared locations are enabled for this channel.
+  final bool sharedLocations;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);

@@ -28,6 +28,7 @@ void main() {
         lastActive: DateTime.now(),
         online: math.Random().nextBool(),
         banned: math.Random().nextBool(),
+        teamsRole: const {'teamId': 'role', 'teamId2': 'role2'},
       ),
     );
     await userDao.updateUsers(users);
@@ -47,6 +48,7 @@ void main() {
       updatedAt: DateTime.now(),
       online: math.Random().nextBool(),
       banned: math.Random().nextBool(),
+      teamsRole: const {'teamId': 'role', 'teamId2': 'role2'},
     );
     await userDao.updateUsers([copyUser, newUser]);
 

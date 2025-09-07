@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Catalan (`ca`).
@@ -83,7 +85,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get messageDeletedText => 'Aquest missatge ha estat esborrat';
 
   @override
-  String get messageDeletedLabel => 'Missatge esborrat';
+  String get messageDeletedLabel => 'Missatge eliminat';
+
+  @override
+  String get systemMessageLabel => 'Missatge del sistema';
 
   @override
   String get editedMessageLabel => 'Editat';
@@ -169,8 +174,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      "Si us plau, permet l'accés a les teves fotos"
-      '\ni vídeos per a que puguis compartir-los';
+      "Si us plau, permet l'accés a les teves fotos i vídeos per a que puguis compartir-los";
 
   @override
   String get allowGalleryAccessMessage => "Permet l'accés a la galeria";
@@ -180,8 +184,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      "Vols enviar una còpia d'aquest missatge a un"
-      '\nmoderador per una major investigació?';
+      "Vols enviar una còpia d'aquest missatge a un moderador per una major investigació?";
 
   @override
   String get flagLabel => 'REPORTA';
@@ -204,7 +207,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      'Estàs segur que vols esborrar aquest\nmissatge de forma permanent?';
+      'Estàs segur que vols esborrar aquest missatge de forma permanent?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -446,8 +449,8 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'Missatges nous';
 
   @override
-  String get enableFileAccessMessage => "Habilita l'accés als fitxers"
-      '\nper poder compartir-los amb amics';
+  String get enableFileAccessMessage =>
+      "Habilita l'accés als fitxers per poder compartir-los amb amics";
 
   @override
   String get allowFileAccessMessage => "Permet l'accés als fitxers";
@@ -553,10 +556,17 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get updateYourCommentLabel => 'Actualitzar el vostre comentari';
 
   @override
-  String get enterYourCommentLabel => 'Introduïu el vostre comentari';
+  String get enterYourCommentLabel => 'Introdueix el teu comentari';
+
+  @override
+  String get endVoteConfirmationText =>
+      'Estàs segur que vols finalitzar la votació?';
 
   @override
   String get createLabel => 'Crear';
+
+  @override
+  String get endLabel => 'Finalitzar';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {
@@ -620,4 +630,54 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   @override
   String get holdToRecordLabel =>
       'Mantén premut per gravar, deixa anar per enviar';
+
+  @override
+  String get sendAnywayLabel => 'Enviar igualment';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Missatge bloquejat per les polítiques de moderació';
+
+  @override
+  String get moderationReviewModalTitle => 'Estàs segur?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Considera com el teu comentari pot fer sentir als altres i assegura't de seguir les nostres Directrius de la Comunitat.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Enregistrament de veu';
+
+  @override
+  String get audioAttachmentText => 'Àudio';
+
+  @override
+  String get imageAttachmentText => 'Imatge';
+
+  @override
+  String get videoAttachmentText => 'Vídeo';
+
+  @override
+  String get pollYouVotedText => 'Has votat';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username ha votat';
+
+  @override
+  String get pollYouCreatedText => 'Has creat';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username ha creat';
+
+  @override
+  String get draftLabel => 'Esborrany';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Ubicació en directe';
+    return '📍 Ubicació';
+  }
 }

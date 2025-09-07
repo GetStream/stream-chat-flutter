@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for English (`en`).
@@ -85,6 +87,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Message deleted';
 
   @override
+  String get systemMessageLabel => 'System Message';
+
+  @override
   String get editedMessageLabel => 'Edited';
 
   @override
@@ -166,8 +171,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Please enable access to your photos'
-      '\nand videos so you can share them with friends.';
+      'Please enable access to your photos and videos so you can share them with friends.';
 
   @override
   String get allowGalleryAccessMessage => 'Allow access to your gallery';
@@ -177,8 +181,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Do you want to send a copy of this message to a'
-      '\nmoderator for further investigation?';
+      'Do you want to send a copy of this message to a moderator for further investigation?';
 
   @override
   String get flagLabel => 'FLAG';
@@ -201,7 +204,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this\nmessage?';
+      'Are you sure you want to permanently delete this message?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -443,8 +446,8 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
-  String get enableFileAccessMessage => 'Please enable access to files'
-      '\nso you can share them with friends.';
+  String get enableFileAccessMessage =>
+      'Please enable access to files so you can share them with friends.';
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
@@ -552,7 +555,14 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
+  String get endVoteConfirmationText =>
+      'Are you sure you want to end the vote?';
+
+  @override
   String get createLabel => 'Create';
+
+  @override
+  String get endLabel => 'End';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {
@@ -615,4 +625,54 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Hold to record, release to send.';
+
+  @override
+  String get sendAnywayLabel => 'Send Anyway';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Message was blocked by moderation policies';
+
+  @override
+  String get moderationReviewModalTitle => 'Are you sure?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Consider how your comment might make others feel and be sure to follow our Community Guidelines.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Voice Recording';
+
+  @override
+  String get audioAttachmentText => 'Audio';
+
+  @override
+  String get imageAttachmentText => 'Image';
+
+  @override
+  String get videoAttachmentText => 'Video';
+
+  @override
+  String get pollYouVotedText => 'You voted';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username voted';
+
+  @override
+  String get pollYouCreatedText => 'You created';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username created';
+
+  @override
+  String get draftLabel => 'Draft';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Live Location';
+    return '📍 Location';
+  }
 }

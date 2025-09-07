@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Portuguese (`pt`).
@@ -82,7 +84,10 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Mensagem excluída';
 
   @override
-  String get editedMessageLabel => 'Editado';
+  String get systemMessageLabel => 'Mensagem do sistema';
+
+  @override
+  String get editedMessageLabel => 'Editada';
 
   @override
   String get messageReactionsLabel => 'Reações às mensagens';
@@ -165,8 +170,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Por favor, permita o acesso às suas fotos'
-      '\ne vídeos para que possa compartilhar com sua rede.';
+      'Por favor, permita o acesso às suas fotos e vídeos para que possa compartilhar com sua rede.';
 
   @override
   String get allowGalleryAccessMessage => 'Permitir acesso à sua galeria';
@@ -175,8 +179,8 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get flagMessageLabel => 'Denunciar mensagem';
 
   @override
-  String get flagMessageQuestion => 'Gostaria de enviar esta mensagem ao'
-      '\nmoderador para maior investigação?';
+  String get flagMessageQuestion =>
+      'Gostaria de enviar esta mensagem ao moderador para maior investigação?';
 
   @override
   String get flagLabel => 'DENUNCIAR';
@@ -199,7 +203,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      'Você tem certeza que deseja apagar essa\nmensagem permanentemente?';
+      'Você tem certeza que deseja apagar essa mensagem permanentemente?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -447,7 +451,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get enableFileAccessMessage =>
-      'Ative o acesso aos arquivos' '\npara poder compartilhá-los com amigos.';
+      'Ative o acesso aos arquivos para poder compartilhá-los com amigos.';
 
   @override
   String get allowFileAccessMessage => 'Permitir acesso aos arquivos';
@@ -555,7 +559,14 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get enterYourCommentLabel => 'Inserir seu comentário';
 
   @override
+  String get endVoteConfirmationText =>
+      'Tem certeza de que deseja encerrar a votação?';
+
+  @override
   String get createLabel => 'Criar';
+
+  @override
+  String get endLabel => 'Encerrar';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {
@@ -619,4 +630,54 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   @override
   String get holdToRecordLabel =>
       'Mantenha pressionado para gravar, solte para enviar';
+
+  @override
+  String get sendAnywayLabel => 'Enviar mesmo assim';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Mensagem bloqueada pelas políticas de moderação';
+
+  @override
+  String get moderationReviewModalTitle => 'Tem certeza?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Considere como seu comentário pode fazer os outros se sentirem e certifique-se de seguir nossas Diretrizes da Comunidade.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Gravação de voz';
+
+  @override
+  String get audioAttachmentText => 'Áudio';
+
+  @override
+  String get imageAttachmentText => 'Imagem';
+
+  @override
+  String get videoAttachmentText => 'Vídeo';
+
+  @override
+  String get pollYouVotedText => 'Você votou';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username votou';
+
+  @override
+  String get pollYouCreatedText => 'Você criou';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username criou';
+
+  @override
+  String get draftLabel => 'Rascunho';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Localização ao Vivo';
+    return '📍 Localização';
+  }
 }

@@ -1,7 +1,14 @@
+import 'dart:convert';
+
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
+import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/reaction.dart';
 
 /// Defines the api dedicated to messages operations
 class MessageApi {
@@ -29,6 +36,82 @@ class MessageApi {
     return SendMessageResponse.fromJson(response.data);
   }
 
+  /// Creates a draft for the given [channelId] of type [channelType].
+  ///
+  /// Returns a [CreateDraftResponse] containing the draft.
+  Future<CreateDraftResponse> createDraft(
+    String channelId,
+    String channelType,
+    DraftMessage message,
+  ) async {
+    final response = await _client.post(
+      '/channels/$channelType/$channelId/draft',
+      data: jsonEncode({'message': message}),
+    );
+    return CreateDraftResponse.fromJson(response.data);
+  }
+
+  /// Deletes the draft for the given [channelId] of type [channelType].
+  ///
+  /// Optionally, you can provide a [parentId] if the draft is in a thread.
+  ///
+  /// Returns an [EmptyResponse] on success.
+  Future<EmptyResponse> deleteDraft(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) async {
+    final response = await _client.delete(
+      '/channels/$channelType/$channelId/draft',
+      queryParameters: {
+        if (parentId != null) 'parent_id': parentId,
+      },
+    );
+    return EmptyResponse.fromJson(response.data);
+  }
+
+  /// Retrieves a draft from the given [channelId] of type [channelType]
+  ///
+  /// Optionally, you can provide a [parentId] if the draft is in a thread.
+  ///
+  /// Returns a [GetDraftResponse] containing the draft message.
+  Future<GetDraftResponse> getDraft(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) async {
+    final response = await _client.get(
+      '/channels/$channelType/$channelId/draft',
+      queryParameters: {
+        if (parentId != null) 'parent_id': parentId,
+      },
+    );
+    return GetDraftResponse.fromJson(response.data);
+  }
+
+  /// Retrieves a list of draft for the current user.
+  ///
+  /// Optionally, you can provide a [filter] to filter the drafts,
+  /// a [sort] order to sort the drafts, and [pagination] parameters to paginate
+  /// the results.
+  ///
+  /// Returns a [QueryDraftsResponse] containing the list of draft.
+  Future<QueryDraftsResponse> queryDrafts({
+    Filter? filter,
+    SortOrder<Draft>? sort,
+    PaginationParams? pagination,
+  }) async {
+    final response = await _client.post(
+      '/drafts/query',
+      data: jsonEncode({
+        if (filter != null) 'filter': filter,
+        if (sort != null) 'sort': sort,
+        if (pagination != null) ...pagination.toJson(),
+      }),
+    );
+    return QueryDraftsResponse.fromJson(response.data);
+  }
+
   /// Retrieves a list of messages by [messageIDs]
   /// from the given [channelId] of type [channelType]
   Future<GetMessagesByIdResponse> getMessagesById(
@@ -54,12 +137,14 @@ class MessageApi {
   /// Updates the given [message]
   Future<UpdateMessageResponse> updateMessage(
     Message message, {
+    bool skipPush = false,
     bool skipEnrichUrl = false,
   }) async {
     final response = await _client.post(
       '/messages/${message.id}',
       data: {
         'message': message,
+        'skip_push': skipPush,
         'skip_enrich_url': skipEnrichUrl,
       },
     );
@@ -126,19 +211,17 @@ class MessageApi {
   /// Set [enforceUnique] to true to remove the existing user reaction
   Future<SendReactionResponse> sendReaction(
     String messageId,
-    String reactionType, {
-    Map<String, Object?> extraData = const {},
+    Reaction reaction, {
+    bool skipPush = false,
     bool enforceUnique = false,
   }) async {
-    final reaction = Map<String, Object?>.from(extraData)
-      ..addAll({'type': reactionType});
-
     final response = await _client.post(
       '/messages/$messageId/reaction',
-      data: {
-        'reaction': reaction,
+      data: json.encode({
+        'reaction': reaction.toJson(),
+        'skip_push': skipPush,
         'enforce_unique': enforceUnique,
-      },
+      }),
     );
     return SendReactionResponse.fromJson(response.data);
   }

@@ -42,7 +42,7 @@ class StreamBackButton extends StatelessWidget {
             start: 12,
             child: switch (channelId) {
               final cid? => StreamUnreadIndicator.channels(cid: cid),
-              _ => StreamUnreadIndicator(),
+              _ => const StreamUnreadIndicator(),
             },
           ),
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_chat_flutter/src/message_widget/reactions/desktop_reactions_builder.dart';
+import 'package:stream_chat_flutter/src/reactions/desktop_reactions_builder.dart';
+import 'package:stream_chat_flutter/src/reactions/indicator/reaction_indicator_bubble_overlay.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Signature for the builder function that will be called when the message
@@ -10,10 +11,10 @@ typedef BottomRowBuilder = Widget Function(BuildContext, Message);
 /// Signature for the builder function that will be called when the message
 /// bottom row is built. Includes the [Message] and the default [BottomRow].
 typedef BottomRowBuilderWithDefaultWidget = Widget Function(
-    BuildContext,
-    Message,
-    BottomRow,
-    );
+  BuildContext,
+  Message,
+  BottomRow,
+);
 
 /// {@template messageWidgetContent}
 /// The main content of a [StreamMessageWidget].
@@ -41,7 +42,6 @@ class MessageWidgetContent extends StatelessWidget {
     required this.hasQuotedMessage,
     required this.hasUrlAttachments,
     required this.hasNonUrlAttachments,
-    required this.hasPoll,
     required this.isOnlyEmoji,
     required this.isGiphy,
     required this.attachmentBuilders,
@@ -52,7 +52,6 @@ class MessageWidgetContent extends StatelessWidget {
     required this.onReplyTap,
     required this.attachmentActionsModalBuilder,
     required this.textPadding,
-    required this.showReactionPickerTail,
     required this.translateUserAvatar,
     required this.bottomRowPadding,
     required this.showInChannel,
@@ -138,9 +137,6 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro hasNonUrlAttachments}
   final bool hasNonUrlAttachments;
 
-  /// {@macro hasPoll}
-  final bool hasPoll;
-
   /// {@macro isOnlyEmoji}
   final bool isOnlyEmoji;
 
@@ -189,9 +185,6 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro quotedMessageBuilder}
   final Widget Function(BuildContext, Message)? quotedMessageBuilder;
 
-  /// {@macro showReactionPickerTail}
-  final bool showReactionPickerTail;
-
   /// {@macro translateUserAvatar}
   final bool translateUserAvatar;
 
@@ -234,15 +227,12 @@ class MessageWidgetContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment:
-      reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Stack(
           clipBehavior: Clip.none,
-          alignment: reverse
-              ? AlignmentDirectional.bottomEnd
-              : AlignmentDirectional.bottomStart,
+          alignment: reverse ? AlignmentDirectional.bottomEnd : AlignmentDirectional.bottomStart,
           children: [
             if (showBottomRow)
               Padding(
@@ -258,134 +248,67 @@ class MessageWidgetContent extends StatelessWidget {
                 bottom: isPinned && showPinHighlight ? 8.0 : 4,
               ),
               child: Column(
-                crossAxisAlignment:
-                reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment: reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (message.pinned &&
-                      message.pinnedBy != null &&
-                      showPinHighlight)
+                  if (isPinned && message.pinnedBy != null && showPinHighlight)
                     PinnedMessage(
                       pinnedBy: message.pinnedBy!,
                       currentUser: streamChat.currentUser!,
                     ),
                   Row(
-                    crossAxisAlignment: showTopUserAvatar
-                        ? CrossAxisAlignment.start
-                        : CrossAxisAlignment.end,
+                    spacing: 8,
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (!reverse &&
-                          showUserAvatar == DisplayWidget.show &&
-                          message.user != null) ...[
-                        UserAvatarTransform(
-                          onUserAvatarTap: onUserAvatarTap,
-                          userAvatarBuilder: userAvatarBuilder,
-                          translateUserAvatar: showTopUserAvatar == false &&
-                              translateUserAvatar,
-                          messageTheme: messageTheme,
-                          message: message,
+                      ...<Widget>[
+                        Flexible(
+                          child: ReactionIndicatorBubbleOverlay(
+                            reverse: reverse,
+                            message: message,
+                            onTap: onReactionsTap,
+                            visible: isMobileDevice && showReactions,
+                            anchorOffset: const Offset(0, 36),
+                            childSizeDelta: switch (showUserAvatar) {
+                              DisplayWidget.gone => Offset.zero,
+                              // Size adjustment for the user avatar
+                              _ => const Offset(40, 0),
+                            },
+                            child: Padding(
+                              padding: switch (showReactions) {
+                                true => const EdgeInsets.only(top: 28),
+                                false => EdgeInsets.zero,
+                              },
+                              child: _buildMessageCard(context),
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 4),
-                      ],
-                      if (showUserAvatar == DisplayWidget.hide)
-                        SizedBox(width: avatarWidth + 4),
-
-                      if (showUserAvatar == DisplayWidget.gone)
-                        const SizedBox(width: 12),
-                      Flexible(
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            if (message.isDeleted && !isFailedState)
-                              Container(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal:
-                                  showUserAvatar == DisplayWidget.gone
-                                      ? 0
-                                      : 4.0,
-                                ),
-                                child: StreamDeletedMessage(
-                                  borderRadiusGeometry: borderRadiusGeometry,
-                                  borderSide: borderSide,
-                                  shape: shape,
-                                  messageTheme: messageTheme,
-                                ),
-                              )
-                            else
-                              MessageCard(
-                                message: message,
-                                isFailedState: isFailedState,
-                                showUserAvatar: showUserAvatar,
-                                messageTheme: messageTheme,
-                                hasQuotedMessage: hasQuotedMessage,
-                                hasUrlAttachments: hasUrlAttachments,
-                                hasNonUrlAttachments: hasNonUrlAttachments,
-                                hasPoll: hasPoll,isOnlyEmoji: isOnlyEmoji,
-                                isGiphy: isGiphy,
-                                attachmentBuilders: attachmentBuilders,
-                                attachmentPadding: attachmentPadding,
-                                attachmentShape: attachmentShape,
-                                onAttachmentTap: onAttachmentTap,
-                                onReplyTap: onReplyTap,
-                                onShowMessage: onShowMessage,
-                                attachmentActionsModalBuilder:
-                                attachmentActionsModalBuilder,
-                                textPadding: textPadding,
-                                reverse: reverse,
-                                onQuotedMessageTap: onQuotedMessageTap,
-                                onMentionTap: onMentionTap,
-                                onLinkTap: onLinkTap,
-                                textBuilder: textBuilder,
-                                quotedMessageBuilder: quotedMessageBuilder,
-                                borderRadiusGeometry: borderRadiusGeometry,
-                                borderSide: borderSide,
-                                shape: shape,
-                              ),
-                            // TODO: Make tail part of the Reaction Picker.
-                            if (showReactionPickerTail)
-                              Positioned(
-                                right: reverse ? null : 4,
-                                left: reverse ? 4 : null,
-                                top: -8,
-                                child: CustomPaint(
-                                  painter: ReactionBubblePainter(
-                                    streamChatTheme.colorTheme.barsBg,
-                                    Colors.transparent,
-                                    Colors.transparent,
-                                    tailCirclesSpace: 1,
-                                    flipTail: !reverse,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
+                      ].addConditionally(
+                        reverse: reverse,
+                        condition: (_) => message.user != null,
+                        switch (showUserAvatar) {
+                          DisplayWidget.gone => null,
+                          DisplayWidget.hide => SizedBox(width: avatarWidth),
+                          DisplayWidget.show => UserAvatarTransform(
+                              onUserAvatarTap: onUserAvatarTap,
+                              userAvatarBuilder: userAvatarBuilder,
+                              translateUserAvatar: translateUserAvatar,
+                              messageTheme: messageTheme,
+                              message: message,
+                            ),
+                        },
                       ),
-                      if (reverse &&
-                          showUserAvatar == DisplayWidget.show &&
-                          message.user != null) ...[
-                        UserAvatarTransform(
-                          onUserAvatarTap: onUserAvatarTap,
-                          userAvatarBuilder: userAvatarBuilder,
-                          translateUserAvatar: showTopUserAvatar == false &&
-                              translateUserAvatar,
-                          messageTheme: messageTheme,
-                          message: message,
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                      if (showUserAvatar == DisplayWidget.hide)
-                        SizedBox(width: avatarWidth + 4),
                     ],
                   ),
                   if (showReactions) ...[
                     Padding(
-                      padding: showUserAvatar != DisplayWidget.gone
-                          ? EdgeInsets.only(
-                        left: avatarWidth + 4,
-                        right: avatarWidth + 4,
-                      )
-                          : EdgeInsets.zero,
+                      padding: switch (showUserAvatar) {
+                        DisplayWidget.gone => EdgeInsets.zero,
+                        _ => EdgeInsets.only(
+                            left: avatarWidth + 4,
+                            right: avatarWidth + 4,
+                          )
+                      },
                       child: DesktopReactionsBuilder(
                         message: message,
                         messageTheme: messageTheme,
@@ -407,14 +330,60 @@ class MessageWidgetContent extends StatelessWidget {
                 right: reverse ? 0 : null,
                 left: reverse ? null : 0,
                 bottom: showBottomRow ? 18 : -2,
-                child: const StreamSvgIcon(
-                  size: 20,
+                child: StreamSvgIcon(
                   icon: StreamSvgIcons.error,
+                  color: streamChatTheme.colorTheme.accentError,
                 ),
               ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildMessageCard(BuildContext context) {
+    if (message.isDeleted) {
+      return Container(
+        margin: EdgeInsetsDirectional.only(
+          end: reverse && isFailedState ? 12.0 : 0.0,
+          start: !reverse && isFailedState ? 12.0 : 0.0,
+        ),
+        child: StreamDeletedMessage(
+          borderRadiusGeometry: borderRadiusGeometry,
+          borderSide: borderSide,
+          shape: shape,
+          messageTheme: messageTheme,
+        ),
+      );
+    }
+
+    return MessageCard(
+      message: message,
+      isFailedState: isFailedState,
+      showUserAvatar: showUserAvatar,
+      messageTheme: messageTheme,
+      hasQuotedMessage: hasQuotedMessage,
+      hasUrlAttachments: hasUrlAttachments,
+      hasNonUrlAttachments: hasNonUrlAttachments,
+      isOnlyEmoji: isOnlyEmoji,
+      isGiphy: isGiphy,
+      attachmentBuilders: attachmentBuilders,
+      attachmentPadding: attachmentPadding,
+      attachmentShape: attachmentShape,
+      onAttachmentTap: onAttachmentTap,
+      onReplyTap: onReplyTap,
+      onShowMessage: onShowMessage,
+      attachmentActionsModalBuilder: attachmentActionsModalBuilder,
+      textPadding: textPadding,
+      reverse: reverse,
+      onQuotedMessageTap: onQuotedMessageTap,
+      onMentionTap: onMentionTap,
+      onLinkTap: onLinkTap,
+      textBuilder: textBuilder,
+      quotedMessageBuilder: quotedMessageBuilder,
+      borderRadiusGeometry: borderRadiusGeometry,
+      borderSide: borderSide,
+      shape: shape,
     );
   }
 
@@ -448,5 +417,19 @@ class MessageWidgetContent extends StatelessWidget {
     }
 
     return defaultWidget;
+  }
+}
+
+extension<T> on Iterable<T> {
+  Iterable<T> addConditionally(
+    T? item, {
+    required bool condition(T element),
+    bool reverse = false,
+  }) sync* {
+    for (final element in this) {
+      if (item != null && !reverse && condition(element)) yield item;
+      yield element;
+      if (item != null && reverse && condition(element)) yield item;
+    }
   }
 }

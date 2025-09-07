@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
+import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/thread.dart';
 
 /// Defines the api dedicated to threads operations
 class ThreadsApi {
@@ -13,12 +16,16 @@ class ThreadsApi {
 
   /// Queries threads with the given [options] and [pagination] params.
   Future<QueryThreadsResponse> queryThreads({
+    Filter? filter,
+    SortOrder<Thread>? sort,
     ThreadOptions options = const ThreadOptions(),
     PaginationParams pagination = const PaginationParams(),
   }) async {
     final response = await _client.post(
       '/threads',
       data: jsonEncode({
+        if (filter != null) 'filter': filter.toJson(),
+        if (sort != null) 'sort': sort.map((e) => e.toJson()).toList(),
         ...options.toJson(),
         ...pagination.toJson(),
       }),

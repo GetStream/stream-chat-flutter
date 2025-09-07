@@ -3,12 +3,6 @@ import 'package:test/test.dart';
 
 void main() {
   group('src/api/requests', () {
-    test('SortOption', () {
-      const option = SortOption('name');
-      final j = option.toJson();
-      expect(j, {'field': 'name', 'direction': -1});
-    });
-
     group('PaginationParams', () {
       test('default', () {
         const option = PaginationParams();

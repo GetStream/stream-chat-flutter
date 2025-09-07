@@ -15,7 +15,10 @@ extension MemberEntityX on MemberEntity {
         inviteAcceptedAt: inviteAcceptedAt,
         invited: invited,
         inviteRejectedAt: inviteRejectedAt,
+        pinnedAt: pinnedAt,
+        archivedAt: archivedAt,
         isModerator: isModerator,
+        extraData: extraData ?? {},
       );
 }
 
@@ -32,7 +35,10 @@ extension MemberX on Member {
         inviteRejectedAt: inviteRejectedAt,
         invited: invited,
         inviteAcceptedAt: inviteAcceptedAt,
+        pinnedAt: pinnedAt,
+        archivedAt: archivedAt,
         channelRole: channelRole,
         updatedAt: updatedAt,
+        extraData: extraData,
       );
 }

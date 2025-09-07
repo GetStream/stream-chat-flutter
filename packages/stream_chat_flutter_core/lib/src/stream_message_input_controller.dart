@@ -1,7 +1,8 @@
+import 'dart:async' show Timer;
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'package:stream_chat_flutter_core/src/message_text_field_controller.dart';
@@ -110,6 +111,47 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     _textFieldController.text = text;
   }
 
+  /// Returns true if the slow mode is currently active.
+  bool get isSlowModeActive => _cooldownTimeOut > 0;
+
+  /// The current [cooldownTimeOut] of the slow mode.
+  ///
+  /// Defaults to 0, which means slow mode is not active.
+  int get cooldownTimeOut => _cooldownTimeOut;
+  int _cooldownTimeOut = 0;
+
+  Timer? _cooldownTimer;
+
+  /// Starts the slow mode timer.
+  void startCooldown(int cooldown) {
+    if (cooldown <= 0) return;
+
+    // Start the slow mode timer.
+    _cooldownTimer ??= _setPeriodicTimer(
+      immediate: true,
+      const Duration(seconds: 1),
+      (timer) {
+        final elapsed = timer.tick;
+        if (elapsed >= cooldown) return cancelCooldown();
+
+        final updatedTimeOut = cooldown - elapsed;
+        if (_cooldownTimeOut == updatedTimeOut) return;
+
+        _cooldownTimeOut = updatedTimeOut;
+        if (hasListeners) notifyListeners();
+      },
+    );
+  }
+
+  /// Cancels the slow mode timer.
+  void cancelCooldown() {
+    _cooldownTimer?.cancel();
+    _cooldownTimer = null;
+
+    _cooldownTimeOut = 0;
+    if (hasListeners) notifyListeners();
+  }
+
   /// The currently selected [text].
   ///
   /// If the selection is collapsed, then this property gives the offset of the
@@ -117,7 +159,7 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   TextSelection get selection => _textFieldController.selection;
 
   set selection(TextSelection newSelection) {
-    _textFieldController.selection = selection;
+    _textFieldController.selection = newSelection;
   }
 
   /// Returns the textEditingValue associated with this controller.
@@ -202,28 +244,31 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     attachments = [];
   }
 
-  // Only used to store the value locally in order to remove it if we call
-  // [clearOGAttachment] or [setOGAttachment] again.
-  Attachment? _ogAttachment;
-
   /// Returns the og attachment of the message if set
-  Attachment? get ogAttachment =>
-      attachments.firstWhereOrNull((it) => it.id == _ogAttachment?.id);
+  Attachment? get ogAttachment {
+    return attachments.firstWhereOrNull((it) => it.ogScrapeUrl != null);
+  }
 
   /// Sets the og attachment in the message.
   void setOGAttachment(Attachment attachment) {
-    attachments = [...attachments]
-      ..remove(_ogAttachment)
-      ..insert(0, attachment);
-    _ogAttachment = attachment;
+    final updatedAttachments = [...attachments];
+    // Remove the existing og attachment if it exists.
+    if (ogAttachment case final existingOGAttachment?) {
+      updatedAttachments.remove(existingOGAttachment);
+    }
+
+    // Add the new og attachment at the beginning of the list.
+    updatedAttachments.insert(0, attachment);
+
+    // Update the attachments list.
+    attachments = updatedAttachments;
   }
 
   /// Removes the og attachment.
   void clearOGAttachment() {
-    if (_ogAttachment != null) {
-      removeAttachment(_ogAttachment!);
+    if (ogAttachment case final existingOGAttachment?) {
+      removeAttachment(existingOGAttachment);
     }
-    _ogAttachment = null;
   }
 
   /// Returns the poll in the message.
@@ -288,6 +333,8 @@ class StreamMessageInputController extends ValueNotifier<Message> {
 
   @override
   void dispose() {
+    _cooldownTimer?.cancel();
+    _cooldownTimer = null;
     _textFieldController
       ..removeListener(_textFieldListener)
       ..dispose();
@@ -331,4 +378,14 @@ class StreamRestorableMessageInputController
 
   @override
   String toPrimitives() => json.encode(value.message);
+}
+
+Timer _setPeriodicTimer(
+  Duration duration,
+  void Function(Timer) callback, {
+  bool immediate = false,
+}) {
+  final timer = Timer.periodic(duration, callback);
+  if (immediate) callback.call(timer);
+  return timer;
 }

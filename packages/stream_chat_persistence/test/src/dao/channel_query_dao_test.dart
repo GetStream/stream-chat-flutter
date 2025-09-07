@@ -87,7 +87,7 @@ void main() {
         memberCount: index + 3,
         lastMessageAt: now.add(Duration(hours: index)),
       ),
-    ).reversed.toList(growable: false);
+    ).toList(growable: false);
 
     await userDao.updateUsers(users);
     await channelDao.updateChannels(channels);
@@ -112,92 +112,6 @@ void main() {
 
       // Should match with the inserted channels
       final updatedChannels = await channelQueryDao.getChannels(filter: filter);
-      expect(updatedChannels.length, insertedChannels.length);
-      for (var i = 0; i < updatedChannels.length; i++) {
-        final updatedChannel = updatedChannels[i];
-        final insertedChannel = insertedChannels[i];
-
-        // Should match all the basic details
-        expect(updatedChannel.id, insertedChannel.id);
-        expect(updatedChannel.type, insertedChannel.type);
-        expect(updatedChannel.cid, insertedChannel.cid);
-        expect(updatedChannel.memberCount, insertedChannel.memberCount);
-
-        // Should match createdAt date
-        expect(
-          updatedChannel.createdAt,
-          isSameDateAs(insertedChannel.createdAt),
-        );
-
-        // Should match lastMessageAt date
-        expect(
-          updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt),
-        );
-      }
-    });
-
-    test('should return sorted channels using member count', () async {
-      int sortComparator(ChannelModel a, ChannelModel b) =>
-          b.memberCount.compareTo(a.memberCount);
-
-      // Inserting test data for get channels
-      final insertedChannels = await _insertTestDataForGetChannel(filter);
-      insertedChannels.sort(sortComparator);
-
-      // Should match with the inserted channels
-      final updatedChannels = await channelQueryDao.getChannels(
-        filter: filter,
-        sort: [
-          SortOption(
-            'member_count',
-            comparator: sortComparator,
-          )
-        ],
-      );
-
-      expect(updatedChannels.length, insertedChannels.length);
-      for (var i = 0; i < updatedChannels.length; i++) {
-        final updatedChannel = updatedChannels[i];
-        final insertedChannel = insertedChannels[i];
-
-        // Should match all the basic details
-        expect(updatedChannel.id, insertedChannel.id);
-        expect(updatedChannel.type, insertedChannel.type);
-        expect(updatedChannel.cid, insertedChannel.cid);
-        expect(updatedChannel.memberCount, insertedChannel.memberCount);
-
-        // Should match createdAt date
-        expect(
-          updatedChannel.createdAt,
-          isSameDateAs(insertedChannel.createdAt),
-        );
-
-        // Should match lastMessageAt date
-        expect(
-          updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt),
-        );
-      }
-    });
-
-    test('should return sorted channels using custom field', () async {
-      int sortComparator(ChannelModel a, ChannelModel b) {
-        final aData = int.parse(a.extraData['test_custom_field'].toString());
-        final bData = int.parse(b.extraData['test_custom_field'].toString());
-        return bData.compareTo(aData);
-      }
-
-      // Inserting test data for get channels
-      final insertedChannels = await _insertTestDataForGetChannel(filter);
-      insertedChannels.sort(sortComparator);
-
-      // Should match with the inserted channels
-      final updatedChannels = await channelQueryDao.getChannels(
-        filter: filter,
-        sort: [SortOption('test_custom_field', comparator: sortComparator)],
-      );
-
       expect(updatedChannels.length, insertedChannels.length);
       for (var i = 0; i < updatedChannels.length; i++) {
         final updatedChannel = updatedChannels[i];

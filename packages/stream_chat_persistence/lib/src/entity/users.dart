@@ -29,6 +29,14 @@ class Users extends Table {
   /// True if user is banned from the chat
   BoolColumn get banned => boolean().withDefault(const Constant(false))();
 
+  /// The roles for the user in the teams.
+  ///
+  /// eg: `{'teamId': 'role', 'teamId2': 'role2'}`
+  TextColumn get teamsRole => text().nullable().map(MapConverter<String>())();
+
+  /// The average response time for the user in seconds.
+  IntColumn get avgResponseTime => integer().nullable()();
+
   /// Map of custom user extraData
   TextColumn get extraData => text().map(MapConverter())();
 

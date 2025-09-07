@@ -12,7 +12,6 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
   /// {@macro streamAudioPlaylistController}
   factory StreamAudioPlaylistController(List<PlaylistTrack> tracks) {
     return StreamAudioPlaylistController.raw(
-      player: AudioPlayer(),
       state: AudioPlaylistState(tracks: tracks),
     );
   }
@@ -20,9 +19,9 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
   /// {@macro streamAudioPlaylistController}
   @visibleForTesting
   StreamAudioPlaylistController.raw({
-    required AudioPlayer player,
+    AudioPlayer? player,
     AudioPlaylistState state = const AudioPlaylistState(tracks: []),
-  })  : _player = player,
+  })  : _player = player ?? AudioPlayer(),
         super(state);
 
   final AudioPlayer _player;

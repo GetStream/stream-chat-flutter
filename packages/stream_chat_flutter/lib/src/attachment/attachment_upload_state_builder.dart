@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamAttachmentUploadStateBuilder}
@@ -37,7 +38,7 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (message.state.isCompleted) {
-      return const Offstage();
+      return const Empty();
     }
 
     final messageId = message.id;

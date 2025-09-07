@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery.dart';
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
@@ -13,7 +15,7 @@ import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Max image resolution which can be resized by the CDN.
-// Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
+/// Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
 const maxCDNImageResolution = 16800000;
 
 /// Widget used to pick media from the device gallery.
@@ -22,41 +24,22 @@ class StreamGalleryPicker extends StatefulWidget {
   const StreamGalleryPicker({
     super.key,
     this.limit = 50,
+    GalleryPickerConfig? config,
     required this.selectedMediaItems,
     required this.onMediaItemSelected,
-    this.mediaThumbnailSize = const ThumbnailSize(400, 400),
-    this.mediaThumbnailFormat = ThumbnailFormat.jpeg,
-    this.mediaThumbnailQuality = 100,
-    this.mediaThumbnailScale = 1,
-  });
+  }) : config = config ?? const GalleryPickerConfig();
 
   /// Maximum number of media items that can be selected.
   final int limit;
+
+  /// Configuration for the gallery picker.
+  final GalleryPickerConfig config;
 
   /// List of selected media items.
   final Iterable<String> selectedMediaItems;
 
   /// Callback called when an media item is selected.
   final ValueSetter<AssetEntity> onMediaItemSelected;
-
-  /// Size of the attachment thumbnails.
-  ///
-  /// Defaults to (400, 400).
-  final ThumbnailSize mediaThumbnailSize;
-
-  /// Format of the attachment thumbnails.
-  ///
-  /// Defaults to [ThumbnailFormat.jpeg].
-  final ThumbnailFormat mediaThumbnailFormat;
-
-  /// The quality value for the attachment thumbnails.
-  ///
-  /// Valid from 1 to 100.
-  /// Defaults to 100.
-  final int mediaThumbnailQuality;
-
-  /// The scale to apply on the [attachmentThumbnailSize].
-  final double mediaThumbnailScale;
 
   @override
   State<StreamGalleryPicker> createState() => _StreamGalleryPickerState();
@@ -95,7 +78,7 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
     return FutureBuilder<PermissionState>(
       future: requestPermission,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox.shrink();
+        if (!snapshot.hasData) return const Empty();
 
         final theme = StreamChatTheme.of(context);
         final textTheme = theme.textTheme;
@@ -158,10 +141,10 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                 onMediaTap: widget.onMediaItemSelected,
                 loadMoreTriggerIndex: 10,
                 padding: const EdgeInsets.all(2),
-                thumbnailSize: widget.mediaThumbnailSize,
-                thumbnailFormat: widget.mediaThumbnailFormat,
-                thumbnailQuality: widget.mediaThumbnailQuality,
-                thumbnailScale: widget.mediaThumbnailScale,
+                thumbnailSize: widget.config.mediaThumbnailSize,
+                thumbnailFormat: widget.config.mediaThumbnailFormat,
+                thumbnailQuality: widget.config.mediaThumbnailQuality,
+                thumbnailScale: widget.config.mediaThumbnailScale,
                 itemBuilder: (context, mediaItems, index, defaultWidget) {
                   final media = mediaItems[index];
                   return defaultWidget.copyWith(
@@ -175,6 +158,29 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
       },
     );
   }
+}
+
+/// Configuration for the [StreamGalleryPicker].
+class GalleryPickerConfig {
+  /// Creates a [GalleryPickerConfig] instance.
+  const GalleryPickerConfig({
+    this.mediaThumbnailSize = const ThumbnailSize(400, 400),
+    this.mediaThumbnailFormat = ThumbnailFormat.jpeg,
+    this.mediaThumbnailQuality = 100,
+    this.mediaThumbnailScale = 1,
+  });
+
+  /// Size of the attachment thumbnails.
+  final ThumbnailSize mediaThumbnailSize;
+
+  /// Format of the attachment thumbnails.
+  final ThumbnailFormat mediaThumbnailFormat;
+
+  /// The quality value for the attachment thumbnails.
+  final int mediaThumbnailQuality;
+
+  /// The scale to apply on the [mediaThumbnailSize].
+  final double mediaThumbnailScale;
 }
 
 ///

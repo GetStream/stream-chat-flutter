@@ -9,7 +9,9 @@ part of 'message.dart';
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       id: json['id'] as String?,
       text: json['text'] as String?,
-      type: json['type'] as String? ?? 'regular',
+      type: json['type'] == null
+          ? MessageType.regular
+          : MessageType.fromJson(json['type'] as String),
       attachments: (json['attachments'] as List<dynamic>?)
               ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -20,11 +22,11 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
           const [],
       silent: json['silent'] as bool? ?? false,
       shadowed: json['shadowed'] as bool? ?? false,
-      reactionCounts: (json['reaction_counts'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ),
-      reactionScores: (json['reaction_scores'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
+      reactionGroups: (Message._reactionGroupsReadValue(json, 'reaction_groups')
+              as Map<String, dynamic>?)
+          ?.map(
+        (k, e) =>
+            MapEntry(k, ReactionGroup.fromJson(e as Map<String, dynamic>)),
       ),
       latestReactions: (json['latest_reactions'] as List<dynamic>?)
           ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
@@ -76,12 +78,28 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       i18n: (json['i18n'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),
+      restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      moderation: Message._moderationReadValue(json, 'moderation') == null
+          ? null
+          : Moderation.fromJson(Message._moderationReadValue(json, 'moderation')
+              as Map<String, dynamic>),
+      draft: json['draft'] == null
+          ? null
+          : Draft.fromJson(json['draft'] as Map<String, dynamic>),
+      reminder: json['reminder'] == null
+          ? null
+          : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+      sharedLocation: json['shared_location'] == null
+          ? null
+          : Location.fromJson(json['shared_location'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'id': instance.id,
       'text': instance.text,
-      if (Message._typeToJson(instance.type) case final value?) 'type': value,
+      if (MessageType.toJson(instance.type) case final value?) 'type': value,
       'attachments': instance.attachments.map((e) => e.toJson()).toList(),
       'mentioned_users': User.toIds(instance.mentionedUsers),
       'parent_id': instance.parentId,
@@ -91,5 +109,9 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'pinned': instance.pinned,
       'pin_expires': instance.pinExpires?.toIso8601String(),
       'poll_id': instance.pollId,
+      if (instance.restrictedVisibility case final value?)
+        'restricted_visibility': value,
+      if (instance.sharedLocation?.toJson() case final value?)
+        'shared_location': value,
       'extra_data': instance.extraData,
     };

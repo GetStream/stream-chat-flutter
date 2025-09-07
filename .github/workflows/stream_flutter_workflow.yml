@@ -139,6 +139,49 @@ jobs:
           path: packages/stream_chat_flutter/coverage/lcov.info
           min_coverage: 44
 
+  build:
+    name: build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    if: github.event.pull_request.draft == false
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: android
+            os: ubuntu-latest
+            working-directory: sample_app/android
+            build-command: bundle exec fastlane build_apk
+          - platform: ios
+            os: macos-15 # Requires xcode 15 or later
+            working-directory: sample_app/ios
+            build-command: bundle exec fastlane build_ipa no_codesign:true
+
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: stable
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
+      - name: Setup Ruby and Gems
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: ${{ matrix.working-directory }}
+          bundler-cache: true
+      - name: "Build ${{ matrix.platform }} App"
+        working-directory: ${{ matrix.working-directory }}
+        run: ${{ matrix.build-command }}
+
   draft-build:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == true

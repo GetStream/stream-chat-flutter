@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template commands_overlay}
@@ -31,7 +32,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
       return normalizedName.contains(normalizedQuery);
     });
 
-    if (commands == null || commands.isEmpty) return const SizedBox.shrink();
+    if (commands == null || commands.isEmpty) return const Empty();
 
     final streamChatTheme = StreamChatTheme.of(context);
     final colorTheme = streamChatTheme.colorTheme;
@@ -50,9 +51,8 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
           ),
           title: Text(
             context.translations.instantCommandsLabel,
-            style: TextStyle(
-              // ignore: deprecated_member_use
-              color: colorTheme.textHighEmphasis.withOpacity(0.5),
+            style: textTheme.body.copyWith(
+              color: colorTheme.textLowEmphasis,
             ),
           ),
         );
@@ -66,8 +66,8 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
             children: [
               Text(
                 command.name.capitalize(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+                style: textTheme.bodyBold.copyWith(
+                  color: colorTheme.textHighEmphasis,
                 ),
               ),
               const SizedBox(width: 8),

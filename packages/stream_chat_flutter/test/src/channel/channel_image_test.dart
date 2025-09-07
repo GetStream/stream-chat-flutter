@@ -39,6 +39,9 @@ void main() {
         ),
       );
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       final image =
           tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
       expect(image.imageUrl, 'https://bit.ly/321RmWb');
@@ -115,6 +118,9 @@ void main() {
         ),
       );
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       final image =
           tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
       expect(image.imageUrl, 'testimage');
@@ -178,6 +184,9 @@ void main() {
         ),
       );
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       final image =
           tester.widget<StreamGroupAvatar>(find.byType(StreamGroupAvatar));
       final otherMembers = members.where((it) => it.userId != currentUser.id);
@@ -222,6 +231,9 @@ void main() {
           ),
         ),
       );
+
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('selectedImage')), findsOneWidget);
     },

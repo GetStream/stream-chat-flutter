@@ -1,0 +1,34 @@
+name: Package Analysis
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Install Tools"
+      shell: bash
+      run: flutter pub global activate melos
+
+    - name: "Bootstrap Workspace"
+      shell: bash
+      run: melos bootstrap --verbose
+
+    # Only analyze lib/; non-client code doesn't need to work on
+    # all supported legacy version.
+    - name: "Stream Chat Analyze"
+      shell: bash
+      run: cd packages/stream_chat/lib && dart analyze --fatal-infos . && cd .. && flutter test --exclude-tags golden
+
+    - name: "Stream Chat Flutter Core Analyze"
+      shell: bash
+      run: cd packages/stream_chat_flutter_core/lib && dart analyze --fatal-infos . && cd .. && flutter test --exclude-tags golden
+
+    - name: "Stream Chat Flutter Analyze"
+      shell: bash
+      run: cd packages/stream_chat_flutter/lib && dart analyze --fatal-infos . && cd .. && flutter test --exclude-tags golden
+
+    - name: "Stream Chat Persistence Analyze"
+      shell: bash
+      run: cd packages/stream_chat_persistence/lib && dart analyze --fatal-infos . && cd .. && flutter test --exclude-tags golden
+
+    - name: "Stream Chat Localizations Analyze"
+      shell: bash
+      run: cd packages/stream_chat_localizations/lib && dart analyze --fatal-infos . && cd .. && flutter test --exclude-tags golden

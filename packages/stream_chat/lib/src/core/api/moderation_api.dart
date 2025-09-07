@@ -130,7 +130,7 @@ class ModerationApi {
   /// Queries banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<BannedUser>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(

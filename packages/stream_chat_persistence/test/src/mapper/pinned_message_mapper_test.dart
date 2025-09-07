@@ -54,11 +54,20 @@ void main() {
       shadowed: math.Random().nextBool(),
       showInChannel: math.Random().nextBool(),
       replyCount: 33,
-      reactionScores: {for (final r in reactions) r.type: r.score},
-      reactionCounts: reactions.fold(
+      reactionGroups: reactions.fold(
         {},
-        (prev, curr) =>
-            prev?..update(curr.type, (value) => value + 1, ifAbsent: () => 1),
+        (prev, curr) => prev
+          ?..update(
+            curr.type,
+            (value) => value.copyWith(
+              count: value.count + 1,
+              sumScores: value.sumScores + curr.score,
+            ),
+            ifAbsent: () => ReactionGroup(
+              count: 1,
+              sumScores: curr.score,
+            ),
+          ),
       ),
       mentionedUsers: [
         jsonEncode(User(id: 'testuser')),
@@ -81,6 +90,7 @@ void main() {
         'hi_text': 'नमस्ते',
         'language': 'en',
       },
+      restrictedVisibility: const ['user-id-2'],
     );
     final message = entity.toMessage(
       user: user,
@@ -108,8 +118,7 @@ void main() {
       expect(message.mentionedUsers[i].id, entityMentionedUser.id);
     }
     expect(message.replyCount, entity.replyCount);
-    expect(message.reactionScores, entity.reactionScores);
-    expect(message.reactionCounts, entity.reactionCounts);
+    expect(message.reactionGroups, entity.reactionGroups);
     expect(message.state, MessageState.fromJson(jsonDecode(entity.state)));
     expect(message.localUpdatedAt, isSameDateAs(entity.localUpdatedAt));
     expect(message.remoteUpdatedAt, isSameDateAs(entity.remoteUpdatedAt));
@@ -126,8 +135,7 @@ void main() {
     expect(message.pinExpires, isSameDateAs(entity.pinExpires));
     expect(message.pinnedAt, isSameDateAs(entity.pinnedAt));
     expect(message.pinnedBy!.id, entity.pinnedByUserId);
-    expect(message.reactionCounts, entity.reactionCounts);
-    expect(message.reactionScores, entity.reactionScores);
+    expect(message.reactionGroups, entity.reactionGroups);
     expect(message.i18n, entity.i18n);
     for (var i = 0; i < message.attachments.length; i++) {
       final messageAttachment = message.attachments[i];
@@ -137,6 +145,7 @@ void main() {
       expect(messageAttachment.type, entityAttachment.type);
       expect(messageAttachment.assetUrl, entityAttachment.assetUrl);
     }
+    expect(message.restrictedVisibility, entity.restrictedVisibility);
   });
 
   test('toEntity should map message into MessageEntity', () {
@@ -187,11 +196,20 @@ void main() {
       mentionedUsers: [
         User(id: 'testuser'),
       ],
-      reactionScores: {for (final r in reactions) r.type: r.score},
-      reactionCounts: reactions.fold(
+      reactionGroups: reactions.fold(
         {},
-        (prev, curr) =>
-            prev?..update(curr.type, (value) => value + 1, ifAbsent: () => 1),
+        (prev, curr) => prev
+          ?..update(
+            curr.type,
+            (value) => value.copyWith(
+              count: value.count + 1,
+              sumScores: value.sumScores + curr.score,
+            ),
+            ifAbsent: () => ReactionGroup(
+              count: 1,
+              sumScores: curr.score,
+            ),
+          ),
       ),
       localUpdatedAt: DateTime.now(),
       updatedAt: DateTime.now().add(const Duration(seconds: 1)),
@@ -210,6 +228,7 @@ void main() {
         'hi_text': 'नमस्ते',
         'language': 'en',
       },
+      restrictedVisibility: const ['user-id-2'],
     );
     final entity = message.toPinnedEntity(cid: cid);
     expect(entity, isA<PinnedMessageEntity>());
@@ -226,8 +245,6 @@ void main() {
     expect(entity.replyCount, message.replyCount);
     expect(
         entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
-    expect(entity.reactionScores, message.reactionScores);
-    expect(entity.reactionCounts, message.reactionCounts);
     expect(entity.state, jsonEncode(message.state));
     expect(entity.localUpdatedAt, isSameDateAs(message.localUpdatedAt));
     expect(entity.remoteUpdatedAt, isSameDateAs(message.remoteUpdatedAt));
@@ -244,12 +261,12 @@ void main() {
     expect(entity.pinExpires, isSameDateAs(message.pinExpires));
     expect(entity.pinnedAt, isSameDateAs(message.pinnedAt));
     expect(entity.pinnedByUserId, message.pinnedBy!.id);
-    expect(entity.reactionCounts, message.reactionCounts);
-    expect(entity.reactionScores, message.reactionScores);
+    expect(entity.reactionGroups, message.reactionGroups);
     expect(
       entity.attachments,
       message.attachments.map((it) => jsonEncode(it.toData())).toList(),
     );
     expect(entity.i18n, message.i18n);
+    expect(entity.restrictedVisibility, message.restrictedVisibility);
   });
 }

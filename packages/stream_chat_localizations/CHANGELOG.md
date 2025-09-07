@@ -1,3 +1,88 @@
+## 10.0.0-beta.5
+
+- Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
+## 9.16.0
+
+- Updated `stream_chat_flutter` dependency to [`9.16.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.4
+
+- Added translations for new `locationLabel` label.
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
+## 9.15.0
+
+- Updated `stream_chat_flutter` dependency to [`9.15.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
+## 9.14.0
+
+- Updated `stream_chat_flutter` dependency to [`9.14.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
+## 9.13.0
+
+- Updated `stream_chat_flutter` dependency to [`9.13.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.1
+
+- Updated `stream_chat_flutter` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.12.0
+
+- Updated `stream_chat_flutter` dependency to [`9.12.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.11.0
+
+- Updated `stream_chat_flutter` dependency to [`9.11.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.10.0
+
+- Updated `stream_chat_flutter` dependency to [`9.10.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.9.0
+
+- Added translations for new `draftLabel` label.
+- Added translations for new `endLabel` label.
+- Added translations for new `endVoteConfirmationText` text.
+
+## 9.8.0
+
+- Updated `stream_chat_flutter` dependency to [`9.8.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 9.7.0
+
+- Added translations for new `sendAnywayLabel` label.
+- Added translations for new `moderatedMessageBlockedText` text.
+- Added translations for new `moderationReviewModalTitle` text.
+- Added translations for new `moderationReviewModalDescription` text.
+- Added translations for new `emptyMessagePreviewText` text.
+- Added translations for new `voiceRecordingText` text.
+- Added translations for new `audioAttachmentText` text.
+- Added translations for new `imageAttachmentText` text.
+- Added translations for new `videoAttachmentText` text.
+- Added translations for new `pollYouVotedText` text.
+- Added translations for new `pollSomeoneVotedText` text.
+- Added translations for new `pollYouCreatedText` text.
+- Added translations for new `pollSomeoneCreatedText` text.
+- Added translations for new `systemMessageLabel` label.
+
+## 9.6.0
+
+- Updated `stream_chat_flutter` dependency to [`9.6.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 9.5.0
+
+- Updated `stream_chat_flutter` dependency to [`9.5.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.4.0
 
 - Updated minimum Flutter version to 3.27.4 for the SDK.

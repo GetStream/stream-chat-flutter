@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/timestamp.dart';
+import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamPollVoteListTile}
@@ -141,33 +143,26 @@ class PollVoteUpdatedAt extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
-    final createdAt = Jiffy.parseFromDateTime(dateTime);
-    final now = Jiffy.parseFromDateTime(DateTime.now());
-
-    var dayInfo = createdAt.MMMd;
-    if (createdAt.isSame(now, unit: Unit.day)) {
-      dayInfo = context.translations.todayLabel;
-    } else if (createdAt.isSame(now.subtract(days: 1), unit: Unit.day)) {
-      dayInfo = context.translations.yesterdayLabel;
-    } else if (createdAt.isAfter(now.subtract(days: 7), unit: Unit.day)) {
-      dayInfo = createdAt.EEEE;
-    } else if (createdAt.isAfter(now.subtract(years: 1), unit: Unit.day)) {
-      dayInfo = createdAt.MMMd;
-    }
-
-    final timeInfo = createdAt.jm;
-
     return Row(
       children: [
-        Text(
-          dayInfo,
+        StreamTimestamp(
+          date: dateTime,
+          formatter: (context, date) {
+            if (date.isToday) return context.translations.todayLabel;
+            if (date.isYesterday) return context.translations.yesterdayLabel;
+            if (date.isWithinAWeek) return Jiffy.parseFromDateTime(date).EEEE;
+            if (date.isWithinAYear) return Jiffy.parseFromDateTime(date).MMMd;
+
+            return Jiffy.parseFromDateTime(date).yMMMd;
+          },
           style: theme.textTheme.bodyBold.copyWith(
             color: theme.colorTheme.textLowEmphasis,
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          timeInfo,
+        StreamTimestamp(
+          date: dateTime,
+          formatter: (context, date) => Jiffy.parseFromDateTime(date).jm,
           style: theme.textTheme.body.copyWith(
             color: theme.colorTheme.textLowEmphasis,
           ),

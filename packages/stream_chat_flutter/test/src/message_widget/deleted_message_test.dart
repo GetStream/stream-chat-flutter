@@ -178,7 +178,17 @@ void main() {
       final materialTheme = ThemeData.light(
         useMaterial3: false,
       );
-      final theme = StreamChatThemeData.fromTheme(materialTheme);
+
+      var theme = StreamChatThemeData.fromTheme(materialTheme);
+      theme = theme.copyWith(
+        ownMessageTheme: theme.ownMessageTheme.copyWith(
+          messageDeletedStyle: theme.ownMessageTheme.messageTextStyle!.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+          ),
+        ),
+      );
+
       return MaterialAppWrapper(
         theme: materialTheme,
         home: StreamChat(

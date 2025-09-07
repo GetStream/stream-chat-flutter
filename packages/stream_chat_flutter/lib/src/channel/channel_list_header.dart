@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChannelListHeader}
@@ -155,7 +156,7 @@ class StreamChannelListHeader extends StatelessWidget
                           constraints: channelListHeaderThemeData
                               .avatarTheme?.constraints,
                         )
-                      : const Offstage(),
+                      : const Empty(),
                 ),
             actions: actions ??
                 [
@@ -198,7 +199,7 @@ class StreamChannelListHeader extends StatelessWidget
                     }
                   },
                 ),
-                subtitle ?? const Offstage(),
+                subtitle ?? const Empty(),
               ],
             ),
           ),
@@ -269,9 +270,7 @@ class _DisconnectedTitleState extends StatelessWidget {
           ),
         ),
         TextButton(
-          onPressed: () => client
-            ..closeConnection()
-            ..openConnection(),
+          onPressed: client.maybeReconnect,
           child: Text(
             context.translations.tryAgainLabel,
             style: channelListHeaderTheme.titleStyle?.copyWith(
