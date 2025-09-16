@@ -14,12 +14,7 @@ part of 'paged_value_notifier.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$PagedValue<Key, Value> implements DiagnosticableTreeMixin {
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties..add(DiagnosticsProperty('type', 'PagedValue<$Key, $Value>'));
-  }
-
+mixin _$PagedValue<Key, Value> {
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -30,7 +25,7 @@ mixin _$PagedValue<Key, Value> implements DiagnosticableTreeMixin {
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString() {
     return 'PagedValue<$Key, $Value>()';
   }
 }
@@ -43,8 +38,7 @@ class $PagedValueCopyWith<Key, Value, $Res> {
 
 /// @nodoc
 
-class Success<Key, Value> extends PagedValue<Key, Value>
-    with DiagnosticableTreeMixin {
+class Success<Key, Value> extends PagedValue<Key, Value> {
   const Success(
       {required final List<Value> items, this.nextPageKey, this.error})
       : _items = items,
@@ -74,15 +68,6 @@ class Success<Key, Value> extends PagedValue<Key, Value>
       _$SuccessCopyWithImpl<Key, Value, Success<Key, Value>>(this, _$identity);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties
-      ..add(DiagnosticsProperty('type', 'PagedValue<$Key, $Value>'))
-      ..add(DiagnosticsProperty('items', items))
-      ..add(DiagnosticsProperty('nextPageKey', nextPageKey))
-      ..add(DiagnosticsProperty('error', error));
-  }
-
-  @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
@@ -101,7 +86,7 @@ class Success<Key, Value> extends PagedValue<Key, Value>
       error);
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString() {
     return 'PagedValue<$Key, $Value>(items: $items, nextPageKey: $nextPageKey, error: $error)';
   }
 }
@@ -151,15 +136,8 @@ class _$SuccessCopyWithImpl<Key, Value, $Res>
 
 /// @nodoc
 
-class Loading<Key, Value> extends PagedValue<Key, Value>
-    with DiagnosticableTreeMixin {
+class Loading<Key, Value> extends PagedValue<Key, Value> {
   const Loading() : super._();
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties
-      ..add(DiagnosticsProperty('type', 'PagedValue<$Key, $Value>.loading'));
-  }
 
   @override
   bool operator ==(Object other) {
@@ -171,15 +149,14 @@ class Loading<Key, Value> extends PagedValue<Key, Value>
   int get hashCode => runtimeType.hashCode;
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString() {
     return 'PagedValue<$Key, $Value>.loading()';
   }
 }
 
 /// @nodoc
 
-class Error<Key, Value> extends PagedValue<Key, Value>
-    with DiagnosticableTreeMixin {
+class Error<Key, Value> extends PagedValue<Key, Value> {
   const Error(this.error) : super._();
 
   final StreamChatError error;
@@ -190,13 +167,6 @@ class Error<Key, Value> extends PagedValue<Key, Value>
   @pragma('vm:prefer-inline')
   $ErrorCopyWith<Key, Value, Error<Key, Value>> get copyWith =>
       _$ErrorCopyWithImpl<Key, Value, Error<Key, Value>>(this, _$identity);
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties
-      ..add(DiagnosticsProperty('type', 'PagedValue<$Key, $Value>.error'))
-      ..add(DiagnosticsProperty('error', error));
-  }
 
   @override
   bool operator ==(Object other) {
@@ -210,7 +180,7 @@ class Error<Key, Value> extends PagedValue<Key, Value>
   int get hashCode => Object.hash(runtimeType, error);
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString() {
     return 'PagedValue<$Key, $Value>.error(error: $error)';
   }
 }
