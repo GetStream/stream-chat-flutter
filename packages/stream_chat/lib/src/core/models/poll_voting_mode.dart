@@ -40,3 +40,118 @@ extension PollVotingModeX on Poll {
     return const VotingAll();
   }
 }
+
+// coverage:ignore-start
+
+/// @nodoc
+extension PollVotingModePatternMatching on PollVotingMode {
+  /// @nodoc
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() disabled,
+    required TResult Function() unique,
+    required TResult Function(int count) limited,
+    required TResult Function() all,
+  }) {
+    final votingMode = this;
+    return switch (votingMode) {
+      VotingDisabled() => disabled(),
+      VotingUnique() => unique(),
+      VotingLimited() => limited(votingMode.count),
+      VotingAll() => all(),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? disabled,
+    TResult? Function()? unique,
+    TResult? Function(int count)? limited,
+    TResult? Function()? all,
+  }) {
+    final votingMode = this;
+    return switch (votingMode) {
+      VotingDisabled() => disabled?.call(),
+      VotingUnique() => unique?.call(),
+      VotingLimited() => limited?.call(votingMode.count),
+      VotingAll() => all?.call(),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? disabled,
+    TResult Function()? unique,
+    TResult Function(int count)? limited,
+    TResult Function()? all,
+    required TResult orElse(),
+  }) {
+    final votingMode = this;
+    final result = switch (votingMode) {
+      VotingDisabled() => disabled?.call(),
+      VotingUnique() => unique?.call(),
+      VotingLimited() => limited?.call(votingMode.count),
+      VotingAll() => all?.call(),
+    };
+
+    return result ?? orElse();
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(VotingDisabled value) disabled,
+    required TResult Function(VotingUnique value) unique,
+    required TResult Function(VotingLimited value) limited,
+    required TResult Function(VotingAll value) all,
+  }) {
+    final votingMode = this;
+    return switch (votingMode) {
+      VotingDisabled() => disabled(votingMode),
+      VotingUnique() => unique(votingMode),
+      VotingLimited() => limited(votingMode),
+      VotingAll() => all(votingMode),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(VotingDisabled value)? disabled,
+    TResult? Function(VotingUnique value)? unique,
+    TResult? Function(VotingLimited value)? limited,
+    TResult? Function(VotingAll value)? all,
+  }) {
+    final votingMode = this;
+    return switch (votingMode) {
+      VotingDisabled() => disabled?.call(votingMode),
+      VotingUnique() => unique?.call(votingMode),
+      VotingLimited() => limited?.call(votingMode),
+      VotingAll() => all?.call(votingMode),
+    };
+  }
+
+  /// @nodoc
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(VotingDisabled value)? disabled,
+    TResult Function(VotingUnique value)? unique,
+    TResult Function(VotingLimited value)? limited,
+    TResult Function(VotingAll value)? all,
+    required TResult orElse(),
+  }) {
+    final votingMode = this;
+    final result = switch (votingMode) {
+      VotingDisabled() => disabled?.call(votingMode),
+      VotingUnique() => unique?.call(votingMode),
+      VotingLimited() => limited?.call(votingMode),
+      VotingAll() => all?.call(votingMode),
+    };
+
+    return result ?? orElse();
+  }
+}
+
+// coverage:ignore-end

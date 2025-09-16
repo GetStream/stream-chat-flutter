@@ -16,7 +16,10 @@ import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
+import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
+import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -92,10 +95,32 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
 class MockStreamChatClient extends Mock implements StreamChatClient {
   @override
   bool get persistenceEnabled => false;
+
+  @override
+  Stream<Event> get eventStream => _eventController.stream;
+  final _eventController = EventController<Event>();
+  void addEvent(Event event) => _eventController.add(event);
+
+  @override
+  Stream<Event> on([
+    String? eventType,
+    String? eventType2,
+    String? eventType3,
+    String? eventType4,
+  ]) {
+    if (eventType == null || eventType == EventType.any) return eventStream;
+    return eventStream.where((event) =>
+        event.type == eventType ||
+        event.type == eventType2 ||
+        event.type == eventType3 ||
+        event.type == eventType4);
+  }
+
+  @override
+  Future<void> dispose() => _eventController.close();
 }
 
-class MockStreamChatClientWithPersistence extends Mock
-    implements StreamChatClient {
+class MockStreamChatClientWithPersistence extends MockStreamChatClient {
   ChatPersistenceClient? _persistenceClient;
 
   @override
@@ -125,6 +150,18 @@ class MockRetryQueueChannel extends Mock implements Channel {
 
   @override
   StreamChatClient get client => _client ??= MockStreamChatClient();
+
+  @override
+  Stream<Event> on([
+    String? eventType,
+    String? eventType2,
+    String? eventType3,
+    String? eventType4,
+  ]) {
+    return client
+        .on(eventType, eventType2, eventType3, eventType4)
+        .where((e) => e.cid == cid);
+  }
 }
 
 class MockWebSocket extends Mock implements WebSocket {}

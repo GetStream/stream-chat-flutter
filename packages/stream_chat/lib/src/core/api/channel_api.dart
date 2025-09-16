@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
@@ -50,7 +51,7 @@ class ChannelApi {
   /// Requests channels with a given query from the API.
   Future<QueryChannelsResponse> queryChannels({
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<ChannelState>? sort,
     int? memberLimit,
     int? messageLimit,
     bool state = true,
@@ -373,5 +374,25 @@ class ChannelApi {
       data: {},
     );
     return EmptyResponse.fromJson(response.data);
+  }
+
+  /// Updates some of the member data
+  Future<PartialUpdateMemberResponse> updateMemberPartial({
+    required String channelId,
+    required String channelType,
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) async {
+    final response = await _client.patch(
+      // Note: user_id is not required for client side Apis as it can be fetched
+      // directly from the user token but, for the api path is built with it
+      // so we need to pass it as a placeholder.
+      '${_getChannelUrl(channelId, channelType)}/member/{user_id}',
+      data: {
+        if (set != null) 'set': set,
+        if (unset != null) 'unset': unset,
+      },
+    );
+    return PartialUpdateMemberResponse.fromJson(response.data);
   }
 }

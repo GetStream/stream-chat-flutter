@@ -122,6 +122,9 @@ class EventType {
   /// Event sent when the AI indicator is cleared
   static const String aiIndicatorClear = 'ai_indicator.clear';
 
+  /// Event sent when a new poll is created.
+  static const String pollCreated = 'poll.created';
+
   /// Event sent when a poll is updated.
   static const String pollUpdated = 'poll.updated';
 
@@ -152,4 +155,31 @@ class EventType {
   /// Event sent when a new message is added to a thread.
   static const String notificationThreadMessageNew =
       'notification.thread_message_new';
+
+  /// Event sent when a draft message is either created or updated.
+  static const String draftUpdated = 'draft.updated';
+
+  /// Event sent when a draft message is deleted.
+  static const String draftDeleted = 'draft.deleted';
+
+  /// Event sent when a message reminder is created.
+  static const String reminderCreated = 'reminder.created';
+
+  /// Event sent when a message reminder is updated.
+  static const String reminderUpdated = 'reminder.updated';
+
+  /// Event sent when a message reminder is deleted.
+  static const String reminderDeleted = 'reminder.deleted';
+
+  /// Event sent when a message reminder is due.
+  static const String notificationReminderDue = 'notification.reminder_due';
+
+  /// Event sent when a new shared location is created.
+  static const String locationShared = 'location.shared';
+
+  /// Event sent when a live shared location is updated.
+  static const String locationUpdated = 'location.updated';
+
+  /// Event sent when a live shared location is expired.
+  static const String locationExpired = 'location.expired';
 }

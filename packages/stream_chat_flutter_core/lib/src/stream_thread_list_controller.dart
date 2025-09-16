@@ -25,9 +25,13 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   StreamThreadListController({
     required this.client,
     StreamThreadListEventHandler? eventHandler,
+    this.filter,
+    this.sort,
     this.options = const ThreadOptions(),
     this.limit = defaultThreadsPagedLimit,
-  })  : _activeOptions = options,
+  })  : _activeFilter = filter,
+        _activeSort = sort,
+        _activeOptions = options,
         _eventHandler = eventHandler ?? StreamThreadListEventHandler(),
         super(const PagedValue.loading());
 
@@ -36,16 +40,35 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
     super.value, {
     required this.client,
     StreamThreadListEventHandler? eventHandler,
+    this.filter,
+    this.sort,
     this.options = const ThreadOptions(),
     this.limit = defaultThreadsPagedLimit,
-  })  : _activeOptions = options,
+  })  : _activeFilter = filter,
+        _activeSort = sort,
+        _activeOptions = options,
         _eventHandler = eventHandler ?? StreamThreadListEventHandler();
 
   /// The Stream client used to perform the queries.
   final StreamChatClient client;
 
-  /// The channel event handlers to use for the channels list.
+  /// The thread event handlers to use for the thread list.
   final StreamThreadListEventHandler _eventHandler;
+
+  /// The query filters to use.
+  ///
+  /// You can query on any of the custom fields you've defined on the [Thread].
+  final Filter? filter;
+  Filter? _activeFilter;
+
+  /// The sorting used for the threads matching the filters.
+  ///
+  /// Sorting is based on field and direction, multiple sorting options
+  /// can be provided.
+  ///
+  /// Direction can be ascending or descending.
+  final SortOrder<Thread>? sort;
+  SortOrder<Thread>? _activeSort;
 
   /// The limit to apply to the thread list.
   ///
@@ -58,10 +81,31 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   final ThreadOptions options;
   ThreadOptions _activeOptions;
 
+  /// Allows for the change of filters used for thread queries.
+  ///
+  /// Use this if you need to support runtime filter changes,
+  /// through custom filters UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new filter.
+  set filter(Filter? value) => _activeFilter = value;
+
+  /// Allows for the change of the query sort used for thread queries.
+  ///
+  /// Use this if you need to support runtime sort changes,
+  /// through custom sort UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new sort.
+  set sort(SortOrder<Thread>? value) => _activeSort = value;
+
   /// Allows for the change of the [options] at runtime.
   ///
   /// Use this if you need to support runtime option changes,
   /// through custom filters UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new option.
   set options(ThreadOptions options) => _activeOptions = options;
 
   /// The ids of the threads that have unseen messages.
@@ -81,6 +125,19 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   void clearUnseenThreadIds() => _unseenThreadIds.value = const {};
 
   @override
+  set value(PagedValue<String, Thread> newValue) {
+    super.value = switch (_activeSort) {
+      null => newValue,
+      final threadSort => newValue.maybeMap(
+          orElse: () => newValue,
+          (success) => success.copyWith(
+            items: success.items.sorted(threadSort.compare),
+          ),
+        ),
+    };
+  }
+
+  @override
   Future<void> doInitialLoad() async {
     final limit = min(
       this.limit * defaultInitialPagedLimitMultiplier,
@@ -88,6 +145,8 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
     );
     try {
       final response = await client.queryThreads(
+        filter: _activeFilter,
+        sort: _activeSort,
         options: _activeOptions,
         pagination: PaginationParams(limit: limit),
       );
@@ -114,6 +173,8 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
 
     try {
       final response = await client.queryThreads(
+        filter: _activeFilter,
+        sort: _activeSort,
         options: _activeOptions,
         pagination: PaginationParams(limit: limit, next: nextPageKey),
       );
@@ -290,6 +351,8 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
         EventType.reactionNew => _eventHandler.onReactionNew,
         EventType.reactionUpdated => _eventHandler.onReactionUpdated,
         EventType.reactionDeleted => _eventHandler.onReactionDeleted,
+        EventType.draftUpdated => _eventHandler.onDraftUpdated,
+        EventType.draftDeleted => _eventHandler.onDraftDeleted,
         _ => null,
       };
 

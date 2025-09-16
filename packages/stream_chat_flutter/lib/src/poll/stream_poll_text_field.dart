@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kTransitionDuration = Duration(milliseconds: 167);
@@ -140,6 +142,7 @@ class _StreamPollTextFieldState extends State<StreamPollTextField> {
           style: widget.style ?? theme.textTheme.headline,
           keyboardType: widget.keyboardType,
           autofocus: widget.autoFocus,
+          inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'^\s'))],
           decoration: InputDecoration(
             filled: true,
             isCollapsed: true,
@@ -239,7 +242,7 @@ class _PollTextFieldErrorState extends State<PollTextFieldError>
   @override
   Widget build(BuildContext context) {
     final errorText = widget.errorText;
-    if (errorText == null) return const SizedBox.shrink();
+    if (errorText == null) return const Empty();
 
     return Container(
       padding: widget.padding,

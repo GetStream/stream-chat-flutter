@@ -20,12 +20,7 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
       key: 'mentioned_users.id',
       value: StreamChat.of(context).currentUser!.id,
     ),
-    sort: [
-      const SortOption(
-        'created_at',
-        direction: SortOption.ASC,
-      ),
-    ],
+    sort: [const SortOption.asc('created_at')],
     limit: 20,
   );
   @override

@@ -5,3 +5,7 @@ targets:
         options:
           explicit_to_json: true
           field_rename: snake
+      freezed:
+        options:
+          map: false
+          when: false

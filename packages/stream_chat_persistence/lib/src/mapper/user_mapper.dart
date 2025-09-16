@@ -14,6 +14,8 @@ extension UserEntityX on UserEntity {
         extraData: extraData,
         banned: banned,
         createdAt: createdAt,
+        teamsRole: teamsRole,
+        avgResponseTime: avgResponseTime,
       );
 }
 
@@ -29,6 +31,8 @@ extension UserX on User {
         lastActive: lastActive,
         online: online,
         banned: banned,
+        teamsRole: teamsRole,
+        avgResponseTime: avgResponseTime,
         extraData: extraData,
       );
 }

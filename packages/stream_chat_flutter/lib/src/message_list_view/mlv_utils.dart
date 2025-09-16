@@ -8,40 +8,34 @@ int getInitialIndex(
   int? initialScrollIndex,
   StreamChannelState channelState,
   bool Function(Message)? messageFilter,
-  Read? read,
 ) {
-  if (initialScrollIndex != null) {
-    return initialScrollIndex;
-  }
+  if (initialScrollIndex != null) return initialScrollIndex;
 
-  final messages = channelState.channel.state!.messages
-      .where(messageFilter ??
-          defaultMessageFilter(
-            channelState.channel.client.state.currentUser!.id,
-          ))
-      .toList(growable: false);
+  final channel = channelState.channel;
+  final currentUser = channel.client.state.currentUser;
+  if (currentUser == null) return 0;
 
-  if (channelState.initialMessageId != null) {
-    final totalMessages = messages.length;
-    final messageIndex =
-        messages.indexWhere((e) => e.id == channelState.initialMessageId);
-    final index = totalMessages - messageIndex;
-    if (index != 0) return index + 1;
-    return index;
-  }
+  final messages = [
+    ...channelState.channel.state!.messages
+        .where(messageFilter ?? defaultMessageFilter(currentUser.id))
+  ].reversed.toList(growable: false);
 
-  if (read != null) {
-    final oldestUnreadMessage = messages.firstWhereOrNull(
-      (it) =>
-          it.user?.id != channelState.channel.client.state.currentUser?.id &&
-          it.createdAt.compareTo(read.lastRead) > 0,
+  // Return the initial message index if available.
+  if (channelState.initialMessageId case final initialMessageId?) {
+    final initialMessageIndex = messages.indexWhere(
+      (it) => it.id == initialMessageId,
     );
 
-    if (oldestUnreadMessage != null) {
-      final oldestUnreadMessageIndex = messages.indexOf(oldestUnreadMessage);
-      final index = messages.length - oldestUnreadMessageIndex;
-      return index + 1;
-    }
+    if (initialMessageIndex != -1) return initialMessageIndex + 2;
+  }
+
+  // Otherwise, return the first unread message index if available.
+  if (channelState.getFirstUnreadMessage() case final firstUnreadMessage?) {
+    final firstUnreadMessageIndex = messages.indexWhere(
+      (it) => it.id == firstUnreadMessage.id,
+    );
+
+    if (firstUnreadMessageIndex != -1) return firstUnreadMessageIndex + 2;
   }
 
   return 0;
@@ -49,9 +43,17 @@ int getInitialIndex(
 
 /// Gets the index of the top element in the viewport.
 int? getTopElementIndex(Iterable<ItemPosition> values) {
-  final inView = values.where((position) => position.itemTrailingEdge > 0);
-  if (inView.isEmpty) return null;
+  final inView = values.where((position) {
+    if (position.itemLeadingEdge == position.itemTrailingEdge) {
+      // If the item's leading and trailing edges are the same, it means the
+      // item isn't actually rendering anything in the viewport.
+      return false;
+    }
 
+    return position.itemTrailingEdge > 0;
+  });
+
+  if (inView.isEmpty) return null;
   return inView.reduce((min, position) {
     return position.itemTrailingEdge < min.itemTrailingEdge ? position : min;
   }).index;
@@ -59,9 +61,17 @@ int? getTopElementIndex(Iterable<ItemPosition> values) {
 
 /// Gets the index of the bottom element in the viewport.
 int? getBottomElementIndex(Iterable<ItemPosition> values) {
-  final inView = values.where((position) => position.itemLeadingEdge < 1);
-  if (inView.isEmpty) return null;
+  final inView = values.where((position) {
+    if (position.itemLeadingEdge == position.itemTrailingEdge) {
+      // If the item's leading and trailing edges are the same, it means the
+      // item isn't actually rendering anything in the viewport.
+      return false;
+    }
 
+    return position.itemLeadingEdge < 1;
+  });
+
+  if (inView.isEmpty) return null;
   return inView.reduce((max, position) {
     return position.itemLeadingEdge > max.itemLeadingEdge ? position : max;
   }).index;

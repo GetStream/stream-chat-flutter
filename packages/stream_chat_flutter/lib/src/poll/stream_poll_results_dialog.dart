@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_option_votes_dialog.dart';
 import 'package:stream_chat_flutter/src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_tile.dart';
 import 'package:stream_chat_flutter/src/theme/poll_results_dialog_theme.dart';
@@ -35,7 +36,7 @@ Future<T?> showStreamPollResultsDialog<T extends Object?>({
           valueListenable: messageNotifier,
           builder: (context, message, child) {
             final poll = message.poll;
-            if (poll == null) return const SizedBox.shrink();
+            if (poll == null) return const Empty();
 
             void onShowAllVotesPressed(PollOption option) {
               showStreamPollOptionVotesDialog(

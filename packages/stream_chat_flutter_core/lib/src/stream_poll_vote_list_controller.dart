@@ -1,11 +1,17 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 
 /// The default channel page limit to load.
 const defaultPollVotePagedLimit = 10;
+
+/// The default sort used for the poll vote list.
+const defaultPollVoteListSort = [
+  SortOption<PollVote>.asc(PollVoteSortKey.createdAt),
+];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -28,7 +34,7 @@ class StreamPollVoteListController
     required this.pollId,
     StreamPollVoteEventHandler? eventHandler,
     this.filter,
-    this.sort,
+    this.sort = defaultPollVoteListSort,
     this.limit = defaultPollVotePagedLimit,
   })  : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
         _activeFilter = filter,
@@ -42,7 +48,7 @@ class StreamPollVoteListController
     required this.pollId,
     StreamPollVoteEventHandler? eventHandler,
     this.filter,
-    this.sort,
+    this.sort = defaultPollVoteListSort,
     this.limit = defaultPollVotePagedLimit,
   })  : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
         _activeFilter = filter,
@@ -70,8 +76,8 @@ class StreamPollVoteListController
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final List<SortOption>? sort;
-  List<SortOption>? _activeSort;
+  final SortOrder<PollVote>? sort;
+  SortOrder<PollVote>? _activeSort;
 
   /// The limit to apply to the poll vote list. The default is set to
   /// [defaultPollVotePagedLimit].
@@ -81,13 +87,32 @@ class StreamPollVoteListController
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new filter.
   set filter(Filter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for poll vote queries.
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
-  set sort(List<SortOption>? value) => _activeSort = value;
+  ///
+  /// Note: This will not trigger a new query. make sure to call
+  /// [doInitialLoad] after setting a new sort.
+  set sort(SortOrder<PollVote>? value) => _activeSort = value;
+
+  @override
+  set value(PagedValue<String, PollVote> newValue) {
+    super.value = switch (_activeSort) {
+      null => newValue,
+      final pollVoteSort => newValue.maybeMap(
+          orElse: () => newValue,
+          (success) => success.copyWith(
+            items: success.items.sorted(pollVoteSort.compare),
+          ),
+        ),
+    };
+  }
 
   @override
   Future<void> doInitialLoad() async {

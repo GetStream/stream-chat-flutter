@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template floatingDateDivider}
@@ -15,26 +16,27 @@ class FloatingDateDivider extends StatelessWidget {
     required this.reverse,
     required this.messages,
     required this.itemCount,
-    this.isThreadConversation = false,
     this.dateDividerBuilder,
   });
 
-  /// true if this is a thread conversation
-  final bool isThreadConversation;
-
-  // ignore: public_member_api_docs
+  /// A [ValueListenable] that provides the positions of items in the list view.
   final ValueListenable<Iterable<ItemPosition>> itemPositionListener;
 
-  // ignore: public_member_api_docs
+  /// Whether the list is reversed or not.
   final bool reverse;
 
-  // ignore: public_member_api_docs
+  /// The list of messages which are displayed in the list view.
   final List<Message> messages;
 
-  // ignore: public_member_api_docs
+  /// The total number of items in the list view, including special items like
+  /// loaders, headers, and footers.
   final int itemCount;
 
-  // ignore: public_member_api_docs
+  /// A optional builder function that creates a widget to display the date
+  /// divider.
+  ///
+  /// If provided, this function will be called with the date of the message
+  /// to create the date divider widget.
   final Widget Function(DateTime)? dateDividerBuilder;
 
   @override
@@ -43,32 +45,40 @@ class FloatingDateDivider extends StatelessWidget {
       valueListenable: itemPositionListener,
       builder: (context, positions, child) {
         if (positions.isEmpty || messages.isEmpty) {
-          return const Offstage();
+          return const Empty();
         }
 
-        var index = switch (reverse) {
+        final index = switch (reverse) {
           true => getBottomElementIndex(positions),
           false => getTopElementIndex(positions),
         };
 
-        if ((index == null) ||
-            (!isThreadConversation && index == itemCount - 2) ||
-            (isThreadConversation && index == itemCount - 1)) {
-          return const Offstage();
+        if (index == null) return const Empty();
+        if (!_isValidMessageIndex(index)) return const Empty();
+
+        // Offset the index to account for two extra items
+        // (loader and footer) at the bottom of the ListView.
+        final message = messages.elementAtOrNull(index - 2);
+        if (message == null) return const Empty();
+
+        if (dateDividerBuilder case final builder?) {
+          return builder.call(message.createdAt.toLocal());
         }
 
-        if (index <= 2 || index >= itemCount - 3) {
-          if (reverse) {
-            index = itemCount - 4;
-          } else {
-            index = 2;
-          }
-        }
-
-        final message = messages[index - 2];
-        return dateDividerBuilder?.call(message.createdAt.toLocal()) ??
-            StreamDateDivider(dateTime: message.createdAt.toLocal());
+        return StreamDateDivider(dateTime: message.createdAt.toLocal());
       },
     );
+  }
+
+  // Returns True if the item index is a valid message index and not one of the
+  // special items (like header, footer, loaders, etc.).
+  bool _isValidMessageIndex(int index) {
+    if (index == itemCount - 1) return false; // Parent Message
+    if (index == itemCount - 2) return false; // Header Builder
+    if (index == itemCount - 3) return false; // Top Loader Builder
+    if (index == 1) return false; // Bottom Loader Builder
+    if (index == 0) return false; // Footer Builder
+
+    return true;
   }
 }

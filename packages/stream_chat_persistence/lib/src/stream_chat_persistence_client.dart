@@ -212,6 +212,33 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<Draft?> getDraftMessageByCid(
+    String cid, {
+    String? parentId,
+  }) {
+    assert(_debugIsConnected, '');
+    _logger.info('getDraftMessageByCid');
+    return db!.draftMessageDao.getDraftMessageByCid(
+      cid,
+      parentId: parentId,
+    );
+  }
+
+  @override
+  Future<List<Location>> getLocationsByCid(String cid) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getLocationsByCid');
+    return db!.locationDao.getLocationsByCid(cid);
+  }
+
+  @override
+  Future<Location?> getLocationByMessageId(String messageId) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getLocationByMessageId');
+    return db!.locationDao.getLocationByMessageId(messageId);
+  }
+
+  @override
   Future<List<Read>> getReadsByCid(String cid) async {
     assert(_debugIsConnected, '');
     _logger.info('getReadsByCid');
@@ -251,19 +278,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    List<SortOption<ChannelState>>? channelStateSort,
+    SortOrder<ChannelState>? channelStateSort,
     PaginationParams? paginationParams,
   }) async {
     assert(_debugIsConnected, '');
-    assert(() {
-      if (channelStateSort?.any((it) => it.comparator == null) ?? false) {
-        throw ArgumentError(
-          'SortOption requires a comparator in order to sort',
-        );
-      }
-      return true;
-    }(), '');
-
     _logger.info('getChannelStates');
 
     final channels = await db!.channelQueryDao.getChannels(filter: filter);
@@ -273,21 +291,19 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     );
 
     // Sort the channel states
-    var comparator = _defaultChannelStateComparator;
     if (channelStateSort != null && channelStateSort.isNotEmpty) {
-      comparator = _combineComparators(
-        channelStateSort.map((it) => it.comparator).withNullifyer,
-      );
-    }
-    channelStates.sort(comparator);
-
-    final offset = paginationParams?.offset;
-    if (offset != null && offset > 0 && channelStates.isNotEmpty) {
-      channelStates.removeRange(0, offset);
+      channelStates.sort(channelStateSort.compare);
     }
 
-    if (paginationParams?.limit != null) {
-      return channelStates.take(paginationParams!.limit).toList();
+    // Apply offset
+    if (paginationParams?.offset case final paginationOffset?) {
+      final clampedOffset = paginationOffset.clamp(0, channelStates.length);
+      channelStates.removeRange(0, clampedOffset);
+    }
+
+    // Apply limit
+    if (paginationParams?.limit case final paginationLimit?) {
+      return channelStates.take(paginationLimit).toList();
     }
 
     return channelStates;
@@ -313,6 +329,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     assert(_debugIsConnected, '');
     _logger.info('updateChannels');
     return db!.channelDao.updateChannels(channels);
+  }
+
+  @override
+  Future<void> updateDraftMessages(List<Draft> draftMessages) {
+    assert(_debugIsConnected, '');
+    _logger.info('updateDraftMessages');
+    return db!.draftMessageDao.updateDraftMessages(draftMessages);
   }
 
   @override
@@ -386,6 +409,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> updateLocations(List<Location> locations) async {
+    assert(_debugIsConnected, '');
+    _logger.info('updateLocations');
+    return db!.locationDao.updateLocations(locations);
+  }
+
+  @override
   Future<void> deletePinnedMessageReactionsByMessageId(
     List<String> messageIds,
   ) {
@@ -413,6 +443,40 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     assert(_debugIsConnected, '');
     _logger.info('deleteMembersByCids');
     return db!.memberDao.deleteMemberByCids(cids);
+  }
+
+  @override
+  Future<void> deleteDraftMessagesByCids(List<String> cids) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteDraftMessagesByCids');
+    return db!.draftMessageDao.deleteDraftMessagesByCids(cids);
+  }
+
+  @override
+  Future<void> deleteDraftMessageByCid(
+    String cid, {
+    String? parentId,
+  }) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteDraftMessageByCid');
+    return db!.draftMessageDao.deleteDraftMessageByCid(
+      cid,
+      parentId: parentId,
+    );
+  }
+
+  @override
+  Future<void> deleteLocationsByCid(String cid) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteLocationsByCid');
+    return db!.locationDao.deleteLocationsByCid(cid);
+  }
+
+  @override
+  Future<void> deleteLocationsByMessageIds(List<String> messageIds) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteLocationsByMessageIds');
+    return db!.locationDao.deleteLocationsByMessageIds(messageIds);
   }
 
   @override
@@ -444,37 +508,5 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       await db!.disconnect();
       db = null;
     }
-  }
-}
-
-// Creates a new combined [Comparator] which sorts items
-// by the given [comparators].
-Comparator<T> _combineComparators<T>(Iterable<Comparator<T>> comparators) {
-  return (T a, T b) {
-    for (final comparator in comparators) {
-      try {
-        final result = comparator(a, b);
-        if (result != 0) return result;
-      } catch (e) {
-        // If the comparator throws an exception, we ignore it and
-        // continue with the next comparator.
-        continue;
-      }
-    }
-    return 0;
-  };
-}
-
-// The default [Comparator] used to sort [ChannelState]s.
-int _defaultChannelStateComparator(ChannelState a, ChannelState b) {
-  final dateA = a.channel?.lastMessageAt ?? a.channel?.createdAt;
-  final dateB = b.channel?.lastMessageAt ?? b.channel?.createdAt;
-
-  if (dateA == null && dateB == null) return 0;
-  if (dateA == null) return 1;
-  if (dateB == null) {
-    return -1;
-  } else {
-    return dateB.compareTo(dateA);
   }
 }

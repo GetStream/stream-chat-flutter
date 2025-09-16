@@ -115,13 +115,15 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                     final position =
                         (box! as RenderBox).localToGlobal(Offset.zero);
 
-                    await Share.shareXFiles(
-                      [XFile(filePath)],
-                      sharePositionOrigin: Rect.fromLTWH(
-                        position.dx,
-                        position.dy,
-                        size?.width ?? 50,
-                        (size?.height ?? 2) / 2,
+                    await SharePlus.instance.share(
+                      ShareParams(
+                        files: [XFile(filePath)],
+                        sharePositionOrigin: Rect.fromLTWH(
+                          position.dx,
+                          position.dy,
+                          size?.width ?? 50,
+                          (size?.height ?? 2) / 2,
+                        ),
                       ),
                     );
                   },

@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Italian (`it`).
@@ -88,7 +90,10 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get messageDeletedText => 'Questo messaggio è stato eliminato';
 
   @override
-  String get messageDeletedLabel => 'Messaggio cancellato';
+  String get messageDeletedLabel => 'Messaggio eliminato';
+
+  @override
+  String get systemMessageLabel => 'Messaggio di sistema';
 
   @override
   String get editedMessageLabel => 'Modificato';
@@ -173,8 +178,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      "Per favore attiva l'accesso alle foto"
-      '\ne ai video cosí potrai condividerli con i tuoi amici.';
+      "Per favore attiva l'accesso alle foto e ai video cosí potrai condividerli con i tuoi amici.";
 
   @override
   String get allowGalleryAccessMessage => "Permetti l'accesso alla galleria";
@@ -183,8 +187,8 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get flagMessageLabel => 'Segnala messaggio';
 
   @override
-  String get flagMessageQuestion => 'Vuoi mandare una copia di questo messaggio'
-      '\nad un moderatore?';
+  String get flagMessageQuestion =>
+      'Vuoi mandare una copia di questo messaggio ad un moderatore?';
 
   @override
   String get flagLabel => 'SEGNALA';
@@ -207,7 +211,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
   String get deleteMessageQuestion =>
-      'Sei sicuro di voler definitivamente cancellare questo\nmessaggio?';
+      'Sei sicuro di voler definitivamente cancellare questo messaggio?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -450,8 +454,8 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String unreadMessagesSeparatorText() => 'Nouveaux messages';
 
   @override
-  String get enableFileAccessMessage => "Per favore attiva l'accesso ai file"
-      '\ncosí potrai condividerli con i tuoi amici.';
+  String get enableFileAccessMessage =>
+      "Per favore attiva l'accesso ai file cosí potrai condividerli con i tuoi amici.";
 
   @override
   String get allowFileAccessMessage => "Consenti l'accesso ai file";
@@ -560,7 +564,14 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get enterYourCommentLabel => 'Inserisci il tuo commento';
 
   @override
+  String get endVoteConfirmationText =>
+      'Sei sicuro di voler terminare il voto?';
+
+  @override
   String get createLabel => 'Crea';
+
+  @override
+  String get endLabel => 'Fine';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {
@@ -625,4 +636,54 @@ Attenzione: il limite massimo di $limit file è stato superato.
   @override
   String get holdToRecordLabel =>
       'Tieni premuto per registrare, rilascia per inviare';
+
+  @override
+  String get sendAnywayLabel => 'Invia comunque';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Messaggio bloccato dalle politiche di moderazione';
+
+  @override
+  String get moderationReviewModalTitle => 'Sei sicuro?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Considera come il tuo commento potrebbe far sentire gli altri e assicurati di seguire le nostre Linee guida della community.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Registrazione vocale';
+
+  @override
+  String get audioAttachmentText => 'Audio';
+
+  @override
+  String get imageAttachmentText => 'Immagine';
+
+  @override
+  String get videoAttachmentText => 'Video';
+
+  @override
+  String get pollYouVotedText => 'Hai votato';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username ha votato';
+
+  @override
+  String get pollYouCreatedText => 'Hai creato';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username ha creato';
+
+  @override
+  String get draftLabel => 'Bozza';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Posizione dal vivo';
+    return '📍 Posizione';
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamUnreadIndicator}
@@ -6,13 +7,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@endtemplate}
 class StreamUnreadIndicator extends StatelessWidget {
   /// Displays the total unread count.
-  StreamUnreadIndicator({
+  const StreamUnreadIndicator({
     super.key,
-    @Deprecated('Use StreamUnreadIndicator.channels instead') String? cid,
-  }) : _unreadType = switch (cid) {
-          final cid? => _UnreadChannels(cid: cid),
-          _ => const _TotalUnreadCount(),
-        };
+  }) : _unreadType = const _TotalUnreadCount();
 
   /// Displays the unreadChannel count.
   ///
@@ -66,7 +63,7 @@ class StreamUnreadIndicator extends StatelessWidget {
         stream: stream,
         initialData: initialData,
         builder: (context, unreadCount) {
-          if (unreadCount == 0) return const SizedBox.shrink();
+          if (unreadCount == 0) return const Empty();
 
           return Badge(
             textColor: Colors.white,

@@ -1,6 +1,8 @@
 export 'channel_dao.dart';
 export 'channel_query_dao.dart';
 export 'connection_event_dao.dart';
+export 'draft_message_dao.dart';
+export 'location_dao.dart';
 export 'member_dao.dart';
 export 'message_dao.dart';
 export 'pinned_message_dao.dart';

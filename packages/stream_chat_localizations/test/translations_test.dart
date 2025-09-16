@@ -19,6 +19,7 @@ void main() {
       expect(localizations.userLastOnlineText, isNotNull);
       expect(localizations.userOnlineText, isNotNull);
       expect(localizations.userOnlineText, isNotNull);
+      expect(localizations.draftLabel, isNotNull);
       // no users
       expect(localizations.userTypingText([]), isNotNull);
       // single user
@@ -52,6 +53,7 @@ void main() {
       expect(localizations.resultCountText(3), isNotNull);
       expect(localizations.messageDeletedText, isNotNull);
       expect(localizations.messageDeletedLabel, isNotNull);
+      expect(localizations.systemMessageLabel, isNotNull);
       expect(localizations.messageReactionsLabel, isNotNull);
       expect(localizations.emptyChatMessagesText, isNotNull);
       expect(localizations.threadSeparatorText(3), isNotNull);
@@ -249,7 +251,9 @@ void main() {
       expect(localizations.anonymousPollLabel, isNotNull);
       expect(localizations.suggestAnOptionLabel, isNotNull);
       expect(localizations.addACommentLabel, isNotNull);
+      expect(localizations.endVoteConfirmationText, isNotNull);
       expect(localizations.createLabel, isNotNull);
+      expect(localizations.endLabel, isNotNull);
       expect(localizations.endVoteLabel, isNotNull);
       expect(localizations.enterANewOptionLabel, isNotNull);
       expect(localizations.enterYourCommentLabel, isNotNull);
@@ -291,6 +295,22 @@ void main() {
       expect(localizations.newThreadsLabel(count: 3), isNotNull);
       expect(localizations.slideToCancelLabel, isNotNull);
       expect(localizations.holdToRecordLabel, isNotNull);
+      expect(localizations.sendAnywayLabel, isNotNull);
+      expect(localizations.moderatedMessageBlockedText, isNotNull);
+      expect(localizations.moderationReviewModalTitle, isNotNull);
+      expect(localizations.moderationReviewModalDescription, isNotNull);
+      expect(localizations.emptyMessagePreviewText, isNotNull);
+      expect(localizations.voiceRecordingText, isNotNull);
+      expect(localizations.audioAttachmentText, isNotNull);
+      expect(localizations.imageAttachmentText, isNotNull);
+      expect(localizations.videoAttachmentText, isNotNull);
+      expect(localizations.pollYouVotedText, isNotNull);
+      expect(localizations.pollSomeoneVotedText('TestUser'), isNotNull);
+      expect(localizations.pollYouCreatedText, isNotNull);
+      expect(localizations.pollSomeoneCreatedText('TestUser'), isNotNull);
+      expect(localizations.systemMessageLabel, isNotNull);
+      expect(localizations.draftLabel, isNotNull);
+      expect(localizations.locationLabel(), isNotNull);
     });
   }
 

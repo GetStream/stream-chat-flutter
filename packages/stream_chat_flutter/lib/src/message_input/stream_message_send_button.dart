@@ -11,12 +11,8 @@ class StreamMessageSendButton extends StatelessWidget {
     super.key,
     this.timeOut = 0,
     this.isIdle = true,
-    @Deprecated('Will be removed in the next major version')
-    this.isCommandEnabled = false,
-    @Deprecated('Will be removed in the next major version')
-    this.isEditEnabled = false,
-    this.idleSendButton,
-    this.activeSendButton,
+    this.idleSendIcon,
+    this.activeSendIcon,
     required this.onSendMessage,
   });
 
@@ -26,19 +22,11 @@ class StreamMessageSendButton extends StatelessWidget {
   /// If true the button will be disabled.
   final bool isIdle;
 
-  /// True if a command is being sent.
-  @Deprecated('It will be removed in the next major version')
-  final bool isCommandEnabled;
+  /// The icon to display when the button is idle.
+  final Widget? idleSendIcon;
 
-  /// True if in editing mode.
-  @Deprecated('It will be removed in the next major version')
-  final bool isEditEnabled;
-
-  /// The widget to display when the button is disabled.
-  final Widget? idleSendButton;
-
-  /// The widget to display when the button is enabled.
-  final Widget? activeSendButton;
+  /// The icon to display when the button is active.
+  final Widget? activeSendIcon;
 
   /// The callback to call when the button is pressed.
   final VoidCallback onSendMessage;
@@ -62,19 +50,25 @@ class StreamMessageSendButton extends StatelessWidget {
       );
     }
 
+    final idleIcon = switch (idleSendIcon) {
+      final idleIcon? => idleIcon,
+      _ => const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
+    };
+
+    final activeIcon = switch (activeSendIcon) {
+      final activeIcon? => activeIcon,
+      _ => const StreamSvgIcon(icon: StreamSvgIcons.circleUp),
+    };
+
     final theme = StreamMessageInputTheme.of(context);
+    final icon = isIdle ? idleIcon : activeIcon;
     final onPressed = isIdle ? null : onSendMessage;
     return StreamMessageInputIconButton(
       key: const Key('send_button'),
-      icon: StreamSvgIcon(icon: _sendButtonIcon),
+      icon: icon,
       color: theme.sendButtonColor,
       disabledColor: theme.sendButtonIdleColor,
       onPressed: onPressed,
     );
-  }
-
-  StreamSvgIconData get _sendButtonIcon {
-    if (isIdle) return StreamSvgIcons.sendMessage;
-    return StreamSvgIcons.circleUp;
   }
 }

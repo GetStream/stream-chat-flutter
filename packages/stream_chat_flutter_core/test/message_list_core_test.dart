@@ -92,7 +92,6 @@ void main() {
       );
 
       final mockChannel = MockChannel();
-      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.messagesStream)
@@ -105,6 +104,8 @@ void main() {
           child: messageListCore,
         ),
       );
+
+      await tester.pumpAndSettle();
 
       expect(find.byKey(messageListCoreKey), findsOneWidget);
     },
@@ -133,7 +134,6 @@ void main() {
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value([]));
       when(() => mockChannel.state.messages).thenReturn([]);
-      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
 
       await tester.pumpWidget(
         StreamChannel(
@@ -141,6 +141,8 @@ void main() {
           child: messageListCore,
         ),
       );
+
+      await tester.pumpAndSettle();
 
       expect(find.byKey(messageListCoreKey), findsOneWidget);
       expect(controller.paginateData, isNotNull);
@@ -174,7 +176,6 @@ void main() {
       when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
-      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
 
       await tester.pumpWidget(
         StreamChannel(
@@ -182,6 +183,8 @@ void main() {
           child: messageListCore,
         ),
       );
+
+      await tester.pumpAndSettle();
 
       final finder = find.byKey(messageListCoreKey);
       final coreState = tester.firstState<MessageListCoreState>(finder);
@@ -218,7 +221,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       const error = 'Error! Error! Error!';
       when(() => mockChannel.state.messagesStream)
@@ -260,7 +262,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       const messages = <Message>[];
       when(() => mockChannel.state.messagesStream)
@@ -301,7 +302,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(false);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
       when(() => mockChannel.query(
             state: any(named: 'state'),
             watch: any(named: 'watch'),
@@ -310,7 +310,7 @@ void main() {
             messagesPagination: any(named: 'messagesPagination'),
             preferOffline: any(named: 'preferOffline'),
             watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => ChannelState());
+          )).thenAnswer((_) async => const ChannelState());
 
       const messages = <Message>[];
       when(() => mockChannel.state.messagesStream)
@@ -356,7 +356,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       final messages = _generateMessages();
       when(() => mockChannel.state.messagesStream)
@@ -405,7 +404,6 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       final threads = {parentMessage.id: messages};
 
@@ -413,6 +411,13 @@ void main() {
       when(() => mockChannel.state.threadsStream)
           .thenAnswer((_) => Stream.value(threads));
       when(() => mockChannel.state.unreadCount).thenReturn(0);
+
+      when(
+        () => mockChannel.getReplies(
+          parentMessage.id,
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
 
       await tester.pumpWidget(
         Directionality(

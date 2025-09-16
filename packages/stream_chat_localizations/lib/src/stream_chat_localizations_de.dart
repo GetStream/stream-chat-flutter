@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for German (`de`).
@@ -81,6 +83,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get messageDeletedLabel => 'Nachricht gelöscht';
 
   @override
+  String get systemMessageLabel => 'Systemnachricht';
+
+  @override
   String get editedMessageLabel => 'Bearbeitet';
 
   @override
@@ -159,8 +164,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Bitte aktivieren Sie den Zugriff auf Ihre Fotos'
-      '\nund Videos, damit Sie sie mit Freunden teilen können.';
+      'Bitte aktivieren Sie den Zugriff auf Ihre Fotos und Videos, damit Sie sie mit Freunden teilen können.';
 
   @override
   String get allowGalleryAccessMessage => 'Zugang zu Ihrer Galerie gewähren';
@@ -170,8 +174,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Möchten Sie eine Kopie dieser Nachricht an einen'
-      '\nModerator für weitere Untersuchungen senden?';
+      'Möchten Sie eine Kopie dieser Nachricht an einen Moderator für weitere Untersuchungen senden?';
 
   @override
   String get flagLabel => 'MELDEN';
@@ -440,8 +443,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get enableFileAccessMessage =>
-      'Bitte aktivieren Sie den Zugriff auf Dateien,'
-      '\ndamit Sie sie mit Freunden teilen können.';
+      'Bitte aktivieren Sie den Zugriff auf Dateien, damit Sie sie mit Freunden teilen können.';
 
   @override
   String get allowFileAccessMessage => 'Zugriff auf Dateien zulassen';
@@ -547,10 +549,17 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get updateYourCommentLabel => 'Kommentar aktualisieren';
 
   @override
-  String get enterYourCommentLabel => 'Kommentar eingeben';
+  String get enterYourCommentLabel => 'Geben Sie Ihren Kommentar ein';
+
+  @override
+  String get endVoteConfirmationText =>
+      'Sind Sie sicher, dass Sie die Abstimmung beenden möchten?';
 
   @override
   String get createLabel => 'Erstellen';
+
+  @override
+  String get endLabel => 'Beenden';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {
@@ -613,4 +622,54 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Zum Aufnehmen halten, zum Senden loslassen';
+
+  @override
+  String get sendAnywayLabel => 'Trotzdem senden';
+
+  @override
+  String get moderatedMessageBlockedText =>
+      'Nachricht wurde durch Moderationsrichtlinien blockiert';
+
+  @override
+  String get moderationReviewModalTitle => 'Bist du sicher?';
+
+  @override
+  String get moderationReviewModalDescription =>
+      '''Bedenke, wie dein Kommentar andere beeinflussen könnte, und achte darauf, unsere Community-Richtlinien einzuhalten.''';
+
+  @override
+  String get emptyMessagePreviewText => '';
+
+  @override
+  String get voiceRecordingText => 'Sprachaufnahme';
+
+  @override
+  String get audioAttachmentText => 'Audio';
+
+  @override
+  String get imageAttachmentText => 'Bild';
+
+  @override
+  String get videoAttachmentText => 'Video';
+
+  @override
+  String get pollYouVotedText => 'Du hast abgestimmt';
+
+  @override
+  String pollSomeoneVotedText(String username) => '$username hat abgestimmt';
+
+  @override
+  String get pollYouCreatedText => 'Du hast erstellt';
+
+  @override
+  String pollSomeoneCreatedText(String username) => '$username hat erstellt';
+
+  @override
+  String get draftLabel => 'Entwurf';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Live-Standort';
+    return '📍 Standort';
+  }
 }

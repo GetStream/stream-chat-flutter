@@ -3,6 +3,7 @@ import 'package:stream_chat_flutter/src/message_widget/sending_indicator_builder
 import 'package:stream_chat_flutter/src/message_widget/thread_painter.dart';
 import 'package:stream_chat_flutter/src/message_widget/thread_participants.dart';
 import 'package:stream_chat_flutter/src/message_widget/username.dart';
+import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template bottomRow}
@@ -185,32 +186,37 @@ class BottomRow extends StatelessWidget {
     const usernameKey = Key('username');
 
     final children = [
-      if (showUsername)
-        usernameBuilder?.call(context, message) ??
-            Username(
-              key: usernameKey,
-              message: message,
-              messageTheme: messageTheme,
-            ),
-      if (showEditedLabel && isEdited)
-        Text(
-          context.translations.editedMessageLabel,
-          style: messageTheme.createdAtStyle,
-        ),
-      if (showTimeStamp)
-        Text(
-          Jiffy.parseFromDateTime(message.createdAt.toLocal()).jm,
-          style: messageTheme.createdAtStyle,
-        ),
       if (showSendingIndicator)
-        sendingIndicatorBuilder?.call(context, message) ??
-            SendingIndicatorBuilder(
+        switch (sendingIndicatorBuilder) {
+          final builder? => builder(context, message),
+          _ => SendingIndicatorBuilder(
               messageTheme: messageTheme,
               message: message,
               hasNonUrlAttachments: hasNonUrlAttachments,
               streamChat: streamChat,
               streamChatTheme: streamChatTheme,
             ),
+        },
+      if (showUsername)
+        switch (usernameBuilder) {
+          final builder? => builder(context, message),
+          _ => Username(
+              key: usernameKey,
+              message: message,
+              messageTheme: messageTheme,
+            ),
+        },
+      if (showEditedLabel && isEdited)
+        Text(
+          context.translations.editedMessageLabel,
+          style: messageTheme.createdAtStyle,
+        ),
+      if (showTimeStamp)
+        StreamTimestamp(
+          date: message.createdAt.toLocal(),
+          style: messageTheme.createdAtStyle,
+          formatter: (_, date) => Jiffy.parseFromDateTime(date).jm,
+        ),
     ];
 
     final showThreadTail =

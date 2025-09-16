@@ -17,7 +17,9 @@ String formatDate(BuildContext context, DateTime date) {
   return Jiffy.parseFromDateTime(date).yMd;
 }
 
-extension on DateTime {
+/// Extension on [DateTime] to provide common date comparison utilities.
+extension DateTimeComparisonUtils on DateTime {
+  /// Returns true if the date is today.
   bool get isToday {
     final jiffyDate = Jiffy.parseFromDateTime(this);
     final jiffyNow = Jiffy.parseFromDateTime(DateTime.now());
@@ -25,6 +27,7 @@ extension on DateTime {
     return jiffyDate.isSame(jiffyNow, unit: Unit.day);
   }
 
+  /// Returns true if the date was yesterday.
   bool get isYesterday {
     final jiffyDate = Jiffy.parseFromDateTime(this);
     final jiffyNow = Jiffy.parseFromDateTime(DateTime.now());
@@ -32,10 +35,14 @@ extension on DateTime {
     return jiffyDate.isSame(jiffyNow.subtract(days: 1), unit: Unit.day);
   }
 
+  /// Returns true if the date is within the last 7 days.
   bool get isWithinAWeek {
     final jiffyDate = Jiffy.parseFromDateTime(this);
     final jiffyNow = Jiffy.parseFromDateTime(DateTime.now());
 
     return jiffyDate.isAfter(jiffyNow.subtract(days: 7), unit: Unit.day);
   }
+
+  /// Returns true if the date is within the current year.
+  bool get isWithinAYear => year == DateTime.now().year;
 }

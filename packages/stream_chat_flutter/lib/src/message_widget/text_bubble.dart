@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template textBubble}
@@ -50,7 +51,7 @@ class TextBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message.text?.trim().isEmpty ?? true) return const Offstage();
+    if (message.text?.trim().isEmpty ?? true) return const Empty();
     return Padding(
       padding: isOnlyEmoji ? EdgeInsets.zero : textPadding,
       child: textBuilder != null

@@ -1,0 +1,43 @@
+name: beta_version_analyze
+
+on:
+  schedule:
+    # Runs "At 02:00 every monday"
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+jobs:
+  # Does a sanity check on packages for the next beta version so we are not surprised by any breaking changes.
+  analyze_beta_versions:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          channel: beta
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: 📊 Analyze and test packages
+        uses: ./.github/actions/package_analysis
+
+  slack:
+    name: Slack Report
+    runs-on: ubuntu-latest
+    needs: [analyze_beta_versions]
+    if: failure() && github.event_name == 'schedule'
+    steps:
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: "<@U08BMRSM8G5> & <@U01EYU51M89>: The beta build for Flutter Chat failed. Please check the logs."
+          job_name: "${{ github.workflow }}: ${{ github.job }}"
+          fields: repo,commit,author,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NIGHTLY_CHECKS }}

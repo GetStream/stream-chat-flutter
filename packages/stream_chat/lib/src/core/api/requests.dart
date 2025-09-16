@@ -3,48 +3,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'requests.g.dart';
 
-/// Sorting options
-@JsonSerializable(includeIfNull: false)
-class SortOption<T> {
-  /// Creates a new SortOption instance
-  ///
-  /// For example:
-  /// ```dart
-  /// // Sort channels by the last message date:
-  /// final sorting = SortOption("last_message_at")
-  /// ```
-  const SortOption(
-    this.field, {
-    this.direction = SortOption.DESC,
-    this.comparator,
-  });
-
-  /// Create a new instance from a json
-  factory SortOption.fromJson(Map<String, dynamic> json) =>
-      _$SortOptionFromJson(json);
-
-  /// Ascending order
-  // ignore: constant_identifier_names
-  static const ASC = 1;
-
-  /// Descending order
-  // ignore: constant_identifier_names
-  static const DESC = -1;
-
-  /// A sorting field name
-  final String field;
-
-  /// A sorting direction
-  final int direction;
-
-  /// Sorting field Comparator required for offline sorting
-  @JsonKey(includeToJson: false, includeFromJson: false)
-  final Comparator<T>? comparator;
-
-  /// Serialize model to json
-  Map<String, dynamic> toJson() => _$SortOptionToJson(this);
-}
-
 /// Pagination options.
 @JsonSerializable(includeIfNull: false)
 class PaginationParams extends Equatable {
@@ -179,6 +137,11 @@ class PaginationParams extends Equatable {
         greaterThanOrEqual,
         lessThan,
         lessThanOrEqual,
+        createdAtAfterOrEqual,
+        createdAtAfter,
+        createdAtBeforeOrEqual,
+        createdAtBefore,
+        createdAtAround,
       ];
 }
 
@@ -246,4 +209,32 @@ class ThreadOptions extends Equatable {
 
   @override
   List<Object?> get props => [watch, replyLimit, participantLimit, memberLimit];
+}
+
+/// Payload for updating a member.
+@JsonSerializable(createFactory: false, includeIfNull: false)
+class MemberUpdatePayload {
+  /// Creates a new MemberUpdatePayload instance.
+  const MemberUpdatePayload({
+    this.archived,
+    this.pinned,
+  });
+
+  /// Set to true to archive the channel for a user.
+  final bool? archived;
+
+  /// Set to true to pin the channel for a user.
+  final bool? pinned;
+
+  /// Serialize model to json
+  Map<String, dynamic> toJson() => _$MemberUpdatePayloadToJson(this);
+}
+
+/// Type of member update to unset.
+enum MemberUpdateType {
+  /// Unset the archived flag.
+  archived,
+
+  /// Unset the pinned flag.
+  pinned,
 }

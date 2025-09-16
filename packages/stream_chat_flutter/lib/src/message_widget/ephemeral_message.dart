@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_widget/giphy_ephemeral_message.dart';
+import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template streamEphemeralMessage}
@@ -10,10 +12,14 @@ class StreamEphemeralMessage extends StatelessWidget {
   const StreamEphemeralMessage({
     super.key,
     required this.message,
+    this.onMessageTap,
   });
 
   /// The underlying [Message] object which this widget represents.
   final Message message;
+
+  /// The action to perform when tapping on the message.
+  final OnMessageTap? onMessageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +29,22 @@ class StreamEphemeralMessage extends StatelessWidget {
     // message instead.
     final isGiphy = message.command == 'giphy';
     if (isGiphy) {
-      return GiphyEphemeralMessage(
-        message: message,
-        onActionPressed: (name, value) {
-          streamChannel.channel.sendAction(
-            message,
-            {name: value},
-          );
-        },
+      return Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: switch (onMessageTap) {
+            final onTap? => () => onTap(message),
+            _ => null,
+          },
+          child: GiphyEphemeralMessage(
+            message: message,
+            onActionPressed: (name, value) {
+              return streamChannel.channel.sendAction(message, {
+                name: value,
+              }).ignore();
+            },
+          ),
+        ),
       );
     }
 
@@ -38,6 +52,6 @@ class StreamEphemeralMessage extends StatelessWidget {
     assert(true, 'Ephemeral message not handled, Please add a handler');
 
     // Show nothing if we don't know how to handle the message.
-    return const SizedBox.shrink();
+    return const Empty();
   }
 }

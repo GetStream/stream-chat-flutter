@@ -21,7 +21,10 @@ void main() {
       invited: math.Random().nextBool(),
       banned: math.Random().nextBool(),
       shadowBanned: math.Random().nextBool(),
+      pinnedAt: DateTime.now(),
+      archivedAt: DateTime.now(),
       isModerator: math.Random().nextBool(),
+      extraData: {'test_extra_data': 'testData'},
     );
     final member = entity.toMember(user: user);
     expect(member, isA<Member>());
@@ -34,7 +37,10 @@ void main() {
     expect(member.invited, entity.invited);
     expect(member.banned, entity.banned);
     expect(member.shadowBanned, entity.shadowBanned);
+    expect(member.pinnedAt, isSameDateAs(entity.pinnedAt));
+    expect(member.archivedAt, isSameDateAs(entity.archivedAt));
     expect(member.isModerator, entity.isModerator);
+    expect(member.extraData, entity.extraData);
   });
 
   test('toEntity show map member into MemberEntity', () {
@@ -50,7 +56,10 @@ void main() {
       invited: math.Random().nextBool(),
       banned: math.Random().nextBool(),
       shadowBanned: math.Random().nextBool(),
+      pinnedAt: DateTime.now(),
+      archivedAt: DateTime.now(),
       isModerator: math.Random().nextBool(),
+      extraData: const {'test_extra_data': 'testData'},
     );
     final entity = member.toEntity(cid: cid);
     expect(entity, isA<MemberEntity>());
@@ -64,6 +73,9 @@ void main() {
     expect(entity.invited, member.invited);
     expect(entity.banned, member.banned);
     expect(entity.shadowBanned, member.shadowBanned);
+    expect(entity.pinnedAt, isSameDateAs(member.pinnedAt));
+    expect(entity.archivedAt, isSameDateAs(member.archivedAt));
     expect(entity.isModerator, member.isModerator);
+    expect(entity.extraData, member.extraData);
   });
 }

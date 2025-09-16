@@ -1,9 +1,13 @@
+import 'package:collection/collection.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -76,25 +80,44 @@ abstract class ChatPersistenceClient {
     PaginationParams? messagePagination,
   });
 
+  /// Get stored [Draft] message by providing channel [cid] and a optional
+  /// [parentId] for thread messages.
+  Future<Draft?> getDraftMessageByCid(String cid, {String? parentId});
+
+  /// Get stored [Location]s by providing channel [cid]
+  Future<List<Location>> getLocationsByCid(String cid);
+
+  /// Get stored [Location] by providing [messageId]
+  Future<Location?> getLocationByMessageId(String messageId);
+
   /// Get [ChannelState] data by providing channel [cid]
   Future<ChannelState> getChannelStateByCid(
     String cid, {
     PaginationParams? messagePagination,
     PaginationParams? pinnedMessagePagination,
   }) async {
-    final data = await Future.wait([
+    final (members, reads, channel, messages, pinnedMessages, draft) = await (
       getMembersByCid(cid),
       getReadsByCid(cid),
       getChannelByCid(cid),
       getMessagesByCid(cid, messagePagination: messagePagination),
       getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
-    ]);
+      getDraftMessageByCid(cid),
+    ).wait;
+
+    final membership = switch (userId) {
+      final userId? => members?.firstWhereOrNull((it) => it.userId == userId),
+      _ => null,
+    };
+
     return ChannelState(
-      members: data[0] as List<Member>?,
-      read: data[1] as List<Read>?,
-      channel: data[2] as ChannelModel?,
-      messages: data[3] as List<Message>?,
-      pinnedMessages: data[4] as List<Message>?,
+      members: members,
+      membership: membership,
+      read: reads,
+      channel: channel,
+      messages: messages,
+      pinnedMessages: pinnedMessages,
+      draft: draft,
     );
   }
 
@@ -104,7 +127,7 @@ abstract class ChatPersistenceClient {
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
-    List<SortOption<ChannelState>>? channelStateSort,
+    SortOrder<ChannelState>? channelStateSort,
     PaginationParams? paginationParams,
   });
 
@@ -147,6 +170,16 @@ abstract class ChatPersistenceClient {
 
   /// Remove a channel by [channelId]
   Future<void> deleteChannels(List<String> cids);
+
+  /// Removes the draft message by matching [DraftMessages.channelCid] and
+  /// [DraftMessages.parentId].
+  Future<void> deleteDraftMessageByCid(String cid, {String? parentId});
+
+  /// Removes locations by channel [cid]
+  Future<void> deleteLocationsByCid(String cid);
+
+  /// Removes locations by message [messageIds]
+  Future<void> deleteLocationsByMessageIds(List<String> messageIds);
 
   /// Updates the message data of a particular channel [cid] with
   /// the new [messages] data
@@ -205,6 +238,12 @@ abstract class ChatPersistenceClient {
   /// Updates the poll votes data with the new [pollVotes] data
   Future<void> updatePollVotes(List<PollVote> pollVotes);
 
+  /// Updates the draft messages data with the new [draftMessages] data
+  Future<void> updateDraftMessages(List<Draft> draftMessages);
+
+  /// Updates the locations data with the new [locations] data
+  Future<void> updateLocations(List<Location> locations);
+
   /// Deletes all the reactions by [messageIds]
   Future<void> deleteReactionsByMessageId(List<String> messageIds);
 
@@ -216,6 +255,9 @@ abstract class ChatPersistenceClient {
 
   /// Deletes all the members by channel [cids]
   Future<void> deleteMembersByCids(List<String> cids);
+
+  /// Deletes all the draft messages by channel [cids]
+  Future<void> deleteDraftMessagesByCids(List<String> cids);
 
   /// Updates the channel [cid] threads data along with reactions and users.
   Future<void> updateChannelThreads(
@@ -231,12 +273,17 @@ abstract class ChatPersistenceClient {
     // Adding new reactions and users data
     final reactions = messages.expand(_expandReactions).toList();
     final users = messages.map((it) => it.user).withNullifyer.toList();
+    await updateUsers(users);
 
-    await Future.wait([
-      updateMessages(cid, messages),
-      updateReactions(reactions),
-      updateUsers(users),
-    ]);
+    final channel = await getChannelByCid(cid);
+    if (channel == null) {
+      // If the channel does not yet exist, we create a new one otherwise
+      // the db will throw an error due to foreign key constraint.
+      await updateChannels([ChannelModel(cid: cid)]);
+    }
+
+    await updateMessages(cid, messages);
+    await updateReactions(reactions);
   }
 
   /// Update the channel state data using [channelState]
@@ -263,6 +310,11 @@ abstract class ChatPersistenceClient {
     final pollVotes = <PollVote>[];
     final pollVotesToDelete = <String>[];
 
+    final drafts = <Draft>[];
+    final draftsToDeleteCids = <String>[];
+
+    final locations = <Location>[];
+
     for (final state in channelStates) {
       final channel = state.channel;
       // Continue if channel is not available.
@@ -287,6 +339,7 @@ abstract class ChatPersistenceClient {
       membersToDelete.add(cid);
       reactionsToDelete.addAll(messages?.map((it) => it.id) ?? []);
       pinnedReactionsToDelete.addAll(pinnedMessages?.map((it) => it.id) ?? []);
+      draftsToDeleteCids.add(cid);
 
       // preparing addition data
       channelWithReads[cid] = reads;
@@ -305,6 +358,17 @@ abstract class ChatPersistenceClient {
       pollVotesToDelete.addAll(polls.map((it) => it.id));
 
       pollVotes.addAll(polls.expand(_expandPollVotes));
+
+      drafts.addAll([
+        state.draft,
+        ...?messages?.map((it) => it.draft),
+        ...?pinnedMessages?.map((it) => it.draft),
+      ].nonNulls);
+
+      locations.addAll([
+        ...?messages?.map((it) => it.sharedLocation),
+        ...?pinnedMessages?.map((it) => it.sharedLocation),
+      ].nonNulls);
 
       users.addAll([
         channel.createdBy,
@@ -326,6 +390,7 @@ abstract class ChatPersistenceClient {
       deleteReactionsByMessageId(reactionsToDelete),
       deletePinnedMessageReactionsByMessageId(pinnedReactionsToDelete),
       deletePollVotesByPollIds(pollVotesToDelete),
+      deleteDraftMessagesByCids(draftsToDeleteCids),
     ]);
 
     // Updating first as does not depend on any other table.
@@ -348,6 +413,8 @@ abstract class ChatPersistenceClient {
       updateReactions(reactions),
       updatePinnedMessageReactions(pinnedReactions),
       updatePollVotes(pollVotes),
+      updateDraftMessages(drafts),
+      updateLocations(locations),
     ]);
   }
 

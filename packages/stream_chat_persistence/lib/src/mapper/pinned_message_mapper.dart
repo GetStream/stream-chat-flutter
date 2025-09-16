@@ -13,6 +13,8 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
     List<Reaction>? ownReactions,
     Message? quotedMessage,
     Poll? poll,
+    Draft? draft,
+    Location? sharedLocation,
   }) =>
       Message(
         shadowed: shadowed,
@@ -39,8 +41,7 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
         quotedMessage: quotedMessage,
         pollId: pollId,
         poll: poll,
-        reactionCounts: reactionCounts,
-        reactionScores: reactionScores,
+        reactionGroups: reactionGroups,
         replyCount: replyCount,
         showInChannel: showInChannel,
         text: messageText,
@@ -52,6 +53,9 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
         mentionedUsers:
             mentionedUsers.map((e) => User.fromJson(jsonDecode(e))).toList(),
         i18n: i18n,
+        restrictedVisibility: restrictedVisibility,
+        draft: draft,
+        sharedLocation: sharedLocation,
       );
 }
 
@@ -73,8 +77,7 @@ extension PMessageX on Message {
         shadowed: shadowed,
         showInChannel: showInChannel,
         replyCount: replyCount,
-        reactionScores: reactionScores,
-        reactionCounts: reactionCounts,
+        reactionGroups: reactionGroups,
         mentionedUsers: mentionedUsers.map(jsonEncode).toList(),
         state: jsonEncode(state),
         remoteUpdatedAt: remoteUpdatedAt,
@@ -90,5 +93,6 @@ extension PMessageX on Message {
         pinExpires: pinExpires,
         pinnedByUserId: pinnedBy?.id,
         i18n: i18n,
+        restrictedVisibility: restrictedVisibility,
       );
 }

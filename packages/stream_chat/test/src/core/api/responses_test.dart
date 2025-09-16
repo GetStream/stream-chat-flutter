@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:stream_chat/src/core/models/call_payload.dart';
-import 'package:stream_chat/src/core/models/user_block.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -4365,32 +4363,6 @@ void main() {
       expect(response.message, isA<Message>());
     });
 
-    test('CallTokenPayload', () {
-      const jsonExample = '''
-      {"duration": "3ms",
-      "agora_app_id":"test",
-      "agora_uid": 12,
-      "token": "token"}
-      ''';
-      final response = CallTokenPayload.fromJson(json.decode(jsonExample));
-      expect(response.agoraAppId, isA<String>());
-      expect(response.agoraUid, isA<int>());
-      expect(response.token, isA<String>());
-    });
-
-    test('CreateCallPayload', () {
-      const jsonExample = '''
-      {"call": 
-      {"id":"test",
-      "provider": "test",
-      "agora": {"channel":"test"},
-      "hms":{"room_id":"test", "room_name":"test"}
-      }}
-      ''';
-      final response = CreateCallPayload.fromJson(json.decode(jsonExample));
-      expect(response.call, isA<CallPayload>());
-    });
-
     test('UserBlockResponse', () {
       const jsonExample = '''
       {
@@ -4440,6 +4412,80 @@ void main() {
       ''';
       final response = BlockedUsersResponse.fromJson(json.decode(jsonExample));
       expect(response.blocks, isA<List<UserBlock>>());
+    });
+
+    test('UpsertPushPreferencesResponse', () {
+      const jsonExample = '''
+      {
+        "user_preferences": {
+          "user1": {
+            "chat_level": "mentions",
+            "call_level": "all",
+            "disabled_until": "2024-12-31T23:59:59Z"
+          },
+          "user2": {
+            "chat_level": "none"
+          }
+        },
+        "user_channel_preferences": {
+          "user1": {
+            "channel1": {
+              "chat_level": "all",
+              "disabled_until": "2024-12-31T23:59:59Z"
+            },
+            "channel2": {
+              "chat_level": "none"
+            }
+          },
+          "user2": {
+            "channel3": {
+              "chat_level": "mentions"
+            }
+          }
+        }
+      }
+      ''';
+      final response = UpsertPushPreferencesResponse.fromJson(
+        json.decode(jsonExample),
+      );
+
+      expect(response.userPreferences, isA<Map<String, PushPreference>>());
+      expect(response.userPreferences, hasLength(2));
+
+      // Test user1 preferences
+      final user1Prefs = response.userPreferences['user1']!;
+      expect(user1Prefs.chatLevel, ChatLevel.mentions);
+      expect(user1Prefs.callLevel, CallLevel.all);
+      expect(user1Prefs.disabledUntil, DateTime.parse('2024-12-31T23:59:59Z'));
+
+      // Test user2 preferences
+      final user2Prefs = response.userPreferences['user2']!;
+      expect(user2Prefs.chatLevel, ChatLevel.none);
+
+      expect(
+        response.userChannelPreferences,
+        isA<Map<String, Map<String, ChannelPushPreference>>>(),
+      );
+      expect(response.userChannelPreferences, hasLength(2));
+
+      // Test user1 channel preferences
+      final user1ChannelPrefs = response.userChannelPreferences['user1']!;
+      expect(user1ChannelPrefs, hasLength(2));
+
+      final channel1Prefs = user1ChannelPrefs['channel1']!;
+      expect(channel1Prefs.chatLevel, ChatLevel.all);
+      expect(
+          channel1Prefs.disabledUntil, DateTime.parse('2024-12-31T23:59:59Z'));
+
+      final channel2Prefs = user1ChannelPrefs['channel2']!;
+      expect(channel2Prefs.chatLevel, ChatLevel.none);
+
+      // Test user2 channel preferences
+      final user2ChannelPrefs = response.userChannelPreferences['user2']!;
+      expect(user2ChannelPrefs, hasLength(1));
+
+      final channel3Prefs = user2ChannelPrefs['channel3']!;
+      expect(channel3Prefs.chatLevel, ChatLevel.mentions);
     });
   });
 }

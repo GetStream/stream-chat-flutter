@@ -228,7 +228,7 @@ class StreamAutocomplete extends StatefulWidget {
   /// place the text field in the AppBar and the options below in the main body.
   ///
   /// When following this pattern, [fieldViewBuilder] can return
-  /// `SizedBox.shrink()` so that nothing is drawn where the text field would
+  /// `EmptyWidget()` so that nothing is drawn where the text field would
   /// normally be. A separate text field can be created elsewhere, and a
   /// FocusNode and StreamMessageEditingController can be passed both to that
   /// text field and to StreamAutocomplete.
@@ -623,7 +623,7 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
         children: [
           if (headerBuilder != null) ...[
             headerBuilder!(context),
-            const Divider(height: 0),
+            Divider(height: 0, color: colorTheme.borders),
           ],
           LimitedBox(
             maxHeight: maxHeight ?? height * 0.5,

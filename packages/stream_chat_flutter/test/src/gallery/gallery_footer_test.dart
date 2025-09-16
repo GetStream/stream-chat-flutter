@@ -82,6 +82,9 @@ void main() {
         ),
       );
 
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
       expect(find.byType(StreamSvgIcon), findsNWidgets(2));
     },
   );

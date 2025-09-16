@@ -1,3 +1,214 @@
+## 10.0.0-beta.5
+
+- Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.16.0
+
+🐞 Fixed
+
+- Fixed context menu being truncated and scrollable on web when there was enough space to display it
+  fully. [[#2317]](https://github.com/GetStream/stream-chat-flutter/issues/2317)
+- Fixed `StreamMessageInput` cooldown resume error if channel state is not yet initialized.
+  [[#2338]](https://github.com/GetStream/stream-chat-flutter/issues/2338)
+
+✅ Added
+
+- Added `padding` and `textInputMargin` to `StreamMessageInput` to allow fine-tuning the layout.
+
+## 10.0.0-beta.4
+
+✅ Added
+
+- Added `emojiCode` property to `StreamReactionIcon` to support custom emojis in reactions.
+- Updated default reaction builders with standard emoji codes. (`❤️`, `👍`, `👎`, `😂`, `😮`)
+- Added `StreamChatConfiguration.maybeOf()` method for safe context access in async operations.
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.15.0
+
+✅ Added
+
+- Added `bottom` and `bottomOpacity` to the `StreamChannelHeader` widget.
+- Added `StreamChat.maybeOf()` method for safe context access in async operations.
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` crashes with "Null check operator used on a null value" when async
+  operations continue after widget unmounting.
+
+## 10.0.0-beta.3
+
+🛑️ Breaking
+
+- **Deprecated API Cleanup**: Removed all deprecated classes, methods, and properties for the v10 major release:
+  - **Removed Classes**: `DmCheckbox` (use `DmCheckboxListTile`), `StreamIconThemeSvgIcon` (use `StreamSvgIcon`), `StreamVoiceRecordingThemeData` (use `StreamVoiceRecordingAttachmentThemeData`), `StreamVoiceRecordingLoading`, `StreamVoiceRecordingSlider` (use `StreamAudioWaveformSlider`), `StreamVoiceRecordingPlayer` (use `StreamVoiceRecordingAttachment`), `StreamVoiceRecordingListPlayer` (use `StreamVoiceRecordingAttachmentPlaylist`)
+  - **Removed Properties**: `reactionIcons` and `voiceRecordingTheme` from `StreamChatTheme`, `isThreadConversation` from `FloatingDateDivider`, `idleSendButton` and `activeSendButton` from `StreamMessageInput`, `isCommandEnabled` and `isEditEnabled` from `StreamMessageSendButton`, `assetName`, `width`, and `height` from `StreamSvgIcon`
+  - **Removed Constructor Parameters**: `useNativeAttachmentPickerOnMobile` from various components, `allowCompression` from `StreamAttachmentHandler.pickFile()` and `StreamFilePicker` (use `compressionQuality` instead), `cid` from `StreamUnreadIndicator` constructor
+  - **Removed Methods**: `lastUnreadMessage()` from message list extensions (use `StreamChannel.getFirstUnreadMessage`), `loadBuffer()` and `_loadAsync()` from `StreamVideoThumbnailImage`
+  - **StreamSvgIcon Refactoring**: Removed 80+ deprecated factory constructors. Use `StreamSvgIcon(icon: StreamSvgIcons.iconName)` instead of factory constructors like `StreamSvgIcon.add()`
+- `PollMessage` widget has been removed and replaced with `PollAttachment` for better integration with the attachment system. Polls can now be customized through `PollAttachmentBuilder` or by creating custom poll attachment widgets via the attachment builder system.
+- `AttachmentPickerType` enum has been replaced with a sealed class to support extensible custom types like contact and location pickers. Use built-in types like `AttachmentPickerType.images` or define your own via `CustomAttachmentPickerType`.
+- `StreamAttachmentPickerOption` has been replaced with two sealed classes to support layout-specific picker options: `SystemAttachmentPickerOption` for system pickers (e.g. camera, files) and `TabbedAttachmentPickerOption` for tabbed pickers (e.g. gallery, polls, location).
+- `showStreamAttachmentPickerModalBottomSheet` now returns a `StreamAttachmentPickerResult` instead of `AttachmentPickerValue` for improved type safety and clearer intent handling.
+- `StreamMobileAttachmentPickerBottomSheet` has been renamed to `StreamTabbedAttachmentPickerBottomSheet`, and `StreamWebOrDesktopAttachmentPickerBottomSheet` has been renamed to `StreamSystemAttachmentPickerBottomSheet` to better reflect their respective layouts.
+
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+
+✅ Added
+
+- Added `extraData` field to `AttachmentPickerValue` to support storing and retrieving custom picker state (e.g. tab-specific config).
+- Added `customAttachmentPickerOptions` to `StreamMessageInput` to allow injecting custom picker tabs like contact and location pickers.
+- Added `onCustomAttachmentPickerResult` callback to `StreamMessageInput` to handle results returned by custom picker tabs.
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.14.0
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` tries to expand to full height when used in a unconstrained environment.
+- Fixed `StreamCommandAutocompleteOptions` to style the command name with `textHighEmphasis` style.
+
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 9.13.0
+
+🐞 Fixed
+
+- Fixed `FloatingDateDivider` not showing the correct date when the latest message was too big and
+  exceeded the viewport main axis size.
+- Fixed `ScrollToBottom` button always showing when the latest message was too big and exceeded the
+  viewport main axis size.
+
+## 10.0.0-beta.1
+
+🛑️ Breaking
+
+- `StreamReactionPicker` now requires reactions to be explicitly handled via `onReactionPicked`. *(Automatic handling is no longer supported.)*
+- `StreamMessageAction` is now generic `(StreamMessageAction<T>)`, enhancing type safety. Individual onTap callbacks have been removed; actions are now handled centrally by widgets like `StreamMessageWidget.onCustomActionTap` or modals using action types.
+- `StreamMessageReactionsModal` no longer requires the `messageTheme` parameter. The theme now automatically derives from the `reverse` property.
+- `StreamMessageWidget` no longer requires the `showReactionTail` parameter. The reaction picker tail is now always shown when the reaction picker is visible.
+
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+
+✅ Added
+
+- Added new `StreamMessageActionsBuilder` which provides a list of actions to be displayed in the message actions modal.
+- Added new `StreamMessageActionConfirmationModal` for confirming destructive actions like delete or flag.
+- Added new `StreamMessageModal` and `showStreamMessageModal` for consistent message-related modals with improved transitions and backdrop effects.
+  ```dart
+  showStreamMessageModal(
+    context: context,
+    ...other parameters,
+    builder: (context) => StreamMessageModal(
+      ...other parameters,
+      headerBuilder: (context) => YourCustomHeader(),
+      contentBuilder: (context) => YourCustomContent(),
+    ),
+  );
+  ```
+- Added `desktopOrWeb` parameter to `PlatformWidgetBuilder` to allow specifying a single builder for both desktop and web platforms.
+- Added `reactionPickerBuilder` to `StreamMessageActionsModal`, `StreamMessageReactionsModal`, and `StreamMessageWidget` to enable custom reaction picker widgets.
+- Added `StreamReactionIcon.defaultReactions` providing a predefined list of common reaction icons.
+- Exported `StreamMessageActionsModal` and `StreamModeratedMessageActionsModal` which are now based on `StreamMessageModal` for consistent styling and behavior.
+
+## 9.12.0
+
+✅ Added
+
+- Added support for `MessageReminder` feature, which allows users to bookmark or set reminders
+  for specific messages in a channel.
+
+## 9.11.0
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` throwing exception when a non-initialized `Channel` is used.
+
+🔄 Changed
+
+- Updated `just_audio` dependency to `">=0.9.38 <0.11.0"`.
+
+## 9.10.0
+
+🔄 Changed
+
+- Updated `share_plus` dependency to `^11.0.0`.
+- Updated `desktop_drop` dependency to `">=0.5.0 <0.7.0"`.
+
+## 9.9.0
+
+✅ Added
+
+- Added support for Draft messages preview.
+- Added a new `StreamDraftListView` for displaying draft messages.
+- Added a confirmation dialog for end vote in Polls. [[#2211]](https://github.com/GetStream/stream-chat-flutter/issues/2211)
+
+🐞 Fixed
+
+- [[#2182]](https://github.com/GetStream/stream-chat-flutter/issues/2182) Fixes StreamMessageInput not listening to channel capabilities.
+
+🔄 Changed
+
+- Exported `StreamQuotedMessageWidget` to allow customization of quoted messages using `StreamMessageWidget.quotedMessageBuilder`.
+
+## 9.8.0
+
+🐞 Fixed
+
+- [[#2184]](https://github.com/GetStream/stream-chat-flutter/issues/2184) Fixed messages not being
+  marked as read when scrolled to the bottom.
+- [[#2187]](https://github.com/GetStream/stream-chat-flutter/issues/2187) Fixed `MessageListView`
+  scrolling back up after reaching bottom when unread indicator or scroll to bottom button is
+  tapped.
+- [[#2085]](https://github.com/GetStream/stream-chat-flutter/issues/2085) Fixed handling of read
+  events in the Channel class.
+- [[#2150]](https://github.com/GetStream/stream-chat-flutter/issues/2150) Fixed Push notifications
+  for mentions shows user ID instead of Username.
+- [[#2203]](https://github.com/GetStream/stream-chat-flutter/issues/2203) Fixed StreamMessageInput
+  shows Poll option even if polls are disabled in channel config.
+
+## 9.7.0
+
+🐞 Fixed
+
+- [[#2118]](https://github.com/GetStream/stream-chat-flutter/issues/2118) Fixed invalid assertions
+  applied on message input command and attachment button.
+- [[#2042]](https://github.com/GetStream/stream-chat-flutter/issues/2042) Fixed `StreamMessageInput`
+  send message predicate to properly handle shift+enter for new lines and improve message text validation.
+
+✅ Added
+
+- Added support for new message moderation feature in the SDK.
+
+## 9.6.0
+
+🐞 Fixed
+
+- [[#2137]](https://github.com/GetStream/stream-chat-flutter/issues/2137) Fixed message input
+  buttons not being able to customized.
+- [[#1775]](https://github.com/GetStream/stream-chat-flutter/issues/1775) Fix incorrect message order.
+
+## 9.5.0
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` not able to edit the ogAttachments.
+- Fixed `MessageWidget` showing pinned background for deleted messages.
+
+✅ Added
+
+- Introduced `StreamMessageInput.useSystemAttachmentPicker` for system media picker support.
+- Introduced `StreamMessageThemeData.messageDeletedStyle` to style the text on a deleted message.
+
+🔄 Changed
+
+- Updated the message list view to prevent pinning messages that have restricted visibility.
+- Deprecated `StreamMessageInput.useNativeAttachmentPickerOnMobile` in favor of `StreamMessageInput.useSystemAttachmentPicker`.
+
 ## 9.4.0
 
 🔄 Changed

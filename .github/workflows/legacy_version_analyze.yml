@@ -47,25 +47,5 @@ jobs:
           cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
-      - name: "Install Tools"
-        run: flutter pub global activate melos
-
-      - name: "Bootstrap Workspace"
-        run: melos bootstrap --verbose
-
-      # Only analyze lib/; non-client code doesn't need to work on
-      # all supported legacy version.
-      - name: "Stream Chat Analyze"
-        run: cd packages/stream_chat/lib && dart analyze --fatal-infos .
-
-      - name: "Stream Chat Flutter Core Analyze"
-        run: cd packages/stream_chat_flutter_core/lib && dart analyze --fatal-infos .
-
-      - name: "Stream Chat Flutter Analyze"
-        run: cd packages/stream_chat_flutter/lib && dart analyze --fatal-infos .
-
-      - name: "Stream Chat Persistence Analyze"
-        run: cd packages/stream_chat_persistence/lib && dart analyze --fatal-infos .
-
-      - name: "Stream Chat Localizations Analyze"
-        run: cd packages/stream_chat_localizations/lib && dart analyze --fatal-infos .
+      - name: 📊 Analyze and test packages
+        uses: ./.github/actions/package_analysis

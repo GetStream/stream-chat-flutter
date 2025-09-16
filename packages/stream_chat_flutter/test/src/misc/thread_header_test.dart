@@ -18,6 +18,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.channels).thenReturn({channel.cid!: channel});
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -61,11 +62,14 @@ void main() {
           ),
         ),
       ));
+
+      // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
       expect(find.text('with '), findsOneWidget);
       expect(find.byType(StreamChannelName), findsOneWidget);
       expect(find.byType(StreamBackButton), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
       expect(find.text('Thread Reply'), findsOneWidget);
     },
   );
@@ -135,6 +139,8 @@ void main() {
           ),
         ),
       ));
+
+      // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
       expect(find.text('title'), findsOneWidget);

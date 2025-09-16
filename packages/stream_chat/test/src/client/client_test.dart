@@ -1,7 +1,5 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
-import 'package:stream_chat/src/core/models/banned_user.dart';
-import 'package:stream_chat/src/core/models/user_block.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -148,21 +146,6 @@ void main() {
           await client.openConnection();
         } catch (e) {
           expect(e, isA<AssertionError>());
-        }
-      });
-
-      test('should throw if connection is already in progress', () async {
-        expect(client.state.currentUser, isNull);
-        try {
-          await client.connectAnonymousUser();
-          await client.openConnection();
-        } catch (e) {
-          expect(e, isA<StreamChatError>());
-          final err = e as StreamChatError;
-          expect(
-            err.message.contains('Connection already in progress for'),
-            isTrue,
-          );
         }
       });
 
@@ -501,7 +484,6 @@ void main() {
   group('Client with connected user with persistence', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
-    late final ws = FakeWebSocket();
     late final persistence = MockPersistenceClient();
 
     final user = User(id: 'test-user-id');
@@ -520,6 +502,7 @@ void main() {
       when(() => persistence.updateLastSyncAt(any()))
           .thenAnswer((_) => Future.value());
       when(persistence.getLastSyncAt).thenAnswer((_) async => null);
+      final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws)
         ..chatPersistenceClient = persistence;
       await client.connectUser(user, token);
@@ -528,8 +511,8 @@ void main() {
       expect(client.wsConnectionStatus, ConnectionStatus.connected);
     });
 
-    tearDown(() {
-      client.dispose();
+    tearDown(() async {
+      await client.dispose();
     });
 
     group('`.sync`', () {
@@ -815,10 +798,10 @@ void main() {
 
   group('Client with connected user without persistence', () {
     const apiKey = 'test-api-key';
+    const userId = 'test-user-id';
     late final api = FakeChatApi();
-    late final ws = FakeWebSocket();
 
-    final user = User(id: 'test-user-id');
+    final user = User(id: userId);
     final token = Token.development(user.id).rawValue;
 
     late StreamChatClient client;
@@ -827,11 +810,13 @@ void main() {
       // fallback values
       registerFallbackValue(FakeEvent());
       registerFallbackValue(FakeMessage());
+      registerFallbackValue(FakeDraftMessage());
       registerFallbackValue(FakePollVote());
       registerFallbackValue(const PaginationParams());
     });
 
     setUp(() async {
+      final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       await client.connectUser(user, token);
       await delay(300);
@@ -839,8 +824,8 @@ void main() {
       expect(client.wsConnectionStatus, ConnectionStatus.connected);
     });
 
-    tearDown(() {
-      client.dispose();
+    tearDown(() async {
+      await client.dispose();
     });
 
     group('`.sync`', () {
@@ -1605,6 +1590,182 @@ void main() {
       verifyNoMoreInteractions(api.moderation);
     });
 
+    test('`.partialMemberUpdate with userId`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      const otherUserId = 'test-other-user-id';
+      const set = {'pinned': true};
+      const unset = ['pinned'];
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: set,
+            unset: unset,
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: otherUserId),
+          ));
+
+      final res = await client.partialMemberUpdate(
+        channelId: channelId,
+        channelType: channelType,
+        set: set,
+        unset: unset,
+      );
+
+      expect(res, isNotNull);
+      expect(res.channelMember.userId, otherUserId);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: set,
+            unset: unset,
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.partialMemberUpdate with current user`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      const set = {'pinned': true};
+      const unset = ['pinned'];
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: set,
+            unset: unset,
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId),
+          ));
+
+      final res = await client.partialMemberUpdate(
+        channelId: channelId,
+        channelType: channelType,
+        set: set,
+        unset: unset,
+      );
+
+      expect(res, isNotNull);
+      expect(res.channelMember.userId, userId);
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: set,
+            unset: unset,
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.pinChannel`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: const MemberUpdatePayload(pinned: true).toJson(),
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+          ));
+
+      final res = await client.pinChannel(
+        channelId: channelId,
+        channelType: channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: const MemberUpdatePayload(pinned: true).toJson(),
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.unpinChannel`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            unset: [MemberUpdateType.pinned.name],
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+          ));
+
+      final res = await client.unpinChannel(
+        channelId: channelId,
+        channelType: channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            unset: [MemberUpdateType.pinned.name],
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.archiveChannel`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: const MemberUpdatePayload(archived: true).toJson(),
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId, archivedAt: DateTime.now()),
+          ));
+
+      final res = await client.archiveChannel(
+        channelId: channelId,
+        channelType: channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            set: const MemberUpdatePayload(archived: true).toJson(),
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.unarchiveChannel`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+
+      when(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            unset: [MemberUpdateType.archived.name],
+          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
+            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+          ));
+
+      final res = await client.unarchiveChannel(
+        channelId: channelId,
+        channelType: channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.updateMemberPartial(
+            channelId: channelId,
+            channelType: channelType,
+            unset: [MemberUpdateType.archived.name],
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
     test('`.acceptChannelInvite`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
@@ -2067,7 +2228,7 @@ void main() {
 
     test('`.queryPolls`', () async {
       final filter = Filter.in_('id', const ['test-poll-id']);
-      final sort = [const SortOption('created_at')];
+      final sort = [const SortOption<Poll>.desc('created_at')];
       const pagination = PaginationParams(limit: 20);
 
       final polls = List.generate(
@@ -2109,7 +2270,7 @@ void main() {
     test('`.queryPollVotes`', () async {
       const pollId = 'test-poll-id';
       final filter = Filter.in_('id', const ['test-vote-id']);
-      final sort = [const SortOption('created_at')];
+      final sort = [const SortOption<PollVote>.desc('created_at')];
       const pagination = PaginationParams(limit: 20);
 
       final votes = List.generate(
@@ -2294,6 +2455,261 @@ void main() {
       verifyNoMoreInteractions(api.user);
     });
 
+    group('Block user state management', () {
+      test('blockUser should update blockedUserIds on client state', () async {
+        final testUser = OwnUser(id: 'test-user');
+        const userId = 'blocked-user-id';
+
+        // Verify initial state
+        expect(client.state.currentUser?.blockedUserIds, isEmpty);
+
+        when(() => api.user.blockUser(userId)).thenAnswer(
+          (_) async => UserBlockResponse()
+            ..blockedUserId = userId
+            ..blockedByUserId = testUser.id
+            ..createdAt = DateTime.now(),
+        );
+
+        await client.blockUser(userId);
+
+        // Verify - should now include the blocked user ID
+        expect(client.state.currentUser?.blockedUserIds, contains(userId));
+        verify(() => api.user.blockUser(userId)).called(1);
+        verifyNoMoreInteractions(api.user);
+      });
+
+      test(
+        'blockUser should not duplicate existing blocked user IDs',
+        () async {
+          const userId = 'blocked-user-id';
+          client.state.blockedUserIds = const [userId];
+
+          // Verify the user is already in the blocked list
+          expect(client.state.currentUser?.blockedUserIds, contains(userId));
+
+          when(() => api.user.blockUser(userId)).thenAnswer(
+            (_) async => UserBlockResponse()
+              ..blockedUserId = userId
+              ..blockedByUserId = client.state.currentUser!.id
+              ..createdAt = DateTime.now(),
+          );
+
+          await client.blockUser(userId);
+
+          // Verify - should still have only one entry
+          expect(client.state.currentUser?.blockedUserIds, contains(userId));
+          expect(client.state.currentUser?.blockedUserIds.length, 1);
+          verify(() => api.user.blockUser(userId)).called(1);
+          verifyNoMoreInteractions(api.user);
+        },
+      );
+
+      test('unblockUser should remove user from blockedUserIds', () async {
+        const blockedUserId = 'blocked-user-id';
+        const otherBlockedId = 'other-blocked-id';
+        client.state.blockedUserIds = const [blockedUserId, otherBlockedId];
+
+        // Verify initial state includes both blocked IDs
+        expect(
+          client.state.currentUser?.blockedUserIds,
+          containsAll([blockedUserId, otherBlockedId]),
+        );
+
+        when(() => api.user.unblockUser(blockedUserId)).thenAnswer(
+          (_) async => EmptyResponse(),
+        );
+
+        await client.unblockUser(blockedUserId);
+
+        // Verify - blockedUserId should be removed
+        expect(
+          client.state.currentUser?.blockedUserIds,
+          contains(otherBlockedId),
+        );
+
+        expect(
+          client.state.currentUser?.blockedUserIds,
+          isNot(contains(blockedUserId)),
+        );
+
+        verify(() => api.user.unblockUser(blockedUserId)).called(1);
+        verifyNoMoreInteractions(api.user);
+      });
+
+      test(
+        'unblockUser should be resilient if user ID not in blocked list',
+        () async {
+          const nonBlockedUserId = 'not-in-list';
+          const otherBlockedId = 'other-blocked-id';
+          client.state.blockedUserIds = const [otherBlockedId];
+
+          // Verify initial state
+          expect(
+            client.state.currentUser?.blockedUserIds,
+            contains(otherBlockedId),
+          );
+
+          expect(
+            client.state.currentUser?.blockedUserIds,
+            isNot(contains(nonBlockedUserId)),
+          );
+
+          when(() => api.user.unblockUser(nonBlockedUserId)).thenAnswer(
+            (_) async => EmptyResponse(),
+          );
+
+          await client.unblockUser(nonBlockedUserId);
+
+          // Verify - should remain unchanged
+          expect(client.state.currentUser?.blockedUserIds,
+              contains(otherBlockedId));
+          expect(client.state.currentUser?.blockedUserIds,
+              isNot(contains(nonBlockedUserId)));
+          verify(() => api.user.unblockUser(nonBlockedUserId)).called(1);
+          verifyNoMoreInteractions(api.user);
+        },
+      );
+
+      test(
+        'queryBlockedUsers should update client state with blockedUserIds',
+        () async {
+          const blockedId1 = 'blocked-1';
+          const blockedId2 = 'blocked-2';
+
+          // Verify initial state
+          expect(client.state.currentUser?.blockedUserIds, isEmpty);
+
+          // Create mock users
+          final blockedUser1 = User(id: 'blocked-user-1');
+          final blockedUser2 = User(id: 'blocked-user-2');
+
+          // Mock the queryBlockedUsers API call
+          when(() => api.user.queryBlockedUsers()).thenAnswer(
+            (_) async => BlockedUsersResponse()
+              ..blocks = [
+                UserBlock(
+                  user: user,
+                  userId: user.id,
+                  blockedUser: blockedUser1,
+                  blockedUserId: blockedId1,
+                ),
+                UserBlock(
+                  user: user,
+                  userId: user.id,
+                  blockedUser: blockedUser2,
+                  blockedUserId: blockedId2,
+                ),
+              ],
+          );
+
+          await client.queryBlockedUsers();
+
+          // Verify - should now include both blocked IDs
+          expect(
+            client.state.currentUser?.blockedUserIds,
+            containsAll([blockedId1, blockedId2]),
+          );
+
+          verify(() => api.user.queryBlockedUsers()).called(1);
+          verifyNoMoreInteractions(api.user);
+        },
+      );
+    });
+
+    test('`.getUnreadCount`', () async {
+      when(() => api.user.getUnreadCount()).thenAnswer(
+        (_) async => GetUnreadCountResponse()
+          ..totalUnreadCount = 42
+          ..totalUnreadThreadsCount = 8
+          ..channelType = []
+          ..channels = [
+            UnreadCountsChannel(
+              channelId: 'messaging:test-channel-1',
+              unreadCount: 10,
+              lastRead: DateTime.now(),
+            ),
+            UnreadCountsChannel(
+              channelId: 'messaging:test-channel-2',
+              unreadCount: 15,
+              lastRead: DateTime.now(),
+            ),
+          ]
+          ..threads = [
+            UnreadCountsThread(
+              unreadCount: 3,
+              lastRead: DateTime.now(),
+              lastReadMessageId: 'message-1',
+              parentMessageId: 'parent-message-1',
+            ),
+            UnreadCountsThread(
+              unreadCount: 5,
+              lastRead: DateTime.now(),
+              lastReadMessageId: 'message-2',
+              parentMessageId: 'parent-message-2',
+            ),
+          ],
+      );
+
+      final res = await client.getUnreadCount();
+
+      expect(res, isNotNull);
+      expect(res.totalUnreadCount, 42);
+      expect(res.totalUnreadThreadsCount, 8);
+
+      verify(() => api.user.getUnreadCount()).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test(
+      '`.getUnreadCount` should also update user unread count as a side effect',
+      () async {
+        when(() => api.user.getUnreadCount()).thenAnswer(
+          (_) async => GetUnreadCountResponse()
+            ..totalUnreadCount = 25
+            ..totalUnreadThreadsCount = 2
+            ..channelType = []
+            ..channels = [
+              UnreadCountsChannel(
+                channelId: 'messaging:test-channel-1',
+                unreadCount: 10,
+                lastRead: DateTime.now(),
+              ),
+              UnreadCountsChannel(
+                channelId: 'messaging:test-channel-2',
+                unreadCount: 15,
+                lastRead: DateTime.now(),
+              ),
+            ]
+            ..threads = [
+              UnreadCountsThread(
+                unreadCount: 3,
+                lastRead: DateTime.now(),
+                lastReadMessageId: 'message-1',
+                parentMessageId: 'parent-message-1',
+              ),
+              UnreadCountsThread(
+                unreadCount: 5,
+                lastRead: DateTime.now(),
+                lastReadMessageId: 'message-2',
+                parentMessageId: 'parent-message-2',
+              ),
+            ],
+        );
+
+        client.getUnreadCount().ignore();
+
+        // Wait for the local side effect event to be processed
+        await Future.delayed(Duration.zero);
+
+        expect(client.state.currentUser?.totalUnreadCount, 25);
+        expect(client.state.currentUser?.unreadChannels, 2); // channels.length
+        expect(client.state.currentUser?.unreadThreads, 2); // threads.length
+
+        verify(() => api.user.getUnreadCount()).called(1);
+        verifyNoMoreInteractions(api.user);
+      },
+    );
+
     test('`.shadowBan`', () async {
       const userId = 'test-user-id';
 
@@ -2410,6 +2826,361 @@ void main() {
       verifyNoMoreInteractions(api.moderation);
     });
 
+    test('`.getActiveLiveLocations`', () async {
+      final locations = [
+        Location(
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        ),
+        Location(
+          latitude: 34.0522,
+          longitude: -118.2437,
+          createdByDeviceId: 'device-2',
+          endAt: DateTime.now().add(const Duration(hours: 2)),
+        ),
+      ];
+
+      when(() => api.user.getActiveLiveLocations()).thenAnswer(
+        (_) async => GetActiveLiveLocationsResponse() //
+          ..activeLiveLocations = locations,
+      );
+
+      // Initial state should be empty
+      expect(client.state.activeLiveLocations, isEmpty);
+
+      final res = await client.getActiveLiveLocations();
+
+      expect(res, isNotNull);
+      expect(res.activeLiveLocations, hasLength(2));
+      expect(res.activeLiveLocations, equals(locations));
+      expect(client.state.activeLiveLocations, equals(locations));
+
+      verify(() => api.user.getActiveLiveLocations()).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.updateLiveLocation`', () async {
+      const messageId = 'test-message-id';
+      const createdByDeviceId = 'test-device-id';
+      final endAt = DateTime.timestamp().add(const Duration(hours: 1));
+      const location = LocationCoordinates(
+        latitude: 40.7128,
+        longitude: -74.0060,
+      );
+
+      final expectedLocation = Location(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        createdByDeviceId: createdByDeviceId,
+        endAt: endAt,
+      );
+
+      when(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          location: location,
+          endAt: endAt,
+        ),
+      ).thenAnswer((_) async => expectedLocation);
+
+      final res = await client.updateLiveLocation(
+        messageId: messageId,
+        createdByDeviceId: createdByDeviceId,
+        location: location,
+        endAt: endAt,
+      );
+
+      expect(res, isNotNull);
+      expect(res, equals(expectedLocation));
+
+      verify(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          location: location,
+          endAt: endAt,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.stopLiveLocation`', () async {
+      const messageId = 'test-message-id';
+      const createdByDeviceId = 'test-device-id';
+
+      final expectedLocation = Location(
+        latitude: 40.7128,
+        longitude: -74.0060,
+        createdByDeviceId: createdByDeviceId,
+        endAt: DateTime.now(), // Should be expired
+      );
+
+      when(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          endAt: any(named: 'endAt'),
+        ),
+      ).thenAnswer((_) async => expectedLocation);
+
+      final res = await client.stopLiveLocation(
+        messageId: messageId,
+        createdByDeviceId: createdByDeviceId,
+      );
+
+      expect(res, isNotNull);
+      expect(res, equals(expectedLocation));
+
+      verify(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          endAt: any(named: 'endAt'),
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    group('Live Location Event Handling', () {
+      test('should handle location.shared event', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location,
+          ),
+        );
+
+        // Initially empty
+        expect(client.state.activeLiveLocations, isEmpty);
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should add location to active live locations
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.messageId, equals('message-123'));
+      });
+
+      test('should handle location.updated event', () async {
+        final initialLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Set initial location
+        client.state.activeLiveLocations = [initialLocation];
+
+        final updatedLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7500, // Updated latitude
+          longitude: -74.1000, // Updated longitude
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationUpdated,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: updatedLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should update the location
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.latitude, equals(40.7500));
+        expect(activeLiveLocations.first.longitude, equals(-74.1000));
+      });
+
+      test('should handle location.expired event', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Set initial location
+        client.state.activeLiveLocations = [location];
+        expect(client.state.activeLiveLocations, hasLength(1));
+
+        final expiredLocation = location.copyWith(
+          endAt: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationExpired,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: expiredLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should remove the location
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should ignore location events for other users', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: 'other-user', // Different user
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should not add location from other user
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should ignore static location events', () async {
+        final staticLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          // No endAt means it's static
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: staticLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should not add static location
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should merge locations with same key', () async {
+        final location1 = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final location2 = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-456',
+          userId: userId,
+          latitude: 40.7500,
+          longitude: -74.1000,
+          createdByDeviceId: 'device-1', // Same device, should merge
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event1 = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location1,
+          ),
+        );
+
+        final event2 = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-456',
+            sharedLocation: location2,
+          ),
+        );
+
+        // Trigger first event
+        client.handleEvent(event1);
+        await Future.delayed(Duration.zero);
+
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.messageId, equals('message-123'));
+
+        // Trigger second event - should merge/update
+        client.handleEvent(event2);
+        await Future.delayed(Duration.zero);
+
+        final activeLiveLocations2 = client.state.activeLiveLocations;
+        expect(activeLiveLocations2, hasLength(1));
+        expect(activeLiveLocations2.first.messageId, equals('message-456'));
+      });
+    });
+
     test('`.markAllRead`', () async {
       when(() => api.channel.markAllRead())
           .thenAnswer((_) async => EmptyResponse());
@@ -2445,109 +3216,35 @@ void main() {
       verifyNoMoreInteractions(api.channel);
     });
 
-    group('`.sendReaction`', () {
-      test('`.sendReaction with default params`', () async {
-        const messageId = 'test-message-id';
-        const reactionType = 'like';
-        const extraData = {'score': 1};
+    test('`.sendReaction`', () async {
+      const messageId = 'test-message-id';
+      const reactionType = 'like';
+      const emojiCode = '👍';
+      const score = 4;
 
-        when(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).thenAnswer((_) async => SendReactionResponse()
+      final reaction = Reaction(
+        type: reactionType,
+        messageId: messageId,
+        emojiCode: emojiCode,
+        score: score,
+      );
+
+      when(() => api.message.sendReaction(messageId, reaction)).thenAnswer(
+        (_) async => SendReactionResponse()
           ..message = Message(id: messageId)
-          ..reaction = Reaction(type: reactionType, messageId: messageId));
+          ..reaction = reaction,
+      );
 
-        final res = await client.sendReaction(messageId, reactionType);
-        expect(res, isNotNull);
-        expect(res.message.id, messageId);
-        expect(res.reaction.type, reactionType);
-        expect(res.reaction.messageId, messageId);
+      final res = await client.sendReaction(messageId, reaction);
+      expect(res, isNotNull);
+      expect(res.message.id, messageId);
+      expect(res.reaction.type, reactionType);
+      expect(res.reaction.emojiCode, emojiCode);
+      expect(res.reaction.score, score);
+      expect(res.reaction.messageId, messageId);
 
-        verify(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).called(1);
-        verifyNoMoreInteractions(api.message);
-      });
-
-      test('`.sendReaction with score`', () async {
-        const messageId = 'test-message-id';
-        const reactionType = 'like';
-        const score = 3;
-        const extraData = {'score': score};
-
-        when(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).thenAnswer((_) async => SendReactionResponse()
-          ..message = Message(id: messageId)
-          ..reaction = Reaction(
-            type: reactionType,
-            messageId: messageId,
-            score: score,
-          ));
-
-        final res = await client.sendReaction(
-          messageId,
-          reactionType,
-          score: score,
-        );
-        expect(res, isNotNull);
-        expect(res.message.id, messageId);
-        expect(res.reaction.type, reactionType);
-        expect(res.reaction.messageId, messageId);
-        expect(res.reaction.score, score);
-
-        verify(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).called(1);
-        verifyNoMoreInteractions(api.message);
-      });
-
-      test('`.sendReaction with score passed in extradata also`', () async {
-        const messageId = 'test-message-id';
-        const reactionType = 'like';
-        const score = 3;
-        const extraDataScore = 5;
-        const extraData = {'score': extraDataScore};
-
-        when(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).thenAnswer((_) async => SendReactionResponse()
-          ..message = Message(id: messageId)
-          ..reaction = Reaction(
-            type: reactionType,
-            messageId: messageId,
-            score: extraDataScore,
-          ));
-
-        final res = await client.sendReaction(
-          messageId,
-          reactionType,
-          score: score,
-          extraData: extraData,
-        );
-        expect(res, isNotNull);
-        expect(res.message.id, messageId);
-        expect(res.reaction.type, reactionType);
-        expect(res.reaction.messageId, messageId);
-        expect(res.reaction.score, extraDataScore);
-
-        verify(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).called(1);
-        verifyNoMoreInteractions(api.message);
-      });
+      verify(() => api.message.sendReaction(messageId, reaction)).called(1);
+      verifyNoMoreInteractions(api.message);
     });
 
     test('`.deleteReaction`', () async {
@@ -2584,6 +3281,105 @@ void main() {
             channelType,
             any(that: isSameMessageAs(message)),
           )).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.createDraft`', () async {
+      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      when(
+        () => api.message.createDraft(
+          channelId,
+          channelType,
+          any(that: isSameDraftMessageAs(message)),
+        ),
+      ).thenAnswer(
+        (_) async => CreateDraftResponse()
+          ..draft = Draft(
+            channelCid: '$channelType:$channelId',
+            createdAt: DateTime.now(),
+            message: message,
+          ),
+      );
+
+      final res = await client.createDraft(
+        message,
+        channelId,
+        channelType,
+      );
+
+      expect(res, isNotNull);
+      expect(res.draft.message, isSameDraftMessageAs(message));
+
+      verify(() => api.message.createDraft(
+            channelId,
+            channelType,
+            any(that: isSameDraftMessageAs(message)),
+          )).called(1);
+
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.deleteDraft`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      when(() => api.message.deleteDraft(channelId, channelType))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.deleteDraft(channelId, channelType);
+      expect(res, isNotNull);
+
+      verify(() => api.message.deleteDraft(channelId, channelType));
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.getDraft`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
+
+      when(() => api.message.getDraft(channelId, channelType))
+          .thenAnswer((_) async => GetDraftResponse()
+            ..draft = Draft(
+              channelCid: '$channelType:$channelId',
+              createdAt: DateTime.now(),
+              message: message,
+            ));
+
+      final res = await client.getDraft(channelId, channelType);
+
+      expect(res, isNotNull);
+      expect(res.draft.message, isSameDraftMessageAs(message));
+
+      verify(() => api.message.getDraft(channelId, channelType));
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.queryDrafts`', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+
+      final drafts = [
+        Draft(
+          channelCid: '$channelType:$channelId',
+          createdAt: DateTime.now(),
+          message: DraftMessage(id: 'test-message-id', text: 'Hello!'),
+        )
+      ];
+
+      when(() => api.message.queryDrafts())
+          .thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
+
+      final res = await client.queryDrafts();
+
+      expect(res, isNotNull);
+      expect(res.drafts.length, drafts.length);
+
+      verify(() => api.message.queryDrafts()).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
@@ -2960,7 +3756,6 @@ void main() {
   group('PersistenceConnectionTests', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
-    late final ws = FakeWebSocket();
 
     final user = User(id: 'test-user-id');
     final token = Token.development(user.id).rawValue;
@@ -2968,14 +3763,15 @@ void main() {
     late StreamChatClient client;
 
     setUp(() async {
+      final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       expect(client.persistenceEnabled, isFalse);
     });
 
-    tearDown(() {
+    tearDown(() async {
       client.chatPersistenceClient = null;
       expect(client.persistenceEnabled, isFalse);
-      client.dispose();
+      await client.dispose();
     });
 
     test('openPersistenceConnection connects the client to the user', () async {

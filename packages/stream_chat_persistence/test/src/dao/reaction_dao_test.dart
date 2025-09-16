@@ -6,6 +6,7 @@ import 'package:stream_chat_persistence/src/dao/reaction_dao.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 
 import '../../stream_chat_persistence_client_test.dart';
+import '../utils/date_matcher.dart';
 
 void main() {
   late ReactionDao reactionDao;
@@ -39,16 +40,23 @@ void main() {
       pinnedAt: DateTime.now(),
       pinnedBy: users.first,
     );
+
+    final now = DateTime.now();
     final reactions = List.generate(
       count,
-      (index) => Reaction(
-        type: 'testType$index',
-        createdAt: DateTime.now(),
-        userId: userId ?? users[index].id,
-        messageId: message.id,
-        score: count + 3,
-        extraData: {'extra_test_field': 'extraTestData'},
-      ),
+      (index) {
+        final createdAt = now.add(Duration(minutes: index));
+        return Reaction(
+          type: 'testType$index',
+          createdAt: createdAt,
+          updatedAt: createdAt.add(const Duration(minutes: 5)),
+          userId: userId ?? users[index].id,
+          messageId: message.id,
+          score: count + 3,
+          emojiCode: '😂$index',
+          extraData: const {'extra_test_field': 'extraTestData'},
+        );
+      },
     );
 
     await database.userDao.updateUsers(users);
@@ -75,6 +83,14 @@ void main() {
     final fetchedReactions = await reactionDao.getReactions(messageId);
     expect(fetchedReactions.length, insertedReactions.length);
     expect(fetchedReactions.every((it) => it.messageId == messageId), true);
+
+    // Verify score and emojiCode are preserved
+    for (var i = 0; i < fetchedReactions.length; i++) {
+      final inserted = insertedReactions[i];
+      final fetched = fetchedReactions[i];
+      expect(fetched.score, inserted.score);
+      expect(fetched.emojiCode, inserted.emojiCode);
+    }
   });
 
   test('getReactionsByUserId', () async {
@@ -98,6 +114,14 @@ void main() {
     expect(fetchedReactions.length, insertedReactions.length);
     expect(fetchedReactions.every((it) => it.messageId == messageId), true);
     expect(fetchedReactions.every((it) => it.userId == userId), true);
+
+    // Verify score and emojiCode are preserved
+    for (var i = 0; i < fetchedReactions.length; i++) {
+      final inserted = insertedReactions[i];
+      final fetched = fetchedReactions[i];
+      expect(fetched.score, inserted.score);
+      expect(fetched.emojiCode, inserted.emojiCode);
+    }
   });
 
   test('updateReactions', () async {
@@ -107,36 +131,45 @@ void main() {
     final reactions = await _prepareReactionData(messageId);
 
     // Modifying one of the reaction and also adding one new
-    final copyReaction = reactions.first.copyWith(score: 33);
+    final now = DateTime.now();
+    final copyReaction = reactions.first.copyWith(
+      score: 33,
+      emojiCode: '🎉',
+      updatedAt: now,
+    );
     final newReaction = Reaction(
       type: 'testType3',
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedAt: now.add(const Duration(minutes: 5)),
       userId: 'testUserId3',
       messageId: messageId,
       score: 30,
-      extraData: {'extra_test_field': 'extraTestData'},
+      emojiCode: '🎈',
+      extraData: const {'extra_test_field': 'extraTestData'},
     );
 
     await reactionDao.updateReactions([copyReaction, newReaction]);
 
     // Fetched reaction length should be one more than inserted reactions.
-    // copyReaction `score` modified field should be 33.
+    // copyReaction modified fields should match
     // Fetched reactions should contain the newReaction.
     final fetchedReactions = await reactionDao.getReactions(messageId);
     expect(fetchedReactions.length, reactions.length + 1);
-    expect(
-      fetchedReactions
-          .firstWhere((it) =>
-              it.userId == copyReaction.userId && it.type == copyReaction.type)
-          .score,
-      33,
+
+    final fetchedCopyReaction = fetchedReactions.firstWhere(
+      (it) => it.userId == copyReaction.userId && it.type == copyReaction.type,
     );
+    expect(fetchedCopyReaction.score, 33);
+    expect(fetchedCopyReaction.emojiCode, '🎉');
+    expect(fetchedCopyReaction.updatedAt, isSameDateAs(now));
+
+    final fetchedNewReaction = fetchedReactions.firstWhere(
+      (it) => it.userId == newReaction.userId && it.type == newReaction.type,
+    );
+    expect(fetchedNewReaction.emojiCode, '🎈');
     expect(
-      fetchedReactions
-          .where((it) =>
-              it.userId == newReaction.userId && it.type == newReaction.type)
-          .isNotEmpty,
-      true,
+      fetchedNewReaction.updatedAt,
+      isSameDateAs(now.add(const Duration(minutes: 5))),
     );
   });
 
@@ -164,6 +197,7 @@ void main() {
       expect(fetchedReactions1, isEmpty);
       expect(fetchedReactions2, isNotEmpty);
     });
+
     test('should delete all the reactions of both message', () async {
       // Preparing test data
       final insertedReactions1 = await _prepareReactionData(messageId1);

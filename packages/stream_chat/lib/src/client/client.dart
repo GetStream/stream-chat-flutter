@@ -1,36 +1,49 @@
-// ignore_for_file: unnecessary_getters_setters
-
 import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/client/event_resolvers.dart' as event_resolvers;
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/api/stream_chat_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
+import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
+import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/location.dart';
+import 'package:stream_chat/src/core/models/location_coordinates.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/push_preference.dart';
+import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
+import 'package:stream_chat/src/core/util/event_controller.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/system_environment.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/version.dart';
@@ -85,7 +98,6 @@ class StreamChatClient {
       baseUrl: baseURL,
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
-      headers: {'X-Stream-Client': defaultUserAgent},
     );
 
     _chatApi = chatApi ??
@@ -94,6 +106,7 @@ class StreamChatClient {
           options: options,
           tokenManager: _tokenManager,
           connectionIdManager: _connectionIdManager,
+          systemEnvironmentManager: _systemEnvironmentManager,
           attachmentFileUploaderProvider: attachmentFileUploaderProvider,
           logger: detachedLogger('🕸️'),
           interceptors: chatApiInterceptors,
@@ -105,11 +118,9 @@ class StreamChatClient {
           apiKey: apiKey,
           baseUrl: baseWsUrl ?? options.baseUrl,
           tokenManager: _tokenManager,
+          systemEnvironmentManager: _systemEnvironmentManager,
           handler: handleEvent,
           logger: detachedLogger('🔌'),
-          queryParameters: {
-            'X-Stream-Client': '$defaultUserAgent-$packageVersion',
-          },
         );
 
     _retryPolicy = retryPolicy ??
@@ -118,6 +129,13 @@ class StreamChatClient {
             return error is StreamChatNetworkError && error.isRetriable;
           },
         );
+
+    _connectionStatusSubscription = wsConnectionStatusStream.pairwise().listen(
+      (statusPair) {
+        final [prevStatus, currStatus] = statusPair;
+        return _onConnectionStatusChanged(prevStatus, currStatus);
+      },
+    );
 
     state = ClientState(this);
   }
@@ -130,10 +148,31 @@ class StreamChatClient {
 
   final _tokenManager = TokenManager();
   final _connectionIdManager = ConnectionIdManager();
+  static final _systemEnvironmentManager = SystemEnvironmentManager();
+
+  /// Updates the system environment information used by the client.
+  ///
+  /// It allows you to set environment-specific information that will be
+  /// included in API requests, such as the application name, platform details,
+  /// and version information.
+  ///
+  /// Example:
+  /// ```dart
+  /// client.updateSystemEnvironment(
+  ///   SystemEnvironment(
+  ///     name: 'my_app',
+  ///     version: '1.0.0',
+  ///   ),
+  /// );
+  /// ```
+  ///
+  /// See [SystemEnvironment] for more information on the available fields.
+  void updateSystemEnvironment(SystemEnvironment environment) {
+    _systemEnvironmentManager.updateEnvironment(environment);
+  }
 
   /// Default user agent for all requests
-  static String defaultUserAgent =
-      'stream-chat-dart-client-${CurrentPlatform.name}';
+  static String defaultUserAgent = _systemEnvironmentManager.userAgent;
 
   /// Additional headers for all requests
   static Map<String, Object?> additionalHeaders = {};
@@ -195,29 +234,21 @@ class StreamChatClient {
   ///```
   final LogHandlerFunction logHandlerFunction;
 
-  StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
-
-  final _eventController = PublishSubject<Event>();
+  StreamSubscription<List<ConnectionStatus>>? _connectionStatusSubscription;
 
   /// Stream of [Event] coming from [_ws] connection
   /// Listen to this or use the [on] method to filter specific event types
-  Stream<Event> get eventStream => _eventController.stream.map(
-        // If the poll vote is an answer, we should emit a different event
-        // to make it easier to handle in the state.
-        (event) => switch ((event.type, event.pollVote?.isAnswer == true)) {
-          (EventType.pollVoteCasted || EventType.pollVoteChanged, true) =>
-            event.copyWith(type: EventType.pollAnswerCasted),
-          (EventType.pollVoteRemoved, true) =>
-            event.copyWith(type: EventType.pollAnswerRemoved),
-          _ => event,
-        },
-      );
-
-  final _wsConnectionStatusController =
-      BehaviorSubject.seeded(ConnectionStatus.disconnected);
-
-  set _wsConnectionStatus(ConnectionStatus status) =>
-      _wsConnectionStatusController.add(status);
+  Stream<Event> get eventStream => _eventController.stream;
+  late final _eventController = EventController<Event>(
+    resolvers: [
+      event_resolvers.pollCreatedResolver,
+      event_resolvers.pollAnswerCastedResolver,
+      event_resolvers.pollAnswerRemovedResolver,
+      event_resolvers.locationSharedResolver,
+      event_resolvers.locationUpdatedResolver,
+      event_resolvers.locationExpiredResolver,
+    ],
+  );
 
   bool _isInForeground = true;
 
@@ -228,13 +259,13 @@ class StreamChatClient {
   }
 
   /// The current status value of the [_ws] connection
-  ConnectionStatus get wsConnectionStatus =>
-      _wsConnectionStatusController.value;
+  ConnectionStatus get wsConnectionStatus => _ws.connectionStatus;
 
   /// This notifies the connection status of the [_ws] connection.
   /// Listen to this to get notified when the [_ws] tries to reconnect.
-  Stream<ConnectionStatus> get wsConnectionStatusStream =>
-      _wsConnectionStatusController.stream.distinct();
+  Stream<ConnectionStatus> get wsConnectionStatusStream {
+    return _ws.connectionStatusStream.distinct();
+  }
 
   /// Default log handler function for the [StreamChatClient] logger.
   static void defaultLogHandler(LogRecord record) {
@@ -431,16 +462,6 @@ class StreamChatClient {
       return user;
     }
 
-    _wsConnectionStatus = ConnectionStatus.connecting;
-
-    // skipping `ws` seed connection status -> ConnectionStatus.disconnected
-    // otherwise `client.wsConnectionStatusStream` will emit in order
-    // 1. ConnectionStatus.disconnected -> client seed status
-    // 2. ConnectionStatus.connecting -> client connecting status
-    // 3. ConnectionStatus.disconnected -> ws seed status
-    _connectionStatusSubscription =
-        _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
-
     try {
       final event = await _ws.connect(
         user,
@@ -463,13 +484,7 @@ class StreamChatClient {
   /// This will not trigger default auto-retry mechanism for reconnection.
   /// You need to call [openConnection] to reconnect to [_ws].
   void closeConnection() {
-    if (wsConnectionStatus == ConnectionStatus.disconnected) return;
-
     logger.info('Closing web-socket connection for ${state.currentUser?.id}');
-    _wsConnectionStatus = ConnectionStatus.disconnected;
-
-    _connectionStatusSubscription?.cancel();
-    _connectionStatusSubscription = null;
 
     // Stop listening to events
     state.cancelEventSubscription();
@@ -497,19 +512,25 @@ class StreamChatClient {
     return _eventController.add(event);
   }
 
-  void _connectionStatusHandler(ConnectionStatus status) async {
-    final previousState = wsConnectionStatus;
-    final currentState = _wsConnectionStatus = status;
+  void _onConnectionStatusChanged(
+    ConnectionStatus prevStatus,
+    ConnectionStatus currStatus,
+  ) async {
+    // If the status hasn't changed, we don't need to do anything.
+    if (prevStatus == currStatus) return;
 
-    if (previousState != currentState) {
-      handleEvent(Event(
-        type: EventType.connectionChanged,
-        online: status == ConnectionStatus.connected,
-      ));
-    }
+    final wasConnected = prevStatus == ConnectionStatus.connected;
+    final isConnected = currStatus == ConnectionStatus.connected;
 
-    if (currentState == ConnectionStatus.connected &&
-        previousState != ConnectionStatus.connected) {
+    // Notify the connection status change event
+    handleEvent(Event(
+      type: EventType.connectionChanged,
+      online: isConnected,
+    ));
+
+    final connectionRecovered = !wasConnected && isConnected;
+
+    if (connectionRecovered) {
       // connection recovered
       final cids = state.channels.keys.toList(growable: false);
       if (cids.isNotEmpty) {
@@ -545,7 +566,7 @@ class StreamChatClient {
     String? eventType3,
     String? eventType4,
   ]) {
-    if (eventType == null) return eventStream;
+    if (eventType == null || eventType == EventType.any) return eventStream;
     return eventStream.where((event) =>
         event.type == eventType ||
         event.type == eventType2 ||
@@ -598,7 +619,7 @@ class StreamChatClient {
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
-    List<SortOption<ChannelState>>? channelStateSort,
+    SortOrder<ChannelState>? channelStateSort,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -623,63 +644,70 @@ class StreamChatClient {
       paginationParams,
     ]);
 
+    // Return results from cache if available
     if (_queryChannelsStreams.containsKey(hash)) {
-      yield await _queryChannelsStreams[hash]!;
-    } else {
-      final channels = await queryChannelsOffline(
+      try {
+        yield await _queryChannelsStreams[hash]!;
+        return;
+      } catch (e, stk) {
+        logger.severe('Error retrieving cached query results', e, stk);
+        // Cache is invalid, continue with fresh query
+        _queryChannelsStreams.remove(hash);
+      }
+    }
+
+    // Get offline results first
+    var offlineChannels = <Channel>[];
+    try {
+      offlineChannels = await queryChannelsOffline(
         filter: filter,
         channelStateSort: channelStateSort,
         paginationParams: paginationParams,
       );
-      if (channels.isNotEmpty) yield channels;
 
-      try {
-        final newQueryChannelsFuture = queryChannelsOnline(
-          filter: filter,
-          sort: channelStateSort,
-          state: state,
-          watch: watch,
-          presence: presence,
-          memberLimit: memberLimit,
-          messageLimit: messageLimit,
-          paginationParams: paginationParams,
-          waitForConnect: waitForConnect,
-        ).whenComplete(() {
-          _queryChannelsStreams.remove(hash);
-        });
-
-        _queryChannelsStreams[hash] = newQueryChannelsFuture;
-
-        yield await newQueryChannelsFuture;
-      } catch (_) {
-        if (channels.isEmpty) rethrow;
-      }
+      if (offlineChannels.isNotEmpty) yield offlineChannels;
+    } catch (e, stk) {
+      logger.warning('Error querying channels offline', e, stk);
+      // Continue to online query even if offline fails
     }
-  }
 
-  /// Returns a token associated with the [callId].
-  Future<CallTokenPayload> getCallToken(String callId) async =>
-      _chatApi.call.getCallToken(callId);
+    try {
+      final newQueryChannelsFuture = queryChannelsOnline(
+        filter: filter,
+        sort: channelStateSort,
+        state: state,
+        watch: watch,
+        presence: presence,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        paginationParams: paginationParams,
+        waitForConnect: waitForConnect,
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          logger.warning('Online channel query timed out');
+          throw TimeoutException('Channel query timed out');
+        },
+      ).whenComplete(() {
+        // Always clean up cache reference when done
+        _queryChannelsStreams.remove(hash);
+      });
 
-  /// Creates a new call.
-  Future<CreateCallPayload> createCall({
-    required String callId,
-    required String callType,
-    required String channelType,
-    required String channelId,
-  }) {
-    return _chatApi.call.createCall(
-      callId: callId,
-      callType: callType,
-      channelType: channelType,
-      channelId: channelId,
-    );
+      // Store the future in cache
+      _queryChannelsStreams[hash] = newQueryChannelsFuture;
+
+      yield await newQueryChannelsFuture;
+    } catch (e, stk) {
+      logger.severe('Error querying channels online', e, stk);
+      // Only rethrow if we have no channels to show the user
+      if (offlineChannels.isEmpty) rethrow;
+    }
   }
 
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<ChannelState>? sort,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -743,7 +771,8 @@ class StreamChatClient {
     await chatPersistenceClient?.updateChannelQueries(
       filter,
       channels.map((c) => c.channel!.cid).toList(),
-      clearQueryCache: paginationParams.offset == 0,
+      // Clear the query cache if we are refreshing.
+      clearQueryCache: (paginationParams.offset ?? 0) == 0,
     );
 
     this.state.addChannels(updateData.key);
@@ -753,7 +782,7 @@ class StreamChatClient {
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
     Filter? filter,
-    List<SortOption<ChannelState>>? channelStateSort,
+    SortOrder<ChannelState>? channelStateSort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final offlineChannels = (await chatPersistenceClient?.getChannelStates(
@@ -792,7 +821,7 @@ class StreamChatClient {
   Future<QueryUsersResponse> queryUsers({
     bool? presence,
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<User>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _chatApi.user.queryUsers(
@@ -808,7 +837,7 @@ class StreamChatClient {
   /// Query banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
     required Filter filter,
-    List<SortOption>? sort,
+    SortOrder<BannedUser>? sort,
     PaginationParams? pagination,
   }) =>
       _chatApi.moderation.queryBannedUsers(
@@ -821,7 +850,7 @@ class StreamChatClient {
   Future<SearchMessagesResponse> search(
     Filter filter, {
     String? query,
-    List<SortOption>? sort,
+    SortOrder? sort,
     PaginationParams? paginationParams,
     Filter? messageFilters,
   }) =>
@@ -953,6 +982,54 @@ class StreamChatClient {
   Future<EmptyResponse> removeDevice(String id) =>
       _chatApi.device.removeDevice(id);
 
+  /// Set push preferences for the current user.
+  ///
+  /// This method allows you to configure push notification settings
+  /// at both global and channel-specific levels.
+  ///
+  /// [preferences] - List of push preferences to apply
+  ///
+  /// Returns [UpsertPushPreferencesResponse] with the updated preferences.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Set global push preferences
+  /// await client.setPushPreferences([
+  ///   const PushPreferenceInput(
+  ///     chatLevel: ChatLevelPushPreference.mentions,
+  ///     callLevel: CallLevelPushPreference.all,
+  ///   ),
+  /// ]);
+  ///
+  /// // Set channel-specific preferences
+  /// await client.setPushPreferences([
+  ///   const PushPreferenceInput.channel(
+  ///     channelCid: 'messaging:general',
+  ///     chatLevel: ChatLevelPushPreference.none,
+  ///   ),
+  ///   const PushPreferenceInput.channel(
+  ///     channelCid: 'messaging:support',
+  ///     chatLevel: ChatLevelPushPreference.mentions,
+  ///   ),
+  /// ]);
+  ///
+  /// // Mix global and channel-specific preferences
+  /// await client.setPushPreferences([
+  ///   const PushPreferenceInput(
+  ///     chatLevel: ChatLevelPushPreference.all,
+  ///   ), // Global default
+  ///   const PushPreferenceInput.channel(
+  ///     channelCid: 'messaging:spam',
+  ///     chatLevel: ChatLevelPushPreference.none,
+  ///   ),
+  /// ]);
+  /// ```
+  Future<UpsertPushPreferencesResponse> setPushPreferences(
+    List<PushPreferenceInput> preferences,
+  ) {
+    return _chatApi.device.setPushPreferences(preferences);
+  }
+
   /// Get a development token
   Token devToken(String userId) => Token.development(userId);
 
@@ -1026,7 +1103,7 @@ class StreamChatClient {
     Filter? filter,
     String? channelId,
     List<Member>? members,
-    List<SortOption>? sort,
+    SortOrder<Member>? sort,
     PaginationParams? pagination,
   }) =>
       _chatApi.general.queryMembers(
@@ -1347,7 +1424,7 @@ class StreamChatClient {
   /// Queries Polls with the given [filter] and [sort] options.
   Future<QueryPollsResponse> queryPolls({
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<Poll>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) =>
       _chatApi.polls.queryPolls(
@@ -1361,7 +1438,7 @@ class StreamChatClient {
   Future<QueryPollVotesResponse> queryPollVotes(
     String pollId, {
     Filter? filter,
-    List<SortOption>? sort,
+    SortOrder<PollVote>? sort,
     PaginationParams pagination = const PaginationParams(),
   }) =>
       _chatApi.polls.queryPollVotes(
@@ -1440,6 +1517,83 @@ class StreamChatClient {
         ...options,
       });
 
+  final _userBlockLock = Lock();
+
+  /// Blocks a user with the provided [userId].
+  Future<UserBlockResponse> blockUser(String userId) async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.blockUser(userId),
+      );
+
+      final blockedUserId = response.blockedUserId;
+      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
+      if (!currentBlockedUserIds.contains(blockedUserId)) {
+        // Add the new blocked user to the blocked user list.
+        state.blockedUserIds = [...currentBlockedUserIds, blockedUserId];
+      }
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error blocking user', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Unblocks a previously blocked user with the provided [userId].
+  Future<EmptyResponse> unblockUser(String userId) async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.unblockUser(userId),
+      );
+
+      final unblockedUserId = userId;
+      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
+      if (currentBlockedUserIds.contains(unblockedUserId)) {
+        // Remove the unblocked user from the blocked user list.
+        state.blockedUserIds = currentBlockedUserIds..remove(unblockedUserId);
+      }
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error unblocking user', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Retrieves a list of all users that the current user has blocked.
+  Future<BlockedUsersResponse> queryBlockedUsers() async {
+    try {
+      final response = await _userBlockLock.synchronized(
+        () => _chatApi.user.queryBlockedUsers(),
+      );
+
+      // Update the blocked user IDs with the latest data.
+      final blockedUserIds = response.blocks.map((it) => it.blockedUserId);
+      state.blockedUserIds = [...blockedUserIds.nonNulls];
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error querying blocked users', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Returns the unread count information for the current user.
+  Future<GetUnreadCountResponse> getUnreadCount() async {
+    final response = await _chatApi.user.getUnreadCount();
+
+    // Emit an local event with the unread count information as a side effect
+    // in order to update the current user state.
+    handleEvent(Event(
+      totalUnreadCount: response.totalUnreadCount,
+      unreadChannels: response.channels.length,
+      unreadThreads: response.threads.length,
+    ));
+
+    return response;
+  }
+
   /// Mutes a user
   Future<EmptyResponse> muteUser(String userId) =>
       _chatApi.moderation.muteUser(userId);
@@ -1447,18 +1601,6 @@ class StreamChatClient {
   /// Unmutes a user
   Future<EmptyResponse> unmuteUser(String userId) =>
       _chatApi.moderation.unmuteUser(userId);
-
-  /// Blocks a user
-  Future<UserBlockResponse> blockUser(String userId) =>
-      _chatApi.user.blockUser(userId);
-
-  /// Unblocks a user
-  Future<EmptyResponse> unblockUser(String userId) =>
-      _chatApi.user.unblockUser(userId);
-
-  /// Requests users with a given query.
-  Future<BlockedUsersResponse> queryBlockedUsers() =>
-      _chatApi.user.queryBlockedUsers();
 
   /// Flag a message
   Future<EmptyResponse> flagMessage(String messageId) =>
@@ -1495,23 +1637,16 @@ class StreamChatClient {
   /// Set [enforceUnique] to true to remove the existing user reaction
   Future<SendReactionResponse> sendReaction(
     String messageId,
-    String reactionType, {
-    int score = 1,
-    Map<String, Object?> extraData = const {},
+    Reaction reaction, {
+    bool skipPush = false,
     bool enforceUnique = false,
-  }) {
-    final _extraData = {
-      'score': score,
-      ...extraData,
-    };
-
-    return _chatApi.message.sendReaction(
-      messageId,
-      reactionType,
-      extraData: _extraData,
-      enforceUnique: enforceUnique,
-    );
-  }
+  }) =>
+      _chatApi.message.sendReaction(
+        messageId,
+        reaction,
+        skipPush: skipPush,
+        enforceUnique: enforceUnique,
+      );
 
   /// Delete a [reactionType] from this [messageId]
   Future<EmptyResponse> deleteReaction(
@@ -1562,10 +1697,12 @@ class StreamChatClient {
   /// Update the given message
   Future<UpdateMessageResponse> updateMessage(
     Message message, {
+    bool skipPush = false,
     bool skipEnrichUrl = false,
   }) =>
       _chatApi.message.updateMessage(
         message,
+        skipPush: skipPush,
         skipEnrichUrl: skipEnrichUrl,
       );
 
@@ -1628,6 +1765,102 @@ class StreamChatClient {
         messageId,
         language,
       );
+
+  /// Creates a draft for the given [channelId] of type [channelType].
+  Future<CreateDraftResponse> createDraft(
+    DraftMessage draft,
+    String channelId,
+    String channelType,
+  ) =>
+      _chatApi.message.createDraft(
+        channelId,
+        channelType,
+        draft,
+      );
+
+  /// Retrieves a draft for the given [channelId] of type [channelType].
+  ///
+  /// Optionally, pass [parentId] to get the draft for a thread.
+  Future<GetDraftResponse> getDraft(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) =>
+      _chatApi.message.getDraft(
+        channelId,
+        channelType,
+        parentId: parentId,
+      );
+
+  /// Deletes a draft for the given [channelId] of type [channelType].
+  ///
+  /// Optionally, pass [parentId] to delete the draft for a thread.
+  Future<EmptyResponse> deleteDraft(
+    String channelId,
+    String channelType, {
+    String? parentId,
+  }) =>
+      _chatApi.message.deleteDraft(
+        channelId,
+        channelType,
+        parentId: parentId,
+      );
+
+  /// Queries drafts for the current user.
+  Future<QueryDraftsResponse> queryDrafts({
+    Filter? filter,
+    SortOrder<Draft>? sort,
+    PaginationParams? pagination,
+  }) =>
+      _chatApi.message.queryDrafts(
+        sort: sort,
+        pagination: pagination,
+      );
+
+  /// Retrieves all the active live locations of the current user.
+  Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
+    try {
+      final response = await _chatApi.user.getActiveLiveLocations();
+
+      // Update the active live locations in the state.
+      final activeLiveLocations = response.activeLiveLocations;
+      state.activeLiveLocations = activeLiveLocations;
+
+      return response;
+    } catch (e, stk) {
+      logger.severe('Error getting active live locations', e, stk);
+      rethrow;
+    }
+  }
+
+  /// Updates an existing live location created by the current user.
+  Future<Location> updateLiveLocation({
+    required String messageId,
+    String? createdByDeviceId,
+    LocationCoordinates? location,
+    DateTime? endAt,
+  }) {
+    return _chatApi.user.updateLiveLocation(
+      messageId: messageId,
+      createdByDeviceId: createdByDeviceId,
+      location: location,
+      endAt: endAt,
+    );
+  }
+
+  /// Expire an existing live location created by the current user.
+  Future<Location> stopLiveLocation({
+    required String messageId,
+    String? createdByDeviceId,
+  }) {
+    return updateLiveLocation(
+      messageId: messageId,
+      createdByDeviceId: createdByDeviceId,
+      // Passing the current time as endAt will mark the location as expired
+      // and make it inactive.
+      endAt: DateTime.timestamp(),
+    );
+  }
 
   /// Enables slow mode
   Future<PartialUpdateChannelResponse> enableSlowdown(
@@ -1698,11 +1931,17 @@ class StreamChatClient {
       _chatApi.general.enrichUrl(url);
 
   /// Queries threads with the given [options] and [pagination] params.
+  ///
+  /// Optionally, pass [filter] and [sort] to filter and sort the threads.
   Future<QueryThreadsResponse> queryThreads({
+    Filter? filter,
+    SortOrder<Thread>? sort,
     ThreadOptions options = const ThreadOptions(),
     PaginationParams pagination = const PaginationParams(),
   }) =>
       _chatApi.threads.queryThreads(
+        filter: filter,
+        sort: sort,
         options: options,
         pagination: pagination,
       );
@@ -1734,11 +1973,130 @@ class StreamChatClient {
         unset: unset,
       );
 
+  /// Pins the channel for the current user.
+  Future<PartialUpdateMemberResponse> pinChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    return partialMemberUpdate(
+      channelId: channelId,
+      channelType: channelType,
+      set: const MemberUpdatePayload(pinned: true).toJson(),
+    );
+  }
+
+  /// Unpins the channel for the current user.
+  Future<PartialUpdateMemberResponse> unpinChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    return partialMemberUpdate(
+      channelId: channelId,
+      channelType: channelType,
+      unset: [MemberUpdateType.pinned.name],
+    );
+  }
+
+  /// Archives the channel for the current user.
+  Future<PartialUpdateMemberResponse> archiveChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    return partialMemberUpdate(
+      channelId: channelId,
+      channelType: channelType,
+      set: const MemberUpdatePayload(archived: true).toJson(),
+    );
+  }
+
+  /// Unarchives the channel for the current user.
+  Future<PartialUpdateMemberResponse> unarchiveChannel({
+    required String channelId,
+    required String channelType,
+  }) {
+    return partialMemberUpdate(
+      channelId: channelId,
+      channelType: channelType,
+      unset: [MemberUpdateType.archived.name],
+    );
+  }
+
+  /// Partially updates the member of the given channel.
+  ///
+  /// Use [set] to define values to be set.
+  /// Use [unset] to define values to be unset.
+  /// When [userId] is not provided, the current user will be used.
+  Future<PartialUpdateMemberResponse> partialMemberUpdate({
+    required String channelId,
+    required String channelType,
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) {
+    assert(set != null || unset != null, 'Set or unset must be provided.');
+
+    return _chatApi.channel.updateMemberPartial(
+      channelId: channelId,
+      channelType: channelType,
+      set: set,
+      unset: unset,
+    );
+  }
+
+  /// Queries reminders for the current user.
+  ///
+  /// Optionally, pass [filter], [sort] and [pagination] to filter, sort and
+  /// paginate the reminders.
+  Future<QueryRemindersResponse> queryReminders({
+    Filter? filter,
+    SortOrder<MessageReminder>? sort,
+    PaginationParams pagination = const PaginationParams(),
+  }) {
+    return _chatApi.reminders.queryReminders(
+      filter: filter,
+      sort: sort,
+      pagination: pagination,
+    );
+  }
+
+  /// Creates a reminder for the given [messageId].
+  ///
+  /// Optionally, pass [remindAt] to set the reminder time.
+  Future<CreateReminderResponse> createReminder(
+    String messageId, {
+    DateTime? remindAt,
+  }) {
+    return _chatApi.reminders.createReminder(
+      messageId,
+      remindAt: remindAt,
+    );
+  }
+
+  /// Updates a reminder for the given [messageId].
+  ///
+  /// Optionally, pass [remindAt] to set the new reminder time.
+  Future<UpdateReminderResponse> updateReminder(
+    String messageId, {
+    DateTime? remindAt,
+  }) {
+    return _chatApi.reminders.updateReminder(
+      messageId,
+      remindAt: remindAt,
+    );
+  }
+
+  /// Deletes a reminder for the given [messageId].
+  Future<EmptyResponse> deleteReminder(String messageId) {
+    return _chatApi.reminders.deleteReminder(messageId);
+  }
+
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline
   /// user's data.
   Future<void> disconnectUser({bool flushChatPersistence = false}) async {
     logger.info('Disconnecting user : ${state.currentUser?.id}');
+
+    // closing web-socket connection
+    closeConnection();
 
     // resetting state.
     state.dispose();
@@ -1750,27 +2108,17 @@ class StreamChatClient {
     _connectionIdManager.reset();
 
     // closing persistence connection.
-    await closePersistenceConnection(flush: flushChatPersistence);
-
-    // closing web-socket connection
-    return closeConnection();
+    return closePersistenceConnection(flush: flushChatPersistence);
   }
 
   /// Call this function to dispose the client
   Future<void> dispose() async {
-    logger.info('Disposing new StreamChatClient');
+    logger.info('Disposing StreamChatClient');
 
-    // disposing state.
-    state.dispose();
-
-    // closing persistence connection.
-    await closePersistenceConnection();
-
-    // closing web-socket connection.
-    closeConnection();
-
+    await disconnectUser();
+    await _ws.dispose();
     await _eventController.close();
-    await _wsConnectionStatusController.close();
+    await _connectionStatusSubscription?.cancel();
   }
 }
 
@@ -1814,15 +2162,27 @@ class ClientState {
         }),
       );
 
+    // region CHANNEL EVENTS
     _listenChannelLeft();
-
     _listenChannelDeleted();
-
     _listenChannelHidden();
+    // endregion
 
+    // region USER EVENTS
     _listenUserUpdated();
+    // endregion
 
+    // region READ EVENTS
     _listenAllChannelsRead();
+    // endregion
+
+    // region LOCATION EVENTS
+    _listenLocationShared();
+    _listenLocationUpdated();
+    _listenLocationExpired();
+    // endregion
+
+    _startCleaningExpiredLocations();
   }
 
   /// Stops listening to the client events.
@@ -1856,10 +2216,25 @@ class ClientState {
   void _listenUserUpdated() {
     _eventsSubscription?.add(
       _client.on(EventType.userUpdated).listen((event) {
-        if (event.user!.id == currentUser!.id) {
-          currentUser = OwnUser.fromUser(event.user!);
+        var user = event.user;
+        if (user == null) return;
+
+        if (user.id == currentUser?.id) {
+          final updatedUser = OwnUser.fromUser(user);
+          currentUser = user = updatedUser.copyWith(
+            // PRESERVE these fields (we don't get them in user.updated events)
+            devices: currentUser?.devices,
+            mutes: currentUser?.mutes,
+            channelMutes: currentUser?.channelMutes,
+            totalUnreadCount: currentUser?.totalUnreadCount,
+            unreadChannels: currentUser?.unreadChannels,
+            unreadThreads: currentUser?.unreadThreads,
+            blockedUserIds: currentUser?.blockedUserIds,
+            pushPreferences: currentUser?.pushPreferences,
+          );
         }
-        updateUser(event.user);
+
+        updateUser(user);
       }),
     );
   }
@@ -1910,6 +2285,103 @@ class ClientState {
     );
   }
 
+  void _listenLocationShared() {
+    _eventsSubscription?.add(
+      _client.on(EventType.locationShared).listen((event) {
+        final location = event.message?.sharedLocation;
+        if (location == null || location.isStatic) return;
+
+        final currentUserId = currentUser?.id;
+        if (currentUserId == null) return;
+        if (location.userId != currentUserId) return;
+
+        final newActiveLiveLocations = <Location>[
+          ...activeLiveLocations.merge(
+            [location],
+            key: (it) => (it.userId, it.channelCid, it.createdByDeviceId),
+            update: (original, updated) => updated,
+          ),
+        ];
+
+        activeLiveLocations = newActiveLiveLocations;
+      }),
+    );
+  }
+
+  void _listenLocationUpdated() {
+    _eventsSubscription?.add(
+      _client.on(EventType.locationUpdated).listen((event) {
+        final location = event.message?.sharedLocation;
+        if (location == null || location.isStatic) return;
+
+        final currentUserId = currentUser?.id;
+        if (currentUserId == null) return;
+        if (location.userId != currentUserId) return;
+
+        final newActiveLiveLocations = <Location>[
+          ...activeLiveLocations.merge(
+            [location],
+            key: (it) => (it.userId, it.channelCid, it.createdByDeviceId),
+            update: (original, updated) => updated,
+          ),
+        ];
+
+        activeLiveLocations = newActiveLiveLocations;
+      }),
+    );
+  }
+
+  void _listenLocationExpired() {
+    _eventsSubscription?.add(
+      _client.on(EventType.locationExpired).listen((event) {
+        final location = event.message?.sharedLocation;
+        if (location == null || location.isStatic) return;
+
+        final currentUserId = currentUser?.id;
+        if (currentUserId == null) return;
+        if (location.userId != currentUserId) return;
+
+        final newActiveLiveLocations = <Location>[
+          ...activeLiveLocations.where(
+            (it) => it.messageId != location.messageId,
+          )
+        ];
+
+        activeLiveLocations = newActiveLiveLocations;
+      }),
+    );
+  }
+
+  Timer? _staleLiveLocationsCleanerTimer;
+  void _startCleaningExpiredLocations() {
+    _staleLiveLocationsCleanerTimer?.cancel();
+    _staleLiveLocationsCleanerTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) {
+        final expired = activeLiveLocations.where((it) => it.isExpired);
+        if (expired.isEmpty) return;
+
+        for (final sharedLocation in expired) {
+          final lastUpdatedAt = DateTime.timestamp();
+
+          final locationExpiredEvent = Event(
+            type: EventType.locationExpired,
+            cid: sharedLocation.channelCid,
+            message: Message(
+              id: sharedLocation.messageId,
+              updatedAt: lastUpdatedAt,
+              sharedLocation: sharedLocation.copyWith(
+                updatedAt: lastUpdatedAt,
+              ),
+            ),
+          );
+
+          _client.handleEvent(locationExpiredEvent);
+        }
+      },
+    );
+  }
+
   final StreamChatClient _client;
 
   /// Sets the user currently interacting with the client
@@ -1943,6 +2415,23 @@ class ClientState {
 
   /// The current user as a stream
   Stream<Map<String, User>> get usersStream => _usersController.stream;
+
+  /// The current active live locations shared by the user.
+  List<Location> get activeLiveLocations {
+    return _activeLiveLocationsController.value;
+  }
+
+  /// The current active live locations shared by the user as a stream.
+  Stream<List<Location>> get activeLiveLocationsStream {
+    return _activeLiveLocationsController.stream;
+  }
+
+  /// Sets the active live locations.
+  set activeLiveLocations(List<Location> locations) {
+    // For safe-keeping, we filter out any inactive locations before update.
+    final activeLocations = [...locations.where((it) => it.isActive)];
+    _activeLiveLocationsController.add(activeLocations);
+  }
 
   /// The current unread channels count
   int get unreadChannels => _unreadChannelsController.value;
@@ -1986,6 +2475,11 @@ class ClientState {
     channels = channels..remove(channelCid);
   }
 
+  @visibleForTesting
+  set blockedUserIds(List<String> blockedUserIds) {
+    currentUser = currentUser?.copyWith(blockedUserIds: blockedUserIds);
+  }
+
   /// Used internally for optimistic update of unread count
   set totalUnreadCount(int unreadCount) {
     _totalUnreadCountController.add(unreadCount);
@@ -2011,14 +2505,18 @@ class ClientState {
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
   final _unreadThreadsController = BehaviorSubject<int>.seeded(0);
   final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
+  final _activeLiveLocationsController = BehaviorSubject.seeded(<Location>[]);
 
   /// Call this method to dispose this object
   void dispose() {
     cancelEventSubscription();
     _currentUserController.close();
+    _usersController.close();
     _unreadChannelsController.close();
     _unreadThreadsController.close();
     _totalUnreadCountController.close();
+    _activeLiveLocationsController.close();
+    _staleLiveLocationsCleanerTimer?.cancel();
 
     final channels = [...this.channels.keys];
     for (final channel in channels) {

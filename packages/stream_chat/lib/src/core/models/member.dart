@@ -1,13 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'member.g.dart';
 
 /// The class that contains the information about the user membership
 /// in a channel
 @JsonSerializable()
-class Member extends Equatable {
+class Member extends Equatable implements ComparableFieldProvider {
   /// Constructor used for json serialization
   Member({
     this.user,
@@ -15,23 +17,44 @@ class Member extends Equatable {
     this.inviteRejectedAt,
     this.invited = false,
     this.channelRole,
-    this.userId,
+    String? userId,
     this.isModerator = false,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.banned = false,
     this.banExpires,
     this.shadowBanned = false,
-  })  : createdAt = createdAt ?? DateTime.now(),
+    this.pinnedAt,
+    this.archivedAt,
+    this.extraData = const {},
+  })  : userId = userId ?? user?.id,
+        createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory Member.fromJson(Map<String, dynamic> json) {
-    final member = _$MemberFromJson(json);
-    return member.copyWith(
-      userId: member.user?.id,
-    );
-  }
+  factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
+        Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
+      );
+
+  /// Known top level fields.
+  ///
+  /// Useful for [Serializer] methods.
+  static const _topLevelFields = [
+    'user',
+    'invite_accepted_at',
+    'invite_rejected_at',
+    'invited',
+    'channel_role',
+    'user_id',
+    'is_moderator',
+    'banned',
+    'ban_expires',
+    'shadow_banned',
+    'created_at',
+    'updated_at',
+    'pinned_at',
+    'archived_at'
+  ];
 
   /// The interested user
   final User? user;
@@ -63,11 +86,20 @@ class Member extends Equatable {
   /// True if the member is shadow banned from the channel
   final bool shadowBanned;
 
+  /// The date at which the channel was pinned by the member
+  final DateTime? pinnedAt;
+
+  /// The date at which the channel was archived by the member
+  final DateTime? archivedAt;
+
   /// The date of creation
   final DateTime createdAt;
 
   /// The last date of update
   final DateTime updatedAt;
+
+  /// Map of custom member extraData.
+  final Map<String, Object?> extraData;
 
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({
@@ -81,9 +113,12 @@ class Member extends Equatable {
     bool? isModerator,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? pinnedAt,
+    DateTime? archivedAt,
     bool? banned,
     DateTime? banExpires,
     bool? shadowBanned,
+    Map<String, Object?>? extraData,
   }) =>
       Member(
         user: user ?? this.user,
@@ -96,12 +131,17 @@ class Member extends Equatable {
         channelRole: channelRole ?? this.channelRole,
         userId: userId ?? this.userId,
         isModerator: isModerator ?? this.isModerator,
+        pinnedAt: pinnedAt ?? this.pinnedAt,
+        archivedAt: archivedAt ?? this.archivedAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        extraData: extraData ?? this.extraData,
       );
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => _$MemberToJson(this);
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
+        _$MemberToJson(this),
+      );
 
   @override
   List<Object?> get props => [
@@ -115,7 +155,43 @@ class Member extends Equatable {
         banned,
         banExpires,
         shadowBanned,
+        pinnedAt,
+        archivedAt,
         createdAt,
         updatedAt,
+        extraData,
       ];
+
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      MemberSortKey.createdAt => createdAt,
+      MemberSortKey.userId => userId,
+      MemberSortKey.name => user?.name,
+      MemberSortKey.channelRole => channelRole,
+      _ => extraData[sortKey],
+    };
+
+    return ComparableField.fromValue(value);
+  }
+}
+
+/// Extension type representing sortable fields for [Member].
+///
+/// This type provides type-safe keys that can be used for sorting members
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const MemberSortKey(String key) implements String {
+  /// Sort members by their creation date in the channel.
+  static const createdAt = MemberSortKey('created_at');
+
+  /// Sort members by the user ID.
+  static const userId = MemberSortKey('user_id');
+
+  /// Sort members by user name.
+  ///
+  /// Note: This requires additional database joins and might be slower.
+  static const name = MemberSortKey('name');
+
+  /// Sort members by the channel role.
+  static const channelRole = MemberSortKey('channel_role');
 }

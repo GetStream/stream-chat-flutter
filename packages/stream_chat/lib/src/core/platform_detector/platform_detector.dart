@@ -56,22 +56,15 @@ class CurrentPlatform {
 
   /// Returns a string version of the platform
   static String get name {
-    switch (type) {
-      case PlatformType.android:
-        return 'android';
-      case PlatformType.ios:
-        return 'ios';
-      case PlatformType.web:
-        return 'web';
-      case PlatformType.macOS:
-        return 'macos';
-      case PlatformType.windows:
-        return 'windows';
-      case PlatformType.linux:
-        return 'linux';
-      case PlatformType.fuchsia:
-        return 'fuchsia';
-    }
+    return switch (type) {
+      PlatformType.android => 'android',
+      PlatformType.ios => 'ios',
+      PlatformType.web => 'web',
+      PlatformType.macOS => 'macos',
+      PlatformType.windows => 'windows',
+      PlatformType.linux => 'linux',
+      PlatformType.fuchsia => 'fuchsia',
+    };
   }
 
   /// Get current platform type

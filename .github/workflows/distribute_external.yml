@@ -1,0 +1,126 @@
+name: distribute_external
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build (android, ios, or both)'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - android
+          - ios
+          - both
+
+env:
+  FLUTTER_VERSION: '3.x'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  determine_platforms:
+    runs-on: ubuntu-latest
+    outputs:
+      run_ios: ${{ steps.set_matrix.outputs.run_ios }}
+      run_android: ${{ steps.set_matrix.outputs.run_android }}
+    steps:
+      - name: Determine platforms to build
+        id: set_matrix
+        run: |
+          # Is this a release?
+          is_release="${{ github.event_name == 'release' }}"
+          
+          # If it's a release event, build both platforms
+          if [[ "$is_release" == "true" ]]; then
+            echo "Building all platforms due to release"
+            echo "run_ios=true" >> $GITHUB_OUTPUT
+            echo "run_android=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # For manual workflow dispatch, store platform in a variable
+          platform="${{ github.event.inputs.platform }}"
+          echo "Selected platform: $platform"
+          
+          # Set outputs only if they should be true
+          [[ "$platform" == "ios" || "$platform" == "both" ]] && echo "run_ios=true" >> $GITHUB_OUTPUT
+          [[ "$platform" == "android" || "$platform" == "both" ]] && echo "run_android=true" >> $GITHUB_OUTPUT
+
+  android:
+    needs: determine_platforms
+    if: ${{ needs.determine_platforms.outputs.run_android == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect Bot
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
+      - name: "Git Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: sample_app/android
+
+      - name: Distribute to S3
+        working-directory: sample_app/android
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        run: bundle exec fastlane distribute_to_s3
+
+  ios:
+    needs: determine_platforms
+    if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
+    runs-on: macos-15 # Requires xcode 15 or later
+
+    steps:
+      - name: Connect Bot
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
+      - name: "Git Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: sample_app/ios
+
+      - name: Distribute to TestFlight
+        working-directory: sample_app/ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+        run: bundle exec fastlane distribute_to_testflight

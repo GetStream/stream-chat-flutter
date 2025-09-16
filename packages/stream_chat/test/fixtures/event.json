@@ -29,5 +29,6 @@
   "ai_state": "AI_STATE_THINKING",
   "ai_message": "Some message",
   "unread_thread_messages": 2,
-  "unread_threads": 3
+  "unread_threads": 3,
+  "channel_last_message_at": "2019-03-27T17:40:17.155892Z"
 }

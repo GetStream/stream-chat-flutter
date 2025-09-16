@@ -1,5 +1,6 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
+import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Members] table in [MoorChatDatabase].
@@ -30,8 +31,19 @@ class Members extends Table {
   /// True if the member is shadow banned from the channel
   BoolColumn get shadowBanned => boolean().withDefault(const Constant(false))();
 
+  /// The date at which the channel was pinned by the member
+  DateTimeColumn get pinnedAt =>
+      dateTime().nullable().withDefault(const Constant(null))();
+
+  /// The date at which the channel was archived by the member
+  DateTimeColumn get archivedAt =>
+      dateTime().nullable().withDefault(const Constant(null))();
+
   /// True if the user is a moderator of the channel
   BoolColumn get isModerator => boolean().withDefault(const Constant(false))();
+
+  /// Map of custom member extraData
+  TextColumn get extraData => text().nullable().map(MapConverter())();
 
   /// The date of creation
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

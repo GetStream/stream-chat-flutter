@@ -220,6 +220,17 @@ void main() {
         ),
       );
       final channel = ChannelModel(cid: cid);
+      final draft = Draft(
+        channelCid: cid,
+        createdAt: DateTime.now(),
+        message: DraftMessage(
+          id: 'testDraftId',
+          text: 'Test draft message',
+        ),
+      );
+
+      when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
+          .thenAnswer((_) async => draft);
 
       when(() => mockDatabase.memberDao.getMembersByCid(cid))
           .thenAnswer((_) async => members);
@@ -231,6 +242,8 @@ void main() {
           .thenAnswer((_) async => messages);
       when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
           .thenAnswer((_) async => messages);
+      when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
+          .thenAnswer((_) async => draft);
 
       final fetchedChannelState = await client.getChannelStateByCid(cid);
       expect(fetchedChannelState.messages?.length, messages.length);
@@ -238,6 +251,7 @@ void main() {
       expect(fetchedChannelState.members?.length, members.length);
       expect(fetchedChannelState.read?.length, reads.length);
       expect(fetchedChannelState.channel!.cid, channel.cid);
+      expect(fetchedChannelState.draft?.message.id, draft.message.id);
 
       verify(() => mockDatabase.memberDao.getMembersByCid(cid)).called(1);
       verify(() => mockDatabase.readDao.getReadsByCid(cid)).called(1);
@@ -245,23 +259,11 @@ void main() {
       verify(() => mockDatabase.messageDao.getMessagesByCid(cid)).called(1);
       verify(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
           .called(1);
+      verify(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
+          .called(1);
     });
 
     group('getChannelState', () {
-      test('should throw if sort is provided without comparator', () async {
-        final sort = [
-          const SortOption<ChannelState>(
-            'testField',
-            direction: SortOption.ASC,
-          ),
-        ];
-
-        expect(
-          () => client.getChannelStates(channelStateSort: sort),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
-
       test('should work fine', () async {
         const cid = 'testType:testId';
         final channels = List.generate(3, (index) => ChannelModel(cid: cid));
@@ -627,6 +629,166 @@ void main() {
 
       await client.deleteMembersByCids(cids);
       verify(() => mockDatabase.memberDao.deleteMemberByCids(cids)).called(1);
+    });
+
+    test('deleteDraftMessagesByCids', () async {
+      final cids = <String>[];
+      when(() => mockDatabase.draftMessageDao.deleteDraftMessagesByCids(cids))
+          .thenAnswer((_) => Future.value());
+
+      await client.deleteDraftMessagesByCids(cids);
+      verify(() => mockDatabase.draftMessageDao.deleteDraftMessagesByCids(cids))
+          .called(1);
+    });
+
+    test('getDraftMessageByCid', () async {
+      const cid = 'testCid';
+      const parentId = 'testParentId';
+      final draft = Draft(
+        channelCid: cid,
+        parentId: parentId,
+        createdAt: DateTime.now(),
+        message: DraftMessage(
+          id: 'testDraftId',
+          text: 'Test draft message',
+        ),
+      );
+
+      when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
+          .thenAnswer((_) async => draft);
+
+      final fetchedDraft = await client.getDraftMessageByCid(cid);
+      expect(fetchedDraft, isNotNull);
+      expect(fetchedDraft!.channelCid, cid);
+      expect(fetchedDraft.message.id, draft.message.id);
+      expect(fetchedDraft.message.text, draft.message.text);
+      verify(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
+          .called(1);
+    });
+
+    test('updateDraftMessages', () async {
+      final drafts = List.generate(
+        3,
+        (index) => Draft(
+          channelCid: 'testCid',
+          createdAt: DateTime.now(),
+          message: DraftMessage(
+            id: 'testDraftId$index',
+            text: 'Test draft message $index',
+          ),
+        ),
+      );
+
+      when(() => mockDatabase.draftMessageDao.updateDraftMessages(drafts))
+          .thenAnswer((_) async {});
+
+      await client.updateDraftMessages(drafts);
+      verify(() => mockDatabase.draftMessageDao.updateDraftMessages(drafts))
+          .called(1);
+    });
+
+    test('deleteDraftMessageByCid', () async {
+      const cid = 'testCid';
+      const parentId = 'testParentId';
+
+      when(() => mockDatabase.draftMessageDao.deleteDraftMessageByCid(cid,
+          parentId: parentId)).thenAnswer((_) async {});
+
+      await client.deleteDraftMessageByCid(cid, parentId: parentId);
+      verify(() => mockDatabase.draftMessageDao
+          .deleteDraftMessageByCid(cid, parentId: parentId)).called(1);
+    });
+
+    test('getLocationsByCid', () async {
+      const cid = 'testCid';
+      final locations = List.generate(
+        3,
+        (index) => Location(
+          channelCid: cid,
+          messageId: 'testMessageId$index',
+          userId: 'testUserId$index',
+          latitude: 37.7749 + index * 0.001,
+          longitude: -122.4194 + index * 0.001,
+          createdByDeviceId: 'testDevice$index',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      when(() => mockDatabase.locationDao.getLocationsByCid(cid))
+          .thenAnswer((_) async => locations);
+
+      final fetchedLocations = await client.getLocationsByCid(cid);
+      expect(fetchedLocations.length, locations.length);
+      verify(() => mockDatabase.locationDao.getLocationsByCid(cid)).called(1);
+    });
+
+    test('getLocationByMessageId', () async {
+      const messageId = 'testMessageId';
+      final location = Location(
+        channelCid: 'testCid',
+        messageId: messageId,
+        userId: 'testUserId',
+        latitude: 37.7749,
+        longitude: -122.4194,
+        createdByDeviceId: 'testDevice',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      when(() => mockDatabase.locationDao.getLocationByMessageId(messageId))
+          .thenAnswer((_) async => location);
+
+      final fetchedLocation = await client.getLocationByMessageId(messageId);
+      expect(fetchedLocation, isNotNull);
+      expect(fetchedLocation!.messageId, messageId);
+      verify(() => mockDatabase.locationDao.getLocationByMessageId(messageId))
+          .called(1);
+    });
+
+    test('updateLocations', () async {
+      final locations = List.generate(
+        3,
+        (index) => Location(
+          channelCid: 'testCid$index',
+          messageId: 'testMessageId$index',
+          userId: 'testUserId$index',
+          latitude: 37.7749 + index * 0.001,
+          longitude: -122.4194 + index * 0.001,
+          createdByDeviceId: 'testDevice$index',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      when(() => mockDatabase.locationDao.updateLocations(locations))
+          .thenAnswer((_) async {});
+
+      await client.updateLocations(locations);
+      verify(() => mockDatabase.locationDao.updateLocations(locations))
+          .called(1);
+    });
+
+    test('deleteLocationsByCid', () async {
+      const cid = 'testCid';
+      when(() => mockDatabase.locationDao.deleteLocationsByCid(cid))
+          .thenAnswer((_) async {});
+
+      await client.deleteLocationsByCid(cid);
+      verify(() => mockDatabase.locationDao.deleteLocationsByCid(cid))
+          .called(1);
+    });
+
+    test('deleteLocationsByMessageIds', () async {
+      final messageIds = <String>['testMessageId1', 'testMessageId2'];
+      when(
+        () => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds),
+      ).thenAnswer((_) async {});
+
+      await client.deleteLocationsByMessageIds(messageIds);
+      verify(
+        () => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds),
+      ).called(1);
     });
 
     tearDown(() async {

@@ -1,21 +1,24 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
-import 'package:stream_chat/src/core/api/call_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
-import 'package:stream_chat/src/core/models/call_payload.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
+import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
+import 'package:stream_chat/src/core/models/unread_counts.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/models/user_block.dart';
 
@@ -81,10 +84,7 @@ class QueryChannelsResponse extends _BaseResponse {
 
 /// Model response for [StreamChatClient.queryChannels] api call
 @JsonSerializable(createToJson: false)
-class TranslateMessageResponse extends _BaseResponse {
-  /// Translated message
-  late Message message;
-
+class TranslateMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static TranslateMessageResponse fromJson(Map<String, dynamic> json) =>
       _$TranslateMessageResponseFromJson(json);
@@ -100,6 +100,18 @@ class QueryMembersResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryMembersResponse fromJson(Map<String, dynamic> json) =>
       _$QueryMembersResponseFromJson(json);
+}
+
+/// Model response for update member API calls, such as
+/// [StreamChatClient.updateMemberPartial]
+@JsonSerializable(createToJson: false)
+class PartialUpdateMemberResponse extends _BaseResponse {
+  /// The updated member state
+  late Member channelMember;
+
+  /// Create a new instance from a json
+  static PartialUpdateMemberResponse fromJson(Map<String, dynamic> json) =>
+      _$PartialUpdateMemberResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.queryUsers] api call
@@ -191,10 +203,7 @@ typedef SendImageResponse = SendAttachmentResponse;
 
 /// Model response for [Channel.sendReaction] api call
 @JsonSerializable(createToJson: false)
-class SendReactionResponse extends _BaseResponse {
-  /// Message returned by the api call
-  late Message message;
-
+class SendReactionResponse extends MessageResponse {
   /// The reaction created by the api call
   late Reaction reaction;
 
@@ -229,12 +238,15 @@ class UpdateUsersResponse extends _BaseResponse {
       _$UpdateUsersResponseFromJson(json);
 }
 
-/// Model response for [StreamChatClient.updateMessage] api call
-@JsonSerializable(createToJson: false)
-class UpdateMessageResponse extends _BaseResponse {
+/// Base Model response for message based api calls.
+class MessageResponse extends _BaseResponse {
   /// Message returned by the api call
   late Message message;
+}
 
+/// Model response for [StreamChatClient.updateMessage] api call
+@JsonSerializable(createToJson: false)
+class UpdateMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static UpdateMessageResponse fromJson(Map<String, dynamic> json) =>
       _$UpdateMessageResponseFromJson(json);
@@ -242,10 +254,7 @@ class UpdateMessageResponse extends _BaseResponse {
 
 /// Model response for [Channel.sendMessage] api call
 @JsonSerializable(createToJson: false)
-class SendMessageResponse extends _BaseResponse {
-  /// Message returned by the api call
-  late Message message;
-
+class SendMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static SendMessageResponse fromJson(Map<String, dynamic> json) =>
       _$SendMessageResponseFromJson(json);
@@ -253,10 +262,7 @@ class SendMessageResponse extends _BaseResponse {
 
 /// Model response for [StreamChatClient.getMessage] api call
 @JsonSerializable(createToJson: false)
-class GetMessageResponse extends _BaseResponse {
-  /// Message returned by the api call
-  late Message message;
-
+class GetMessageResponse extends MessageResponse {
   /// Channel of the message
   ChannelModel? channel;
 
@@ -508,34 +514,6 @@ class OGAttachmentResponse extends _BaseResponse {
       _$OGAttachmentResponseFromJson(json);
 }
 
-/// The response to [CallApi.getCallToken]
-@JsonSerializable(createToJson: false)
-class CallTokenPayload extends _BaseResponse {
-  /// Create a new instance from a [json].
-  static CallTokenPayload fromJson(Map<String, dynamic> json) =>
-      _$CallTokenPayloadFromJson(json);
-
-  /// The token to use for the call.
-  String? token;
-
-  /// The user id specific to Agora.
-  int? agoraUid;
-
-  /// The appId specific to Agora.
-  String? agoraAppId;
-}
-
-/// The response to [CallApi.createCall]
-@JsonSerializable(createToJson: false)
-class CreateCallPayload extends _BaseResponse {
-  /// Create a new instance from a [json].
-  static CreateCallPayload fromJson(Map<String, dynamic> json) =>
-      _$CreateCallPayloadFromJson(json);
-
-  /// The call object.
-  CallPayload? call;
-}
-
 /// Contains information about a [User] that was banned from a [Channel] or App.
 @JsonSerializable(createToJson: false)
 class UserBlockResponse extends _BaseResponse {
@@ -720,4 +698,131 @@ class QueryThreadsResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryThreadsResponse fromJson(Map<String, dynamic> json) =>
       _$QueryThreadsResponseFromJson(json);
+}
+
+/// Base Model response for draft based api calls.
+class DraftResponse extends _BaseResponse {
+  /// Draft returned by the api call
+  late Draft draft;
+}
+
+/// Model response for [StreamChatClient.createDraft] api call
+@JsonSerializable(createToJson: false)
+class CreateDraftResponse extends DraftResponse {
+  /// Create a new instance from a json
+  static CreateDraftResponse fromJson(Map<String, dynamic> json) =>
+      _$CreateDraftResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getDraft] api call
+@JsonSerializable(createToJson: false)
+class GetDraftResponse extends DraftResponse {
+  /// Create a new instance from a json
+  static GetDraftResponse fromJson(Map<String, dynamic> json) =>
+      _$GetDraftResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryDrafts] api call
+@JsonSerializable(createToJson: false)
+class QueryDraftsResponse extends _BaseResponse {
+  /// List of draft messages returned by the query
+  @JsonKey(defaultValue: [])
+  late List<Draft> drafts;
+
+  /// The next page token
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryDraftsResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryDraftsResponseFromJson(json);
+}
+
+/// Base Model response for draft based api calls.
+class MessageReminderResponse extends _BaseResponse {
+  /// Draft returned by the api call
+  late MessageReminder reminder;
+}
+
+/// Model response for [StreamChatClient.createReminder] api call
+@JsonSerializable(createToJson: false)
+class CreateReminderResponse extends MessageReminderResponse {
+  /// Create a new instance from a json
+  static CreateReminderResponse fromJson(Map<String, dynamic> json) =>
+      _$CreateReminderResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updateReminder] api call
+@JsonSerializable(createToJson: false)
+class UpdateReminderResponse extends MessageReminderResponse {
+  /// Create a new instance from a json
+  static UpdateReminderResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdateReminderResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryReminders] api call
+@JsonSerializable(createToJson: false)
+class QueryRemindersResponse extends _BaseResponse {
+  /// List of reminders returned by the query
+  @JsonKey(defaultValue: [])
+  late List<MessageReminder> reminders;
+
+  /// The next page token
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryRemindersResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryRemindersResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getUnreadCount] api call
+@JsonSerializable(createToJson: false)
+class GetUnreadCountResponse extends _BaseResponse {
+  /// Total number of unread messages across all channels
+  late int totalUnreadCount;
+
+  /// Total number of threads with unread replies
+  late int totalUnreadThreadsCount;
+
+  /// Total number of unread messages grouped by team
+  late Map<String, int>? totalUnreadCountByTeam;
+
+  /// List of channels with unread messages
+  late List<UnreadCountsChannel> channels;
+
+  /// Summary of unread counts grouped by channel type
+  late List<UnreadCountsChannelType> channelType;
+
+  /// List of threads with unread replies
+  late List<UnreadCountsThread> threads;
+
+  /// Create a new instance from a json
+  static GetUnreadCountResponse fromJson(Map<String, dynamic> json) =>
+      _$GetUnreadCountResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.setPushPreferences] api call
+@JsonSerializable(createToJson: false)
+class UpsertPushPreferencesResponse extends _BaseResponse {
+  /// Mapping of user IDs to their push preferences
+  @JsonKey(defaultValue: {})
+  late Map<String, PushPreference> userPreferences;
+
+  /// Mapping of user IDs to their channel-specific push preferences
+  @JsonKey(defaultValue: {})
+  late Map<String, Map<String, ChannelPushPreference>> userChannelPreferences;
+
+  /// Create a new instance from a json
+  static UpsertPushPreferencesResponse fromJson(Map<String, dynamic> json) =>
+      _$UpsertPushPreferencesResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updateDraft] api call
+@JsonSerializable(createToJson: false)
+class GetActiveLiveLocationsResponse extends _BaseResponse {
+  /// List of active live locations returned by the api call
+  late List<Location> activeLiveLocations;
+
+  /// Create a new instance from a json
+  static GetActiveLiveLocationsResponse fromJson(Map<String, dynamic> json) =>
+      _$GetActiveLiveLocationsResponseFromJson(json);
 }
