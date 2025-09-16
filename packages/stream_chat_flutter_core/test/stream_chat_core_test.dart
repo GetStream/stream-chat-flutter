@@ -132,13 +132,13 @@ void main() {
   group('StreamChatCore lifecycle behavior', () {
     late MockClient mockClient;
     late MockOnBackgroundEventReceived mockOnBackgroundEventReceived;
-    late BehaviorSubject<List<ConnectivityResult>> connectivityController;
+    late BehaviorSubject<InternetStatus> connectivityController;
 
     setUp(() {
       mockClient = MockClient();
       mockOnBackgroundEventReceived = MockOnBackgroundEventReceived();
       connectivityController = BehaviorSubject.seeded(
-        [ConnectivityResult.mobile],
+        InternetStatus.connected,
       );
 
       // Setup the mock client
@@ -275,7 +275,7 @@ void main() {
         ).thenReturn(ConnectionStatus.disconnected);
 
         // Act - restore connectivity
-        connectivityController.add([ConnectivityResult.mobile]);
+        connectivityController.add(InternetStatus.connected);
         await tester.pumpAndSettle();
 
         // Assert
@@ -295,7 +295,7 @@ void main() {
         ).thenReturn(ConnectionStatus.connected);
 
         // Act - lose connectivity
-        connectivityController.add([ConnectivityResult.none]);
+        connectivityController.add(InternetStatus.disconnected);
         await tester.pumpAndSettle();
 
         // Assert
@@ -317,7 +317,7 @@ void main() {
         clearInteractions(mockClient);
 
         // Act - connectivity changes while in background
-        connectivityController.add([ConnectivityResult.mobile]);
+        connectivityController.add(InternetStatus.connected);
         await tester.pumpAndSettle();
 
         // Assert

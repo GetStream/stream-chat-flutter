@@ -250,7 +250,7 @@ Widget _wrapWithMaterialApp(
       home: StreamChat(
         client: client,
         // Mock the connectivity stream to always return wifi.
-        connectivityStream: Stream.value([ConnectivityResult.wifi]),
+        connectivityStream: Stream.value(InternetStatus.connected),
         child: StreamChatConfiguration(
           data: StreamChatConfigurationData(reactionIcons: reactionIcons),
           child: StreamChatTheme(

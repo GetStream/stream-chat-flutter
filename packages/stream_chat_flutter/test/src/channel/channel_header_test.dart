@@ -530,7 +530,7 @@ void main() {
       return MaterialAppWrapper(
         home: StreamChat(
           client: client,
-          connectivityStream: Stream.value([ConnectivityResult.wifi]),
+          connectivityStream: Stream.value(InternetStatus.connected),
           child: StreamChannel(
             channel: channel,
             child: const Scaffold(

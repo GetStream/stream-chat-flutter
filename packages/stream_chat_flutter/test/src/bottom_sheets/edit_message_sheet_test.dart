@@ -17,7 +17,7 @@ void main() {
         MaterialApp(
           builder: (context, child) => StreamChat(
             client: MockClient(),
-            connectivityStream: Stream.value([ConnectivityResult.wifi]),
+            connectivityStream: Stream.value(InternetStatus.connected),
             child: child,
           ),
           home: Scaffold(
@@ -60,7 +60,7 @@ void main() {
         return MaterialAppWrapper(
           builder: (context, child) => StreamChat(
             client: MockClient(),
-            connectivityStream: Stream.value([ConnectivityResult.wifi]),
+            connectivityStream: Stream.value(InternetStatus.connected),
             child: child,
           ),
           home: Scaffold(

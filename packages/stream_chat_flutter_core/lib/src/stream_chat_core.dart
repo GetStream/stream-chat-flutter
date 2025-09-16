@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
@@ -67,7 +68,7 @@ class StreamChatCore extends StatefulWidget {
   /// Stream of connectivity result
   /// Visible for testing
   @visibleForTesting
-  final Stream<List<ConnectivityResult>>? connectivityStream;
+  final Stream<InternetStatus>? connectivityStream;
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
@@ -144,6 +145,10 @@ class StreamChatCoreState extends State<StreamChatCore> with WidgetsBindingObser
   /// The current user as a stream
   Stream<User?> get currentUserStream => client.state.currentUserStream;
 
+  StreamSubscription<InternetStatus>? _connectivitySubscription;
+
+  var _isInForeground = true;
+  var _isConnectionAvailable = true;
   /// Initialized client used throughout the application.
   StreamChatClient get client => widget.client;
 
@@ -227,21 +232,33 @@ class StreamChatCoreState extends State<StreamChatCore> with WidgetsBindingObser
     unawaited(_getSystemEnvironment.then(client.updateSystemEnvironment));
   }
 
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   void _subscribeToConnectivityChange([
-    Stream<List<ConnectivityResult>>? connectivityStream,
+    Stream<InternetStatus>? connectivityStream,
   ]) {
-    _unsubscribeFromConnectivityChange();
-
-    final stream = connectivityStream ?? Connectivity().onConnectivityChanged;
-    _connectivitySubscription = stream.listen(
-      _lifecycleManager.onConnectivityChanged,
-    );
+    if (_connectivitySubscription == null) {
+      connectivityStream ??= InternetConnection().onStatusChange;
+      _connectivitySubscription = connectivityStream.listen((status) {
+        _isConnectionAvailable = status == InternetStatus.connected;
+        if (!_isInForeground) return;
+        if (_isConnectionAvailable) {
+          if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
+              currentUser != null) {
+            client.openConnection();
+          }
+        } else {
+          if (client.wsConnectionStatus == ConnectionStatus.connected) {
+            client.closeConnection();
+          }
+        }
+      });
+    }
   }
 
   void _unsubscribeFromConnectivityChange() {
-    _connectivitySubscription?.cancel();
-    _connectivitySubscription = null;
+    if (_connectivitySubscription != null) {
+      _connectivitySubscription?.cancel();
+      _connectivitySubscription = null;
+    }
   }
 
   @override

@@ -52,7 +52,7 @@ Widget _wrapWithMaterialApp(
     home: StreamChat(
       client: client,
       streamChatConfigData: StreamChatConfigurationData(),
-      connectivityStream: Stream.value([ConnectivityResult.wifi]),
+      connectivityStream: Stream.value(InternetStatus.connected),
       streamChatThemeData: StreamChatThemeData(brightness: brightness),
       child: Builder(
         builder: (context) {
