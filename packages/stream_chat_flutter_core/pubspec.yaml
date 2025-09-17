@@ -23,13 +23,13 @@ environment:
 
 dependencies:
   collection: ^1.17.2
-  connectivity_plus: ^6.0.3
-  device_info_plus: ">=10.1.2 <12.0.0"
+  connectivity_plus: ^7.0.0
+  device_info_plus: ">=10.1.2 <13.0.0"
   flutter:
     sdk: flutter
   freezed_annotation: ">=2.4.1 <4.0.0"
   meta: ^1.9.1
-  package_info_plus: ^8.3.0
+  package_info_plus: ^9.0.0
   rxdart: ^0.28.0
   stream_chat: ^9.16.0
 
