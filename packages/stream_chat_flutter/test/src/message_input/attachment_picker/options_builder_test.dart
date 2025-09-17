@@ -114,8 +114,8 @@ void main() {
     });
 
     test(
-        'WebOrDesktopAttachmentPickerOptionsBuilder typedef is defined correctly',
-        () {
+        'WebOrDesktopAttachmentPickerOptionsBuilder typedef is defined '
+        'correctly', () {
       // Test that the typedef is properly defined and can be used
       WebOrDesktopAttachmentPickerOptionsBuilder? builder;
 
