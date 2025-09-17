@@ -227,6 +227,122 @@ void main() {
       },
     );
 
+    group('replaceMentions with special regex characters', () {
+      test('should handle usernames with parentheses', () {
+        final user = User(id: 'user1', name: 'Tester (X)');
+
+        final message = Message(
+          text: 'Hello, @Tester (X)!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(modifiedMessage.text, equals('Hello, [@Tester (X)](user1)!'));
+      });
+
+      test('should handle usernames with square brackets', () {
+        final user = User(id: 'user1', name: 'User[123]');
+
+        final message = Message(
+          text: 'Hello, @User[123]!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(modifiedMessage.text, equals('Hello, [@User[123]](user1)!'));
+      });
+
+      test('should handle usernames with dots and asterisks', () {
+        final user = User(id: 'user1', name: 'user.name*');
+
+        final message = Message(
+          text: 'Hello, @user.name*!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(modifiedMessage.text, equals('Hello, [@user.name*](user1)!'));
+      });
+
+      test('should handle usernames with plus and question marks', () {
+        final user = User(id: 'user1', name: 'test+user?');
+
+        final message = Message(
+          text: 'Hello, @test+user?!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(modifiedMessage.text, equals('Hello, [@test+user?](user1)!'));
+      });
+
+      test('should handle usernames without linkify', () {
+        final user = User(id: 'user1', name: 'Tester (X)');
+
+        final message = Message(
+          text: 'Hello, @Tester (X)!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions(linkify: false);
+
+        expect(modifiedMessage.text, equals('Hello, @Tester (X)!'));
+      });
+
+      test('should not replace partial matches', () {
+        final user = User(id: 'user1', name: 'Test (X)');
+
+        final message = Message(
+          text: 'Hello, @Test (X) and @Test (Y)!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(
+          modifiedMessage.text,
+          equals('Hello, [@Test (X)](user1) and @Test (Y)!'),
+        );
+      });
+
+      test('should handle userIds with special characters', () {
+        final user = User(id: 'user.id+123', name: 'TestUser');
+
+        final message = Message(
+          text: 'Hello, @user.id+123!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(
+          modifiedMessage.text,
+          equals('Hello, [@TestUser](user.id+123)!'),
+        );
+      });
+
+      test('should handle both userId and userName with special characters',
+          () {
+        final user = User(id: 'user[123]', name: 'Test (X)');
+
+        final message = Message(
+          text: 'Hello, @user[123] and @Test (X)!',
+          mentionedUsers: [user],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(
+          modifiedMessage.text,
+          equals('Hello, [@Test (X)](user[123]) and [@Test (X)](user[123])!'),
+        );
+      });
+    });
+
     test('replaceMentionsWithId should replace user names with IDs', () {
       final user1 = User(id: 'user1', name: 'Alice');
       final user2 = User(id: 'user2', name: 'Bob');
