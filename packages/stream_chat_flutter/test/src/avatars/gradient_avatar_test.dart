@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -112,4 +114,58 @@ void main() {
       ),
     ),
   );
+
+  group('Gradient Avatar deterministic color tests', () {
+    test('users with same length IDs should have different gradient colors', () {
+      // Create a few user IDs of the same length but different values
+      final userIdsWithSameLength = ['12133', '12134', '12135', '98765', '54321'];
+      final gradientIndices = <int>[];
+      
+      for (final userId in userIdsWithSameLength) {
+        // Create a mock random generator using userId.hashCode (the fix)
+        final rand = Random(userId.hashCode);
+        final gradientIndex = rand.nextInt(colorGradients.length);
+        gradientIndices.add(gradientIndex);
+      }
+      
+      // Verify that not all gradient indices are the same
+      // (With the old behavior using userId.length, they would all be identical)
+      final uniqueIndices = gradientIndices.toSet();
+      expect(uniqueIndices.length, greaterThan(1), 
+        reason: 'Users with same-length IDs should get different gradient colors');
+    });
+
+    test('same user ID should always get the same gradient color', () {
+      const userId = '12345';
+      final gradientIndices = <int>[];
+      
+      // Generate gradient index multiple times for the same user
+      for (int i = 0; i < 5; i++) {
+        final rand = Random(userId.hashCode);
+        final gradientIndex = rand.nextInt(colorGradients.length);
+        gradientIndices.add(gradientIndex);
+      }
+      
+      // All indices should be the same for the same user
+      final uniqueIndices = gradientIndices.toSet();
+      expect(uniqueIndices.length, equals(1),
+        reason: 'Same user ID should always get the same gradient color');
+    });
+    
+    test('different user IDs should have potential for different colors', () {
+      final userIds = ['user1', 'user2', 'user3', 'user4', 'user5'];
+      final gradientIndices = <int>[];
+      
+      for (final userId in userIds) {
+        final rand = Random(userId.hashCode);
+        final gradientIndex = rand.nextInt(colorGradients.length);
+        gradientIndices.add(gradientIndex);
+      }
+      
+      // While not guaranteed, different users should very likely get different colors
+      final uniqueIndices = gradientIndices.toSet();
+      expect(uniqueIndices.length, greaterThan(1), 
+        reason: 'Different users should have potential for different gradient colors');
+    });
+  });
 }

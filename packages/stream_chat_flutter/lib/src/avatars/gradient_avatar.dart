@@ -88,7 +88,7 @@ class PolygonGradientPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rowUnit = size.width / columnCount;
     final columnUnit = size.height / rowCount;
-    final rand = Random(userId.length);
+    final rand = Random(userId.hashCode);
 
     final squares = <Offset4>[];
     final points = <Offset>{};
@@ -159,7 +159,7 @@ class PolygonGradientPainter extends CustomPainter {
   List<Offset> transformPoints(Set<Offset> points, Size size) {
     final transformedList = <Offset>[];
     final orgList = points.toList();
-    final rand = Random(userId.length);
+    final rand = Random(userId.hashCode);
 
     for (var i = 0; i < points.length; i++) {
       final orgDx = orgList[i].dx;
@@ -235,9 +235,9 @@ class Offset4 {
     final paint = Paint()
       ..color = Color.fromARGB(
         255,
-        Random().nextInt(255),
-        Random().nextInt(255),
-        Random().nextInt(255),
+        Random(row * colSize + column).nextInt(255),
+        Random(row * colSize + column + 1).nextInt(255),
+        Random(row * colSize + column + 2).nextInt(255),
       )
       ..shader = ui.Gradient.linear(
         points[p1],
