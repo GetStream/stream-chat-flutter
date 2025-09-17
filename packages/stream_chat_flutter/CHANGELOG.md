@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `.replaceMentions` not escaping special characters in the username.
+
 ## 9.16.0
 
 🐞 Fixed
