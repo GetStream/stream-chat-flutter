@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:record_platform_interface/record_platform_interface.dart';
 
 const String kTemporaryPath = 'temporaryPath';
 const String kApplicationSupportPath = 'applicationSupportPath';
@@ -100,4 +101,43 @@ class AllNullFakePathProviderPlatform extends Fake
   Future<String?> getDownloadsPath() async {
     return null;
   }
+}
+
+class FakeRecordPlatform extends Fake
+    with MockPlatformInterfaceMixin
+    implements RecordPlatform {
+  @override
+  Future<void> create(String recorderId) async {}
+
+  @override
+  Future<bool> hasPermission(String recorderId) async {
+    return true;
+  }
+
+  @override
+  Future<bool> isPaused(String recorderId) async {
+    return false;
+  }
+
+  @override
+  Future<bool> isRecording(String recorderId) async {
+    return false;
+  }
+
+  @override
+  Future<void> pause(String recorderId) async {}
+
+  @override
+  Future<void> resume(String recorderId) async {}
+
+  @override
+  Future<String?> stop(String recorderId) async {
+    return 'path';
+  }
+
+  @override
+  Future<void> cancel(String recorderId) async {}
+
+  @override
+  Future<void> dispose(String recorderId) async {}
 }

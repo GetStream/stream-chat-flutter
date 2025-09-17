@@ -70,8 +70,10 @@ class DefaultFirebaseOptions {
     projectId: 'stream-chat-internal',
     databaseURL: 'https://stream-chat-internal.firebaseio.com',
     storageBucket: 'stream-chat-internal.appspot.com',
-    androidClientId: '674907137625-0aa50j6b2i35ef9c52lsbk1v16otl492.apps.googleusercontent.com',
-    iosClientId: '674907137625-flarfn9cefu4lermgpbc4b8rm8l15ian.apps.googleusercontent.com',
+    androidClientId:
+        '674907137625-0aa50j6b2i35ef9c52lsbk1v16otl492.apps.googleusercontent.com',
+    iosClientId:
+        '674907137625-flarfn9cefu4lermgpbc4b8rm8l15ian.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.flutter',
   );
 
@@ -82,9 +84,10 @@ class DefaultFirebaseOptions {
     projectId: 'stream-chat-internal',
     databaseURL: 'https://stream-chat-internal.firebaseio.com',
     storageBucket: 'stream-chat-internal.appspot.com',
-    androidClientId: '674907137625-0aa50j6b2i35ef9c52lsbk1v16otl492.apps.googleusercontent.com',
-    iosClientId: '674907137625-p3msks3snq0h22l7ekpqcf0frr0vt8mg.apps.googleusercontent.com',
+    androidClientId:
+        '674907137625-0aa50j6b2i35ef9c52lsbk1v16otl492.apps.googleusercontent.com',
+    iosClientId:
+        '674907137625-p3msks3snq0h22l7ekpqcf0frr0vt8mg.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.streamChatV1',
   );
-
 }

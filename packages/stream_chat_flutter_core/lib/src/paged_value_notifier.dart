@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide Key;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_chat/stream_chat.dart' show StreamChatError;
 
