@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:record/record.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../fakes.dart';
 import '../mocks.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() {
     registerFallbackValue(
-        MaterialPageRoute(builder: (context) => const SizedBox()));
+      MaterialPageRoute(builder: (context) => const SizedBox()),
+    );
+
     registerFallbackValue(Message());
   });
+
+  final originalRecordPlatform = RecordPlatform.instance;
+  setUp(() => RecordPlatform.instance = FakeRecordPlatform());
+  tearDown(() => RecordPlatform.instance = originalRecordPlatform);
 
   testWidgets(
     'it should show the all actions',
