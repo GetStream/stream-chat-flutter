@@ -1,75 +1,41 @@
 import 'package:alchemist/alchemist.dart';
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../fakes.dart';
 import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late MockClient client;
   late MockChannel channel;
   late MockChannelState channelState;
-  late MockMember member;
-  late MockUser user;
-  late MockMember member2;
-  late MockUser user2;
-  const methodChannel =
-      MethodChannel('dev.fluttercommunity.plus/connectivity_status');
+
+  late final member = Member(user: User(id: 'alice', name: 'Alice'));
+  late final member2 = Member(user: User(id: 'bob', name: 'Bob'));
 
   setUpAll(() {
     client = MockClient();
     channel = MockChannel();
     channelState = MockChannelState();
-    member = MockMember();
-    user = MockUser();
-    member2 = MockMember();
-    user2 = MockUser();
 
     when(() => channel.state!).thenReturn(channelState);
-    when(() => channelState.membersStream)
-        .thenAnswer((_) => Stream<List<Member>>.value([member, member2]));
-    when(() => member.user).thenReturn(user);
-    when(() => user.name).thenReturn('user123');
-    when(() => user.id).thenReturn('123');
-    when(() => member2.user).thenReturn(user2);
-    when(() => user2.name).thenReturn('user456');
-    when(() => user2.id).thenReturn('456');
-  });
-
-  setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      methodChannel,
-      (MethodCall methodCall) async {
-        if (methodCall.method == 'listen') {
-          try {
-            await TestDefaultBinaryMessengerBinding
-                .instance.defaultBinaryMessenger
-                .handlePlatformMessage(
-              methodChannel.name,
-              methodChannel.codec.encodeSuccessEnvelope(['wifi']),
-              (_) {},
-            );
-          } catch (e) {
-            print(e);
-          }
-        }
-
-        return null;
-      },
+    when(() => channelState.membersStream).thenAnswer(
+      (_) => Stream<List<Member>>.value([member, member2]),
     );
   });
 
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(methodChannel, null);
-  });
+  final originalConnectivityPlatform = ConnectivityPlatform.instance;
+  setUp(() => ConnectivityPlatform.instance = FakeConnectivityPlatform());
+  tearDown(() => ConnectivityPlatform.instance = originalConnectivityPlatform);
 
   testWidgets(
-    'control test',
+    'control test - verify different users are displayed',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

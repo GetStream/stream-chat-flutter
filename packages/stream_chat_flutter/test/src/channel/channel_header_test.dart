@@ -2,12 +2,20 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../fakes.dart';
 import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  final originalPathProviderPlatform = PathProviderPlatform.instance;
+  setUp(() => PathProviderPlatform.instance = FakePathProviderPlatform());
+  tearDown(() => PathProviderPlatform.instance = originalPathProviderPlatform);
+
   testWidgets(
     'it should show basic channel information',
     (WidgetTester tester) async {

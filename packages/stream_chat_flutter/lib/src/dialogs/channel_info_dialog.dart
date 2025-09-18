@@ -55,9 +55,9 @@ class ChannelInfoDialog extends StatelessWidget {
                         (e) => e.user?.id != userAsMember.user?.id,
                       )
                       .user!,
-                  constraints: const BoxConstraints(
-                    maxHeight: 64,
-                    maxWidth: 64,
+                  constraints: const BoxConstraints.tightFor(
+                    height: 64,
+                    width: 64,
                   ),
                   borderRadius: BorderRadius.circular(32),
                   onlineIndicatorConstraints:
