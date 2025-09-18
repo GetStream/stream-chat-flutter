@@ -1,254 +1,248 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 
-/// {@template streamGradientAvatar}
-/// Fallback user avatar with a polygon gradient overlaid with text
-/// {@endtemplate}
-class StreamGradientAvatar extends StatefulWidget {
-  /// {@macro streamGradientAvatar}
+/// Fallback avatar with a polygon gradient background and initials overlay.
+///
+/// Creates a deterministic gradient avatar based on the user's [userId] that
+/// displays user initials over a colorful jittered polygon background. Each
+/// user gets a consistent gradient color and jitter pattern based on their ID.
+///
+/// The avatar uses a jittered polygon grid to create visual variety while
+/// maintaining deterministic appearance for the same user across sessions.
+///
+/// Example usage:
+/// ```dart
+/// StreamGradientAvatar(
+///   name: 'John Doe',
+///   userId: 'user-123',
+///   jitterIntensity: 0.6,
+/// )
+/// ```
+class StreamGradientAvatar extends StatelessWidget {
+  /// Creates a gradient avatar with the specified [name] and [userId].
+  ///
+  /// The [jitterIntensity] controls how much randomness is applied to the
+  /// polygon grid, where 0.0 creates a perfectly regular grid and 1.0 creates
+  /// maximum randomness.
   const StreamGradientAvatar({
     super.key,
     required this.name,
     required this.userId,
+    this.jitterIntensity = 0.4,
   });
 
-  /// Name of user to shorten and display
+  /// The display name used to generate initials for the avatar.
   final String name;
 
-  /// ID of user to be used for key
+  /// The unique identifier used to generate consistent colors and jitter.
   final String userId;
 
-  @override
-  _StreamGradientAvatarState createState() => _StreamGradientAvatarState();
-}
+  /// The intensity of polygon jitter applied to the background.
+  ///
+  /// Must be between 0.0 (no jitter) and 1.0 (maximum jitter).
+  /// Defaults to 0.4 for moderate visual variety.
+  final double jitterIntensity;
 
-class _StreamGradientAvatarState extends State<StreamGradientAvatar> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: RepaintBoundary(
-        child: CustomPaint(
-          painter: PolygonGradientPainter(
-            widget.userId,
-            getShortenedName(widget.name),
-            DefaultTextStyle.of(context).style.fontFamily ?? 'Roboto',
-          ),
-          child: const SizedBox.expand(),
+    final random = Random(userId.hashCode);
+    final gradient = _palettes[random.nextInt(_palettes.length)];
+    final jitter = Jitter.custom(random: random, intensity: jitterIntensity);
+
+    return RepaintBoundary(
+      key: Key(userId),
+      child: CustomPaint(
+        painter: PolygonGradientPainter(
+          jitter: jitter,
+          gradient: gradient,
         ),
+        child: Center(child: _Initials(username: name)),
       ),
     );
   }
-
-  String getShortenedName(String name) {
-    var parts = name.split(' ')..removeWhere((e) => e == '');
-
-    if (parts.length > 2) {
-      parts = parts.take(2).toList();
-    }
-
-    var result = '';
-
-    for (var i = 0; i < parts.length; i++) {
-      result = result + parts[i][0].toUpperCase();
-    }
-
-    return result;
-  }
 }
 
-/// {@template polygonGradientPainter}
-/// Painter for bg polygon gradient
-/// {@endtemplate}
-class PolygonGradientPainter extends CustomPainter {
-  /// {@macro polygonGradientPainter}
-  PolygonGradientPainter(
-    this.userId,
-    this.username,
-    this.fontFamily,
-  );
+/// Displays user initials with responsive sizing over gradient backgrounds.
+///
+/// Extracts and displays up to two initials from the username with automatic
+/// font sizing based on the available space and number of characters.
+class _Initials extends StatelessWidget {
+  /// Creates an initials widget for the given [username].
+  const _Initials({
+    required this.username,
+  });
 
-  /// User ID used for key
-  final String userId;
-
-  /// User name to display
+  /// The username from which to extract and display initials.
   final String username;
 
-  /// Font family to use
-  final String fontFamily;
-
-  /// Initial grid row count
-  static const int rowCount = 5;
-
-  /// Initial grid column count
-  static const int columnCount = 5;
-
-  late final Random _rand = Random(userId.hashCode);
-
   @override
-  void paint(Canvas canvas, Size size) {
-    final rowUnit = size.width / columnCount;
-    final columnUnit = size.height / rowCount;
+  Widget build(BuildContext context) {
+    final initials = username.initials ?? '?';
 
-    final squares = <Offset4>[];
-    final points = <Offset>{};
-    final gradient = colorGradients[_rand.nextInt(colorGradients.length)];
+    return LayoutBuilder(builder: (context, constraints) {
+      final side = min(constraints.maxWidth, constraints.maxHeight);
+      final fontSize = initials.length == 2 ? side / 3 : side / 2;
 
-    for (var i = 0; i < rowCount; i++) {
-      for (var j = 0; j < columnCount; j++) {
-        final off1 = Offset(rowUnit * j, columnUnit * i);
-        final off2 = Offset(rowUnit * (j + 1), columnUnit * i);
-        final off3 = Offset(rowUnit * (j + 1), columnUnit * (i + 1));
-        final off4 = Offset(rowUnit * j, columnUnit * (i + 1));
-
-        points.addAll([off1, off2, off3, off4]);
-
-        final pointsList = points.toList();
-
-        final p1 = pointsList.indexOf(off1);
-        final p2 = pointsList.indexOf(off2);
-        final p3 = pointsList.indexOf(off3);
-        final p4 = pointsList.indexOf(off4);
-
-        squares.add(
-          Offset4(p1, p2, p3, p4, i, j, rowCount, columnCount, gradient),
-        );
-      }
-    }
-
-    final list = transformPoints(points, size);
-    squares.forEach((e) => e.draw(canvas, list));
-
-    final smallerSide = size.width > size.height ? size.width : size.height;
-
-    final textSize = smallerSide / 3;
-
-    final dxShift = (username.length == 2 ? 1.45 : 0.9) * textSize / 2;
-    final dyShift = (username.length == 2 ? 1.0 : 1.65) * textSize / 2;
-
-    final fontSize = username.length == 2 ? textSize : textSize * 1.5;
-
-    TextPainter(
-      text: TextSpan(
-        text: username,
+      return Text(
+        initials,
+        textAlign: TextAlign.center,
         style: TextStyle(
-          fontFamily: fontFamily,
           fontSize: fontSize,
           fontWeight: FontWeight.w500,
           // ignore: deprecated_member_use
-          color: Colors.white.withOpacity(0.7),
-        ),
-      ),
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.ltr,
-    )
-      ..layout(maxWidth: size.width)
-      ..paint(
-        canvas,
-        Offset(
-          (size.width / 2) - dxShift,
-          (size.height / 2) - dyShift,
+          color: Colors.white.withValues(alpha: 0.7),
         ),
       );
+    });
+  }
+}
+
+/// Custom painter that draws a jittered polygon grid with gradient fills.
+///
+/// Creates a grid of polygon cells with optional jitter displacement and fills
+/// each cell with a linear gradient. The grid layout is customizable through
+/// [rows] and [columns], while visual variety is controlled by the [jitter]
+/// configuration.
+///
+/// Each polygon cell is filled with a linear gradient that creates smooth
+/// color transitions across the entire painted area.
+class PolygonGradientPainter extends CustomPainter {
+  /// Creates a polygon gradient painter with the specified configuration.
+  ///
+  /// The [jitter] controls the random displacement applied to interior grid
+  /// points, while [gradient] defines the colors used for filling the polygon
+  /// cells.
+  PolygonGradientPainter({
+    this.rows = 4,
+    this.columns = 4,
+    required this.jitter,
+    required this.gradient,
+  });
+
+  /// The number of rows in the polygon grid.
+  final int rows;
+
+  /// The number of columns in the polygon grid.
+  final int columns;
+
+  /// The jitter configuration for displacing interior grid points.
+  final Jitter jitter;
+
+  /// The gradient colors used to fill each polygon cell.
+  final List<Color> gradient;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final cols1 = columns + 1;
+    final rows1 = rows + 1;
+    final cellW = size.width / columns;
+    final cellH = size.height / rows;
+
+    final maxDx = cellW;
+    final maxDy = cellH;
+
+    // Build jittered grid points
+    final points = List<Offset>.filled(cols1 * rows1, Offset.zero);
+    for (var r = 0; r < rows1; r++) {
+      final y = r * cellH;
+      final rowBase = r * cols1;
+      for (var c = 0; c < cols1; c++) {
+        final x = c * cellW;
+        final isBorder = r == 0 || c == 0 || r == rows1 - 1 || c == cols1 - 1;
+
+        if (isBorder) {
+          points[rowBase + c] = Offset(x, y);
+        } else {
+          points[rowBase + c] = jitter.applyTo(Offset(x, y), maxDx, maxDy);
+        }
+      }
+    }
+
+    // Build cells from jittered points and draw them
+    for (var r = 0; r < rows; r++) {
+      final base = r * cols1;
+      final next = (r + 1) * cols1;
+      for (var c = 0; c < columns; c++) {
+        final a = points[base + c];
+        final b = points[base + c + 1];
+        final d = points[next + c];
+        final e = points[next + c + 1];
+
+        PolygonCell(a, b, e, d).paint(canvas, gradient);
+      }
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-
-  /// Transforms initial grid into a polygon grid.
-  List<Offset> transformPoints(Set<Offset> points, Size size) {
-    final transformedList = <Offset>[];
-    final orgList = points.toList();
-
-    for (var i = 0; i < points.length; i++) {
-      final orgDx = orgList[i].dx;
-      final orgDy = orgList[i].dy;
-
-      if (orgDx == 0 ||
-          orgDy == 0 ||
-          orgDx == size.width ||
-          orgDy == size.height) {
-        transformedList.add(Offset(orgDx, orgDy));
-        continue;
-      }
-
-      final sign1 = _rand.nextInt(2) == 1 ? 1 : -1;
-      final sign2 = _rand.nextInt(2) == 1 ? 1 : -1;
-
-      final dx = sign1 * 0.6 * _rand.nextInt(size.width ~/ columnCount);
-      final dy = sign2 * 0.6 * _rand.nextInt(size.height ~/ rowCount);
-
-      transformedList.add(Offset(orgDx + dx, orgDy + dy));
-    }
-
-    return transformedList;
-  }
+  bool shouldRepaint(covariant PolygonGradientPainter old) =>
+      old.rows != rows ||
+      old.columns != columns ||
+      old.jitter.intensity != jitter.intensity ||
+      !const ListEquality().equals(old.gradient, gradient);
 }
 
-/// {@template offset4}
-/// Class for storing and drawing four points of a polygon.
-/// {@endtemplate}
-class Offset4 {
-  /// {@macro offset4}
-  Offset4(
-    this.p1,
-    this.p2,
-    this.p3,
-    this.p4,
-    this.row,
-    this.column,
-    this.rowSize,
-    this.colSize,
-    this.gradient,
+/// A quadrilateral polygon cell defined by four corner points.
+///
+/// Represents a single cell in the jittered polygon grid that can paint itself
+/// with a linear gradient fill. The cell is defined by four corner points that
+/// form a quadrilateral shape.
+class PolygonCell {
+  /// Creates a polygon cell with the specified corner points.
+  ///
+  /// Points should be ordered to form a proper quadrilateral shape.
+  const PolygonCell(
+    this.pointA,
+    this.pointB,
+    this.pointC,
+    this.pointD,
   );
 
-  /// Point 1
-  final int p1;
+  /// The first corner point of the polygon cell.
+  final Offset pointA;
 
-  /// Point 2
-  final int p2;
+  /// The second corner point of the polygon cell.
+  final Offset pointB;
 
-  /// Point 3
-  final int p3;
+  /// The third corner point of the polygon cell.
+  final Offset pointC;
 
-  /// Point 4
-  final int p4;
+  /// The fourth corner point of the polygon cell.
+  final Offset pointD;
 
-  /// Position of polygon on grid
-  final int row;
+  /// Paints this polygon cell on the [canvas] with the specified [gradient].
+  ///
+  /// Creates a linear gradient shader from [pointA] to [pointC] and fills
+  /// the quadrilateral path formed by all four corner points.
+  void paint(
+    Canvas canvas,
+    List<Color> gradient,
+  ) {
+    final shader = ui.Gradient.linear(pointA, pointC, gradient);
+    final paint = Paint()..shader = shader;
 
-  /// Position of polygon on grid
-  final int column;
-
-  /// Max row size
-  final int rowSize;
-
-  /// Max col size
-  final int colSize;
-
-  /// Gradient to be applied to polygon
-  final List<Color> gradient;
-
-  /// Draw the polygon on canvas
-  void draw(Canvas canvas, List<Offset> points) {
-    final paint = Paint()
-      ..shader = ui.Gradient.linear(points[p1], points[p3], gradient);
-
-    final backgroundPath = Path()
-      ..moveTo(points[p1].dx, points[p1].dy)
-      ..lineTo(points[p2].dx, points[p2].dy)
-      ..lineTo(points[p3].dx, points[p3].dy)
-      ..lineTo(points[p4].dx, points[p4].dy)
-      ..lineTo(points[p1].dx, points[p1].dy)
+    final path = Path()
+      ..moveTo(pointA.dx, pointA.dy)
+      ..lineTo(pointB.dx, pointB.dy)
+      ..lineTo(pointC.dx, pointC.dy)
+      ..lineTo(pointD.dx, pointD.dy)
       ..close();
 
-    canvas.drawPath(backgroundPath, paint);
+    canvas.drawPath(path, paint);
   }
 }
 
-/// Gradient list for polygons
-const colorGradients = [
+/// Predefined gradient color palettes for avatar backgrounds.
+///
+/// Contains a curated collection of two-color gradients that provide visually
+/// appealing and accessible color combinations for user avatars. Each palette
+/// consists of two colors that create smooth linear gradients.
+const _palettes = <List<Color>>[
   [Color(0xffffafbd), Color(0xffffc3a0)],
   [Color(0xff2193b0), Color(0xff6dd5ed)],
   [Color(0xffcc2b5e), Color(0xff753a88)],
