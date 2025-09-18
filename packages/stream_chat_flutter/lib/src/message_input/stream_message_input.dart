@@ -1016,7 +1016,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       },
       onDragExited: (details) {},
       child: Container(
-        margin: widget.textInputMargin ?? margin,
+        margin: margin,
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: _messageInputTheme.borderRadius,
@@ -1035,25 +1035,46 @@ class StreamMessageInputState extends State<StreamMessageInput>
             _buildAttachments(),
             LimitedBox(
               maxHeight: widget.maxHeight,
-              child: Focus(
-                skipTraversal: true,
-                onKeyEvent: _handleKeyPressed,
-                child: StreamMessageTextField(
-                  key: const Key('messageInputText'),
-                  maxLines: widget.maxLines,
-                  minLines: widget.minLines,
-                  textInputAction: widget.textInputAction,
-                  onSubmitted: (_) => sendMessage(),
-                  keyboardType: widget.keyboardType,
-                  controller: _effectiveController,
-                  focusNode: _effectiveFocusNode,
-                  style: _messageInputTheme.inputTextStyle,
-                  autofocus: widget.autofocus,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: _getInputDecoration(context),
-                  textCapitalization: widget.textCapitalization,
-                  autocorrect: widget.autoCorrect,
-                  contentInsertionConfiguration: widget.contentInsertionConfiguration,
+              child: PlatformWidgetBuilder(
+                web: (context, child) => Focus(
+                  skipTraversal: true,
+                  onKeyEvent: _handleKeyPressed,
+                  child: child!,
+                ),
+                desktop: (context, child) => Focus(
+                  skipTraversal: true,
+                  onKeyEvent: _handleKeyPressed,
+                  child: child!,
+                ),
+                mobile: (context, child) => Focus(
+                  skipTraversal: true,
+                  onKeyEvent: _handleKeyPressed,
+                  child: child!,
+                ),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: StreamMessageTextField(
+                        key: const Key('messageInputText'),
+                        maxLines: widget.maxLines,
+                        minLines: widget.minLines,
+                        textInputAction: widget.textInputAction,
+                        onSubmitted: (_) => sendMessage(),
+                        keyboardType: widget.keyboardType,
+                        controller: _effectiveController,
+                        focusNode: _effectiveFocusNode,
+                        style: _messageInputTheme.inputTextStyle,
+                        autofocus: widget.autofocus,
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: _getInputDecoration(context),
+                        textCapitalization: widget.textCapitalization,
+                        autocorrect: widget.autoCorrect,
+                        contentInsertionConfiguration: widget.contentInsertionConfiguration,
+                        onTextChange: widget.onTextChanged,
+                      ),
+                    ),
+                    if (widget.suffix != null) widget.suffix!,
+                  ],
                 ),
               ),
             ),
@@ -1091,11 +1112,31 @@ class StreamMessageInputState extends State<StreamMessageInput>
           _messageInputTheme.inputTextStyle!.copyWith(
             color: _streamChatTheme.colorTheme.textLowEmphasis,
           ),
-      border: const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
-      focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
-      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
-      errorBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
-      disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
+      border: const OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      enabledBorder: const OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      errorBorder: const OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      disabledBorder: const OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
       contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       prefixIcon: Padding(
         padding: const EdgeInsets.all(8),
@@ -1106,7 +1147,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
               Container(
                 constraints: BoxConstraints.tight(const Size(64, 24)),
                 decoration: BoxDecoration(
-                  borderRadius: _messageInputTheme.borderRadius?.add(BorderRadius.circular(6)),
+                  borderRadius: _messageInputTheme.borderRadius?.add(
+                    BorderRadius.circular(6),
+                  ),
                   color: _streamChatTheme.colorTheme.accentPrimary,
                 ),
                 margin: const EdgeInsets.all(6),
@@ -1122,7 +1165,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     ),
                     Text(
                       _effectiveController.message.command!.toUpperCase(),
-                      style: _streamChatTheme.textTheme.footnoteBold.copyWith(color: Colors.white),
+                      style: _streamChatTheme.textTheme.footnoteBold.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),

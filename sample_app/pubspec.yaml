@@ -41,11 +41,11 @@ dependencies:
   rxdart: ^0.28.0
   sentry_flutter: ^8.3.0
   stream_chat_flutter:
-    path: ../stream_chat_flutter
+    path: ../packages/stream_chat_flutter
   stream_chat_localizations:
-    path: ../stream_chat_localizations
+    path: ../packages/stream_chat_localizations
   stream_chat_persistence:
-    path: ../stream_chat_persistence
+    path: ../packages/stream_chat_persistence
   streaming_shared_preferences: ^2.0.0
   uuid: ^4.4.0
   video_player: ^2.8.7

@@ -25,9 +25,9 @@ dependencies:
   flutter:
     sdk: flutter
   stream_chat_flutter:
-    path: ../stream_chat_flutter
+    path: ../../stream_chat_flutter
   stream_chat_localizations:
-    path: ../stream_chat_localizations
+    path: ../../stream_chat_localizations
 
 flutter:
   uses-material-design: true
