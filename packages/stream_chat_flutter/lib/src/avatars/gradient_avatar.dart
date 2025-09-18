@@ -82,21 +82,23 @@ class _Initials extends StatelessWidget {
   Widget build(BuildContext context) {
     final initials = username.initials ?? '?';
 
-    return LayoutBuilder(builder: (context, constraints) {
-      final side = min(constraints.maxWidth, constraints.maxHeight);
-      final fontSize = initials.length == 2 ? side / 3 : side / 2;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = min(constraints.maxWidth, constraints.maxHeight);
+        final fontSize = initials.length == 2 ? side / 3 : side / 2;
 
-      return Text(
-        initials,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w500,
-          // ignore: deprecated_member_use
-          color: Colors.white.withOpacity(0.7),
-        ),
-      );
-    });
+        return Text(
+          initials,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w500,
+            // ignore: deprecated_member_use
+            color: Colors.white.withOpacity(0.7),
+          ),
+        );
+      },
+    );
   }
 }
 
