@@ -124,13 +124,46 @@ void main() {
   goldenTest(
     'GitHub issue #2369 - same-length user IDs should have different colors',
     fileName: 'gradient_avatar_issue_2369',
-    builder: () => GoldenTestGroup(
+    constraints: const BoxConstraints.tightFor(width: 600, height: 1200),
+    builder: () => _wrapWithMaterialApp(
+      const AvatarComparisonTestWidget(),
+    ),
+  );
+}
+
+/// Custom test widget for GitHub issue #2369 avatar comparison
+///
+/// This widget creates a custom themed layout without using GoldenTestGroup
+/// to avoid theme conflicts with other tests in the package.
+class AvatarComparisonTestWidget extends StatelessWidget {
+  const AvatarComparisonTestWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = StreamChatTheme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Test case from GitHub issue #2369 - these numeric IDs have same length
-        // but should produce different gradient colors after the fix
-        GoldenTestScenario(
-          name: 'Numeric IDs (5 chars) - Should show different colors',
-          constraints: const BoxConstraints.tightFor(width: 450, height: 180),
+        Text(
+          'GitHub Issue #2369 - Gradient Avatar Color Fix',
+          style: theme.textTheme.title,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Users with same-length IDs should have different colors',
+          style: theme.textTheme.headline.copyWith(
+            color: theme.colorTheme.textLowEmphasis,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Test scenarios
+        _buildTestSection(
+          context,
+          title: 'Numeric IDs (5 chars) - Should show different colors',
+          description: 'Example IDs from the GitHub issue',
           child: const AvatarComparisonRow(
             users: [
               ('12133', 'User One'), // Example IDs from the issue
@@ -139,10 +172,13 @@ void main() {
             ],
           ),
         ),
-        // Additional test with alphabetic IDs of same length
-        GoldenTestScenario(
-          name: 'Alphabetic IDs (5 chars) - Should show different colors',
-          constraints: const BoxConstraints.tightFor(width: 450, height: 180),
+
+        const SizedBox(height: 24),
+
+        _buildTestSection(
+          context,
+          title: 'Alphabetic IDs (5 chars) - Should show different colors',
+          description: 'Additional test with same-length alphabetic IDs',
           child: const AvatarComparisonRow(
             users: [
               ('abcde', 'User Alpha'),
@@ -151,9 +187,13 @@ void main() {
             ],
           ),
         ),
-        GoldenTestScenario(
-          name: 'Mixed length IDs - For reference (should be different)',
-          constraints: const BoxConstraints.tightFor(width: 450, height: 180),
+
+        const SizedBox(height: 24),
+
+        _buildTestSection(
+          context,
+          title: 'Mixed length IDs - For reference',
+          description: 'Different length IDs should always be different',
           child: const AvatarComparisonRow(
             users: [
               ('a', 'Short'),
@@ -162,9 +202,13 @@ void main() {
             ],
           ),
         ),
-        GoldenTestScenario(
-          name: 'Same user ID - Should be identical',
-          constraints: const BoxConstraints.tightFor(width: 450, height: 180),
+
+        const SizedBox(height: 24),
+
+        _buildTestSection(
+          context,
+          title: 'Same user ID - Should be identical',
+          description: 'Consistency test - same ID should produce same colors',
           child: const AvatarComparisonRow(
             users: [
               ('test123', 'Same User'),
@@ -174,8 +218,47 @@ void main() {
           ),
         ),
       ],
-    ),
-  );
+    );
+  }
+
+  Widget _buildTestSection(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required Widget child,
+  }) {
+    final theme = StreamChatTheme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.headline.copyWith(
+            color: theme.colorTheme.textHighEmphasis,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          description,
+          style: theme.textTheme.body.copyWith(
+            color: theme.colorTheme.textLowEmphasis,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.colorTheme.barsBg,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: theme.colorTheme.borders),
+          ),
+          child: child,
+        ),
+      ],
+    );
+  }
 }
 
 /// A widget that displays a row of gradient avatars for comparison testing.
@@ -241,6 +324,8 @@ class _AvatarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamChatTheme.of(context);
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -256,18 +341,16 @@ class _AvatarItem extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           userId,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.footnoteBold.copyWith(
+            color: theme.colorTheme.textHighEmphasis,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 2),
         Text(
           userName,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey.shade600,
+          style: theme.textTheme.footnote.copyWith(
+            color: theme.colorTheme.textLowEmphasis,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -276,4 +359,25 @@ class _AvatarItem extends StatelessWidget {
       ],
     );
   }
+}
+
+Widget _wrapWithMaterialApp(
+  Widget widget, {
+  Brightness? brightness,
+}) {
+  return MaterialApp(
+    home: StreamChatTheme(
+      data: StreamChatThemeData(brightness: brightness),
+      child: Builder(builder: (context) {
+        final theme = StreamChatTheme.of(context);
+        return Scaffold(
+          backgroundColor: theme.colorTheme.appBg,
+          body: Container(
+            padding: const EdgeInsets.all(16),
+            child: Center(child: widget),
+          ),
+        );
+      }),
+    ),
+  );
 }
