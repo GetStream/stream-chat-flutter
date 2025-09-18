@@ -49,9 +49,9 @@ class StreamGradientAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final random = Random(userId.hashCode);
-    final gradient = _palettes[random.nextInt(_palettes.length)];
-    final jitter = Jitter.custom(random: random, intensity: jitterIntensity);
+    final seed = userId.hashCode;
+    final gradient = _palettes[seed.abs() % _palettes.length];
+    final jitter = Jitter(seed: seed, intensity: jitterIntensity);
 
     return RepaintBoundary(
       key: Key(userId),
