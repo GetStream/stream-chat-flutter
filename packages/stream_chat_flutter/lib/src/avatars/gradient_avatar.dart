@@ -117,8 +117,8 @@ class PolygonGradientPainter extends CustomPainter {
   /// points, while [gradient] defines the colors used for filling the polygon
   /// cells.
   PolygonGradientPainter({
-    this.rows = 4,
-    this.columns = 4,
+    this.rows = 5,
+    this.columns = 5,
     required this.jitter,
     required this.gradient,
   });
