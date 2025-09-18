@@ -117,7 +117,7 @@ void main() {
 
   // Regression test for GitHub issue #2369
   // https://github.com/GetStream/stream-chat-flutter/issues/2369
-  // 
+  //
   // Issue: All Users have the same Gradient Avatar color
   // Problem: Users with same-length IDs were getting identical gradient colors
   // Solution: Use userId.hashCode instead of length-based randomization
@@ -133,8 +133,8 @@ void main() {
           constraints: const BoxConstraints.tightFor(width: 450, height: 180),
           child: const AvatarComparisonRow(
             users: [
-              ('12133', 'User One'),   // Example IDs from the issue
-              ('12134', 'User Two'),   // These were showing same colors
+              ('12133', 'User One'), // Example IDs from the issue
+              ('12134', 'User Two'), // These were showing same colors
               ('12135', 'User Three'), // before the hashCode fix
             ],
           ),
@@ -179,15 +179,15 @@ void main() {
 }
 
 /// A widget that displays a row of gradient avatars for comparison testing.
-/// 
-/// This widget is specifically designed for testing gradient avatar color 
+///
+/// This widget is specifically designed for testing gradient avatar color
 /// variations, particularly for verifying fixes to GitHub issue #2369 where
 /// users with same-length IDs were getting identical colors.
-/// 
+///
 /// See: https://github.com/GetStream/stream-chat-flutter/issues/2369
 class AvatarComparisonRow extends StatelessWidget {
   /// Creates an [AvatarComparisonRow] with the given list of users.
-  /// 
+  ///
   /// The [users] parameter should contain tuples of (userId, userName) pairs
   /// to be displayed as gradient avatars for visual comparison.
   const AvatarComparisonRow({
