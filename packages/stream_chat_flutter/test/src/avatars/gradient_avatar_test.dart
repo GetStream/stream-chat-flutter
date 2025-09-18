@@ -325,7 +325,7 @@ class _AvatarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
