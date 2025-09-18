@@ -49,16 +49,16 @@ class StreamGradientAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hash = userId.hashCode;
-    final gradient = _palettes[hash.abs() % _palettes.length];
-    final jitter = Jitter(seed: hash, intensity: jitterIntensity);
+    final jitterSeed = userId.hashCode;
+    final gradient = _palettes[jitterSeed.abs() % _palettes.length];
 
     return RepaintBoundary(
       key: Key(userId),
       child: CustomPaint(
         painter: PolygonGradientPainter(
-          jitter: jitter,
           gradient: gradient,
+          jitterSeed: jitterSeed,
+          jitterIntensity: jitterIntensity,
         ),
         child: Center(child: _Initials(username: name)),
       ),
@@ -119,7 +119,8 @@ class PolygonGradientPainter extends CustomPainter {
   PolygonGradientPainter({
     this.rows = 5,
     this.columns = 5,
-    required this.jitter,
+    this.jitterSeed,
+    this.jitterIntensity = 0.4,
     required this.gradient,
   });
 
@@ -129,8 +130,11 @@ class PolygonGradientPainter extends CustomPainter {
   /// The number of columns in the polygon grid.
   final int columns;
 
-  /// The jitter configuration for displacing interior grid points.
-  final Jitter jitter;
+  /// The seed for the jitter configuration to ensure consistent randomness.
+  final int? jitterSeed;
+
+  /// The intensity of jitter applied to the grid points.
+  final double jitterIntensity;
 
   /// The gradient colors used to fill each polygon cell.
   final List<Color> gradient;
@@ -138,6 +142,11 @@ class PolygonGradientPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
+
+    final jitter = Jitter(
+      seed: jitterSeed,
+      intensity: jitterIntensity,
+    );
 
     final cols1 = columns + 1;
     final rows1 = rows + 1;
@@ -183,7 +192,8 @@ class PolygonGradientPainter extends CustomPainter {
   bool shouldRepaint(covariant PolygonGradientPainter old) =>
       old.rows != rows ||
       old.columns != columns ||
-      old.jitter.intensity != jitter.intensity ||
+      old.jitterSeed != jitterSeed ||
+      old.jitterIntensity != jitterIntensity ||
       !const ListEquality().equals(old.gradient, gradient);
 }
 
