@@ -53,7 +53,6 @@ class StreamGradientAvatar extends StatelessWidget {
     final gradient = _palettes[jitterSeed.abs() % _palettes.length];
 
     return RepaintBoundary(
-      key: Key(userId),
       child: CustomPaint(
         painter: PolygonGradientPainter(
           gradient: gradient,
@@ -94,7 +93,7 @@ class _Initials extends StatelessWidget {
           fontSize: fontSize,
           fontWeight: FontWeight.w500,
           // ignore: deprecated_member_use
-          color: Colors.white.withValues(alpha: 0.7),
+          color: Colors.white.withOpacity(0.7),
         ),
       );
     });
