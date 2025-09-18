@@ -69,30 +69,31 @@ class PolygonGradientPainter extends CustomPainter {
     this.fontFamily,
   );
 
+  /// User ID used for key
+  final String userId;
+
+  /// User name to display
+  final String username;
+
+  /// Font family to use
+  final String fontFamily;
+
   /// Initial grid row count
   static const int rowCount = 5;
 
   /// Initial grid column count
   static const int columnCount = 5;
 
-  /// User ID used for key
-  String userId;
-
-  /// User name to display
-  String username;
-
-  /// Font family to use
-  String fontFamily;
+  late final Random _rand = Random(userId.hashCode);
 
   @override
   void paint(Canvas canvas, Size size) {
     final rowUnit = size.width / columnCount;
     final columnUnit = size.height / rowCount;
-    final rand = Random(userId.length);
 
     final squares = <Offset4>[];
     final points = <Offset>{};
-    final gradient = colorGradients[rand.nextInt(colorGradients.length)];
+    final gradient = colorGradients[_rand.nextInt(colorGradients.length)];
 
     for (var i = 0; i < rowCount; i++) {
       for (var j = 0; j < columnCount; j++) {
@@ -159,7 +160,6 @@ class PolygonGradientPainter extends CustomPainter {
   List<Offset> transformPoints(Set<Offset> points, Size size) {
     final transformedList = <Offset>[];
     final orgList = points.toList();
-    final rand = Random(userId.length);
 
     for (var i = 0; i < points.length; i++) {
       final orgDx = orgList[i].dx;
@@ -173,11 +173,11 @@ class PolygonGradientPainter extends CustomPainter {
         continue;
       }
 
-      final sign1 = rand.nextInt(2) == 1 ? 1 : -1;
-      final sign2 = rand.nextInt(2) == 1 ? 1 : -1;
+      final sign1 = _rand.nextInt(2) == 1 ? 1 : -1;
+      final sign2 = _rand.nextInt(2) == 1 ? 1 : -1;
 
-      final dx = sign1 * 0.6 * rand.nextInt(size.width ~/ columnCount);
-      final dy = sign2 * 0.6 * rand.nextInt(size.height ~/ rowCount);
+      final dx = sign1 * 0.6 * _rand.nextInt(size.width ~/ columnCount);
+      final dy = sign2 * 0.6 * _rand.nextInt(size.height ~/ rowCount);
 
       transformedList.add(Offset(orgDx + dx, orgDy + dy));
     }
@@ -204,46 +204,36 @@ class Offset4 {
   );
 
   /// Point 1
-  int p1;
+  final int p1;
 
   /// Point 2
-  int p2;
+  final int p2;
 
   /// Point 3
-  int p3;
+  final int p3;
 
   /// Point 4
-  int p4;
+  final int p4;
 
   /// Position of polygon on grid
-  int row;
+  final int row;
 
   /// Position of polygon on grid
-  int column;
+  final int column;
 
   /// Max row size
-  int rowSize;
+  final int rowSize;
 
   /// Max col size
-  int colSize;
+  final int colSize;
 
   /// Gradient to be applied to polygon
-  List<Color> gradient;
+  final List<Color> gradient;
 
   /// Draw the polygon on canvas
   void draw(Canvas canvas, List<Offset> points) {
     final paint = Paint()
-      ..color = Color.fromARGB(
-        255,
-        Random().nextInt(255),
-        Random().nextInt(255),
-        Random().nextInt(255),
-      )
-      ..shader = ui.Gradient.linear(
-        points[p1],
-        points[p3],
-        gradient,
-      );
+      ..shader = ui.Gradient.linear(points[p1], points[p3], gradient);
 
     final backgroundPath = Path()
       ..moveTo(points[p1].dx, points[p1].dy)
