@@ -16,6 +16,7 @@
 - Fixed `OwnUser` specific fields getting lost when creating a new `OwnUser` instance from
   an `User` instance.
 - Fixed `Client.currentUser` specific fields getting reset on `user.updated` events.
+- Fixed build in dart2wasm environment.
 
 ✅ Added
 
