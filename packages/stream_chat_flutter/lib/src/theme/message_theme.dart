@@ -17,6 +17,7 @@ class StreamMessageThemeData with Diagnosticable {
     this.messageLinksStyle,
     this.messageDeletedStyle,
     this.messageBackgroundColor,
+    this.messageBackgroundGradient,
     this.messageBorderColor,
     this.reactionsBackgroundColor,
     this.reactionsBorderColor,
@@ -53,6 +54,10 @@ class StreamMessageThemeData with Diagnosticable {
 
   /// Color for messageBackgroundColor
   final Color? messageBackgroundColor;
+
+  /// Gradient for message background. Takes precedence over messageBackgroundColor
+  /// when both are provided.
+  final Gradient? messageBackgroundGradient;
 
   /// Color for message border color
   final Color? messageBorderColor;
@@ -96,6 +101,7 @@ class StreamMessageThemeData with Diagnosticable {
     TextStyle? createdAtStyle,
     TextStyle? repliesStyle,
     Color? messageBackgroundColor,
+    Gradient? messageBackgroundGradient,
     Color? messageBorderColor,
     StreamAvatarThemeData? avatarTheme,
     Color? reactionsBackgroundColor,
@@ -116,6 +122,8 @@ class StreamMessageThemeData with Diagnosticable {
       messageDeletedStyle: messageDeletedStyle ?? this.messageDeletedStyle,
       messageBackgroundColor:
           messageBackgroundColor ?? this.messageBackgroundColor,
+      messageBackgroundGradient:
+          messageBackgroundGradient ?? this.messageBackgroundGradient,
       messageBorderColor: messageBorderColor ?? this.messageBorderColor,
       avatarTheme: avatarTheme ?? this.avatarTheme,
       repliesStyle: repliesStyle ?? this.repliesStyle,
@@ -154,6 +162,8 @@ class StreamMessageThemeData with Diagnosticable {
           TextStyle.lerp(a.messageDeletedStyle, b.messageDeletedStyle, t),
       messageBackgroundColor:
           Color.lerp(a.messageBackgroundColor, b.messageBackgroundColor, t),
+      messageBackgroundGradient:
+          t < 0.5 ? a.messageBackgroundGradient : b.messageBackgroundGradient,
       messageBorderColor:
           Color.lerp(a.messageBorderColor, b.messageBorderColor, t),
       messageLinksStyle:
@@ -218,6 +228,7 @@ class StreamMessageThemeData with Diagnosticable {
       repliesStyle:
           repliesStyle?.merge(other.repliesStyle) ?? other.repliesStyle,
       messageBackgroundColor: other.messageBackgroundColor,
+      messageBackgroundGradient: other.messageBackgroundGradient,
       messageBorderColor: other.messageBorderColor,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       reactionsBackgroundColor: other.reactionsBackgroundColor,
@@ -244,6 +255,7 @@ class StreamMessageThemeData with Diagnosticable {
           messageDeletedStyle == other.messageDeletedStyle &&
           repliesStyle == other.repliesStyle &&
           messageBackgroundColor == other.messageBackgroundColor &&
+          messageBackgroundGradient == other.messageBackgroundGradient &&
           messageBorderColor == other.messageBorderColor &&
           reactionsBackgroundColor == other.reactionsBackgroundColor &&
           reactionsBorderColor == other.reactionsBorderColor &&
@@ -265,6 +277,7 @@ class StreamMessageThemeData with Diagnosticable {
       messageDeletedStyle.hashCode ^
       repliesStyle.hashCode ^
       messageBackgroundColor.hashCode ^
+      messageBackgroundGradient.hashCode ^
       messageBorderColor.hashCode ^
       reactionsBackgroundColor.hashCode ^
       reactionsBorderColor.hashCode ^
@@ -288,6 +301,7 @@ class StreamMessageThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('messageDeletedStyle', messageDeletedStyle))
       ..add(DiagnosticsProperty('repliesStyle', repliesStyle))
       ..add(ColorProperty('messageBackgroundColor', messageBackgroundColor))
+      ..add(DiagnosticsProperty('messageBackgroundGradient', messageBackgroundGradient))
       ..add(ColorProperty('messageBorderColor', messageBorderColor))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
       ..add(ColorProperty('reactionsBackgroundColor', reactionsBackgroundColor))
