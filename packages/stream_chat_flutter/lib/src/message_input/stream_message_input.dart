@@ -619,6 +619,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Widget build(BuildContext context) {
     bool canSendOrUpdateMessage(List<ChannelCapability> capabilities) {
       var result = capabilities.contains(ChannelCapability.sendMessage);
+
+      final insideThread = _effectiveController.message.parentId != null;
+      if (insideThread) {
+        result |= capabilities.contains(ChannelCapability.sendReply);
+      }
+
       if (_isEditing) {
         result |= capabilities.contains(ChannelCapability.updateOwnMessage);
         result |= capabilities.contains(ChannelCapability.updateAnyMessage);
@@ -626,6 +632,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       return result;
     }
+    //fix(ui): enable sending reply in threads for users with sendReply capability
+    //
+    // This commit allows users with the `sendReply` capability to send replies within a thread, even if they don't have broader send message permission.
 
     final channel = StreamChannel.of(context).channel;
     final messageInput = switch (_buildAutocompleteMessageInput(context)) {
