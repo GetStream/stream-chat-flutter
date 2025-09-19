@@ -301,7 +301,8 @@ class StreamMessageThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('messageDeletedStyle', messageDeletedStyle))
       ..add(DiagnosticsProperty('repliesStyle', repliesStyle))
       ..add(ColorProperty('messageBackgroundColor', messageBackgroundColor))
-      ..add(DiagnosticsProperty('messageBackgroundGradient', messageBackgroundGradient))
+      ..add(DiagnosticsProperty(
+          'messageBackgroundGradient', messageBackgroundGradient))
       ..add(ColorProperty('messageBorderColor', messageBorderColor))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
       ..add(ColorProperty('reactionsBackgroundColor', reactionsBackgroundColor))
