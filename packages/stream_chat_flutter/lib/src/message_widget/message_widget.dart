@@ -1105,7 +1105,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       ),
     );
 
-    if (confirmDelete == false) return null;
+    if (confirmDelete != true) return null;
 
     return channel.deleteMessage(message);
   }
@@ -1139,7 +1139,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       ),
     );
 
-    if (confirmFlag == false) return null;
+    if (confirmFlag != true) return null;
 
     final messageId = message.id;
     return channel.client.flagMessage(messageId);
