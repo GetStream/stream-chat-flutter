@@ -1242,6 +1242,88 @@ void main() {
       verifyNoMoreInteractions(api.device);
     });
 
+    test('`.setPushPreferences`', () async {
+      const pushPreferenceInput = PushPreferenceInput(
+        chatLevel: ChatLevel.mentions,
+      );
+
+      const channelCid = 'messaging:123';
+      const channelPreferenceInput = PushPreferenceInput.channel(
+        channelCid: channelCid,
+        chatLevel: ChatLevel.mentions,
+      );
+
+      const preferences = [pushPreferenceInput, channelPreferenceInput];
+
+      final currentUser = client.state.currentUser;
+      when(() => api.device.setPushPreferences(preferences)).thenAnswer(
+        (_) async => UpsertPushPreferencesResponse()
+          ..userPreferences = {
+            '${currentUser?.id}': PushPreference(
+              chatLevel: pushPreferenceInput.chatLevel,
+            ),
+          }
+          ..userChannelPreferences = {
+            '${currentUser?.id}': {
+              channelCid: ChannelPushPreference(
+                chatLevel: channelPreferenceInput.chatLevel,
+              ),
+            },
+          },
+      );
+
+      expect(
+        client.eventStream,
+        emitsInOrder([
+          isA<Event>().having(
+            (e) => e.type,
+            'push_preference.updated event',
+            EventType.pushPreferenceUpdated,
+          ),
+          isA<Event>().having(
+            (e) => e.type,
+            'channel.push_preference.updated event',
+            EventType.channelPushPreferenceUpdated,
+          ),
+        ]),
+      );
+
+      final res = await client.setPushPreferences(preferences);
+      expect(res, isNotNull);
+
+      verify(() => api.device.setPushPreferences(preferences)).called(1);
+      verifyNoMoreInteractions(api.device);
+    });
+
+    test('should handle push_preference.updated event', () async {
+      final pushPreference = PushPreference(
+        chatLevel: ChatLevel.mentions,
+        callLevel: CallLevel.all,
+        disabledUntil: DateTime.now().add(const Duration(hours: 1)),
+      );
+
+      final event = Event(
+        type: EventType.pushPreferenceUpdated,
+        pushPreference: pushPreference,
+      );
+
+      // Initially null
+      expect(client.state.currentUser?.pushPreferences, isNull);
+
+      // Trigger the event
+      client.handleEvent(event);
+
+      // Wait for the event to get processed
+      await Future.delayed(Duration.zero);
+
+      // Should update currentUser.pushPreferences
+      final pushPreferences = client.state.currentUser?.pushPreferences;
+      expect(pushPreferences, isNotNull);
+      expect(pushPreferences?.chatLevel, ChatLevel.mentions);
+      expect(pushPreferences?.callLevel, CallLevel.all);
+      expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
+    });
+
     test('`.devToken`', () async {
       const userId = 'test-user-id';
 

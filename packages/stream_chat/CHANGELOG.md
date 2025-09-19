@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `currentUser.pushPreferences` not updating immediately after calling `setPushPreferences`.
+
 ## 9.16.0
 
 🐞 Fixed
