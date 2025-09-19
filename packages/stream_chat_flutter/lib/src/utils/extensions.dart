@@ -386,18 +386,13 @@ extension MessageX on Message {
     for (final user in mentionedUsers.toSet()) {
       final userId = user.id;
       final userName = user.name;
-      if (linkify) {
-        messageTextToRender = messageTextToRender?.replaceAll(
-          RegExp('@($userId|$userName)'),
-          '[@$userName]($userId)',
-        );
-      } else {
-        messageTextToRender = messageTextToRender?.replaceAll(
-          RegExp('@($userId|$userName)'),
-          '@$userName',
-        );
-      }
+
+      messageTextToRender = messageTextToRender?.replaceAll(
+        RegExp('@(${RegExp.escape(userId)}|${RegExp.escape(userName)})'),
+        linkify ? '[@$userName]($userId)' : '@$userName',
+      );
     }
+
     return copyWith(text: messageTextToRender);
   }
 

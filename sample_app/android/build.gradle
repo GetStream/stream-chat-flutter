@@ -5,27 +5,27 @@ allprojects {
     }
 }
 
-rootProject.buildDir = '../build'
+rootProject.layout.buildDirectory = "../build"
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.layout.buildDirectory = rootProject.layout.buildDirectory.dir(project.name)
 
-    afterEvaluate {
-        // check if `android` block is available and namespace isn't set
-        if(it.hasProperty('android') && it.android.namespace == null){
-            def manifest = new XmlSlurper().parse(file(it.android.sourceSets.main.manifest.srcFile))
-            def packageName = manifest.@package.text()
-            android.namespace= packageName
-        }
-        if (project.hasProperty('android')) {
-            project.android { compileSdkVersion 35 }
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            // Set the namespace for all subprojects if not set
+            if (android.namespace == null) {
+                android.namespace = project.group
+            }
+
+            // Align the compileSdkVersion with Flutter's compileSdkVersion
+            android.compileSdkVersion = flutter.compileSdkVersion
         }
     }
 
 }
 subprojects {
-    project.evaluationDependsOn(':app')
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }

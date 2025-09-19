@@ -44,19 +44,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA4Obi2paSQ1IZZ88OcMC98DJlpV16DAzE',
-    appId: '1:674907137625:web:a4b97e5d080ec165d7f348',
+    apiKey: 'AIzaSyAAz5GWLv7UzWJx0QYNBNk2bowXDju6jMU',
+    appId: '1:674907137625:web:7a93c02445f2585ad7f348',
     messagingSenderId: '674907137625',
     projectId: 'stream-chat-internal',
     authDomain: 'stream-chat-internal.firebaseapp.com',
     databaseURL: 'https://stream-chat-internal.firebaseio.com',
     storageBucket: 'stream-chat-internal.appspot.com',
-    measurementId: 'G-F2RV4P139L',
+    measurementId: 'G-L0JLRVLDZL',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBArS4RH7lUn3xbD-jhzWl5hVWZhliRgY0',
-    appId: '1:674907137625:android:e55b74fd5747e39ad7f348',
+    appId: '1:674907137625:android:f4033353c54985b0d7f348',
     messagingSenderId: '674907137625',
     projectId: 'stream-chat-internal',
     databaseURL: 'https://stream-chat-internal.firebaseio.com',
@@ -71,7 +71,7 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://stream-chat-internal.firebaseio.com',
     storageBucket: 'stream-chat-internal.appspot.com',
     androidClientId:
-        '674907137625-2scfo9a5cs074dced5vhm712ej6hhtpm.apps.googleusercontent.com',
+        '674907137625-0aa50j6b2i35ef9c52lsbk1v16otl492.apps.googleusercontent.com',
     iosClientId:
         '674907137625-flarfn9cefu4lermgpbc4b8rm8l15ian.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.flutter',
@@ -85,7 +85,7 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://stream-chat-internal.firebaseio.com',
     storageBucket: 'stream-chat-internal.appspot.com',
     androidClientId:
-        '674907137625-2scfo9a5cs074dced5vhm712ej6hhtpm.apps.googleusercontent.com',
+        '674907137625-0aa50j6b2i35ef9c52lsbk1v16otl492.apps.googleusercontent.com',
     iosClientId:
         '674907137625-p3msks3snq0h22l7ekpqcf0frr0vt8mg.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.streamChatV1',

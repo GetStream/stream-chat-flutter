@@ -48,10 +48,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -84,10 +84,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -120,10 +120,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -172,10 +172,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -216,10 +216,46 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674907137625:android:c24d9f14da7a9b62d7f348",
+        "android_client_info": {
+          "package_name": "io.getstream.chat.android.compose.sample.pntest.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBArS4RH7lUn3xbD-jhzWl5hVWZhliRgY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -268,10 +304,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -304,10 +340,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -340,10 +376,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -376,10 +412,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -420,10 +456,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -472,10 +508,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -516,10 +552,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -552,10 +588,118 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674907137625:android:ff89101ac2565fd9d7f348",
+        "android_client_info": {
+          "package_name": "io.getstream.expotiktokapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBArS4RH7lUn3xbD-jhzWl5hVWZhliRgY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.getstream.expotiktokapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674907137625:android:3f084bd915af3b11d7f348",
+        "android_client_info": {
+          "package_name": "io.getstream.feeds.android.sample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBArS4RH7lUn3xbD-jhzWl5hVWZhliRgY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.getstream.expotiktokapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674907137625:android:d563721ebce8e225d7f348",
+        "android_client_info": {
+          "package_name": "io.getstream.feeds.flutter.sample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBArS4RH7lUn3xbD-jhzWl5hVWZhliRgY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
@@ -588,10 +732,10 @@
               "client_type": 3
             },
             {
-              "client_id": "674907137625-2n5l5f3j8chjrgl0hkendtgvlbdnf42j.apps.googleusercontent.com",
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "io.getstream.reactnative.SampleApp"
+                "bundle_id": "io.getstream.expotiktokapp"
               }
             }
           ]
