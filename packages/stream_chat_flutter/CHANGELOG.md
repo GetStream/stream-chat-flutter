@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🐞 Fixed
+
+- Fixed delete/flag message dialogs executing action when dialog is dismissed without confirmation.
+
 ## Upcoming
 
 🐞 Fixed
