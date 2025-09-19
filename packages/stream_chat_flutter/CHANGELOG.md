@@ -1,5 +1,10 @@
 ## Upcoming
 
+✅ Added
+
+- Added `messageBackgroundGradient` property to `StreamMessageThemeData` for gradient message
+  backgrounds.
+
 🐞 Fixed
 
 - Fixed `.replaceMentions` not escaping special characters in the username.
