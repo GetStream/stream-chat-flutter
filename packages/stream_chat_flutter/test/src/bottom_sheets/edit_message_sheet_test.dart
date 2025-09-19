@@ -2,12 +2,20 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../fakes.dart';
 import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  final originalRecordPlatform = RecordPlatform.instance;
+  setUp(() => RecordPlatform.instance = FakeRecordPlatform());
+  tearDown(() => RecordPlatform.instance = originalRecordPlatform);
+
   group('EditMessageSheet tests', () {
     testWidgets('appears on tap', (tester) async {
       final channel = MockChannel();
