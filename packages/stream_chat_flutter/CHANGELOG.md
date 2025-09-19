@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Fixed users with `sendReply` capability unable to send replies in threads.
+- Fixed delete/flag message dialogs executing action when dialog is dismissed without confirmation.
 
 ## Upcoming
 
