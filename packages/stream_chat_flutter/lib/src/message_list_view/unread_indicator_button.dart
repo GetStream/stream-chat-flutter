@@ -92,7 +92,7 @@ class UnreadIndicatorButton extends StatelessWidget {
                     context.translations.unreadCountIndicatorLabel(
                       unreadCount: unreadCount,
                     ),
-                    style: textTheme.body.copyWith(color: Colors.white),
+                    style: textTheme.body.copyWith(color: colorTheme.barsBg),
                   ),
                   const SizedBox(width: 12),
                   IconButton(
@@ -100,7 +100,7 @@ class UnreadIndicatorButton extends StatelessWidget {
                     icon: const SvgIcon(StreamSvgIcons.close),
                     padding: const EdgeInsets.all(4),
                     style: IconButton.styleFrom(
-                      foregroundColor: Colors.white,
+                      foregroundColor: colorTheme.barsBg,
                       minimumSize: const Size.square(24),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),

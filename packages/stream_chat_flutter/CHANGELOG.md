@@ -3,6 +3,8 @@
 🐞 Fixed
 
 - Fixed `.replaceMentions` not escaping special characters in the username.
+- Fixed unread indicator button using hardcoded white color instead of theme color
+  `colorTheme.barsBg`. [[#2366]](https://github.com/GetStream/stream-chat-flutter/issues/2366)
 
 ## 9.16.0
 
