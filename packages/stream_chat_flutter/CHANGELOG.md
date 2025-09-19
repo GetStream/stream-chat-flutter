@@ -3,6 +3,8 @@
 🐞 Fixed
 
 - Fixed `.replaceMentions` not escaping special characters in the username.
+- Fixed videos not being saved to gallery correctly on mobile
+  platforms. [[#2357]](https://github.com/GetStream/stream-chat-flutter/issues/2357)
 
 ## 9.16.0
 
