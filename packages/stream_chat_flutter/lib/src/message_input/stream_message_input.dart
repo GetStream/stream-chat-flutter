@@ -632,9 +632,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       return result;
     }
-    //fix(ui): enable sending reply in threads for users with sendReply capability
-    //
-    // This commit allows users with the `sendReply` capability to send replies within a thread, even if they don't have broader send message permission.
 
     final channel = StreamChannel.of(context).channel;
     final messageInput = switch (_buildAutocompleteMessageInput(context)) {
