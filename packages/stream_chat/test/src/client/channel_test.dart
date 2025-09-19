@@ -4814,6 +4814,99 @@ void main() {
         expect(updatedMessage?.reminder, isNull);
       });
     });
+
+    group('Channel push preference events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('should handle channel.push_preference.updated event', () async {
+        // Verify initial state
+        expect(channel.state?.channelState.pushPreferences, isNull);
+
+        // Create channel push preference
+        final channelPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.mentions,
+          disabledUntil: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Create channel.push_preference.updated event
+        final channelPushPreferenceUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.channelPushPreferenceUpdated,
+          channelPushPreference: channelPushPreference,
+        );
+
+        // Dispatch event
+        client.addEvent(channelPushPreferenceUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify channel push preferences were updated
+        final updatedPreferences = channel.state?.channelState.pushPreferences;
+        expect(updatedPreferences, isNotNull);
+        expect(updatedPreferences?.chatLevel, ChatLevel.mentions);
+        expect(
+          updatedPreferences?.disabledUntil,
+          channelPushPreference.disabledUntil,
+        );
+      });
+
+      test('should update existing channel push preferences', () async {
+        // Set initial push preferences
+        const initialPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.all,
+        );
+
+        channel.state?.updateChannelState(
+          channel.state!.channelState.copyWith(
+            pushPreferences: initialPushPreference,
+          ),
+        );
+
+        // Verify initial state
+        final pushPreferences = channel.state?.channelState.pushPreferences;
+        expect(pushPreferences?.chatLevel, ChatLevel.all);
+        expect(pushPreferences?.disabledUntil, isNull);
+
+        // Create updated channel push preference
+        final updatedPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.none,
+          disabledUntil: DateTime.now().add(const Duration(hours: 2)),
+        );
+
+        // Create channel.push_preference.updated event
+        final channelPushPreferenceUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.channelPushPreferenceUpdated,
+          channelPushPreference: updatedPushPreference,
+        );
+
+        // Dispatch event
+        client.addEvent(channelPushPreferenceUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify channel push preferences were updated
+        final updatedPreferences = channel.state?.channelState.pushPreferences;
+        expect(updatedPreferences?.chatLevel, ChatLevel.none);
+        expect(
+          updatedPreferences?.disabledUntil,
+          updatedPushPreference.disabledUntil,
+        );
+      });
+    });
   });
 
   group('ChannelCapabilityCheck', () {
