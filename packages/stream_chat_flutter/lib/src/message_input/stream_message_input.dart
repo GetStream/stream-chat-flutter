@@ -619,6 +619,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Widget build(BuildContext context) {
     bool canSendOrUpdateMessage(List<ChannelCapability> capabilities) {
       var result = capabilities.contains(ChannelCapability.sendMessage);
+
+      final insideThread = _effectiveController.message.parentId != null;
+      if (insideThread) {
+        result |= capabilities.contains(ChannelCapability.sendReply);
+      }
+
       if (_isEditing) {
         result |= capabilities.contains(ChannelCapability.updateOwnMessage);
         result |= capabilities.contains(ChannelCapability.updateAnyMessage);
