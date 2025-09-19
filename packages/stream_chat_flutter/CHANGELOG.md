@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🐞 Fixed
+
+- Fixed users with `sendReply` capability unable to send replies in threads.
+
 ## Upcoming
 
 🐞 Fixed
