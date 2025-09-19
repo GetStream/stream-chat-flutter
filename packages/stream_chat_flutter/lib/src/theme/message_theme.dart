@@ -55,8 +55,9 @@ class StreamMessageThemeData with Diagnosticable {
   /// Color for messageBackgroundColor
   final Color? messageBackgroundColor;
 
-  /// Gradient for message background. Takes precedence over messageBackgroundColor
-  /// when both are provided.
+  /// Gradient for message background.
+  ///
+  /// Note: If this is set, it will override [messageBackgroundColor].
   final Gradient? messageBackgroundGradient;
 
   /// Color for message border color
