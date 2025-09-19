@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+🐞 Fixed
+
+- Fixed delete/flag message dialogs executing action when dialog is dismissed without confirmation.
+
 ## 10.0.0-beta.5
 
 - Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
