@@ -198,10 +198,19 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
     // Now that the file is saved, we need to copy it to the user's gallery
     // because the gallery only shows files that are in the gallery folder.
-    await Gal.putImage(path);
+    final copyToGallery = switch (file.mimeType) {
+      final type? when type.startsWith('image/') => Gal.putImage,
+      final type? when type.startsWith('video/') => Gal.putVideo,
+      _ => null,
+    };
 
-    // Once the file is copied to the gallery, we can delete the temporary file.
-    await file.delete();
+    if (copyToGallery != null) {
+      await copyToGallery.call(path);
+
+      // If the file was successfully copied to the gallery, we can safely
+      // delete the temporary file.
+      await file.delete();
+    }
 
     return path;
   }
