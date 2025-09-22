@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `toDraftMessage` to only include successfully uploaded attachments in draft messages.
+
 ## 9.16.0
 
 🐞 Fixed
