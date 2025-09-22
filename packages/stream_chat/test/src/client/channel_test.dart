@@ -510,6 +510,17 @@ void main() {
             throwsA(isA<StreamChatError>()),
           );
 
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
           verifyNever(
             () => client.sendMessage(any(), channelId, channelType),
           );
@@ -566,6 +577,17 @@ void main() {
 
           expect(res, isNotNull);
           expect(res.message.text, 'Hello world!');
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
 
           verify(
             () => client.sendMessage(
@@ -634,6 +656,17 @@ void main() {
           expect(res.message.quotedMessageId, quotedMessage.id);
 
           verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verify(
             () => client.sendMessage(
               any(that: isSameMessageAs(message)),
               channelId,
@@ -693,6 +726,17 @@ void main() {
 
           expect(res, isNotNull);
           expect(res.message.pollId, 'poll-123');
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
 
           verify(
             () => client.sendMessage(
