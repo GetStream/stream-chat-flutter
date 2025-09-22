@@ -461,6 +461,19 @@ void main() {
             )).called(1);
       });
 
+      test('should not send if the message is invalid', () async {
+        final message = Message(id: 'test-message-id');
+
+        expect(
+          () => channel.sendMessage(message),
+          throwsA(isA<StreamChatError>()),
+        );
+
+        verifyNever(
+          () => client.sendMessage(any(), channelId, channelType),
+        );
+      });
+
       test(
         'should not send empty message when all attachments are cancelled',
         () async {
