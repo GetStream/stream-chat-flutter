@@ -245,6 +245,7 @@ void main() {
       test('should work fine', () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello world!',
           user: client.state.currentUser,
         );
 
@@ -459,6 +460,236 @@ void main() {
               channelType,
             )).called(1);
       });
+
+      test(
+        'should not send empty message when all attachments are cancelled',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          expect(
+            () => channel.sendMessage(message),
+            throwsA(isA<StreamChatError>()),
+          );
+
+          verifyNever(
+            () => client.sendMessage(any(), channelId, channelType),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but text exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello world!',
+            attachments: [attachment],
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.text, 'Hello world!');
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but quoted message exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final quotedMessage = Message(
+            id: 'quoted-123',
+            text: 'Original message',
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+            quotedMessageId: quotedMessage.id,
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.quotedMessageId, quotedMessage.id);
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but poll exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+            pollId: 'poll-123',
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.pollId, 'poll-123');
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
     });
 
     group('`.createDraft`', () {
