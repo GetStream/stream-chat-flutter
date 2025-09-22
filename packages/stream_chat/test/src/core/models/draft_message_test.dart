@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:stream_chat/src/core/models/attachment.dart';
+import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -303,8 +304,8 @@ void main() {
     group('Message and DraftMessage conversion', () {
       test('should convert Message to DraftMessage correctly', () {
         final attachments = [
-          Attachment(type: 'image'),
-          Attachment(type: 'file'),
+          Attachment(type: 'image', uploadState: const UploadState.success()),
+          Attachment(type: 'file', uploadState: const UploadState.success()),
         ];
         final mentionedUsers = [
           User(id: 'user1'),
@@ -355,10 +356,51 @@ void main() {
         expect(draftMessage.extraData, equals(message.extraData));
       });
 
+      test('should only include successfully uploaded attachments', () {
+        final successfulAttachment = Attachment(
+          id: 'success-attachment',
+          type: 'image',
+          uploadState: const UploadState.success(),
+        );
+        final preparingAttachment = Attachment(
+          id: 'preparing-attachment',
+          type: 'file',
+          uploadState: const UploadState.preparing(),
+        );
+        final inProgressAttachment = Attachment(
+          id: 'progress-attachment',
+          type: 'image',
+          uploadState: const UploadState.inProgress(uploaded: 50, total: 100),
+        );
+        final failedAttachment = Attachment(
+          id: 'failed-attachment',
+          type: 'file',
+          uploadState: const UploadState.failed(error: 'Upload failed'),
+        );
+
+        final message = Message(
+          id: 'test-message',
+          text: 'Test message with mixed upload states',
+          attachments: [
+            successfulAttachment,
+            preparingAttachment,
+            inProgressAttachment,
+            failedAttachment,
+          ],
+        );
+
+        final draftMessage = message.toDraftMessage();
+
+        // Only the successfully uploaded attachment should be included
+        expect(draftMessage.attachments.length, equals(1));
+        expect(draftMessage.attachments.first.id, equals('success-attachment'));
+        expect(draftMessage.attachments.first.uploadState.isSuccess, isTrue);
+      });
+
       test('should convert DraftMessage to Message correctly', () {
         final attachments = [
-          Attachment(type: 'image'),
-          Attachment(type: 'file'),
+          Attachment(type: 'image', uploadState: const UploadState.success()),
+          Attachment(type: 'file', uploadState: const UploadState.success()),
         ];
         final mentionedUsers = [
           User(id: 'user1'),
