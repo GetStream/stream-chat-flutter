@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `Channel.sendMessage` to prevent sending empty messages when all attachments are cancelled
+  during upload.
+
 ## 9.16.0
 
 🐞 Fixed
