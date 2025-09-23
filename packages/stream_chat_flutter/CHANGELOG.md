@@ -1,8 +1,15 @@
 ## Upcoming
 
+✅ Added
+
+- Added `messageBackgroundGradient` property to `StreamMessageThemeData` for gradient message
+  backgrounds.
+
 🐞 Fixed
 
 - Fixed `.replaceMentions` not escaping special characters in the username.
+- Fixed `GradientAvatars` for users with same-length IDs would have identical
+  colors. [[#2369]](https://github.com/GetStream/stream-chat-flutter/issues/2369)
 
 ## 9.16.0
 
