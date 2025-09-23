@@ -93,8 +93,7 @@ class _Initials extends StatelessWidget {
           style: TextStyle(
             fontSize: fontSize,
             fontWeight: FontWeight.w500,
-            // ignore: deprecated_member_use
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
         );
       },
