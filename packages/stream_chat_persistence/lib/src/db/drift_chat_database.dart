@@ -73,11 +73,18 @@ class DriftChatDatabase extends _$DriftChatDatabase {
       );
 
   /// Deletes all the tables
-  Future<void> flush() => batch((batch) {
-        allTables.forEach((table) {
-          delete(table).go();
-        });
+  Future<void> flush() async {
+    await customStatement('PRAGMA foreign_keys = OFF');
+    try {
+      await transaction(() async {
+        for (final table in allTables) {
+          await delete(table).go();
+        }
       });
+    } finally {
+      await customStatement('PRAGMA foreign_keys = ON');
+    }
+  }
 
   /// Closes the database instance
   Future<void> disconnect() => close();
