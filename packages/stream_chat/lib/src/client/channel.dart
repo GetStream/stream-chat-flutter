@@ -2197,6 +2197,8 @@ class ChannelClientState {
 
     _startCleaningStalePinnedMessages();
 
+    _listenChannelPushPreferenceUpdated();
+
     _channel._client.chatPersistenceClient
         ?.getChannelThreads(_channel.cid!)
         .then((threads) {
@@ -3512,6 +3514,24 @@ class ChannelClientState {
           ));
         }
       },
+    );
+  }
+
+  // Listens to channel push preference update events and updates the state
+  void _listenChannelPushPreferenceUpdated() {
+    _subscriptions.add(
+      _channel.on(EventType.channelPushPreferenceUpdated).listen(
+        (event) {
+          final pushPreferences = event.channelPushPreference;
+          if (pushPreferences == null) return;
+
+          updateChannelState(
+            channelState.copyWith(
+              pushPreferences: pushPreferences,
+            ),
+          );
+        },
+      ),
     );
   }
 
