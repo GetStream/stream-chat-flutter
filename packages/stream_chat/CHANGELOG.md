@@ -1,3 +1,12 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `currentUser.pushPreferences` not updating immediately after calling `setPushPreferences`.
+- Fixed `Channel.sendMessage` to prevent sending empty messages when all attachments are cancelled
+  during upload.
+- Fixed `toDraftMessage` to only include successfully uploaded attachments in draft messages.
+
 ## 9.16.0
 
 🐞 Fixed

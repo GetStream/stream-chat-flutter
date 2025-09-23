@@ -245,6 +245,7 @@ void main() {
       test('should work fine', () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello world!',
           user: client.state.currentUser,
         );
 
@@ -459,6 +460,293 @@ void main() {
               channelType,
             )).called(1);
       });
+
+      test('should not send if the message is invalid', () async {
+        final message = Message(id: 'test-message-id');
+
+        expect(
+          () => channel.sendMessage(message),
+          throwsA(isA<StreamChatError>()),
+        );
+
+        verifyNever(
+          () => client.sendMessage(any(), channelId, channelType),
+        );
+      });
+
+      test(
+        'should not send empty message when all attachments are cancelled',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          expect(
+            () => channel.sendMessage(message),
+            throwsA(isA<StreamChatError>()),
+          );
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verifyNever(
+            () => client.sendMessage(any(), channelId, channelType),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but text exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello world!',
+            attachments: [attachment],
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.text, 'Hello world!');
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but quoted message exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final quotedMessage = Message(
+            id: 'quoted-123',
+            text: 'Original message',
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+            quotedMessageId: quotedMessage.id,
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.quotedMessageId, quotedMessage.id);
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but poll exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+            pollId: 'poll-123',
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.pollId, 'poll-123');
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
     });
 
     group('`.createDraft`', () {
@@ -4812,6 +5100,99 @@ void main() {
           (m) => m.id == messageId,
         );
         expect(updatedMessage?.reminder, isNull);
+      });
+    });
+
+    group('Channel push preference events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('should handle channel.push_preference.updated event', () async {
+        // Verify initial state
+        expect(channel.state?.channelState.pushPreferences, isNull);
+
+        // Create channel push preference
+        final channelPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.mentions,
+          disabledUntil: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Create channel.push_preference.updated event
+        final channelPushPreferenceUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.channelPushPreferenceUpdated,
+          channelPushPreference: channelPushPreference,
+        );
+
+        // Dispatch event
+        client.addEvent(channelPushPreferenceUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify channel push preferences were updated
+        final updatedPreferences = channel.state?.channelState.pushPreferences;
+        expect(updatedPreferences, isNotNull);
+        expect(updatedPreferences?.chatLevel, ChatLevel.mentions);
+        expect(
+          updatedPreferences?.disabledUntil,
+          channelPushPreference.disabledUntil,
+        );
+      });
+
+      test('should update existing channel push preferences', () async {
+        // Set initial push preferences
+        const initialPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.all,
+        );
+
+        channel.state?.updateChannelState(
+          channel.state!.channelState.copyWith(
+            pushPreferences: initialPushPreference,
+          ),
+        );
+
+        // Verify initial state
+        final pushPreferences = channel.state?.channelState.pushPreferences;
+        expect(pushPreferences?.chatLevel, ChatLevel.all);
+        expect(pushPreferences?.disabledUntil, isNull);
+
+        // Create updated channel push preference
+        final updatedPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.none,
+          disabledUntil: DateTime.now().add(const Duration(hours: 2)),
+        );
+
+        // Create channel.push_preference.updated event
+        final channelPushPreferenceUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.channelPushPreferenceUpdated,
+          channelPushPreference: updatedPushPreference,
+        );
+
+        // Dispatch event
+        client.addEvent(channelPushPreferenceUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify channel push preferences were updated
+        final updatedPreferences = channel.state?.channelState.pushPreferences;
+        expect(updatedPreferences?.chatLevel, ChatLevel.none);
+        expect(
+          updatedPreferences?.disabledUntil,
+          updatedPushPreference.disabledUntil,
+        );
       });
     });
   });
