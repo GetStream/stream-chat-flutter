@@ -54,6 +54,37 @@ void main() {
     expect(client.isConnected, false);
   });
 
+  test('flush', () async {
+    const userId = 'testUserId';
+    final client = StreamChatPersistenceClient(logLevel: Level.ALL);
+
+    await client.connect(userId, databaseProvider: testDatabaseProvider);
+    addTearDown(() async => client.disconnect());
+
+    final connectionEvent = Event(
+      type: EventType.healthCheck,
+      createdAt: DateTime.timestamp(),
+      me: OwnUser(id: userId, name: 'Test User'),
+    );
+
+    await client.updateConnectionInfo(connectionEvent);
+
+    // Add some test data
+    final testDate = DateTime.now();
+    await client.updateLastSyncAt(testDate);
+
+    // Verify data exists
+    final lastSyncAtBeforeFlush = await client.getLastSyncAt();
+    expect(lastSyncAtBeforeFlush, isNotNull);
+
+    // Flush the database
+    await client.flush();
+
+    // Verify data is cleared
+    final lastSyncAtAfterFlush = await client.getLastSyncAt();
+    expect(lastSyncAtAfterFlush, isNull);
+  });
+
   test('client function throws stateError if db is not yet connected', () {
     final client = StreamChatPersistenceClient(logLevel: Level.ALL);
     expect(

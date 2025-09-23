@@ -68,6 +68,9 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> disconnect({bool flush = false}) => throw UnimplementedError();
 
   @override
+  Future<void> flush() => throw UnimplementedError();
+
+  @override
   Future<ChannelModel?> getChannelByCid(String cid) async =>
       ChannelModel(cid: cid);
 
