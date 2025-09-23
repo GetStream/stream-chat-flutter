@@ -8,6 +8,8 @@
 🐞 Fixed
 
 - Fixed `.replaceMentions` not escaping special characters in the username.
+- Fixed unread indicator button using hardcoded white color instead of theme color
+  `colorTheme.barsBg`. [[#2366]](https://github.com/GetStream/stream-chat-flutter/issues/2366)
 - Fixed `GradientAvatars` for users with same-length IDs would have identical
   colors. [[#2369]](https://github.com/GetStream/stream-chat-flutter/issues/2369)
 
