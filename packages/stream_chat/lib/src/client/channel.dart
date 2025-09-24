@@ -3848,7 +3848,7 @@ class ChannelClientState {
   void _listenChannelPushPreferenceUpdated() {
     _subscriptions.add(
       _channel.on(EventType.channelPushPreferenceUpdated).listen(
-            (event) {
+        (event) {
           final pushPreferences = event.channelPushPreference;
           if (pushPreferences == null) return;
 

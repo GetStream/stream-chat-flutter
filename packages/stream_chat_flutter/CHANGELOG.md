@@ -1,9 +1,11 @@
-## Upcoming Beta
+## 10.0.0-beta.6
 
 🐞 Fixed
 
 - Fixed users with `sendReply` capability unable to send replies in threads.
 - Fixed delete/flag message dialogs executing action when dialog is dismissed without confirmation.
+
+- Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.17.0
 
