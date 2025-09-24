@@ -159,18 +159,7 @@ class _MessageCardState extends State<MessageCard> {
         start: !widget.reverse && widget.isFailedState ? 12.0 : 0.0,
       ),
       clipBehavior: Clip.hardEdge,
-      decoration: ShapeDecoration(
-        color: _getBackgroundColor(),
-        shape: widget.shape ??
-            RoundedRectangleBorder(
-              side: widget.borderSide ??
-                  BorderSide(
-                    color: widget.messageTheme.messageBorderColor ??
-                        Colors.transparent,
-                  ),
-              borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
-            ),
-      ),
+      decoration: _buildDecoration(widget.messageTheme),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,22 +207,49 @@ class _MessageCardState extends State<MessageCard> {
     );
   }
 
-  Color? _getBackgroundColor() {
+  ShapeDecoration _buildDecoration(StreamMessageThemeData theme) {
+    final gradient = _getBackgroundGradient(theme);
+    final color = gradient == null ? _getBackgroundColor(theme) : null;
+
+    final borderColor = theme.messageBorderColor ?? Colors.transparent;
+    final borderRadius = widget.borderRadiusGeometry ?? BorderRadius.zero;
+
+    return ShapeDecoration(
+      color: color,
+      gradient: gradient,
+      shape: switch (widget.shape) {
+        final shape? => shape,
+        _ => RoundedRectangleBorder(
+            borderRadius: borderRadius,
+            side: switch (widget.borderSide) {
+              final side? => side,
+              _ => BorderSide(color: borderColor),
+            },
+          ),
+      },
+    );
+  }
+
+  Color? _getBackgroundColor(StreamMessageThemeData theme) {
     if (widget.hasQuotedMessage) {
-      return widget.messageTheme.messageBackgroundColor;
+      return theme.messageBackgroundColor;
     }
 
     final containsOnlyUrlAttachment =
         widget.hasUrlAttachments && !widget.hasNonUrlAttachments;
 
     if (containsOnlyUrlAttachment) {
-      return widget.messageTheme.urlAttachmentBackgroundColor;
+      return theme.urlAttachmentBackgroundColor;
     }
 
-    if (widget.isOnlyEmoji) {
-      return Colors.transparent;
-    }
+    if (widget.isOnlyEmoji) return null;
 
-    return widget.messageTheme.messageBackgroundColor;
+    return theme.messageBackgroundColor;
+  }
+
+  Gradient? _getBackgroundGradient(StreamMessageThemeData theme) {
+    if (widget.isOnlyEmoji) return null;
+
+    return theme.messageBackgroundGradient;
   }
 }

@@ -5,11 +5,22 @@
 - Fixed users with `sendReply` capability unable to send replies in threads.
 - Fixed delete/flag message dialogs executing action when dialog is dismissed without confirmation.
 
-## Upcoming
+## 9.17.0
+
+✅ Added
+
+- Added `messageBackgroundGradient` property to `StreamMessageThemeData` for gradient message
+  backgrounds.
 
 🐞 Fixed
 
 - Fixed `.replaceMentions` not escaping special characters in the username.
+- Fixed videos not being saved to gallery correctly on mobile
+  platforms. [[#2357]](https://github.com/GetStream/stream-chat-flutter/issues/2357)
+- Fixed unread indicator button using hardcoded white color instead of theme color
+  `colorTheme.barsBg`. [[#2366]](https://github.com/GetStream/stream-chat-flutter/issues/2366)
+- Fixed `GradientAvatars` for users with same-length IDs would have identical
+  colors. [[#2369]](https://github.com/GetStream/stream-chat-flutter/issues/2369)
 
 ## 10.0.0-beta.5
 

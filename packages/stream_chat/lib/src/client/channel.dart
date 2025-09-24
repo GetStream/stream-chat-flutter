@@ -649,6 +649,15 @@ class Channel {
     });
   }
 
+  bool _isMessageValidForUpload(Message message) {
+    final hasText = message.text?.trim().isNotEmpty == true;
+    final hasAttachments = message.attachments.isNotEmpty;
+    final hasQuotedMessage = message.quotedMessageId != null;
+    final hasPoll = message.pollId != null;
+
+    return hasText || hasAttachments || hasQuotedMessage || hasPoll;
+  }
+
   final _sendMessageLock = Lock();
 
   /// Send a [message] to this channel.
@@ -705,6 +714,15 @@ class Channel {
 
         // ignore: parameter_assignments
         message = await attachmentsUploadCompleter.future;
+      }
+
+      // Validate the final message before sending it to the server.
+      if (_isMessageValidForUpload(message) == false) {
+        client.logger.warning('Message is not valid for sending, removing it');
+
+        // Remove the message from state as it is invalid.
+        state!.deleteMessage(message, hardDelete: true);
+        throw const StreamChatError('Message is not valid for sending');
       }
 
       // Wait for the previous sendMessage call to finish. Otherwise, the order
@@ -2261,6 +2279,8 @@ class ChannelClientState {
     _startCleaningStalePinnedMessages();
 
     _startCleaningExpiredLocations();
+
+    _listenChannelPushPreferenceUpdated();
 
     _channel._client.chatPersistenceClient
         ?.getChannelThreads(_channel.cid!)
@@ -3821,6 +3841,24 @@ class ChannelClientState {
           _channel._client.handleEvent(locationExpiredEvent);
         }
       },
+    );
+  }
+
+  // Listens to channel push preference update events and updates the state
+  void _listenChannelPushPreferenceUpdated() {
+    _subscriptions.add(
+      _channel.on(EventType.channelPushPreferenceUpdated).listen(
+            (event) {
+          final pushPreferences = event.channelPushPreference;
+          if (pushPreferences == null) return;
+
+          updateChannelState(
+            channelState.copyWith(
+              pushPreferences: pushPreferences,
+            ),
+          );
+        },
+      ),
     );
   }
 

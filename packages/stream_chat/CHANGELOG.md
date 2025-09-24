@@ -1,3 +1,12 @@
+## 9.17.0
+
+🐞 Fixed
+
+- Fixed `currentUser.pushPreferences` not updating immediately after calling `setPushPreferences`.
+- Fixed `Channel.sendMessage` to prevent sending empty messages when all attachments are cancelled
+  during upload.
+- Fixed `toDraftMessage` to only include successfully uploaded attachments in draft messages.
+
 ## 10.0.0-beta.5
 
 - Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat/changelog).

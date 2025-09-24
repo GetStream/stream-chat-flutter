@@ -182,4 +182,11 @@ class EventType {
 
   /// Event sent when a live shared location is expired.
   static const String locationExpired = 'location.expired';
+
+  /// Local event sent when push notification preference is updated.
+  static const String pushPreferenceUpdated = 'push_preference.updated';
+
+  /// Local event sent when channel push notification preference is updated.
+  static const String channelPushPreferenceUpdated =
+      'channel.push_preference.updated';
 }

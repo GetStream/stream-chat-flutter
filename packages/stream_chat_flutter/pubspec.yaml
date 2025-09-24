@@ -64,6 +64,7 @@ dependencies:
 
 dev_dependencies:
   alchemist: ">=0.11.0 <0.13.0"
+  connectivity_plus_platform_interface: ^2.0.0
   faker_dart: ^0.2.1
   flutter_test:
     sdk: flutter
