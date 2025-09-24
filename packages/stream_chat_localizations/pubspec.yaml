@@ -26,7 +26,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  stream_chat_flutter: ^9.16.0
+  stream_chat_flutter: ^9.17.0
 
 dev_dependencies:
   flutter_test:
