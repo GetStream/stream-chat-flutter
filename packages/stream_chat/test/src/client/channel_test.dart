@@ -295,6 +295,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello world!',
           user: client.state.currentUser,
         );
 
@@ -347,6 +348,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id-2',
+          text: 'Hello world!',
           user: client.state.currentUser,
         );
 
@@ -401,6 +403,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id-3',
+          text: 'Hello world!',
           user: client.state.currentUser,
         );
 
@@ -453,6 +456,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id-4',
+          text: 'Hello world!',
           user: client.state.currentUser,
         );
 
@@ -502,6 +506,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello world!',
           user: client.state.currentUser,
         );
 
@@ -6996,6 +7001,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello, World!',
           state: MessageState.sendingFailed(
             skipPush: true,
             skipEnrichUrl: true,
@@ -7031,6 +7037,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello, World!',
           state: MessageState.sendingFailed(
             skipPush: true,
             skipEnrichUrl: false,
@@ -7064,6 +7071,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello, World!',
           state: MessageState.sendingFailed(
             skipPush: false,
             skipEnrichUrl: true,
@@ -7098,6 +7106,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello, World!',
           state: MessageState.sendingFailed(
             skipPush: false,
             skipEnrichUrl: false,
@@ -7130,6 +7139,7 @@ void main() {
           () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello, World!',
           state: MessageState.updatingFailed(
             skipPush: true,
             skipEnrichUrl: true,
