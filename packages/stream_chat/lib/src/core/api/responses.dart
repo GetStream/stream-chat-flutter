@@ -202,6 +202,12 @@ class SendFileResponse extends SendAttachmentResponse {
 /// Model response for [Channel.sendImage] api call
 typedef SendImageResponse = SendAttachmentResponse;
 
+/// Model response for [StreamChatClient.uploadImage] api call
+typedef UploadImageResponse = SendAttachmentResponse;
+
+/// Model response for [StreamChatClient.uploadFile] api call
+typedef UploadFileResponse = SendAttachmentResponse;
+
 /// Model response for [Channel.sendReaction] api call
 @JsonSerializable(createToJson: false)
 class SendReactionResponse extends MessageResponse {
