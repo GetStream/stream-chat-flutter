@@ -179,7 +179,7 @@ class MessageApi {
   }) async {
     if (hard == true && deleteForMe == true) {
       throw ArgumentError(
-        'Both hard and deleteForMe cannot be set at the same time.'
+        'Both hard and deleteForMe cannot be set at the same time.',
       );
     }
 
