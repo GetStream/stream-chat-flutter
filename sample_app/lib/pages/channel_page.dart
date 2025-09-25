@@ -438,6 +438,6 @@ final class RemoveReminder extends ReminderMessageAction {
   final MessageReminder reminder;
 }
 
-class DeleteMessageForMe extends CustomMessageAction {
+final class DeleteMessageForMe extends CustomMessageAction {
   const DeleteMessageForMe({required super.message});
 }
