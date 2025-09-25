@@ -1,3 +1,7 @@
+## Upcoming Beta
+
+- Added support for `Messages.deleteForMe` and `Members.deletedMessages` fields.
+
 ## 10.0.0-beta.6
 
 - Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
