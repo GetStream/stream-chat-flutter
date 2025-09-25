@@ -9,6 +9,47 @@ import '../mocks.dart';
 import '../utils.dart';
 
 void main() {
+  test('description', () async {
+    /// Create a new instance of [StreamChatClient]
+    /// by passing the apikey obtained from your project dashboard.
+    final client = StreamChatClient(
+      's2dxdhpxd94g',
+      logLevel: Level.ALL,
+    );
+
+    /// Set the current user and connect the websocket. In a production
+    /// scenario, this should be done using a backend to generate a user token
+    /// using our server SDK.
+    ///
+    /// Please see the following for more information:
+    /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
+    await client.connectUser(
+      User(id: 'super-band-9'),
+      '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
+    );
+
+    final channels = await client.queryChannelsOnline(
+      filter: Filter.in_('members', const ['super-band-9']),
+    );
+
+    final channel = channels.first;
+    await channel.watch();
+
+    channel.on().listen((event) {
+      // handle event
+      print('Deleted For Me: ${event.message?.deletedOnlyForMe}');
+    });
+
+    final message = Message(text: 'Hello, world!');
+    final response = await channel.sendMessage(message);
+    print(response);
+
+    final res = await channel.deleteMessageForMe(response.message);
+    print(res);
+    //
+    await Future.delayed(const Duration(seconds: 5));
+  });
+
   group('Fake web-socket connection functions', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
@@ -3533,6 +3574,20 @@ void main() {
       expect(res, isNotNull);
 
       verify(() => api.message.deleteMessage(messageId, hard: false)).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.deleteMessageForMe`', () async {
+      const messageId = 'test-message-id';
+
+      when(() => api.message.deleteMessage(messageId, deleteForMe: true))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.deleteMessageForMe(messageId);
+      expect(res, isNotNull);
+
+      verify(() => api.message.deleteMessage(messageId, deleteForMe: true))
+          .called(1);
       verifyNoMoreInteractions(api.message);
     });
 

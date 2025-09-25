@@ -175,14 +175,20 @@ class MessageApi {
   Future<EmptyResponse> deleteMessage(
     String messageId, {
     bool? hard,
+    bool? deleteForMe,
   }) async {
+    if (hard == true && deleteForMe == true) {
+      throw ArgumentError(
+        'Both hard and deleteForMe cannot be set at the same time.'
+      );
+    }
+
     final response = await _client.delete(
       '/messages/$messageId',
-      queryParameters: hard != null
-          ? {
-              'hard': hard,
-            }
-          : null,
+      queryParameters: {
+        if (hard != null) 'hard': hard,
+        if (deleteForMe != null) 'delete_for_me': deleteForMe,
+      },
     );
     return EmptyResponse.fromJson(response.data);
   }

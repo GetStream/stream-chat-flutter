@@ -2239,41 +2239,47 @@ void main() {
             uploadState: const UploadState.success(),
           ),
         );
+
         const messageId = 'test-message-id';
         final message = Message(
-          attachments: attachments,
           id: messageId,
+          attachments: attachments,
           createdAt: DateTime.now(),
           state: MessageState.sent,
         );
 
-        when(() => client.deleteMessage(messageId, hard: true))
-            .thenAnswer((_) async => EmptyResponse());
+        when(
+          () => client.deleteMessage(messageId, hard: true),
+        ).thenAnswer((_) async => EmptyResponse());
 
-        when(() => client.deleteImage(any(), channelId, channelType))
-            .thenAnswer((_) async => EmptyResponse());
+        when(
+          () => client.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => EmptyResponse());
 
-        when(() => client.deleteFile(any(), channelId, channelType))
-            .thenAnswer((_) async => EmptyResponse());
+        when(
+          () => client.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => EmptyResponse());
 
         final res = await channel.deleteMessage(message, hard: true);
-
         expect(res, isNotNull);
 
         verify(() => client.deleteMessage(messageId, hard: true)).called(1);
-        verify(() => client.deleteImage(
-              any(),
-              channelId,
-              channelType,
-            )).called(2);
+
+        verify(() => client.deleteImage(any(), channelId, channelType))
+            .called(2);
+
+        verify(() => client.deleteFile(any(), channelId, channelType))
+            .called(1);
       });
 
       test(
-        '''should directly update the state with message as deleted if the state is sending or failed''',
+        'should hard delete the message if the state is sending or failed',
         () async {
           const messageId = 'test-message-id';
           final message = Message(
             id: messageId,
+            text: 'Hello World!',
+            state: MessageState.sending,
           );
 
           expectLater(
@@ -2282,17 +2288,94 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.softDeleted),
+                  message.copyWith(state: MessageState.sending),
                   matchMessageState: true,
                 ),
               ],
+              const [], // message is hard deleted from state
             ]),
           );
+
+          // Add message to channel state first
+          channel.state?.addNewMessage(message);
 
           final res = await channel.deleteMessage(message);
 
           expect(res, isNotNull);
           verifyNever(() => client.deleteMessage(messageId));
+        },
+      );
+    });
+
+    group('`.deleteMessageForMe`', () {
+      test('should work fine', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+
+        when(() => client.deleteMessageForMe(messageId))
+            .thenAnswer((_) async => EmptyResponse());
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.deletingForMe),
+                matchMessageState: true,
+              ),
+            ],
+            [
+              isSameMessageAs(
+                message.copyWith(state: MessageState.deletedForMe),
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.deleteMessageForMe(message);
+
+        expect(res, isNotNull);
+
+        verify(() => client.deleteMessageForMe(messageId)).called(1);
+      });
+
+      test(
+        'should hard delete the message if the state is sending or failed',
+        () async {
+          const messageId = 'test-message-id';
+          final message = Message(
+            id: messageId,
+            text: 'Hello World!',
+            state: MessageState.sending,
+          );
+
+          expectLater(
+            // skipping first seed message list -> [] messages
+            channel.state?.messagesStream.skip(1),
+            emitsInOrder([
+              [
+                isSameMessageAs(
+                  message.copyWith(state: MessageState.sending),
+                  matchMessageState: true,
+                ),
+              ],
+              const [], // message is hard deleted from state
+            ]),
+          );
+
+          // Add message to channel state first
+          channel.state?.addNewMessage(message);
+
+          final res = await channel.deleteMessageForMe(message);
+
+          expect(res, isNotNull);
+          verifyNever(() => client.deleteMessageForMe(messageId));
         },
       );
     });
@@ -7199,7 +7282,7 @@ void main() {
         final message = Message(
           id: 'test-message-id',
           createdAt: DateTime.now(),
-          state: MessageState.deletingFailed(hard: true),
+          state: MessageState.hardDeletingFailed,
         );
 
         when(() => client.deleteMessage(
@@ -7223,7 +7306,7 @@ void main() {
         final message = Message(
           id: 'test-message-id',
           createdAt: DateTime.now(),
-          state: MessageState.deletingFailed(hard: false),
+          state: MessageState.softDeletingFailed,
         );
 
         when(() => client.deleteMessage(
@@ -7238,6 +7321,25 @@ void main() {
         verify(() => client.deleteMessage(
               message.id,
             )).called(1);
+      });
+
+      test('should call deleteMessageForMe for deletingForMeFailed state',
+          () async {
+        final message = Message(
+          id: 'test-message-id',
+          createdAt: DateTime.now(),
+          state: MessageState.deletingForMeFailed,
+        );
+
+        when(() => client.deleteMessageForMe(message.id))
+            .thenAnswer((_) async => EmptyResponse());
+
+        final result = await channel.retryMessage(message);
+
+        expect(result, isNotNull);
+        expect(result, isA<EmptyResponse>());
+
+        verify(() => client.deleteMessageForMe(message.id)).called(1);
       });
 
       test('should throw AssertionError when message state is not failed',
