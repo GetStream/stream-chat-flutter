@@ -221,7 +221,7 @@ class _ChannelPageState extends State<ChannelPage> {
         StreamMessageAction(
           isDestructive: true,
           title: const Text('Delete Message for Me'),
-          action: DeleteForMe(message: message),
+          action: DeleteMessageForMe(message: message),
           leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
         ),
       if (channelConfig?.userMessageReminders == true) ...[
@@ -300,7 +300,7 @@ class _ChannelPageState extends State<ChannelPage> {
               CreateBookmark() => _createBookmark(it.message),
               EditReminder() => _editReminder(it.message, it.reminder),
               RemoveReminder() => _removeReminder(it.message, it.reminder),
-              DeleteForMe() => _deleteMessageForMe(it.message),
+              DeleteMessageForMe() => _deleteMessageForMe(it.message),
               _ => null,
             },
             attachmentBuilders: [locationAttachmentBuilder],
@@ -438,6 +438,6 @@ final class RemoveReminder extends ReminderMessageAction {
   final MessageReminder reminder;
 }
 
-class DeleteForMe extends CustomMessageAction {
-  const DeleteForMe({required super.message});
+class DeleteMessageForMe extends CustomMessageAction {
+  const DeleteMessageForMe({required super.message});
 }
