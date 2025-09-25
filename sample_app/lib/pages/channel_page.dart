@@ -214,11 +214,10 @@ class _ChannelPageState extends State<ChannelPage> {
 
     final currentUser = StreamChat.of(context).currentUser;
     final isSentByCurrentUser = message.user?.id == currentUser?.id;
-    final canDeleteAnyMessage = channel.canDeleteAnyMessage;
     final canDeleteOwnMessage = channel.canDeleteOwnMessage;
 
     final customOptions = <StreamMessageAction>[
-      if (isSentByCurrentUser && (canDeleteAnyMessage || canDeleteOwnMessage))
+      if (isSentByCurrentUser && canDeleteOwnMessage)
         StreamMessageAction(
           isDestructive: true,
           title: const Text('Delete Message for Me'),
