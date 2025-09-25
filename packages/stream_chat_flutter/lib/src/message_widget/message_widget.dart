@@ -1194,14 +1194,3 @@ extension on Poll {
     return copyWith(name: trimmedName);
   }
 }
-
-extension on String {
-  String get sentenceCase {
-    if (isEmpty) return this;
-
-    final firstChar = this[0].toUpperCase();
-    final restOfString = substring(1).toLowerCase();
-
-    return '$firstChar$restOfString';
-  }
-}
