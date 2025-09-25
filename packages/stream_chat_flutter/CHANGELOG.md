@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for `StreamMessageWidget.deletedMessageBuilder` to customize the deleted message UI.
+
 ## 10.0.0-beta.6
 
 🐞 Fixed
