@@ -6,6 +6,8 @@
   now includes four new abstract methods (`uploadImage`, `uploadFile`, `removeImage`, `removeFile`).
   Custom implementations must implement these methods.
 
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+
 ✅ Added
 
 - Added standalone file and image upload/removal methods for CDN operations:
