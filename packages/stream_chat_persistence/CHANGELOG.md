@@ -1,6 +1,7 @@
 ## Upcoming Beta
 
-- Added support for `Messages.deletedForMe` and `Members.deletedMessages` fields.
+- Added support for `Messages.deletedForMe`, `PinnedMessages.deletedForMe`, and
+  `Members.deletedMessages` fields.
 
 ## 10.0.0-beta.6
 
