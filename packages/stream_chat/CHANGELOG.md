@@ -1,21 +1,3 @@
-## Upcoming Beta
-
-🛑️ Breaking
-
-- **Added new abstract methods to `AttachmentFileUploader`**: The `AttachmentFileUploader` interface
-  now includes four new abstract methods (`uploadImage`, `uploadFile`, `removeImage`, `removeFile`).
-  Custom implementations must implement these methods.
-
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
-
-✅ Added
-
-- Added standalone file and image upload/removal methods for CDN operations:
-  - `StreamChatClient.uploadImage()` - Upload an image to the Stream CDN
-  - `StreamChatClient.uploadFile()` - Upload a file to the Stream CDN
-  - `StreamChatClient.removeImage()` - Remove an image from the Stream CDN
-  - `StreamChatClient.removeFile()` - Remove a file from the Stream CDN
-
 ## 10.0.0-beta.6
 
 - Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).
@@ -172,10 +154,10 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 - Added support for Channel pinning and archiving.
 - Added support for 'DraftMessage' feature, which allows users to save draft messages in channels.
   Several methods have been added to the `Client` and `Channel` class to manage draft messages:
-  - `channel.createDraft`: Saves a draft message for a specific channel.
-  - `channel.getDraft`: Retrieves a draft message for a specific channel.
-  - `channel.deleteDraft`: Deletes a draft message for a specific channel.
-  - `client.queryDrafts`: Queries draft messages created by the current user.
+    - `channel.createDraft`: Saves a draft message for a specific channel.
+    - `channel.getDraft`: Retrieves a draft message for a specific channel.
+    - `channel.deleteDraft`: Deletes a draft message for a specific channel.
+    - `client.queryDrafts`: Queries draft messages created by the current user.
 
 🐞 Fixed
 
@@ -234,7 +216,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 
 - [[#1774]](https://github.com/GetStream/stream-chat-flutter/issues/1774) Fixed failed to execute 'close' on 'WebSocket'.
 - [[#2016]](https://github.com/GetStream/stream-chat-flutter/issues/2016) Fix muted channel's unreadCount incorrectly updated.
-
+  
 🔄 Changed
 
 - Refactored identifying the `Attachment.uploadState` logic for local and remote attachments. Also updated the logic for determining the attachment type to check for ogScrapeUrl instead of `AttachmentType.giphy`.
@@ -345,7 +327,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 
 🐞 Fixed
 
-- [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file
+- [[#1837]](https://github.com/GetStream/stream-chat-flutter/issues/1837) Delete image and file 
   attachments from the CDN, when the message get's hard deleted.
 - [[#1819]](https://github.com/GetStream/stream-chat-flutter/issues/1819) Handle network errors
   with String payload.
@@ -370,12 +352,12 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 🔄 Changed
 
 - Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
-
+  
 # 6.10.0
 
 🐞 Fixed
 
-- [[#1753]](https://github.com/GetStream/stream-chat-flutter/issues/1753) Fixed Unhandled null
+- [[#1753]](https://github.com/GetStream/stream-chat-flutter/issues/1753) Fixed Unhandled null 
   check operator exception when user is removed from a channel.
 
 ## 6.9.0
@@ -841,12 +823,12 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 🛑️ Breaking Changes from `2.2.1`
 
 - Added 6 new methods in `ChatPersistenceClient`.
-  - `bulkUpdateMessages`
-  - `bulkUpdatePinnedMessages`
-  - `bulkUpdateMembers`
-  - `bulkUpdateReads`
-  - `updatePinnedMessageReactions`
-  - `deletePinnedMessageReactionsByMessageId`
+    - `bulkUpdateMessages`
+    - `bulkUpdatePinnedMessages`
+    - `bulkUpdateMembers`
+    - `bulkUpdateReads`
+    - `updatePinnedMessageReactions`
+    - `deletePinnedMessageReactionsByMessageId`
 
 ✅ Added
 
@@ -930,19 +912,19 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 - `ConnectUserWithProvider` now requires `tokenProvider` as a required parameter. (Removed from the
   constructor)
 - `client.disconnect()` is now divided into two different functions
-  - `client.closeConnection()` -> for closing user web socket connection.
-  - `client.disconnectUser()` -> for disconnecting user and resetting client state.
+    - `client.closeConnection()` -> for closing user web socket connection.
+    - `client.disconnectUser()` -> for disconnecting user and resetting client state.
 - `client.devToken()` now returns a `Token` model instead of `String`.
 - `ApiError` is removed in favor of `StreamChatError`
-  - `StreamChatError` -> parent type for all the stream errors.
-  - `StreamWebSocketError` -> for user web socket related errors.
-  - `StreamChatNetworkError` -> for network related errors.
+    - `StreamChatError` -> parent type for all the stream errors.
+    - `StreamWebSocketError` -> for user web socket related errors.
+    - `StreamChatNetworkError` -> for network related errors.
 - `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual parameters
-  - `option.state` -> bool state
-  - `option.watch` -> bool watch
-  - `option.presence` -> bool presence
+    - `option.state` -> bool state
+    - `option.watch` -> bool watch
+    - `option.presence` -> bool presence
 - `client.queryUsers()` options parameter is removed in favor of individual parameters
-  - `option.presence` -> bool presence
+    - `option.presence` -> bool presence
 - Migrate this package to null safety
 - Added typed filters
 
@@ -978,19 +960,19 @@ the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migra
 - `ConnectUserWithProvider` now requires `tokenProvider` as a required parameter. (Removed from the
   constructor)
 - `client.disconnect()` is now divided into two different functions
-  - `client.closeConnection()` -> for closing user web socket connection.
-  - `client.disconnectUser()` -> for disconnecting user and resetting client state.
+    - `client.closeConnection()` -> for closing user web socket connection.
+    - `client.disconnectUser()` -> for disconnecting user and resetting client state.
 - `client.devToken()` now returns a `Token` model instead of `String`.
 - `ApiError` is removed in favor of `StreamChatError`
-  - `StreamChatError` -> parent type for all the stream errors.
-  - `StreamWebSocketError` -> for user web socket related errors.
-  - `StreamChatNetworkError` -> for network related errors.
+    - `StreamChatError` -> parent type for all the stream errors.
+    - `StreamWebSocketError` -> for user web socket related errors.
+    - `StreamChatNetworkError` -> for network related errors.
 - `client.queryChannels()`, `channel.query()` options parameter is removed in favor of individual parameters
-  - `option.state` -> bool state
-  - `option.watch` -> bool watch
-  - `option.presence` -> bool presence
+    - `option.state` -> bool state
+    - `option.watch` -> bool watch
+    - `option.presence` -> bool presence
 - `client.queryUsers()` options parameter is removed in favor of individual parameters
-  - `option.presence` -> bool presence
+    - `option.presence` -> bool presence
 
 ✅ Added
 
