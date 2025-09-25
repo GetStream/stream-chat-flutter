@@ -5,9 +5,9 @@ part 'message_delete_scope.g.dart';
 
 /// Represents the scope of deletion for a message.
 ///
-/// - [forMe]: The message is deleted only for the current user.
-/// - [forAll]: The message is deleted for all users. The [hard]
-/// parameter indicates whether the deletion is permanent (hard) or soft.
+/// - [deleteForMe]: The message is deleted only for the current user.
+/// - [deleteForAll]: The message is deleted for all users. The [hard]
+///   parameter indicates whether the deletion is permanent (hard) or soft.
 @freezed
 sealed class MessageDeleteScope with _$MessageDeleteScope {
   /// The message is deleted only for the current user.
