@@ -971,7 +971,7 @@ class Channel {
     message = message.copyWith(
       type: MessageType.deleted,
       deletedAt: DateTime.now(),
-      deletedOnlyForMe: scope is DeleteForMe,
+      deletedForMe: scope is DeleteForMe,
       state: MessageState.deleting(scope: scope),
     );
 
@@ -988,7 +988,7 @@ class Channel {
       );
 
       final deletedMessage = message.copyWith(
-        deletedOnlyForMe: scope is DeleteForMe,
+        deletedForMe: scope is DeleteForMe,
         state: MessageState.deleted(scope: scope),
       );
 
@@ -3056,7 +3056,7 @@ class ChannelClientState {
 
       final message = event.message!.copyWith(
         // TODO: Remove once deletedForMe is properly enriched on the backend.
-        deletedOnlyForMe: event.deletedForMe,
+        deletedForMe: event.deletedForMe,
       );
 
       return deleteMessage(message, hardDelete: hardDelete);

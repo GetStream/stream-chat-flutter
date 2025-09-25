@@ -51,7 +51,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.localUpdatedAt,
     DateTime? deletedAt,
     this.localDeletedAt,
-    this.deletedOnlyForMe = false,
+    this.deletedForMe,
     this.messageTextUpdatedAt,
     this.user,
     this.pinned = false,
@@ -85,12 +85,12 @@ class Message extends Equatable implements ComparableFieldProvider {
 
     // TODO: Remove this once type are properly enriched on the backend.
     var type = message.type;
-    if (message.deletedOnlyForMe) {
+    if (message.deletedForMe ?? false) {
       type = MessageType.deleted;
     }
 
     var state = MessageState.sent;
-    if (message.deletedOnlyForMe) {
+    if (message.deletedForMe ?? false) {
       state = MessageState.deletedForMe;
     } else if (message.deletedAt != null) {
       state = MessageState.softDeleted;
@@ -321,8 +321,8 @@ class Message extends Equatable implements ComparableFieldProvider {
   final Location? sharedLocation;
 
   /// Whether the message was deleted only for the current user.
-  @JsonKey(name: 'deleted_for_me', defaultValue: false, includeToJson: false)
-  final bool deletedOnlyForMe;
+  @JsonKey(includeToJson: false)
+  final bool? deletedForMe;
 
   /// Message custom extraData.
   final Map<String, Object?> extraData;
@@ -433,7 +433,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     Object? draft = _nullConst,
     Object? reminder = _nullConst,
     Location? sharedLocation,
-    bool? deletedOnlyForMe,
+    bool? deletedForMe,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -512,7 +512,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       reminder:
           reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
       sharedLocation: sharedLocation ?? this.sharedLocation,
-      deletedOnlyForMe: deletedOnlyForMe ?? this.deletedOnlyForMe,
+      deletedForMe: deletedForMe ?? this.deletedForMe,
     );
   }
 
@@ -559,7 +559,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       draft: other.draft,
       reminder: other.reminder,
       sharedLocation: other.sharedLocation,
-      deletedOnlyForMe: other.deletedOnlyForMe,
+      deletedForMe: other.deletedForMe,
     );
   }
 
@@ -626,7 +626,7 @@ class Message extends Equatable implements ComparableFieldProvider {
         draft,
         reminder,
         sharedLocation,
-        deletedOnlyForMe,
+        deletedForMe,
       ];
 
   @override
