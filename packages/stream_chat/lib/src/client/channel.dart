@@ -3052,12 +3052,8 @@ class ChannelClientState {
 
   void _listenMessageDeleted() {
     _subscriptions.add(_channel.on(EventType.messageDeleted).listen((event) {
+      final message = event.message!;
       final hardDelete = event.hardDelete ?? false;
-
-      final message = event.message!.copyWith(
-        // TODO: Remove once deletedForMe is properly enriched on the backend.
-        deletedForMe: event.deletedForMe,
-      );
 
       return deleteMessage(message, hardDelete: hardDelete);
     }));

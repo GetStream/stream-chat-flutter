@@ -83,12 +83,6 @@ class Message extends Equatable implements ComparableFieldProvider {
       Serializer.moveToExtraDataFromRoot(json, topLevelFields),
     );
 
-    // TODO: Remove this once type are properly enriched on the backend.
-    var type = message.type;
-    if (message.deletedForMe ?? false) {
-      type = MessageType.deleted;
-    }
-
     var state = MessageState.sent;
     if (message.deletedForMe ?? false) {
       state = MessageState.deletedForMe;
@@ -98,7 +92,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       state = MessageState.updated;
     }
 
-    return message.copyWith(type: type, state: state);
+    return message.copyWith(state: state);
   }
 
   /// The message ID. This is either created by Stream or set client side when
