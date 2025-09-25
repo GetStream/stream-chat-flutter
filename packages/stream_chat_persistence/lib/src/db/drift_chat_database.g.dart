@@ -791,12 +791,11 @@ class $MessagesTable extends Messages
       const VerificationMeta('deletedForMe');
   @override
   late final GeneratedColumn<bool> deletedForMe = GeneratedColumn<bool>(
-      'deleted_for_me', aliasedName, false,
+      'deleted_for_me', aliasedName, true,
       type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("deleted_for_me" IN (0, 1))'),
-      defaultValue: const Constant(false));
+          'CHECK ("deleted_for_me" IN (0, 1))'));
   static const VerificationMeta _messageTextUpdatedAtMeta =
       const VerificationMeta('messageTextUpdatedAt');
   @override
@@ -1094,7 +1093,7 @@ class $MessagesTable extends Messages
       remoteDeletedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}remote_deleted_at']),
       deletedForMe: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}deleted_for_me'])!,
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted_for_me']),
       messageTextUpdatedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime,
           data['${effectivePrefix}message_text_updated_at']),
@@ -1210,7 +1209,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   final DateTime? remoteDeletedAt;
 
   /// Whether the message was deleted only for the current user.
-  final bool deletedForMe;
+  final bool? deletedForMe;
 
   /// The DateTime at which the message text was edited
   final DateTime? messageTextUpdatedAt;
@@ -1262,7 +1261,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       this.remoteUpdatedAt,
       this.localDeletedAt,
       this.remoteDeletedAt,
-      required this.deletedForMe,
+      this.deletedForMe,
       this.messageTextUpdatedAt,
       this.userId,
       required this.pinned,
@@ -1331,7 +1330,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     if (!nullToAbsent || remoteDeletedAt != null) {
       map['remote_deleted_at'] = Variable<DateTime>(remoteDeletedAt);
     }
-    map['deleted_for_me'] = Variable<bool>(deletedForMe);
+    if (!nullToAbsent || deletedForMe != null) {
+      map['deleted_for_me'] = Variable<bool>(deletedForMe);
+    }
     if (!nullToAbsent || messageTextUpdatedAt != null) {
       map['message_text_updated_at'] = Variable<DateTime>(messageTextUpdatedAt);
     }
@@ -1389,7 +1390,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       remoteUpdatedAt: serializer.fromJson<DateTime?>(json['remoteUpdatedAt']),
       localDeletedAt: serializer.fromJson<DateTime?>(json['localDeletedAt']),
       remoteDeletedAt: serializer.fromJson<DateTime?>(json['remoteDeletedAt']),
-      deletedForMe: serializer.fromJson<bool>(json['deletedForMe']),
+      deletedForMe: serializer.fromJson<bool?>(json['deletedForMe']),
       messageTextUpdatedAt:
           serializer.fromJson<DateTime?>(json['messageTextUpdatedAt']),
       userId: serializer.fromJson<String?>(json['userId']),
@@ -1429,7 +1430,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'remoteUpdatedAt': serializer.toJson<DateTime?>(remoteUpdatedAt),
       'localDeletedAt': serializer.toJson<DateTime?>(localDeletedAt),
       'remoteDeletedAt': serializer.toJson<DateTime?>(remoteDeletedAt),
-      'deletedForMe': serializer.toJson<bool>(deletedForMe),
+      'deletedForMe': serializer.toJson<bool?>(deletedForMe),
       'messageTextUpdatedAt':
           serializer.toJson<DateTime?>(messageTextUpdatedAt),
       'userId': serializer.toJson<String?>(userId),
@@ -1467,7 +1468,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           Value<DateTime?> remoteUpdatedAt = const Value.absent(),
           Value<DateTime?> localDeletedAt = const Value.absent(),
           Value<DateTime?> remoteDeletedAt = const Value.absent(),
-          bool? deletedForMe,
+          Value<bool?> deletedForMe = const Value.absent(),
           Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
           Value<String?> userId = const Value.absent(),
           bool? pinned,
@@ -1512,7 +1513,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         remoteDeletedAt: remoteDeletedAt.present
             ? remoteDeletedAt.value
             : this.remoteDeletedAt,
-        deletedForMe: deletedForMe ?? this.deletedForMe,
+        deletedForMe:
+            deletedForMe.present ? deletedForMe.value : this.deletedForMe,
         messageTextUpdatedAt: messageTextUpdatedAt.present
             ? messageTextUpdatedAt.value
             : this.messageTextUpdatedAt,
@@ -1728,7 +1730,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<DateTime?> remoteUpdatedAt;
   final Value<DateTime?> localDeletedAt;
   final Value<DateTime?> remoteDeletedAt;
-  final Value<bool> deletedForMe;
+  final Value<bool?> deletedForMe;
   final Value<DateTime?> messageTextUpdatedAt;
   final Value<String?> userId;
   final Value<bool> pinned;
@@ -1905,7 +1907,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<DateTime?>? remoteUpdatedAt,
       Value<DateTime?>? localDeletedAt,
       Value<DateTime?>? remoteDeletedAt,
-      Value<bool>? deletedForMe,
+      Value<bool?>? deletedForMe,
       Value<DateTime?>? messageTextUpdatedAt,
       Value<String?>? userId,
       Value<bool>? pinned,
@@ -3426,12 +3428,11 @@ class $PinnedMessagesTable extends PinnedMessages
       const VerificationMeta('deletedForMe');
   @override
   late final GeneratedColumn<bool> deletedForMe = GeneratedColumn<bool>(
-      'deleted_for_me', aliasedName, false,
+      'deleted_for_me', aliasedName, true,
       type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("deleted_for_me" IN (0, 1))'),
-      defaultValue: const Constant(false));
+          'CHECK ("deleted_for_me" IN (0, 1))'));
   static const VerificationMeta _messageTextUpdatedAtMeta =
       const VerificationMeta('messageTextUpdatedAt');
   @override
@@ -3728,7 +3729,7 @@ class $PinnedMessagesTable extends PinnedMessages
       remoteDeletedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}remote_deleted_at']),
       deletedForMe: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}deleted_for_me'])!,
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted_for_me']),
       messageTextUpdatedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime,
           data['${effectivePrefix}message_text_updated_at']),
@@ -3846,7 +3847,7 @@ class PinnedMessageEntity extends DataClass
   final DateTime? remoteDeletedAt;
 
   /// Whether the message was deleted only for the current user.
-  final bool deletedForMe;
+  final bool? deletedForMe;
 
   /// The DateTime at which the message text was edited
   final DateTime? messageTextUpdatedAt;
@@ -3898,7 +3899,7 @@ class PinnedMessageEntity extends DataClass
       this.remoteUpdatedAt,
       this.localDeletedAt,
       this.remoteDeletedAt,
-      required this.deletedForMe,
+      this.deletedForMe,
       this.messageTextUpdatedAt,
       this.userId,
       required this.pinned,
@@ -3967,7 +3968,9 @@ class PinnedMessageEntity extends DataClass
     if (!nullToAbsent || remoteDeletedAt != null) {
       map['remote_deleted_at'] = Variable<DateTime>(remoteDeletedAt);
     }
-    map['deleted_for_me'] = Variable<bool>(deletedForMe);
+    if (!nullToAbsent || deletedForMe != null) {
+      map['deleted_for_me'] = Variable<bool>(deletedForMe);
+    }
     if (!nullToAbsent || messageTextUpdatedAt != null) {
       map['message_text_updated_at'] = Variable<DateTime>(messageTextUpdatedAt);
     }
@@ -4026,7 +4029,7 @@ class PinnedMessageEntity extends DataClass
       remoteUpdatedAt: serializer.fromJson<DateTime?>(json['remoteUpdatedAt']),
       localDeletedAt: serializer.fromJson<DateTime?>(json['localDeletedAt']),
       remoteDeletedAt: serializer.fromJson<DateTime?>(json['remoteDeletedAt']),
-      deletedForMe: serializer.fromJson<bool>(json['deletedForMe']),
+      deletedForMe: serializer.fromJson<bool?>(json['deletedForMe']),
       messageTextUpdatedAt:
           serializer.fromJson<DateTime?>(json['messageTextUpdatedAt']),
       userId: serializer.fromJson<String?>(json['userId']),
@@ -4066,7 +4069,7 @@ class PinnedMessageEntity extends DataClass
       'remoteUpdatedAt': serializer.toJson<DateTime?>(remoteUpdatedAt),
       'localDeletedAt': serializer.toJson<DateTime?>(localDeletedAt),
       'remoteDeletedAt': serializer.toJson<DateTime?>(remoteDeletedAt),
-      'deletedForMe': serializer.toJson<bool>(deletedForMe),
+      'deletedForMe': serializer.toJson<bool?>(deletedForMe),
       'messageTextUpdatedAt':
           serializer.toJson<DateTime?>(messageTextUpdatedAt),
       'userId': serializer.toJson<String?>(userId),
@@ -4104,7 +4107,7 @@ class PinnedMessageEntity extends DataClass
           Value<DateTime?> remoteUpdatedAt = const Value.absent(),
           Value<DateTime?> localDeletedAt = const Value.absent(),
           Value<DateTime?> remoteDeletedAt = const Value.absent(),
-          bool? deletedForMe,
+          Value<bool?> deletedForMe = const Value.absent(),
           Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
           Value<String?> userId = const Value.absent(),
           bool? pinned,
@@ -4149,7 +4152,8 @@ class PinnedMessageEntity extends DataClass
         remoteDeletedAt: remoteDeletedAt.present
             ? remoteDeletedAt.value
             : this.remoteDeletedAt,
-        deletedForMe: deletedForMe ?? this.deletedForMe,
+        deletedForMe:
+            deletedForMe.present ? deletedForMe.value : this.deletedForMe,
         messageTextUpdatedAt: messageTextUpdatedAt.present
             ? messageTextUpdatedAt.value
             : this.messageTextUpdatedAt,
@@ -4365,7 +4369,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<DateTime?> remoteUpdatedAt;
   final Value<DateTime?> localDeletedAt;
   final Value<DateTime?> remoteDeletedAt;
-  final Value<bool> deletedForMe;
+  final Value<bool?> deletedForMe;
   final Value<DateTime?> messageTextUpdatedAt;
   final Value<String?> userId;
   final Value<bool> pinned;
@@ -4542,7 +4546,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       Value<DateTime?>? remoteUpdatedAt,
       Value<DateTime?>? localDeletedAt,
       Value<DateTime?>? remoteDeletedAt,
-      Value<bool>? deletedForMe,
+      Value<bool?>? deletedForMe,
       Value<DateTime?>? messageTextUpdatedAt,
       Value<String?>? userId,
       Value<bool>? pinned,
@@ -9922,7 +9926,7 @@ typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   Value<DateTime?> remoteUpdatedAt,
   Value<DateTime?> localDeletedAt,
   Value<DateTime?> remoteDeletedAt,
-  Value<bool> deletedForMe,
+  Value<bool?> deletedForMe,
   Value<DateTime?> messageTextUpdatedAt,
   Value<String?> userId,
   Value<bool> pinned,
@@ -9956,7 +9960,7 @@ typedef $$MessagesTableUpdateCompanionBuilder = MessagesCompanion Function({
   Value<DateTime?> remoteUpdatedAt,
   Value<DateTime?> localDeletedAt,
   Value<DateTime?> remoteDeletedAt,
-  Value<bool> deletedForMe,
+  Value<bool?> deletedForMe,
   Value<DateTime?> messageTextUpdatedAt,
   Value<String?> userId,
   Value<bool> pinned,
@@ -10612,7 +10616,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<DateTime?> remoteUpdatedAt = const Value.absent(),
             Value<DateTime?> localDeletedAt = const Value.absent(),
             Value<DateTime?> remoteDeletedAt = const Value.absent(),
-            Value<bool> deletedForMe = const Value.absent(),
+            Value<bool?> deletedForMe = const Value.absent(),
             Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<bool> pinned = const Value.absent(),
@@ -10681,7 +10685,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<DateTime?> remoteUpdatedAt = const Value.absent(),
             Value<DateTime?> localDeletedAt = const Value.absent(),
             Value<DateTime?> remoteDeletedAt = const Value.absent(),
-            Value<bool> deletedForMe = const Value.absent(),
+            Value<bool?> deletedForMe = const Value.absent(),
             Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<bool> pinned = const Value.absent(),
@@ -11769,7 +11773,7 @@ typedef $$PinnedMessagesTableCreateCompanionBuilder = PinnedMessagesCompanion
   Value<DateTime?> remoteUpdatedAt,
   Value<DateTime?> localDeletedAt,
   Value<DateTime?> remoteDeletedAt,
-  Value<bool> deletedForMe,
+  Value<bool?> deletedForMe,
   Value<DateTime?> messageTextUpdatedAt,
   Value<String?> userId,
   Value<bool> pinned,
@@ -11804,7 +11808,7 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder = PinnedMessagesCompanion
   Value<DateTime?> remoteUpdatedAt,
   Value<DateTime?> localDeletedAt,
   Value<DateTime?> remoteDeletedAt,
-  Value<bool> deletedForMe,
+  Value<bool?> deletedForMe,
   Value<DateTime?> messageTextUpdatedAt,
   Value<String?> userId,
   Value<bool> pinned,
@@ -12286,7 +12290,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<DateTime?> remoteUpdatedAt = const Value.absent(),
             Value<DateTime?> localDeletedAt = const Value.absent(),
             Value<DateTime?> remoteDeletedAt = const Value.absent(),
-            Value<bool> deletedForMe = const Value.absent(),
+            Value<bool?> deletedForMe = const Value.absent(),
             Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<bool> pinned = const Value.absent(),
@@ -12355,7 +12359,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<DateTime?> remoteUpdatedAt = const Value.absent(),
             Value<DateTime?> localDeletedAt = const Value.absent(),
             Value<DateTime?> remoteDeletedAt = const Value.absent(),
-            Value<bool> deletedForMe = const Value.absent(),
+            Value<bool?> deletedForMe = const Value.absent(),
             Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<bool> pinned = const Value.absent(),
