@@ -1,3 +1,22 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- **Changed `MessageState` factory constructors**: The `deleting`, `deleted`, and `deletingFailed` 
+  factory constructors now accept a `MessageDeleteScope` parameter instead of `bool hard`. 
+  Pattern matching callbacks also receive `MessageDeleteScope scope` instead of `bool hard`.
+
+✅ Added
+
+- Added support for deleting messages only for the current user:
+  - `Channel.deleteMessageForMe()` - Delete a message only for the current user
+  - `StreamChatClient.deleteMessageForMe()` - Delete a message only for the current user via client
+  - `MessageDeleteScope` - New sealed class to represent deletion scope
+  - `MessageState.deletingForMe`, `MessageState.deletedForMe`, `MessageState.deletingForMeFailed` states
+  - `Message.deletedOnlyForMe`, `Event.deletedForMe`, `Member.deletedMessages` model fields
+
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+
 ## 10.0.0-beta.6
 
 - Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).
