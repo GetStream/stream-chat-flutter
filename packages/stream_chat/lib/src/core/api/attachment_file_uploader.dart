@@ -72,7 +72,7 @@ abstract class AttachmentFileUploader {
   /// Returns a [UploadImageResponse] once uploaded successfully.
   Future<UploadImageResponse> uploadImage(
     AttachmentFile image, {
-    ProgressCallback? onSendProgress,
+    ProgressCallback? onProgress,
     CancelToken? cancelToken,
   }) {
     throw UnimplementedError();
@@ -86,7 +86,7 @@ abstract class AttachmentFileUploader {
   /// Returns a [UploadFileResponse] once uploaded successfully.
   Future<UploadFileResponse> uploadFile(
     AttachmentFile file, {
-    ProgressCallback? onSendProgress,
+    ProgressCallback? onProgress,
     CancelToken? cancelToken,
   }) {
     throw UnimplementedError();
@@ -199,14 +199,14 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   @override
   Future<UploadImageResponse> uploadImage(
     AttachmentFile image, {
-    ProgressCallback? onSendProgress,
+    ProgressCallback? onProgress,
     CancelToken? cancelToken,
   }) async {
     final multiPartFile = await image.toMultipartFile();
     final response = await _client.postFile(
       '/uploads/image',
       multiPartFile,
-      onSendProgress: onSendProgress,
+      onSendProgress: onProgress,
       cancelToken: cancelToken,
     );
     return UploadImageResponse.fromJson(response.data);
@@ -215,14 +215,14 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   @override
   Future<UploadFileResponse> uploadFile(
     AttachmentFile file, {
-    ProgressCallback? onSendProgress,
+    ProgressCallback? onProgress,
     CancelToken? cancelToken,
   }) async {
     final multiPartFile = await file.toMultipartFile();
     final response = await _client.postFile(
       '/uploads/file',
       multiPartFile,
-      onSendProgress: onSendProgress,
+      onSendProgress: onProgress,
       cancelToken: cancelToken,
     );
     return UploadFileResponse.fromJson(response.data);

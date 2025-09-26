@@ -946,12 +946,12 @@ class StreamChatClient {
   /// Returns a [UploadImageResponse] once uploaded successfully.
   Future<UploadImageResponse> uploadImage(
     AttachmentFile image, {
-    ProgressCallback? onUploadProgress,
+    ProgressCallback? onProgress,
     CancelToken? cancelToken,
   }) =>
       _chatApi.fileUploader.uploadImage(
         image,
-        onSendProgress: onUploadProgress,
+        onProgress: onProgress,
         cancelToken: cancelToken,
       );
 
@@ -963,12 +963,12 @@ class StreamChatClient {
   /// Returns a [UploadFileResponse] once uploaded successfully.
   Future<UploadFileResponse> uploadFile(
     AttachmentFile file, {
-    ProgressCallback? onUploadProgress,
+    ProgressCallback? onProgress,
     CancelToken? cancelToken,
   }) =>
       _chatApi.fileUploader.uploadFile(
         file,
-        onSendProgress: onUploadProgress,
+        onProgress: onProgress,
         cancelToken: cancelToken,
       );
 
