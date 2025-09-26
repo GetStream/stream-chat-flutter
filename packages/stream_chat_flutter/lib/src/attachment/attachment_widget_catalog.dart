@@ -37,11 +37,6 @@ class AttachmentWidgetCatalog {
   Widget build(BuildContext context, Message message) {
     assert(!message.isDeleted, 'Cannot build attachment for deleted message');
 
-    assert(
-      message.attachments.isNotEmpty,
-      'Cannot build attachment for message without attachments',
-    );
-
     // The list of attachments to build the widget for.
     final attachments = message.attachments.grouped;
     for (final builder in builders) {

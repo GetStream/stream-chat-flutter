@@ -24,6 +24,7 @@ void main() {
       pinnedAt: DateTime.now(),
       archivedAt: DateTime.now(),
       isModerator: math.Random().nextBool(),
+      deletedMessages: ['msg1', 'msg2', 'msg3'],
       extraData: {'test_extra_data': 'testData'},
     );
     final member = entity.toMember(user: user);
@@ -40,6 +41,7 @@ void main() {
     expect(member.pinnedAt, isSameDateAs(entity.pinnedAt));
     expect(member.archivedAt, isSameDateAs(entity.archivedAt));
     expect(member.isModerator, entity.isModerator);
+    expect(member.deletedMessages, entity.deletedMessages);
     expect(member.extraData, entity.extraData);
   });
 
@@ -59,6 +61,7 @@ void main() {
       pinnedAt: DateTime.now(),
       archivedAt: DateTime.now(),
       isModerator: math.Random().nextBool(),
+      deletedMessages: const ['msg1', 'msg2', 'msg3'],
       extraData: const {'test_extra_data': 'testData'},
     );
     final entity = member.toEntity(cid: cid);
@@ -76,6 +79,7 @@ void main() {
     expect(entity.pinnedAt, isSameDateAs(member.pinnedAt));
     expect(entity.archivedAt, isSameDateAs(member.archivedAt));
     expect(entity.isModerator, member.isModerator);
+    expect(entity.deletedMessages, member.deletedMessages);
     expect(entity.extraData, member.extraData);
   });
 }

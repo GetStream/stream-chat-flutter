@@ -48,6 +48,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
           : DateTime.parse(json['channel_last_message_at'] as String),
       parentId: json['parent_id'] as String?,
       hardDelete: json['hard_delete'] as bool?,
+      deletedForMe: json['deleted_for_me'] as bool?,
       aiState: $enumDecodeNullable(_$AITypingStateEnumMap, json['ai_state'],
           unknownValue: AITypingState.idle),
       aiMessage: json['ai_message'] as String?,
@@ -105,6 +106,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       if (instance.parentId case final value?) 'parent_id': value,
       'is_local': instance.isLocal,
       if (instance.hardDelete case final value?) 'hard_delete': value,
+      if (instance.deletedForMe case final value?) 'deleted_for_me': value,
       if (_$AITypingStateEnumMap[instance.aiState] case final value?)
         'ai_state': value,
       if (instance.aiMessage case final value?) 'ai_message': value,
