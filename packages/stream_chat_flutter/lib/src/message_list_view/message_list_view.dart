@@ -1478,17 +1478,29 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (_upToDate && lastFullyVisibleMessageChanged) {
       _lastFullyVisibleMessage = newLastFullyVisibleMessage;
 
-      if (streamChannel?.channel case final channel?) {
-        final hasUnread = (channel.state?.unreadCount ?? 0) > 0;
-        final allowMarkRead = channel.config?.readEvents == true;
-        final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
-
-        // Mark messages as read if it's allowed.
-        if (hasUnread && allowMarkRead && canMarkReadAtBottom) {
-          return _markMessagesAsRead().ignore();
-        }
-      }
+      // Mark messages as read if needed.
+      _maybeMarkMessagesAsRead().ignore();
     }
+  }
+
+  Future<void> _maybeMarkMessagesAsRead() async {
+    final channel = streamChannel?.channel;
+    if (channel == null) return;
+
+    final hasUnread = (channel.state?.unreadCount ?? 0) > 0;
+    if (!hasUnread) return;
+
+    final allowMarkRead = channel.config?.readEvents == true;
+    if (!allowMarkRead) return;
+
+    final markPendingDisabled = channel.config?.markMessagesPending == false;
+    if (!markPendingDisabled) return;
+
+    final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
+    if (!canMarkReadAtBottom) return;
+
+    // Mark messages as read if it's allowed.
+    return _markMessagesAsRead();
   }
 
   void _getOnThreadTap() {
