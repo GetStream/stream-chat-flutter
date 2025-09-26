@@ -1483,6 +1483,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
   }
 
+  // Marks messages as read if the conditions are met.
+  //
+  // The conditions are:
+  // 1. There are unread messages.
+  // 2. Marking messages as read is allowed in the channel config.
+  // 3. Marking messages as read when at the bottom is enabled.
+  // 4. Mark messages as pending is not enabled in the channel config.
+  //
+  // If any of the conditions are not met, the function returns early.
+  // Otherwise, it calls the _markMessagesAsRead function to mark the messages
+  // as read.
   Future<void> _maybeMarkMessagesAsRead() async {
     final channel = streamChannel?.channel;
     if (channel == null) return;
@@ -1493,8 +1504,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final allowMarkRead = channel.config?.readEvents == true;
     if (!allowMarkRead) return;
 
-    final markPendingDisabled = channel.config?.markMessagesPending == false;
-    if (!markPendingDisabled) return;
+    // When markMessagesPending is enabled, messages are held for moderation
+    // and should not be immediately marked as read.
+    final markPendingEnabled = channel.config?.markMessagesPending == true;
+    if (markPendingEnabled) return;
 
     final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
     if (!canMarkReadAtBottom) return;
