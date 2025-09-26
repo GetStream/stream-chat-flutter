@@ -74,7 +74,9 @@ abstract class AttachmentFileUploader {
     AttachmentFile image, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
-  });
+  }) {
+    throw UnimplementedError();
+  }
 
   /// Uploads a file to the CDN.
   ///
@@ -86,7 +88,9 @@ abstract class AttachmentFileUploader {
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
-  });
+  }) {
+    throw UnimplementedError();
+  }
 
   /// Removes an image from the CDN using its [url].
   ///
@@ -96,7 +100,9 @@ abstract class AttachmentFileUploader {
   Future<EmptyResponse> removeImage(
     String url, {
     CancelToken? cancelToken,
-  });
+  }) {
+    throw UnimplementedError();
+  }
 
   /// Removes a file from the CDN using its [url].
   ///
@@ -106,7 +112,9 @@ abstract class AttachmentFileUploader {
   Future<EmptyResponse> removeFile(
     String url, {
     CancelToken? cancelToken,
-  });
+  }) {
+    throw UnimplementedError();
+  }
 
   // endregion
 }
