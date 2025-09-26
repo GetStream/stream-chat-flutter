@@ -47,6 +47,7 @@ export 'src/core/models/location.dart';
 export 'src/core/models/location_coordinates.dart';
 export 'src/core/models/member.dart';
 export 'src/core/models/message.dart';
+export 'src/core/models/message_delete_scope.dart';
 export 'src/core/models/message_reminder.dart';
 export 'src/core/models/message_state.dart';
 export 'src/core/models/moderation.dart';

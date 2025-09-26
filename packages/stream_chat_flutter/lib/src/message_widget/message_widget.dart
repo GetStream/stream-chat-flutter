@@ -79,6 +79,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onShowMessage,
     this.userAvatarBuilder,
     this.quotedMessageBuilder,
+    this.deletedMessageBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
     this.bottomRowBuilderWithDefaultWidget,
@@ -160,6 +161,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// Widget builder for building quoted message
   /// {@endtemplate}
   final Widget Function(BuildContext, Message)? quotedMessageBuilder;
+
+  /// {@template deletedMessageBuilder}
+  /// Widget builder for building deleted message
+  /// {@endtemplate}
+  final Widget Function(BuildContext, Message)? deletedMessageBuilder;
 
   /// {@template message}
   /// The message to display.
@@ -407,6 +413,7 @@ class StreamMessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
     Widget Function(BuildContext, Message)? quotedMessageBuilder,
+    Widget Function(BuildContext, Message)? deletedMessageBuilder,
     BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget,
     void Function(BuildContext, Message)? onMessageActions,
     void Function(BuildContext, Message)? onBouncedErrorMessageActions,
@@ -473,6 +480,8 @@ class StreamMessageWidget extends StatefulWidget {
           editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
       quotedMessageBuilder: quotedMessageBuilder ?? this.quotedMessageBuilder,
+      deletedMessageBuilder:
+          deletedMessageBuilder ?? this.deletedMessageBuilder,
       bottomRowBuilderWithDefaultWidget: bottomRowBuilderWithDefaultWidget ??
           this.bottomRowBuilderWithDefaultWidget,
       onMessageActions: onMessageActions ?? this.onMessageActions,
@@ -753,6 +762,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                 borderRadiusGeometry: widget.borderRadiusGeometry,
                 textBuilder: widget.textBuilder,
                 quotedMessageBuilder: widget.quotedMessageBuilder,
+                deletedMessageBuilder: widget.deletedMessageBuilder,
                 onLinkTap: widget.onLinkTap,
                 onMentionTap: widget.onMentionTap,
                 onQuotedMessageTap: widget.onQuotedMessageTap,
@@ -1192,16 +1202,5 @@ extension on Poll {
     };
 
     return copyWith(name: trimmedName);
-  }
-}
-
-extension on String {
-  String get sentenceCase {
-    if (isEmpty) return this;
-
-    final firstChar = this[0].toUpperCase();
-    final restOfString = substring(1).toLowerCase();
-
-    return '$firstChar$restOfString';
   }
 }

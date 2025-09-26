@@ -79,6 +79,17 @@ class StreamMessageActionsBuilder {
               ),
             ),
           ),
+          if (messageState.isSendingFailed)
+            StreamMessageAction(
+              isDestructive: true,
+              action: HardDeleteMessage(message: message),
+              leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+              title: Text(
+                context.translations.toggleDeleteRetryDeleteMessageText(
+                  isDeleteFailed: false,
+                ),
+              ),
+            ),
         ],
         if (message.state.isDeletingFailed)
           StreamMessageAction(

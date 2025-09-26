@@ -1,9 +1,9 @@
 // ignore_for_file: avoid_positional_boolean_parameters
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:stream_chat/src/core/models/message_delete_scope.dart';
 
 part 'message_state.freezed.dart';
-
 part 'message_state.g.dart';
 
 /// Helper extension for [MessageState].
@@ -33,7 +33,7 @@ extension MessageStateX on MessageState {
   }
 
   /// Returns true if the message is in outgoing deleting state.
-  bool get isDeleting => isSoftDeleting || isHardDeleting;
+  bool get isDeleting => isSoftDeleting || isHardDeleting || isDeletingForMe;
 
   /// Returns true if the message is in outgoing soft deleting state.
   bool get isSoftDeleting {
@@ -43,7 +43,10 @@ extension MessageStateX on MessageState {
     final outgoingState = messageState.state;
     if (outgoingState is! Deleting) return false;
 
-    return !outgoingState.hard;
+    final deletingScope = outgoingState.scope;
+    if (deletingScope is! DeleteForAll) return false;
+
+    return !deletingScope.hard;
   }
 
   /// Returns true if the message is in outgoing hard deleting state.
@@ -54,7 +57,22 @@ extension MessageStateX on MessageState {
     final outgoingState = messageState.state;
     if (outgoingState is! Deleting) return false;
 
-    return outgoingState.hard;
+    final deletingScope = outgoingState.scope;
+    if (deletingScope is! DeleteForAll) return false;
+
+    return deletingScope.hard;
+  }
+
+  /// Returns true if the message is in outgoing deleting for me state.
+  bool get isDeletingForMe {
+    final messageState = this;
+    if (messageState is! MessageOutgoing) return false;
+
+    final outgoingState = messageState.state;
+    if (outgoingState is! Deleting) return false;
+
+    final deletingScope = outgoingState.scope;
+    return deletingScope is DeleteForMe;
   }
 
   /// Returns true if the message is in completed sent state.
@@ -70,7 +88,7 @@ extension MessageStateX on MessageState {
   }
 
   /// Returns true if the message is in completed deleted state.
-  bool get isDeleted => isSoftDeleted || isHardDeleted;
+  bool get isDeleted => isSoftDeleted || isHardDeleted || isDeletedForMe;
 
   /// Returns true if the message is in completed soft deleted state.
   bool get isSoftDeleted {
@@ -80,7 +98,10 @@ extension MessageStateX on MessageState {
     final completedState = messageState.state;
     if (completedState is! Deleted) return false;
 
-    return !completedState.hard;
+    final deletingScope = completedState.scope;
+    if (deletingScope is! DeleteForAll) return false;
+
+    return !deletingScope.hard;
   }
 
   /// Returns true if the message is in completed hard deleted state.
@@ -91,7 +112,22 @@ extension MessageStateX on MessageState {
     final completedState = messageState.state;
     if (completedState is! Deleted) return false;
 
-    return completedState.hard;
+    final deletingScope = completedState.scope;
+    if (deletingScope is! DeleteForAll) return false;
+
+    return deletingScope.hard;
+  }
+
+  /// Returns true if the message is in completed deleted for me state.
+  bool get isDeletedForMe {
+    final messageState = this;
+    if (messageState is! MessageCompleted) return false;
+
+    final completedState = messageState.state;
+    if (completedState is! Deleted) return false;
+
+    final deletingScope = completedState.scope;
+    return deletingScope is DeleteForMe;
   }
 
   /// Returns true if the message is in failed sending state.
@@ -111,7 +147,8 @@ extension MessageStateX on MessageState {
   }
 
   /// Returns true if the message is in failed deleting state.
-  bool get isDeletingFailed => isSoftDeletingFailed || isHardDeletingFailed;
+  bool get isDeletingFailed =>
+      isSoftDeletingFailed || isHardDeletingFailed || isDeletingForMeFailed;
 
   /// Returns true if the message is in failed soft deleting state.
   bool get isSoftDeletingFailed {
@@ -121,7 +158,10 @@ extension MessageStateX on MessageState {
     final failedState = messageState.state;
     if (failedState is! DeletingFailed) return false;
 
-    return !failedState.hard;
+    final deletingScope = failedState.scope;
+    if (deletingScope is! DeleteForAll) return false;
+
+    return !deletingScope.hard;
   }
 
   /// Returns true if the message is in failed hard deleting state.
@@ -132,7 +172,22 @@ extension MessageStateX on MessageState {
     final failedState = messageState.state;
     if (failedState is! DeletingFailed) return false;
 
-    return failedState.hard;
+    final deletingScope = failedState.scope;
+    if (deletingScope is! DeleteForAll) return false;
+
+    return deletingScope.hard;
+  }
+
+  /// Returns true if the message is in failed deleting for me state.
+  bool get isDeletingForMeFailed {
+    final messageState = this;
+    if (messageState is! MessageFailed) return false;
+
+    final failedState = messageState.state;
+    if (failedState is! DeletingFailed) return false;
+
+    final deletingScope = failedState.scope;
+    return deletingScope is DeleteForMe;
   }
 }
 
@@ -163,24 +218,32 @@ sealed class MessageState with _$MessageState {
   factory MessageState.fromJson(Map<String, dynamic> json) =>
       _$MessageStateFromJson(json);
 
+  // region Factory Constructors for Common States
+
   /// Deleting state when the message is being deleted.
-  factory MessageState.deleting({required bool hard}) {
+  factory MessageState.deleting({
+    required MessageDeleteScope scope,
+  }) {
     return MessageState.outgoing(
-      state: OutgoingState.deleting(hard: hard),
+      state: OutgoingState.deleting(scope: scope),
     );
   }
 
   /// Deleting state when the message has been successfully deleted.
-  factory MessageState.deleted({required bool hard}) {
+  factory MessageState.deleted({
+    required MessageDeleteScope scope,
+  }) {
     return MessageState.completed(
-      state: CompletedState.deleted(hard: hard),
+      state: CompletedState.deleted(scope: scope),
     );
   }
 
   /// Deleting failed state when the message fails to be deleted.
-  factory MessageState.deletingFailed({required bool hard}) {
+  factory MessageState.deletingFailed({
+    required MessageDeleteScope scope,
+  }) {
     return MessageState.failed(
-      state: FailedState.deletingFailed(hard: hard),
+      state: FailedState.deletingFailed(scope: scope),
     );
   }
 
@@ -224,6 +287,10 @@ sealed class MessageState with _$MessageState {
     );
   }
 
+  // endregion
+
+  // region Common Static Instances
+
   /// Sending state when the message is being sent.
   static const sending = MessageState.outgoing(
     state: OutgoingState.sending(),
@@ -241,7 +308,16 @@ sealed class MessageState with _$MessageState {
 
   /// Hard deleting state when the message is being hard deleted.
   static const hardDeleting = MessageState.outgoing(
-    state: OutgoingState.deleting(hard: true),
+    state: OutgoingState.deleting(
+      scope: MessageDeleteScope.hardDeleteForAll,
+    ),
+  );
+
+  /// Deleting for me state when the message is being deleted only for me.
+  static const deletingForMe = MessageState.outgoing(
+    state: OutgoingState.deleting(
+      scope: MessageDeleteScope.deleteForMe(),
+    ),
   );
 
   /// Sent state when the message has been successfully sent.
@@ -261,7 +337,17 @@ sealed class MessageState with _$MessageState {
 
   /// Hard deleted state when the message has been successfully hard deleted.
   static const hardDeleted = MessageState.completed(
-    state: CompletedState.deleted(hard: true),
+    state: CompletedState.deleted(
+      scope: MessageDeleteScope.hardDeleteForAll,
+    ),
+  );
+
+  /// Deleted for me state when the message has been successfully deleted only
+  /// for me.
+  static const deletedForMe = MessageState.completed(
+    state: CompletedState.deleted(
+      scope: MessageDeleteScope.deleteForMe(),
+    ),
   );
 
   /// Deleting failed state when the message fails to be soft deleted.
@@ -271,8 +357,19 @@ sealed class MessageState with _$MessageState {
 
   /// Hard deleting failed state when the message fails to be hard deleted.
   static const hardDeletingFailed = MessageState.failed(
-    state: FailedState.deletingFailed(hard: true),
+    state: FailedState.deletingFailed(
+      scope: MessageDeleteScope.hardDeleteForAll,
+    ),
   );
+
+  /// Deleting for me failed state when the message fails to be deleted only
+  static const deletingForMeFailed = MessageState.failed(
+    state: FailedState.deletingFailed(
+      scope: MessageDeleteScope.deleteForMe(),
+    ),
+  );
+
+  // endregion
 }
 
 /// Represents the state of an outgoing message.
@@ -286,7 +383,7 @@ sealed class OutgoingState with _$OutgoingState {
 
   /// Deleting state when the message is being deleted.
   const factory OutgoingState.deleting({
-    @Default(false) bool hard,
+    @Default(MessageDeleteScope.softDeleteForAll) MessageDeleteScope scope,
   }) = Deleting;
 
   /// Creates a new instance from a json
@@ -305,7 +402,7 @@ sealed class CompletedState with _$CompletedState {
 
   /// Deleted state when the message has been successfully deleted.
   const factory CompletedState.deleted({
-    @Default(false) bool hard,
+    @Default(MessageDeleteScope.softDeleteForAll) MessageDeleteScope scope,
   }) = Deleted;
 
   /// Creates a new instance from a json
@@ -336,7 +433,7 @@ sealed class FailedState with _$FailedState {
 
   /// Deleting failed state when the message fails to be deleted.
   const factory FailedState.deletingFailed({
-    @Default(false) bool hard,
+    @Default(MessageDeleteScope.softDeleteForAll) MessageDeleteScope scope,
   }) = DeletingFailed;
 
   /// Creates a new instance from a json
@@ -464,13 +561,13 @@ extension OutgoingStatePatternMatching on OutgoingState {
   TResult when<TResult extends Object?>({
     required TResult Function() sending,
     required TResult Function() updating,
-    required TResult Function(bool hard) deleting,
+    required TResult Function(MessageDeleteScope scope) deleting,
   }) {
     final outgoingState = this;
     return switch (outgoingState) {
       Sending() => sending(),
       Updating() => updating(),
-      Deleting() => deleting(outgoingState.hard),
+      Deleting() => deleting(outgoingState.scope),
     };
   }
 
@@ -479,13 +576,13 @@ extension OutgoingStatePatternMatching on OutgoingState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? sending,
     TResult? Function()? updating,
-    TResult? Function(bool hard)? deleting,
+    TResult? Function(MessageDeleteScope scope)? deleting,
   }) {
     final outgoingState = this;
     return switch (outgoingState) {
       Sending() => sending?.call(),
       Updating() => updating?.call(),
-      Deleting() => deleting?.call(outgoingState.hard),
+      Deleting() => deleting?.call(outgoingState.scope),
     };
   }
 
@@ -494,14 +591,14 @@ extension OutgoingStatePatternMatching on OutgoingState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? sending,
     TResult Function()? updating,
-    TResult Function(bool hard)? deleting,
+    TResult Function(MessageDeleteScope scope)? deleting,
     required TResult orElse(),
   }) {
     final outgoingState = this;
     final result = switch (outgoingState) {
       Sending() => sending?.call(),
       Updating() => updating?.call(),
-      Deleting() => deleting?.call(outgoingState.hard),
+      Deleting() => deleting?.call(outgoingState.scope),
     };
 
     return result ?? orElse();
@@ -563,13 +660,13 @@ extension CompletedStatePatternMatching on CompletedState {
   TResult when<TResult extends Object?>({
     required TResult Function() sent,
     required TResult Function() updated,
-    required TResult Function(bool hard) deleted,
+    required TResult Function(MessageDeleteScope scope) deleted,
   }) {
     final completedState = this;
     return switch (completedState) {
       Sent() => sent(),
       Updated() => updated(),
-      Deleted() => deleted(completedState.hard),
+      Deleted() => deleted(completedState.scope),
     };
   }
 
@@ -578,13 +675,13 @@ extension CompletedStatePatternMatching on CompletedState {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? sent,
     TResult? Function()? updated,
-    TResult? Function(bool hard)? deleted,
+    TResult? Function(MessageDeleteScope scope)? deleted,
   }) {
     final completedState = this;
     return switch (completedState) {
       Sent() => sent?.call(),
       Updated() => updated?.call(),
-      Deleted() => deleted?.call(completedState.hard),
+      Deleted() => deleted?.call(completedState.scope),
     };
   }
 
@@ -593,14 +690,14 @@ extension CompletedStatePatternMatching on CompletedState {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? sent,
     TResult Function()? updated,
-    TResult Function(bool hard)? deleted,
+    TResult Function(MessageDeleteScope scope)? deleted,
     required TResult orElse(),
   }) {
     final completedState = this;
     final result = switch (completedState) {
       Sent() => sent?.call(),
       Updated() => updated?.call(),
-      Deleted() => deleted?.call(completedState.hard),
+      Deleted() => deleted?.call(completedState.scope),
     };
 
     return result ?? orElse();
@@ -665,7 +762,7 @@ extension FailedStatePatternMatching on FailedState {
     required TResult Function(
             Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl)
         partialUpdatingFailed,
-    required TResult Function(bool hard) deletingFailed,
+    required TResult Function(MessageDeleteScope scope) deletingFailed,
   }) {
     final failedState = this;
     return switch (failedState) {
@@ -675,7 +772,7 @@ extension FailedStatePatternMatching on FailedState {
         updatingFailed(failedState.skipPush, failedState.skipEnrichUrl),
       PartialUpdatingFailed() => partialUpdatingFailed(
           failedState.set, failedState.unset, failedState.skipEnrichUrl),
-      DeletingFailed() => deletingFailed(failedState.hard),
+      DeletingFailed() => deletingFailed(failedState.scope),
     };
   }
 
@@ -687,7 +784,7 @@ extension FailedStatePatternMatching on FailedState {
     required TResult Function(
             Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl)
         partialUpdatingFailed,
-    TResult? Function(bool hard)? deletingFailed,
+    TResult? Function(MessageDeleteScope scope)? deletingFailed,
   }) {
     final failedState = this;
     return switch (failedState) {
@@ -697,7 +794,7 @@ extension FailedStatePatternMatching on FailedState {
         updatingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
       PartialUpdatingFailed() => partialUpdatingFailed(
           failedState.set, failedState.unset, failedState.skipEnrichUrl),
-      DeletingFailed() => deletingFailed?.call(failedState.hard),
+      DeletingFailed() => deletingFailed?.call(failedState.scope),
     };
   }
 
@@ -709,7 +806,7 @@ extension FailedStatePatternMatching on FailedState {
     required TResult Function(
             Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl)
         partialUpdatingFailed,
-    TResult Function(bool hard)? deletingFailed,
+    TResult Function(MessageDeleteScope scope)? deletingFailed,
     required TResult orElse(),
   }) {
     final failedState = this;
@@ -720,7 +817,7 @@ extension FailedStatePatternMatching on FailedState {
         updatingFailed?.call(failedState.skipPush, failedState.skipEnrichUrl),
       PartialUpdatingFailed() => partialUpdatingFailed(
           failedState.set, failedState.unset, failedState.skipEnrichUrl),
-      DeletingFailed() => deletingFailed?.call(failedState.hard),
+      DeletingFailed() => deletingFailed?.call(failedState.scope),
     };
 
     return result ?? orElse();

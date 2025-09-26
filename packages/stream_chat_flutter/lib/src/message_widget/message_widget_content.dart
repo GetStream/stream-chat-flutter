@@ -72,6 +72,7 @@ class MessageWidgetContent extends StatelessWidget {
     this.onLinkTap,
     this.textBuilder,
     this.quotedMessageBuilder,
+    this.deletedMessageBuilder,
     this.bottomRowBuilderWithDefaultWidget,
     this.userAvatarBuilder,
   });
@@ -183,6 +184,9 @@ class MessageWidgetContent extends StatelessWidget {
 
   /// {@macro quotedMessageBuilder}
   final Widget Function(BuildContext, Message)? quotedMessageBuilder;
+
+  /// {@macro deletedMessageBuilder}
+  final Widget Function(BuildContext, Message)? deletedMessageBuilder;
 
   /// {@macro translateUserAvatar}
   final bool translateUserAvatar;
@@ -341,6 +345,19 @@ class MessageWidgetContent extends StatelessWidget {
     );
   }
 
+  Widget _buildDeletedMessage(BuildContext context) {
+    if (deletedMessageBuilder case final builder?) {
+      return builder(context, message);
+    }
+
+    return StreamDeletedMessage(
+      borderRadiusGeometry: borderRadiusGeometry,
+      borderSide: borderSide,
+      shape: shape,
+      messageTheme: messageTheme,
+    );
+  }
+
   Widget _buildMessageCard(BuildContext context) {
     if (message.isDeleted) {
       return Container(
@@ -348,12 +365,7 @@ class MessageWidgetContent extends StatelessWidget {
           end: reverse && isFailedState ? 12.0 : 0.0,
           start: !reverse && isFailedState ? 12.0 : 0.0,
         ),
-        child: StreamDeletedMessage(
-          borderRadiusGeometry: borderRadiusGeometry,
-          borderSide: borderSide,
-          shape: shape,
-          messageTheme: messageTheme,
-        ),
+        child: _buildDeletedMessage(context),
       );
     }
 

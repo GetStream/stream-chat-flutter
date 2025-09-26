@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -212,40 +212,39 @@ class _ChannelPageState extends State<ChannelPage> {
     final channel = StreamChannel.of(context).channel;
     final channelConfig = channel.config;
 
+    final currentUser = StreamChat.of(context).currentUser;
+    final isSentByCurrentUser = message.user?.id == currentUser?.id;
+    final canDeleteOwnMessage = channel.canDeleteOwnMessage;
+
     final customOptions = <StreamMessageAction>[
+      if (isSentByCurrentUser && canDeleteOwnMessage)
+        StreamMessageAction(
+          isDestructive: true,
+          title: const Text('Delete Message for Me'),
+          action: DeleteMessageForMe(message: message),
+          leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+        ),
       if (channelConfig?.userMessageReminders == true) ...[
         if (reminder != null) ...[
           StreamMessageAction(
-            leading: StreamSvgIcon(
-              icon: StreamSvgIcons.time,
-              color: colorTheme.textLowEmphasis,
-            ),
             title: const Text('Edit Reminder'),
+            leading: const StreamSvgIcon(icon: StreamSvgIcons.time),
             action: EditReminder(message: message, reminder: reminder),
           ),
           StreamMessageAction(
-            leading: StreamSvgIcon(
-              icon: StreamSvgIcons.checkAll,
-              color: colorTheme.textLowEmphasis,
-            ),
             title: const Text('Remove from later'),
+            leading: const StreamSvgIcon(icon: StreamSvgIcons.checkAll),
             action: RemoveReminder(message: message, reminder: reminder),
           ),
         ] else ...[
           StreamMessageAction(
-            leading: StreamSvgIcon(
-              icon: StreamSvgIcons.time,
-              color: colorTheme.textLowEmphasis,
-            ),
             title: const Text('Remind me'),
+            leading: const StreamSvgIcon(icon: StreamSvgIcons.time),
             action: CreateReminder(message: message),
           ),
           StreamMessageAction(
-            leading: Icon(
-              Icons.bookmark_border,
-              color: colorTheme.textLowEmphasis,
-            ),
             title: const Text('Save for later'),
+            leading: const Icon(Icons.bookmark_border),
             action: CreateBookmark(message: message),
           ),
         ],
@@ -301,6 +300,7 @@ class _ChannelPageState extends State<ChannelPage> {
               CreateBookmark() => _createBookmark(it.message),
               EditReminder() => _editReminder(it.message, it.reminder),
               RemoveReminder() => _removeReminder(it.message, it.reminder),
+              DeleteMessageForMe() => _deleteMessageForMe(it.message),
               _ => null,
             },
             attachmentBuilders: [locationAttachmentBuilder],
@@ -374,6 +374,24 @@ class _ChannelPageState extends State<ChannelPage> {
     return client.createReminder(messageId).ignore();
   }
 
+  Future<void> _deleteMessageForMe(Message message) async {
+    final confirmDelete = await showStreamDialog<bool>(
+      context: context,
+      builder: (context) => const StreamMessageActionConfirmationModal(
+        isDestructiveAction: true,
+        title: Text('Delete for me'),
+        content: Text('Are you sure you want to delete this message for you?'),
+        cancelActionTitle: Text('Cancel'),
+        confirmActionTitle: Text('Delete'),
+      ),
+    );
+
+    if (confirmDelete != true) return;
+
+    final channel = StreamChannel.of(context).channel;
+    return channel.deleteMessageForMe(message).ignore();
+  }
+
   bool defaultFilter(Message m) {
     final currentUser = StreamChat.of(context).currentUser;
     final isMyMessage = m.user?.id == currentUser?.id;
@@ -418,4 +436,8 @@ final class RemoveReminder extends ReminderMessageAction {
 
   @override
   final MessageReminder reminder;
+}
+
+final class DeleteMessageForMe extends CustomMessageAction {
+  const DeleteMessageForMe({required super.message});
 }

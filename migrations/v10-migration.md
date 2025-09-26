@@ -8,6 +8,10 @@
 
 This guide includes breaking changes grouped by release phase:
 
+### 🚧 v10.0.0-beta.7
+
+- [MessageState](#-messagestate)
+
 ### 🚧 v10.0.0-beta.4
 
 - [SendReaction](#-sendreaction)
@@ -25,6 +29,77 @@ This guide includes breaking changes grouped by release phase:
 - [StreamMessageAction](#-streammessageaction)
 - [StreamMessageReactionsModal](#-streammessagereactionsmodal)
 - [StreamMessageWidget](#-streammessagewidget)
+
+---
+
+## 🧪 Migration for v10.0.0-beta.7
+
+### 🛠 MessageState
+
+#### Key Changes:
+
+- `MessageState` factory constructors now accept `MessageDeleteScope` instead of `bool hard` parameter
+- Pattern matching callbacks in state classes now receive `MessageDeleteScope scope` instead of `bool hard`
+- New delete-for-me functionality with dedicated states and methods
+
+#### Migration Steps:
+
+**Before:**
+```dart
+// Factory constructors with bool hard
+final deletingState = MessageState.deleting(hard: true);
+final deletedState = MessageState.deleted(hard: false);
+final failedState = MessageState.deletingFailed(hard: true);
+
+// Pattern matching with bool hard
+message.state.whenOrNull(
+  deleting: (hard) => handleDeleting(hard),
+  deleted: (hard) => handleDeleted(hard),
+  deletingFailed: (hard) => handleDeletingFailed(hard),
+);
+```
+
+**After:**
+```dart
+// Factory constructors with MessageDeleteScope
+final deletingState = MessageState.deleting(
+  scope: MessageDeleteScope.hardDeleteForAll,
+);
+final deletedState = MessageState.deleted(
+  scope: MessageDeleteScope.softDeleteForAll,
+);
+final failedState = MessageState.deletingFailed(
+  scope: MessageDeleteScope.deleteForMe(),
+);
+
+// Pattern matching with MessageDeleteScope
+message.state.whenOrNull(
+  deleting: (scope) => handleDeleting(scope.hard),
+  deleted: (scope) => handleDeleted(scope.hard),
+  deletingFailed: (scope) => handleDeletingFailed(scope.hard),
+);
+
+// New delete-for-me functionality
+channel.deleteMessageForMe(message); // Delete only for current user
+client.deleteMessageForMe(messageId); // Delete only for current user
+
+// Check delete-for-me states
+if (message.state.isDeletingForMe) {
+  // Handle deleting for me state
+}
+if (message.state.isDeletedForMe) {
+  // Handle deleted for me state  
+}
+if (message.state.isDeletingForMeFailed) {
+  // Handle delete for me failed state
+}
+```
+
+> ⚠️ **Important:**  
+> - All `MessageState` factory constructors now require `MessageDeleteScope` parameter
+> - Pattern matching callbacks receive `MessageDeleteScope` instead of `bool hard`
+> - Use `scope.hard` to access the hard delete boolean value
+> - New delete-for-me methods are available on both `Channel` and `StreamChatClient`
 
 ---
 
@@ -428,6 +503,15 @@ StreamMessageWidget(
 ---
 
 ## 🎉 You're Ready to Migrate!
+
+### For v10.0.0-beta.7:
+- ✅ Update `MessageState` factory constructors to use `MessageDeleteScope` parameter
+- ✅ Update pattern matching callbacks to handle `MessageDeleteScope` instead of `bool hard`
+- ✅ Leverage new delete-for-me functionality with `deleteMessageForMe` methods
+- ✅ Use new state checking methods for delete-for-me operations
+
+### For v10.0.0-beta.4:
+- ✅ Update `sendReaction` method calls to use `Reaction` object instead of individual parameters
 
 ### For v10.0.0-beta.3:
 - ✅ Update attachment picker options to use `SystemAttachmentPickerOption` or `TabbedAttachmentPickerOption`

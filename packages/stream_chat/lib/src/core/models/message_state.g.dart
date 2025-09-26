@@ -71,12 +71,14 @@ Map<String, dynamic> _$UpdatingToJson(Updating instance) => <String, dynamic>{
     };
 
 Deleting _$DeletingFromJson(Map<String, dynamic> json) => Deleting(
-      hard: json['hard'] as bool? ?? false,
+      scope: json['scope'] == null
+          ? MessageDeleteScope.softDeleteForAll
+          : MessageDeleteScope.fromJson(json['scope'] as Map<String, dynamic>),
       $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$DeletingToJson(Deleting instance) => <String, dynamic>{
-      'hard': instance.hard,
+      'scope': instance.scope.toJson(),
       'runtimeType': instance.$type,
     };
 
@@ -97,12 +99,14 @@ Map<String, dynamic> _$UpdatedToJson(Updated instance) => <String, dynamic>{
     };
 
 Deleted _$DeletedFromJson(Map<String, dynamic> json) => Deleted(
-      hard: json['hard'] as bool? ?? false,
+      scope: json['scope'] == null
+          ? MessageDeleteScope.softDeleteForAll
+          : MessageDeleteScope.fromJson(json['scope'] as Map<String, dynamic>),
       $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$DeletedToJson(Deleted instance) => <String, dynamic>{
-      'hard': instance.hard,
+      'scope': instance.scope.toJson(),
       'runtimeType': instance.$type,
     };
 
@@ -155,12 +159,14 @@ Map<String, dynamic> _$PartialUpdatingFailedToJson(
 
 DeletingFailed _$DeletingFailedFromJson(Map<String, dynamic> json) =>
     DeletingFailed(
-      hard: json['hard'] as bool? ?? false,
+      scope: json['scope'] == null
+          ? MessageDeleteScope.softDeleteForAll
+          : MessageDeleteScope.fromJson(json['scope'] as Map<String, dynamic>),
       $type: json['runtimeType'] as String?,
     );
 
 Map<String, dynamic> _$DeletingFailedToJson(DeletingFailed instance) =>
     <String, dynamic>{
-      'hard': instance.hard,
+      'scope': instance.scope.toJson(),
       'runtimeType': instance.$type,
     };
