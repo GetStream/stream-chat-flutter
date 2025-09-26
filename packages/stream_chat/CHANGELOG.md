@@ -25,7 +25,6 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
   - `StreamChatClient.removeImage()` - Remove an image from the Stream CDN
   - `StreamChatClient.removeFile()` - Remove a file from the Stream CDN
 
-
 ## 10.0.0-beta.6
 
 - Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).
