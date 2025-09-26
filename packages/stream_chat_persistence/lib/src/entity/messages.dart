@@ -99,6 +99,9 @@ class Messages extends Table {
   /// The DateTime on which the message was deleted on the server.
   DateTimeColumn get remoteDeletedAt => dateTime().nullable()();
 
+  /// Whether the message was deleted only for the current user.
+  BoolColumn get deletedForMe => boolean().nullable()();
+
   /// The DateTime at which the message text was edited
   DateTimeColumn get messageTextUpdatedAt => dateTime().nullable()();
 
