@@ -1,3 +1,13 @@
+## Upcoming
+
+✅ Added
+
+- Added standalone file and image upload/removal methods for CDN operations:
+  - `StreamChatClient.uploadImage()` - Upload an image to the Stream CDN
+  - `StreamChatClient.uploadFile()` - Upload a file to the Stream CDN
+  - `StreamChatClient.removeImage()` - Remove an image from the Stream CDN
+  - `StreamChatClient.removeFile()` - Remove a file from the Stream CDN
+
 ## 9.17.0
 
 🐞 Fixed
