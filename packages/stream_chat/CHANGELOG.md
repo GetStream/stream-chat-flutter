@@ -5,6 +5,11 @@
 - **Changed `MessageState` factory constructors**: The `deleting`, `deleted`, and `deletingFailed` 
   factory constructors now accept a `MessageDeleteScope` parameter instead of `bool hard`. 
   Pattern matching callbacks also receive `MessageDeleteScope scope` instead of `bool hard`.
+- **Added new abstract methods to `AttachmentFileUploader`**: The `AttachmentFileUploader` interface
+  now includes four new abstract methods (`uploadImage`, `uploadFile`, `removeImage`, `removeFile`).
+  Custom implementations must implement these methods.
+
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 ✅ Added
 
@@ -14,8 +19,11 @@
   - `MessageDeleteScope` - New sealed class to represent deletion scope
   - `MessageState.deletingForMe`, `MessageState.deletedForMe`, `MessageState.deletingForMeFailed` states
   - `Message.deletedOnlyForMe`, `Event.deletedForMe`, `Member.deletedMessages` model fields
-
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+- Added standalone file and image upload/removal methods for CDN operations:
+  - `StreamChatClient.uploadImage()` - Upload an image to the Stream CDN
+  - `StreamChatClient.uploadFile()` - Upload a file to the Stream CDN
+  - `StreamChatClient.removeImage()` - Remove an image from the Stream CDN
+  - `StreamChatClient.removeFile()` - Remove a file from the Stream CDN
 
 ## 10.0.0-beta.6
 

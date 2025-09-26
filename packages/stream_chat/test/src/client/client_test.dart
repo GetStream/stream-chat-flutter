@@ -1111,6 +1111,62 @@ void main() {
       verifyNoMoreInteractions(api.fileUploader);
     });
 
+    test('`.uploadImage`', () async {
+      final image = AttachmentFile(size: 33, path: 'test-image-path');
+      const fileUrl = 'test-image-url';
+
+      when(() => api.fileUploader.uploadImage(image))
+          .thenAnswer((_) async => UploadImageResponse()..file = fileUrl);
+
+      final res = await client.uploadImage(image);
+      expect(res, isNotNull);
+      expect(res.file, fileUrl);
+
+      verify(() => api.fileUploader.uploadImage(image)).called(1);
+      verifyNoMoreInteractions(api.fileUploader);
+    });
+
+    test('`.uploadFile`', () async {
+      final file = AttachmentFile(size: 33, path: 'test-file-path');
+      const fileUrl = 'test-file-url';
+
+      when(() => api.fileUploader.uploadFile(file))
+          .thenAnswer((_) async => UploadFileResponse()..file = fileUrl);
+
+      final res = await client.uploadFile(file);
+      expect(res, isNotNull);
+      expect(res.file, fileUrl);
+
+      verify(() => api.fileUploader.uploadFile(file)).called(1);
+      verifyNoMoreInteractions(api.fileUploader);
+    });
+
+    test('`.removeImage`', () async {
+      const imageUrl = 'test-image-url';
+
+      when(() => api.fileUploader.removeImage(imageUrl))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.removeImage(imageUrl);
+      expect(res, isNotNull);
+
+      verify(() => api.fileUploader.removeImage(imageUrl)).called(1);
+      verifyNoMoreInteractions(api.fileUploader);
+    });
+
+    test('`.removeFile`', () async {
+      const fileUrl = 'test-file-url';
+
+      when(() => api.fileUploader.removeFile(fileUrl))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.removeFile(fileUrl);
+      expect(res, isNotNull);
+
+      verify(() => api.fileUploader.removeFile(fileUrl)).called(1);
+      verifyNoMoreInteractions(api.fileUploader);
+    });
+
     test('`.updateChannel`', () async {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';

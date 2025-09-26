@@ -921,6 +921,68 @@ class StreamChatClient {
         extraData: extraData,
       );
 
+  /// Upload an image to the Stream CDN
+  ///
+  /// Upload progress can be tracked using [onProgress], and the operation can
+  /// be cancelled using [cancelToken].
+  ///
+  /// Returns a [UploadImageResponse] once uploaded successfully.
+  Future<UploadImageResponse> uploadImage(
+    AttachmentFile image, {
+    ProgressCallback? onUploadProgress,
+    CancelToken? cancelToken,
+  }) =>
+      _chatApi.fileUploader.uploadImage(
+        image,
+        onSendProgress: onUploadProgress,
+        cancelToken: cancelToken,
+      );
+
+  /// Upload a file to the Stream CDN
+  ///
+  /// Upload progress can be tracked using [onProgress], and the operation can
+  /// be cancelled using [cancelToken].
+  ///
+  /// Returns a [UploadFileResponse] once uploaded successfully.
+  Future<UploadFileResponse> uploadFile(
+    AttachmentFile file, {
+    ProgressCallback? onUploadProgress,
+    CancelToken? cancelToken,
+  }) =>
+      _chatApi.fileUploader.uploadFile(
+        file,
+        onSendProgress: onUploadProgress,
+        cancelToken: cancelToken,
+      );
+
+  /// Remove an image from the Stream CDN using its [url].
+  ///
+  /// The operation can be cancelled using [cancelToken] if needed.
+  ///
+  /// Returns an [EmptyResponse] once removed successfully.
+  Future<EmptyResponse> removeImage(
+    String url, {
+    CancelToken? cancelToken,
+  }) =>
+      _chatApi.fileUploader.removeImage(
+        url,
+        cancelToken: cancelToken,
+      );
+
+  /// Remove a file from the Stream CDN using its [url].
+  ///
+  /// The operation can be cancelled using [cancelToken] if needed.
+  ///
+  /// Returns an [EmptyResponse] once removed successfully.
+  Future<EmptyResponse> removeFile(
+    String url, {
+    CancelToken? cancelToken,
+  }) =>
+      _chatApi.fileUploader.removeFile(
+        url,
+        cancelToken: cancelToken,
+      );
+
   /// Replaces the [channelId] of type [ChannelType] data with [data].
   ///
   /// Use [updateChannelPartial] for a partial update.

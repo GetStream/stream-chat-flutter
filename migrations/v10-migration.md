@@ -10,6 +10,7 @@ This guide includes breaking changes grouped by release phase:
 
 ### 🚧 v10.0.0-beta.7
 
+- [AttachmentFileUploader](#-attachmentfileuploader)
 - [MessageState](#-messagestate)
 
 ### 🚧 v10.0.0-beta.4
@@ -33,6 +34,111 @@ This guide includes breaking changes grouped by release phase:
 ---
 
 ## 🧪 Migration for v10.0.0-beta.7
+
+### 🛠 AttachmentFileUploader
+
+#### Key Changes:
+
+- `AttachmentFileUploader` interface now includes four new abstract methods: `uploadImage`, `uploadFile`, `removeImage`, and `removeFile`.
+- Custom implementations must implement these new standalone upload/removal methods.
+
+#### Migration Steps:
+
+**Before:**
+```dart
+class CustomAttachmentFileUploader implements AttachmentFileUploader {
+  // Only needed to implement sendImage, sendFile, deleteImage, deleteFile
+  
+  @override
+  Future<SendImageResponse> sendImage(/* ... */) async {
+    // Implementation
+  }
+  
+  @override
+  Future<SendFileResponse> sendFile(/* ... */) async {
+    // Implementation
+  }
+  
+  @override
+  Future<EmptyResponse> deleteImage(/* ... */) async {
+    // Implementation
+  }
+  
+  @override
+  Future<EmptyResponse> deleteFile(/* ... */) async {
+    // Implementation
+  }
+}
+```
+
+**After:**
+```dart
+class CustomAttachmentFileUploader implements AttachmentFileUploader {
+  // Must now implement all 8 methods including the new standalone ones
+  
+  @override
+  Future<SendImageResponse> sendImage(/* ... */) async {
+    // Implementation
+  }
+  
+  @override
+  Future<SendFileResponse> sendFile(/* ... */) async {
+    // Implementation
+  }
+  
+  @override
+  Future<EmptyResponse> deleteImage(/* ... */) async {
+    // Implementation
+  }
+  
+  @override
+  Future<EmptyResponse> deleteFile(/* ... */) async {
+    // Implementation
+  }
+  
+  // New required methods
+  @override
+  Future<UploadImageResponse> uploadImage(
+    AttachmentFile image, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
+    // Implementation for standalone image upload
+  }
+  
+  @override
+  Future<UploadFileResponse> uploadFile(
+    AttachmentFile file, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
+    // Implementation for standalone file upload
+  }
+  
+  @override
+  Future<EmptyResponse> removeImage(
+    String url, {
+    CancelToken? cancelToken,
+  }) async {
+    // Implementation for standalone image removal
+  }
+  
+  @override
+  Future<EmptyResponse> removeFile(
+    String url, {
+    CancelToken? cancelToken,
+  }) async {
+    // Implementation for standalone file removal
+  }
+}
+```
+
+> ⚠️ **Important:**  
+> - Custom `AttachmentFileUploader` implementations must now implement four additional methods
+> - The new methods support standalone uploads/removals without requiring channel context
+> - `UploadImageResponse` and `UploadFileResponse` are aliases for `SendAttachmentResponse`
+
+---
 
 ### 🛠 MessageState
 
@@ -505,6 +611,7 @@ StreamMessageWidget(
 ## 🎉 You're Ready to Migrate!
 
 ### For v10.0.0-beta.7:
+- ✅ Update custom `AttachmentFileUploader` implementations to include the four new abstract methods: `uploadImage`, `uploadFile`, `removeImage`, and `removeFile`
 - ✅ Update `MessageState` factory constructors to use `MessageDeleteScope` parameter
 - ✅ Update pattern matching callbacks to handle `MessageDeleteScope` instead of `bool hard`
 - ✅ Leverage new delete-for-me functionality with `deleteMessageForMe` methods
