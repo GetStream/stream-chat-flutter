@@ -65,17 +65,16 @@ class ChannelState implements ComparableFieldProvider {
     Map<Object?, Object?> json,
     String key,
   ) {
-    final pendingMessageResponse = json[key] as List<Object?>?;
-    if (pendingMessageResponse == null) return null;
+    final pendingMessageResponse = json[key];
+    if (pendingMessageResponse is! List<Object?>) return null;
 
     final value = pendingMessageResponse.map((it) {
-      final response = it as Map<String, Object?>?;
-      if (response == null) return null;
+      if (it is! Map<String, Object?>) return null;
+      return it['message'];
+    }).nonNulls;
 
-      return response['message'] as Map<String, Object?>?;
-    }).nonNulls.toList();
-
-    return value;
+    if (value.isEmpty) return null;
+    return value.toList(growable: false);
   }
 
   /// List of messages pending for moderation on this channel.
