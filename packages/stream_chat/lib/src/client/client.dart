@@ -1806,21 +1806,29 @@ class StreamChatClient {
         skipEnrichUrl: skipEnrichUrl,
       );
 
-  /// Deletes the given message
+  /// Deletes the given message.
+  ///
+  /// If [hard] is true, the message is permanently deleted.
   Future<EmptyResponse> deleteMessage(
     String messageId, {
     bool hard = false,
-  }) async {
-    final response = await _chatApi.message.deleteMessage(
+  }) {
+    return _chatApi.message.deleteMessage(
       messageId,
       hard: hard,
     );
+  }
 
-    if (hard) {
-      await chatPersistenceClient?.deleteMessageById(messageId);
-    }
-
-    return response;
+  /// Deletes the given message for the current user only.
+  ///
+  /// Note: This does not delete the message for other users in the channel.
+  Future<EmptyResponse> deleteMessageForMe(
+    String messageId,
+  ) {
+    return _chatApi.message.deleteMessage(
+      messageId,
+      deleteForMe: true,
+    );
   }
 
   /// Get a message by [messageId]

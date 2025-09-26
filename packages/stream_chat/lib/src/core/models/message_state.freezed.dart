@@ -473,13 +473,14 @@ class Updating implements OutgoingState {
 /// @nodoc
 @JsonSerializable()
 class Deleting implements OutgoingState {
-  const Deleting({this.hard = false, final String? $type})
+  const Deleting(
+      {this.scope = MessageDeleteScope.softDeleteForAll, final String? $type})
       : $type = $type ?? 'deleting';
   factory Deleting.fromJson(Map<String, dynamic> json) =>
       _$DeletingFromJson(json);
 
   @JsonKey()
-  final bool hard;
+  final MessageDeleteScope scope;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -503,16 +504,16 @@ class Deleting implements OutgoingState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Deleting &&
-            (identical(other.hard, hard) || other.hard == hard));
+            (identical(other.scope, scope) || other.scope == scope));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, hard);
+  int get hashCode => Object.hash(runtimeType, scope);
 
   @override
   String toString() {
-    return 'OutgoingState.deleting(hard: $hard)';
+    return 'OutgoingState.deleting(scope: $scope)';
   }
 }
 
@@ -522,7 +523,9 @@ abstract mixin class $DeletingCopyWith<$Res>
   factory $DeletingCopyWith(Deleting value, $Res Function(Deleting) _then) =
       _$DeletingCopyWithImpl;
   @useResult
-  $Res call({bool hard});
+  $Res call({MessageDeleteScope scope});
+
+  $MessageDeleteScopeCopyWith<$Res> get scope;
 }
 
 /// @nodoc
@@ -536,14 +539,24 @@ class _$DeletingCopyWithImpl<$Res> implements $DeletingCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? hard = null,
+    Object? scope = null,
   }) {
     return _then(Deleting(
-      hard: null == hard
-          ? _self.hard
-          : hard // ignore: cast_nullable_to_non_nullable
-              as bool,
+      scope: null == scope
+          ? _self.scope
+          : scope // ignore: cast_nullable_to_non_nullable
+              as MessageDeleteScope,
     ));
+  }
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MessageDeleteScopeCopyWith<$Res> get scope {
+    return $MessageDeleteScopeCopyWith<$Res>(_self.scope, (value) {
+      return _then(_self.copyWith(scope: value));
+    });
   }
 }
 
@@ -656,13 +669,14 @@ class Updated implements CompletedState {
 /// @nodoc
 @JsonSerializable()
 class Deleted implements CompletedState {
-  const Deleted({this.hard = false, final String? $type})
+  const Deleted(
+      {this.scope = MessageDeleteScope.softDeleteForAll, final String? $type})
       : $type = $type ?? 'deleted';
   factory Deleted.fromJson(Map<String, dynamic> json) =>
       _$DeletedFromJson(json);
 
   @JsonKey()
-  final bool hard;
+  final MessageDeleteScope scope;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -686,16 +700,16 @@ class Deleted implements CompletedState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Deleted &&
-            (identical(other.hard, hard) || other.hard == hard));
+            (identical(other.scope, scope) || other.scope == scope));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, hard);
+  int get hashCode => Object.hash(runtimeType, scope);
 
   @override
   String toString() {
-    return 'CompletedState.deleted(hard: $hard)';
+    return 'CompletedState.deleted(scope: $scope)';
   }
 }
 
@@ -705,7 +719,9 @@ abstract mixin class $DeletedCopyWith<$Res>
   factory $DeletedCopyWith(Deleted value, $Res Function(Deleted) _then) =
       _$DeletedCopyWithImpl;
   @useResult
-  $Res call({bool hard});
+  $Res call({MessageDeleteScope scope});
+
+  $MessageDeleteScopeCopyWith<$Res> get scope;
 }
 
 /// @nodoc
@@ -719,14 +735,24 @@ class _$DeletedCopyWithImpl<$Res> implements $DeletedCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? hard = null,
+    Object? scope = null,
   }) {
     return _then(Deleted(
-      hard: null == hard
-          ? _self.hard
-          : hard // ignore: cast_nullable_to_non_nullable
-              as bool,
+      scope: null == scope
+          ? _self.scope
+          : scope // ignore: cast_nullable_to_non_nullable
+              as MessageDeleteScope,
     ));
+  }
+
+  /// Create a copy of CompletedState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MessageDeleteScopeCopyWith<$Res> get scope {
+    return $MessageDeleteScopeCopyWith<$Res>(_self.scope, (value) {
+      return _then(_self.copyWith(scope: value));
+    });
   }
 }
 
@@ -1078,13 +1104,14 @@ class _$PartialUpdatingFailedCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class DeletingFailed implements FailedState {
-  const DeletingFailed({this.hard = false, final String? $type})
+  const DeletingFailed(
+      {this.scope = MessageDeleteScope.softDeleteForAll, final String? $type})
       : $type = $type ?? 'deletingFailed';
   factory DeletingFailed.fromJson(Map<String, dynamic> json) =>
       _$DeletingFailedFromJson(json);
 
   @JsonKey()
-  final bool hard;
+  final MessageDeleteScope scope;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -1108,16 +1135,16 @@ class DeletingFailed implements FailedState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeletingFailed &&
-            (identical(other.hard, hard) || other.hard == hard));
+            (identical(other.scope, scope) || other.scope == scope));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, hard);
+  int get hashCode => Object.hash(runtimeType, scope);
 
   @override
   String toString() {
-    return 'FailedState.deletingFailed(hard: $hard)';
+    return 'FailedState.deletingFailed(scope: $scope)';
   }
 }
 
@@ -1128,7 +1155,9 @@ abstract mixin class $DeletingFailedCopyWith<$Res>
           DeletingFailed value, $Res Function(DeletingFailed) _then) =
       _$DeletingFailedCopyWithImpl;
   @useResult
-  $Res call({bool hard});
+  $Res call({MessageDeleteScope scope});
+
+  $MessageDeleteScopeCopyWith<$Res> get scope;
 }
 
 /// @nodoc
@@ -1143,14 +1172,24 @@ class _$DeletingFailedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? hard = null,
+    Object? scope = null,
   }) {
     return _then(DeletingFailed(
-      hard: null == hard
-          ? _self.hard
-          : hard // ignore: cast_nullable_to_non_nullable
-              as bool,
+      scope: null == scope
+          ? _self.scope
+          : scope // ignore: cast_nullable_to_non_nullable
+              as MessageDeleteScope,
     ));
+  }
+
+  /// Create a copy of FailedState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MessageDeleteScopeCopyWith<$Res> get scope {
+    return $MessageDeleteScopeCopyWith<$Res>(_self.scope, (value) {
+      return _then(_self.copyWith(scope: value));
+    });
   }
 }
 

@@ -44,8 +44,20 @@ extension DurationExtension on Duration {
 /// String extension
 extension StringExtension on String {
   /// Returns the capitalized string
-  String capitalize() =>
-      isNotEmpty ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
+  @Deprecated('Use sentenceCase instead')
+  String capitalize() => sentenceCase;
+
+  /// Returns the string in sentence case.
+  ///
+  /// Example: 'hello WORLD' -> 'Hello world'
+  String get sentenceCase {
+    if (isEmpty) return this;
+
+    final firstChar = this[0].toUpperCase();
+    final restOfString = substring(1).toLowerCase();
+
+    return '$firstChar$restOfString';
+  }
 
   /// Returns the biggest line of a text.
   String biggestLine() {

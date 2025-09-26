@@ -3592,6 +3592,20 @@ void main() {
       verifyNoMoreInteractions(api.message);
     });
 
+    test('`.deleteMessageForMe`', () async {
+      const messageId = 'test-message-id';
+
+      when(() => api.message.deleteMessage(messageId, deleteForMe: true))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.deleteMessageForMe(messageId);
+      expect(res, isNotNull);
+
+      verify(() => api.message.deleteMessage(messageId, deleteForMe: true))
+          .called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
     test('`.getMessage`', () async {
       const messageId = 'test-message-id';
       final message = Message(id: messageId);

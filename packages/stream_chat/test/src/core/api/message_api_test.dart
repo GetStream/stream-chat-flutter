@@ -205,16 +205,17 @@ void main() {
     const messageId = 'test-message-id';
 
     const path = '/messages/$messageId';
+    const params = {'delete_for_me': true};
 
-    when(() => client.delete(path)).thenAnswer(
+    when(() => client.delete(path, queryParameters: params)).thenAnswer(
       (_) async => successResponse(path, data: <String, dynamic>{}),
     );
 
-    final res = await messageApi.deleteMessage(messageId);
+    final res = await messageApi.deleteMessage(messageId, deleteForMe: true);
 
     expect(res, isNotNull);
 
-    verify(() => client.delete(path)).called(1);
+    verify(() => client.delete(path, queryParameters: params)).called(1);
     verifyNoMoreInteractions(client);
   });
 

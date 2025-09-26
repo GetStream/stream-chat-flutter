@@ -920,31 +920,49 @@ class Channel {
 
   final _deleteMessageLock = Lock();
 
-  /// Deletes the [message] from the channel.
-  Future<EmptyResponse> deleteMessage(
+  /// Deletes the [message] for everyone.
+  ///
+  /// If [hard] is true, the message is permanently deleted from the server
+  /// and cannot be recovered. In this case, any attachments associated with the
+  /// message are also deleted from the server.
+  Future<EmptyResponse> deleteMessage(Message message, {bool hard = false}) {
+    final deletionScope = MessageDeleteScope.deleteForAll(hard: hard);
+
+    return _deleteMessage(message, scope: deletionScope);
+  }
+
+  /// Deletes the [message] only for the current user.
+  ///
+  /// Note: This does not delete the message for other channel members and
+  /// they can still see the message.
+  Future<EmptyResponse> deleteMessageForMe(Message message) {
+    const deletionScope = MessageDeleteScope.deleteForMe();
+
+    return _deleteMessage(message, scope: deletionScope);
+  }
+
+  // Deletes the [message] from the channel.
+  //
+  // The [scope] defines whether to delete the message for everyone or just
+  // for the current user.
+  //
+  // If the message is a local message (not yet sent to the server) or a bounced
+  // error message, it is deleted locally without making an API call.
+  //
+  // If the message is deleted for everyone and [scope.hard] is true, the
+  // message is permanently deleted from the server and cannot be recovered.
+  // In this case, any attachments associated with the message are also deleted
+  // from the server.
+  Future<EmptyResponse> _deleteMessage(
     Message message, {
-    bool hard = false,
+    required MessageDeleteScope scope,
   }) async {
     _checkInitialized();
 
     // Directly deleting the local messages and bounced error messages as they
     // are not available on the server.
     if (message.remoteCreatedAt == null || message.isBouncedWithError) {
-      state?.deleteMessage(
-        message.copyWith(
-          type: MessageType.deleted,
-          localDeletedAt: DateTime.now(),
-          state: MessageState.deleted(hard: hard),
-        ),
-        hardDelete: hard,
-      );
-
-      // Removing the attachments upload completer to stop the `sendMessage`
-      // waiting for attachments to complete.
-      _messageAttachmentsUploadCompleter
-          .remove(message.id)
-          ?.completeError(const StreamChatError('Message deleted'));
-
+      _deleteLocalMessage(message);
       // Returning empty response to mark the api call as success.
       return EmptyResponse();
     }
@@ -953,50 +971,82 @@ class Channel {
     message = message.copyWith(
       type: MessageType.deleted,
       deletedAt: DateTime.now(),
-      state: MessageState.deleting(hard: hard),
+      deletedForMe: scope is DeleteForMe,
+      state: MessageState.deleting(scope: scope),
     );
 
-    state?.deleteMessage(message, hardDelete: hard);
+    state?.deleteMessage(message, hardDelete: scope.hard);
 
     try {
       // Wait for the previous delete call to finish. Otherwise, the order of
       // messages will not be maintained.
       final response = await _deleteMessageLock.synchronized(
-        () => _client.deleteMessage(message.id, hard: hard),
+        () => switch (scope) {
+          DeleteForMe() => _client.deleteMessageForMe(message.id),
+          DeleteForAll() => _client.deleteMessage(message.id, hard: scope.hard),
+        },
       );
 
       final deletedMessage = message.copyWith(
-        state: MessageState.deleted(hard: hard),
+        deletedForMe: scope is DeleteForMe,
+        state: MessageState.deleted(scope: scope),
       );
 
-      state?.deleteMessage(deletedMessage, hardDelete: hard);
-
-      if (hard) {
-        deletedMessage.attachments.forEach((attachment) {
-          if (attachment.uploadState.isSuccess) {
-            if (attachment.type == AttachmentType.image) {
-              deleteImage(attachment.imageUrl!);
-            } else if (attachment.type == AttachmentType.file) {
-              deleteFile(attachment.assetUrl!);
-            }
-          }
-        });
-      }
+      state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
+      // If hard delete, also delete the attachments from the server.
+      if (scope.hard) _deleteMessageAttachments(deletedMessage);
 
       return response;
     } catch (e) {
       final failedMessage = message.copyWith(
         // Update the message state to failed.
-        state: MessageState.deletingFailed(hard: hard),
+        state: MessageState.deletingFailed(scope: scope),
       );
 
-      state?.deleteMessage(failedMessage, hardDelete: hard);
+      state?.deleteMessage(failedMessage, hardDelete: scope.hard);
       // If the error is retriable, add it to the retry queue.
       if (e is StreamChatNetworkError && e.isRetriable) {
         state?._retryQueue.add([failedMessage]);
       }
 
       rethrow;
+    }
+  }
+
+  // Deletes a local [message] that is not yet sent to the server.
+  //
+  // This is typically called when a user wants to delete a message that they
+  // have composed but not yet sent, or if a message failed to send and the user
+  // wants to remove it from their local view.
+  void _deleteLocalMessage(Message message) {
+    state?.deleteMessage(
+      hardDelete: true, // Local messages are always hard deleted.
+      message.copyWith(
+        type: MessageType.deleted,
+        localDeletedAt: DateTime.now(),
+        state: MessageState.hardDeleted,
+      ),
+    );
+
+    // Removing the attachments upload completer to stop the `sendMessage`
+    // waiting for attachments to complete.
+    final completer = _messageAttachmentsUploadCompleter.remove(message.id);
+    completer?.completeError(const StreamChatError('Message deleted'));
+  }
+
+  // Deletes all the attachments associated with the given [message]
+  // from the server. This is typically called when a message is hard deleted.
+  Future<void> _deleteMessageAttachments(Message message) async {
+    final attachments = message.attachments;
+    final deleteFutures = attachments.map((it) async {
+      if (it.imageUrl case final url?) return deleteImage(url);
+      if (it.assetUrl case final url?) return deleteFile(url);
+    });
+
+    try {
+      await Future.wait(deleteFutures);
+    } catch (e, stk) {
+      _client.logger.warning('Error deleting message attachments', e, stk);
     }
   }
 
@@ -1009,9 +1059,12 @@ class Channel {
   /// - For [MessageState.partialUpdatingFailed], it attempts to partially
   ///   update the message with the same 'set' and 'unset' parameters that were
   ///   used in the original request.
-  /// - For [MessageState.deletingFailed], it attempts to delete the message.
-  ///   with the same 'hard' parameter that was used in the original request
+  /// - For [MessageState.deletingFailed], it attempts to delete the message
+  ///   again, using the same scope (for me or for all) as the original request.
   /// - For messages with [isBouncedWithError], it attempts to send the message.
+  ///
+  /// Throws a [StateError] if the message is not in a failed state or
+  /// bounced with an error.
   Future<Object> retryMessage(Message message) async {
     assert(
       message.state.isFailed || message.isBouncedWithError,
@@ -1038,7 +1091,10 @@ class Channel {
             skipEnrichUrl: skipEnrichUrl,
           );
         },
-        deletingFailed: (hard) => deleteMessage(message, hard: hard),
+        deletingFailed: (scope) => switch (scope) {
+          DeleteForMe() => deleteMessageForMe(message),
+          DeleteForAll(hard: final hard) => deleteMessage(message, hard: hard),
+        },
       ),
       orElse: () {
         // Check if the message is bounced with error.
@@ -2996,8 +3052,12 @@ class ChannelClientState {
 
   void _listenMessageDeleted() {
     _subscriptions.add(_channel.on(EventType.messageDeleted).listen((event) {
-      final message = event.message!;
       final hardDelete = event.hardDelete ?? false;
+
+      final message = event.message!.copyWith(
+        // TODO: Remove once deletedForMe is properly enriched on the backend.
+        deletedForMe: event.deletedForMe,
+      );
 
       return deleteMessage(message, hardDelete: hardDelete);
     }));

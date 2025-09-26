@@ -54,6 +54,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       deletedAt: json['deleted_at'] == null
           ? null
           : DateTime.parse(json['deleted_at'] as String),
+      deletedForMe: json['deleted_for_me'] as bool?,
       messageTextUpdatedAt: json['message_text_updated_at'] == null
           ? null
           : DateTime.parse(json['message_text_updated_at'] as String),

@@ -787,6 +787,15 @@ class $MessagesTable extends Messages
   late final GeneratedColumn<DateTime> remoteDeletedAt =
       GeneratedColumn<DateTime>('remote_deleted_at', aliasedName, true,
           type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _deletedForMeMeta =
+      const VerificationMeta('deletedForMe');
+  @override
+  late final GeneratedColumn<bool> deletedForMe = GeneratedColumn<bool>(
+      'deleted_for_me', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("deleted_for_me" IN (0, 1))'));
   static const VerificationMeta _messageTextUpdatedAtMeta =
       const VerificationMeta('messageTextUpdatedAt');
   @override
@@ -874,6 +883,7 @@ class $MessagesTable extends Messages
         remoteUpdatedAt,
         localDeletedAt,
         remoteDeletedAt,
+        deletedForMe,
         messageTextUpdatedAt,
         userId,
         pinned,
@@ -986,6 +996,12 @@ class $MessagesTable extends Messages
           remoteDeletedAt.isAcceptableOrUnknown(
               data['remote_deleted_at']!, _remoteDeletedAtMeta));
     }
+    if (data.containsKey('deleted_for_me')) {
+      context.handle(
+          _deletedForMeMeta,
+          deletedForMe.isAcceptableOrUnknown(
+              data['deleted_for_me']!, _deletedForMeMeta));
+    }
     if (data.containsKey('message_text_updated_at')) {
       context.handle(
           _messageTextUpdatedAtMeta,
@@ -1076,6 +1092,8 @@ class $MessagesTable extends Messages
           DriftSqlType.dateTime, data['${effectivePrefix}local_deleted_at']),
       remoteDeletedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}remote_deleted_at']),
+      deletedForMe: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted_for_me']),
       messageTextUpdatedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime,
           data['${effectivePrefix}message_text_updated_at']),
@@ -1190,6 +1208,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   /// The DateTime on which the message was deleted on the server.
   final DateTime? remoteDeletedAt;
 
+  /// Whether the message was deleted only for the current user.
+  final bool? deletedForMe;
+
   /// The DateTime at which the message text was edited
   final DateTime? messageTextUpdatedAt;
 
@@ -1240,6 +1261,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       this.remoteUpdatedAt,
       this.localDeletedAt,
       this.remoteDeletedAt,
+      this.deletedForMe,
       this.messageTextUpdatedAt,
       this.userId,
       required this.pinned,
@@ -1308,6 +1330,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     if (!nullToAbsent || remoteDeletedAt != null) {
       map['remote_deleted_at'] = Variable<DateTime>(remoteDeletedAt);
     }
+    if (!nullToAbsent || deletedForMe != null) {
+      map['deleted_for_me'] = Variable<bool>(deletedForMe);
+    }
     if (!nullToAbsent || messageTextUpdatedAt != null) {
       map['message_text_updated_at'] = Variable<DateTime>(messageTextUpdatedAt);
     }
@@ -1365,6 +1390,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       remoteUpdatedAt: serializer.fromJson<DateTime?>(json['remoteUpdatedAt']),
       localDeletedAt: serializer.fromJson<DateTime?>(json['localDeletedAt']),
       remoteDeletedAt: serializer.fromJson<DateTime?>(json['remoteDeletedAt']),
+      deletedForMe: serializer.fromJson<bool?>(json['deletedForMe']),
       messageTextUpdatedAt:
           serializer.fromJson<DateTime?>(json['messageTextUpdatedAt']),
       userId: serializer.fromJson<String?>(json['userId']),
@@ -1404,6 +1430,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'remoteUpdatedAt': serializer.toJson<DateTime?>(remoteUpdatedAt),
       'localDeletedAt': serializer.toJson<DateTime?>(localDeletedAt),
       'remoteDeletedAt': serializer.toJson<DateTime?>(remoteDeletedAt),
+      'deletedForMe': serializer.toJson<bool?>(deletedForMe),
       'messageTextUpdatedAt':
           serializer.toJson<DateTime?>(messageTextUpdatedAt),
       'userId': serializer.toJson<String?>(userId),
@@ -1441,6 +1468,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           Value<DateTime?> remoteUpdatedAt = const Value.absent(),
           Value<DateTime?> localDeletedAt = const Value.absent(),
           Value<DateTime?> remoteDeletedAt = const Value.absent(),
+          Value<bool?> deletedForMe = const Value.absent(),
           Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
           Value<String?> userId = const Value.absent(),
           bool? pinned,
@@ -1485,6 +1513,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         remoteDeletedAt: remoteDeletedAt.present
             ? remoteDeletedAt.value
             : this.remoteDeletedAt,
+        deletedForMe:
+            deletedForMe.present ? deletedForMe.value : this.deletedForMe,
         messageTextUpdatedAt: messageTextUpdatedAt.present
             ? messageTextUpdatedAt.value
             : this.messageTextUpdatedAt,
@@ -1546,6 +1576,9 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       remoteDeletedAt: data.remoteDeletedAt.present
           ? data.remoteDeletedAt.value
           : this.remoteDeletedAt,
+      deletedForMe: data.deletedForMe.present
+          ? data.deletedForMe.value
+          : this.deletedForMe,
       messageTextUpdatedAt: data.messageTextUpdatedAt.present
           ? data.messageTextUpdatedAt.value
           : this.messageTextUpdatedAt,
@@ -1590,6 +1623,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
           ..write('localDeletedAt: $localDeletedAt, ')
           ..write('remoteDeletedAt: $remoteDeletedAt, ')
+          ..write('deletedForMe: $deletedForMe, ')
           ..write('messageTextUpdatedAt: $messageTextUpdatedAt, ')
           ..write('userId: $userId, ')
           ..write('pinned: $pinned, ')
@@ -1626,6 +1660,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         remoteUpdatedAt,
         localDeletedAt,
         remoteDeletedAt,
+        deletedForMe,
         messageTextUpdatedAt,
         userId,
         pinned,
@@ -1661,6 +1696,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.remoteUpdatedAt == this.remoteUpdatedAt &&
           other.localDeletedAt == this.localDeletedAt &&
           other.remoteDeletedAt == this.remoteDeletedAt &&
+          other.deletedForMe == this.deletedForMe &&
           other.messageTextUpdatedAt == this.messageTextUpdatedAt &&
           other.userId == this.userId &&
           other.pinned == this.pinned &&
@@ -1694,6 +1730,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<DateTime?> remoteUpdatedAt;
   final Value<DateTime?> localDeletedAt;
   final Value<DateTime?> remoteDeletedAt;
+  final Value<bool?> deletedForMe;
   final Value<DateTime?> messageTextUpdatedAt;
   final Value<String?> userId;
   final Value<bool> pinned;
@@ -1726,6 +1763,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.remoteUpdatedAt = const Value.absent(),
     this.localDeletedAt = const Value.absent(),
     this.remoteDeletedAt = const Value.absent(),
+    this.deletedForMe = const Value.absent(),
     this.messageTextUpdatedAt = const Value.absent(),
     this.userId = const Value.absent(),
     this.pinned = const Value.absent(),
@@ -1759,6 +1797,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.remoteUpdatedAt = const Value.absent(),
     this.localDeletedAt = const Value.absent(),
     this.remoteDeletedAt = const Value.absent(),
+    this.deletedForMe = const Value.absent(),
     this.messageTextUpdatedAt = const Value.absent(),
     this.userId = const Value.absent(),
     this.pinned = const Value.absent(),
@@ -1796,6 +1835,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<DateTime>? remoteUpdatedAt,
     Expression<DateTime>? localDeletedAt,
     Expression<DateTime>? remoteDeletedAt,
+    Expression<bool>? deletedForMe,
     Expression<DateTime>? messageTextUpdatedAt,
     Expression<String>? userId,
     Expression<bool>? pinned,
@@ -1829,6 +1869,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (remoteUpdatedAt != null) 'remote_updated_at': remoteUpdatedAt,
       if (localDeletedAt != null) 'local_deleted_at': localDeletedAt,
       if (remoteDeletedAt != null) 'remote_deleted_at': remoteDeletedAt,
+      if (deletedForMe != null) 'deleted_for_me': deletedForMe,
       if (messageTextUpdatedAt != null)
         'message_text_updated_at': messageTextUpdatedAt,
       if (userId != null) 'user_id': userId,
@@ -1866,6 +1907,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<DateTime?>? remoteUpdatedAt,
       Value<DateTime?>? localDeletedAt,
       Value<DateTime?>? remoteDeletedAt,
+      Value<bool?>? deletedForMe,
       Value<DateTime?>? messageTextUpdatedAt,
       Value<String?>? userId,
       Value<bool>? pinned,
@@ -1898,6 +1940,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       remoteUpdatedAt: remoteUpdatedAt ?? this.remoteUpdatedAt,
       localDeletedAt: localDeletedAt ?? this.localDeletedAt,
       remoteDeletedAt: remoteDeletedAt ?? this.remoteDeletedAt,
+      deletedForMe: deletedForMe ?? this.deletedForMe,
       messageTextUpdatedAt: messageTextUpdatedAt ?? this.messageTextUpdatedAt,
       userId: userId ?? this.userId,
       pinned: pinned ?? this.pinned,
@@ -1978,6 +2021,9 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     if (remoteDeletedAt.present) {
       map['remote_deleted_at'] = Variable<DateTime>(remoteDeletedAt.value);
     }
+    if (deletedForMe.present) {
+      map['deleted_for_me'] = Variable<bool>(deletedForMe.value);
+    }
     if (messageTextUpdatedAt.present) {
       map['message_text_updated_at'] =
           Variable<DateTime>(messageTextUpdatedAt.value);
@@ -2042,6 +2088,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
           ..write('localDeletedAt: $localDeletedAt, ')
           ..write('remoteDeletedAt: $remoteDeletedAt, ')
+          ..write('deletedForMe: $deletedForMe, ')
           ..write('messageTextUpdatedAt: $messageTextUpdatedAt, ')
           ..write('userId: $userId, ')
           ..write('pinned: $pinned, ')
@@ -3377,6 +3424,15 @@ class $PinnedMessagesTable extends PinnedMessages
   late final GeneratedColumn<DateTime> remoteDeletedAt =
       GeneratedColumn<DateTime>('remote_deleted_at', aliasedName, true,
           type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _deletedForMeMeta =
+      const VerificationMeta('deletedForMe');
+  @override
+  late final GeneratedColumn<bool> deletedForMe = GeneratedColumn<bool>(
+      'deleted_for_me', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("deleted_for_me" IN (0, 1))'));
   static const VerificationMeta _messageTextUpdatedAtMeta =
       const VerificationMeta('messageTextUpdatedAt');
   @override
@@ -3462,6 +3518,7 @@ class $PinnedMessagesTable extends PinnedMessages
         remoteUpdatedAt,
         localDeletedAt,
         remoteDeletedAt,
+        deletedForMe,
         messageTextUpdatedAt,
         userId,
         pinned,
@@ -3575,6 +3632,12 @@ class $PinnedMessagesTable extends PinnedMessages
           remoteDeletedAt.isAcceptableOrUnknown(
               data['remote_deleted_at']!, _remoteDeletedAtMeta));
     }
+    if (data.containsKey('deleted_for_me')) {
+      context.handle(
+          _deletedForMeMeta,
+          deletedForMe.isAcceptableOrUnknown(
+              data['deleted_for_me']!, _deletedForMeMeta));
+    }
     if (data.containsKey('message_text_updated_at')) {
       context.handle(
           _messageTextUpdatedAtMeta,
@@ -3665,6 +3728,8 @@ class $PinnedMessagesTable extends PinnedMessages
           DriftSqlType.dateTime, data['${effectivePrefix}local_deleted_at']),
       remoteDeletedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}remote_deleted_at']),
+      deletedForMe: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}deleted_for_me']),
       messageTextUpdatedAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime,
           data['${effectivePrefix}message_text_updated_at']),
@@ -3781,6 +3846,9 @@ class PinnedMessageEntity extends DataClass
   /// The DateTime on which the message was deleted on the server.
   final DateTime? remoteDeletedAt;
 
+  /// Whether the message was deleted only for the current user.
+  final bool? deletedForMe;
+
   /// The DateTime at which the message text was edited
   final DateTime? messageTextUpdatedAt;
 
@@ -3831,6 +3899,7 @@ class PinnedMessageEntity extends DataClass
       this.remoteUpdatedAt,
       this.localDeletedAt,
       this.remoteDeletedAt,
+      this.deletedForMe,
       this.messageTextUpdatedAt,
       this.userId,
       required this.pinned,
@@ -3899,6 +3968,9 @@ class PinnedMessageEntity extends DataClass
     if (!nullToAbsent || remoteDeletedAt != null) {
       map['remote_deleted_at'] = Variable<DateTime>(remoteDeletedAt);
     }
+    if (!nullToAbsent || deletedForMe != null) {
+      map['deleted_for_me'] = Variable<bool>(deletedForMe);
+    }
     if (!nullToAbsent || messageTextUpdatedAt != null) {
       map['message_text_updated_at'] = Variable<DateTime>(messageTextUpdatedAt);
     }
@@ -3957,6 +4029,7 @@ class PinnedMessageEntity extends DataClass
       remoteUpdatedAt: serializer.fromJson<DateTime?>(json['remoteUpdatedAt']),
       localDeletedAt: serializer.fromJson<DateTime?>(json['localDeletedAt']),
       remoteDeletedAt: serializer.fromJson<DateTime?>(json['remoteDeletedAt']),
+      deletedForMe: serializer.fromJson<bool?>(json['deletedForMe']),
       messageTextUpdatedAt:
           serializer.fromJson<DateTime?>(json['messageTextUpdatedAt']),
       userId: serializer.fromJson<String?>(json['userId']),
@@ -3996,6 +4069,7 @@ class PinnedMessageEntity extends DataClass
       'remoteUpdatedAt': serializer.toJson<DateTime?>(remoteUpdatedAt),
       'localDeletedAt': serializer.toJson<DateTime?>(localDeletedAt),
       'remoteDeletedAt': serializer.toJson<DateTime?>(remoteDeletedAt),
+      'deletedForMe': serializer.toJson<bool?>(deletedForMe),
       'messageTextUpdatedAt':
           serializer.toJson<DateTime?>(messageTextUpdatedAt),
       'userId': serializer.toJson<String?>(userId),
@@ -4033,6 +4107,7 @@ class PinnedMessageEntity extends DataClass
           Value<DateTime?> remoteUpdatedAt = const Value.absent(),
           Value<DateTime?> localDeletedAt = const Value.absent(),
           Value<DateTime?> remoteDeletedAt = const Value.absent(),
+          Value<bool?> deletedForMe = const Value.absent(),
           Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
           Value<String?> userId = const Value.absent(),
           bool? pinned,
@@ -4077,6 +4152,8 @@ class PinnedMessageEntity extends DataClass
         remoteDeletedAt: remoteDeletedAt.present
             ? remoteDeletedAt.value
             : this.remoteDeletedAt,
+        deletedForMe:
+            deletedForMe.present ? deletedForMe.value : this.deletedForMe,
         messageTextUpdatedAt: messageTextUpdatedAt.present
             ? messageTextUpdatedAt.value
             : this.messageTextUpdatedAt,
@@ -4138,6 +4215,9 @@ class PinnedMessageEntity extends DataClass
       remoteDeletedAt: data.remoteDeletedAt.present
           ? data.remoteDeletedAt.value
           : this.remoteDeletedAt,
+      deletedForMe: data.deletedForMe.present
+          ? data.deletedForMe.value
+          : this.deletedForMe,
       messageTextUpdatedAt: data.messageTextUpdatedAt.present
           ? data.messageTextUpdatedAt.value
           : this.messageTextUpdatedAt,
@@ -4182,6 +4262,7 @@ class PinnedMessageEntity extends DataClass
           ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
           ..write('localDeletedAt: $localDeletedAt, ')
           ..write('remoteDeletedAt: $remoteDeletedAt, ')
+          ..write('deletedForMe: $deletedForMe, ')
           ..write('messageTextUpdatedAt: $messageTextUpdatedAt, ')
           ..write('userId: $userId, ')
           ..write('pinned: $pinned, ')
@@ -4218,6 +4299,7 @@ class PinnedMessageEntity extends DataClass
         remoteUpdatedAt,
         localDeletedAt,
         remoteDeletedAt,
+        deletedForMe,
         messageTextUpdatedAt,
         userId,
         pinned,
@@ -4253,6 +4335,7 @@ class PinnedMessageEntity extends DataClass
           other.remoteUpdatedAt == this.remoteUpdatedAt &&
           other.localDeletedAt == this.localDeletedAt &&
           other.remoteDeletedAt == this.remoteDeletedAt &&
+          other.deletedForMe == this.deletedForMe &&
           other.messageTextUpdatedAt == this.messageTextUpdatedAt &&
           other.userId == this.userId &&
           other.pinned == this.pinned &&
@@ -4286,6 +4369,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<DateTime?> remoteUpdatedAt;
   final Value<DateTime?> localDeletedAt;
   final Value<DateTime?> remoteDeletedAt;
+  final Value<bool?> deletedForMe;
   final Value<DateTime?> messageTextUpdatedAt;
   final Value<String?> userId;
   final Value<bool> pinned;
@@ -4318,6 +4402,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.remoteUpdatedAt = const Value.absent(),
     this.localDeletedAt = const Value.absent(),
     this.remoteDeletedAt = const Value.absent(),
+    this.deletedForMe = const Value.absent(),
     this.messageTextUpdatedAt = const Value.absent(),
     this.userId = const Value.absent(),
     this.pinned = const Value.absent(),
@@ -4351,6 +4436,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.remoteUpdatedAt = const Value.absent(),
     this.localDeletedAt = const Value.absent(),
     this.remoteDeletedAt = const Value.absent(),
+    this.deletedForMe = const Value.absent(),
     this.messageTextUpdatedAt = const Value.absent(),
     this.userId = const Value.absent(),
     this.pinned = const Value.absent(),
@@ -4388,6 +4474,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Expression<DateTime>? remoteUpdatedAt,
     Expression<DateTime>? localDeletedAt,
     Expression<DateTime>? remoteDeletedAt,
+    Expression<bool>? deletedForMe,
     Expression<DateTime>? messageTextUpdatedAt,
     Expression<String>? userId,
     Expression<bool>? pinned,
@@ -4421,6 +4508,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (remoteUpdatedAt != null) 'remote_updated_at': remoteUpdatedAt,
       if (localDeletedAt != null) 'local_deleted_at': localDeletedAt,
       if (remoteDeletedAt != null) 'remote_deleted_at': remoteDeletedAt,
+      if (deletedForMe != null) 'deleted_for_me': deletedForMe,
       if (messageTextUpdatedAt != null)
         'message_text_updated_at': messageTextUpdatedAt,
       if (userId != null) 'user_id': userId,
@@ -4458,6 +4546,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       Value<DateTime?>? remoteUpdatedAt,
       Value<DateTime?>? localDeletedAt,
       Value<DateTime?>? remoteDeletedAt,
+      Value<bool?>? deletedForMe,
       Value<DateTime?>? messageTextUpdatedAt,
       Value<String?>? userId,
       Value<bool>? pinned,
@@ -4490,6 +4579,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       remoteUpdatedAt: remoteUpdatedAt ?? this.remoteUpdatedAt,
       localDeletedAt: localDeletedAt ?? this.localDeletedAt,
       remoteDeletedAt: remoteDeletedAt ?? this.remoteDeletedAt,
+      deletedForMe: deletedForMe ?? this.deletedForMe,
       messageTextUpdatedAt: messageTextUpdatedAt ?? this.messageTextUpdatedAt,
       userId: userId ?? this.userId,
       pinned: pinned ?? this.pinned,
@@ -4572,6 +4662,9 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     if (remoteDeletedAt.present) {
       map['remote_deleted_at'] = Variable<DateTime>(remoteDeletedAt.value);
     }
+    if (deletedForMe.present) {
+      map['deleted_for_me'] = Variable<bool>(deletedForMe.value);
+    }
     if (messageTextUpdatedAt.present) {
       map['message_text_updated_at'] =
           Variable<DateTime>(messageTextUpdatedAt.value);
@@ -4636,6 +4729,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
           ..write('localDeletedAt: $localDeletedAt, ')
           ..write('remoteDeletedAt: $remoteDeletedAt, ')
+          ..write('deletedForMe: $deletedForMe, ')
           ..write('messageTextUpdatedAt: $messageTextUpdatedAt, ')
           ..write('userId: $userId, ')
           ..write('pinned: $pinned, ')
@@ -7432,6 +7526,12 @@ class $MembersTable extends Members
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String>
+      deletedMessages = GeneratedColumn<String>(
+              'deleted_messages', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<List<String>>($MembersTable.$converterdeletedMessages);
+  @override
   List<GeneratedColumn> get $columns => [
         userId,
         channelCid,
@@ -7446,7 +7546,8 @@ class $MembersTable extends Members
         isModerator,
         extraData,
         createdAt,
-        updatedAt
+        updatedAt,
+        deletedMessages
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -7566,6 +7667,9 @@ class $MembersTable extends Members
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedMessages: $MembersTable.$converterdeletedMessages.fromSql(
+          attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}deleted_messages'])!),
     );
   }
 
@@ -7578,6 +7682,8 @@ class $MembersTable extends Members
       MapConverter();
   static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
       NullAwareTypeConverter.wrap($converterextraData);
+  static TypeConverter<List<String>, String> $converterdeletedMessages =
+      ListConverter<String>();
 }
 
 class MemberEntity extends DataClass implements Insertable<MemberEntity> {
@@ -7622,6 +7728,12 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
 
   /// The last date of update
   final DateTime updatedAt;
+
+  /// List of message ids deleted by the member only for himself.
+  ///
+  /// These messages are now marked deleted for this member, but are still
+  /// kept as regular to other channel members.
+  final List<String> deletedMessages;
   const MemberEntity(
       {required this.userId,
       required this.channelCid,
@@ -7636,7 +7748,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       required this.isModerator,
       this.extraData,
       required this.createdAt,
-      required this.updatedAt});
+      required this.updatedAt,
+      required this.deletedMessages});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -7667,6 +7780,10 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    {
+      map['deleted_messages'] = Variable<String>(
+          $MembersTable.$converterdeletedMessages.toSql(deletedMessages));
+    }
     return map;
   }
 
@@ -7690,6 +7807,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedMessages:
+          serializer.fromJson<List<String>>(json['deletedMessages']),
     );
   }
   @override
@@ -7710,6 +7829,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedMessages': serializer.toJson<List<String>>(deletedMessages),
     };
   }
 
@@ -7727,7 +7847,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           bool? isModerator,
           Value<Map<String, dynamic>?> extraData = const Value.absent(),
           DateTime? createdAt,
-          DateTime? updatedAt}) =>
+          DateTime? updatedAt,
+          List<String>? deletedMessages}) =>
       MemberEntity(
         userId: userId ?? this.userId,
         channelCid: channelCid ?? this.channelCid,
@@ -7747,6 +7868,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
         extraData: extraData.present ? extraData.value : this.extraData,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        deletedMessages: deletedMessages ?? this.deletedMessages,
       );
   MemberEntity copyWithCompanion(MembersCompanion data) {
     return MemberEntity(
@@ -7774,6 +7896,9 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedMessages: data.deletedMessages.present
+          ? data.deletedMessages.value
+          : this.deletedMessages,
     );
   }
 
@@ -7793,7 +7918,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           ..write('isModerator: $isModerator, ')
           ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedMessages: $deletedMessages')
           ..write(')'))
         .toString();
   }
@@ -7813,7 +7939,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
       isModerator,
       extraData,
       createdAt,
-      updatedAt);
+      updatedAt,
+      deletedMessages);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7831,7 +7958,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
           other.isModerator == this.isModerator &&
           other.extraData == this.extraData &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.deletedMessages == this.deletedMessages);
 }
 
 class MembersCompanion extends UpdateCompanion<MemberEntity> {
@@ -7849,6 +7977,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
   final Value<Map<String, dynamic>?> extraData;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<List<String>> deletedMessages;
   final Value<int> rowid;
   const MembersCompanion({
     this.userId = const Value.absent(),
@@ -7865,6 +7994,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedMessages = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MembersCompanion.insert({
@@ -7882,9 +8012,11 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     this.extraData = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    required List<String> deletedMessages,
     this.rowid = const Value.absent(),
   })  : userId = Value(userId),
-        channelCid = Value(channelCid);
+        channelCid = Value(channelCid),
+        deletedMessages = Value(deletedMessages);
   static Insertable<MemberEntity> custom({
     Expression<String>? userId,
     Expression<String>? channelCid,
@@ -7900,6 +8032,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     Expression<String>? extraData,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? deletedMessages,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7917,6 +8050,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       if (extraData != null) 'extra_data': extraData,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedMessages != null) 'deleted_messages': deletedMessages,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7936,6 +8070,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       Value<Map<String, dynamic>?>? extraData,
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
+      Value<List<String>>? deletedMessages,
       Value<int>? rowid}) {
     return MembersCompanion(
       userId: userId ?? this.userId,
@@ -7952,6 +8087,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
       extraData: extraData ?? this.extraData,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedMessages: deletedMessages ?? this.deletedMessages,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -8002,6 +8138,10 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (deletedMessages.present) {
+      map['deleted_messages'] = Variable<String>(
+          $MembersTable.$converterdeletedMessages.toSql(deletedMessages.value));
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -8025,6 +8165,7 @@ class MembersCompanion extends UpdateCompanion<MemberEntity> {
           ..write('extraData: $extraData, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('deletedMessages: $deletedMessages, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9785,6 +9926,7 @@ typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   Value<DateTime?> remoteUpdatedAt,
   Value<DateTime?> localDeletedAt,
   Value<DateTime?> remoteDeletedAt,
+  Value<bool?> deletedForMe,
   Value<DateTime?> messageTextUpdatedAt,
   Value<String?> userId,
   Value<bool> pinned,
@@ -9818,6 +9960,7 @@ typedef $$MessagesTableUpdateCompanionBuilder = MessagesCompanion Function({
   Value<DateTime?> remoteUpdatedAt,
   Value<DateTime?> localDeletedAt,
   Value<DateTime?> remoteDeletedAt,
+  Value<bool?> deletedForMe,
   Value<DateTime?> messageTextUpdatedAt,
   Value<String?> userId,
   Value<bool> pinned,
@@ -9978,6 +10121,9 @@ class $$MessagesTableFilterComposer
   ColumnFilters<DateTime> get remoteDeletedAt => $composableBuilder(
       column: $table.remoteDeletedAt,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deletedForMe => $composableBuilder(
+      column: $table.deletedForMe, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get messageTextUpdatedAt => $composableBuilder(
       column: $table.messageTextUpdatedAt,
@@ -10179,6 +10325,10 @@ class $$MessagesTableOrderingComposer
       column: $table.remoteDeletedAt,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get deletedForMe => $composableBuilder(
+      column: $table.deletedForMe,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get messageTextUpdatedAt => $composableBuilder(
       column: $table.messageTextUpdatedAt,
       builder: (column) => ColumnOrderings(column));
@@ -10301,6 +10451,9 @@ class $$MessagesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get remoteDeletedAt => $composableBuilder(
       column: $table.remoteDeletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deletedForMe => $composableBuilder(
+      column: $table.deletedForMe, builder: (column) => column);
 
   GeneratedColumn<DateTime> get messageTextUpdatedAt => $composableBuilder(
       column: $table.messageTextUpdatedAt, builder: (column) => column);
@@ -10463,6 +10616,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<DateTime?> remoteUpdatedAt = const Value.absent(),
             Value<DateTime?> localDeletedAt = const Value.absent(),
             Value<DateTime?> remoteDeletedAt = const Value.absent(),
+            Value<bool?> deletedForMe = const Value.absent(),
             Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<bool> pinned = const Value.absent(),
@@ -10496,6 +10650,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             remoteUpdatedAt: remoteUpdatedAt,
             localDeletedAt: localDeletedAt,
             remoteDeletedAt: remoteDeletedAt,
+            deletedForMe: deletedForMe,
             messageTextUpdatedAt: messageTextUpdatedAt,
             userId: userId,
             pinned: pinned,
@@ -10530,6 +10685,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             Value<DateTime?> remoteUpdatedAt = const Value.absent(),
             Value<DateTime?> localDeletedAt = const Value.absent(),
             Value<DateTime?> remoteDeletedAt = const Value.absent(),
+            Value<bool?> deletedForMe = const Value.absent(),
             Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<bool> pinned = const Value.absent(),
@@ -10563,6 +10719,7 @@ class $$MessagesTableTableManager extends RootTableManager<
             remoteUpdatedAt: remoteUpdatedAt,
             localDeletedAt: localDeletedAt,
             remoteDeletedAt: remoteDeletedAt,
+            deletedForMe: deletedForMe,
             messageTextUpdatedAt: messageTextUpdatedAt,
             userId: userId,
             pinned: pinned,
@@ -11616,6 +11773,7 @@ typedef $$PinnedMessagesTableCreateCompanionBuilder = PinnedMessagesCompanion
   Value<DateTime?> remoteUpdatedAt,
   Value<DateTime?> localDeletedAt,
   Value<DateTime?> remoteDeletedAt,
+  Value<bool?> deletedForMe,
   Value<DateTime?> messageTextUpdatedAt,
   Value<String?> userId,
   Value<bool> pinned,
@@ -11650,6 +11808,7 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder = PinnedMessagesCompanion
   Value<DateTime?> remoteUpdatedAt,
   Value<DateTime?> localDeletedAt,
   Value<DateTime?> remoteDeletedAt,
+  Value<bool?> deletedForMe,
   Value<DateTime?> messageTextUpdatedAt,
   Value<String?> userId,
   Value<bool> pinned,
@@ -11770,6 +11929,9 @@ class $$PinnedMessagesTableFilterComposer
   ColumnFilters<DateTime> get remoteDeletedAt => $composableBuilder(
       column: $table.remoteDeletedAt,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get deletedForMe => $composableBuilder(
+      column: $table.deletedForMe, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get messageTextUpdatedAt => $composableBuilder(
       column: $table.messageTextUpdatedAt,
@@ -11914,6 +12076,10 @@ class $$PinnedMessagesTableOrderingComposer
       column: $table.remoteDeletedAt,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get deletedForMe => $composableBuilder(
+      column: $table.deletedForMe,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get messageTextUpdatedAt => $composableBuilder(
       column: $table.messageTextUpdatedAt,
       builder: (column) => ColumnOrderings(column));
@@ -12020,6 +12186,9 @@ class $$PinnedMessagesTableAnnotationComposer
   GeneratedColumn<DateTime> get remoteDeletedAt => $composableBuilder(
       column: $table.remoteDeletedAt, builder: (column) => column);
 
+  GeneratedColumn<bool> get deletedForMe => $composableBuilder(
+      column: $table.deletedForMe, builder: (column) => column);
+
   GeneratedColumn<DateTime> get messageTextUpdatedAt => $composableBuilder(
       column: $table.messageTextUpdatedAt, builder: (column) => column);
 
@@ -12121,6 +12290,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<DateTime?> remoteUpdatedAt = const Value.absent(),
             Value<DateTime?> localDeletedAt = const Value.absent(),
             Value<DateTime?> remoteDeletedAt = const Value.absent(),
+            Value<bool?> deletedForMe = const Value.absent(),
             Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<bool> pinned = const Value.absent(),
@@ -12154,6 +12324,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             remoteUpdatedAt: remoteUpdatedAt,
             localDeletedAt: localDeletedAt,
             remoteDeletedAt: remoteDeletedAt,
+            deletedForMe: deletedForMe,
             messageTextUpdatedAt: messageTextUpdatedAt,
             userId: userId,
             pinned: pinned,
@@ -12188,6 +12359,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             Value<DateTime?> remoteUpdatedAt = const Value.absent(),
             Value<DateTime?> localDeletedAt = const Value.absent(),
             Value<DateTime?> remoteDeletedAt = const Value.absent(),
+            Value<bool?> deletedForMe = const Value.absent(),
             Value<DateTime?> messageTextUpdatedAt = const Value.absent(),
             Value<String?> userId = const Value.absent(),
             Value<bool> pinned = const Value.absent(),
@@ -12221,6 +12393,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
             remoteUpdatedAt: remoteUpdatedAt,
             localDeletedAt: localDeletedAt,
             remoteDeletedAt: remoteDeletedAt,
+            deletedForMe: deletedForMe,
             messageTextUpdatedAt: messageTextUpdatedAt,
             userId: userId,
             pinned: pinned,
@@ -13969,6 +14142,7 @@ typedef $$MembersTableCreateCompanionBuilder = MembersCompanion Function({
   Value<Map<String, dynamic>?> extraData,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  required List<String> deletedMessages,
   Value<int> rowid,
 });
 typedef $$MembersTableUpdateCompanionBuilder = MembersCompanion Function({
@@ -13986,6 +14160,7 @@ typedef $$MembersTableUpdateCompanionBuilder = MembersCompanion Function({
   Value<Map<String, dynamic>?> extraData,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<List<String>> deletedMessages,
   Value<int> rowid,
 });
 
@@ -14062,6 +14237,11 @@ class $$MembersTableFilterComposer
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+      get deletedMessages => $composableBuilder(
+          column: $table.deletedMessages,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
   $$ChannelsTableFilterComposer get channelCid {
     final $$ChannelsTableFilterComposer composer = $composerBuilder(
         composer: this,
@@ -14134,6 +14314,10 @@ class $$MembersTableOrderingComposer
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get deletedMessages => $composableBuilder(
+      column: $table.deletedMessages,
+      builder: (column) => ColumnOrderings(column));
+
   $$ChannelsTableOrderingComposer get channelCid {
     final $$ChannelsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -14204,6 +14388,10 @@ class $$MembersTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<List<String>, String> get deletedMessages =>
+      $composableBuilder(
+          column: $table.deletedMessages, builder: (column) => column);
+
   $$ChannelsTableAnnotationComposer get channelCid {
     final $$ChannelsTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -14262,6 +14450,7 @@ class $$MembersTableTableManager extends RootTableManager<
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
+            Value<List<String>> deletedMessages = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               MembersCompanion(
@@ -14279,6 +14468,7 @@ class $$MembersTableTableManager extends RootTableManager<
             extraData: extraData,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            deletedMessages: deletedMessages,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -14296,6 +14486,7 @@ class $$MembersTableTableManager extends RootTableManager<
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
+            required List<String> deletedMessages,
             Value<int> rowid = const Value.absent(),
           }) =>
               MembersCompanion.insert(
@@ -14313,6 +14504,7 @@ class $$MembersTableTableManager extends RootTableManager<
             extraData: extraData,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            deletedMessages: deletedMessages,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
