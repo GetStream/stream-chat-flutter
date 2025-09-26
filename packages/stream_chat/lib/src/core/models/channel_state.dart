@@ -30,6 +30,7 @@ class ChannelState implements ComparableFieldProvider {
     this.read,
     this.membership,
     this.draft,
+    this.pendingMessages,
     this.pushPreferences,
   });
 
@@ -60,6 +61,29 @@ class ChannelState implements ComparableFieldProvider {
   /// The draft message for this channel if it exists.
   final Draft? draft;
 
+  static Object? _pendingMessagesReadValue(
+    Map<Object?, Object?> json,
+    String key,
+  ) {
+    final pendingMessageResponse = json[key] as List<Object?>?;
+    if (pendingMessageResponse == null) return null;
+
+    final value = pendingMessageResponse.map((it) {
+      final response = it as Map<String, Object?>?;
+      if (response == null) return null;
+
+      return response['message'] as Map<String, Object?>?;
+    }).nonNulls.toList();
+
+    return value;
+  }
+
+  /// List of messages pending for moderation on this channel.
+  ///
+  /// These messages are only visible to the author until they are approved.
+  @JsonKey(readValue: _pendingMessagesReadValue)
+  final List<Message>? pendingMessages;
+
   /// The push preferences for this channel if it exists.
   final ChannelPushPreference? pushPreferences;
 
@@ -81,6 +105,7 @@ class ChannelState implements ComparableFieldProvider {
     List<Read>? read,
     Member? membership,
     Object? draft = _nullConst,
+    List<Message>? pendingMessages,
     ChannelPushPreference? pushPreferences,
   }) =>
       ChannelState(
@@ -93,6 +118,7 @@ class ChannelState implements ComparableFieldProvider {
         read: read ?? this.read,
         membership: membership ?? this.membership,
         draft: draft == _nullConst ? this.draft : draft as Draft?,
+        pendingMessages: pendingMessages ?? this.pendingMessages,
         pushPreferences: pushPreferences ?? this.pushPreferences,
       );
 
