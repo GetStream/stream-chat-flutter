@@ -8,10 +8,6 @@ import '../matchers.dart';
 import '../mocks.dart';
 import '../utils.dart';
 
-void abc(String abc) {
-  print(abc);
-}
-
 void main() {
   group('Fake web-socket connection functions', () {
     const apiKey = 'test-api-key';
