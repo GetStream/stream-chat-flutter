@@ -606,7 +606,7 @@ void main() {
           final persistentChannelStates = List.generate(
             3,
             (index) => ChannelState(
-              channel: ChannelModel(cid: 'p-test-type-$index:p-test-id-$index'),
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
@@ -685,11 +685,11 @@ void main() {
               )).called(1);
 
           verify(() => persistence.getChannelThreads(any()))
-              .called((persistentChannelStates + channelStates).length);
+              .called(channelStates.length);
           verify(() => persistence.updateChannelState(any()))
-              .called((persistentChannelStates + channelStates).length);
+              .called(channelStates.length);
           verify(() => persistence.updateChannelThreads(any(), any()))
-              .called((persistentChannelStates + channelStates).length);
+              .called(channelStates.length);
           verify(() => persistence.updateChannelQueries(any(), any(),
               clearQueryCache: any(named: 'clearQueryCache'))).called(1);
         },
@@ -701,7 +701,7 @@ void main() {
           final persistentChannelStates = List.generate(
             3,
             (index) => ChannelState(
-              channel: ChannelModel(cid: 'p-test-type-$index:p-test-id-$index'),
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
