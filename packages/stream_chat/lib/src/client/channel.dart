@@ -2169,6 +2169,8 @@ class ChannelClientState {
 
     _listenChannelUpdated();
 
+    _listenChannelMessageCount();
+
     _listenMemberAdded();
 
     _listenMemberRemoved();
@@ -2345,6 +2347,23 @@ class ChannelClientState {
         members: channel.members,
       ));
     }));
+  }
+
+  void _listenChannelMessageCount() {
+    _subscriptions.add(_channel.on().listen(
+      (Event e) {
+        final messageCount = e.channelMessageCount;
+        if (messageCount == null) return;
+
+        updateChannelState(
+          channelState.copyWith(
+            channel: channelState.channel?.copyWith(
+              messageCount: messageCount,
+            ),
+          ),
+        );
+      },
+    ));
   }
 
   void _listenChannelTruncated() {
