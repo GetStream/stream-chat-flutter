@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed thread messages increasing the unread count in the main channel.
+
 ## 9.17.0
 
 🐞 Fixed
