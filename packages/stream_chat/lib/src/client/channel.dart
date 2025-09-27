@@ -416,6 +416,24 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.memberCount);
   }
 
+  /// Channel message count.
+  ///
+  /// Note: This field is only populated if the `count_messages` option is
+  /// enabled for your app.
+  int? get messageCount {
+    _checkInitialized();
+    return state!._channelState.channel?.messageCount;
+  }
+
+  /// Channel message count as a stream.
+  ///
+  /// Note: This field is only populated if the `count_messages` option is
+  /// enabled for your app.
+  Stream<int?> get messageCountStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.messageCount);
+  }
+
   /// Channel id.
   String? get id => state?._channelState.channel?.id ?? _id;
 
