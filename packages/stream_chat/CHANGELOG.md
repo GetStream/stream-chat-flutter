@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for `Channel.messageCount` field.
+
 ## 9.17.0
 
 🐞 Fixed
