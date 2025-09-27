@@ -463,11 +463,11 @@ class StreamMessageInput extends StatefulWidget {
   }
 
   static bool _defaultValidator(Message message) {
-    // The message is valid if it has text or attachments.
-    if (message.attachments.isNotEmpty) return true;
-    if (message.text?.trim() case final text? when text.isNotEmpty) return true;
+    final hasText = message.text?.trim().isNotEmpty == true;
+    final hasAttachments = message.attachments.isNotEmpty;
+    final hasPoll = message.pollId != null;
 
-    return false;
+    return hasText || hasAttachments || hasPoll;
   }
 
   static bool _defaultSendMessageKeyPredicate(
@@ -1593,6 +1593,10 @@ class StreamMessageInputState extends State<StreamMessageInput>
     };
 
     final draftMessage = message.toDraftMessage();
+
+    // If the draft message is not valid, we don't need to update it.
+    final isDraftValid = widget.validator.call(draftMessage.toMessage());
+    if (!isDraftValid) return;
 
     // If the draft message didn't change, we don't need to update it.
     if (draft?.message == draftMessage) return;
