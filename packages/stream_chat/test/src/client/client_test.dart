@@ -8,6 +8,10 @@ import '../matchers.dart';
 import '../mocks.dart';
 import '../utils.dart';
 
+void abc(String abc) {
+  print(abc);
+}
+
 void main() {
   group('Fake web-socket connection functions', () {
     const apiKey = 'test-api-key';
@@ -636,18 +640,19 @@ void main() {
             (_) async => QueryChannelsResponse()..channels = channelStates,
           );
 
-          when(() => persistence.getChannelThreads(any()))
-              .thenAnswer((_) async => {});
-          when(() => persistence.updateChannelThreads(any(), any()))
-              .thenAnswer((_) async => {});
-          when(() => persistence.getChannelStateByCid(any(),
-              messagePagination: any(named: 'messagePagination'),
-              pinnedMessagePagination:
-                  any(named: 'pinnedMessagePagination'))).thenAnswer(
-            (invocation) async => ChannelState(
-              channel: ChannelModel(cid: invocation.positionalArguments.first),
-            ),
+          when(() => persistence.getChannelThreads(any())).thenAnswer(
+            (_) async => <String, List<Message>>{
+              for (final channelState in channelStates)
+                channelState.channel!.cid: [
+                  Message(id: 'test-message-id', text: 'Test message')
+                ],
+            },
           );
+
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
           when(() => persistence.updateChannelQueries(any(), any(),
                   clearQueryCache: any(named: 'clearQueryCache')))
               .thenAnswer((_) => Future.value());
@@ -664,7 +669,7 @@ void main() {
 
           // Hack as `teardown` gets called even
           // before our stream starts emitting data
-          await delay(300);
+          await delay(1050);
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
@@ -685,13 +690,10 @@ void main() {
 
           verify(() => persistence.getChannelThreads(any()))
               .called((persistentChannelStates + channelStates).length);
+          verify(() => persistence.updateChannelState(any()))
+              .called((persistentChannelStates + channelStates).length);
           verify(() => persistence.updateChannelThreads(any(), any()))
               .called((persistentChannelStates + channelStates).length);
-          verify(
-            () => persistence.getChannelStateByCid(any(),
-                messagePagination: any(named: 'messagePagination'),
-                pinnedMessagePagination: any(named: 'pinnedMessagePagination')),
-          ).called((persistentChannelStates + channelStates).length);
           verify(() => persistence.updateChannelQueries(any(), any(),
               clearQueryCache: any(named: 'clearQueryCache'))).called(1);
         },
@@ -724,18 +726,19 @@ void main() {
                 paginationParams: any(named: 'paginationParams'),
               )).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
-          when(() => persistence.getChannelThreads(any()))
+          when(() => persistence.getChannelThreads(any())).thenAnswer(
+            (_) async => <String, List<Message>>{
+              for (final channelState in persistentChannelStates)
+                channelState.channel!.cid: [
+                  Message(id: 'test-message-id', text: 'Test message')
+                ],
+            },
+          );
+
+          when(() => persistence.updateChannelState(any()))
               .thenAnswer((_) async => {});
           when(() => persistence.updateChannelThreads(any(), any()))
               .thenAnswer((_) async => {});
-          when(() => persistence.getChannelStateByCid(any(),
-              messagePagination: any(named: 'messagePagination'),
-              pinnedMessagePagination:
-                  any(named: 'pinnedMessagePagination'))).thenAnswer(
-            (invocation) async => ChannelState(
-              channel: ChannelModel(cid: invocation.positionalArguments.first),
-            ),
-          );
 
           expectLater(
             client.queryChannels(),
@@ -747,7 +750,7 @@ void main() {
 
           // Hack as `teardown` gets called even
           // before our stream starts emitting data
-          await delay(300);
+          await delay(1050);
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
@@ -768,13 +771,10 @@ void main() {
 
           verify(() => persistence.getChannelThreads(any()))
               .called(persistentChannelStates.length);
+          verify(() => persistence.updateChannelState(any()))
+              .called(persistentChannelStates.length);
           verify(() => persistence.updateChannelThreads(any(), any()))
               .called(persistentChannelStates.length);
-          verify(
-            () => persistence.getChannelStateByCid(any(),
-                messagePagination: any(named: 'messagePagination'),
-                pinnedMessagePagination: any(named: 'pinnedMessagePagination')),
-          ).called(persistentChannelStates.length);
         },
       );
     });
