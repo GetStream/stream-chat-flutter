@@ -3242,7 +3242,7 @@ class ChannelClientState {
     if (message.isEphemeral) return false;
 
     // Don't count thread replies which are not shown in the channel as unread.
-    if (message.parentId != null && message.showInChannel == false) {
+    if (message.parentId != null && message.showInChannel != true) {
       return false;
     }
 
@@ -3263,6 +3263,18 @@ class ChannelClientState {
     // Don't count messages from muted users as unread.
     final isMuted = currentUser.mutes.any((it) => it.user.id == messageUser.id);
     if (isMuted) return false;
+
+    final lastRead = currentUserRead?.lastRead;
+    // Don't count messages created before the last read time as unread.
+    if (lastRead case final read? when message.createdAt.isBefore(read)) {
+      return false;
+    }
+
+    final lastReadMessageId = currentUserRead?.lastReadMessageId;
+    // Don't count if the last read message id is the same as the message id.
+    if (lastReadMessageId case final id? when message.id == id) {
+      return false;
+    }
 
     // If we've passed all checks, count the message as unread.
     return true;
