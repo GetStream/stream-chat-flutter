@@ -1,3 +1,7 @@
+## Upcoming
+
+- Added support for `Channel.messageCount` field.
+
 ## 9.17.0
 
 - Updated `stream_chat` dependency to [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).

@@ -5637,5 +5637,165 @@ void main() {
         },
       );
     });
+
+    group('Channel message count events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test(
+        'should update channel messageCount when event contains channelMessageCount',
+        () async {
+          // Verify initial state - no messageCount
+          expect(channel.messageCount, isNull);
+
+          // Create event with channelMessageCount
+          final messageCountEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            channelMessageCount: 42,
+          );
+
+          // Dispatch event
+          client.addEvent(messageCountEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify channel messageCount was updated
+          expect(channel.messageCount, equals(42));
+        },
+      );
+
+      test(
+        'should update channel messageCount from message.new and message.deleted events',
+        () async {
+          // Test with message.new event - count increases
+          final messageNewEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            message: Message(
+              id: 'new-message-1',
+              text: 'Hello world!',
+              user: User(id: 'user-1'),
+            ),
+            channelMessageCount: 1,
+          );
+
+          client.addEvent(messageNewEvent);
+          await Future.delayed(Duration.zero);
+          expect(channel.messageCount, equals(1));
+
+          // Test with another message.new event - count increases
+          final messageNewEvent2 = Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            message: Message(
+              id: 'new-message-2',
+              text: 'Second message',
+              user: User(id: 'user-2'),
+            ),
+            channelMessageCount: 2,
+          );
+
+          client.addEvent(messageNewEvent2);
+          await Future.delayed(Duration.zero);
+          expect(channel.messageCount, equals(2));
+
+          // Test with message.deleted event - count decreases
+          final messageDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageDeleted,
+            message: Message(
+              id: 'new-message-1',
+              text: 'Hello world!',
+              user: User(id: 'user-1'),
+            ),
+            channelMessageCount: 1,
+          );
+
+          client.addEvent(messageDeletedEvent);
+          await Future.delayed(Duration.zero);
+          expect(channel.messageCount, equals(1));
+        },
+      );
+
+      test(
+        'should preserve other channel properties when updating messageCount',
+        () async {
+          // Set initial channel state with some properties
+          final initialChannel = channel.state?.channelState.channel?.copyWith(
+            extraData: {'name': 'Test Channel'},
+            memberCount: 5,
+            frozen: true,
+          );
+
+          if (initialChannel != null) {
+            channel.state?.updateChannelState(
+              channel.state!.channelState.copyWith(channel: initialChannel),
+            );
+          }
+
+          // Verify initial state
+          expect(channel.name, 'Test Channel');
+          expect(channel.memberCount, equals(5));
+          expect(channel.frozen, equals(true));
+          expect(channel.messageCount, isNull);
+
+          // Update messageCount via event
+          final messageCountEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            channelMessageCount: 100,
+          );
+
+          client.addEvent(messageCountEvent);
+          await Future.delayed(Duration.zero);
+
+          // Verify messageCount was updated while preserving other properties
+          expect(channel.messageCount, equals(100));
+          expect(channel.name, 'Test Channel');
+          expect(channel.memberCount, equals(5));
+          expect(channel.frozen, equals(true));
+        },
+      );
+
+      test(
+        'should provide messageCountStream for reactive updates',
+        () async {
+          expectLater(
+            channel.messageCountStream.distinct(),
+            emitsInOrder([null, 1, 5, 10]),
+          );
+
+          // Update messageCount multiple times
+          final counts = [1, 5, 10];
+          for (final count in counts) {
+            final event = Event(
+              cid: channel.cid,
+              type: EventType.messageNew,
+              message: Message(
+                id: 'msg-$count',
+                text: 'Message $count',
+                user: User(id: 'user-1'),
+              ),
+              channelMessageCount: count,
+            );
+
+            client.addEvent(event);
+            await Future.delayed(Duration.zero);
+          }
+        },
+      );
+    });
   });
 }

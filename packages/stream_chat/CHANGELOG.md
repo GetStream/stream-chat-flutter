@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added support for `Channel.messageCount` field.
+
 🐞 Fixed
 
 - Fixed thread messages increasing the unread count in the main channel.
