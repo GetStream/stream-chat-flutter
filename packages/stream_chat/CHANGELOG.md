@@ -4,6 +4,11 @@
 
 - Added support for `Channel.messageCount` field.
 
+🐞 Fixed
+
+- Fixed `ChannelState.memberCount`, `ChannelState.config` and `ChannelState.extraData` getting reset
+  on first load.
+
 ## 9.17.0
 
 🐞 Fixed
