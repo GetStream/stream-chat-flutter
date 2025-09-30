@@ -417,6 +417,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
 
+      debouncedMarkRead.cancel();
+      debouncedMarkThreadRead.cancel();
+
       _messageNewListener?.cancel();
       _userReadListener?.cancel();
 
