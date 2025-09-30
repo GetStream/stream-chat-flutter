@@ -1478,17 +1478,42 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (_upToDate && lastFullyVisibleMessageChanged) {
       _lastFullyVisibleMessage = newLastFullyVisibleMessage;
 
-      if (streamChannel?.channel case final channel?) {
-        final hasUnread = (channel.state?.unreadCount ?? 0) > 0;
-        final allowMarkRead = channel.config?.readEvents == true;
-        final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
-
-        // Mark messages as read if it's allowed.
-        if (hasUnread && allowMarkRead && canMarkReadAtBottom) {
-          return _markMessagesAsRead().ignore();
-        }
-      }
+      // Mark messages as read if needed.
+      _maybeMarkMessagesAsRead().ignore();
     }
+  }
+
+  // Marks messages as read if the conditions are met.
+  //
+  // The conditions are:
+  // 1. There are unread messages.
+  // 2. Marking messages as read is allowed in the channel config.
+  // 3. Marking messages as read when at the bottom is enabled.
+  // 4. Mark messages as pending is not enabled in the channel config.
+  //
+  // If any of the conditions are not met, the function returns early.
+  // Otherwise, it calls the _markMessagesAsRead function to mark the messages
+  // as read.
+  Future<void> _maybeMarkMessagesAsRead() async {
+    final channel = streamChannel?.channel;
+    if (channel == null) return;
+
+    final hasUnread = (channel.state?.unreadCount ?? 0) > 0;
+    if (!hasUnread) return;
+
+    final allowMarkRead = channel.config?.readEvents == true;
+    if (!allowMarkRead) return;
+
+    // When markMessagesPending is enabled, messages are held for moderation
+    // and should not be immediately marked as read.
+    final markPendingEnabled = channel.config?.markMessagesPending == true;
+    if (markPendingEnabled) return;
+
+    final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
+    if (!canMarkReadAtBottom) return;
+
+    // Mark messages as read if it's allowed.
+    return _markMessagesAsRead();
   }
 
   void _getOnThreadTap() {
