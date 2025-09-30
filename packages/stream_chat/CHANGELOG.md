@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- Fixed thread messages increasing the unread count in the main channel.
 - Fixed `ChannelState.memberCount`, `ChannelState.config` and `ChannelState.extraData` getting reset
   on first load.
 

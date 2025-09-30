@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamMessageListView` not marking thread messages as read when scrolled to the bottom of the list.
+- Fixed `StreamMessageInput` not validating draft messages before creating/updating them.
+
 ## 9.17.0
 
 ✅ Added
