@@ -220,6 +220,28 @@ typedef AttachmentPickerOptionViewBuilder = Widget Function(
   StreamAttachmentPickerController controller,
 );
 
+/// Function signature for building the list of attachment picker options.
+///
+/// The [defaultOptions] parameter contains the standard attachment picker
+/// options(gallery, file, image, video, poll pickers). Developers can use
+/// these as-is, reorder them, or combine them with custom options.
+typedef AttachmentPickerOptionsBuilder = List<AttachmentPickerOption> Function(
+  BuildContext context,
+  List<AttachmentPickerOption> defaultOptions,
+);
+
+/// Function signature for building the list of web/desktop attachment picker
+/// options.
+///
+/// The [defaultOptions] parameter contains the standard web/desktop attachment
+/// picker options (image, video, file, poll pickers). Developers can use these
+/// as-is,reorder them, or combine them with custom options.
+typedef WebOrDesktopAttachmentPickerOptionsBuilder
+    = List<WebOrDesktopAttachmentPickerOption> Function(
+  BuildContext context,
+  List<WebOrDesktopAttachmentPickerOption> defaultOptions,
+);
+
 /// Model class for the attachment picker options.
 class AttachmentPickerOption {
   /// Creates a new instance of [AttachmentPickerOption].
@@ -751,6 +773,7 @@ Widget mobileAttachmentPickerBuilder({
   Poll? initialPoll,
   PollConfig? pollConfig,
   Iterable<AttachmentPickerOption>? customOptions,
+  AttachmentPickerOptionsBuilder? optionsBuilder,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
   ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
@@ -758,131 +781,148 @@ Widget mobileAttachmentPickerBuilder({
   double attachmentThumbnailScale = 1,
   ErrorListener? onError,
 }) {
+  assert(
+    optionsBuilder == null || customOptions == null,
+    'Cannot use both optionsBuilder and customOptions. '
+    'Use optionsBuilder for full control over options, '
+    'or customOptions for simple prepending of options.',
+  );
+
+  // Build default options
+  final defaultOptions = <AttachmentPickerOption>[
+    AttachmentPickerOption(
+      key: 'gallery-picker',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
+      supportedTypes: [
+        AttachmentPickerType.images,
+        AttachmentPickerType.videos,
+      ],
+      optionViewBuilder: (context, controller) {
+        final attachment = controller.value.attachments;
+        final selectedIds = attachment.map((it) => it.id);
+        return StreamGalleryPicker(
+          selectedMediaItems: selectedIds,
+          mediaThumbnailSize: attachmentThumbnailSize,
+          mediaThumbnailFormat: attachmentThumbnailFormat,
+          mediaThumbnailQuality: attachmentThumbnailQuality,
+          mediaThumbnailScale: attachmentThumbnailScale,
+          onMediaItemSelected: (media) async {
+            try {
+              if (selectedIds.contains(media.id)) {
+                return await controller.removeAssetAttachment(media);
+              }
+              return await controller.addAssetAttachment(media);
+            } catch (e, stk) {
+              if (onError != null) return onError.call(e, stk);
+              rethrow;
+            }
+          },
+        );
+      },
+    ),
+    AttachmentPickerOption(
+      key: 'file-picker',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
+      supportedTypes: [AttachmentPickerType.files],
+      optionViewBuilder: (context, controller) {
+        return StreamFilePicker(
+          onFilePicked: (file) async {
+            try {
+              if (file != null) await controller.addAttachment(file);
+              return Navigator.pop(context, controller.value);
+            } catch (e, stk) {
+              Navigator.pop(context, controller.value);
+              if (onError != null) return onError.call(e, stk);
+
+              rethrow;
+            }
+          },
+        );
+      },
+    ),
+    AttachmentPickerOption(
+      key: 'image-picker',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.camera),
+      supportedTypes: [AttachmentPickerType.images],
+      optionViewBuilder: (context, controller) {
+        return StreamImagePicker(
+          onImagePicked: (image) async {
+            try {
+              if (image != null) {
+                await controller.addAttachment(image);
+              }
+              return Navigator.pop(context, controller.value);
+            } catch (e, stk) {
+              Navigator.pop(context, controller.value);
+              if (onError != null) return onError.call(e, stk);
+
+              rethrow;
+            }
+          },
+        );
+      },
+    ),
+    AttachmentPickerOption(
+      key: 'video-picker',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
+      supportedTypes: [AttachmentPickerType.videos],
+      optionViewBuilder: (context, controller) {
+        return StreamVideoPicker(
+          onVideoPicked: (video) async {
+            try {
+              if (video != null) {
+                await controller.addAttachment(video);
+              }
+              return Navigator.pop(context, controller.value);
+            } catch (e, stk) {
+              Navigator.pop(context, controller.value);
+              if (onError != null) return onError.call(e, stk);
+
+              rethrow;
+            }
+          },
+        );
+      },
+    ),
+    AttachmentPickerOption(
+      key: 'poll-creator',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
+      supportedTypes: [AttachmentPickerType.poll],
+      optionViewBuilder: (context, controller) {
+        final initialPoll = controller.value.poll;
+        return StreamPollCreator(
+          poll: initialPoll,
+          config: pollConfig,
+          onPollCreated: (poll) {
+            try {
+              if (poll != null) controller.poll = poll;
+              return Navigator.pop(context, controller.value);
+            } catch (e, stk) {
+              Navigator.pop(context, controller.value);
+              if (onError != null) return onError.call(e, stk);
+
+              rethrow;
+            }
+          },
+        );
+      },
+    ),
+  ]
+      .where((option) => option.supportedTypes.every(allowedTypes.contains))
+      .toList();
+
+  // Determine final options based on builder or custom options
+  final finalOptions = optionsBuilder != null
+      ? optionsBuilder(context, defaultOptions).toSet()
+      : {
+          if (customOptions != null) ...customOptions,
+          ...defaultOptions,
+        };
+
   return StreamMobileAttachmentPickerBottomSheet(
     controller: controller,
     onSendValue: Navigator.of(context).pop,
-    options: {
-      ...{
-        if (customOptions != null) ...customOptions,
-        AttachmentPickerOption(
-          key: 'gallery-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
-          supportedTypes: [
-            AttachmentPickerType.images,
-            AttachmentPickerType.videos,
-          ],
-          optionViewBuilder: (context, controller) {
-            final attachment = controller.value.attachments;
-            final selectedIds = attachment.map((it) => it.id);
-            return StreamGalleryPicker(
-              selectedMediaItems: selectedIds,
-              mediaThumbnailSize: attachmentThumbnailSize,
-              mediaThumbnailFormat: attachmentThumbnailFormat,
-              mediaThumbnailQuality: attachmentThumbnailQuality,
-              mediaThumbnailScale: attachmentThumbnailScale,
-              onMediaItemSelected: (media) async {
-                try {
-                  if (selectedIds.contains(media.id)) {
-                    return await controller.removeAssetAttachment(media);
-                  }
-                  return await controller.addAssetAttachment(media);
-                } catch (e, stk) {
-                  if (onError != null) return onError.call(e, stk);
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-        AttachmentPickerOption(
-          key: 'file-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
-          supportedTypes: [AttachmentPickerType.files],
-          optionViewBuilder: (context, controller) {
-            return StreamFilePicker(
-              onFilePicked: (file) async {
-                try {
-                  if (file != null) await controller.addAttachment(file);
-                  return Navigator.pop(context, controller.value);
-                } catch (e, stk) {
-                  Navigator.pop(context, controller.value);
-                  if (onError != null) return onError.call(e, stk);
-
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-        AttachmentPickerOption(
-          key: 'image-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.camera),
-          supportedTypes: [AttachmentPickerType.images],
-          optionViewBuilder: (context, controller) {
-            return StreamImagePicker(
-              onImagePicked: (image) async {
-                try {
-                  if (image != null) {
-                    await controller.addAttachment(image);
-                  }
-                  return Navigator.pop(context, controller.value);
-                } catch (e, stk) {
-                  Navigator.pop(context, controller.value);
-                  if (onError != null) return onError.call(e, stk);
-
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-        AttachmentPickerOption(
-          key: 'video-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
-          supportedTypes: [AttachmentPickerType.videos],
-          optionViewBuilder: (context, controller) {
-            return StreamVideoPicker(
-              onVideoPicked: (video) async {
-                try {
-                  if (video != null) {
-                    await controller.addAttachment(video);
-                  }
-                  return Navigator.pop(context, controller.value);
-                } catch (e, stk) {
-                  Navigator.pop(context, controller.value);
-                  if (onError != null) return onError.call(e, stk);
-
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-        AttachmentPickerOption(
-          key: 'poll-creator',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
-          supportedTypes: [AttachmentPickerType.poll],
-          optionViewBuilder: (context, controller) {
-            final initialPoll = controller.value.poll;
-            return StreamPollCreator(
-              poll: initialPoll,
-              config: pollConfig,
-              onPollCreated: (poll) {
-                try {
-                  if (poll != null) controller.poll = poll;
-                  return Navigator.pop(context, controller.value);
-                } catch (e, stk) {
-                  Navigator.pop(context, controller.value);
-                  if (onError != null) return onError.call(e, stk);
-
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
-    },
+    options: finalOptions,
   );
 }
 
@@ -893,6 +933,7 @@ Widget webOrDesktopAttachmentPickerBuilder({
   Poll? initialPoll,
   PollConfig? pollConfig,
   Iterable<WebOrDesktopAttachmentPickerOption>? customOptions,
+  WebOrDesktopAttachmentPickerOptionsBuilder? optionsBuilder,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
   ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
@@ -900,37 +941,58 @@ Widget webOrDesktopAttachmentPickerBuilder({
   double attachmentThumbnailScale = 1,
   ErrorListener? onError,
 }) {
+  assert(
+    optionsBuilder == null || customOptions == null,
+    'Cannot use both optionsBuilder and customOptions. '
+    'Use optionsBuilder for full control over options, '
+    'or customOptions for simple prepending of options.',
+  );
+
+  // Build default options
+  final defaultOptions = <WebOrDesktopAttachmentPickerOption>[
+    WebOrDesktopAttachmentPickerOption(
+      key: 'image-picker',
+      type: AttachmentPickerType.images,
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
+      title: context.translations.uploadAPhotoLabel,
+    ),
+    WebOrDesktopAttachmentPickerOption(
+      key: 'video-picker',
+      type: AttachmentPickerType.videos,
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
+      title: context.translations.uploadAVideoLabel,
+    ),
+    WebOrDesktopAttachmentPickerOption(
+      key: 'file-picker',
+      type: AttachmentPickerType.files,
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
+      title: context.translations.uploadAFileLabel,
+    ),
+    WebOrDesktopAttachmentPickerOption(
+      key: 'poll-creator',
+      type: AttachmentPickerType.poll,
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
+      title: context.translations.createPollLabel(isNew: true),
+    ),
+  ]
+      .where((option) => option.supportedTypes.every(allowedTypes.contains))
+      .toList();
+
+  // Use options builder if provided, otherwise fall back to legacy behavior
+  final Set<WebOrDesktopAttachmentPickerOption> finalOptions;
+  if (optionsBuilder != null) {
+    finalOptions = optionsBuilder(context, defaultOptions).toSet();
+  } else {
+    // Legacy behavior: combine custom and default options
+    finalOptions = {
+      if (customOptions != null) ...customOptions,
+      ...defaultOptions,
+    };
+  }
+
   return StreamWebOrDesktopAttachmentPickerBottomSheet(
     controller: controller,
-    options: {
-      ...{
-        if (customOptions != null) ...customOptions,
-        WebOrDesktopAttachmentPickerOption(
-          key: 'image-picker',
-          type: AttachmentPickerType.images,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
-          title: context.translations.uploadAPhotoLabel,
-        ),
-        WebOrDesktopAttachmentPickerOption(
-          key: 'video-picker',
-          type: AttachmentPickerType.videos,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
-          title: context.translations.uploadAVideoLabel,
-        ),
-        WebOrDesktopAttachmentPickerOption(
-          key: 'file-picker',
-          type: AttachmentPickerType.files,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
-          title: context.translations.uploadAFileLabel,
-        ),
-        WebOrDesktopAttachmentPickerOption(
-          key: 'poll-creator',
-          type: AttachmentPickerType.poll,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
-          title: context.translations.createPollLabel(isNew: true),
-        ),
-      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
-    },
+    options: finalOptions,
     onOptionTap: (context, controller, option) async {
       // Handle the polls type option separately
       if (option.type case AttachmentPickerType.poll) {

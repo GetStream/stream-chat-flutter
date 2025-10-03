@@ -22,6 +22,12 @@
 - Fixed `GradientAvatars` for users with same-length IDs would have identical
   colors. [[#2369]](https://github.com/GetStream/stream-chat-flutter/issues/2369)
 
+✅ Added
+
+- Added `optionsBuilder` to `showStreamAttachmentPickerModalBottomSheet`, 
+  `mobileAttachmentPickerBuilder`, and `webOrDesktopAttachmentPickerBuilder` 
+  to allow full control over the attachment picker options ordering / display.
+
 ## 9.16.0
 
 🐞 Fixed
