@@ -5,6 +5,25 @@
 - Improved sync reliability and error handling with enhanced `lastSyncAt` initialization, 400
   error recovery, and automatic flushing of stale persistence data after 30 days of inactivity.
 
+✅ Added
+
+- Added support for `Channel.messageCount` field.
+
+🐞 Fixed
+
+- Fixed thread messages increasing the unread count in the main channel.
+- Fixed `ChannelState.memberCount`, `ChannelState.config` and `ChannelState.extraData` getting reset
+  on first load.
+
+## 9.17.0
+
+🐞 Fixed
+
+- Fixed `currentUser.pushPreferences` not updating immediately after calling `setPushPreferences`.
+- Fixed `Channel.sendMessage` to prevent sending empty messages when all attachments are cancelled
+  during upload.
+- Fixed `toDraftMessage` to only include successfully uploaded attachments in draft messages.
+
 ## 9.16.0
 
 🐞 Fixed

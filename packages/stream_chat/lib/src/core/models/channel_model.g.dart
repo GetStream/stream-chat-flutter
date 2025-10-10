@@ -39,6 +39,7 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) => ChannelModel(
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       team: json['team'] as String?,
       cooldown: (json['cooldown'] as num?)?.toInt() ?? 0,
+      messageCount: (json['message_count'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) =>

@@ -2,7 +2,25 @@
 
 🐞 Fixed
 
+- Fixed `StreamMessageListView` not marking thread messages as read when scrolled to the bottom of the list.
+- Fixed `StreamMessageInput` not validating draft messages before creating/updating them.
+
+## 9.17.0
+
+✅ Added
+
+- Added `messageBackgroundGradient` property to `StreamMessageThemeData` for gradient message
+  backgrounds.
+
+🐞 Fixed
+
 - Fixed `.replaceMentions` not escaping special characters in the username.
+- Fixed videos not being saved to gallery correctly on mobile
+  platforms. [[#2357]](https://github.com/GetStream/stream-chat-flutter/issues/2357)
+- Fixed unread indicator button using hardcoded white color instead of theme color
+  `colorTheme.barsBg`. [[#2366]](https://github.com/GetStream/stream-chat-flutter/issues/2366)
+- Fixed `GradientAvatars` for users with same-length IDs would have identical
+  colors. [[#2369]](https://github.com/GetStream/stream-chat-flutter/issues/2369)
 
 ## 9.16.0
 

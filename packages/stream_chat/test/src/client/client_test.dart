@@ -608,7 +608,7 @@ void main() {
           final persistentChannelStates = List.generate(
             3,
             (index) => ChannelState(
-              channel: ChannelModel(cid: 'p-test-type-$index:p-test-id-$index'),
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
@@ -638,18 +638,19 @@ void main() {
             (_) async => QueryChannelsResponse()..channels = channelStates,
           );
 
-          when(() => persistence.getChannelThreads(any()))
-              .thenAnswer((_) async => {});
-          when(() => persistence.updateChannelThreads(any(), any()))
-              .thenAnswer((_) async => {});
-          when(() => persistence.getChannelStateByCid(any(),
-              messagePagination: any(named: 'messagePagination'),
-              pinnedMessagePagination:
-                  any(named: 'pinnedMessagePagination'))).thenAnswer(
-            (invocation) async => ChannelState(
-              channel: ChannelModel(cid: invocation.positionalArguments.first),
-            ),
+          when(() => persistence.getChannelThreads(any())).thenAnswer(
+            (_) async => <String, List<Message>>{
+              for (final channelState in channelStates)
+                channelState.channel!.cid: [
+                  Message(id: 'test-message-id', text: 'Test message')
+                ],
+            },
           );
+
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
           when(() => persistence.updateChannelQueries(any(), any(),
                   clearQueryCache: any(named: 'clearQueryCache')))
               .thenAnswer((_) => Future.value());
@@ -666,7 +667,7 @@ void main() {
 
           // Hack as `teardown` gets called even
           // before our stream starts emitting data
-          await delay(300);
+          await delay(1050);
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
@@ -686,14 +687,11 @@ void main() {
               )).called(1);
 
           verify(() => persistence.getChannelThreads(any()))
-              .called((persistentChannelStates + channelStates).length);
+              .called(channelStates.length);
+          verify(() => persistence.updateChannelState(any()))
+              .called(channelStates.length);
           verify(() => persistence.updateChannelThreads(any(), any()))
-              .called((persistentChannelStates + channelStates).length);
-          verify(
-            () => persistence.getChannelStateByCid(any(),
-                messagePagination: any(named: 'messagePagination'),
-                pinnedMessagePagination: any(named: 'pinnedMessagePagination')),
-          ).called((persistentChannelStates + channelStates).length);
+              .called(channelStates.length);
           verify(() => persistence.updateChannelQueries(any(), any(),
               clearQueryCache: any(named: 'clearQueryCache'))).called(1);
         },
@@ -705,7 +703,7 @@ void main() {
           final persistentChannelStates = List.generate(
             3,
             (index) => ChannelState(
-              channel: ChannelModel(cid: 'p-test-type-$index:p-test-id-$index'),
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
@@ -726,18 +724,19 @@ void main() {
                 paginationParams: any(named: 'paginationParams'),
               )).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
-          when(() => persistence.getChannelThreads(any()))
+          when(() => persistence.getChannelThreads(any())).thenAnswer(
+            (_) async => <String, List<Message>>{
+              for (final channelState in persistentChannelStates)
+                channelState.channel!.cid: [
+                  Message(id: 'test-message-id', text: 'Test message')
+                ],
+            },
+          );
+
+          when(() => persistence.updateChannelState(any()))
               .thenAnswer((_) async => {});
           when(() => persistence.updateChannelThreads(any(), any()))
               .thenAnswer((_) async => {});
-          when(() => persistence.getChannelStateByCid(any(),
-              messagePagination: any(named: 'messagePagination'),
-              pinnedMessagePagination:
-                  any(named: 'pinnedMessagePagination'))).thenAnswer(
-            (invocation) async => ChannelState(
-              channel: ChannelModel(cid: invocation.positionalArguments.first),
-            ),
-          );
 
           expectLater(
             client.queryChannels(),
@@ -749,7 +748,7 @@ void main() {
 
           // Hack as `teardown` gets called even
           // before our stream starts emitting data
-          await delay(300);
+          await delay(1050);
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
@@ -770,13 +769,10 @@ void main() {
 
           verify(() => persistence.getChannelThreads(any()))
               .called(persistentChannelStates.length);
+          verify(() => persistence.updateChannelState(any()))
+              .called(persistentChannelStates.length);
           verify(() => persistence.updateChannelThreads(any(), any()))
               .called(persistentChannelStates.length);
-          verify(
-            () => persistence.getChannelStateByCid(any(),
-                messagePagination: any(named: 'messagePagination'),
-                pinnedMessagePagination: any(named: 'pinnedMessagePagination')),
-          ).called(persistentChannelStates.length);
         },
       );
     });
@@ -1242,6 +1238,88 @@ void main() {
 
       verify(() => api.device.removeDevice(deviceId)).called(1);
       verifyNoMoreInteractions(api.device);
+    });
+
+    test('`.setPushPreferences`', () async {
+      const pushPreferenceInput = PushPreferenceInput(
+        chatLevel: ChatLevel.mentions,
+      );
+
+      const channelCid = 'messaging:123';
+      const channelPreferenceInput = PushPreferenceInput.channel(
+        channelCid: channelCid,
+        chatLevel: ChatLevel.mentions,
+      );
+
+      const preferences = [pushPreferenceInput, channelPreferenceInput];
+
+      final currentUser = client.state.currentUser;
+      when(() => api.device.setPushPreferences(preferences)).thenAnswer(
+        (_) async => UpsertPushPreferencesResponse()
+          ..userPreferences = {
+            '${currentUser?.id}': PushPreference(
+              chatLevel: pushPreferenceInput.chatLevel,
+            ),
+          }
+          ..userChannelPreferences = {
+            '${currentUser?.id}': {
+              channelCid: ChannelPushPreference(
+                chatLevel: channelPreferenceInput.chatLevel,
+              ),
+            },
+          },
+      );
+
+      expect(
+        client.eventStream,
+        emitsInOrder([
+          isA<Event>().having(
+            (e) => e.type,
+            'push_preference.updated event',
+            EventType.pushPreferenceUpdated,
+          ),
+          isA<Event>().having(
+            (e) => e.type,
+            'channel.push_preference.updated event',
+            EventType.channelPushPreferenceUpdated,
+          ),
+        ]),
+      );
+
+      final res = await client.setPushPreferences(preferences);
+      expect(res, isNotNull);
+
+      verify(() => api.device.setPushPreferences(preferences)).called(1);
+      verifyNoMoreInteractions(api.device);
+    });
+
+    test('should handle push_preference.updated event', () async {
+      final pushPreference = PushPreference(
+        chatLevel: ChatLevel.mentions,
+        callLevel: CallLevel.all,
+        disabledUntil: DateTime.now().add(const Duration(hours: 1)),
+      );
+
+      final event = Event(
+        type: EventType.pushPreferenceUpdated,
+        pushPreference: pushPreference,
+      );
+
+      // Initially null
+      expect(client.state.currentUser?.pushPreferences, isNull);
+
+      // Trigger the event
+      client.handleEvent(event);
+
+      // Wait for the event to get processed
+      await Future.delayed(Duration.zero);
+
+      // Should update currentUser.pushPreferences
+      final pushPreferences = client.state.currentUser?.pushPreferences;
+      expect(pushPreferences, isNotNull);
+      expect(pushPreferences?.chatLevel, ChatLevel.mentions);
+      expect(pushPreferences?.callLevel, CallLevel.all);
+      expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
     });
 
     test('`.devToken`', () async {

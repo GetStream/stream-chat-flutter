@@ -251,7 +251,11 @@ abstract class ChatPersistenceClient {
     String cid,
     Map<String, List<Message>> threads,
   ) async {
+    if (threads.isEmpty) return;
+
+    // Flattening the messages from threads
     final messages = threads.values.expand((it) => it).toList();
+    if (messages.isEmpty) return;
 
     // Removing old reactions before saving the new
     final oldReactions = messages.map((it) => it.id).toList();
@@ -279,6 +283,8 @@ abstract class ChatPersistenceClient {
 
   /// Update list of channel states
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {
+    if (channelStates.isEmpty) return;
+
     final reactionsToDelete = <String>[];
     final pinnedReactionsToDelete = <String>[];
     final membersToDelete = <String>[];

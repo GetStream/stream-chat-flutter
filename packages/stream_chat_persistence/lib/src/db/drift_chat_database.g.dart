@@ -81,6 +81,12 @@ class $ChannelsTable extends Channels
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _messageCountMeta =
+      const VerificationMeta('messageCount');
+  @override
+  late final GeneratedColumn<int> messageCount = GeneratedColumn<int>(
+      'message_count', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _createdByIdMeta =
       const VerificationMeta('createdById');
   @override
@@ -106,6 +112,7 @@ class $ChannelsTable extends Channels
         updatedAt,
         deletedAt,
         memberCount,
+        messageCount,
         createdById,
         extraData
       ];
@@ -164,6 +171,12 @@ class $ChannelsTable extends Channels
           memberCount.isAcceptableOrUnknown(
               data['member_count']!, _memberCountMeta));
     }
+    if (data.containsKey('message_count')) {
+      context.handle(
+          _messageCountMeta,
+          messageCount.isAcceptableOrUnknown(
+              data['message_count']!, _messageCountMeta));
+    }
     if (data.containsKey('created_by_id')) {
       context.handle(
           _createdByIdMeta,
@@ -203,6 +216,8 @@ class $ChannelsTable extends Channels
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       memberCount: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}member_count'])!,
+      messageCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}message_count']),
       createdById: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}created_by_id']),
       extraData: $ChannelsTable.$converterextraDatan.fromSql(attachedDatabase
@@ -262,6 +277,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   /// The count of this channel members
   final int memberCount;
 
+  /// The count of messages in this channel
+  final int? messageCount;
+
   /// The id of the user that created this channel
   final String? createdById;
 
@@ -279,6 +297,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       required this.updatedAt,
       this.deletedAt,
       required this.memberCount,
+      this.messageCount,
       this.createdById,
       this.extraData});
   @override
@@ -305,6 +324,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['member_count'] = Variable<int>(memberCount);
+    if (!nullToAbsent || messageCount != null) {
+      map['message_count'] = Variable<int>(messageCount);
+    }
     if (!nullToAbsent || createdById != null) {
       map['created_by_id'] = Variable<String>(createdById);
     }
@@ -331,6 +353,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       memberCount: serializer.fromJson<int>(json['memberCount']),
+      messageCount: serializer.fromJson<int?>(json['messageCount']),
       createdById: serializer.fromJson<String?>(json['createdById']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
@@ -350,6 +373,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'memberCount': serializer.toJson<int>(memberCount),
+      'messageCount': serializer.toJson<int?>(messageCount),
       'createdById': serializer.toJson<String?>(createdById),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
@@ -367,6 +391,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           DateTime? updatedAt,
           Value<DateTime?> deletedAt = const Value.absent(),
           int? memberCount,
+          Value<int?> messageCount = const Value.absent(),
           Value<String?> createdById = const Value.absent(),
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       ChannelEntity(
@@ -384,6 +409,8 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         memberCount: memberCount ?? this.memberCount,
+        messageCount:
+            messageCount.present ? messageCount.value : this.messageCount,
         createdById: createdById.present ? createdById.value : this.createdById,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
@@ -405,6 +432,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       memberCount:
           data.memberCount.present ? data.memberCount.value : this.memberCount,
+      messageCount: data.messageCount.present
+          ? data.messageCount.value
+          : this.messageCount,
       createdById:
           data.createdById.present ? data.createdById.value : this.createdById,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
@@ -425,6 +455,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('memberCount: $memberCount, ')
+          ..write('messageCount: $messageCount, ')
           ..write('createdById: $createdById, ')
           ..write('extraData: $extraData')
           ..write(')'))
@@ -444,6 +475,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       updatedAt,
       deletedAt,
       memberCount,
+      messageCount,
       createdById,
       extraData);
   @override
@@ -461,6 +493,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.memberCount == this.memberCount &&
+          other.messageCount == this.messageCount &&
           other.createdById == this.createdById &&
           other.extraData == this.extraData);
 }
@@ -477,6 +510,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<int> memberCount;
+  final Value<int?> messageCount;
   final Value<String?> createdById;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
@@ -492,6 +526,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.memberCount = const Value.absent(),
+    this.messageCount = const Value.absent(),
     this.createdById = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -508,6 +543,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.memberCount = const Value.absent(),
+    this.messageCount = const Value.absent(),
     this.createdById = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -527,6 +563,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<int>? memberCount,
+    Expression<int>? messageCount,
     Expression<String>? createdById,
     Expression<String>? extraData,
     Expression<int>? rowid,
@@ -543,6 +580,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (memberCount != null) 'member_count': memberCount,
+      if (messageCount != null) 'message_count': messageCount,
       if (createdById != null) 'created_by_id': createdById,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
@@ -561,6 +599,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       Value<DateTime>? updatedAt,
       Value<DateTime?>? deletedAt,
       Value<int>? memberCount,
+      Value<int?>? messageCount,
       Value<String?>? createdById,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
@@ -576,6 +615,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       memberCount: memberCount ?? this.memberCount,
+      messageCount: messageCount ?? this.messageCount,
       createdById: createdById ?? this.createdById,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
@@ -621,6 +661,9 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     if (memberCount.present) {
       map['member_count'] = Variable<int>(memberCount.value);
     }
+    if (messageCount.present) {
+      map['message_count'] = Variable<int>(messageCount.value);
+    }
     if (createdById.present) {
       map['created_by_id'] = Variable<String>(createdById.value);
     }
@@ -648,6 +691,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('memberCount: $memberCount, ')
+          ..write('messageCount: $messageCount, ')
           ..write('createdById: $createdById, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
@@ -8435,6 +8479,7 @@ typedef $$ChannelsTableCreateCompanionBuilder = ChannelsCompanion Function({
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> memberCount,
+  Value<int?> messageCount,
   Value<String?> createdById,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
@@ -8451,6 +8496,7 @@ typedef $$ChannelsTableUpdateCompanionBuilder = ChannelsCompanion Function({
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
   Value<int> memberCount,
+  Value<int?> messageCount,
   Value<String?> createdById,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
@@ -8568,6 +8614,9 @@ class $$ChannelsTableFilterComposer
 
   ColumnFilters<int> get memberCount => $composableBuilder(
       column: $table.memberCount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get messageCount => $composableBuilder(
+      column: $table.messageCount, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get createdById => $composableBuilder(
       column: $table.createdById, builder: (column) => ColumnFilters(column));
@@ -8707,6 +8756,10 @@ class $$ChannelsTableOrderingComposer
   ColumnOrderings<int> get memberCount => $composableBuilder(
       column: $table.memberCount, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get messageCount => $composableBuilder(
+      column: $table.messageCount,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get createdById => $composableBuilder(
       column: $table.createdById, builder: (column) => ColumnOrderings(column));
 
@@ -8756,6 +8809,9 @@ class $$ChannelsTableAnnotationComposer
 
   GeneratedColumn<int> get memberCount => $composableBuilder(
       column: $table.memberCount, builder: (column) => column);
+
+  GeneratedColumn<int> get messageCount => $composableBuilder(
+      column: $table.messageCount, builder: (column) => column);
 
   GeneratedColumn<String> get createdById => $composableBuilder(
       column: $table.createdById, builder: (column) => column);
@@ -8887,6 +8943,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> memberCount = const Value.absent(),
+            Value<int?> messageCount = const Value.absent(),
             Value<String?> createdById = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -8903,6 +8960,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             memberCount: memberCount,
+            messageCount: messageCount,
             createdById: createdById,
             extraData: extraData,
             rowid: rowid,
@@ -8919,6 +8977,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
             Value<int> memberCount = const Value.absent(),
+            Value<int?> messageCount = const Value.absent(),
             Value<String?> createdById = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -8935,6 +8994,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             deletedAt: deletedAt,
             memberCount: memberCount,
+            messageCount: messageCount,
             createdById: createdById,
             extraData: extraData,
             rowid: rowid,

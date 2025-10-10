@@ -68,6 +68,15 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       reminder: json['reminder'] == null
           ? null
           : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+      pushPreference: json['push_preference'] == null
+          ? null
+          : PushPreference.fromJson(
+              json['push_preference'] as Map<String, dynamic>),
+      channelPushPreference: json['channel_push_preference'] == null
+          ? null
+          : ChannelPushPreference.fromJson(
+              json['channel_push_preference'] as Map<String, dynamic>),
+      channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       isLocal: json['is_local'] as bool? ?? false,
     );
@@ -112,6 +121,12 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
         'last_read_message_id': value,
       if (instance.draft?.toJson() case final value?) 'draft': value,
       if (instance.reminder?.toJson() case final value?) 'reminder': value,
+      if (instance.pushPreference?.toJson() case final value?)
+        'push_preference': value,
+      if (instance.channelPushPreference?.toJson() case final value?)
+        'channel_push_preference': value,
+      if (instance.channelMessageCount case final value?)
+        'channel_message_count': value,
       'extra_data': instance.extraData,
     };
 

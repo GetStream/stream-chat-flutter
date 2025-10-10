@@ -1035,8 +1035,39 @@ class StreamChatClient {
   /// ```
   Future<UpsertPushPreferencesResponse> setPushPreferences(
     List<PushPreferenceInput> preferences,
-  ) {
-    return _chatApi.device.setPushPreferences(preferences);
+  ) async {
+    final res = await _chatApi.device.setPushPreferences(preferences);
+
+    final currentUser = state.currentUser;
+    final currentUserId = currentUser?.id;
+    if (currentUserId == null) return res;
+
+    // Emit events for updated preferences
+    final updatedPushPreference = res.userPreferences[currentUserId];
+    if (updatedPushPreference != null) {
+      final pushPreferenceUpdatedEvent = Event(
+        type: EventType.pushPreferenceUpdated,
+        pushPreference: updatedPushPreference,
+      );
+
+      handleEvent(pushPreferenceUpdatedEvent);
+    }
+
+    // Emit events for updated channel-specific preferences
+    final channelPushPreferences = res.userChannelPreferences[currentUserId];
+    if (channelPushPreferences != null) {
+      for (final MapEntry(:key, :value) in channelPushPreferences.entries) {
+        final pushPreferenceUpdatedEvent = Event(
+          type: EventType.channelPushPreferenceUpdated,
+          cid: key,
+          channelPushPreference: value,
+        );
+
+        handleEvent(pushPreferenceUpdatedEvent);
+      }
+    }
+
+    return res;
   }
 
   /// Get a development token
@@ -2128,6 +2159,11 @@ class ClientState {
           // Update the unread threads count.
           if (event.unreadThreads case final count?) {
             currentUser = currentUser?.copyWith(unreadThreads: count);
+          }
+
+          // Update the push preferences.
+          if (event.pushPreference case final preferences?) {
+            currentUser = currentUser?.copyWith(pushPreferences: preferences);
           }
         }),
       );

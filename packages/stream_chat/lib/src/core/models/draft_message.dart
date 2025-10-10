@@ -189,11 +189,16 @@ extension MessageToDraftMessage on Message {
   /// This is useful when you want to convert a message to a draft message
   /// before sending it to the server.
   DraftMessage toDraftMessage() {
+    // Only include attachments that have been successfully uploaded.
+    final uploadedAttachments = attachments.where((it) {
+      return it.uploadState.isSuccess;
+    }).toList();
+
     return DraftMessage(
       id: id,
       text: text,
       type: type,
-      attachments: attachments,
+      attachments: uploadedAttachments,
       parentId: parentId,
       showInChannel: showInChannel,
       mentionedUsers: mentionedUsers,

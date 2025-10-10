@@ -245,6 +245,7 @@ void main() {
       test('should work fine', () async {
         final message = Message(
           id: 'test-message-id',
+          text: 'Hello world!',
           user: client.state.currentUser,
         );
 
@@ -459,6 +460,293 @@ void main() {
               channelType,
             )).called(1);
       });
+
+      test('should not send if the message is invalid', () async {
+        final message = Message(id: 'test-message-id');
+
+        expect(
+          () => channel.sendMessage(message),
+          throwsA(isA<StreamChatError>()),
+        );
+
+        verifyNever(
+          () => client.sendMessage(any(), channelId, channelType),
+        );
+      });
+
+      test(
+        'should not send empty message when all attachments are cancelled',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          expect(
+            () => channel.sendMessage(message),
+            throwsA(isA<StreamChatError>()),
+          );
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verifyNever(
+            () => client.sendMessage(any(), channelId, channelType),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but text exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            text: 'Hello world!',
+            attachments: [attachment],
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.text, 'Hello world!');
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but quoted message exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final quotedMessage = Message(
+            id: 'quoted-123',
+            text: 'Original message',
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+            quotedMessageId: quotedMessage.id,
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.quotedMessageId, quotedMessage.id);
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
+
+      test(
+        'should send message when attachment is cancelled but poll exists',
+        () async {
+          final attachment = Attachment(
+            id: 'test-attachment-id',
+            type: 'image',
+            file: AttachmentFile(size: 100, path: 'test-file-path'),
+          );
+
+          final message = Message(
+            id: 'test-message-id',
+            attachments: [attachment],
+            pollId: 'poll-123',
+          );
+
+          when(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          ).thenAnswer(
+            (_) async => throw StreamChatNetworkError.raw(
+              code: 0,
+              message: 'Request cancelled',
+              isRequestCancelledError: true,
+            ),
+          );
+
+          when(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          ).thenAnswer(
+            (_) async => SendMessageResponse()
+              ..message = message.copyWith(
+                attachments: [],
+                state: MessageState.sent,
+              ),
+          );
+
+          final res = await channel.sendMessage(message);
+
+          expect(res, isNotNull);
+          expect(res.message.pollId, 'poll-123');
+
+          verify(
+            () => client.sendImage(
+              any(),
+              channelId,
+              channelType,
+              onSendProgress: any(named: 'onSendProgress'),
+              cancelToken: any(named: 'cancelToken'),
+              extraData: any(named: 'extraData'),
+            ),
+          );
+
+          verify(
+            () => client.sendMessage(
+              any(that: isSameMessageAs(message)),
+              channelId,
+              channelType,
+            ),
+          );
+        },
+      );
     });
 
     group('`.createDraft`', () {
@@ -4814,6 +5102,99 @@ void main() {
         expect(updatedMessage?.reminder, isNull);
       });
     });
+
+    group('Channel push preference events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('should handle channel.push_preference.updated event', () async {
+        // Verify initial state
+        expect(channel.state?.channelState.pushPreferences, isNull);
+
+        // Create channel push preference
+        final channelPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.mentions,
+          disabledUntil: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Create channel.push_preference.updated event
+        final channelPushPreferenceUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.channelPushPreferenceUpdated,
+          channelPushPreference: channelPushPreference,
+        );
+
+        // Dispatch event
+        client.addEvent(channelPushPreferenceUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify channel push preferences were updated
+        final updatedPreferences = channel.state?.channelState.pushPreferences;
+        expect(updatedPreferences, isNotNull);
+        expect(updatedPreferences?.chatLevel, ChatLevel.mentions);
+        expect(
+          updatedPreferences?.disabledUntil,
+          channelPushPreference.disabledUntil,
+        );
+      });
+
+      test('should update existing channel push preferences', () async {
+        // Set initial push preferences
+        const initialPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.all,
+        );
+
+        channel.state?.updateChannelState(
+          channel.state!.channelState.copyWith(
+            pushPreferences: initialPushPreference,
+          ),
+        );
+
+        // Verify initial state
+        final pushPreferences = channel.state?.channelState.pushPreferences;
+        expect(pushPreferences?.chatLevel, ChatLevel.all);
+        expect(pushPreferences?.disabledUntil, isNull);
+
+        // Create updated channel push preference
+        final updatedPushPreference = ChannelPushPreference(
+          chatLevel: ChatLevel.none,
+          disabledUntil: DateTime.now().add(const Duration(hours: 2)),
+        );
+
+        // Create channel.push_preference.updated event
+        final channelPushPreferenceUpdatedEvent = Event(
+          cid: channel.cid,
+          type: EventType.channelPushPreferenceUpdated,
+          channelPushPreference: updatedPushPreference,
+        );
+
+        // Dispatch event
+        client.addEvent(channelPushPreferenceUpdatedEvent);
+
+        // Wait for the event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify channel push preferences were updated
+        final updatedPreferences = channel.state?.channelState.pushPreferences;
+        expect(updatedPreferences?.chatLevel, ChatLevel.none);
+        expect(
+          updatedPreferences?.disabledUntil,
+          updatedPushPreference.disabledUntil,
+        );
+      });
+    });
   });
 
   group('ChannelCapabilityCheck', () {
@@ -5253,6 +5634,166 @@ void main() {
           expect(() => raceChannel.cooldown, throwsA(isA<StateError>()));
 
           expect(raceChannel.getRemainingCooldown, throwsA(isA<StateError>()));
+        },
+      );
+    });
+
+    group('Channel message count events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test(
+        'should update channel messageCount when event contains channelMessageCount',
+        () async {
+          // Verify initial state - no messageCount
+          expect(channel.messageCount, isNull);
+
+          // Create event with channelMessageCount
+          final messageCountEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            channelMessageCount: 42,
+          );
+
+          // Dispatch event
+          client.addEvent(messageCountEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify channel messageCount was updated
+          expect(channel.messageCount, equals(42));
+        },
+      );
+
+      test(
+        'should update channel messageCount from message.new and message.deleted events',
+        () async {
+          // Test with message.new event - count increases
+          final messageNewEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            message: Message(
+              id: 'new-message-1',
+              text: 'Hello world!',
+              user: User(id: 'user-1'),
+            ),
+            channelMessageCount: 1,
+          );
+
+          client.addEvent(messageNewEvent);
+          await Future.delayed(Duration.zero);
+          expect(channel.messageCount, equals(1));
+
+          // Test with another message.new event - count increases
+          final messageNewEvent2 = Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            message: Message(
+              id: 'new-message-2',
+              text: 'Second message',
+              user: User(id: 'user-2'),
+            ),
+            channelMessageCount: 2,
+          );
+
+          client.addEvent(messageNewEvent2);
+          await Future.delayed(Duration.zero);
+          expect(channel.messageCount, equals(2));
+
+          // Test with message.deleted event - count decreases
+          final messageDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageDeleted,
+            message: Message(
+              id: 'new-message-1',
+              text: 'Hello world!',
+              user: User(id: 'user-1'),
+            ),
+            channelMessageCount: 1,
+          );
+
+          client.addEvent(messageDeletedEvent);
+          await Future.delayed(Duration.zero);
+          expect(channel.messageCount, equals(1));
+        },
+      );
+
+      test(
+        'should preserve other channel properties when updating messageCount',
+        () async {
+          // Set initial channel state with some properties
+          final initialChannel = channel.state?.channelState.channel?.copyWith(
+            extraData: {'name': 'Test Channel'},
+            memberCount: 5,
+            frozen: true,
+          );
+
+          if (initialChannel != null) {
+            channel.state?.updateChannelState(
+              channel.state!.channelState.copyWith(channel: initialChannel),
+            );
+          }
+
+          // Verify initial state
+          expect(channel.name, 'Test Channel');
+          expect(channel.memberCount, equals(5));
+          expect(channel.frozen, equals(true));
+          expect(channel.messageCount, isNull);
+
+          // Update messageCount via event
+          final messageCountEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageNew,
+            channelMessageCount: 100,
+          );
+
+          client.addEvent(messageCountEvent);
+          await Future.delayed(Duration.zero);
+
+          // Verify messageCount was updated while preserving other properties
+          expect(channel.messageCount, equals(100));
+          expect(channel.name, 'Test Channel');
+          expect(channel.memberCount, equals(5));
+          expect(channel.frozen, equals(true));
+        },
+      );
+
+      test(
+        'should provide messageCountStream for reactive updates',
+        () async {
+          expectLater(
+            channel.messageCountStream.distinct(),
+            emitsInOrder([null, 1, 5, 10]),
+          );
+
+          // Update messageCount multiple times
+          final counts = [1, 5, 10];
+          for (final count in counts) {
+            final event = Event(
+              cid: channel.cid,
+              type: EventType.messageNew,
+              message: Message(
+                id: 'msg-$count',
+                text: 'Message $count',
+                user: User(id: 'user-1'),
+              ),
+              channelMessageCount: count,
+            );
+
+            client.addEvent(event);
+            await Future.delayed(Duration.zero);
+          }
         },
       );
     });
