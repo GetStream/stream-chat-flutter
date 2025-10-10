@@ -37,6 +37,7 @@ void main() {
       expect(message.pinnedBy, null);
       expect(message.i18n, null);
       expect(message.restrictedVisibility, isA<List<String>>());
+      expect(message.channelRole, 'channel_member');
     });
 
     test('should serialize to json correctly', () {
