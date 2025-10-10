@@ -7,6 +7,7 @@
 
 ✅ Added
 
+- Added support for `Message.channelRole` field to provide access to the sender's channel role.
 - Added support for `Channel.messageCount` field.
 
 🐞 Fixed
