@@ -34,6 +34,9 @@ abstract class ChatPersistenceClient {
   /// If [flush] is true, the data will also be deleted
   Future<void> disconnect({bool flush = false});
 
+  /// Clears all the data stored in the persistence client.
+  Future<void> flush();
+
   /// Get stored replies by messageId
   Future<List<Message>> getReplies(
     String parentId, {

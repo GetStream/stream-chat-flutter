@@ -1,5 +1,10 @@
 ## Upcoming
 
+🐞 Fixed
+
+- Improved sync reliability and error handling with enhanced `lastSyncAt` initialization, 400
+  error recovery, and automatic flushing of stale persistence data after 30 days of inactivity.
+
 ✅ Added
 
 - Added support for `Channel.messageCount` field.
