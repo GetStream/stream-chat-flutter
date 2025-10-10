@@ -3,6 +3,8 @@
 ✅ Added
 
 - Added support for `Channel.messageCount` field.
+- Added support for Pending Messages. Pending messages can be accessed via
+  `ChannelState.pendingMessages` or `ChannelState.pendingMessagesStream`.
 
 🐞 Fixed
 
