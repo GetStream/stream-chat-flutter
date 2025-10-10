@@ -11,6 +11,7 @@ import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
 
@@ -320,7 +321,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     final member = json['member'];
     if (member is! Map<String, Object?>) return null;
 
-    final channelRole = member[key];
+    final channelRole = member[key].safeCast<String>();
     return channelRole;
   }
 
