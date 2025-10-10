@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -185,9 +186,6 @@ class StreamChatClient {
   }
 
   late final RetryPolicy _retryPolicy;
-
-  /// the last dateTime at the which all the channels were synced
-  DateTime? _lastSyncedAt;
 
   /// The retry policy options getter
   RetryPolicy get retryPolicy => _retryPolicy;
@@ -519,25 +517,17 @@ class StreamChatClient {
 
     if (connectionRecovered) {
       // connection recovered
-      final cids = state.channels.keys.toList(growable: false);
+      final cids = [...state.channels.keys.toSet()];
       if (cids.isNotEmpty) {
         await queryChannelsOnline(
           filter: Filter.in_('cid', cids),
           paginationParams: const PaginationParams(limit: 30),
         );
-        if (persistenceEnabled) {
-          await sync(cids: cids, lastSyncAt: _lastSyncedAt);
-        }
-      } else {
-        // channels are empty, assuming it's a fresh start
-        // and making sure `lastSyncAt` is initialized
-        if (persistenceEnabled) {
-          final lastSyncAt = await chatPersistenceClient?.getLastSyncAt();
-          if (lastSyncAt == null) {
-            await chatPersistenceClient?.updateLastSyncAt(DateTime.now());
-          }
-        }
+
+        // Sync the persistence client if available
+        if (persistenceEnabled) await sync(cids: cids);
       }
+
       handleEvent(Event(
         type: EventType.connectionRecovered,
         online: true,
@@ -569,34 +559,45 @@ class StreamChatClient {
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
     return _syncLock.synchronized(() async {
       final channels = cids ?? await chatPersistenceClient?.getChannelCids();
-      if (channels == null || channels.isEmpty) {
-        return;
-      }
+      if (channels == null || channels.isEmpty) return;
 
       final syncAt = lastSyncAt ?? await chatPersistenceClient?.getLastSyncAt();
       if (syncAt == null) {
-        return;
+        logger.info('Fresh sync start: lastSyncAt initialized to now.');
+        return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
       }
 
       try {
+        logger.info('Syncing events since $syncAt for channels: $channels');
+
         final res = await _chatApi.general.sync(channels, syncAt);
-        final events = res.events
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        final events = res.events.sorted(
+          (a, b) => a.createdAt.compareTo(b.createdAt),
+        );
 
         for (final event in events) {
-          logger.fine('event.type: ${event.type}');
-          final messageText = event.message?.text;
-          if (messageText != null) {
-            logger.fine('event.message.text: $messageText');
-          }
+          logger.fine('Syncing event: ${event.type}');
           handleEvent(event);
         }
 
-        final now = DateTime.now();
-        _lastSyncedAt = now;
-        chatPersistenceClient?.updateLastSyncAt(now);
-      } catch (e, stk) {
-        logger.severe('Error during sync', e, stk);
+        final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.now();
+        return chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
+      } catch (error, stk) {
+        // If we got a 400 error, it means that either the sync time is too
+        // old or the channel list is too long or too many events need to be
+        // synced. In this case, we should just flush the persistence client
+        // and start over.
+        if (error is StreamChatNetworkError && error.statusCode == 400) {
+          logger.warning(
+            'Failed to sync events due to stale or oversized state. '
+            'Resetting the persistence client to enable a fresh start.',
+          );
+
+          await chatPersistenceClient?.flush();
+          return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+        }
+
+        logger.warning('Error syncing events', error, stk);
       }
     });
   }
@@ -2102,7 +2103,6 @@ class StreamChatClient {
     // resetting state.
     state.dispose();
     state = ClientState(this);
-    _lastSyncedAt = null;
 
     // resetting credentials.
     _tokenManager.reset();

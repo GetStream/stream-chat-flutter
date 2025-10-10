@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -3668,5 +3670,69 @@ void main() {
         );
       },
     );
+
+    group('Sync Method Tests', () {
+      test(
+        'should retrieve data from persistence client and sync successfully',
+        () async {
+          final cids = ['channel1', 'channel2'];
+          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+          final fakeClient = FakePersistenceClient(
+            channelCids: cids,
+            lastSyncAt: lastSyncAt,
+          );
+
+          client.chatPersistenceClient = fakeClient;
+          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+            (_) async => SyncResponse()..events = [],
+          );
+
+          await client.sync();
+
+          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+
+          final newLastSyncAt = await fakeClient.getLastSyncAt();
+          expect(newLastSyncAt?.isAfter(lastSyncAt), isTrue);
+        },
+      );
+
+      test('should set lastSyncAt on first sync when null', () async {
+        final fakeClient = FakePersistenceClient(
+          channelCids: ['channel1'],
+          lastSyncAt: null,
+        );
+
+        client.chatPersistenceClient = fakeClient;
+
+        await client.sync();
+
+        expectLater(fakeClient.getLastSyncAt(), completion(isNotNull));
+        verifyNever(() => api.general.sync(any(), any()));
+      });
+
+      test('should flush persistence client on 400 error', () async {
+        final cids = ['channel1'];
+        final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+        final fakeClient = FakePersistenceClient(
+          channelCids: cids,
+          lastSyncAt: lastSyncAt,
+        );
+
+        client.chatPersistenceClient = fakeClient;
+        when(() => api.general.sync(cids, lastSyncAt)).thenThrow(
+          StreamChatNetworkError.raw(
+            code: 4,
+            statusCode: 400,
+            message: 'Too many events',
+          ),
+        );
+
+        await client.sync();
+
+        expect(await fakeClient.getChannelCids(), isEmpty); // Should be flushed
+
+        verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+      });
+    });
   });
 }
