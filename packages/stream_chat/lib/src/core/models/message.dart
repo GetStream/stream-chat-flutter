@@ -69,6 +69,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.moderation,
     this.draft,
     this.reminder,
+    this.channelRole,
   })  : id = id ?? const Uuid().v4(),
         type = MessageType(type),
         pinExpires = pinExpires?.toUtc(),
@@ -314,6 +315,19 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// This is present when a user has set a reminder for this message.
   final MessageReminder? reminder;
 
+  static Object? _channelRoleReadValue(Map<Object?, Object?> json, String key) {
+    // Extract the channel role from the member object if present.
+    final member = json['member'];
+    if (member is! Map<String, Object?>) return null;
+
+    final channelRole = member[key];
+    return channelRole;
+  }
+
+  /// The role of the user in the channel the message belongs to.
+  @JsonKey(includeToJson: false, readValue: _channelRoleReadValue)
+  final String? channelRole;
+
   /// Message custom extraData.
   final Map<String, Object?> extraData;
 
@@ -362,6 +376,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     'moderation_details',
     'draft',
     'reminder',
+    'member',
   ];
 
   /// Serialize to json.
@@ -424,6 +439,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     Moderation? moderation,
     Object? draft = _nullConst,
     Object? reminder = _nullConst,
+    String? channelRole,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -506,6 +522,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       draft: draft == _nullConst ? this.draft : draft as Draft?,
       reminder:
           reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
+      channelRole: channelRole ?? this.channelRole,
     );
   }
 
@@ -551,6 +568,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       moderation: other.moderation,
       draft: other.draft,
       reminder: other.reminder,
+      channelRole: other.channelRole,
     );
   }
 
@@ -616,6 +634,7 @@ class Message extends Equatable implements ComparableFieldProvider {
         moderation,
         draft,
         reminder,
+        channelRole,
       ];
 
   @override
