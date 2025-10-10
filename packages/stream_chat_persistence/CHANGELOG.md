@@ -1,8 +1,5 @@
 ## Upcoming
 
-✅ Added
-
-- Added support for `client.flush()` method to clear database.
 - Added support for `Channel.messageCount` field.
 
 ## 9.17.0
@@ -121,8 +118,7 @@
 
 ## 7.2.0-hotfix.1
 
-- Updated `stream_chat` dependency to [
-  `7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat` dependency to [`7.2.0-hotfix.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 7.2.0
 
@@ -143,8 +139,7 @@
 ## 7.0.0
 
 - Updated minimum supported `SDK` version to Flutter 3.13/Dart 3.1
-- 🛑 **BREAKING** Removed deprecated `getChannelStates.sort` parameter. Use
-  `getChannelStates.channelStateSort` instead.
+- 🛑 **BREAKING** Removed deprecated `getChannelStates.sort` parameter. Use `getChannelStates.channelStateSort` instead.
 
 ## 6.10.0
 
@@ -161,8 +156,7 @@
 
 ## 6.7.0
 
-- [[#1683]](https://github.com/GetStream/stream-chat-flutter/issues/1683) Fixed SqliteException no
-  such column `messages.state`.
+- [[#1683]](https://github.com/GetStream/stream-chat-flutter/issues/1683) Fixed SqliteException no such column `messages.state`.
 - Updated `stream_chat` dependency to [`6.7.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 6.6.0
@@ -183,14 +177,12 @@
 
 ## 6.2.0
 
-- Added support for `StreamChatPersistenceClient.isConnected` for checking if the client is
-  connected to the database.
+- Added support for `StreamChatPersistenceClient.isConnected` for checking if the client is connected to the database.
 - [[#1422]](https://github.com/GetStream/stream-chat-flutter/issues/1422) Removed default values
   from `UserEntity` `createdAt` and `updatedAt` fields.
 - Updated `stream_chat` dependency to [`6.2.0`](https://pub.dev/packages/stream_chat/changelog).
 - Added support for `StreamChatPersistenceClient.openPersistenceConnection`
-  and `StreamChatPersistenceClient.closePersistenceConnection` for opening and closing the database
-  connection.
+  and `StreamChatPersistenceClient.closePersistenceConnection` for opening and closing the database connection.
 
 ## 6.1.0
 
@@ -218,8 +210,7 @@
 
 ## 5.0.0-beta.1
 
-- Updated `stream_chat` dependency to [
-  `5.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat` dependency to [`5.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 4.4.0
 
@@ -251,8 +242,7 @@
 
 ## 4.0.0-beta.0
 
-- Updated `stream_chat` dependency to [
-  `4.0.0-beta.0`](https://pub.dev/packages/stream_chat/changelog).
+- Updated `stream_chat` dependency to [`4.0.0-beta.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 3.1.0
 
@@ -261,10 +251,8 @@
 ## 3.0.0
 
 - Updated `stream_chat` dependency to [`3.0.0`](https://pub.dev/packages/stream_chat/changelog).
-- [[#604]](https://github.com/GetStream/stream-chat-flutter/issues/604) Fix cascade deletion by
-  enabling `pragma foreign_keys`.
-- Added a new table `PinnedMessageReactions` and dao `PinnedMessageReactionDao` specifically for
-  pinned messages.
+- [[#604]](https://github.com/GetStream/stream-chat-flutter/issues/604) Fix cascade deletion by enabling `pragma foreign_keys`.
+- Added a new table `PinnedMessageReactions` and dao `PinnedMessageReactionDao` specifically for pinned messages.
 
 ## 2.2.0
 
