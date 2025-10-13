@@ -3292,7 +3292,14 @@ class ChannelClientState {
   }
 
   /// Clears all the replies in the thread identified by [parentId].
-  void clearThread(String parentId) => updateThreadInfo(parentId, <Message>[]);
+  void clearThread(String parentId) {
+    final updatedThreads = {
+      ...threads,
+      parentId: <Message>[],
+    };
+
+    _threads = updatedThreads;
+  }
 
   /// Update threads with updated information about messages.
   void updateThreadInfo(String parentId, List<Message> messages) {
