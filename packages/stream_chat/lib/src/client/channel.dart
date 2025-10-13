@@ -3530,8 +3530,11 @@ class ChannelClientState {
 
     // Calculate the new last message at time.
     var lastMessageAt = _channelState.channel?.lastMessageAt;
-    final lastMessage = updatedChannelMessages.lastOrNull;
-    if (lastMessage != null && _shouldUpdateChannelLastMessageAt(lastMessage)) {
+    final lastMessage = updatedChannelMessages.lastWhereOrNull(
+      _shouldUpdateChannelLastMessageAt,
+    );
+
+    if (lastMessage != null) {
       lastMessageAt = [lastMessageAt, lastMessage.createdAt].nonNulls.max;
     }
 

@@ -2291,7 +2291,7 @@ class ClientState {
 
         // Iterate through all the available channels and send the event
         // to be handled by the respective channel instances.
-        for (final cid in channels.keys) {
+        for (final cid in [...channels.keys]) {
           final channelEvent = event.copyWith(cid: cid);
           _client.handleEvent(channelEvent);
         }
