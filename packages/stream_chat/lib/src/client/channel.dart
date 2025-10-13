@@ -3202,13 +3202,10 @@ class ChannelClientState {
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
     final _existingStateMessages = <Message>[...messages];
-    final newMessages = <Message>[
-      ..._existingStateMessages.merge(
-        updatedState.messages,
-        key: (message) => message.id,
-        update: (original, updated) => updated.syncWith(original),
-      ),
-    ].sorted(_sortByCreatedAt);
+    final newMessages = _mergeMessagesIntoExisting(
+      existing: _existingStateMessages,
+      toMerge: updatedState.messages ?? <Message>[],
+    ).sorted(_sortByCreatedAt);
 
     final _existingStateWatchers = <User>[...?_channelState.watchers];
     final newWatchers = <User>[
@@ -3302,9 +3299,9 @@ class ChannelClientState {
     final updatedThreads = {...threads};
 
     final threadMessages = [...?updatedThreads[parentId]];
-    final updatedThreadMessages = _updateMessagesIntoOriginal(
-      original: threadMessages,
-      toUpdate: messages,
+    final updatedThreadMessages = _mergeMessagesIntoExisting(
+      existing: threadMessages,
+      toMerge: messages,
     ).sorted(_sortByCreatedAt);
 
     // Update the thread with the modified message list.
@@ -3488,9 +3485,9 @@ class ChannelClientState {
     final updatedThreads = {...threads};
     for (final thread in affectedThreads) {
       final threadMessages = [...?updatedThreads[thread]];
-      final updatedThreadMessages = _updateMessagesIntoOriginal(
-        original: threadMessages,
-        toUpdate: messages,
+      final updatedThreadMessages = _mergeMessagesIntoExisting(
+        existing: threadMessages,
+        toMerge: messages,
       ).sorted(_sortByCreatedAt);
 
       // Update the thread with the modified message list.
@@ -3519,15 +3516,15 @@ class ChannelClientState {
     if (affectedMessages.isEmpty) return;
 
     final channelMessages = [...this.messages];
-    final updatedChannelMessages = _updateMessagesIntoOriginal(
-      original: channelMessages,
-      toUpdate: affectedMessages,
+    final updatedChannelMessages = _mergeMessagesIntoExisting(
+      existing: channelMessages,
+      toMerge: affectedMessages,
     ).sorted(_sortByCreatedAt);
 
     final pinnedMessages = [...this.pinnedMessages];
-    final updatedPinnedMessages = _updateMessagesIntoOriginal(
-      original: pinnedMessages,
-      toUpdate: affectedMessages,
+    final updatedPinnedMessages = _mergeMessagesIntoExisting(
+      existing: pinnedMessages,
+      toMerge: affectedMessages,
     ).where(_pinIsValid).sorted(_sortByCreatedAt);
 
     // Calculate the new last message at time.
@@ -3544,14 +3541,14 @@ class ChannelClientState {
     );
   }
 
-  List<Message> _updateMessagesIntoOriginal({
-    required List<Message> original,
-    required List<Message> toUpdate,
+  List<Message> _mergeMessagesIntoExisting({
+    required List<Message> existing,
+    required List<Message> toMerge,
   }) {
-    if (toUpdate.isEmpty) return original;
+    if (toMerge.isEmpty) return existing;
 
-    final mergedMessages = original.merge(
-      toUpdate,
+    final mergedMessages = existing.merge(
+      toMerge,
       key: (message) => message.id,
       update: (original, updated) {
         var merged = updated.syncWith(original);
@@ -3565,7 +3562,7 @@ class ChannelClientState {
       },
     );
 
-    final toUpdateMap = {for (final m in toUpdate) m.id: m};
+    final toUpdateMap = {for (final m in toMerge) m.id: m};
     final updatedMessages = [
       ...mergedMessages.map((it) {
         // Continue if the message doesn't quote any of the updated messages.
