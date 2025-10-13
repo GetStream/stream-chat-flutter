@@ -177,4 +177,7 @@ class EventType {
   /// Local event sent when channel push notification preference is updated.
   static const String channelPushPreferenceUpdated =
       'channel.push_preference.updated';
+
+  /// Event sent when all messages of a user are deleted.
+  static const String userMessagesDeleted = 'user.messages.deleted';
 }

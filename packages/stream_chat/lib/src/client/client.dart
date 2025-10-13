@@ -2177,6 +2177,8 @@ class ClientState {
     _listenUserUpdated();
 
     _listenAllChannelsRead();
+
+    _listenUserMessagesDeleted();
   }
 
   /// Stops listening to the client events.
@@ -2275,6 +2277,24 @@ class ClientState {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
         channels.remove(eventChannel.cid)?.dispose();
+      }),
+    );
+  }
+
+  void _listenUserMessagesDeleted() {
+    _eventsSubscription?.add(
+      _client.on(EventType.userMessagesDeleted).listen((event) async {
+        final cid = event.cid;
+        // Only handle message deletions that are not channel specific
+        // (i.e. user banned globally from the app)
+        if (cid != null) return;
+
+        // Iterate through all the available channels and send the event
+        // to be handled by the respective channel instances.
+        for (final cid in channels.keys) {
+          final channelEvent = event.copyWith(cid: cid);
+          _client.handleEvent(channelEvent);
+        }
       }),
     );
   }
