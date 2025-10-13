@@ -6590,6 +6590,280 @@ void main() {
         );
       });
     });
+
+    group('User messages deleted event', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(channelId, channelType);
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test(
+        'should soft delete all messages from user when hardDelete is false',
+        () async {
+          // Setup: Add messages from different users
+          final user1 = User(id: 'user-1', name: 'User 1');
+          final user2 = User(id: 'user-2', name: 'User 2');
+
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message from user 1',
+            user: user1,
+          );
+          final message2 = Message(
+            id: 'msg-2',
+            text: 'Another message from user 1',
+            user: user1,
+          );
+          final message3 = Message(
+            id: 'msg-3',
+            text: 'Message from user 2',
+            user: user2,
+          );
+
+          channel.state?.updateMessage(message1);
+          channel.state?.updateMessage(message2);
+          channel.state?.updateMessage(message3);
+
+          // Verify initial state
+          expect(channel.state?.messages.length, equals(3));
+          expect(
+            channel.state?.messages.where((m) => m.user?.id == 'user-1').length,
+            equals(2),
+          );
+          expect(
+            channel.state?.messages.where((m) => m.user?.id == 'user-2').length,
+            equals(1),
+          );
+
+          // Create user.messages.deleted event (soft delete)
+          final deletedAt = DateTime.now();
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            user: user1,
+            hardDelete: false,
+            createdAt: deletedAt,
+          );
+
+          // Dispatch event
+          client.addEvent(userMessagesDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify user1's messages are soft deleted
+          expect(channel.state?.messages.length, equals(3));
+          final deletedMessages = channel.state?.messages
+              .where((m) => m.user?.id == 'user-1')
+              .toList();
+          expect(deletedMessages?.length, equals(2));
+          for (final message in deletedMessages!) {
+            expect(message.type, equals(MessageType.deleted));
+            expect(message.deletedAt, isNotNull);
+            expect(message.state.isDeleted, isTrue);
+          }
+
+          // Verify user2's message is unaffected
+          final user2Message =
+              channel.state?.messages.firstWhere((m) => m.id == 'msg-3');
+          expect(user2Message?.type, isNot(MessageType.deleted));
+          expect(user2Message?.deletedAt, isNull);
+        },
+      );
+
+      test(
+        'should hard delete all messages from user when hardDelete is true',
+        () async {
+          // Setup: Add messages from different users
+          final user1 = User(id: 'user-1', name: 'User 1');
+          final user2 = User(id: 'user-2', name: 'User 2');
+
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message from user 1',
+            user: user1,
+          );
+          final message2 = Message(
+            id: 'msg-2',
+            text: 'Another message from user 1',
+            user: user1,
+          );
+          final message3 = Message(
+            id: 'msg-3',
+            text: 'Message from user 2',
+            user: user2,
+          );
+
+          channel.state?.updateMessage(message1);
+          channel.state?.updateMessage(message2);
+          channel.state?.updateMessage(message3);
+
+          // Verify initial state
+          expect(channel.state?.messages.length, equals(3));
+
+          // Create user.messages.deleted event (hard delete)
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            user: user1,
+            hardDelete: true,
+          );
+
+          // Dispatch event
+          client.addEvent(userMessagesDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify user1's messages are removed
+          expect(channel.state?.messages.length, equals(1));
+          expect(
+            channel.state?.messages.any((m) => m.user?.id == 'user-1'),
+            isFalse,
+          );
+
+          // Verify user2's message still exists
+          final user2Message =
+              channel.state?.messages.firstWhere((m) => m.id == 'msg-3');
+          expect(user2Message, isNotNull);
+          expect(user2Message?.user?.id, equals('user-2'));
+        },
+      );
+
+      test(
+        'should handle thread messages from user',
+        () async {
+          // Setup: Add parent and thread messages
+          final user1 = User(id: 'user-1', name: 'User 1');
+          final user2 = User(id: 'user-2', name: 'User 2');
+
+          final parentMessage = Message(
+            id: 'parent-msg',
+            text: 'Parent message',
+            user: user2,
+          );
+          final threadMessage1 = Message(
+            id: 'thread-msg-1',
+            text: 'Thread message from user 1',
+            user: user1,
+            parentId: 'parent-msg',
+          );
+          final threadMessage2 = Message(
+            id: 'thread-msg-2',
+            text: 'Another thread message from user 1',
+            user: user1,
+            parentId: 'parent-msg',
+          );
+
+          channel.state?.updateMessage(parentMessage);
+          channel.state?.updateThreadInfo('parent-msg', [
+            threadMessage1,
+            threadMessage2,
+          ]);
+
+          // Verify initial state
+          expect(channel.state?.messages.length, equals(1));
+          expect(channel.state?.threads['parent-msg']?.length, equals(2));
+
+          // Create user.messages.deleted event (soft delete)
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            user: user1,
+            hardDelete: false,
+          );
+
+          // Dispatch event
+          client.addEvent(userMessagesDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify thread messages are soft deleted
+          final threadMessages = channel.state?.threads['parent-msg'];
+          expect(threadMessages?.length, equals(2));
+          for (final message in threadMessages!) {
+            expect(message.type, equals(MessageType.deleted));
+            expect(message.state.isDeleted, isTrue);
+          }
+
+          // Verify parent message is unaffected
+          final parent = channel.state?.messages.first;
+          expect(parent?.type, isNot(MessageType.deleted));
+        },
+      );
+
+      test(
+        'should do nothing when user is null',
+        () async {
+          // Setup: Add messages
+          final user1 = User(id: 'user-1', name: 'User 1');
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message from user 1',
+            user: user1,
+          );
+
+          channel.state?.updateMessage(message1);
+
+          // Verify initial state
+          expect(channel.state?.messages.length, equals(1));
+
+          // Create user.messages.deleted event without user
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            hardDelete: false,
+          );
+
+          // Dispatch event
+          client.addEvent(userMessagesDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify messages are unaffected
+          expect(channel.state?.messages.length, equals(1));
+          expect(
+            channel.state?.messages.first.type,
+            isNot(MessageType.deleted),
+          );
+        },
+      );
+
+      test(
+        'should handle empty message list',
+        () async {
+          // Setup: Empty channel
+          expect(channel.state?.messages.length, equals(0));
+
+          // Create user.messages.deleted event
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            user: User(id: 'user-1'),
+            hardDelete: false,
+          );
+
+          // Dispatch event - should not throw
+          client.addEvent(userMessagesDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify state is still empty
+          expect(channel.state?.messages.length, equals(0));
+        },
+      );
+    });
   });
 
   group('ChannelCapabilityCheck', () {
