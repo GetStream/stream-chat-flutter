@@ -2355,6 +2355,8 @@ class ChannelClientState {
     _listenLocationExpired();
     // endregion
 
+    _listenUserMessagesDeleted();
+
     _startCleaningStaleTypingEvents();
 
     _startCleaningStalePinnedMessages();
@@ -3205,140 +3207,16 @@ class ChannelClientState {
   }
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
-  void updateMessage(Message message) {
-    // Determine if the message should be displayed in the channel view.
-    if (message.parentId == null || message.showInChannel == true) {
-      // Create a new list of messages to avoid modifying the original
-      // list directly.
-      var newMessages = [...messages];
-      final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
-
-      if (oldIndex != -1) {
-        // If the message already exists, prepare it for update.
-        final oldMessage = newMessages[oldIndex];
-        var updatedMessage = message.syncWith(oldMessage);
-
-        // Preserve quotedMessage if the update doesn't include a new
-        // quotedMessage.
-        if (message.quotedMessageId != null &&
-            message.quotedMessage == null &&
-            oldMessage.quotedMessage != null) {
-          updatedMessage = updatedMessage.copyWith(
-            quotedMessage: oldMessage.quotedMessage,
-          );
-        }
-
-        // Update the message in the list.
-        newMessages[oldIndex] = updatedMessage;
-
-        // Update quotedMessage references in all messages.
-        newMessages = newMessages.map((it) {
-          // Skip if the current message does not quote the updated message.
-          if (it.quotedMessageId != message.id) return it;
-
-          // Update the quotedMessage only if the updatedMessage indicates
-          // deletion.
-          if (message.isDeleted) {
-            return it.copyWith(
-              quotedMessage: updatedMessage.copyWith(
-                type: message.type,
-                deletedAt: message.deletedAt,
-              ),
-            );
-          }
-          return it;
-        }).toList();
-      } else {
-        // If the message is new, add it to the list.
-        newMessages.add(message);
-      }
-
-      // Calculate the new last message at time.
-      var lastMessageAt = _channelState.channel?.lastMessageAt;
-      lastMessageAt ??= message.createdAt;
-      if (_shouldUpdateChannelLastMessageAt(message)) {
-        lastMessageAt = [lastMessageAt, message.createdAt].max;
-      }
-
-      // Apply the updated lists to the channel state.
-      _channelState = _channelState.copyWith(
-        messages: newMessages.sorted(_sortByCreatedAt),
-        channel: _channelState.channel?.copyWith(
-          lastMessageAt: lastMessageAt,
-        ),
-      );
-    }
-
-    // If the message is part of a thread, update thread message.
-    if (message.parentId case final parentId?) {
-      _updateThreadMessage(parentId, message);
-    }
-
-    // Handle updates to pinned messages.
-    final newPinnedMessages = _updatePinnedMessages(message);
-
-    // Handle updates to the active live locations.
-    final newActiveLiveLocations = _updateActiveLiveLocations(message);
-
-    // Update the channel state with the new pinned messages and
-    // active live locations.
-    _channelState = _channelState.copyWith(
-      pinnedMessages: newPinnedMessages,
-      activeLiveLocations: newActiveLiveLocations,
-    );
-  }
-
-  void _updateThreadMessage(String parentId, Message message) {
-    final existingThreadMessages = threads[parentId] ?? [];
-    final updatedThreadMessages = <Message>[
-      ...existingThreadMessages.merge(
-        [message],
-        key: (it) => it.id,
-        update: (original, updated) => updated.syncWith(original),
-      ),
-    ];
-
-    _threads = {
-      ...threads,
-      parentId: updatedThreadMessages.sorted(_sortByCreatedAt)
-    };
-  }
+  void updateMessage(Message message) => _updateMessages([message]);
 
   /// Cleans up all the stale error messages which requires no action.
   void cleanUpStaleErrorMessages() {
     final errorMessages = messages.where((message) {
       return message.isError && !message.isBounced;
-    });
+    }).toList();
 
     if (errorMessages.isEmpty) return;
-    return errorMessages.forEach(removeMessage);
-  }
-
-  /// Updates the list of pinned messages based on the current message's
-  /// pinned status.
-  List<Message> _updatePinnedMessages(Message message) {
-    final existingPinnedMessages = [...pinnedMessages];
-
-    // If the message is pinned and not yet deleted,
-    // merge it into the existing pinned messages.
-    if (message.pinned && !message.isDeleted) {
-      final newPinnedMessages = [
-        ...existingPinnedMessages.merge(
-          [message],
-          key: (it) => it.id,
-          update: (old, updated) => updated,
-        ),
-      ];
-
-      return newPinnedMessages;
-    }
-
-    // Otherwise, remove the message from the pinned messages.
-    final newPinnedMessages = <Message>[
-      ...existingPinnedMessages.where((m) => m.id != message.id),
-    ];
-
-    return newPinnedMessages;
+    return _removeMessages(errorMessages);
   }
 
   List<Location> _updateActiveLiveLocations(Message message) {
@@ -3370,68 +3248,7 @@ class ChannelClientState {
   }
 
   /// Remove a [message] from this [channelState].
-  void removeMessage(Message message) async {
-    await _channel._client.chatPersistenceClient?.deleteMessageById(message.id);
-
-    if (message.parentId == null || message.showInChannel == true) {
-      // Remove regular message, thread message shown in channel
-      var updatedMessages = [...messages.where((e) => e.id != message.id)];
-
-      // Remove quoted message reference from every message if available.
-      updatedMessages = [
-        ...updatedMessages.map((it) {
-          // Early return if the message doesn't have a quoted message.
-          if (it.quotedMessageId != message.id) return it;
-
-          // Setting it to null will remove the quoted message from the message.
-          return it.copyWith(quotedMessage: null, quotedMessageId: null);
-        }),
-      ];
-
-      _channelState = _channelState.copyWith(
-        messages: updatedMessages.sorted(_sortByCreatedAt),
-      );
-    }
-
-    if (message.parentId case final parentId?) {
-      // If the message is a thread message, remove it from the threads.
-      _removeThreadMessage(message, parentId);
-    }
-
-    // If the message is pinned, remove it from the pinned messages.
-    final updatedPinnedMessages = [
-      ...pinnedMessages.where((it) => it.id != message.id),
-    ];
-
-    // If the message is a live location, update the active live locations.
-    final updatedActiveLiveLocations = [
-      ...activeLiveLocations.where((it) => it.messageId != message.id),
-    ];
-
-    _channelState = _channelState.copyWith(
-      pinnedMessages: updatedPinnedMessages,
-      activeLiveLocations: updatedActiveLiveLocations,
-    );
-  }
-
-  void _removeThreadMessage(Message message, String parentId) {
-    final existingThreadMessages = threads[parentId] ?? [];
-    final updatedThreadMessages = <Message>[
-      ...existingThreadMessages.where((it) => it.id != message.id),
-    ];
-
-    // If there are no more messages in the thread, remove the thread entry.
-    if (updatedThreadMessages.isEmpty) {
-      _threads = {...threads}..remove(parentId);
-      return;
-    }
-
-    // Otherwise, update the thread messages.
-    _threads = {
-      ...threads,
-      parentId: updatedThreadMessages.sorted(_sortByCreatedAt),
-    };
-  }
+  void removeMessage(Message message) => _removeMessages([message]);
 
   /// Removes/Updates the [message] based on the [hardDelete] value.
   void deleteMessage(Message message, {bool hardDelete = false}) {
@@ -3991,6 +3808,262 @@ class ChannelClientState {
     );
   }
 
+  void _deleteMessagesFromUser({
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  }) {
+    final userMessages = [
+      ...messages.where((it) => it.user?.id == userId).map((it) {
+        return it.copyWith(
+          type: MessageType.deleted,
+          deletedAt: deletedAt ?? DateTime.now(),
+          state: MessageState.deleted(hard: hardDelete),
+        );
+      }),
+    ];
+
+    return _deleteMessages(userMessages, hardDelete: hardDelete);
+  }
+
+  void _deleteMessages(
+    List<Message> messages, {
+    bool hardDelete = false,
+  }) {
+    if (messages.isEmpty) return;
+
+    if (hardDelete) return _removeMessages(messages);
+    return _updateMessages(messages);
+  }
+
+  void _updateMessages(List<Message> messages) {
+    if (messages.isEmpty) return;
+
+    _updatedThreadMessages(messages);
+    _updateChannelMessages(messages);
+  }
+
+  void _updatedThreadMessages(List<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final affectedThreads = {...messages.map((it) => it.parentId).nonNulls};
+    // If there are no affected threads, return early.
+    if (affectedThreads.isEmpty) return;
+
+    final updatedThreads = {...threads};
+    for (final thread in affectedThreads) {
+      final threadMessages = [...?updatedThreads[thread]];
+      final updatedThreadMessages = _updateMessagesIntoOriginal(
+        original: threadMessages,
+        toUpdate: messages,
+      ).sorted(_sortByCreatedAt);
+
+      // Update the thread with the modified message list.
+      updatedThreads[thread] = updatedThreadMessages;
+    }
+
+    // Update the threads map.
+    _threads = updatedThreads;
+  }
+
+  void _updateChannelMessages(List<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final affectedMessages = [
+      ...messages.map((it) {
+        // If it's not a thread message, consider it affected.
+        if (it.parentId == null) return it;
+        // If it's a thread message shown in channel, consider it affected.
+        if (it.showInChannel == true) return it;
+
+        return null; // Thread message not shown in channel, ignore it.
+      }).nonNulls,
+    ];
+
+    // If there are no affected messages, return early.
+    if (affectedMessages.isEmpty) return;
+
+    final channelMessages = [...this.messages];
+    final updatedChannelMessages = _updateMessagesIntoOriginal(
+      original: channelMessages,
+      toUpdate: affectedMessages,
+    ).sorted(_sortByCreatedAt);
+
+    final pinnedMessages = [...this.pinnedMessages];
+    final updatedPinnedMessages = _updateMessagesIntoOriginal(
+      original: pinnedMessages,
+      toUpdate: affectedMessages,
+    ).where(_pinIsValid).sorted(_sortByCreatedAt);
+
+    // Calculate the new last message at time.
+    var lastMessageAt = _channelState.channel?.lastMessageAt;
+    final lastMessage = updatedChannelMessages.lastOrNull;
+    if (lastMessage != null && _shouldUpdateChannelLastMessageAt(lastMessage)) {
+      lastMessageAt = [lastMessageAt, lastMessage.createdAt].nonNulls.max;
+    }
+
+    _channelState = _channelState.copyWith(
+      messages: updatedChannelMessages,
+      pinnedMessages: updatedPinnedMessages,
+      channel: _channelState.channel?.copyWith(lastMessageAt: lastMessageAt),
+    );
+  }
+
+  List<Message> _updateMessagesIntoOriginal({
+    required List<Message> original,
+    required List<Message> toUpdate,
+  }) {
+    if (toUpdate.isEmpty) return original;
+
+    final mergedMessages = original.merge(
+      toUpdate,
+      key: (message) => message.id,
+      update: (original, updated) {
+        var merged = updated.syncWith(original);
+
+        // Preserve quotedMessage if the updated doesn't include it.
+        if (updated.quotedMessageId != null && updated.quotedMessage == null) {
+          merged = merged.copyWith(quotedMessage: original.quotedMessage);
+        }
+
+        return merged;
+      },
+    );
+
+    final toUpdateMap = {for (final m in toUpdate) m.id: m};
+    final updatedMessages = [
+      ...mergedMessages.map((it) {
+        // Continue if the message doesn't quote any of the updated messages.
+        if (!toUpdateMap.containsKey(it.quotedMessageId)) return it;
+
+        final updatedQuotedMessage = toUpdateMap[it.quotedMessageId];
+        // Update the quotedMessage reference in the message.
+        return it.copyWith(quotedMessage: updatedQuotedMessage);
+      })
+    ];
+
+    return updatedMessages;
+  }
+
+  void _removeMessages(List<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final messageIds = messages.map((m) => m.id).toSet().toList();
+    final persistenceClient = _channel.client.chatPersistenceClient;
+    // Remove the messages from the persistence client.
+    persistenceClient?.deleteMessageByIds(messageIds);
+    persistenceClient?.deletePinnedMessageByIds(messageIds);
+
+    _removeThreadMessages(messages);
+    _removeChannelMessages(messages);
+  }
+
+  void _removeThreadMessages(List<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final affectedThreads = {...messages.map((it) => it.parentId).nonNulls};
+    // If there are no affected threads, return early.
+    if (affectedThreads.isEmpty) return;
+
+    final updatedThreads = {...threads};
+    for (final thread in affectedThreads) {
+      final threadMessages = updatedThreads[thread];
+      // Continue if the thread doesn't exist.
+      if (threadMessages == null) continue;
+
+      // Remove the deleted message from the thread messages and reference from
+      // other messages quoting it.
+      final updatedThreadMessages = _removeMessagesFromOriginal(
+        original: threadMessages,
+        toRemove: messages,
+      );
+
+      // If there are no more messages in the thread, remove the thread entry.
+      if (updatedThreadMessages.isEmpty) {
+        updatedThreads.remove(thread);
+        continue;
+      }
+
+      // Otherwise, update the thread with the modified message list.
+      updatedThreads[thread] = updatedThreadMessages;
+    }
+
+    // Update the threads map.
+    _threads = updatedThreads;
+  }
+
+  void _removeChannelMessages(List<Message> messages) {
+    if (messages.isEmpty) return;
+
+    final affectedMessages = [
+      ...messages.map((it) {
+        // If it's not a thread message, consider it affected.
+        if (it.parentId == null) return it;
+        // If it's a thread message shown in channel, consider it affected.
+        if (it.showInChannel == true) return it;
+
+        return null; // Thread message not shown in channel, ignore it.
+      }).nonNulls,
+    ];
+
+    // If there are no affected messages, return early.
+    if (affectedMessages.isEmpty) return;
+
+    final channelMessages = [...this.messages];
+    final updatedChannelMessages = _removeMessagesFromOriginal(
+      original: channelMessages,
+      toRemove: affectedMessages,
+    );
+
+    final pinnedMessages = [...this.pinnedMessages];
+    final updatedPinnedMessages = _removeMessagesFromOriginal(
+      original: pinnedMessages,
+      toRemove: affectedMessages,
+    );
+
+    _channelState = _channelState.copyWith(
+      messages: updatedChannelMessages,
+      pinnedMessages: updatedPinnedMessages,
+    );
+  }
+
+  List<Message> _removeMessagesFromOriginal({
+    required List<Message> original,
+    required List<Message> toRemove,
+  }) {
+    if (toRemove.isEmpty) return original;
+
+    final toRemoveIds = toRemove.map((m) => m.id).toSet();
+    final updatedMessages = [
+      ...original.where((it) => !toRemoveIds.contains(it.id)).map((it) {
+        // Continue if the message doesn't quote any of the deleted messages.
+        if (!toRemoveIds.contains(it.quotedMessageId)) return it;
+
+        // Setting it to null will remove the quoted message from the message.
+        return it.copyWith(quotedMessageId: null, quotedMessage: null);
+      }),
+    ];
+
+    return updatedMessages;
+  }
+
+  // Listens to user message deleted events and marks messages from that user
+  // as either soft or hard deleted based on the event data.
+  void _listenUserMessagesDeleted() {
+    _subscriptions.add(
+      _channel.on(EventType.userMessagesDeleted).listen((event) {
+        final user = event.user;
+        if (user == null) return;
+
+        return _deleteMessagesFromUser(
+          userId: user.id,
+          hardDelete: event.hardDelete ?? false,
+          deletedAt: event.createdAt,
+        );
+      }),
+    );
+  }
+
   /// Call this method to dispose this object.
   void dispose() {
     _debouncedUpdatePersistenceChannelThreads.cancel();
@@ -4008,8 +4081,15 @@ class ChannelClientState {
 }
 
 bool _pinIsValid(Message message) {
-  final now = DateTime.now();
-  return message.pinExpires!.isAfter(now);
+  // If the message is not pinned, it's not valid.
+  if (message.pinned != true) return false;
+
+  // If there's no expiration, the pin is valid.
+  final pinExpires = message.pinExpires;
+  if (pinExpires == null) return true;
+
+  // If there's an expiration, check if it's still valid.
+  return pinExpires.isAfter(DateTime.now());
 }
 
 /// Extension methods for checking channel capabilities on a Channel instance.

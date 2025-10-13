@@ -2271,6 +2271,7 @@ class ClientState {
 
     // region READ EVENTS
     _listenAllChannelsRead();
+    _listenUserMessagesDeleted();
     // endregion
 
     // region LOCATION EVENTS
@@ -2382,6 +2383,24 @@ class ClientState {
     );
   }
 
+  void _listenUserMessagesDeleted() {
+    _eventsSubscription?.add(
+      _client.on(EventType.userMessagesDeleted).listen((event) async {
+        final cid = event.cid;
+        // Only handle message deletions that are not channel specific
+        // (i.e. user banned globally from the app)
+        if (cid != null) return;
+
+        // Iterate through all the available channels and send the event
+        // to be handled by the respective channel instances.
+        for (final cid in channels.keys) {
+          final channelEvent = event.copyWith(cid: cid);
+          _client.handleEvent(channelEvent);
+        }
+      }),
+    );
+  }
+
   void _listenLocationShared() {
     _eventsSubscription?.add(
       _client.on(EventType.locationShared).listen((event) {
@@ -2440,7 +2459,7 @@ class ClientState {
 
         final newActiveLiveLocations = <Location>[
           ...activeLiveLocations.where(
-            (it) => it.messageId != location.messageId,
+                (it) => it.messageId != location.messageId,
           )
         ];
 
@@ -2454,7 +2473,7 @@ class ClientState {
     _staleLiveLocationsCleanerTimer?.cancel();
     _staleLiveLocationsCleanerTimer = Timer.periodic(
       const Duration(seconds: 1),
-      (_) {
+          (_) {
         final expired = activeLiveLocations.where((it) => it.isExpired);
         if (expired.isEmpty) return;
 
