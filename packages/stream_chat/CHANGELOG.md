@@ -8,6 +8,7 @@
 ✅ Added
 
 - Added support for `Channel.messageCount` field.
+- Added support for `user.messages.deleted` event.
 
 🐞 Fixed
 
