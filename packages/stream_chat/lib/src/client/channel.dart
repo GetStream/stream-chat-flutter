@@ -3445,17 +3445,18 @@ class ChannelClientState {
     bool hardDelete = false,
     DateTime? deletedAt,
   }) {
-    final userMessages = [
-      ...messages.where((it) => it.user?.id == userId).map((it) {
-        return it.copyWith(
-          type: MessageType.deleted,
-          deletedAt: deletedAt ?? DateTime.now(),
-          state: MessageState.deleted(hard: hardDelete),
-        );
-      }),
-    ];
+    final userMessages = <String, Message>{};
+    for (final message in [...messages, ...threads.values.flattened]) {
+      if (message.user?.id != userId) continue;
+      userMessages[message.id] = message.copyWith(
+        type: MessageType.deleted,
+        deletedAt: deletedAt ?? DateTime.now(),
+        state: MessageState.deleted(hard: hardDelete),
+      );
+    }
 
-    return _deleteMessages(userMessages, hardDelete: hardDelete);
+    final messagesToDelete = userMessages.values.toList();
+    return _deleteMessages(messagesToDelete, hardDelete: hardDelete);
   }
 
   void _deleteMessages(
