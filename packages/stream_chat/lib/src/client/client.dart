@@ -2267,11 +2267,11 @@ class ClientState {
 
     // region USER EVENTS
     _listenUserUpdated();
+    _listenUserMessagesDeleted();
     // endregion
 
     // region READ EVENTS
     _listenAllChannelsRead();
-    _listenUserMessagesDeleted();
     // endregion
 
     // region LOCATION EVENTS
@@ -2393,7 +2393,7 @@ class ClientState {
 
         // Iterate through all the available channels and send the event
         // to be handled by the respective channel instances.
-        for (final cid in channels.keys) {
+        for (final cid in [...channels.keys]) {
           final channelEvent = event.copyWith(cid: cid);
           _client.handleEvent(channelEvent);
         }
