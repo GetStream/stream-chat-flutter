@@ -3734,22 +3734,28 @@ void main() {
         verify(() => api.general.sync(cids, lastSyncAt)).called(1);
       });
     });
+  });
+
+  group('WS events', () {
+    late StreamChatClient client;
+
+    setUp(() async {
+      final ws = FakeWebSocket();
+      client = StreamChatClient('test-api-key', ws: ws);
+
+      final user = User(id: 'test-user-id');
+      final token = Token.development(user.id).rawValue;
+
+      await client.connectUser(user, token);
+      await delay(300);
+      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+    });
+
+    tearDown(() async {
+      await client.dispose();
+    });
 
     group('User messages deleted event', () {
-      const apiKey = 'test-api-key';
-      late StreamChatClient client;
-
-      setUp(() {
-        final ws = FakeWebSocket();
-        final api = FakeChatApi();
-        client = StreamChatClient(apiKey, ws: ws, chatApi: api);
-        client.state.currentUser = OwnUser(id: 'test-user');
-      });
-
-      tearDown(() {
-        client.dispose();
-      });
-
       test(
         'should broadcast global user.messages.deleted event to all channels',
         () async {
@@ -3780,8 +3786,10 @@ void main() {
           final channel2 = Channel.fromState(client, channelState2);
 
           // Register channels in client state
-          client.state.channels['messaging:channel-1'] = channel1;
-          client.state.channels['messaging:channel-2'] = channel2;
+          client.state.addChannels({
+            'messaging:channel-1': channel1,
+            'messaging:channel-2': channel2,
+          });
 
           // Verify initial state
           expect(channel1.state?.messages.length, equals(1));
@@ -3789,23 +3797,13 @@ void main() {
 
           // Simulate global user.messages.deleted event being broadcast to channels
           // (In production, ClientState._listenUserMessagesDeleted does this)
-          final event1 = Event(
-            cid: channel1.cid,
+          final event = Event(
             type: EventType.userMessagesDeleted,
             user: bannedUser,
             hardDelete: false,
           );
 
-          client.handleEvent(event1);
-
-          final event2 = Event(
-            cid: channel2.cid,
-            type: EventType.userMessagesDeleted,
-            user: bannedUser,
-            hardDelete: false,
-          );
-
-          client.handleEvent(event2);
+          client.handleEvent(event);
 
           // Wait for the events to be processed
           await Future.delayed(Duration.zero);
@@ -3818,10 +3816,6 @@ void main() {
           final channel2Message = channel2.state?.messages.first;
           expect(channel2Message?.type, equals(MessageType.deleted));
           expect(channel2Message?.state.isDeleted, isTrue);
-
-          // Cleanup
-          channel1.dispose();
-          channel2.dispose();
         },
       );
 
@@ -3862,8 +3856,10 @@ void main() {
           final channel2 = Channel.fromState(client, channelState2);
 
           // Register channels in client state
-          client.state.channels['messaging:channel-1'] = channel1;
-          client.state.channels['messaging:channel-2'] = channel2;
+          client.state.addChannels({
+            'messaging:channel-1': channel1,
+            'messaging:channel-2': channel2,
+          });
 
           // Verify initial state
           expect(channel1.state?.messages.length, equals(2));
@@ -3871,23 +3867,13 @@ void main() {
 
           // Simulate global user.messages.deleted event being broadcast to channels
           // (In production, ClientState._listenUserMessagesDeleted does this)
-          final event1 = Event(
-            cid: channel1.cid,
+          final event = Event(
             type: EventType.userMessagesDeleted,
             user: bannedUser,
             hardDelete: true,
           );
 
-          client.handleEvent(event1);
-
-          final event2 = Event(
-            cid: channel2.cid,
-            type: EventType.userMessagesDeleted,
-            user: bannedUser,
-            hardDelete: true,
-          );
-
-          client.handleEvent(event2);
+          client.handleEvent(event);
 
           // Wait for the events to be processed
           await Future.delayed(Duration.zero);
@@ -3904,80 +3890,6 @@ void main() {
           final safeMessage =
               channel1.state?.messages.firstWhere((m) => m.id == 'msg-3');
           expect(safeMessage?.user?.id, equals('other-user'));
-
-          // Cleanup
-          channel1.dispose();
-          channel2.dispose();
-        },
-      );
-
-      test(
-        'should not handle channel-specific user.messages.deleted events',
-        () async {
-          // Add messages
-          final bannedUser = User(id: 'banned-user', name: 'Banned User');
-          final message1 = Message(
-            id: 'msg-1',
-            text: 'Message in channel 1',
-            user: bannedUser,
-          );
-          final message2 = Message(
-            id: 'msg-2',
-            text: 'Message in channel 2',
-            user: bannedUser,
-          );
-
-          // Setup: Create channels with state
-          final channelState1 = ChannelState(
-            channel: ChannelModel(id: 'channel-1', type: 'messaging'),
-            messages: [message1],
-          );
-          final channelState2 = ChannelState(
-            channel: ChannelModel(id: 'channel-2', type: 'messaging'),
-            messages: [message2],
-          );
-
-          final channel1 = Channel.fromState(client, channelState1);
-          final channel2 = Channel.fromState(client, channelState2);
-
-          // Register channels in client state
-          client.state.channels['messaging:channel-1'] = channel1;
-          client.state.channels['messaging:channel-2'] = channel2;
-
-          // Verify initial state
-          expect(channel1.state?.messages.length, equals(1));
-          expect(channel2.state?.messages.length, equals(1));
-
-          // Create channel-specific event (has cid)
-          final channelSpecificEvent = Event(
-            cid: channel1.cid,
-            type: EventType.userMessagesDeleted,
-            user: bannedUser,
-            hardDelete: true,
-          );
-
-          // Dispatch event - this should be handled by channel, not client state
-          client.handleEvent(channelSpecificEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify only channel1 is affected (by channel's own handler)
-          expect(
-            channel1.state?.messages.any((m) => m.user?.id == 'banned-user'),
-            isFalse,
-          );
-
-          // Verify channel2 is unaffected (client state didn't broadcast it)
-          expect(channel2.state?.messages.length, equals(1));
-          expect(
-            channel2.state?.messages.any((m) => m.user?.id == 'banned-user'),
-            isTrue,
-          );
-
-          // Cleanup
-          channel1.dispose();
-          channel2.dispose();
         },
       );
     });

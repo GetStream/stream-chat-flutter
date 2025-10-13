@@ -5200,8 +5200,18 @@ void main() {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
       late Channel channel;
+      late MockPersistenceClient persistenceClient;
 
       setUp(() {
+        persistenceClient = MockPersistenceClient();
+        when(() => client.chatPersistenceClient).thenReturn(persistenceClient);
+        when(() => persistenceClient.deleteMessageByIds(any()))
+            .thenAnswer((_) async {});
+        when(() => persistenceClient.deletePinnedMessageByIds(any()))
+            .thenAnswer((_) async {});
+        when(() => persistenceClient.getChannelThreads(any()))
+            .thenAnswer((_) async => <String, List<Message>>{});
+
         final channelState = _generateChannelState(channelId, channelType);
         channel = Channel.fromState(client, channelState);
       });
@@ -5466,6 +5476,106 @@ void main() {
 
           // Verify state is still empty
           expect(channel.state?.messages.length, equals(0));
+        },
+      );
+
+      test(
+        'should delete messages from persistence when hardDelete is true',
+        () async {
+          // Setup: Add messages from different users
+          final user1 = User(id: 'user-1', name: 'User 1');
+          final user2 = User(id: 'user-2', name: 'User 2');
+
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message from user 1',
+            user: user1,
+          );
+          final message2 = Message(
+            id: 'msg-2',
+            text: 'Another message from user 1',
+            user: user1,
+          );
+          final message3 = Message(
+            id: 'msg-3',
+            text: 'Message from user 2',
+            user: user2,
+          );
+
+          channel.state?.updateMessage(message1);
+          channel.state?.updateMessage(message2);
+          channel.state?.updateMessage(message3);
+
+          // Verify initial state
+          expect(channel.state?.messages.length, equals(3));
+
+          // Create user.messages.deleted event (hard delete)
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            user: user1,
+            hardDelete: true,
+          );
+
+          // Dispatch event
+          client.addEvent(userMessagesDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify messages are removed from persistence
+          verify(
+            () => persistenceClient.deleteMessageByIds(['msg-1', 'msg-2']),
+          ).called(1);
+          verify(
+            () =>
+                persistenceClient.deletePinnedMessageByIds(['msg-1', 'msg-2']),
+          ).called(1);
+
+          // Verify user1's messages are removed from state
+          expect(channel.state?.messages.length, equals(1));
+          expect(
+            channel.state?.messages.any((m) => m.user?.id == 'user-1'),
+            isFalse,
+          );
+        },
+      );
+
+      test(
+        'should not delete from persistence when hardDelete is false',
+        () async {
+          // Setup: Add messages
+          final user1 = User(id: 'user-1', name: 'User 1');
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message from user 1',
+            user: user1,
+          );
+
+          channel.state?.updateMessage(message1);
+
+          // Create user.messages.deleted event (soft delete)
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            user: user1,
+            hardDelete: false,
+          );
+
+          // Dispatch event
+          client.addEvent(userMessagesDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify persistence deletion methods were NOT called
+          verifyNever(() => persistenceClient.deleteMessageByIds(any()));
+          verifyNever(() => persistenceClient.deletePinnedMessageByIds(any()));
+
+          // Verify message is soft deleted (still in state)
+          expect(channel.state?.messages.length, equals(1));
+          expect(
+              channel.state?.messages.first.type, equals(MessageType.deleted));
         },
       );
     });
