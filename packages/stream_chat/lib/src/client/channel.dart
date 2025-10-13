@@ -3605,8 +3605,8 @@ class ChannelClientState {
 
       // Remove the deleted message from the thread messages and reference from
       // other messages quoting it.
-      final updatedThreadMessages = _removeMessagesFromOriginal(
-        original: threadMessages,
+      final updatedThreadMessages = _removeMessagesFromExisting(
+        existing: threadMessages,
         toRemove: messages,
       );
 
@@ -3642,14 +3642,14 @@ class ChannelClientState {
     if (affectedMessages.isEmpty) return;
 
     final channelMessages = [...this.messages];
-    final updatedChannelMessages = _removeMessagesFromOriginal(
-      original: channelMessages,
+    final updatedChannelMessages = _removeMessagesFromExisting(
+      existing: channelMessages,
       toRemove: affectedMessages,
     );
 
     final pinnedMessages = [...this.pinnedMessages];
-    final updatedPinnedMessages = _removeMessagesFromOriginal(
-      original: pinnedMessages,
+    final updatedPinnedMessages = _removeMessagesFromExisting(
+      existing: pinnedMessages,
       toRemove: affectedMessages,
     );
 
@@ -3659,15 +3659,15 @@ class ChannelClientState {
     );
   }
 
-  List<Message> _removeMessagesFromOriginal({
-    required List<Message> original,
+  List<Message> _removeMessagesFromExisting({
+    required List<Message> existing,
     required List<Message> toRemove,
   }) {
-    if (toRemove.isEmpty) return original;
+    if (toRemove.isEmpty) return existing;
 
     final toRemoveIds = toRemove.map((m) => m.id).toSet();
     final updatedMessages = [
-      ...original.where((it) => !toRemoveIds.contains(it.id)).map((it) {
+      ...existing.where((it) => !toRemoveIds.contains(it.id)).map((it) {
         // Continue if the message doesn't quote any of the deleted messages.
         if (!toRemoveIds.contains(it.quotedMessageId)) return it;
 
