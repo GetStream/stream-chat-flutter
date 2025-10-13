@@ -3295,30 +3295,22 @@ class ChannelClientState {
   }
 
   /// Clears all the replies in the thread identified by [parentId].
-  void clearThread(String parentId) {
-    final updatedThreads = {
-      ...threads,
-      parentId: <Message>[],
-    };
-
-    _threads = updatedThreads;
-  }
+  void clearThread(String parentId) => updateThreadInfo(parentId, <Message>[]);
 
   /// Update threads with updated information about messages.
   void updateThreadInfo(String parentId, List<Message> messages) {
-    final newThreads = {...threads}..update(
-        parentId,
-        (original) => <Message>[
-          ...original.merge(
-            messages,
-            key: (message) => message.id,
-            update: (original, updated) => updated.syncWith(original),
-          ),
-        ].sorted(_sortByCreatedAt),
-        ifAbsent: () => messages.sorted(_sortByCreatedAt),
-      );
+    final updatedThreads = {...threads};
 
-    _threads = newThreads;
+    final threadMessages = [...?updatedThreads[parentId]];
+    final updatedThreadMessages = _updateMessagesIntoOriginal(
+      original: threadMessages,
+      toUpdate: messages,
+    ).sorted(_sortByCreatedAt);
+
+    // Update the thread with the modified message list.
+    updatedThreads[parentId] = updatedThreadMessages;
+
+    _threads = updatedThreads;
   }
 
   Draft? _getThreadDraft(String parentId, List<Message>? messages) {
@@ -3482,11 +3474,11 @@ class ChannelClientState {
   void _updateMessages(List<Message> messages) {
     if (messages.isEmpty) return;
 
-    _updatedThreadMessages(messages);
+    _updateThreadMessages(messages);
     _updateChannelMessages(messages);
   }
 
-  void _updatedThreadMessages(List<Message> messages) {
+  void _updateThreadMessages(List<Message> messages) {
     if (messages.isEmpty) return;
 
     final affectedThreads = {...messages.map((it) => it.parentId).nonNulls};
