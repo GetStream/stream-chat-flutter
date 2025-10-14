@@ -18,27 +18,16 @@ jobs:
     steps:
       - uses: amannn/action-semantic-pull-request@v6.1.1
         with: 
-          # Package scopes (published packages):
-          # - llc: stream_chat (Low-level client)
-          # - ui: stream_chat_flutter (UI components)
-          # - core: stream_chat_flutter_core (Core business logic)
-          # - localization: stream_chat_localizations (Localizations)
-          # - persistence: stream_chat_persistence (Local persistence)
-          # Infrastructure scopes:
-          # - samples: Sample app changes
-          # - ci: CI/CD workflows and GitHub Actions
-          # - deps: Dependency updates (Dependabot)
-          # - repo: Repository-wide changes (releases, melos config)
           scopes: |
             llc
             ui
             core
             localization
             persistence
-            samples
             ci
             deps
             repo
+            samples
           requireScope: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
