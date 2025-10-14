@@ -158,8 +158,8 @@ class StreamMessageInput extends StatefulWidget {
     this.contentInsertionConfiguration,
     this.useSystemAttachmentPicker = false,
     this.pollConfig,
-    this.customAttachmentPickerOptions = const [],
-    this.onCustomAttachmentPickerResult,
+    this.attachmentPickerOptionsBuilder,
+    this.onAttachmentPickerResult,
     this.padding = const EdgeInsets.all(8),
     this.textInputMargin,
   });
@@ -394,15 +394,19 @@ class StreamMessageInput extends StatefulWidget {
   /// If not provided, the default configuration is used.
   final PollConfig? pollConfig;
 
-  /// A list of custom attachment picker options that can be used to extend the
-  /// attachment picker functionality.
-  final List<AttachmentPickerOption> customAttachmentPickerOptions;
-
-  /// Callback that is called when the custom attachment picker result is
-  /// received.
+  /// Builder for customizing the attachment picker options.
   ///
-  /// This is used to handle the result of the custom attachment picker
-  final OnCustomAttachmentPickerResult? onCustomAttachmentPickerResult;
+  /// The builder receives the [BuildContext] and a list of default options
+  /// that can be modified or extended.
+  ///
+  /// If not provided, the default options are presented.
+  final AttachmentPickerOptionsBuilder? attachmentPickerOptionsBuilder;
+
+  /// Callback that is called when the attachment picker result is received.
+  ///
+  /// Return `true` if the result is handled. Otherwise, return `false` to
+  /// allow the result to be handled internally.
+  final OnAttachmentPickerResult? onAttachmentPickerResult;
 
   /// Padding for the message input.
   ///
@@ -991,10 +995,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
       pollConfig: widget.pollConfig,
       initialAttachments: initialAttachments,
       useSystemAttachmentPicker: useSystemPicker,
-      customOptions: widget.customAttachmentPickerOptions,
+      optionsBuilder: widget.attachmentPickerOptionsBuilder,
     );
 
     if (result == null || result is! StreamAttachmentPickerResult) return;
+
+    // Returns early if the result is already handled by the user.
+    final resultHandled = await widget.onAttachmentPickerResult?.call(result);
+    if (resultHandled ?? false) return;
 
     void _onAttachmentsPicked(List<Attachment> attachments) {
       _effectiveController.attachments = attachments;
@@ -1004,19 +1012,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
       return widget.onError?.call(error.error, error.stackTrace);
     }
 
-    void _onCustomAttachmentPickerResult(CustomAttachmentPickerResult result) {
-      return widget.onCustomAttachmentPickerResult?.call(result);
-    }
-
     return switch (result) {
       // Add the attachments to the controller.
       AttachmentsPicked() => _onAttachmentsPicked(result.attachments),
       // Send the created poll in the channel.
       PollCreated() => _onPollCreated(result.poll),
-      // Handle custom attachment picker results.
-      CustomAttachmentPickerResult() => _onCustomAttachmentPickerResult(result),
       // Handle/Notify returned errors.
       AttachmentPickerError() => _onAttachmentPickerError(result),
+      _ => () {}, // Ignore other results.
     };
   }
 
