@@ -1,26 +1,97 @@
+# See Dependabot documentation for all configuration options:
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
 version: 2
 updates:
+  # GitHub Actions
+  # Updates workflow dependencies and groups them into a single PR
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    # Group all GitHub Actions updates into a single PR
+    groups:
+      all-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+    # Ignore patch updates to reduce noise
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+  
+  # Pub Packages
+  # Each package groups all dependency updates into a single PR per week
+  
+  # stream_chat (Low-level client)
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+  
+  # stream_chat_flutter_core (Core business logic)
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat_flutter_core"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+  
+  # stream_chat_flutter (UI components)
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat_flutter"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+  
+  # stream_chat_persistence (Local persistence)
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat_persistence"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+  
+  # stream_chat_localizations (Localizations)
   - package-ecosystem: "pub"
     directory: "/packages/stream_chat_localizations"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+  
+  # Sample App
+  - package-ecosystem: "pub"
+    directory: "/sample_app"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
