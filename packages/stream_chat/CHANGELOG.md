@@ -1,4 +1,4 @@
-## Upcoming Beta
+## 10.0.0-beta.7
 
 🛑️ Breaking
 
@@ -24,6 +24,8 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
   - `StreamChatClient.uploadFile()` - Upload a file to the Stream CDN
   - `StreamChatClient.removeImage()` - Remove an image from the Stream CDN
   - `StreamChatClient.removeFile()` - Remove a file from the Stream CDN
+
+- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.18.0
 
