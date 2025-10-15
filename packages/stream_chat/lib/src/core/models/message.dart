@@ -645,8 +645,8 @@ class Message extends Equatable implements ComparableFieldProvider {
         draft,
         reminder,
         channelRole,
-    sharedLocation,
-    deletedForMe,
+        sharedLocation,
+        deletedForMe,
       ];
 
   @override
