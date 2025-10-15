@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added support for `Message.channelRole` field.
 - Added support for `client.flush()` method to clear database.
 - Added support for `Channel.messageCount` field.
 

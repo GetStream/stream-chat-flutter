@@ -105,6 +105,9 @@ class Messages extends Table {
   /// Id of the User who sent the message
   TextColumn get userId => text().nullable()();
 
+  /// The channel role of the user who sent the message
+  TextColumn get channelRole => text().nullable()();
+
   /// Whether the message is pinned or not
   BoolColumn get pinned => boolean().withDefault(const Constant(false))();
 

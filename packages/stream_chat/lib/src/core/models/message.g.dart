@@ -95,6 +95,8 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       reminder: json['reminder'] == null
           ? null
           : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+      channelRole:
+          Message._channelRoleReadValue(json, 'channel_role') as String?,
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{

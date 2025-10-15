@@ -31,6 +31,7 @@ void main() {
         id: 'testMessageId$cid$index',
         type: 'testType',
         user: users[index],
+        channelRole: 'channel_member',
         createdAt: DateTime.now(),
         shadowed: math.Random().nextBool(),
         replyCount: index,
@@ -52,6 +53,7 @@ void main() {
         id: 'testQuotedMessageId$cid$index',
         type: 'testType',
         user: users[index],
+        channelRole: 'channel_member',
         createdAt: DateTime.now(),
         shadowed: math.Random().nextBool(),
         replyCount: index,
@@ -70,6 +72,7 @@ void main() {
         id: 'testThreadMessageId$cid$index',
         type: 'testType',
         user: users[index],
+        channelRole: 'channel_member',
         parentId:
             mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
         createdAt: DateTime.now(),
