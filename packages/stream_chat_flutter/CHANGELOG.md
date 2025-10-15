@@ -1,8 +1,10 @@
-## Upcoming Beta
+## 10.0.0-beta.7
 
 ✅ Added
 
 - Added support for `StreamMessageWidget.deletedMessageBuilder` to customize the deleted message UI.
+
+- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.18.0
 

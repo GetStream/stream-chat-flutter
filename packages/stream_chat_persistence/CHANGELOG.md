@@ -1,7 +1,9 @@
-## Upcoming Beta
+## 10.0.0-beta.7
 
 - Added support for `Messages.deletedForMe`, `PinnedMessages.deletedForMe`, and
   `Members.deletedMessages` fields.
+
+- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.18.0
 
