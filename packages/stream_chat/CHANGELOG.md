@@ -9,6 +9,8 @@
 
 - Added support for `Message.channelRole` field to provide access to the sender's channel role.
 - Added support for `Channel.messageCount` field.
+- Added support for Pending Messages. Pending messages can be accessed via
+  `ChannelState.pendingMessages` or `ChannelState.pendingMessagesStream`.
 
 🐞 Fixed
 
