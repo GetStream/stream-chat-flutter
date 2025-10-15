@@ -79,11 +79,11 @@ command:
       share_plus: ">=11.0.0 <13.0.0"
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
-      stream_chat: ^9.17.0
-      stream_chat_flutter: ^9.17.0
-      stream_chat_flutter_core: ^9.17.0
-      stream_chat_localizations: ^9.17.0
-      stream_chat_persistence: ^9.17.0
+      stream_chat: ^9.18.0
+      stream_chat_flutter: ^9.18.0
+      stream_chat_flutter_core: ^9.18.0
+      stream_chat_localizations: ^9.18.0
+      stream_chat_persistence: ^9.18.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       synchronized: ^3.1.0+1
