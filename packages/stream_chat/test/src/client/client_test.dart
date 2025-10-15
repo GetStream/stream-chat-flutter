@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -606,7 +608,7 @@ void main() {
           final persistentChannelStates = List.generate(
             3,
             (index) => ChannelState(
-              channel: ChannelModel(cid: 'p-test-type-$index:p-test-id-$index'),
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
@@ -636,18 +638,19 @@ void main() {
             (_) async => QueryChannelsResponse()..channels = channelStates,
           );
 
-          when(() => persistence.getChannelThreads(any()))
-              .thenAnswer((_) async => {});
-          when(() => persistence.updateChannelThreads(any(), any()))
-              .thenAnswer((_) async => {});
-          when(() => persistence.getChannelStateByCid(any(),
-              messagePagination: any(named: 'messagePagination'),
-              pinnedMessagePagination:
-                  any(named: 'pinnedMessagePagination'))).thenAnswer(
-            (invocation) async => ChannelState(
-              channel: ChannelModel(cid: invocation.positionalArguments.first),
-            ),
+          when(() => persistence.getChannelThreads(any())).thenAnswer(
+            (_) async => <String, List<Message>>{
+              for (final channelState in channelStates)
+                channelState.channel!.cid: [
+                  Message(id: 'test-message-id', text: 'Test message')
+                ],
+            },
           );
+
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
           when(() => persistence.updateChannelQueries(any(), any(),
                   clearQueryCache: any(named: 'clearQueryCache')))
               .thenAnswer((_) => Future.value());
@@ -664,7 +667,7 @@ void main() {
 
           // Hack as `teardown` gets called even
           // before our stream starts emitting data
-          await delay(300);
+          await delay(1050);
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
@@ -684,14 +687,11 @@ void main() {
               )).called(1);
 
           verify(() => persistence.getChannelThreads(any()))
-              .called((persistentChannelStates + channelStates).length);
+              .called(channelStates.length);
+          verify(() => persistence.updateChannelState(any()))
+              .called(channelStates.length);
           verify(() => persistence.updateChannelThreads(any(), any()))
-              .called((persistentChannelStates + channelStates).length);
-          verify(
-            () => persistence.getChannelStateByCid(any(),
-                messagePagination: any(named: 'messagePagination'),
-                pinnedMessagePagination: any(named: 'pinnedMessagePagination')),
-          ).called((persistentChannelStates + channelStates).length);
+              .called(channelStates.length);
           verify(() => persistence.updateChannelQueries(any(), any(),
               clearQueryCache: any(named: 'clearQueryCache'))).called(1);
         },
@@ -703,7 +703,7 @@ void main() {
           final persistentChannelStates = List.generate(
             3,
             (index) => ChannelState(
-              channel: ChannelModel(cid: 'p-test-type-$index:p-test-id-$index'),
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
             ),
           );
 
@@ -724,18 +724,19 @@ void main() {
                 paginationParams: any(named: 'paginationParams'),
               )).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
-          when(() => persistence.getChannelThreads(any()))
+          when(() => persistence.getChannelThreads(any())).thenAnswer(
+            (_) async => <String, List<Message>>{
+              for (final channelState in persistentChannelStates)
+                channelState.channel!.cid: [
+                  Message(id: 'test-message-id', text: 'Test message')
+                ],
+            },
+          );
+
+          when(() => persistence.updateChannelState(any()))
               .thenAnswer((_) async => {});
           when(() => persistence.updateChannelThreads(any(), any()))
               .thenAnswer((_) async => {});
-          when(() => persistence.getChannelStateByCid(any(),
-              messagePagination: any(named: 'messagePagination'),
-              pinnedMessagePagination:
-                  any(named: 'pinnedMessagePagination'))).thenAnswer(
-            (invocation) async => ChannelState(
-              channel: ChannelModel(cid: invocation.positionalArguments.first),
-            ),
-          );
 
           expectLater(
             client.queryChannels(),
@@ -747,7 +748,7 @@ void main() {
 
           // Hack as `teardown` gets called even
           // before our stream starts emitting data
-          await delay(300);
+          await delay(1050);
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
@@ -768,13 +769,10 @@ void main() {
 
           verify(() => persistence.getChannelThreads(any()))
               .called(persistentChannelStates.length);
+          verify(() => persistence.updateChannelState(any()))
+              .called(persistentChannelStates.length);
           verify(() => persistence.updateChannelThreads(any(), any()))
               .called(persistentChannelStates.length);
-          verify(
-            () => persistence.getChannelStateByCid(any(),
-                messagePagination: any(named: 'messagePagination'),
-                pinnedMessagePagination: any(named: 'pinnedMessagePagination')),
-          ).called(persistentChannelStates.length);
         },
       );
     });
@@ -4023,5 +4021,69 @@ void main() {
         );
       },
     );
+
+    group('Sync Method Tests', () {
+      test(
+        'should retrieve data from persistence client and sync successfully',
+        () async {
+          final cids = ['channel1', 'channel2'];
+          final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+          final fakeClient = FakePersistenceClient(
+            channelCids: cids,
+            lastSyncAt: lastSyncAt,
+          );
+
+          client.chatPersistenceClient = fakeClient;
+          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+            (_) async => SyncResponse()..events = [],
+          );
+
+          await client.sync();
+
+          verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+
+          final newLastSyncAt = await fakeClient.getLastSyncAt();
+          expect(newLastSyncAt?.isAfter(lastSyncAt), isTrue);
+        },
+      );
+
+      test('should set lastSyncAt on first sync when null', () async {
+        final fakeClient = FakePersistenceClient(
+          channelCids: ['channel1'],
+          lastSyncAt: null,
+        );
+
+        client.chatPersistenceClient = fakeClient;
+
+        await client.sync();
+
+        expectLater(fakeClient.getLastSyncAt(), completion(isNotNull));
+        verifyNever(() => api.general.sync(any(), any()));
+      });
+
+      test('should flush persistence client on 400 error', () async {
+        final cids = ['channel1'];
+        final lastSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+        final fakeClient = FakePersistenceClient(
+          channelCids: cids,
+          lastSyncAt: lastSyncAt,
+        );
+
+        client.chatPersistenceClient = fakeClient;
+        when(() => api.general.sync(cids, lastSyncAt)).thenThrow(
+          StreamChatNetworkError.raw(
+            code: 4,
+            statusCode: 400,
+            message: 'Too many events',
+          ),
+        );
+
+        await client.sync();
+
+        expect(await fakeClient.getChannelCids(), isEmpty); // Should be flushed
+
+        verify(() => api.general.sync(cids, lastSyncAt)).called(1);
+      });
+    });
   });
 }

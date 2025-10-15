@@ -417,6 +417,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
 
+      debouncedMarkRead.cancel();
+      debouncedMarkThreadRead.cancel();
+
       _messageNewListener?.cancel();
       _userReadListener?.cancel();
 
@@ -467,8 +470,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   @override
   void dispose() {
-    debouncedMarkRead?.cancel();
-    debouncedMarkThreadRead?.cancel();
+    debouncedMarkRead.cancel();
+    debouncedMarkThreadRead.cancel();
     _messageNewListener?.cancel();
     _userReadListener?.cancel();
     _itemPositionListener.itemPositions
@@ -954,29 +957,23 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
   }
 
-  late final debouncedMarkRead = switch (streamChannel) {
-    final streamChannel? => debounce(
-        streamChannel.channel.markRead,
-        const Duration(seconds: 1),
-      ),
-    _ => null,
-  };
+  late final debouncedMarkRead = debounce(
+    ([String? id]) => streamChannel?.channel.markRead(messageId: id),
+    const Duration(seconds: 1),
+  );
 
-  late final debouncedMarkThreadRead = switch (streamChannel) {
-    final streamChannel? => debounce(
-        streamChannel.channel.markThreadRead,
-        const Duration(seconds: 1),
-      ),
-    _ => null,
-  };
+  late final debouncedMarkThreadRead = debounce(
+    (String parentId) => streamChannel?.channel.markThreadRead(parentId),
+    const Duration(seconds: 1),
+  );
 
   Future<void> _markMessagesAsRead() async {
-    // Mark regular messages as read.
-    debouncedMarkRead?.call();
-
-    // Mark thread messages as read.
     if (widget.parentMessage case final parent?) {
-      debouncedMarkThreadRead?.call([parent.id]);
+      // If we are in a thread, mark the thread as read.
+      debouncedMarkThreadRead.call([parent.id]);
+    } else {
+      // Otherwise, mark the channel as read.
+      debouncedMarkRead.call();
     }
   }
 
@@ -1453,22 +1450,41 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       null => true, // Allows setting the initial value.
     };
 
-    // If the channel is upToDate and the last fully visible message has
-    // been changed, we need to update the value and mark the messages as read.
-    if (_upToDate && lastFullyVisibleMessageChanged) {
+    // If the last fully visible message has been changed, we need to update the
+    // value and maybe mark messages as read if needed.
+    if (lastFullyVisibleMessageChanged) {
       _lastFullyVisibleMessage = newLastFullyVisibleMessage;
 
-      if (streamChannel?.channel case final channel?) {
-        final hasUnread = (channel.state?.unreadCount ?? 0) > 0;
-        final allowMarkRead = channel.config?.readEvents == true;
-        final canMarkReadAtBottom = widget.markReadWhenAtTheBottom;
-
-        // Mark messages as read if it's allowed.
-        if (hasUnread && allowMarkRead && canMarkReadAtBottom) {
-          return _markMessagesAsRead().ignore();
-        }
+      // Mark messages as read if needed.
+      if (widget.markReadWhenAtTheBottom) {
+        _maybeMarkMessagesAsRead().ignore();
       }
     }
+  }
+
+  // Marks messages as read if the conditions are met.
+  //
+  // The conditions are:
+  // 1. The channel is up to date or we are in a thread conversation.
+  // 2. There are unread messages or we are in a thread conversation.
+  //
+  // If any of the conditions are not met, the function returns early.
+  // Otherwise, it calls the _markMessagesAsRead function to mark the messages
+  // as read.
+  Future<void> _maybeMarkMessagesAsRead() async {
+    final channel = streamChannel?.channel;
+    if (channel == null) return;
+
+    final isInThread = widget.parentMessage != null;
+
+    final isUpToDate = channel.state?.isUpToDate ?? false;
+    if (!isInThread && !isUpToDate) return;
+
+    final hasUnread = (channel.state?.unreadCount ?? 0) > 0;
+    if (!isInThread && !hasUnread) return;
+
+    // Mark messages as read if it's allowed.
+    return _markMessagesAsRead();
   }
 
   void _getOnThreadTap() {

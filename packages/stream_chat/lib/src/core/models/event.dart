@@ -44,6 +44,7 @@ class Event {
     this.reminder,
     this.pushPreference,
     this.channelPushPreference,
+    this.channelMessageCount,
     this.extraData = const {},
     this.isLocal = true,
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
@@ -166,6 +167,9 @@ class Event {
   /// Push notification preferences for the current user for this channel.
   final ChannelPushPreference? channelPushPreference;
 
+  /// The total number of messages in the channel.
+  final int? channelMessageCount;
+
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
 
@@ -208,6 +212,7 @@ class Event {
     'reminder',
     'push_preference',
     'channel_push_preference',
+    'channel_message_count',
   ];
 
   /// Serialize to json
@@ -252,6 +257,7 @@ class Event {
     MessageReminder? reminder,
     PushPreference? pushPreference,
     ChannelPushPreference? channelPushPreference,
+    int? channelMessageCount,
     Map<String, Object?>? extraData,
   }) =>
       Event(
@@ -291,6 +297,7 @@ class Event {
         pushPreference: pushPreference ?? this.pushPreference,
         channelPushPreference:
             channelPushPreference ?? this.channelPushPreference,
+        channelMessageCount: channelMessageCount ?? this.channelMessageCount,
         isLocal: isLocal,
         extraData: extraData ?? this.extraData,
       );

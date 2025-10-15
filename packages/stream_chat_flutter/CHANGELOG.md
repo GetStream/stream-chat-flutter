@@ -4,6 +4,13 @@
 
 - Added support for `StreamMessageWidget.deletedMessageBuilder` to customize the deleted message UI.
 
+## 9.18.0
+
+🐞 Fixed
+
+- Fixed `StreamMessageListView` not marking thread messages as read when scrolled to the bottom of the list.
+- Fixed `StreamMessageInput` not validating draft messages before creating/updating them.
+
 ## 10.0.0-beta.6
 
 🐞 Fixed

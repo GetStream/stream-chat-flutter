@@ -25,6 +25,26 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
   - `StreamChatClient.removeImage()` - Remove an image from the Stream CDN
   - `StreamChatClient.removeFile()` - Remove a file from the Stream CDN
 
+## 9.18.0
+
+🐞 Fixed
+
+- Improved sync reliability and error handling with enhanced `lastSyncAt` initialization, 400
+  error recovery, and automatic flushing of stale persistence data after 30 days of inactivity.
+
+✅ Added
+
+- Added support for `Message.channelRole` field to provide access to the sender's channel role.
+- Added support for `Channel.messageCount` field.
+- Added support for Pending Messages. Pending messages can be accessed via
+  `ChannelState.pendingMessages` or `ChannelState.pendingMessagesStream`.
+
+🐞 Fixed
+
+- Fixed thread messages increasing the unread count in the main channel.
+- Fixed `ChannelState.memberCount`, `ChannelState.config` and `ChannelState.extraData` getting reset
+  on first load.
+
 ## 10.0.0-beta.6
 
 - Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).

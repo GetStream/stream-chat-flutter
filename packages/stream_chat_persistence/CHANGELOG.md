@@ -3,6 +3,14 @@
 - Added support for `Messages.deletedForMe`, `PinnedMessages.deletedForMe`, and
   `Members.deletedMessages` fields.
 
+## 9.18.0
+
+✅ Added
+
+- Added support for `Message.channelRole` field.
+- Added support for `client.flush()` method to clear database.
+- Added support for `Channel.messageCount` field.
+
 ## 10.0.0-beta.6
 
 - Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat_persistence/changelog).

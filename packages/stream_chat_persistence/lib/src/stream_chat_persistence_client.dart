@@ -497,6 +497,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> flush() {
+    assert(_debugIsConnected, '');
+    _logger.info('flush');
+    return db!.flush();
+  }
+
+  @override
   Future<void> disconnect({bool flush = false}) async {
     _logger.info('disconnect');
     if (isConnected) {

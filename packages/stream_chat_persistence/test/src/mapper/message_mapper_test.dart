@@ -78,6 +78,7 @@ void main() {
       messageTextUpdatedAt: DateTime.now().add(const Duration(minutes: 5)),
       extraData: {'extra_test_data': 'extraData'},
       userId: user.id,
+      channelRole: 'channel_member',
       localDeletedAt: DateTime.now(),
       remoteDeletedAt: DateTime.now().add(const Duration(seconds: 1)),
       deletedForMe: false,
@@ -133,6 +134,7 @@ void main() {
     expect(message.remoteDeletedAt, isSameDateAs(entity.remoteDeletedAt));
     expect(message.deletedForMe, entity.deletedForMe);
     expect(message.text, entity.messageText);
+    expect(message.channelRole, entity.channelRole);
     expect(message.pinned, entity.pinned);
     expect(message.pinExpires, isSameDateAs(entity.pinExpires));
     expect(message.pinnedAt, isSameDateAs(entity.pinnedAt));
@@ -218,6 +220,7 @@ void main() {
       messageTextUpdatedAt: DateTime.now().add(const Duration(minutes: 5)),
       extraData: const {'extra_test_data': 'extraData'},
       user: user,
+      channelRole: 'channel_member',
       localDeletedAt: DateTime.now(),
       deletedAt: DateTime.now().add(const Duration(seconds: 1)),
       deletedForMe: true,
@@ -261,6 +264,7 @@ void main() {
     expect(entity.remoteDeletedAt, isSameDateAs(message.remoteDeletedAt));
     expect(entity.deletedForMe, message.deletedForMe);
     expect(entity.messageText, message.text);
+    expect(entity.channelRole, message.channelRole);
     expect(entity.pinned, message.pinned);
     expect(entity.pinExpires, isSameDateAs(message.pinExpires));
     expect(entity.pinnedAt, isSameDateAs(message.pinnedAt));

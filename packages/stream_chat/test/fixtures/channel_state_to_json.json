@@ -12,6 +12,7 @@
   "read": [],
   "membership": null,
   "draft": null,
+  "pending_messages": null,
   "push_preferences": {
     "chat_level": "all",
     "disabled_until": "2020-01-30T13:43:41.062362Z"

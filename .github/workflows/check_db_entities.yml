@@ -48,7 +48,7 @@ jobs:
 
       - name: 🔍 Find Comment
         if: steps.check_entities.outputs.has_changes == 'true'
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@v4
         id: find_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -57,7 +57,7 @@ jobs:
 
       - name: 💬 Create or Update Comment
         if: steps.check_entities.outputs.has_changes == 'true'
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}

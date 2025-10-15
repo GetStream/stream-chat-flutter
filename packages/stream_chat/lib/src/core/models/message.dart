@@ -12,6 +12,7 @@ import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
 
@@ -67,6 +68,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.moderation,
     this.draft,
     this.reminder,
+    this.channelRole,
     this.sharedLocation,
   })  : id = id ?? const Uuid().v4(),
         type = MessageType(type),
@@ -313,6 +315,19 @@ class Message extends Equatable implements ComparableFieldProvider {
   @JsonKey(includeToJson: false)
   final MessageReminder? reminder;
 
+  static Object? _channelRoleReadValue(Map<Object?, Object?> json, String key) {
+    // Extract the channel role from the member object if present.
+    final member = json['member'];
+    if (member is! Map<String, Object?>) return null;
+
+    final channelRole = member[key].safeCast<String>();
+    return channelRole;
+  }
+
+  /// The role of the user in the channel the message belongs to.
+  @JsonKey(includeToJson: false, readValue: _channelRoleReadValue)
+  final String? channelRole;
+
   /// Optional shared location associated with this message.
   ///
   /// This is used to share a location in a message, allowing users to view the
@@ -372,6 +387,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     'moderation_details',
     'draft',
     'reminder',
+    'member',
     'shared_location',
     'deleted_for_me',
   ];
@@ -432,6 +448,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     Moderation? moderation,
     Object? draft = _nullConst,
     Object? reminder = _nullConst,
+    String? channelRole,
     Location? sharedLocation,
     bool? deletedForMe,
   }) {
@@ -511,6 +528,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       draft: draft == _nullConst ? this.draft : draft as Draft?,
       reminder:
           reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
+      channelRole: channelRole ?? this.channelRole,
       sharedLocation: sharedLocation ?? this.sharedLocation,
       deletedForMe: deletedForMe ?? this.deletedForMe,
     );
@@ -558,6 +576,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       moderation: other.moderation,
       draft: other.draft,
       reminder: other.reminder,
+      channelRole: other.channelRole,
       sharedLocation: other.sharedLocation,
       deletedForMe: other.deletedForMe,
     );
@@ -625,8 +644,9 @@ class Message extends Equatable implements ComparableFieldProvider {
         moderation,
         draft,
         reminder,
-        sharedLocation,
-        deletedForMe,
+        channelRole,
+    sharedLocation,
+    deletedForMe,
       ];
 
   @override

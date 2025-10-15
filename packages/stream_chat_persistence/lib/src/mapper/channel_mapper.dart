@@ -15,6 +15,7 @@ extension ChannelEntityX on ChannelEntity {
       createdAt: createdAt,
       updatedAt: updatedAt,
       memberCount: memberCount,
+      messageCount: messageCount,
       cid: cid,
       lastMessageAt: lastMessageAt,
       deletedAt: deletedAt,
@@ -55,6 +56,7 @@ extension ChannelModelX on ChannelModel {
         updatedAt: updatedAt,
         deletedAt: deletedAt,
         memberCount: memberCount,
+        messageCount: messageCount,
         createdById: createdBy?.id,
         extraData: extraData,
       );

@@ -26,6 +26,7 @@ class ChannelConfig {
     this.urlEnrichment = false,
     this.skipLastMsgUpdateForSystemMsgs = false,
     this.userMessageReminders = false,
+    this.markMessagesPending = false,
     this.sharedLocations = false,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
@@ -91,6 +92,9 @@ class ChannelConfig {
 
   /// True if the user can set reminders for messages in this channel.
   final bool userMessageReminders;
+
+  /// Whether pending messages are enabled for this channel.
+  final bool markMessagesPending;
 
   /// True if shared locations are enabled for this channel.
   final bool sharedLocations;

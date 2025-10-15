@@ -31,6 +31,7 @@ class ChannelModel {
     bool? disabled,
     bool? hidden,
     DateTime? truncatedAt,
+    this.messageCount,
   })  : assert(
           (cid != null && cid.contains(':')) || (id != null && type != null),
           'provide either a cid or an id and type',
@@ -151,6 +152,13 @@ class ChannelModel {
     return null;
   }
 
+  /// The total number of messages in the channel.
+  ///
+  /// Note: This field is only populated if the `count_messages` option is
+  /// enabled for your app.
+  @JsonKey(includeToJson: false)
+  final int? messageCount;
+
   /// Known top level fields.
   /// Useful for [Serializer] methods.
   static const topLevelFields = [
@@ -169,6 +177,7 @@ class ChannelModel {
     'members',
     'team',
     'cooldown',
+    'message_count',
   ];
 
   /// Serialize to json
@@ -197,6 +206,7 @@ class ChannelModel {
     bool? disabled,
     bool? hidden,
     DateTime? truncatedAt,
+    int? messageCount,
   }) =>
       ChannelModel(
         id: id ?? this.id,
@@ -223,6 +233,7 @@ class ChannelModel {
                 // ignore: cast_nullable_to_non_nullable
                 : DateTime.parse(extraData?['truncated_at'] as String)) ??
             this.truncatedAt,
+        messageCount: messageCount ?? this.messageCount,
       );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
@@ -249,6 +260,7 @@ class ChannelModel {
       disabled: other.disabled,
       hidden: other.hidden,
       truncatedAt: other.truncatedAt,
+      messageCount: other.messageCount,
     );
   }
 }

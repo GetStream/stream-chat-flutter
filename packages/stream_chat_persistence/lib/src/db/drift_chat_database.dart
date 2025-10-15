@@ -57,7 +57,7 @@ class DriftChatDatabase extends _$DriftChatDatabase {
 
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 1000 + 25;
+  int get schemaVersion => 1000 + 26;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -75,11 +75,18 @@ class DriftChatDatabase extends _$DriftChatDatabase {
       );
 
   /// Deletes all the tables
-  Future<void> flush() => batch((batch) {
-        allTables.forEach((table) {
-          delete(table).go();
-        });
+  Future<void> flush() async {
+    await customStatement('PRAGMA foreign_keys = OFF');
+    try {
+      await transaction(() async {
+        for (final table in allTables) {
+          await delete(table).go();
+        }
       });
+    } finally {
+      await customStatement('PRAGMA foreign_keys = ON');
+    }
+  }
 
   /// Closes the database instance
   Future<void> disconnect() => close();
