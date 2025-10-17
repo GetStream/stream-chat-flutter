@@ -6973,6 +6973,114 @@ void main() {
               channel.state?.messages.first.type, equals(MessageType.deleted));
         },
       );
+
+      test(
+        'should delete all user messages including those only in storage',
+        () async {
+          final user1 = User(id: 'user-1', name: 'User 1');
+          final user2 = User(id: 'user-2', name: 'User 2');
+
+          final stateMessage1 = Message(
+            id: 'msg-1',
+            text: 'Message from user 1 in state',
+            user: user1,
+            pinned: true,
+          );
+          final stateMessage2 = Message(
+            id: 'msg-2',
+            text: 'Message from user 2 in state',
+            user: user2,
+          );
+          final stateThreadMessage1 = Message(
+            id: 'thread-msg-1',
+            text: 'Thread message from user 1 in state',
+            user: user1,
+            parentId: 'msg-1',
+          );
+          final stateThreadMessage2 = Message(
+            id: 'thread-msg-2',
+            text: 'Another thread message from user 2 in state',
+            user: user2,
+            parentId: 'msg-1',
+          );
+
+          // Mock the persistence delete - this will handle ALL user messages
+          // in storage, including those not yet loaded into state
+          when(
+            () => persistenceClient.deleteMessagesFromUser(
+              cid: channel.cid,
+              userId: user1.id,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            ),
+          ).thenAnswer((_) async {});
+
+          // Load the state with only 2 messages and 1 thread with 2 replies.
+          // Note: In reality, storage may contain many more user1 messages
+          // (e.g., older messages not loaded into state yet), but the delete
+          // operation should remove ALL of them from storage.
+          channel.state?.updateMessage(stateMessage1);
+          channel.state?.updateMessage(stateMessage2);
+          channel.state?.updateMessage(stateThreadMessage1);
+          channel.state?.updateMessage(stateThreadMessage2);
+
+          // Verify initial state has only 2 messages and 1 thread with 2 replies
+          expect(channel.state?.messages.length, equals(2));
+          expect(channel.state?.threads['msg-1']?.length, equals(2));
+
+          // Create user.messages.deleted event (hard delete)
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            user: user1,
+            hardDelete: true,
+          );
+
+          // Dispatch event
+          client.addEvent(userMessagesDeletedEvent);
+
+          // Wait for the event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify user1's messages are removed from state
+          expect(channel.state?.messages.length, equals(1));
+          expect(channel.state?.threads['msg-1']?.length, equals(1));
+
+          expect(
+            channel.state?.messages.any((m) => m.user?.id == 'user-1'),
+            isFalse,
+          );
+
+          expect(
+            channel.state?.threads['msg-1']?.any((m) => m.user?.id == 'user-1'),
+            isFalse,
+          );
+
+          // Verify persistence delete was called - this handles ALL messages
+          // in storage (both those in state AND those only in storage)
+          verify(
+            () => persistenceClient.deleteMessagesFromUser(
+              cid: channel.cid,
+              userId: user1.id,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            ),
+          ).called(1);
+
+          // Verify in-state messages were also removed from state's persistence
+          final capturedIds = verify(
+            () => persistenceClient.deleteMessageByIds(captureAny()),
+          ).captured.first as List<String>;
+
+          expect(
+            capturedIds,
+            containsAll([
+              'msg-1', // state message
+              'thread-msg-1', // state thread message
+            ]),
+          );
+        },
+      );
     });
   });
 

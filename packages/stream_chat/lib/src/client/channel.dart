@@ -3779,6 +3779,20 @@ class ChannelClientState {
     bool hardDelete = false,
     DateTime? deletedAt,
   }) {
+    // Delete messages from persistence.
+    //
+    // Note: We perform this operation separately even though [_removeMessages]
+    // already handles it as we need to delete all messages from the user, not
+    // only the ones present in the current state.
+    final persistence = _channel.client.chatPersistenceClient;
+    persistence?.deleteMessagesFromUser(
+      userId: userId,
+      cid: _channel.cid,
+      hardDelete: hardDelete,
+      deletedAt: deletedAt,
+    );
+
+    // Gather messages to delete from state.
     final userMessages = <String, Message>{};
     for (final message in [...messages, ...threads.values.flattened]) {
       if (message.user?.id != userId) continue;

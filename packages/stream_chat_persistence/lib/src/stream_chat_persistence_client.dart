@@ -212,6 +212,30 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> deleteMessagesFromUser({
+    String? cid,
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  }) async {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteMessagesFromUser');
+
+    // Delete from both messages and pinned_messages tables
+    await Future.wait([
+      db!.messageDao.deleteMessagesByUser,
+      db!.pinnedMessageDao.deleteMessagesByUser,
+    ].map(
+      (f) => f.call(
+        cid: cid,
+        userId: userId,
+        hardDelete: hardDelete,
+        deletedAt: deletedAt,
+      ),
+    ));
+  }
+
+  @override
   Future<Draft?> getDraftMessageByCid(
     String cid, {
     String? parentId,

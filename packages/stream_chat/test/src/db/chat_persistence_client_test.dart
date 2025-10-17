@@ -50,6 +50,14 @@ class TestPersistenceClient extends ChatPersistenceClient {
       Future.value();
 
   @override
+  Future<void> deleteMessagesFromUser(
+          {String? cid,
+          required String userId,
+          bool hardDelete = false,
+          DateTime? deletedAt}) =>
+      throw UnimplementedError();
+
+  @override
   Future<void> deleteReactionsByMessageId(List<String> messageIds) =>
       Future.value();
 

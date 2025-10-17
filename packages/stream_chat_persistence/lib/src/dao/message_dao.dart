@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:drift/drift.dart';
@@ -229,6 +230,54 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       }
     }
     return msgList;
+  }
+
+  /// Deletes all messages sent by a user with the given [userId].
+  ///
+  /// If [hardDelete] is `true`, permanently removes messages from the database.
+  /// Otherwise, soft-deletes them by updating their type, deletion timestamp,
+  /// and state.
+  ///
+  /// If [cid] is provided, only deletes messages in that channel. Otherwise,
+  /// deletes messages across all channels.
+  ///
+  /// The [deletedAt] timestamp is used for soft deletes. Defaults to the
+  /// current time if not provided.
+  ///
+  /// Returns the number of rows affected.
+  Future<int> deleteMessagesByUser({
+    String? cid,
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  }) async {
+    if (hardDelete) {
+      // Hard delete: remove from database
+      final deleteQuery = delete(messages)
+        ..where((tbl) => tbl.userId.equals(userId));
+
+      if (cid != null) {
+        deleteQuery.where((tbl) => tbl.channelCid.equals(cid));
+      }
+
+      return deleteQuery.go();
+    }
+
+    // Soft delete: update messages to mark as deleted
+    final updateQuery = update(messages)
+      ..where((tbl) => tbl.userId.equals(userId));
+
+    if (cid != null) {
+      updateQuery.where((tbl) => tbl.channelCid.equals(cid));
+    }
+
+    return updateQuery.write(
+      MessagesCompanion(
+        type: const Value('deleted'),
+        remoteDeletedAt: Value(deletedAt ?? DateTime.now()),
+        state: Value(jsonEncode(MessageState.softDeleted)),
+      ),
+    );
   }
 
   /// Updates the message data of a particular channel with

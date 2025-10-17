@@ -171,6 +171,24 @@ abstract class ChatPersistenceClient {
   /// Remove a pinned message by message [cids]
   Future<void> deletePinnedMessageByCids(List<String> cids);
 
+  /// Deletes all stored messages sent by a user with the given [userId].
+  ///
+  /// If [hardDelete] is `true`, permanently removes messages from storage.
+  /// Otherwise, soft-deletes them by updating their type, deletion timestamp,
+  /// and state.
+  ///
+  /// If [cid] is provided, only deletes messages in that channel. Otherwise,
+  /// deletes messages across all channels.
+  ///
+  /// The [deletedAt] timestamp is used for soft deletes. Defaults to the
+  /// current time if not provided.
+  Future<void> deleteMessagesFromUser({
+    String? cid,
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  });
+
   /// Remove a channel by [channelId]
   Future<void> deleteChannels(List<String> cids);
 
