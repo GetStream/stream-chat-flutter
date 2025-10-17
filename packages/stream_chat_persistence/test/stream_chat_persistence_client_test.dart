@@ -331,10 +331,13 @@ void main() {
             .thenAnswer((_) async => reads);
         when(() => mockDatabase.channelDao.getChannelByCid(cid))
             .thenAnswer((_) async => channel);
-        when(() => mockDatabase.messageDao.getMessagesByCid(cid))
+        when(() => mockDatabase.messageDao.getMessagesByCid(cid,
+                messagePagination: any(named: 'messagePagination')))
             .thenAnswer((_) async => messages);
         when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
             .thenAnswer((_) async => messages);
+        when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
+            .thenAnswer((_) async => null);
 
         final fetchedChannelStates = await client.getChannelStates();
         expect(fetchedChannelStates.length, channelStates.length);
@@ -354,8 +357,11 @@ void main() {
         verify(() => mockDatabase.memberDao.getMembersByCid(cid)).called(3);
         verify(() => mockDatabase.readDao.getReadsByCid(cid)).called(3);
         verify(() => mockDatabase.channelDao.getChannelByCid(cid)).called(3);
-        verify(() => mockDatabase.messageDao.getMessagesByCid(cid)).called(3);
+        verify(() => mockDatabase.messageDao.getMessagesByCid(cid,
+            messagePagination: any(named: 'messagePagination'))).called(3);
         verify(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
+            .called(3);
+        verify(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
             .called(3);
       });
     });

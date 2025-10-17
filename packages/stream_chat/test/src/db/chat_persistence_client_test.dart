@@ -90,6 +90,7 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<List<ChannelState>> getChannelStates(
           {Filter? filter,
           SortOrder<ChannelState>? channelStateSort,
+          int? messageLimit,
           PaginationParams? paginationParams}) =>
       throw UnimplementedError();
 

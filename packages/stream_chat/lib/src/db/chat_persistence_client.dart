@@ -124,13 +124,15 @@ abstract class ChatPersistenceClient {
     );
   }
 
-  /// Get all the stored [ChannelState]s
+  /// Returns all stored channel states.
   ///
-  /// Optionally, pass [filter], [sort], [paginationParams]
-  /// for filtering out states.
+  /// Optionally provide [filter] to filter channels, [channelStateSort] to
+  /// sort results, [messageLimit] to limit messages per channel, and
+  /// [paginationParams] to paginate results.
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
+    int? messageLimit,
     PaginationParams? paginationParams,
   });
 
