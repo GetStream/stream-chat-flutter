@@ -25,7 +25,7 @@ dependencies:
   cached_network_image: ^3.3.1
   chewie: ^1.8.1
   collection: ^1.17.2
-  desktop_drop: ">=0.5.0 <0.7.0"
+  desktop_drop: ">=0.5.0 <0.8.0"
   diacritic: ^0.1.5
   dio: ^5.4.3+1
   ezanimation: ^0.6.0
