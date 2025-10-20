@@ -63,7 +63,7 @@ dependencies:
   video_player: ^2.8.7
 
 dev_dependencies:
-  alchemist: ">=0.11.0 <0.13.0"
+  alchemist: ">=0.11.0 <0.14.0"
   connectivity_plus_platform_interface: ^2.0.0
   faker_dart: ^0.2.1
   flutter_test:
