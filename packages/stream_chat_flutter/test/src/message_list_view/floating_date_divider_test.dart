@@ -140,7 +140,7 @@ void main() {
     );
 
     testWidgets(
-      'renders custom dateDividerBuilder when provided',
+      'renders custom floatingDateDividerBuilder when provided',
       (tester) async {
         itemPositionListener.value = [
           const ItemPosition(
