@@ -95,6 +95,7 @@ class StreamMessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.dateDividerBuilder,
+    this.floatingDateDividerBuilder,
     // we need to use ClampingScrollPhysics to avoid the list view to bounce
     // when we are at the either end of the list view and try to use 'animateTo'
     // to animate in the same direction.
@@ -240,6 +241,10 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Builder used to render date dividers
   final Widget Function(DateTime)? dateDividerBuilder;
+
+  /// Builder used to render floating date divider separately from
+  /// the date dividers in the list
+  final Widget Function(DateTime)? floatingDateDividerBuilder;
 
   /// Index of an item to initially align within the viewport.
   final int? initialScrollIndex;
@@ -852,7 +857,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               reverse: widget.reverse,
               itemPositionListener: _itemPositionListener.itemPositions,
               messages: messages,
-              dateDividerBuilder: widget.dateDividerBuilder,
+              floatingDateDividerBuilder: widget.floatingDateDividerBuilder,
             ),
           ),
         if (widget.showScrollToBottom)
