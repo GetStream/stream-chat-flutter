@@ -2469,7 +2469,7 @@ class ClientState {
 
         final newActiveLiveLocations = <Location>[
           ...activeLiveLocations.where(
-                (it) => it.messageId != location.messageId,
+            (it) => it.messageId != location.messageId,
           )
         ];
 
@@ -2483,7 +2483,7 @@ class ClientState {
     _staleLiveLocationsCleanerTimer?.cancel();
     _staleLiveLocationsCleanerTimer = Timer.periodic(
       const Duration(seconds: 1),
-          (_) {
+      (_) {
         final expired = activeLiveLocations.where((it) => it.isExpired);
         if (expired.isEmpty) return;
 

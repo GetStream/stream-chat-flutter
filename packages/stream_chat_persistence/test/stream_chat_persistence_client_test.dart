@@ -835,94 +835,94 @@ void main() {
       const cid = 'testCid';
 
       test('calls deleteMessagesByUser on both DAOs with hard delete',
-              () async {
-            when(() => mockDatabase.messageDao.deleteMessagesByUser(
+          () async {
+        when(() => mockDatabase.messageDao.deleteMessagesByUser(
               cid: cid,
               userId: userId,
               hardDelete: true,
               deletedAt: any(named: 'deletedAt'),
             )).thenAnswer((_) async => 1);
 
-            when(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+        when(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
               cid: cid,
               userId: userId,
               hardDelete: true,
               deletedAt: any(named: 'deletedAt'),
             )).thenAnswer((_) async => 1);
 
-            await client.deleteMessagesFromUser(
-              cid: cid,
-              userId: userId,
-              hardDelete: true,
-            );
+        await client.deleteMessagesFromUser(
+          cid: cid,
+          userId: userId,
+          hardDelete: true,
+        );
 
-            verify(() => mockDatabase.messageDao.deleteMessagesByUser(
+        verify(() => mockDatabase.messageDao.deleteMessagesByUser(
               cid: cid,
               userId: userId,
               hardDelete: true,
               deletedAt: any(named: 'deletedAt'),
             )).called(1);
 
-            verify(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+        verify(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
               cid: cid,
               userId: userId,
               hardDelete: true,
               deletedAt: any(named: 'deletedAt'),
             )).called(1);
-          });
+      });
 
       test('calls deleteMessagesByUser on both DAOs with soft delete',
-              () async {
-            final deletedAt = DateTime.now();
+          () async {
+        final deletedAt = DateTime.now();
 
-            when(() => mockDatabase.messageDao.deleteMessagesByUser(
+        when(() => mockDatabase.messageDao.deleteMessagesByUser(
               cid: cid,
               userId: userId,
               hardDelete: false,
               deletedAt: deletedAt,
             )).thenAnswer((_) async => 1);
 
-            when(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+        when(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
               cid: cid,
               userId: userId,
               hardDelete: false,
               deletedAt: deletedAt,
             )).thenAnswer((_) async => 1);
 
-            await client.deleteMessagesFromUser(
-              cid: cid,
-              userId: userId,
-              hardDelete: false,
-              deletedAt: deletedAt,
-            );
+        await client.deleteMessagesFromUser(
+          cid: cid,
+          userId: userId,
+          hardDelete: false,
+          deletedAt: deletedAt,
+        );
 
-            verify(() => mockDatabase.messageDao.deleteMessagesByUser(
+        verify(() => mockDatabase.messageDao.deleteMessagesByUser(
               cid: cid,
               userId: userId,
               hardDelete: false,
               deletedAt: deletedAt,
             )).called(1);
 
-            verify(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+        verify(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
               cid: cid,
               userId: userId,
               hardDelete: false,
               deletedAt: deletedAt,
             )).called(1);
-          });
+      });
 
       test('calls deleteMessagesByUser without cid when cid is null', () async {
         when(() => mockDatabase.messageDao.deleteMessagesByUser(
-          userId: userId,
-          hardDelete: true,
-          deletedAt: any(named: 'deletedAt'),
-        )).thenAnswer((_) async => 1);
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).thenAnswer((_) async => 1);
 
         when(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
-          userId: userId,
-          hardDelete: true,
-          deletedAt: any(named: 'deletedAt'),
-        )).thenAnswer((_) async => 1);
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).thenAnswer((_) async => 1);
 
         await client.deleteMessagesFromUser(
           userId: userId,
@@ -930,16 +930,16 @@ void main() {
         );
 
         verify(() => mockDatabase.messageDao.deleteMessagesByUser(
-          userId: userId,
-          hardDelete: true,
-          deletedAt: any(named: 'deletedAt'),
-        )).called(1);
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).called(1);
 
         verify(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
-          userId: userId,
-          hardDelete: true,
-          deletedAt: any(named: 'deletedAt'),
-        )).called(1);
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).called(1);
       });
     });
 
