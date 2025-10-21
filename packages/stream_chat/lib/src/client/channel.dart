@@ -3799,9 +3799,10 @@ class ChannelClientState {
       userMessages[message.id] = message.copyWith(
         type: MessageType.deleted,
         deletedAt: deletedAt ?? DateTime.now(),
-        state: MessageState.deleted(
-          scope: MessageDeleteScope.deleteForAll(hard: hardDelete),
-        ),
+        state: switch (hardDelete) {
+          true => MessageState.hardDeleted,
+          false => MessageState.softDeleted,
+        },
       );
     }
 
