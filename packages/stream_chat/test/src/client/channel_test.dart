@@ -6600,6 +6600,12 @@ void main() {
       setUp(() {
         persistenceClient = MockPersistenceClient();
         when(() => client.chatPersistenceClient).thenReturn(persistenceClient);
+        when(() => persistenceClient.deleteMessagesFromUser(
+              cid: any(named: 'cid'),
+              userId: any(named: 'userId'),
+              hardDelete: any(named: 'hardDelete'),
+              deletedAt: any(named: 'deletedAt'),
+            )).thenAnswer((_) async {});
         when(() => persistenceClient.deleteMessageByIds(any()))
             .thenAnswer((_) async {});
         when(() => persistenceClient.deletePinnedMessageByIds(any()))
@@ -6638,9 +6644,9 @@ void main() {
             user: user2,
           );
 
-          channel.state?.updateMessage(message1);
-          channel.state?.updateMessage(message2);
-          channel.state?.updateMessage(message3);
+          channel.state?.addNewMessage(message1);
+          channel.state?.addNewMessage(message2);
+          channel.state?.addNewMessage(message3);
 
           // Verify initial state
           expect(channel.state?.messages.length, equals(3));
@@ -6712,9 +6718,9 @@ void main() {
             user: user2,
           );
 
-          channel.state?.updateMessage(message1);
-          channel.state?.updateMessage(message2);
-          channel.state?.updateMessage(message3);
+          channel.state?.addNewMessage(message1);
+          channel.state?.addNewMessage(message2);
+          channel.state?.addNewMessage(message3);
 
           // Verify initial state
           expect(channel.state?.messages.length, equals(3));
@@ -6773,11 +6779,9 @@ void main() {
             parentId: 'parent-msg',
           );
 
-          channel.state?.updateMessage(parentMessage);
-          channel.state?.updateThreadInfo('parent-msg', [
-            threadMessage1,
-            threadMessage2,
-          ]);
+          channel.state?.addNewMessage(parentMessage);
+          channel.state?.addNewMessage(threadMessage1);
+          channel.state?.addNewMessage(threadMessage2);
 
           // Verify initial state
           expect(channel.state?.messages.length, equals(1));
@@ -6822,7 +6826,7 @@ void main() {
             user: user1,
           );
 
-          channel.state?.updateMessage(message1);
+          channel.state?.addNewMessage(message1);
 
           // Verify initial state
           expect(channel.state?.messages.length, equals(1));
@@ -6897,9 +6901,9 @@ void main() {
             user: user2,
           );
 
-          channel.state?.updateMessage(message1);
-          channel.state?.updateMessage(message2);
-          channel.state?.updateMessage(message3);
+          channel.state?.addNewMessage(message1);
+          channel.state?.addNewMessage(message2);
+          channel.state?.addNewMessage(message3);
 
           // Verify initial state
           expect(channel.state?.messages.length, equals(3));
@@ -6947,7 +6951,7 @@ void main() {
             user: user1,
           );
 
-          channel.state?.updateMessage(message1);
+          channel.state?.addNewMessage(message1);
 
           // Create user.messages.deleted event (soft delete)
           final userMessagesDeletedEvent = Event(
@@ -7004,25 +7008,14 @@ void main() {
             parentId: 'msg-1',
           );
 
-          // Mock the persistence delete - this will handle ALL user messages
-          // in storage, including those not yet loaded into state
-          when(
-            () => persistenceClient.deleteMessagesFromUser(
-              cid: channel.cid,
-              userId: user1.id,
-              hardDelete: true,
-              deletedAt: any(named: 'deletedAt'),
-            ),
-          ).thenAnswer((_) async {});
-
           // Load the state with only 2 messages and 1 thread with 2 replies.
           // Note: In reality, storage may contain many more user1 messages
           // (e.g., older messages not loaded into state yet), but the delete
           // operation should remove ALL of them from storage.
-          channel.state?.updateMessage(stateMessage1);
-          channel.state?.updateMessage(stateMessage2);
-          channel.state?.updateMessage(stateThreadMessage1);
-          channel.state?.updateMessage(stateThreadMessage2);
+          channel.state?.addNewMessage(stateMessage1);
+          channel.state?.addNewMessage(stateMessage2);
+          channel.state?.addNewMessage(stateThreadMessage1);
+          channel.state?.addNewMessage(stateThreadMessage2);
 
           // Verify initial state has only 2 messages and 1 thread with 2 replies
           expect(channel.state?.messages.length, equals(2));
