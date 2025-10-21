@@ -1,3 +1,12 @@
+## Upcoming Beta
+
+✅ Added
+
+- Added a new `StreamChatPersistenceClient.deleteMessagesFromUser()` method to delete
+  all messages from a specific user across all channels.
+- Added a new `messageLimit` parameter to the `getChannelStates` method
+  to limit the number of messages fetched per channel.
+
 ## 10.0.0-beta.7
 
 - Added support for `Messages.deletedForMe`, `PinnedMessages.deletedForMe`, and
