@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added floatingDateDividerBuilder to StreamMessageListView and FloatingDateDivider.
+
 🐞 Fixed
 
 - Fixed `StreamMessageListView` not marking thread messages as read when scrolled to the bottom of the list.
