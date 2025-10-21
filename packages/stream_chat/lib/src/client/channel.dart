@@ -3774,18 +3774,18 @@ class ChannelClientState {
     );
   }
 
-  void _deleteMessagesFromUser({
+  Future<void> _deleteMessagesFromUser({
     required String userId,
     bool hardDelete = false,
     DateTime? deletedAt,
-  }) {
+  }) async {
     // Delete messages from persistence.
     //
     // Note: We perform this operation separately even though [_removeMessages]
     // already handles it as we need to delete all messages from the user, not
     // only the ones present in the current state.
     final persistence = _channel.client.chatPersistenceClient;
-    persistence?.deleteMessagesFromUser(
+    await persistence?.deleteMessagesFromUser(
       userId: userId,
       cid: _channel.cid,
       hardDelete: hardDelete,
@@ -4140,7 +4140,7 @@ class ChannelClientState {
   // as either soft or hard deleted based on the event data.
   void _listenUserMessagesDeleted() {
     _subscriptions.add(
-      _channel.on(EventType.userMessagesDeleted).listen((event) {
+      _channel.on(EventType.userMessagesDeleted).listen((event) async {
         final user = event.user;
         if (user == null) return;
 
