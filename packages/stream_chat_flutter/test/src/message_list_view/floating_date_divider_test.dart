@@ -160,7 +160,7 @@ void main() {
               reverse: false,
               messages: messages,
               itemCount: itemCount,
-              dateDividerBuilder: (date) {
+              floatingDateDividerBuilder: (date) {
                 receivedDate = date;
                 return Container(
                   key: customKey,
