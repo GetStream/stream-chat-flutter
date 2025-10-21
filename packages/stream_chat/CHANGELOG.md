@@ -1,3 +1,9 @@
+## Upcoming Beta
+
+✅ Added
+
+- Added support for `user.messages.deleted` event.
+
 ## 10.0.0-beta.7
 
 🛑️ Breaking

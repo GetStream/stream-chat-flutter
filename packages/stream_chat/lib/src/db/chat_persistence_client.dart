@@ -124,13 +124,15 @@ abstract class ChatPersistenceClient {
     );
   }
 
-  /// Get all the stored [ChannelState]s
+  /// Returns all stored channel states.
   ///
-  /// Optionally, pass [filter], [sort], [paginationParams]
-  /// for filtering out states.
+  /// Optionally provide [filter] to filter channels, [channelStateSort] to
+  /// sort results, [messageLimit] to limit messages per channel, and
+  /// [paginationParams] to paginate results.
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
+    int? messageLimit,
     PaginationParams? paginationParams,
   });
 
@@ -170,6 +172,24 @@ abstract class ChatPersistenceClient {
 
   /// Remove a pinned message by message [cids]
   Future<void> deletePinnedMessageByCids(List<String> cids);
+
+  /// Deletes all stored messages sent by a user with the given [userId].
+  ///
+  /// If [hardDelete] is `true`, permanently removes messages from storage.
+  /// Otherwise, soft-deletes them by updating their type, deletion timestamp,
+  /// and state.
+  ///
+  /// If [cid] is provided, only deletes messages in that channel. Otherwise,
+  /// deletes messages across all channels.
+  ///
+  /// The [deletedAt] timestamp is used for soft deletes. Defaults to the
+  /// current time if not provided.
+  Future<void> deleteMessagesFromUser({
+    String? cid,
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  });
 
   /// Remove a channel by [channelId]
   Future<void> deleteChannels(List<String> cids);

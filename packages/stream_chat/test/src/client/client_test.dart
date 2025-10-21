@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
@@ -614,6 +614,7 @@ void main() {
 
           when(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
+                messageLimit: any(named: 'messageLimit'),
                 channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).thenAnswer((_) async => persistentChannelStates);
@@ -671,6 +672,7 @@ void main() {
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
+                messageLimit: any(named: 'messageLimit'),
                 channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).called(1);
@@ -709,6 +711,7 @@ void main() {
 
           when(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
+                messageLimit: any(named: 'messageLimit'),
                 channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).thenAnswer((_) async => persistentChannelStates);
@@ -752,6 +755,7 @@ void main() {
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
+                messageLimit: any(named: 'messageLimit'),
                 channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).called(1);
@@ -4084,6 +4088,165 @@ void main() {
 
         verify(() => api.general.sync(cids, lastSyncAt)).called(1);
       });
+    });
+  });
+
+  group('WS events', () {
+    late StreamChatClient client;
+
+    setUp(() async {
+      final ws = FakeWebSocket();
+      client = StreamChatClient('test-api-key', ws: ws);
+
+      final user = User(id: 'test-user-id');
+      final token = Token.development(user.id).rawValue;
+
+      await client.connectUser(user, token);
+      await delay(300);
+      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+    });
+
+    tearDown(() async {
+      await client.dispose();
+    });
+
+    group('User messages deleted event', () {
+      test(
+        'should broadcast global user.messages.deleted event to all channels',
+        () async {
+          // Add messages from the user to be deleted
+          final bannedUser = User(id: 'banned-user', name: 'Banned User');
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message in channel 1',
+            user: bannedUser,
+          );
+          final message2 = Message(
+            id: 'msg-2',
+            text: 'Message in channel 2',
+            user: bannedUser,
+          );
+
+          // Setup: Create multiple channels with state
+          final channelState1 = ChannelState(
+            channel: ChannelModel(id: 'channel-1', type: 'messaging'),
+            messages: [message1],
+          );
+          final channelState2 = ChannelState(
+            channel: ChannelModel(id: 'channel-2', type: 'messaging'),
+            messages: [message2],
+          );
+
+          final channel1 = Channel.fromState(client, channelState1);
+          final channel2 = Channel.fromState(client, channelState2);
+
+          // Register channels in client state
+          client.state.addChannels({
+            'messaging:channel-1': channel1,
+            'messaging:channel-2': channel2,
+          });
+
+          // Verify initial state
+          expect(channel1.state?.messages.length, equals(1));
+          expect(channel2.state?.messages.length, equals(1));
+
+          // Simulate global user.messages.deleted event being broadcast to channels
+          // (In production, ClientState._listenUserMessagesDeleted does this)
+          final event = Event(
+            type: EventType.userMessagesDeleted,
+            user: bannedUser,
+            hardDelete: false,
+          );
+
+          client.handleEvent(event);
+
+          // Wait for the events to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify messages are soft deleted in all channels
+          final channel1Message = channel1.state?.messages.first;
+          expect(channel1Message?.type, equals(MessageType.deleted));
+          expect(channel1Message?.state.isDeleted, isTrue);
+
+          final channel2Message = channel2.state?.messages.first;
+          expect(channel2Message?.type, equals(MessageType.deleted));
+          expect(channel2Message?.state.isDeleted, isTrue);
+        },
+      );
+
+      test(
+        'should broadcast global hard delete to all channels',
+        () async {
+          // Add messages from the user to be deleted
+          final bannedUser = User(id: 'banned-user', name: 'Banned User');
+          final otherUser = User(id: 'other-user', name: 'Other User');
+
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message in channel 1',
+            user: bannedUser,
+          );
+          final message2 = Message(
+            id: 'msg-2',
+            text: 'Message in channel 2',
+            user: bannedUser,
+          );
+          final message3 = Message(
+            id: 'msg-3',
+            text: 'Safe message',
+            user: otherUser,
+          );
+
+          // Setup: Create multiple channels with state
+          final channelState1 = ChannelState(
+            channel: ChannelModel(id: 'channel-1', type: 'messaging'),
+            messages: [message1, message3],
+          );
+          final channelState2 = ChannelState(
+            channel: ChannelModel(id: 'channel-2', type: 'messaging'),
+            messages: [message2],
+          );
+
+          final channel1 = Channel.fromState(client, channelState1);
+          final channel2 = Channel.fromState(client, channelState2);
+
+          // Register channels in client state
+          client.state.addChannels({
+            'messaging:channel-1': channel1,
+            'messaging:channel-2': channel2,
+          });
+
+          // Verify initial state
+          expect(channel1.state?.messages.length, equals(2));
+          expect(channel2.state?.messages.length, equals(1));
+
+          // Simulate global user.messages.deleted event being broadcast to channels
+          // (In production, ClientState._listenUserMessagesDeleted does this)
+          final event = Event(
+            type: EventType.userMessagesDeleted,
+            user: bannedUser,
+            hardDelete: true,
+          );
+
+          client.handleEvent(event);
+
+          // Wait for the events to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify banned user's messages are removed from all channels
+          expect(channel1.state?.messages.length, equals(1));
+          expect(
+            channel1.state?.messages.any((m) => m.user?.id == 'banned-user'),
+            isFalse,
+          );
+          expect(channel2.state?.messages.length, equals(0));
+
+          // Verify other user's message is unaffected
+          final safeMessage =
+              channel1.state?.messages.firstWhere((m) => m.id == 'msg-3');
+          expect(safeMessage?.user?.id, equals('other-user'));
+        },
+      );
     });
   });
 }

@@ -50,6 +50,14 @@ class TestPersistenceClient extends ChatPersistenceClient {
       Future.value();
 
   @override
+  Future<void> deleteMessagesFromUser(
+          {String? cid,
+          required String userId,
+          bool hardDelete = false,
+          DateTime? deletedAt}) =>
+      throw UnimplementedError();
+
+  @override
   Future<void> deleteReactionsByMessageId(List<String> messageIds) =>
       Future.value();
 
@@ -82,6 +90,7 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<List<ChannelState>> getChannelStates(
           {Filter? filter,
           SortOrder<ChannelState>? channelStateSort,
+          int? messageLimit,
           PaginationParams? paginationParams}) =>
       throw UnimplementedError();
 

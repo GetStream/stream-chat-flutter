@@ -212,6 +212,30 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> deleteMessagesFromUser({
+    String? cid,
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  }) async {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteMessagesFromUser');
+
+    // Delete from both messages and pinned_messages tables
+    await Future.wait([
+      db!.messageDao.deleteMessagesByUser,
+      db!.pinnedMessageDao.deleteMessagesByUser,
+    ].map(
+      (f) => f.call(
+        cid: cid,
+        userId: userId,
+        hardDelete: hardDelete,
+        deletedAt: deletedAt,
+      ),
+    ));
+  }
+
+  @override
   Future<Draft?> getDraftMessageByCid(
     String cid, {
     String? parentId,
@@ -279,6 +303,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
+    int? messageLimit,
     PaginationParams? paginationParams,
   }) async {
     assert(_debugIsConnected, '');
@@ -286,8 +311,18 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
     final channels = await db!.channelQueryDao.getChannels(filter: filter);
 
+    final messagePagination = PaginationParams(
+      // Default limit is set to 25 in backend.
+      limit: messageLimit ?? 25,
+    );
+
     final channelStates = await Future.wait(
-      channels.map((e) => getChannelStateByCid(e.cid)),
+      channels.map(
+        (e) => getChannelStateByCid(
+          e.cid,
+          messagePagination: messagePagination,
+        ),
+      ),
     );
 
     // Sort the channel states

@@ -654,6 +654,7 @@ class StreamChatClient {
       offlineChannels = await queryChannelsOffline(
         filter: filter,
         channelStateSort: channelStateSort,
+        messageLimit: messageLimit,
         paginationParams: paginationParams,
       );
 
@@ -734,7 +735,8 @@ class StreamChatClient {
       watch: watch,
       presence: presence,
       memberLimit: memberLimit,
-      messageLimit: messageLimit,
+      // Default limit is set to 25 in backend.
+      messageLimit: messageLimit ?? 25,
       paginationParams: paginationParams,
     );
 
@@ -775,14 +777,22 @@ class StreamChatClient {
   Future<List<Channel>> queryChannelsOffline({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
+    int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
-    final offlineChannels = (await chatPersistenceClient?.getChannelStates(
-          filter: filter,
-          channelStateSort: channelStateSort,
-          paginationParams: paginationParams,
-        )) ??
-        [];
+    final offlineChannels = await chatPersistenceClient?.getChannelStates(
+      filter: filter,
+      channelStateSort: channelStateSort,
+      // Default limit is set to 25 in backend.
+      messageLimit: messageLimit ?? 25,
+      paginationParams: paginationParams,
+    );
+
+    if (offlineChannels == null || offlineChannels.isEmpty) {
+      logger.info('No channels found in offline storage for the given query');
+      return [];
+    }
+
     final updatedData = _mapChannelStateToChannel(offlineChannels);
     state.addChannels(updatedData.key);
     return updatedData.value;
@@ -2267,6 +2277,7 @@ class ClientState {
 
     // region USER EVENTS
     _listenUserUpdated();
+    _listenUserMessagesDeleted();
     // endregion
 
     // region READ EVENTS
@@ -2378,6 +2389,24 @@ class ClientState {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
         channels.remove(eventChannel.cid)?.dispose();
+      }),
+    );
+  }
+
+  void _listenUserMessagesDeleted() {
+    _eventsSubscription?.add(
+      _client.on(EventType.userMessagesDeleted).listen((event) async {
+        final cid = event.cid;
+        // Only handle message deletions that are not channel specific
+        // (i.e. user banned globally from the app)
+        if (cid != null) return;
+
+        // Iterate through all the available channels and send the event
+        // to be handled by the respective channel instances.
+        for (final cid in [...channels.keys]) {
+          final channelEvent = event.copyWith(cid: cid);
+          _client.handleEvent(channelEvent);
+        }
       }),
     );
   }
