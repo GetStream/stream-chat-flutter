@@ -3152,6 +3152,15 @@ class ChannelClientState {
       .map((cs) => cs.pinnedMessages ?? <Message>[])
       .distinct(const ListEquality().equals);
 
+  /// Channel pending message list.
+  List<Message> get pendingMessages =>
+      _channelState.pendingMessages ?? <Message>[];
+
+  /// Channel pending message list as a stream.
+  Stream<List<Message>> get pendingMessagesStream => channelStateStream
+      .map((cs) => cs.pendingMessages ?? <Message>[])
+      .distinct(const ListEquality().equals);
+
   /// Get channel last message.
   Message? get lastMessage =>
       _channelState.messages != null && _channelState.messages!.isNotEmpty
@@ -3376,6 +3385,7 @@ class ChannelClientState {
       read: newReads,
       draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
+      pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
     );
   }
