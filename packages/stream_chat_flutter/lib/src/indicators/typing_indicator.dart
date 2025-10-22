@@ -58,14 +58,12 @@ class StreamTypingIndicator extends StatelessWidget {
                 padding: padding,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 2),
-                      child: Lottie.asset(
-                        'lib/assets/animations/typing_dots.json',
-                        package: 'stream_chat_flutter',
-                        height: 4,
-                      ),
+                    Lottie.asset(
+                      'lib/assets/animations/typing_dots.json',
+                      package: 'stream_chat_flutter',
+                      height: 4,
                     ),
                     Flexible(
                       child: Text(
