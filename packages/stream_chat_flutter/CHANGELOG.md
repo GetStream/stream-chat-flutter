@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamMessageListView.floatingDateDividerBuilder` in order to specifically customize the
+  floating date divider.
+
 ## 9.18.0
 
 🐞 Fixed
