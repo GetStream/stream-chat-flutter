@@ -857,7 +857,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               reverse: widget.reverse,
               itemPositionListener: _itemPositionListener.itemPositions,
               messages: messages,
-              floatingDateDividerBuilder: widget.floatingDateDividerBuilder,
+              dateDividerBuilder: widget.floatingDateDividerBuilder ??
+                  widget.dateDividerBuilder,
             ),
           ),
         if (widget.showScrollToBottom)
@@ -1465,6 +1466,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Message? _lastFullyVisibleMessage;
+
   void _handleLastItemFullyVisible() {
     // We are using the first message as the last fully visible message
     // because the messages are reversed in the list view.

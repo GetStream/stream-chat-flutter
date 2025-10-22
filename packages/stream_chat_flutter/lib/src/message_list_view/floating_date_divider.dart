@@ -18,7 +18,7 @@ class FloatingDateDivider extends StatelessWidget {
     required this.itemCount,
     @Deprecated('No longer used, Will be removed in future versions.')
     this.isThreadConversation = false,
-    this.floatingDateDividerBuilder,
+    this.dateDividerBuilder,
   });
 
   /// true if this is a thread conversation
@@ -43,7 +43,7 @@ class FloatingDateDivider extends StatelessWidget {
   ///
   /// If provided, this function will be called with the date of the message
   /// to create the date divider widget.
-  final Widget Function(DateTime)? floatingDateDividerBuilder;
+  final Widget Function(DateTime)? dateDividerBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class FloatingDateDivider extends StatelessWidget {
         final message = messages.elementAtOrNull(index - 2);
         if (message == null) return const Empty();
 
-        if (floatingDateDividerBuilder case final builder?) {
+        if (dateDividerBuilder case final builder?) {
           return builder.call(message.createdAt.toLocal());
         }
 

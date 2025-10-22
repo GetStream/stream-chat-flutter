@@ -140,7 +140,7 @@ void main() {
     );
 
     testWidgets(
-      'renders custom floatingDateDividerBuilder when provided',
+      'renders custom dateDividerBuilder when provided',
       (tester) async {
         itemPositionListener.value = [
           const ItemPosition(
@@ -160,7 +160,7 @@ void main() {
               reverse: false,
               messages: messages,
               itemCount: itemCount,
-              floatingDateDividerBuilder: (date) {
+              dateDividerBuilder: (date) {
                 receivedDate = date;
                 return Container(
                   key: customKey,
