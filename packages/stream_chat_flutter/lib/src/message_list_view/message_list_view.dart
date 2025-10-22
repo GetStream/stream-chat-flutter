@@ -1466,7 +1466,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Message? _lastFullyVisibleMessage;
-
   void _handleLastItemFullyVisible() {
     // We are using the first message as the last fully visible message
     // because the messages are reversed in the list view.
