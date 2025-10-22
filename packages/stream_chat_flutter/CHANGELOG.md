@@ -7,10 +7,6 @@
 
 ## 9.18.0
 
-✅ Added
-
--  Added `StreamMessageListView.floatingDateDividerBuilder` in order to specifically customize the floating date divider.
-
 🐞 Fixed
 
 - Fixed `StreamMessageListView` not marking thread messages as read when scrolled to the bottom of the list.
