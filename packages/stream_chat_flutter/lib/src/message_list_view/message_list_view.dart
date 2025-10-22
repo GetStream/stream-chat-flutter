@@ -242,8 +242,10 @@ class StreamMessageListView extends StatefulWidget {
   /// Builder used to render date dividers
   final Widget Function(DateTime)? dateDividerBuilder;
 
-  /// Builder used to render floating date divider separately from
-  /// the date dividers in the list
+  /// Builder used to render floating date divider that stays on top while scrolling
+  /// the message list.
+  ///
+  /// If null, It will fall back to [dateDividerBuilder] if provided.
   final Widget Function(DateTime)? floatingDateDividerBuilder;
 
   /// Index of an item to initially align within the viewport.
@@ -857,8 +859,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               reverse: widget.reverse,
               itemPositionListener: _itemPositionListener.itemPositions,
               messages: messages,
-              dateDividerBuilder: widget.floatingDateDividerBuilder ??
-                  widget.dateDividerBuilder,
+              dateDividerBuilder: switch (widget.floatingDateDividerBuilder) {
+                final builder? => builder,
+                _ => widget.dateDividerBuilder,
+              },
             ),
           ),
         if (widget.showScrollToBottom)
