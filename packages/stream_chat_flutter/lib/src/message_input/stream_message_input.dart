@@ -1019,7 +1019,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       PollCreated() => _onPollCreated(result.poll),
       // Handle/Notify returned errors.
       AttachmentPickerError() => _onAttachmentPickerError(result),
-      _ => () {}, // Ignore other results.
+      _ => Future.value(), // Ignore other results.
     };
   }
 

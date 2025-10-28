@@ -176,11 +176,12 @@ class _ChannelPageState extends State<ChannelPage> {
     Channel channel,
     StreamAttachmentPickerResult result,
   ) {
-    // Notify that the result was not handled.
-    if (result is! LocationPicked) return false;
+    if (result is LocationPicked) {
+      _onShareLocationPicked(channel, result.location).ignore();
+      return true; // Notify that the result was handled.
+    }
 
-    _onShareLocationPicked(channel, result.location).ignore();
-    return true; // Notify that the result was handled.
+    return false; // Notify that the result was not handled.
   }
 
   Future<SendMessageResponse> _onShareLocationPicked(
