@@ -4,6 +4,10 @@
 
 - Added support for `user.messages.deleted` event.
 
+## 9.19.0
+
+- Minor bug fixes and improvements
+
 ## 10.0.0-beta.7
 
 🛑️ Breaking
