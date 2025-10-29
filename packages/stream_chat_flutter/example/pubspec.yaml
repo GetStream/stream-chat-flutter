@@ -25,9 +25,9 @@ dependencies:
   flutter:
     sdk: flutter
   responsive_builder: ^0.7.0
-  stream_chat_flutter: ^9.18.0
-  stream_chat_localizations: ^9.18.0
-  stream_chat_persistence: ^9.18.0
+  stream_chat_flutter: ^9.19.0
+  stream_chat_localizations: ^9.19.0
+  stream_chat_persistence: ^9.19.0
 
 flutter:
   uses-material-design: true

@@ -1,3 +1,7 @@
+## 9.19.0
+
+- Minor bug fixes and improvements
+
 ## 9.18.0
 
 🐞 Fixed
