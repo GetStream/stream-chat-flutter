@@ -428,8 +428,8 @@ Widget tabbedAttachmentPickerBuilder({
   required StreamAttachmentPickerController controller,
   PollConfig? pollConfig,
   GalleryPickerConfig? galleryPickerConfig,
-  Iterable<TabbedAttachmentPickerOption>? customOptions,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
+  AttachmentPickerOptionsBuilder? optionsBuilder,
 }) {
   Future<StreamAttachmentPickerResult> _handleSingePick(
     StreamAttachmentPickerController controller,
@@ -443,127 +443,144 @@ Widget tabbedAttachmentPickerBuilder({
     }
   }
 
+  final defaultOptions = <TabbedAttachmentPickerOption>[
+    TabbedAttachmentPickerOption(
+      key: 'gallery-picker',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
+      supportedTypes: [
+        AttachmentPickerType.images,
+        AttachmentPickerType.videos,
+      ],
+      isEnabled: (value) {
+        // Enable if nothing has been selected yet.
+        if (value.isEmpty) return true;
+
+        // Otherwise, enable only if there is at least a image or a video.
+        return value.attachments.any((it) => it.isImage || it.isVideo);
+      },
+      optionViewBuilder: (context, controller) {
+        final attachment = controller.value.attachments;
+        final selectedIds = attachment.map((it) => it.id);
+        return StreamGalleryPicker(
+          config: galleryPickerConfig,
+          selectedMediaItems: selectedIds,
+          onMediaItemSelected: (media) async {
+            try {
+              if (selectedIds.contains(media.id)) {
+                return await controller.removeAssetAttachment(media);
+              }
+              return await controller.addAssetAttachment(media);
+            } catch (e, stk) {
+              final err = AttachmentPickerError(error: e, stackTrace: stk);
+              return Navigator.pop(context, err);
+            }
+          },
+        );
+      },
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'file-picker',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
+      supportedTypes: [AttachmentPickerType.files],
+      isEnabled: (value) {
+        // Enable if nothing has been selected yet.
+        if (value.isEmpty) return true;
+
+        // Otherwise, enable only if there is at least a file.
+        return value.attachments.any((it) => it.isFile);
+      },
+      optionViewBuilder: (context, controller) => StreamFilePicker(
+        onFilePicked: (file) async {
+          final result = await _handleSingePick(controller, file);
+          return Navigator.pop(context, result);
+        },
+      ),
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'image-picker',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.camera),
+      supportedTypes: [AttachmentPickerType.images],
+      isEnabled: (value) {
+        // Enable if nothing has been selected yet.
+        if (value.isEmpty) return true;
+
+        // Otherwise, enable only if there is at least a image.
+        return value.attachments.any((it) => it.isImage);
+      },
+      optionViewBuilder: (context, controller) => StreamImagePicker(
+        onImagePicked: (image) async {
+          final result = await _handleSingePick(controller, image);
+          return Navigator.pop(context, result);
+        },
+      ),
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'video-picker',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
+      supportedTypes: [AttachmentPickerType.videos],
+      isEnabled: (value) {
+        // Enable if nothing has been selected yet.
+        if (value.isEmpty) return true;
+
+        // Otherwise, enable only if there is at least a video.
+        return value.attachments.any((it) => it.isVideo);
+      },
+      optionViewBuilder: (context, controller) => StreamVideoPicker(
+        onVideoPicked: (video) async {
+          final result = await _handleSingePick(controller, video);
+          return Navigator.pop(context, result);
+        },
+      ),
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'poll-creator',
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
+      supportedTypes: [AttachmentPickerType.poll],
+      isEnabled: (value) {
+        // Enable if nothing has been selected yet.
+        if (value.isEmpty) return true;
+
+        // Otherwise, enable only if there is a poll.
+        return value.poll != null;
+      },
+      optionViewBuilder: (context, controller) {
+        final initialPoll = controller.value.poll;
+        return StreamPollCreator(
+          poll: initialPoll,
+          config: pollConfig,
+          onPollCreated: (poll) {
+            if (poll == null) return Navigator.pop(context);
+            controller.poll = poll;
+
+            final result = PollCreated(poll: poll);
+            return Navigator.pop(context, result);
+          },
+        );
+      },
+    ),
+  ];
+
+  final allOptions = switch (optionsBuilder) {
+    final builder? => builder(context, defaultOptions),
+    _ => defaultOptions,
+  };
+
+  final validOptions = allOptions.whereType<TabbedAttachmentPickerOption>();
+
+  if (validOptions.length < allOptions.length) {
+    throw ArgumentError(
+      'custom options must be of type TabbedAttachmentPickerOption when using '
+      'the tabbed attachment picker (default on mobile).',
+    );
+  }
+
   return StreamTabbedAttachmentPickerBottomSheet(
     controller: controller,
     onSendValue: Navigator.of(context).pop,
     options: {
-      ...{
-        TabbedAttachmentPickerOption(
-          key: 'gallery-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
-          supportedTypes: [
-            AttachmentPickerType.images,
-            AttachmentPickerType.videos,
-          ],
-          isEnabled: (value) {
-            // Enable if nothing has been selected yet.
-            if (value.isEmpty) return true;
-
-            // Otherwise, enable only if there is at least a image or a video.
-            return value.attachments.any((it) => it.isImage || it.isVideo);
-          },
-          optionViewBuilder: (context, controller) {
-            final attachment = controller.value.attachments;
-            final selectedIds = attachment.map((it) => it.id);
-            return StreamGalleryPicker(
-              config: galleryPickerConfig,
-              selectedMediaItems: selectedIds,
-              onMediaItemSelected: (media) async {
-                try {
-                  if (selectedIds.contains(media.id)) {
-                    return await controller.removeAssetAttachment(media);
-                  }
-                  return await controller.addAssetAttachment(media);
-                } catch (e, stk) {
-                  final err = AttachmentPickerError(error: e, stackTrace: stk);
-                  return Navigator.pop(context, err);
-                }
-              },
-            );
-          },
-        ),
-        TabbedAttachmentPickerOption(
-          key: 'file-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
-          supportedTypes: [AttachmentPickerType.files],
-          isEnabled: (value) {
-            // Enable if nothing has been selected yet.
-            if (value.isEmpty) return true;
-
-            // Otherwise, enable only if there is at least a file.
-            return value.attachments.any((it) => it.isFile);
-          },
-          optionViewBuilder: (context, controller) => StreamFilePicker(
-            onFilePicked: (file) async {
-              final result = await _handleSingePick(controller, file);
-              return Navigator.pop(context, result);
-            },
-          ),
-        ),
-        TabbedAttachmentPickerOption(
-          key: 'image-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.camera),
-          supportedTypes: [AttachmentPickerType.images],
-          isEnabled: (value) {
-            // Enable if nothing has been selected yet.
-            if (value.isEmpty) return true;
-
-            // Otherwise, enable only if there is at least a image.
-            return value.attachments.any((it) => it.isImage);
-          },
-          optionViewBuilder: (context, controller) => StreamImagePicker(
-            onImagePicked: (image) async {
-              final result = await _handleSingePick(controller, image);
-              return Navigator.pop(context, result);
-            },
-          ),
-        ),
-        TabbedAttachmentPickerOption(
-          key: 'video-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
-          supportedTypes: [AttachmentPickerType.videos],
-          isEnabled: (value) {
-            // Enable if nothing has been selected yet.
-            if (value.isEmpty) return true;
-
-            // Otherwise, enable only if there is at least a video.
-            return value.attachments.any((it) => it.isVideo);
-          },
-          optionViewBuilder: (context, controller) => StreamVideoPicker(
-            onVideoPicked: (video) async {
-              final result = await _handleSingePick(controller, video);
-              return Navigator.pop(context, result);
-            },
-          ),
-        ),
-        TabbedAttachmentPickerOption(
-          key: 'poll-creator',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
-          supportedTypes: [AttachmentPickerType.poll],
-          isEnabled: (value) {
-            // Enable if nothing has been selected yet.
-            if (value.isEmpty) return true;
-
-            // Otherwise, enable only if there is a poll.
-            return value.poll != null;
-          },
-          optionViewBuilder: (context, controller) {
-            final initialPoll = controller.value.poll;
-            return StreamPollCreator(
-              poll: initialPoll,
-              config: pollConfig,
-              onPollCreated: (poll) {
-                if (poll == null) return Navigator.pop(context);
-                controller.poll = poll;
-
-                final result = PollCreated(poll: poll);
-                return Navigator.pop(context, result);
-              },
-            );
-          },
-        ),
-        ...?customOptions,
-      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
+      ...validOptions.where(
+        (option) => option.supportedTypes.every(allowedTypes.contains),
+      ),
     },
   );
 }
@@ -582,8 +599,8 @@ Widget systemAttachmentPickerBuilder({
   required StreamAttachmentPickerController controller,
   PollConfig? pollConfig = const PollConfig(),
   GalleryPickerConfig? galleryPickerConfig = const GalleryPickerConfig(),
-  Iterable<SystemAttachmentPickerOption>? customOptions,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
+  AttachmentPickerOptionsBuilder? optionsBuilder,
 }) {
   Future<StreamAttachmentPickerResult> _pickSystemFile(
     StreamAttachmentPickerController controller,
@@ -599,62 +616,79 @@ Widget systemAttachmentPickerBuilder({
     }
   }
 
+  final defaultOptions = <SystemAttachmentPickerOption>[
+    SystemAttachmentPickerOption(
+      key: 'image-picker',
+      supportedTypes: [AttachmentPickerType.images],
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
+      title: context.translations.uploadAPhotoLabel,
+      onTap: (context, controller) async {
+        final result = await _pickSystemFile(controller, FileType.image);
+        return Navigator.pop(context, result);
+      },
+    ),
+    SystemAttachmentPickerOption(
+      key: 'video-picker',
+      supportedTypes: [AttachmentPickerType.videos],
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
+      title: context.translations.uploadAVideoLabel,
+      onTap: (context, controller) async {
+        final result = await _pickSystemFile(controller, FileType.video);
+        return Navigator.pop(context, result);
+      },
+    ),
+    SystemAttachmentPickerOption(
+      key: 'file-picker',
+      supportedTypes: [AttachmentPickerType.files],
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
+      title: context.translations.uploadAFileLabel,
+      onTap: (context, controller) async {
+        final result = await _pickSystemFile(controller, FileType.any);
+        return Navigator.pop(context, result);
+      },
+    ),
+    SystemAttachmentPickerOption(
+      key: 'poll-creator',
+      supportedTypes: [AttachmentPickerType.poll],
+      icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
+      title: context.translations.createPollLabel(isNew: true),
+      onTap: (context, controller) async {
+        final initialPoll = controller.value.poll;
+        final poll = await showStreamPollCreatorDialog(
+          context: context,
+          poll: initialPoll,
+          config: pollConfig,
+        );
+
+        if (poll == null) return Navigator.pop(context);
+        controller.poll = poll;
+
+        final result = PollCreated(poll: poll);
+        return Navigator.pop(context, result);
+      },
+    ),
+  ];
+
+  final allOptions = switch (optionsBuilder) {
+    final builder? => builder(context, defaultOptions),
+    _ => defaultOptions,
+  };
+
+  final validOptions = allOptions.whereType<SystemAttachmentPickerOption>();
+
+  if (validOptions.length < allOptions.length) {
+    throw ArgumentError(
+      'custom options must be of type SystemAttachmentPickerOption when using '
+      'the system attachment picker (enabled explicitly or on web/desktop).',
+    );
+  }
+
   return StreamSystemAttachmentPickerBottomSheet(
     controller: controller,
     options: {
-      ...{
-        SystemAttachmentPickerOption(
-          key: 'image-picker',
-          supportedTypes: [AttachmentPickerType.images],
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
-          title: context.translations.uploadAPhotoLabel,
-          onTap: (context, controller) async {
-            final result = await _pickSystemFile(controller, FileType.image);
-            return Navigator.pop(context, result);
-          },
-        ),
-        SystemAttachmentPickerOption(
-          key: 'video-picker',
-          supportedTypes: [AttachmentPickerType.videos],
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
-          title: context.translations.uploadAVideoLabel,
-          onTap: (context, controller) async {
-            final result = await _pickSystemFile(controller, FileType.video);
-            return Navigator.pop(context, result);
-          },
-        ),
-        SystemAttachmentPickerOption(
-          key: 'file-picker',
-          supportedTypes: [AttachmentPickerType.files],
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
-          title: context.translations.uploadAFileLabel,
-          onTap: (context, controller) async {
-            final result = await _pickSystemFile(controller, FileType.any);
-            return Navigator.pop(context, result);
-          },
-        ),
-        SystemAttachmentPickerOption(
-          key: 'poll-creator',
-          supportedTypes: [AttachmentPickerType.poll],
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
-          title: context.translations.createPollLabel(isNew: true),
-          onTap: (context, controller) async {
-            final initialPoll = controller.value.poll;
-            final poll = await showStreamPollCreatorDialog(
-              context: context,
-              poll: initialPoll,
-              config: pollConfig,
-            );
-
-            if (poll == null) return Navigator.pop(context);
-            controller.poll = poll;
-
-            final result = PollCreated(poll: poll);
-            return Navigator.pop(context, result);
-          },
-        ),
-        ...?customOptions,
-      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
+      ...validOptions.where(
+        (option) => option.supportedTypes.every(allowedTypes.contains),
+      ),
     },
   );
 }

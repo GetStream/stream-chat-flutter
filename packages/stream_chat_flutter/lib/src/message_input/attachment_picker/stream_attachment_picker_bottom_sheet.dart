@@ -4,6 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/stream_gallery_picker.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template streamAttachmentPickerOptionsBuilder}
+/// Signature for a function that creates a list of [AttachmentPickerOption]s
+/// to be used in the attachment picker.
+///
+/// The function receives the [BuildContext] and a list of [defaultOptions]
+/// that can be modified or extended.
+/// {@endtemplate}
+typedef AttachmentPickerOptionsBuilder<T extends AttachmentPickerOption>
+    = List<T> Function(BuildContext context, List<T> defaultOptions);
+
 /// Shows a modal bottom sheet with the Stream attachment picker.
 ///
 /// The picker supports two modes:
@@ -60,7 +70,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// or `null` if the sheet was dismissed.
 Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   required BuildContext context,
-  Iterable<AttachmentPickerOption>? customOptions,
+  AttachmentPickerOptionsBuilder? optionsBuilder,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   Poll? initialPoll,
   PollConfig? pollConfig,
@@ -113,60 +123,18 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
 
           final useSystemPicker = useSystemAttachmentPicker || isWebOrDesktop;
 
-          if (useSystemPicker) {
-            final invalidOptions = <AttachmentPickerOption>[];
-            final customSystemOptions = <SystemAttachmentPickerOption>[];
+          final builder = switch (useSystemPicker) {
+            true => systemAttachmentPickerBuilder,
+            false => tabbedAttachmentPickerBuilder,
+          };
 
-            for (final option in customOptions ?? <AttachmentPickerOption>[]) {
-              if (option is SystemAttachmentPickerOption) {
-                customSystemOptions.add(option);
-              } else {
-                invalidOptions.add(option);
-              }
-            }
-
-            if (invalidOptions.isNotEmpty) {
-              throw ArgumentError(
-                'customOptions must be SystemAttachmentPickerOption when using '
-                'the attachment picker (enabled explicitly or on web/desktop).',
-              );
-            }
-
-            return systemAttachmentPickerBuilder.call(
-              context: context,
-              controller: controller,
-              allowedTypes: allowedTypes,
-              customOptions: customSystemOptions,
-              pollConfig: pollConfig,
-              galleryPickerConfig: galleryPickerConfig,
-            );
-          }
-
-          final invalidOptions = <AttachmentPickerOption>[];
-          final customTabbedOptions = <TabbedAttachmentPickerOption>[];
-
-          for (final option in customOptions ?? <AttachmentPickerOption>[]) {
-            if (option is TabbedAttachmentPickerOption) {
-              customTabbedOptions.add(option);
-            } else {
-              invalidOptions.add(option);
-            }
-          }
-
-          if (invalidOptions.isNotEmpty == true) {
-            throw ArgumentError(
-              'customOptions must be TabbedAttachmentPickerOption when using '
-              'the tabbed picker (default on mobile).',
-            );
-          }
-
-          return tabbedAttachmentPickerBuilder.call(
+          return builder.call(
             context: context,
             controller: controller,
             allowedTypes: allowedTypes,
-            customOptions: customTabbedOptions,
             pollConfig: pollConfig,
             galleryPickerConfig: galleryPickerConfig,
+            optionsBuilder: optionsBuilder,
           );
         },
       );

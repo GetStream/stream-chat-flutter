@@ -135,10 +135,11 @@ class _ChannelPageState extends State<ChannelPage> {
               if (config?.sharedLocations == true && channel.canShareLocation)
                 const LocationPickerType(),
             ],
-            onCustomAttachmentPickerResult: (result) {
-              return _onCustomAttachmentPickerResult(channel, result).ignore();
+            onAttachmentPickerResult: (result) {
+              return _onCustomAttachmentPickerResult(channel, result);
             },
-            customAttachmentPickerOptions: [
+            attachmentPickerOptionsBuilder: (context, defaultOptions) => [
+              ...defaultOptions,
               TabbedAttachmentPickerOption(
                 key: 'location-picker',
                 icon: const Icon(Icons.near_me_rounded),
@@ -171,16 +172,16 @@ class _ChannelPageState extends State<ChannelPage> {
     );
   }
 
-  Future<void> _onCustomAttachmentPickerResult(
+  bool _onCustomAttachmentPickerResult(
     Channel channel,
-    CustomAttachmentPickerResult result,
-  ) async {
-    final response = switch (result) {
-      LocationPicked() => _onShareLocationPicked(channel, result.location),
-      _ => null,
-    };
+    StreamAttachmentPickerResult result,
+  ) {
+    if (result is LocationPicked) {
+      _onShareLocationPicked(channel, result.location).ignore();
+      return true; // Notify that the result was handled.
+    }
 
-    return response?.ignore();
+    return false; // Notify that the result was not handled.
   }
 
   Future<SendMessageResponse> _onShareLocationPicked(
