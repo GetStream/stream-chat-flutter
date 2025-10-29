@@ -8,6 +8,11 @@
 
 This guide includes breaking changes grouped by release phase:
 
+### 🚧 v10.0.0-beta.8
+
+- [customAttachmentPickerOptions](#-customattachmentpickeroptions)
+- [onCustomAttachmentPickerResult](#-oncustomattachmentpickerresult)
+
 ### 🚧 v10.0.0-beta.7
 
 - [AttachmentFileUploader](#-attachmentfileuploader)
@@ -30,6 +35,141 @@ This guide includes breaking changes grouped by release phase:
 - [StreamMessageAction](#-streammessageaction)
 - [StreamMessageReactionsModal](#-streammessagereactionsmodal)
 - [StreamMessageWidget](#-streammessagewidget)
+
+---
+
+## 🧪 Migration for v10.0.0-beta.8
+
+### 🛠 customAttachmentPickerOptions
+
+#### Key Changes:
+
+- `customAttachmentPickerOptions` has been removed. Use `attachmentPickerOptionsBuilder` instead.
+- New builder pattern provides access to default options which can be modified, reordered, or extended.
+
+#### Migration Steps:
+
+**Before:**
+```dart
+StreamMessageInput(
+  customAttachmentPickerOptions: [
+    TabbedAttachmentPickerOption(
+      key: 'custom-location',
+      icon: const Icon(Icons.location_on),
+      supportedTypes: [AttachmentPickerType.images],
+      optionViewBuilder: (context, controller) {
+        return CustomLocationPicker();
+      },
+    ),
+  ],
+)
+```
+
+**After:**
+```dart
+StreamMessageInput(
+  attachmentPickerOptionsBuilder: (context, defaultOptions) {
+    // You can now modify, filter, reorder, or extend default options
+    return [
+      ...defaultOptions,
+      TabbedAttachmentPickerOption(
+        key: 'custom-location',
+        icon: const Icon(Icons.location_on),
+        supportedTypes: [AttachmentPickerType.images],
+        optionViewBuilder: (context, controller) {
+          return CustomLocationPicker();
+        },
+      ),
+    ];
+  },
+)
+```
+
+**Example: Filtering default options**
+```dart
+StreamMessageInput(
+  attachmentPickerOptionsBuilder: (context, defaultOptions) {
+    // Remove poll option
+    return defaultOptions.where((option) => option.key != 'poll').toList();
+  },
+)
+```
+
+**Example: Reordering options**
+```dart
+StreamMessageInput(
+  attachmentPickerOptionsBuilder: (context, defaultOptions) {
+    // Reverse the order
+    return defaultOptions.reversed.toList();
+  },
+)
+```
+
+**Using with `showStreamAttachmentPickerModalBottomSheet`:**
+```dart
+final result = await showStreamAttachmentPickerModalBottomSheet(
+  context: context,
+  optionsBuilder: (context, defaultOptions) {
+    return [
+      ...defaultOptions,
+      TabbedAttachmentPickerOption(
+        key: 'custom-option',
+        icon: const Icon(Icons.star),
+        supportedTypes: [AttachmentPickerType.images],
+        optionViewBuilder: (context, controller) {
+          return CustomPickerView();
+        },
+      ),
+    ];
+  },
+);
+```
+
+> ⚠️ **Important:**  
+> - The builder pattern gives you access to default options, allowing more flexible customization
+> - The builder works with both mobile (tabbed) and desktop (system) pickers
+
+---
+
+### 🛠 onCustomAttachmentPickerResult
+
+#### Key Changes:
+
+- `onCustomAttachmentPickerResult` has been removed. Use `onAttachmentPickerResult` which returns `FutureOr<bool>`.
+- Result handler can now short-circuit default behavior by returning `true`.
+
+#### Migration Steps:
+
+**Before:**
+```dart
+StreamMessageInput(
+  onCustomAttachmentPickerResult: (result) {
+    if (result is CustomAttachmentPickerResult) {
+      final data = result.data;
+      // Handle custom result
+    }
+  },
+)
+```
+
+**After:**
+```dart
+StreamMessageInput(
+  onAttachmentPickerResult: (result) {
+    if (result is CustomAttachmentPickerResult) {
+      final data = result.data;
+      // Handle custom result
+      return true; // Indicate we handled it - skips default processing
+    }
+    return false; // Let default handler process other result types
+  },
+)
+```
+
+> ⚠️ **Important:**  
+> - `onAttachmentPickerResult` replaces `onCustomAttachmentPickerResult` and must return a boolean
+> - Return `true` from `onAttachmentPickerResult` to skip default handling
+> - Return `false` to allow the default handler to process the result
 
 ---
 
@@ -609,6 +749,10 @@ StreamMessageWidget(
 ---
 
 ## 🎉 You're Ready to Migrate!
+
+### For v10.0.0-beta.8:
+- ✅ Replace `customAttachmentPickerOptions` with `attachmentPickerOptionsBuilder` to access and modify default options
+- ✅ Replace `onCustomAttachmentPickerResult` with `onAttachmentPickerResult` that returns `FutureOr<bool>`
 
 ### For v10.0.0-beta.7:
 - ✅ Update custom `AttachmentFileUploader` implementations to include the four new abstract methods: `uploadImage`, `uploadFile`, `removeImage`, and `removeFile`

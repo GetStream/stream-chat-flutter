@@ -1,3 +1,60 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `onCustomAttachmentPickerResult` has been removed. Use `onAttachmentPickerResult` which returns `FutureOr<bool>` to indicate if the result was handled.
+  ```dart
+  // Before
+  StreamMessageInput(
+    onCustomAttachmentPickerResult: (result) {
+      // Handle custom location attachment
+      final location = result.data['location'];
+      sendLocationMessage(location);
+    },
+  )
+  
+  // After
+  StreamMessageInput(
+    onAttachmentPickerResult: (result) {
+      if (result is CustomAttachmentPickerResult) {
+        // Handle custom location attachment
+        final location = result.data['location'];
+        sendLocationMessage(location);
+        return true; // Skip default handling
+      }
+      return false; // Use default handling for built-in types
+    },
+  )
+  ```
+
+- `customAttachmentPickerOptions` has been removed. Use `attachmentPickerOptionsBuilder` to modify, reorder, or extend default options.
+  ```dart
+  // Before - could only add custom options
+  StreamMessageInput(
+    customAttachmentPickerOptions: [
+      TabbedAttachmentPickerOption(
+        key: 'location',
+        icon: Icon(Icons.location_on),
+        // ...
+      ),
+    ],
+  )
+  
+  // After - can now modify, filter, or extend default options
+  StreamMessageInput(
+    attachmentPickerOptionsBuilder: (context, defaultOptions) {
+      return [
+        ...defaultOptions, // Keep all default options
+        TabbedAttachmentPickerOption(
+          key: 'location',
+          icon: Icon(Icons.location_on),
+          // ...
+        ),
+      ];
+    },
+  )
+  ```
+
 ## 9.19.0
 
 ✅ Added
