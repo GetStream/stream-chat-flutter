@@ -1,4 +1,4 @@
-## Upcoming Beta
+## 10.0.0-beta.8
 
 🛑️ Breaking
 
@@ -54,6 +54,8 @@
     },
   )
   ```
+
+- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.19.0
 

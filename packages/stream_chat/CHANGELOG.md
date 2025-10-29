@@ -1,8 +1,10 @@
-## Upcoming Beta
+## 10.0.0-beta.8
 
 ✅ Added
 
 - Added support for `user.messages.deleted` event.
+
+- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.19.0
 

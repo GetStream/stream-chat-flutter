@@ -1,4 +1,4 @@
-## Upcoming Beta
+## 10.0.0-beta.8
 
 ✅ Added
 
@@ -6,6 +6,8 @@
   all messages from a specific user across all channels.
 - Added a new `messageLimit` parameter to the `getChannelStates` method
   to limit the number of messages fetched per channel.
+
+- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.19.0
 
