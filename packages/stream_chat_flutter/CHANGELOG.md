@@ -1,3 +1,36 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `onAttachmentTap` callback signature has changed to support custom attachment handling with automatic fallback to default behavior. The callback now receives `BuildContext` as the first parameter and returns `FutureOr<bool>` to indicate if the attachment was handled.
+  ```dart
+  // Before
+  StreamMessageWidget(
+    message: message,
+    onAttachmentTap: (message, attachment) {
+      // Could only override - no way to fallback to default behavior
+      if (attachment.type == 'location') {
+        showLocationDialog(context, attachment);
+      }
+      // Other attachment types lost default behavior
+    },
+  )
+  
+  // After
+  StreamMessageWidget(
+    message: message,
+    onAttachmentTap: (context, message, attachment) async {
+      if (attachment.type == 'location') {
+        await showLocationDialog(context, attachment);
+        return true; // Handled by custom logic
+      }
+      return false; // Use default behavior for images, videos, URLs, etc.
+    },
+  )
+  ```
+
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+
 ## 10.0.0-beta.8
 
 🛑️ Breaking
@@ -54,6 +87,8 @@
     },
   )
   ```
+  
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 - Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 

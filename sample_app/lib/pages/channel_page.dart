@@ -295,6 +295,14 @@ class _ChannelPageState extends State<ChannelPage> {
           defaultMessageWidget.copyWith(
             onReplyTap: _reply,
             customActions: customOptions,
+            onAttachmentTap: (context, message, attachment) {
+              if (attachment.type == AttachmentType.urlPreview) {
+                print('Hello Attachment');
+                return true;
+              }
+
+              return false;
+            },
             showEditMessage: message.sharedLocation == null,
             onCustomActionTap: (it) async => await switch (it) {
               CreateReminder() => _createReminder(it.message),

@@ -83,8 +83,8 @@ class MessageCard extends StatefulWidget {
   /// {@macro attachmentShape}
   final ShapeBorder? attachmentShape;
 
-  /// {@macro onAttachmentTap}
-  final StreamAttachmentWidgetTapCallback? onAttachmentTap;
+  /// {@macro onAttachmentWidgetTap}
+  final OnAttachmentWidgetTap? onAttachmentTap;
 
   /// {@macro onShowMessage}
   final ShowMessageCallback? onShowMessage;
@@ -188,6 +188,7 @@ class _MessageCardState extends State<MessageCard> {
             attachmentShape: widget.attachmentShape,
             onAttachmentTap: widget.onAttachmentTap,
             onShowMessage: widget.onShowMessage,
+            onLinkTap: widget.onLinkTap,
             onReplyTap: widget.onReplyTap,
             attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
           ),

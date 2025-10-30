@@ -8,6 +8,10 @@
 
 This guide includes breaking changes grouped by release phase:
 
+### 🚧 Upcoming Beta
+
+- [onAttachmentTap](#-onattachmenttap)
+
 ### 🚧 v10.0.0-beta.8
 
 - [customAttachmentPickerOptions](#-customattachmentpickeroptions)
@@ -35,6 +39,79 @@ This guide includes breaking changes grouped by release phase:
 - [StreamMessageAction](#-streammessageaction)
 - [StreamMessageReactionsModal](#-streammessagereactionsmodal)
 - [StreamMessageWidget](#-streammessagewidget)
+
+---
+
+## 🧪 Migration for Upcoming Beta
+
+### 🛠 onAttachmentTap
+
+#### Key Changes:
+
+- `onAttachmentTap` callback signature has changed to support custom attachment handling with automatic fallback to default behavior.
+- Callback now receives `BuildContext` as the first parameter.
+- Returns `FutureOr<bool>` to indicate whether the attachment was handled.
+- Returning `true` skips default behavior, `false` uses default handling (URLs, images, videos, giphys).
+
+#### Migration Steps:
+
+**Before:**
+```dart
+StreamMessageWidget(
+  message: message,
+  onAttachmentTap: (message, attachment) {
+    // Could only override - no way to fallback to default behavior
+    if (attachment.type == 'location') {
+      showLocationDialog(context, attachment);
+    }
+    // Other attachment types (images, videos, URLs) lost default behavior
+  },
+)
+```
+
+**After:**
+```dart
+StreamMessageWidget(
+  message: message,
+  onAttachmentTap: (context, message, attachment) async {
+    if (attachment.type == 'location') {
+      await showLocationDialog(context, attachment);
+      return true; // Handled by custom logic
+    }
+    return false; // Use default behavior for images, videos, URLs, etc.
+  },
+)
+```
+
+**Example: Handling multiple custom types**
+```dart
+StreamMessageWidget(
+  message: message,
+  onAttachmentTap: (context, message, attachment) async {
+    switch (attachment.type) {
+      case 'location':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => MapView(attachment)),
+        );
+        return true;
+      
+      case 'product':
+        await showProductDialog(context, attachment);
+        return true;
+      
+      default:
+        return false; // Images, videos, URLs use default viewer
+    }
+  },
+)
+```
+
+> ⚠️ **Important:**  
+> - The callback now requires `BuildContext` as the first parameter
+> - Must return `FutureOr<bool>` - `true` if handled, `false` for default behavior
+> - Default behavior automatically handles URL previews, images, videos, and giphys
+> - Supports both synchronous and asynchronous operations
 
 ---
 
@@ -749,6 +826,11 @@ StreamMessageWidget(
 ---
 
 ## 🎉 You're Ready to Migrate!
+
+### For Upcoming Beta:
+- ✅ Update `onAttachmentTap` callback signature to include `BuildContext` as first parameter
+- ✅ Return `FutureOr<bool>` from `onAttachmentTap` - `true` if handled, `false` for default behavior
+- ✅ Leverage automatic fallback to default handling for standard attachment types (images, videos, URLs)
 
 ### For v10.0.0-beta.8:
 - ✅ Replace `customAttachmentPickerOptions` with `attachmentPickerOptionsBuilder` to access and modify default options
