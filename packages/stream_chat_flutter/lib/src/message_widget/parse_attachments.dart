@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget_catalog.dart';
@@ -144,6 +145,9 @@ class ParseAttachments extends StatelessWidget {
 
       final navigator = Navigator.of(context);
       final channel = StreamChannel.of(context).channel;
+      final startIndex = attachments.indexWhere(
+        (it) => it.attachment.id == attachment.id,
+      );
 
       return navigator.push<void>(
         MaterialPageRoute(
@@ -152,9 +156,7 @@ class ParseAttachments extends StatelessWidget {
             child: StreamFullScreenMediaBuilder(
               userName: message.user!.name,
               mediaAttachmentPackages: attachments,
-              startIndex: attachments.indexWhere(
-                (it) => it.attachment.id == attachment.id,
-              ),
+              startIndex: math.max(0, startIndex),
               onReplyMessage: onReplyTap,
               onShowMessage: onShowMessage,
               attachmentActionsModalBuilder: attachmentActionsModalBuilder,
