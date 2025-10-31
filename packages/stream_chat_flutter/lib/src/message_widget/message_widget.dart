@@ -377,8 +377,8 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@macro onMessageActionTap}
   final OnMessageActionTap<CustomMessageAction>? onCustomActionTap;
 
-  /// {@macro onMessageWidgetAttachmentTap}
-  final StreamAttachmentWidgetTapCallback? onAttachmentTap;
+  /// {@macro onAttachmentWidgetTap}
+  final OnAttachmentWidgetTap? onAttachmentTap;
 
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
@@ -462,7 +462,7 @@ class StreamMessageWidget extends StatefulWidget {
     OnReactionsHover? onReactionsHover,
     List<StreamMessageAction>? customActions,
     OnMessageActionTap<CustomMessageAction>? onCustomActionTap,
-    void Function(Message message, Attachment attachment)? onAttachmentTap,
+    OnAttachmentWidgetTap? onAttachmentTap,
     Widget Function(BuildContext, User)? userAvatarBuilder,
     Size? imageAttachmentThumbnailSize,
     String? imageAttachmentThumbnailResizeType,

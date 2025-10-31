@@ -152,8 +152,8 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro attachmentShape}
   final ShapeBorder? attachmentShape;
 
-  /// {@macro onAttachmentTap}
-  final StreamAttachmentWidgetTapCallback? onAttachmentTap;
+  /// {@macro onAttachmentWidgetTap}
+  final OnAttachmentWidgetTap? onAttachmentTap;
 
   /// {@macro onShowMessage}
   final ShowMessageCallback? onShowMessage;
