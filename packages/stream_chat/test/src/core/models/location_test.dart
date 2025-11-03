@@ -108,6 +108,34 @@ void main() {
       expect(json['end_at'], equals('2024-12-31T23:59:59.999Z'));
     });
 
+    test(
+      'should convert endAt to UTC in toJson regardless of input timezone',
+      () {
+        // Create a non-UTC DateTime (local time)
+        final localEndAt = DateTime(2024, 10, 16, 17, 12, 30, 338, 726);
+        final liveLocation = Location(
+          latitude: latitude,
+          longitude: longitude,
+          createdByDeviceId: createdByDeviceId,
+          endAt: localEndAt,
+        );
+
+        final json = liveLocation.toJson();
+        final serializedEndAt = json['end_at'] as String?;
+
+        // Verify the serialized date is in UTC format (ends with 'Z')
+        expect(serializedEndAt, isNotNull);
+        expect(serializedEndAt, endsWith('Z'));
+
+        // Verify the stored endAt is in UTC
+        expect(liveLocation.endAt?.isUtc, isTrue);
+
+        // Verify the date is the same instant, just in UTC
+        final expectedUtc = localEndAt.toUtc();
+        expect(liveLocation.endAt, equals(expectedUtc));
+      },
+    );
+
     test('should return correct coordinates', () {
       final coordinates = location.coordinates;
 
@@ -184,7 +212,8 @@ void main() {
         channelCid: 'test:channel',
         messageId: 'message_123',
         userId: 'user_123',
-        latitude: 40.7128, // Different latitude
+        latitude: 40.7128,
+        // Different latitude
         longitude: longitude,
         createdByDeviceId: createdByDeviceId,
         endAt: DateTime.parse('2024-12-31T23:59:59.999Z'),
