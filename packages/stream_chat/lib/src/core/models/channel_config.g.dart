@@ -35,6 +35,7 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) =>
           json['skip_last_msg_update_for_system_msgs'] as bool? ?? false,
       userMessageReminders: json['user_message_reminders'] as bool? ?? false,
       markMessagesPending: json['mark_messages_pending'] as bool? ?? false,
+      sharedLocations: json['shared_locations'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) =>
@@ -59,4 +60,5 @@ Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) =>
           instance.skipLastMsgUpdateForSystemMsgs,
       'user_message_reminders': instance.userMessageReminders,
       'mark_messages_pending': instance.markMessagesPending,
+      'shared_locations': instance.sharedLocations,
     };

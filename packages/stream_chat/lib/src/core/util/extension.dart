@@ -49,7 +49,7 @@ extension StreamControllerX<T> on StreamController<T> {
 
 /// Extension providing merge functionality for any iterable.
 extension IterableMergeExtension<T extends Object?> on Iterable<T> {
-  /// Merges this iterable with another iterable of the same type.
+  /// Merges this iterable with another iterable of the **same type**.
   ///
   /// This method allows merging two iterables by identifying items with the
   /// same key and using an update function to combine them. Items that exist
@@ -77,11 +77,82 @@ extension IterableMergeExtension<T extends Object?> on Iterable<T> {
     required K Function(T item) key,
     required T Function(T original, T updated) update,
   }) {
+    return mergeFrom(
+      other,
+      key: key,
+      value: (item) => item,
+      update: update,
+    );
+  }
+
+  /// Merges this iterable with another iterable of **a different type**.
+  ///
+  /// This method generalizes [merge] to support merging items of type [V]
+  /// (for example, DTOs or partial updates) into an existing collection of
+  /// items of type [T].
+  ///
+  /// The [value] function converts each [V] element into a corresponding [T]
+  /// instance (or returns `null` to skip the item).
+  ///
+  /// The [key] extractor identifies how to match existing and new elements.
+  /// When a matching key already exists, the [update] function determines how
+  /// to combine the original and new values. If no match exists, the new
+  /// element is added.
+  ///
+  /// Items that appear only in one iterable are preserved as-is.
+  ///
+  /// Example (merging DTOs into models):
+  /// ```dart
+  /// final users = [User(id: '1', name: 'John'), User(id: '2', name: 'Alice')];
+  ///
+  /// final dtos = [
+  ///   UserDTO(id: '1', name: 'John Doe'),
+  ///   UserDTO(id: '3', name: 'Bob'),
+  /// ];
+  ///
+  /// final merged = users.mergeFrom(
+  ///   dtos,
+  ///   key: (user) => user.id,
+  ///   value: (dto) => dto.toUser(),
+  ///   update: (original, updated) => original.copyWith(name: updated.name),
+  /// );
+  ///
+  /// // Result:
+  /// // [
+  /// //   User(id: '1', name: 'John Doe'),
+  /// //   User(id: '2', name: 'Alice'),
+  /// //   User(id: '3', name: 'Bob'),
+  /// // ]
+  /// ```
+  ///
+  /// Example (skipping null conversions):
+  /// ```dart
+  /// final list = [Item(id: 1, name: 'A')];
+  /// final updates = [ItemUpdate(id: 1, name: null)];
+  ///
+  /// final merged = list.mergeFrom(
+  ///   updates,
+  ///   key: (item) => item.id,
+  ///   value: (update) => update.toItemOrNull(),
+  ///   update: (original, updated) => updated,
+  /// );
+  ///
+  /// // The null return from `toItemOrNull()` causes the item to be skipped.
+  /// ```
+  Iterable<T> mergeFrom<K, V>(
+    Iterable<V>? other, {
+    required K Function(T item) key,
+    required T? Function(V item) value,
+    required T Function(T original, T updated) update,
+  }) {
     if (other == null) return this;
 
     final itemMap = {for (final item in this) key(item): item};
 
-    for (final item in other) {
+    for (final otherItem in other) {
+      final item = value.call(otherItem);
+      if (item == null) continue;
+
       itemMap.update(
         key(item),
         (original) => update(original, item),
