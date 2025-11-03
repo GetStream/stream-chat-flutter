@@ -1,3 +1,10 @@
+## Upcoming Beta
+
+🐞 Fixed
+
+- Fixed `Location.endAt` field not being properly converted to UTC, causing "expected date" API
+  errors when sending location messages.
+
 ## 10.0.0-beta.8
 
 ✅ Added

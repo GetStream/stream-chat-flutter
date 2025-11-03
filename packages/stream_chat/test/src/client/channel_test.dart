@@ -1065,7 +1065,7 @@ void main() {
     group('`.startLiveLocationSharing`', () {
       const deviceId = 'test-device-id';
       const locationId = 'test-location-id';
-      final endSharingAt = DateTime.now().add(const Duration(hours: 1));
+      final endSharingAt = DateTime.timestamp().add(const Duration(hours: 1));
       const coordinates = LocationCoordinates(
         latitude: 40.7128,
         longitude: -74.0060,
