@@ -29,10 +29,11 @@ class Location extends Equatable {
     required this.latitude,
     required this.longitude,
     this.createdByDeviceId,
-    this.endAt,
+    DateTime? endAt,
     DateTime? createdAt,
     DateTime? updatedAt,
-  })  : createdAt = createdAt ?? DateTime.timestamp(),
+  })  : endAt = endAt?.toUtc(),
+        createdAt = createdAt ?? DateTime.timestamp(),
         updatedAt = updatedAt ?? DateTime.timestamp();
 
   /// Create a new instance from a json
