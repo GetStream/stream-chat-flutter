@@ -193,5 +193,8 @@ class ChannelDeliveryReporter {
   ///
   /// Typically used when shutting down the reporter or permanently stopping
   /// delivery reporting.
-  void cancel() => _throttledMarkCandidatesAsDelivered.cancel();
+  void cancel() {
+    _throttledMarkCandidatesAsDelivered.cancel();
+    _deliveryCandidatesLock.synchronized(_deliveryCandidates.clear);
+  }
 }
