@@ -2061,6 +2061,15 @@ class Channel {
           )
           .where((e) => e.cid == cid);
 
+  // Whether sending typing events is allowed in the channel and by the user
+  // privacy settings.
+  bool get _canSendTypingEvents {
+    final currentUser = client.state.currentUser;
+    final typingIndicatorsEnabled = currentUser?.isTypingIndicatorsEnabled;
+
+    return canUseTypingEvents && (typingIndicatorsEnabled ?? true);
+  }
+
   late final _keyStrokeHandler = KeyStrokeHandler(
     onStartTyping: startTyping,
     onStopTyping: stopTyping,
@@ -2071,7 +2080,7 @@ class Channel {
   ///
   /// This is meant to be called every time the user presses a key.
   Future<void> keyStroke([String? parentId]) async {
-    if (config?.typingEvents == false) return;
+    if (!_canSendTypingEvents) return;
 
     client.logger.info('KeyStroke received');
     return _keyStrokeHandler(parentId);
@@ -2079,7 +2088,7 @@ class Channel {
 
   /// Sends the [EventType.typingStart] event.
   Future<void> startTyping([String? parentId]) async {
-    if (config?.typingEvents == false) return;
+    if (!_canSendTypingEvents) return;
 
     client.logger.info('start typing');
     await sendEvent(Event(
@@ -2090,7 +2099,7 @@ class Channel {
 
   /// Sends the [EventType.typingStop] event.
   Future<void> stopTyping([String? parentId]) async {
-    if (config?.typingEvents == false) return;
+    if (!_canSendTypingEvents) return;
 
     client.logger.info('stop typing');
     await sendEvent(Event(
@@ -3091,7 +3100,7 @@ class ChannelClientState {
   }
 
   void _listenReadEvents() {
-    if (_channelState.channel?.config.readEvents == false) return;
+    if (!_channel.canReceiveReadEvents) return;
 
     _subscriptions
       ..add(
@@ -3489,17 +3498,19 @@ class ChannelClientState {
   final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
 
   void _listenTypingEvents() {
-    if (_channelState.channel?.config.typingEvents == false) return;
-
-    final currentUser = _channel.client.state.currentUser;
-    if (currentUser == null) return;
+    if (!_channel.canUseTypingEvents) return;
 
     _subscriptions
       ..add(
         _channel.on(EventType.typingStart).listen(
           (event) {
             final user = event.user;
-            if (user != null && user.id != currentUser.id) {
+            if (user == null) return;
+
+            final currentUser = _channel.client.state.currentUser;
+            if (currentUser == null) return;
+
+            if (user.id != currentUser.id) {
               final events = {...typingEvents};
               events[user] = event;
               _typingEventsController.safeAdd(events);
@@ -3511,7 +3522,12 @@ class ChannelClientState {
         _channel.on(EventType.typingStop).listen(
           (event) {
             final user = event.user;
-            if (user != null && user.id != currentUser.id) {
+            if (user == null) return;
+
+            final currentUser = _channel.client.state.currentUser;
+            if (currentUser == null) return;
+
+            if (user.id != currentUser.id) {
               final events = {...typingEvents}..remove(user);
               _typingEventsController.safeAdd(events);
             }
@@ -3526,7 +3542,7 @@ class ChannelClientState {
   // the sender due to technical difficulties. e.g. process death, loss of
   // Internet connection or custom implementation.
   void _startCleaningStaleTypingEvents() {
-    if (_channelState.channel?.config.typingEvents == false) return;
+    if (!_channel._canSendTypingEvents) return;
 
     _staleTypingEventsCleanerTimer = Timer.periodic(
       const Duration(seconds: 1),
@@ -3703,9 +3719,8 @@ extension ChannelCapabilityCheck on Channel {
   }
 
   /// True, if the current user can send typing events.
-  bool get canSendTypingEvents {
-    return ownCapabilities.contains(ChannelCapability.sendTypingEvents);
-  }
+  @Deprecated('Use canUseTypingEvents instead')
+  bool get canSendTypingEvents => canUseTypingEvents;
 
   /// True, if the current user can upload message attachments.
   bool get canUploadFile {

@@ -30,6 +30,10 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
           ? null
           : PushPreference.fromJson(
               json['push_preferences'] as Map<String, dynamic>),
+      privacySettings: json['privacy_settings'] == null
+          ? null
+          : PrivacySettings.fromJson(
+              json['privacy_settings'] as Map<String, dynamic>),
       id: json['id'] as String,
       role: json['role'] as String?,
       createdAt: json['created_at'] == null

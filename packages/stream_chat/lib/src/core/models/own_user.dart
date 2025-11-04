@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/privacy_settings.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -20,6 +21,7 @@ class OwnUser extends User {
     this.unreadThreads = 0,
     this.blockedUserIds = const [],
     this.pushPreferences,
+    this.privacySettings,
     required super.id,
     super.role,
     super.name,
@@ -70,6 +72,7 @@ class OwnUser extends User {
       unreadThreads: user.extraData['unread_threads'].safeCast(),
       blockedUserIds: user.extraData['blocked_user_ids'].safeCast(),
       pushPreferences: user.extraData['push_preferences'].safeCast(),
+      privacySettings: user.extraData['privacy_settings'].safeCast(),
     );
 
     // Once we are done working with the extraData, we have to clean it up
@@ -115,6 +118,7 @@ class OwnUser extends User {
     Map<String, String>? teamsRole,
     int? avgResponseTime,
     PushPreference? pushPreferences,
+    PrivacySettings? privacySettings,
   }) =>
       OwnUser(
         id: id ?? this.id,
@@ -143,6 +147,7 @@ class OwnUser extends User {
         teamsRole: teamsRole ?? this.teamsRole,
         avgResponseTime: avgResponseTime ?? this.avgResponseTime,
         pushPreferences: pushPreferences ?? this.pushPreferences,
+        privacySettings: privacySettings ?? this.privacySettings,
       );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
@@ -173,6 +178,7 @@ class OwnUser extends User {
       teamsRole: other.teamsRole,
       avgResponseTime: other.avgResponseTime,
       pushPreferences: other.pushPreferences,
+      privacySettings: other.privacySettings,
     );
   }
 
@@ -208,6 +214,10 @@ class OwnUser extends User {
   @JsonKey(includeIfNull: false)
   final PushPreference? pushPreferences;
 
+  /// Privacy settings for the user if set.
+  @JsonKey(includeIfNull: false)
+  final PrivacySettings? privacySettings;
+
   /// Known top level fields.
   ///
   /// Useful for [Serializer] methods.
@@ -220,6 +230,26 @@ class OwnUser extends User {
     'unread_threads',
     'blocked_user_ids',
     'push_preferences',
+    'privacy_settings',
     ...User.topLevelFields,
   ];
+}
+
+/// Extension methods for [OwnUser] related to privacy settings.
+extension PrivacySettingsExtension on OwnUser {
+  /// Whether typing indicators are enabled for the user.
+  bool get isTypingIndicatorsEnabled {
+    final typingIndicators = privacySettings?.typingIndicators;
+    if (typingIndicators == null) return true;
+
+    return typingIndicators.enabled;
+  }
+
+  /// Whether read receipts are enabled for the user.
+  bool get isReadReceiptsEnabled {
+    final readIndicators = privacySettings?.readReceipts;
+    if (readIndicators == null) return true;
+
+    return readIndicators.enabled;
+  }
 }

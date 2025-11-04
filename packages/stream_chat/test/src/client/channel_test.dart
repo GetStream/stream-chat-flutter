@@ -5344,12 +5344,6 @@ void main() {
     );
 
     testCapability(
-      'SendTypingEvents',
-      ChannelCapability.sendTypingEvents,
-      (channel) => channel.canSendTypingEvents,
-    );
-
-    testCapability(
       'UploadFile',
       ChannelCapability.uploadFile,
       (channel) => channel.canUploadFile,
