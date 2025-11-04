@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
@@ -27,6 +28,7 @@ import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_delivery_info.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -227,6 +229,15 @@ class StreamChatClient {
   final LogHandlerFunction logHandlerFunction;
 
   StreamSubscription<List<ConnectionStatus>>? _connectionStatusSubscription;
+
+  /// Manages delivery receipt reporting for channel messages.
+  ///
+  /// Collects and batches delivery receipts to acknowledge message delivery
+  /// to senders across multiple channels.
+  late final channelDeliveryReporter = ChannelDeliveryReporter(
+    logger: detachedLogger('🧾'),
+    onMarkChannelsDelivered: markChannelsDelivered,
+  );
 
   final _eventController = PublishSubject<Event>();
 
@@ -776,6 +787,8 @@ class StreamChatClient {
     logger.info('Got ${res.channels.length} channels from api');
 
     final updateData = _mapChannelStateToChannel(channels);
+    // Submit delivery report for the channels fetched in this query.
+    await channelDeliveryReporter.submitForDelivery(updateData.value);
 
     await chatPersistenceClient?.updateChannelQueries(
       filter,
@@ -1661,6 +1674,29 @@ class StreamChatClient {
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() => _chatApi.channel.markAllRead();
 
+  /// Sends delivery receipts for the latest messages in multiple channels.
+  ///
+  /// Useful when receiving messages through push notifications where only
+  /// channel IDs and message IDs are available, without full channel/message
+  /// objects. For in-app message delivery, use [channelDeliveryReporter]
+  /// which handles this automatically.
+  ///
+  /// ```dart
+  /// // From notification payload
+  /// final receipt = MessageDeliveryInfo(
+  ///   channelCid: notificationData['channel_id'],
+  ///   messageId: notificationData['message_id'],
+  /// );
+  /// await client.markChannelsDelivered([receipt]);
+  /// ```
+  ///
+  /// Accepts up to 100 channels per call.
+  Future<EmptyResponse> markChannelsDelivered(
+    Iterable<MessageDeliveryInfo> messages,
+  ) {
+    return _chatApi.channel.markChannelsDelivered(messages);
+  }
+
   /// Send an event to a particular channel
   Future<EmptyResponse> sendEvent(
     String channelId,
@@ -2097,6 +2133,9 @@ class StreamChatClient {
   Future<void> disconnectUser({bool flushChatPersistence = false}) async {
     logger.info('Disconnecting user : ${state.currentUser?.id}');
 
+    // Cancelling delivery reporter.
+    channelDeliveryReporter.cancel();
+
     // closing web-socket connection
     closeConnection();
 
@@ -2235,10 +2274,12 @@ class ClientState {
   void _listenAllChannelsRead() {
     _eventsSubscription?.add(
       _client.on(EventType.notificationMarkRead).listen((event) {
-        if (event.cid == null) {
-          channels.forEach((key, value) {
-            value.state?.unreadCount = 0;
-          });
+        // If a cid is provided, it means it's for a specific channel.
+        if (event.cid != null) return;
+
+        // Update all channels' unread count to 0.
+        for (final channel in channels.values) {
+          channel.state?.unreadCount = 0;
         }
       }),
     );
@@ -2342,10 +2383,7 @@ class ClientState {
 
   /// Adds a list of channels to the current list of cached channels
   void addChannels(Map<String, Channel> channelMap) {
-    final newChannels = {
-      ...channels,
-      ...channelMap,
-    };
+    final newChannels = {...channels, ...channelMap};
     channels = newChannels;
   }
 

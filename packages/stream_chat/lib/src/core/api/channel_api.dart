@@ -8,6 +8,7 @@ import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_delivery_info.dart';
 
 /// Defines the api dedicated to channel operations
 class ChannelApi {
@@ -84,10 +85,7 @@ class ChannelApi {
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() async {
-    final response = await _client.post(
-      '/channels/read',
-      data: {},
-    );
+    final response = await _client.post('/channels/read', data: {});
     return EmptyResponse.fromJson(response.data);
   }
 
@@ -394,5 +392,18 @@ class ChannelApi {
       },
     );
     return PartialUpdateMemberResponse.fromJson(response.data);
+  }
+
+  /// Sends delivery receipts for the latest messages in multiple channels.
+  ///
+  /// Accepts up to 100 channels per call.
+  Future<EmptyResponse> markChannelsDelivered(
+    Iterable<MessageDeliveryInfo> messages,
+  ) async {
+    final response = await _client.post(
+      '/channels/delivered',
+      data: jsonEncode({'latest_delivered_messages': messages}),
+    );
+    return EmptyResponse.fromJson(response.data);
   }
 }

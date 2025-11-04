@@ -27,6 +27,7 @@ class ChannelConfig {
     this.skipLastMsgUpdateForSystemMsgs = false,
     this.userMessageReminders = false,
     this.markMessagesPending = false,
+    this.deliveryEvents = false,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -94,6 +95,9 @@ class ChannelConfig {
 
   /// Whether pending messages are enabled for this channel.
   final bool markMessagesPending;
+
+  /// Whether delivery events are enabled for this channel.
+  final bool deliveryEvents;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);

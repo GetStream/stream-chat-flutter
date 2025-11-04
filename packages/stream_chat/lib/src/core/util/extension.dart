@@ -47,6 +47,23 @@ extension StreamControllerX<T> on StreamController<T> {
   }
 }
 
+/// Extension on [Completer] to safely complete with value or error.
+extension CompleterX<T> on Completer<T> {
+  /// Safely completes the completer with the provided value.
+  /// Returns early if the completer is already completed.
+  void safeComplete([T? value]) {
+    if (isCompleted) return;
+    complete(value);
+  }
+
+  /// Safely completes the completer with the provided error.
+  /// Returns early if the completer is already completed.
+  void safeCompleteError(Object error, [StackTrace? stackTrace]) {
+    if (isCompleted) return;
+    completeError(error, stackTrace);
+  }
+}
+
 /// Extension providing merge functionality for any iterable.
 extension IterableMergeExtension<T extends Object?> on Iterable<T> {
   /// Merges this iterable with another iterable of the same type.

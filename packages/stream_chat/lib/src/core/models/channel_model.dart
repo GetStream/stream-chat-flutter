@@ -358,6 +358,9 @@ extension type const ChannelCapability(String capability) implements String {
   /// Ability to receive read events.
   static const readEvents = ChannelCapability('read-events');
 
+  /// Ability to receive delivery events.
+  static const deliveryEvents = ChannelCapability('delivery-events');
+
   /// Ability to receive connect events.
   static const connectEvents = ChannelCapability('connect-events');
 
