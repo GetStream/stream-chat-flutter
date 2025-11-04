@@ -4257,56 +4257,8 @@ void main() {
         expect(updatedRead?.lastRead.isAtSameMomentAs(DateTime(2022)), isTrue);
       });
 
-      test('should update read state on notification mark read event',
-          () async {
-        // Create the current read state
-        final currentUser = User(id: 'test-user');
-        final currentRead = Read(
-          user: currentUser,
-          lastRead: DateTime(2020),
-          unreadMessages: 10,
-        );
-
-        // Setup initial read state
-        channel.state?.updateChannelState(
-          channel.state!.channelState.copyWith(
-            read: [currentRead],
-          ),
-        );
-
-        // Verify initial state
-        final read = channel.state?.read.first;
-        expect(read?.user.id, 'test-user');
-        expect(read?.unreadMessages, 10);
-        expect(read?.lastReadMessageId, isNull);
-        expect(read?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
-
-        // Create mark read notification event
-        final markReadEvent = Event(
-          cid: channel.cid,
-          type: EventType.notificationMarkRead,
-          user: currentUser,
-          createdAt: DateTime(2022),
-          unreadMessages: 0,
-          lastReadMessageId: 'message-123',
-        );
-
-        // Dispatch event
-        client.addEvent(markReadEvent);
-
-        // Wait for event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Verify read state is updated
-        final updatedRead = channel.state?.read.first;
-        expect(updatedRead?.user.id, 'test-user');
-        expect(updatedRead?.unreadMessages, 0);
-        expect(updatedRead?.lastReadMessageId, 'message-123');
-        expect(updatedRead?.lastRead.isAtSameMomentAs(DateTime(2022)), isTrue);
-      });
-
       test(
-        'should add a new read state if not exist on notification mark read',
+        'should add a new read state if not exist on message read event',
         () async {
           // Create the current read state
           final currentUser = User(id: 'test-user');
@@ -4318,7 +4270,7 @@ void main() {
           // Create mark read notification event
           final markReadEvent = Event(
             cid: channel.cid,
-            type: EventType.notificationMarkRead,
+            type: EventType.messageRead,
             user: currentUser,
             createdAt: DateTime(2022),
             unreadMessages: 0,

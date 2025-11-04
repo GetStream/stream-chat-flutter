@@ -339,7 +339,8 @@ enum AITypingState {
   generating,
 }
 
-extension ABC on Event {
+/// Helper extension methods for [Event].
+extension EventExtension on Event {
   /// Whether the event is from the given user.
   bool isFromUser({String? userId}) {
     if (userId == null) return false;

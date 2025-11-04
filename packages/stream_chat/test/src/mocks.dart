@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
@@ -96,6 +97,13 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
   @override
   bool get persistenceEnabled => false;
 
+  ChannelDeliveryReporter? _deliveryReporter;
+
+  @override
+  ChannelDeliveryReporter get channelDeliveryReporter {
+    return _deliveryReporter ??= MockChannelDeliveryReporter();
+  }
+
   @override
   Stream<Event> get eventStream => _eventController.stream;
   final _eventController = PublishSubject<Event>();
@@ -165,3 +173,24 @@ class MockRetryQueueChannel extends Mock implements Channel {
 }
 
 class MockWebSocket extends Mock implements WebSocket {}
+
+class MockChannelDeliveryReporter extends Mock
+    implements ChannelDeliveryReporter {
+  @override
+  Future<void> submitForDelivery(Iterable<Channel> channels) {
+    return Future.value();
+  }
+
+  @override
+  Future<void> reconcileDelivery(Iterable<Channel> channels) {
+    return Future.value();
+  }
+
+  @override
+  Future<void> cancelDelivery(Iterable<String> channels) {
+    return Future.value();
+  }
+
+  @override
+  void cancel() {}
+}

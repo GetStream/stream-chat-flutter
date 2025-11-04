@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
-import 'package:stream_chat/src/core/util/message_rules.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:synchronized/synchronized.dart';
@@ -2886,26 +2885,6 @@ class ChannelClientState {
 
       _client.channelDeliveryReporter.submitForDelivery([_channel]);
     }));
-  }
-
-  // Logic taken from the backend SDK
-  // https://github.com/GetStream/chat/blob/9245c2b3f7e679267d57ee510c60e93de051cb8e/types/channel.go#L1136-L1150
-  bool _shouldUpdateChannelLastMessageAt(Message message) {
-    if (message.isError) return false;
-    if (message.shadowed) return false;
-    if (message.isEphemeral) return false;
-
-    final config = channelState.channel?.config;
-    if (message.isSystem && config?.skipLastMsgUpdateForSystemMsgs == true) {
-      return false;
-    }
-
-    final currentUserId = _client.state.currentUser?.id;
-    if (currentUserId case final userId? when message.isNotVisibleTo(userId)) {
-      return false;
-    }
-
-    return true;
   }
 
   /// Updates the [read] in the state if it exists. Adds it otherwise.

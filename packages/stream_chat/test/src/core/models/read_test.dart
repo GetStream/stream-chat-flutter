@@ -12,6 +12,14 @@ void main() {
       expect(read.user.id, 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e');
       expect(read.unreadMessages, 10);
       expect(read.lastReadMessageId, '8cc1301d-2d47-4305-945a-cd8e19b736d6');
+      expect(
+        read.lastDeliveredAt,
+        DateTime.parse('2020-01-28T22:17:30.966485504Z'),
+      );
+      expect(
+        read.lastDeliveredMessageId,
+        '8cc1301d-2d47-4305-945a-cd8e19b736d6',
+      );
     });
 
     test('should serialize to json correctly', () {
@@ -20,6 +28,8 @@ void main() {
         user: User(id: 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e'),
         unreadMessages: 10,
         lastReadMessageId: '8cc1301d-2d47-4305-945a-cd8e19b736d6',
+        lastDeliveredAt: DateTime.parse('2020-01-28T22:17:30.966485504Z'),
+        lastDeliveredMessageId: '8cc1301d-2d47-4305-945a-cd8e19b736d6',
       );
 
       expect(read.toJson(), {
@@ -32,6 +42,8 @@ void main() {
         'last_read': '2020-01-28T22:17:30.966485Z',
         'unread_messages': 10,
         'last_read_message_id': '8cc1301d-2d47-4305-945a-cd8e19b736d6',
+        'last_delivered_at': '2020-01-28T22:17:30.966485Z',
+        'last_delivered_message_id': '8cc1301d-2d47-4305-945a-cd8e19b736d6',
       });
     });
 
@@ -51,6 +63,8 @@ void main() {
         lastRead: DateTime.parse('2021-01-28T22:17:30.966485504Z'),
         unreadMessages: 2,
         lastReadMessageId: 'last_test',
+        lastDeliveredAt: DateTime.parse('2021-01-28T22:17:30.966485504Z'),
+        lastDeliveredMessageId: 'last_delivered_test',
       );
 
       expect(
@@ -60,6 +74,10 @@ void main() {
       expect(newRead.user.id, 'test');
       expect(newRead.unreadMessages, 2);
       expect(newRead.lastReadMessageId, 'last_test');
+      expect(
+        newRead.lastDeliveredAt,
+        DateTime.parse('2021-01-28T22:17:30.966485504Z'),
+      );
     });
   });
 }

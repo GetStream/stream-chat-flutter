@@ -17,6 +17,7 @@ export 'package:rate_limiter/rate_limiter.dart';
 export 'package:uuid/uuid.dart';
 
 export 'src/client/channel.dart';
+export 'src/client/channel_delivery_reporter.dart';
 export 'src/client/client.dart';
 export 'src/client/key_stroke_handler.dart';
 export 'src/client/retry_policy.dart';
