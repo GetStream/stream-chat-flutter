@@ -303,7 +303,8 @@ void main() {
     });
 
     test(
-      'isTypingIndicatorsEnabled should return true when privacy settings exists but typing indicators is null',
+      'isTypingIndicatorsEnabled should return true when privacy settings '
+      'exists but typing indicators is null',
       () {
         final user = OwnUser(
           id: 'test-user',
@@ -345,7 +346,8 @@ void main() {
     });
 
     test(
-      'isReadReceiptsEnabled should return true when privacy settings exists but read receipts is null',
+      'isReadReceiptsEnabled should return true when privacy settings exists '
+      'but read receipts is null',
       () {
         final user = OwnUser(
           id: 'test-user',
