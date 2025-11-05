@@ -1641,6 +1641,14 @@ class Channel {
   /// read from a particular message onwards.
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
+
+    if (!canReceiveReadEvents) {
+      throw const StreamChatError(
+        'Cannot mark as read: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
@@ -1650,19 +1658,43 @@ class Channel {
   /// to be marked as unread.
   Future<EmptyResponse> markUnread(String messageId) async {
     _checkInitialized();
+
+    if (!canReceiveReadEvents) {
+      throw const StreamChatError(
+        'Cannot mark as unread: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
     return _client.markChannelUnread(id!, type, messageId);
   }
 
   /// Mark the thread with [threadId] in the channel as read.
-  Future<EmptyResponse> markThreadRead(String threadId) {
+  Future<EmptyResponse> markThreadRead(String threadId) async {
     _checkInitialized();
-    return client.markThreadRead(id!, type, threadId);
+
+    if (!canReceiveReadEvents) {
+      throw const StreamChatError(
+        'Cannot mark thread as read: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
+    return _client.markThreadRead(id!, type, threadId);
   }
 
   /// Mark the thread with [threadId] in the channel as unread.
-  Future<EmptyResponse> markThreadUnread(String threadId) {
+  Future<EmptyResponse> markThreadUnread(String threadId) async {
     _checkInitialized();
-    return client.markThreadUnread(id!, type, threadId);
+
+    if (!canReceiveReadEvents) {
+      throw const StreamChatError(
+        'Cannot mark thread as unread: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
+    return _client.markThreadUnread(id!, type, threadId);
   }
 
   void _initState(ChannelState channelState) {
@@ -2061,6 +2093,11 @@ class Channel {
           )
           .where((e) => e.cid == cid);
 
+  late final _keyStrokeHandler = KeyStrokeHandler(
+    onStartTyping: startTyping,
+    onStopTyping: stopTyping,
+  );
+
   // Whether sending typing events is allowed in the channel and by the user
   // privacy settings.
   bool get _canSendTypingEvents {
@@ -2069,11 +2106,6 @@ class Channel {
 
     return canUseTypingEvents && (typingIndicatorsEnabled ?? true);
   }
-
-  late final _keyStrokeHandler = KeyStrokeHandler(
-    onStartTyping: startTyping,
-    onStopTyping: stopTyping,
-  );
 
   /// Sends the [Event.typingStart] event and schedules a timer to invoke the
   /// [Event.typingStop] event.
@@ -3100,8 +3132,6 @@ class ChannelClientState {
   }
 
   void _listenReadEvents() {
-    if (!_channel.canReceiveReadEvents) return;
-
     _subscriptions
       ..add(
         _channel
@@ -3498,8 +3528,6 @@ class ChannelClientState {
   final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
 
   void _listenTypingEvents() {
-    if (!_channel.canUseTypingEvents) return;
-
     _subscriptions
       ..add(
         _channel.on(EventType.typingStart).listen(
