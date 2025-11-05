@@ -4,13 +4,13 @@ import 'package:json_annotation/json_annotation.dart';
 part 'privacy_settings.g.dart';
 
 /// The privacy settings of the current user.
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class PrivacySettings extends Equatable {
   /// Create a new instance of [PrivacySettings].
-  const PrivacySettings(
+  const PrivacySettings({
     this.typingIndicators,
     this.readReceipts,
-  );
+  });
 
   /// Create a new instance from json.
   factory PrivacySettings.fromJson(Map<String, dynamic> json) {
@@ -23,12 +23,15 @@ class PrivacySettings extends Equatable {
   /// The settings for the read receipt events.
   final ReadReceiptsPrivacySettings? readReceipts;
 
+  /// Serialize to json.
+  Map<String, dynamic> toJson() => _$PrivacySettingsToJson(this);
+
   @override
   List<Object?> get props => [typingIndicators, readReceipts];
 }
 
 /// The settings for typing indicator events.
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class TypingIndicatorPrivacySettings extends Equatable {
   /// Create a new instance of [TypingIndicatorPrivacySettings].
   const TypingIndicatorPrivacySettings({
@@ -43,12 +46,15 @@ class TypingIndicatorPrivacySettings extends Equatable {
   /// Whether the typing indicator events are enabled for the user.
   final bool enabled;
 
+  /// Serialize to json.
+  Map<String, dynamic> toJson() => _$TypingIndicatorPrivacySettingsToJson(this);
+
   @override
   List<Object?> get props => [enabled];
 }
 
 /// The settings for the read receipt events.
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class ReadReceiptsPrivacySettings extends Equatable {
   /// Create a new instance of [ReadReceiptsPrivacySettings].
   const ReadReceiptsPrivacySettings({
@@ -62,6 +68,9 @@ class ReadReceiptsPrivacySettings extends Equatable {
 
   /// Whether the read receipt events are enabled for the user.
   final bool enabled;
+
+  /// Serialize to json.
+  Map<String, dynamic> toJson() => _$ReadReceiptsPrivacySettingsToJson(this);
 
   @override
   List<Object?> get props => [enabled];

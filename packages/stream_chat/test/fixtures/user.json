@@ -10,9 +10,9 @@
   "banned": true,
   "online": true,
   "teams": ["team-1", "team-2"],
-  "created_at": "2021-08-03 12:39:21.817646",
-  "updated_at": "2021-08-04 12:39:21.817646",
-  "last_active" : "2021-08-05 12:39:21.817646",
+  "created_at": "2021-08-05T10:39:21.817646Z",
+  "updated_at": "2021-08-05T10:39:21.817646Z",
+  "last_active" : "2021-08-05T10:39:21.817646Z",
   "language": "en",
   "teams_role": {"team-1": "admin", "team-2": "member"},
   "avg_response_time": 120

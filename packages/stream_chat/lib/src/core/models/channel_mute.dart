@@ -5,7 +5,7 @@ import 'package:stream_chat/src/core/models/user.dart';
 part 'channel_mute.g.dart';
 
 /// The class that contains the information about a muted channel
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class ChannelMute {
   /// Constructor used for json serialization
   ChannelMute({
@@ -34,4 +34,7 @@ class ChannelMute {
 
   /// The date in which the mute expires
   final DateTime? expires;
+
+  /// Serialize to json
+  Map<String, dynamic> toJson() => _$ChannelMuteToJson(this);
 }

@@ -1,6 +1,4 @@
-import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/privacy_settings.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -9,7 +7,7 @@ part 'own_user.g.dart';
 /// The class that defines the own user model.
 ///
 /// This object can be found in [Event].
-@JsonSerializable(createToJson: false)
+@JsonSerializable(includeIfNull: false)
 class OwnUser extends User {
   /// Constructor used for json serialization.
   OwnUser({
@@ -45,52 +43,7 @@ class OwnUser extends User {
       );
 
   /// Create a new instance from [User] object.
-  factory OwnUser.fromUser(User user) {
-    final ownUser = OwnUser(
-      id: user.id,
-      role: user.role,
-      // Using extraData value in order to not use id as name.
-      name: user.extraData['name'] as String?,
-      image: user.image,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      lastActive: user.lastActive,
-      online: user.online,
-      banned: user.banned,
-      teams: user.teams,
-      language: user.language,
-      teamsRole: user.teamsRole,
-      avgResponseTime: user.avgResponseTime,
-    ).copyWith(
-      // The OwnUser specific fields are not directly available in the User
-      // object, so we need to extract them from extraData if they exist.
-      devices: user.extraData['devices'].safeCast(),
-      mutes: user.extraData['mutes'].safeCast(),
-      channelMutes: user.extraData['channel_mutes'].safeCast(),
-      totalUnreadCount: user.extraData['total_unread_count'].safeCast(),
-      unreadChannels: user.extraData['unread_channels'].safeCast(),
-      unreadThreads: user.extraData['unread_threads'].safeCast(),
-      blockedUserIds: user.extraData['blocked_user_ids'].safeCast(),
-      pushPreferences: user.extraData['push_preferences'].safeCast(),
-      privacySettings: user.extraData['privacy_settings'].safeCast(),
-    );
-
-    // Once we are done working with the extraData, we have to clean it up
-    // and remove the fields that are specific to OwnUser.
-
-    final ownUserSpecificFields = topLevelFields.whereNot(
-      User.topLevelFields.contains,
-    );
-
-    final sanitizedExtraData = {
-      for (final MapEntry(:key, :value) in user.extraData.entries)
-        if (!ownUserSpecificFields.contains(key)) key: value,
-      // Ensure that the OwnUser specific extraData fields are included.
-      ...ownUser.extraData,
-    };
-
-    return ownUser.copyWith(extraData: sanitizedExtraData);
-  }
+  factory OwnUser.fromUser(User user) => OwnUser.fromJson(user.toJson());
 
   /// Creates a copy of [OwnUser] with specified attributes overridden.
   @override
@@ -183,40 +136,37 @@ class OwnUser extends User {
   }
 
   /// List of user devices.
-  @JsonKey(includeIfNull: false)
   final List<Device> devices;
 
   /// List of users muted by the user.
-  @JsonKey(includeIfNull: false)
   final List<Mute> mutes;
 
   /// List of channels muted by the user.
-  @JsonKey(includeIfNull: false)
   final List<ChannelMute> channelMutes;
 
   /// Total unread messages by the user.
-  @JsonKey(includeIfNull: false)
   final int totalUnreadCount;
 
   /// Total unread channels by the user.
-  @JsonKey(includeIfNull: false)
   final int unreadChannels;
 
   /// Total unread threads by the user.
-  @JsonKey(includeIfNull: false)
   final int unreadThreads;
 
   /// List of user ids that are blocked by the user.
-  @JsonKey(includeIfNull: false)
   final List<String> blockedUserIds;
 
   /// Push preferences for the user if set.
-  @JsonKey(includeIfNull: false)
   final PushPreference? pushPreferences;
 
   /// Privacy settings for the user if set.
-  @JsonKey(includeIfNull: false)
   final PrivacySettings? privacySettings;
+
+  /// Convert instance to json.
+  @override
+  Map<String, dynamic> toJson() {
+    return Serializer.moveFromExtraDataToRoot(_$OwnUserToJson(this));
+  }
 
   /// Known top level fields.
   ///

@@ -15,3 +15,11 @@ Mute _$MuteFromJson(Map<String, dynamic> json) => Mute(
           ? null
           : DateTime.parse(json['expires'] as String),
     );
+
+Map<String, dynamic> _$MuteToJson(Mute instance) => <String, dynamic>{
+      'user': instance.user.toJson(),
+      'target': instance.target.toJson(),
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
+      'expires': instance.expires?.toIso8601String(),
+    };

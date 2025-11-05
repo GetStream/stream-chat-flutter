@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -194,6 +196,169 @@ void main() {
         final encodedOwnUser = ownUser.toJson();
         expect(encodedOwnUser['id'], 'test-id');
         expect(encodedOwnUser['name'], null);
+      },
+    );
+
+    test('should parse json with privacy settings correctly', () {
+      final json = {
+        'id': 'test-user',
+        'role': 'user',
+        'privacy_settings': {
+          'typing_indicators': {'enabled': false},
+          'read_receipts': {'enabled': false},
+        },
+      };
+
+      final ownUser = OwnUser.fromJson(json);
+
+      expect(ownUser.id, 'test-user');
+      expect(ownUser.privacySettings, isNotNull);
+      expect(ownUser.privacySettings?.typingIndicators?.enabled, false);
+      expect(ownUser.privacySettings?.readReceipts?.enabled, false);
+    });
+
+    test('copyWith should handle privacy settings', () {
+      final user = OwnUser(id: 'test-user');
+
+      expect(user.privacySettings, isNull);
+
+      final updatedUser = user.copyWith(
+        privacySettings: const PrivacySettings(
+          typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+          readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+        ),
+      );
+
+      expect(updatedUser.privacySettings, isNotNull);
+      expect(updatedUser.privacySettings?.typingIndicators?.enabled, false);
+      expect(updatedUser.privacySettings?.readReceipts?.enabled, false);
+    });
+
+    test('merge should handle privacy settings', () {
+      final user = OwnUser(id: 'test-user');
+
+      expect(user.privacySettings, isNull);
+
+      final updatedUser = user.merge(
+        OwnUser(
+          id: 'test-user',
+          privacySettings: const PrivacySettings(
+            typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+            readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+          ),
+        ),
+      );
+
+      expect(updatedUser.privacySettings, isNotNull);
+      expect(updatedUser.privacySettings?.typingIndicators?.enabled, false);
+      expect(updatedUser.privacySettings?.readReceipts?.enabled, false);
+    });
+
+    test('fromUser should extract privacy settings from extraData', () {
+      // Create user from JSON to properly deserialize privacy_settings
+      final userJson = {
+        'id': 'test-user',
+        'privacy_settings': {
+          'typing_indicators': {'enabled': false},
+          'read_receipts': {'enabled': true},
+        },
+      };
+
+      final user = User.fromJson(userJson);
+      final ownUser = OwnUser.fromUser(user);
+
+      final json = ownUser.toJson();
+
+      final newOwnUser = OwnUser.fromJson(json);
+
+      expect(ownUser.privacySettings, isNotNull);
+      expect(ownUser.privacySettings?.typingIndicators?.enabled, false);
+      expect(ownUser.privacySettings?.readReceipts?.enabled, true);
+    });
+  });
+
+  group('PrivacySettingsExtension', () {
+    test('isTypingIndicatorsEnabled should return true when null', () {
+      final user = OwnUser(id: 'test-user');
+
+      expect(user.isTypingIndicatorsEnabled, true);
+    });
+
+    test('isTypingIndicatorsEnabled should return true when enabled', () {
+      final user = OwnUser(
+        id: 'test-user',
+        privacySettings: const PrivacySettings(
+          typingIndicators: TypingIndicatorPrivacySettings(enabled: true),
+        ),
+      );
+
+      expect(user.isTypingIndicatorsEnabled, true);
+    });
+
+    test('isTypingIndicatorsEnabled should return false when disabled', () {
+      final user = OwnUser(
+        id: 'test-user',
+        privacySettings: const PrivacySettings(
+          typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+        ),
+      );
+
+      expect(user.isTypingIndicatorsEnabled, false);
+    });
+
+    test(
+      'isTypingIndicatorsEnabled should return true when privacy settings exists but typing indicators is null',
+      () {
+        final user = OwnUser(
+          id: 'test-user',
+          privacySettings: const PrivacySettings(
+            readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+          ),
+        );
+
+        expect(user.isTypingIndicatorsEnabled, true);
+      },
+    );
+
+    test('isReadReceiptsEnabled should return true when null', () {
+      final user = OwnUser(id: 'test-user');
+
+      expect(user.isReadReceiptsEnabled, true);
+    });
+
+    test('isReadReceiptsEnabled should return true when enabled', () {
+      final user = OwnUser(
+        id: 'test-user',
+        privacySettings: const PrivacySettings(
+          readReceipts: ReadReceiptsPrivacySettings(enabled: true),
+        ),
+      );
+
+      expect(user.isReadReceiptsEnabled, true);
+    });
+
+    test('isReadReceiptsEnabled should return false when disabled', () {
+      final user = OwnUser(
+        id: 'test-user',
+        privacySettings: const PrivacySettings(
+          readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+        ),
+      );
+
+      expect(user.isReadReceiptsEnabled, false);
+    });
+
+    test(
+      'isReadReceiptsEnabled should return true when privacy settings exists but read receipts is null',
+      () {
+        final user = OwnUser(
+          id: 'test-user',
+          privacySettings: const PrivacySettings(
+            typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+          ),
+        );
+
+        expect(user.isReadReceiptsEnabled, true);
       },
     );
   });

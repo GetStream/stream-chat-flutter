@@ -60,3 +60,35 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
       ),
       avgResponseTime: (json['avg_response_time'] as num?)?.toInt(),
     );
+
+Map<String, dynamic> _$OwnUserToJson(OwnUser instance) => <String, dynamic>{
+      'id': instance.id,
+      if (instance.role case final value?) 'role': value,
+      'teams': instance.teams,
+      if (instance.createdAt?.toIso8601String() case final value?)
+        'created_at': value,
+      if (instance.updatedAt?.toIso8601String() case final value?)
+        'updated_at': value,
+      if (instance.lastActive?.toIso8601String() case final value?)
+        'last_active': value,
+      'online': instance.online,
+      'banned': instance.banned,
+      if (instance.banExpires?.toIso8601String() case final value?)
+        'ban_expires': value,
+      if (instance.language case final value?) 'language': value,
+      if (instance.teamsRole case final value?) 'teams_role': value,
+      if (instance.avgResponseTime case final value?)
+        'avg_response_time': value,
+      'extra_data': instance.extraData,
+      'devices': instance.devices.map((e) => e.toJson()).toList(),
+      'mutes': instance.mutes.map((e) => e.toJson()).toList(),
+      'channel_mutes': instance.channelMutes.map((e) => e.toJson()).toList(),
+      'total_unread_count': instance.totalUnreadCount,
+      'unread_channels': instance.unreadChannels,
+      'unread_threads': instance.unreadThreads,
+      'blocked_user_ids': instance.blockedUserIds,
+      if (instance.pushPreferences?.toJson() case final value?)
+        'push_preferences': value,
+      if (instance.privacySettings?.toJson() case final value?)
+        'privacy_settings': value,
+    };

@@ -20,9 +20,9 @@ void main() {
   const teams = ['team-1', 'team-2'];
   const teamsRole = {'team-1': 'admin', 'team-2': 'member'};
   const avgResponseTime = 120;
-  const createdAtString = '2021-08-03 12:39:21.817646';
-  const updatedAtString = '2021-08-04 12:39:21.817646';
-  const lastActiveString = '2021-08-05 12:39:21.817646';
+  const createdAtString = '2021-08-03T10:39:21.817646Z';
+  const updatedAtString = '2021-08-04T10:39:21.817646Z';
+  const lastActiveString = '2021-08-05T10:39:21.817646Z';
 
   group('src/models/user', () {
     test('should parse json correctly', () {
@@ -72,6 +72,13 @@ void main() {
 
       expect(user.toJson(), {
         'id': id,
+        'role': role,
+        'teams': teams,
+        'created_at': createdAtString,
+        'updated_at': updatedAtString,
+        'last_active': lastActiveString,
+        'online': online,
+        'banned': banned,
         'name': name,
         'image': image,
         'extraDataStringTest': extraDataStringTest,
@@ -80,6 +87,7 @@ void main() {
         'extraDataBoolTest': extraDataBoolTest,
         'language': 'fr',
         'teams_role': teamsRole,
+        'avg_response_time': avgResponseTime,
       });
     });
 
@@ -138,8 +146,6 @@ void main() {
 
       expect(user.name, name);
       expect(user.extraData['name'], name);
-      expect(user.toJson(), {'id': id, 'name': name});
-      expect(User.fromJson(user.toJson()).toJson(), {'id': id, 'name': name});
 
       const nameOne = 'Name One';
       var newUser = user.copyWith(
@@ -172,8 +178,6 @@ void main() {
 
       expect(user.image, image);
       expect(user.extraData['image'], image);
-      expect(user.toJson(), {'id': id, 'image': image});
-      expect(User.fromJson(user.toJson()).toJson(), {'id': id, 'image': image});
 
       const imageURLOne = 'https://stream.io/image-one';
       var newUser = user.copyWith(
