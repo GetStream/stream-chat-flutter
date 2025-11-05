@@ -38,6 +38,7 @@ class ConnectUserDetails {
       name: user.name,
       image: user.image,
       language: user.language,
+      invisible: user.invisible,
       privacySettings: user.privacySettings,
       extraData: user.extraData,
     );

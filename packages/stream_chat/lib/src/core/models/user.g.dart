@@ -27,6 +27,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
           (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const [],
       language: json['language'] as String?,
+      invisible: json['invisible'] as bool?,
       teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
       ),
@@ -49,6 +50,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       if (instance.banExpires?.toIso8601String() case final value?)
         'ban_expires': value,
       if (instance.language case final value?) 'language': value,
+      if (instance.invisible case final value?) 'invisible': value,
       if (instance.teamsRole case final value?) 'teams_role': value,
       if (instance.avgResponseTime case final value?)
         'avg_response_time': value,

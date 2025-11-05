@@ -45,6 +45,7 @@ class User extends Equatable implements ComparableFieldProvider {
     this.banExpires,
     this.teams = const [],
     this.language,
+    this.invisible,
     this.teamsRole,
     this.avgResponseTime,
     Map<String, Object?> extraData = const {},
@@ -74,6 +75,7 @@ class User extends Equatable implements ComparableFieldProvider {
     'ban_expires',
     'teams',
     'language',
+    'invisible',
     'teams_role',
     'avg_response_time',
   ];
@@ -130,6 +132,9 @@ class User extends Equatable implements ComparableFieldProvider {
   /// The language this user prefers.
   final String? language;
 
+  /// Whether the user is sharing their online presence.
+  final bool? invisible;
+
   /// The roles for the user in the teams.
   ///
   /// eg: `{'teamId': 'role', 'teamId2': 'role2'}`
@@ -165,6 +170,7 @@ class User extends Equatable implements ComparableFieldProvider {
     DateTime? banExpires,
     List<String>? teams,
     String? language,
+    bool? invisible,
     Map<String, String>? teamsRole,
     int? avgResponseTime,
   }) =>
@@ -185,6 +191,7 @@ class User extends Equatable implements ComparableFieldProvider {
         banExpires: banExpires ?? this.banExpires,
         teams: teams ?? this.teams,
         language: language ?? this.language,
+        invisible: invisible ?? this.invisible,
         teamsRole: teamsRole ?? this.teamsRole,
         avgResponseTime: avgResponseTime ?? this.avgResponseTime,
       );
@@ -200,6 +207,7 @@ class User extends Equatable implements ComparableFieldProvider {
         banExpires,
         teams,
         language,
+        invisible,
         teamsRole,
         avgResponseTime,
       ];
