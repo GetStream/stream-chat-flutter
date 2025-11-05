@@ -3746,7 +3746,10 @@ extension ChannelCapabilityCheck on Channel {
 
   /// True, if the current user can send typing events.
   @Deprecated('Use canUseTypingEvents instead')
-  bool get canSendTypingEvents => canUseTypingEvents;
+  bool get canSendTypingEvents {
+    if (canUseTypingEvents) return true;
+    return ownCapabilities.contains(ChannelCapability.sendTypingEvents);
+  }
 
   /// True, if the current user can upload message attachments.
   bool get canUploadFile {

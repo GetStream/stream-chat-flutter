@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars, cascade_invocations
+// ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -5237,6 +5237,12 @@ void main() {
       'SearchMessages',
       ChannelCapability.searchMessages,
       (channel) => channel.canSearchMessages,
+    );
+
+    testCapability(
+      'SendTypingEvents',
+      ChannelCapability.sendTypingEvents,
+      (channel) => channel.canSendTypingEvents,
     );
 
     testCapability(
