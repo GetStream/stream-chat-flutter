@@ -267,10 +267,6 @@ void main() {
       final user = User.fromJson(userJson);
       final ownUser = OwnUser.fromUser(user);
 
-      final json = ownUser.toJson();
-
-      final newOwnUser = OwnUser.fromJson(json);
-
       expect(ownUser.privacySettings, isNotNull);
       expect(ownUser.privacySettings?.typingIndicators?.enabled, false);
       expect(ownUser.privacySettings?.readReceipts?.enabled, true);

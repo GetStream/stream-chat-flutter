@@ -43,6 +43,7 @@ void main() {
       expect(user.updatedAt, DateTime.parse(updatedAtString));
       expect(user.lastActive, DateTime.parse(lastActiveString));
       expect(user.language, 'en');
+      expect(user.invisible, false);
       expect(user.teamsRole, teamsRole);
       expect(user.avgResponseTime, avgResponseTime);
     });
@@ -66,6 +67,7 @@ void main() {
         online: banned,
         teams: const ['team-1', 'team-2'],
         language: 'fr',
+        invisible: true,
         teamsRole: teamsRole,
         avgResponseTime: avgResponseTime,
       );
@@ -86,6 +88,7 @@ void main() {
         'extraDataDoubleTest': extraDataDoubleTest,
         'extraDataBoolTest': extraDataBoolTest,
         'language': 'fr',
+        'invisible': true,
         'teams_role': teamsRole,
         'avg_response_time': avgResponseTime,
       });
@@ -106,6 +109,7 @@ void main() {
       expect(newUser.updatedAt, user.updatedAt);
       expect(newUser.lastActive, user.lastActive);
       expect(newUser.language, user.language);
+      expect(newUser.invisible, user.invisible);
       expect(newUser.teamsRole, user.teamsRole);
       expect(newUser.avgResponseTime, user.avgResponseTime);
 
@@ -121,6 +125,7 @@ void main() {
         updatedAt: DateTime.parse('2021-05-04 12:39:21.817646'),
         lastActive: DateTime.parse('2021-05-06 12:39:21.817646'),
         language: 'it',
+        invisible: true,
         teamsRole: {'new-team1': 'admin', 'new-team2': 'member'},
         avgResponseTime: 60,
       );
@@ -137,6 +142,7 @@ void main() {
       expect(newUser.updatedAt, DateTime.parse('2021-05-04 12:39:21.817646'));
       expect(newUser.lastActive, DateTime.parse('2021-05-06 12:39:21.817646'));
       expect(newUser.language, 'it');
+      expect(newUser.invisible, true);
       expect(newUser.teamsRole, {'new-team1': 'admin', 'new-team2': 'member'});
       expect(newUser.avgResponseTime, 60);
     });
