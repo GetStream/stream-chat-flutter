@@ -3570,8 +3570,6 @@ class ChannelClientState {
   // the sender due to technical difficulties. e.g. process death, loss of
   // Internet connection or custom implementation.
   void _startCleaningStaleTypingEvents() {
-    if (!_channel._canSendTypingEvents) return;
-
     _staleTypingEventsCleanerTimer = Timer.periodic(
       const Duration(seconds: 1),
       (_) {
