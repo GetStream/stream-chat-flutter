@@ -469,91 +469,93 @@ void main() {
     });
 
     test(
-        'fromUser should work with JSON round-trip (OwnUser -> JSON -> User -> OwnUser)',
-        () {
-      final originalOwnUser = OwnUser(
-        id: 'test-user',
-        name: 'Test User',
-        role: 'moderator',
-        image: 'https://example.com/profile.jpg',
-        extraData: const {
-          'title': 'Senior Developer',
-          'location': 'Amsterdam',
-          'is_verified': true,
-        },
-        devices: [
-          Device(
-            id: 'device-1',
-            pushProvider: 'firebase',
+      'fromUser should work with JSON round-trip '
+      '(OwnUser -> JSON -> User -> OwnUser)',
+      () {
+        final originalOwnUser = OwnUser(
+          id: 'test-user',
+          name: 'Test User',
+          role: 'moderator',
+          image: 'https://example.com/profile.jpg',
+          extraData: const {
+            'title': 'Senior Developer',
+            'location': 'Amsterdam',
+            'is_verified': true,
+          },
+          devices: [
+            Device(
+              id: 'device-1',
+              pushProvider: 'firebase',
+            ),
+            Device(
+              id: 'device-2',
+              pushProvider: 'apn',
+            ),
+          ],
+          totalUnreadCount: 25,
+          unreadChannels: 5,
+          unreadThreads: 3,
+          blockedUserIds: const ['blocked-1', 'blocked-2', 'blocked-3'],
+          pushPreferences: const PushPreference(
+            callLevel: CallLevel.none,
+            chatLevel: ChatLevel.all,
+            disabledUntil: null,
           ),
-          Device(
-            id: 'device-2',
-            pushProvider: 'apn',
+          privacySettings: const PrivacySettings(
+            typingIndicators: TypingIndicators(enabled: true),
+            readReceipts: ReadReceipts(enabled: false),
           ),
-        ],
-        totalUnreadCount: 25,
-        unreadChannels: 5,
-        unreadThreads: 3,
-        blockedUserIds: const ['blocked-1', 'blocked-2', 'blocked-3'],
-        pushPreferences: const PushPreference(
-          callLevel: CallLevel.none,
-          chatLevel: ChatLevel.all,
-          disabledUntil: null,
-        ),
-        privacySettings: const PrivacySettings(
-          typingIndicators: TypingIndicators(enabled: true),
-          readReceipts: ReadReceipts(enabled: false),
-        ),
-      );
+        );
 
-      // Step 1: OwnUser -> JSON
-      final json = originalOwnUser.toJson();
+        // Step 1: OwnUser -> JSON
+        final json = originalOwnUser.toJson();
 
-      // Step 2: JSON -> User
-      final user = User.fromJson(json);
+        // Step 2: JSON -> User
+        final user = User.fromJson(json);
 
-      // Step 3: User -> OwnUser
-      final reconstructedOwnUser = OwnUser.fromUser(user);
+        // Step 3: User -> OwnUser
+        final reconstructedOwnUser = OwnUser.fromUser(user);
 
-      // Verify all fields are preserved through the round-trip
-      expect(reconstructedOwnUser.id, originalOwnUser.id);
-      expect(reconstructedOwnUser.name, originalOwnUser.name);
-      expect(reconstructedOwnUser.role, originalOwnUser.role);
-      expect(reconstructedOwnUser.image, originalOwnUser.image);
+        // Verify all fields are preserved through the round-trip
+        expect(reconstructedOwnUser.id, originalOwnUser.id);
+        expect(reconstructedOwnUser.name, originalOwnUser.name);
+        expect(reconstructedOwnUser.role, originalOwnUser.role);
+        expect(reconstructedOwnUser.image, originalOwnUser.image);
 
-      // Verify extraData
-      expect(reconstructedOwnUser.extraData['title'], 'Senior Developer');
-      expect(reconstructedOwnUser.extraData['location'], 'Amsterdam');
-      expect(reconstructedOwnUser.extraData['is_verified'], true);
+        // Verify extraData
+        expect(reconstructedOwnUser.extraData['title'], 'Senior Developer');
+        expect(reconstructedOwnUser.extraData['location'], 'Amsterdam');
+        expect(reconstructedOwnUser.extraData['is_verified'], true);
 
-      // Verify OwnUser-specific fields
-      expect(reconstructedOwnUser.devices.length, 2);
-      expect(reconstructedOwnUser.devices[0].id, 'device-1');
-      expect(reconstructedOwnUser.devices[0].pushProvider, 'firebase');
-      expect(reconstructedOwnUser.devices[1].id, 'device-2');
-      expect(reconstructedOwnUser.devices[1].pushProvider, 'apn');
+        // Verify OwnUser-specific fields
+        expect(reconstructedOwnUser.devices.length, 2);
+        expect(reconstructedOwnUser.devices[0].id, 'device-1');
+        expect(reconstructedOwnUser.devices[0].pushProvider, 'firebase');
+        expect(reconstructedOwnUser.devices[1].id, 'device-2');
+        expect(reconstructedOwnUser.devices[1].pushProvider, 'apn');
 
-      expect(reconstructedOwnUser.totalUnreadCount, 25);
-      expect(reconstructedOwnUser.unreadChannels, 5);
-      expect(reconstructedOwnUser.unreadThreads, 3);
-      expect(reconstructedOwnUser.blockedUserIds.length, 3);
-      expect(reconstructedOwnUser.blockedUserIds, contains('blocked-1'));
-      expect(reconstructedOwnUser.blockedUserIds, contains('blocked-2'));
-      expect(reconstructedOwnUser.blockedUserIds, contains('blocked-3'));
+        expect(reconstructedOwnUser.totalUnreadCount, 25);
+        expect(reconstructedOwnUser.unreadChannels, 5);
+        expect(reconstructedOwnUser.unreadThreads, 3);
+        expect(reconstructedOwnUser.blockedUserIds.length, 3);
+        expect(reconstructedOwnUser.blockedUserIds, contains('blocked-1'));
+        expect(reconstructedOwnUser.blockedUserIds, contains('blocked-2'));
+        expect(reconstructedOwnUser.blockedUserIds, contains('blocked-3'));
 
-      // Verify push preferences
-      final pushPrefs = reconstructedOwnUser.pushPreferences;
-      expect(pushPrefs, isNotNull);
-      expect(pushPrefs?.callLevel, CallLevel.none);
-      expect(pushPrefs?.chatLevel, ChatLevel.all);
-      expect(pushPrefs?.disabledUntil, isNull);
+        // Verify push preferences
+        final pushPrefs = reconstructedOwnUser.pushPreferences;
+        expect(pushPrefs, isNotNull);
+        expect(pushPrefs?.callLevel, CallLevel.none);
+        expect(pushPrefs?.chatLevel, ChatLevel.all);
+        expect(pushPrefs?.disabledUntil, isNull);
 
-      // Verify privacy settings
-      final privacySettings = reconstructedOwnUser.privacySettings;
-      expect(privacySettings, isNotNull);
-      expect(privacySettings?.typingIndicators?.enabled, true);
-      expect(privacySettings?.readReceipts?.enabled, false);
-    });
+        // Verify privacy settings
+        final privacySettings = reconstructedOwnUser.privacySettings;
+        expect(privacySettings, isNotNull);
+        expect(privacySettings?.typingIndicators?.enabled, true);
+        expect(privacySettings?.readReceipts?.enabled, false);
+      },
+    );
   });
 
   group('PrivacySettingsExtension', () {
