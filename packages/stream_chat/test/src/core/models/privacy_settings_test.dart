@@ -42,18 +42,18 @@ void main() {
 
     test('equality should work correctly', () {
       const privacySettings1 = PrivacySettings(
-        typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
-        readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+        typingIndicators: TypingIndicators(enabled: false),
+        readReceipts: ReadReceipts(enabled: false),
       );
 
       const privacySettings2 = PrivacySettings(
-        typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
-        readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+        typingIndicators: TypingIndicators(enabled: false),
+        readReceipts: ReadReceipts(enabled: false),
       );
 
       const privacySettings3 = PrivacySettings(
-        typingIndicators: TypingIndicatorPrivacySettings(enabled: true),
-        readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+        typingIndicators: TypingIndicators(enabled: true),
+        readReceipts: ReadReceipts(enabled: false),
       );
 
       expect(privacySettings1, equals(privacySettings2));
@@ -63,14 +63,14 @@ void main() {
 
   group('TypingIndicatorPrivacySettings', () {
     test('should have enabled as true by default', () {
-      const settings = TypingIndicatorPrivacySettings();
+      const settings = TypingIndicators();
       expect(settings.enabled, true);
     });
 
     test('should parse json correctly', () {
       final json = {'enabled': false};
 
-      final settings = TypingIndicatorPrivacySettings.fromJson(json);
+      final settings = TypingIndicators.fromJson(json);
 
       expect(settings.enabled, false);
     });
@@ -78,15 +78,15 @@ void main() {
     test('should parse json with enabled as true', () {
       final json = {'enabled': true};
 
-      final settings = TypingIndicatorPrivacySettings.fromJson(json);
+      final settings = TypingIndicators.fromJson(json);
 
       expect(settings.enabled, true);
     });
 
     test('equality should work correctly', () {
-      const settings1 = TypingIndicatorPrivacySettings(enabled: true);
-      const settings2 = TypingIndicatorPrivacySettings(enabled: true);
-      const settings3 = TypingIndicatorPrivacySettings(enabled: false);
+      const settings1 = TypingIndicators(enabled: true);
+      const settings2 = TypingIndicators(enabled: true);
+      const settings3 = TypingIndicators(enabled: false);
 
       expect(settings1, equals(settings2));
       expect(settings1, isNot(equals(settings3)));
@@ -95,14 +95,14 @@ void main() {
 
   group('ReadReceiptsPrivacySettings', () {
     test('should have enabled as true by default', () {
-      const settings = ReadReceiptsPrivacySettings();
+      const settings = ReadReceipts();
       expect(settings.enabled, true);
     });
 
     test('should parse json correctly', () {
       final json = {'enabled': false};
 
-      final settings = ReadReceiptsPrivacySettings.fromJson(json);
+      final settings = ReadReceipts.fromJson(json);
 
       expect(settings.enabled, false);
     });
@@ -110,15 +110,15 @@ void main() {
     test('should parse json with enabled as true', () {
       final json = {'enabled': true};
 
-      final settings = ReadReceiptsPrivacySettings.fromJson(json);
+      final settings = ReadReceipts.fromJson(json);
 
       expect(settings.enabled, true);
     });
 
     test('equality should work correctly', () {
-      const settings1 = ReadReceiptsPrivacySettings(enabled: true);
-      const settings2 = ReadReceiptsPrivacySettings(enabled: true);
-      const settings3 = ReadReceiptsPrivacySettings(enabled: false);
+      const settings1 = ReadReceipts(enabled: true);
+      const settings2 = ReadReceipts(enabled: true);
+      const settings3 = ReadReceipts(enabled: false);
 
       expect(settings1, equals(settings2));
       expect(settings1, isNot(equals(settings3)));

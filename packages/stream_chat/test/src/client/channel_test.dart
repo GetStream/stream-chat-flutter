@@ -5758,7 +5758,7 @@ void main() {
         final currentUser = client.state.currentUser;
         final updatedUser = currentUser?.copyWith(
           privacySettings: const PrivacySettings(
-            typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+            typingIndicators: TypingIndicators(enabled: false),
           ),
         );
 
@@ -5871,7 +5871,7 @@ void main() {
         final currentUser = client.state.currentUser;
         final updatedUser = currentUser?.copyWith(
           privacySettings: const PrivacySettings(
-            typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+            typingIndicators: TypingIndicators(enabled: false),
           ),
         );
 
@@ -5961,7 +5961,7 @@ void main() {
         final currentUser = client.state.currentUser;
         final updatedUser = currentUser?.copyWith(
           privacySettings: const PrivacySettings(
-            typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+            typingIndicators: TypingIndicators(enabled: false),
           ),
         );
 

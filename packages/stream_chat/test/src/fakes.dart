@@ -161,8 +161,8 @@ class FakeClientState extends Fake implements ClientState {
       id: 'test-user-id',
       name: 'Test User',
       privacySettings: const PrivacySettings(
-        typingIndicators: TypingIndicatorPrivacySettings(),
-        readReceipts: ReadReceiptsPrivacySettings(),
+        typingIndicators: TypingIndicators(),
+        readReceipts: ReadReceipts(),
       ),
     );
   }

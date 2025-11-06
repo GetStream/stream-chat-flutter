@@ -224,8 +224,8 @@ void main() {
 
       final updatedUser = user.copyWith(
         privacySettings: const PrivacySettings(
-          typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
-          readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+          typingIndicators: TypingIndicators(enabled: false),
+          readReceipts: ReadReceipts(enabled: false),
         ),
       );
 
@@ -243,8 +243,8 @@ void main() {
         OwnUser(
           id: 'test-user',
           privacySettings: const PrivacySettings(
-            typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
-            readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+            typingIndicators: TypingIndicators(enabled: false),
+            readReceipts: ReadReceipts(enabled: false),
           ),
         ),
       );
@@ -438,8 +438,8 @@ void main() {
           chatLevel: ChatLevel.mentions,
         ),
         privacySettings: const PrivacySettings(
-          typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
-          readReceipts: ReadReceiptsPrivacySettings(enabled: true),
+          typingIndicators: TypingIndicators(enabled: false),
+          readReceipts: ReadReceipts(enabled: true),
         ),
       );
 
@@ -501,8 +501,8 @@ void main() {
           disabledUntil: null,
         ),
         privacySettings: const PrivacySettings(
-          typingIndicators: TypingIndicatorPrivacySettings(enabled: true),
-          readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+          typingIndicators: TypingIndicators(enabled: true),
+          readReceipts: ReadReceipts(enabled: false),
         ),
       );
 
@@ -567,7 +567,7 @@ void main() {
       final user = OwnUser(
         id: 'test-user',
         privacySettings: const PrivacySettings(
-          typingIndicators: TypingIndicatorPrivacySettings(enabled: true),
+          typingIndicators: TypingIndicators(enabled: true),
         ),
       );
 
@@ -578,7 +578,7 @@ void main() {
       final user = OwnUser(
         id: 'test-user',
         privacySettings: const PrivacySettings(
-          typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+          typingIndicators: TypingIndicators(enabled: false),
         ),
       );
 
@@ -592,7 +592,7 @@ void main() {
         final user = OwnUser(
           id: 'test-user',
           privacySettings: const PrivacySettings(
-            readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+            readReceipts: ReadReceipts(enabled: false),
           ),
         );
 
@@ -610,7 +610,7 @@ void main() {
       final user = OwnUser(
         id: 'test-user',
         privacySettings: const PrivacySettings(
-          readReceipts: ReadReceiptsPrivacySettings(enabled: true),
+          readReceipts: ReadReceipts(enabled: true),
         ),
       );
 
@@ -621,7 +621,7 @@ void main() {
       final user = OwnUser(
         id: 'test-user',
         privacySettings: const PrivacySettings(
-          readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+          readReceipts: ReadReceipts(enabled: false),
         ),
       );
 
@@ -635,7 +635,7 @@ void main() {
         final user = OwnUser(
           id: 'test-user',
           privacySettings: const PrivacySettings(
-            typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+            typingIndicators: TypingIndicators(enabled: false),
           ),
         );
 

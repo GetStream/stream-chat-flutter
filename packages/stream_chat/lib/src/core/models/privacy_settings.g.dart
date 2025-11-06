@@ -10,11 +10,11 @@ PrivacySettings _$PrivacySettingsFromJson(Map<String, dynamic> json) =>
     PrivacySettings(
       typingIndicators: json['typing_indicators'] == null
           ? null
-          : TypingIndicatorPrivacySettings.fromJson(
+          : TypingIndicators.fromJson(
               json['typing_indicators'] as Map<String, dynamic>),
       readReceipts: json['read_receipts'] == null
           ? null
-          : ReadReceiptsPrivacySettings.fromJson(
+          : ReadReceipts.fromJson(
               json['read_receipts'] as Map<String, dynamic>),
     );
 
@@ -26,26 +26,21 @@ Map<String, dynamic> _$PrivacySettingsToJson(PrivacySettings instance) =>
         'read_receipts': value,
     };
 
-TypingIndicatorPrivacySettings _$TypingIndicatorPrivacySettingsFromJson(
-        Map<String, dynamic> json) =>
-    TypingIndicatorPrivacySettings(
+TypingIndicators _$TypingIndicatorsFromJson(Map<String, dynamic> json) =>
+    TypingIndicators(
       enabled: json['enabled'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$TypingIndicatorPrivacySettingsToJson(
-        TypingIndicatorPrivacySettings instance) =>
+Map<String, dynamic> _$TypingIndicatorsToJson(TypingIndicators instance) =>
     <String, dynamic>{
       'enabled': instance.enabled,
     };
 
-ReadReceiptsPrivacySettings _$ReadReceiptsPrivacySettingsFromJson(
-        Map<String, dynamic> json) =>
-    ReadReceiptsPrivacySettings(
+ReadReceipts _$ReadReceiptsFromJson(Map<String, dynamic> json) => ReadReceipts(
       enabled: json['enabled'] as bool? ?? true,
     );
 
-Map<String, dynamic> _$ReadReceiptsPrivacySettingsToJson(
-        ReadReceiptsPrivacySettings instance) =>
+Map<String, dynamic> _$ReadReceiptsToJson(ReadReceipts instance) =>
     <String, dynamic>{
       'enabled': instance.enabled,
     };

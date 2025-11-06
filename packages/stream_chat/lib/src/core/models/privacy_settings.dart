@@ -18,10 +18,10 @@ class PrivacySettings extends Equatable {
   }
 
   /// The settings for typing indicator events.
-  final TypingIndicatorPrivacySettings? typingIndicators;
+  final TypingIndicators? typingIndicators;
 
   /// The settings for the read receipt events.
-  final ReadReceiptsPrivacySettings? readReceipts;
+  final ReadReceipts? readReceipts;
 
   /// Serialize to json.
   Map<String, dynamic> toJson() => _$PrivacySettingsToJson(this);
@@ -32,22 +32,24 @@ class PrivacySettings extends Equatable {
 
 /// The settings for typing indicator events.
 @JsonSerializable(includeIfNull: false)
-class TypingIndicatorPrivacySettings extends Equatable {
-  /// Create a new instance of [TypingIndicatorPrivacySettings].
-  const TypingIndicatorPrivacySettings({
+class TypingIndicators extends Equatable {
+  /// Create a new instance of [TypingIndicators].
+  const TypingIndicators({
     this.enabled = true,
   });
 
   /// Create a new instance from json.
-  factory TypingIndicatorPrivacySettings.fromJson(Map<String, dynamic> json) {
-    return _$TypingIndicatorPrivacySettingsFromJson(json);
+  factory TypingIndicators.fromJson(Map<String, dynamic> json) {
+    return _$TypingIndicatorsFromJson(json);
   }
 
   /// Whether the typing indicator events are enabled for the user.
+  ///
+  /// If False, the user typing events will not be sent to other users.
   final bool enabled;
 
   /// Serialize to json.
-  Map<String, dynamic> toJson() => _$TypingIndicatorPrivacySettingsToJson(this);
+  Map<String, dynamic> toJson() => _$TypingIndicatorsToJson(this);
 
   @override
   List<Object?> get props => [enabled];
@@ -55,22 +57,25 @@ class TypingIndicatorPrivacySettings extends Equatable {
 
 /// The settings for the read receipt events.
 @JsonSerializable(includeIfNull: false)
-class ReadReceiptsPrivacySettings extends Equatable {
-  /// Create a new instance of [ReadReceiptsPrivacySettings].
-  const ReadReceiptsPrivacySettings({
+class ReadReceipts extends Equatable {
+  /// Create a new instance of [ReadReceipts].
+  const ReadReceipts({
     this.enabled = true,
   });
 
   /// Create a new instance from json.
-  factory ReadReceiptsPrivacySettings.fromJson(Map<String, dynamic> json) {
-    return _$ReadReceiptsPrivacySettingsFromJson(json);
+  factory ReadReceipts.fromJson(Map<String, dynamic> json) {
+    return _$ReadReceiptsFromJson(json);
   }
 
   /// Whether the read receipt events are enabled for the user.
+  ///
+  /// If False, the user read events will not be sent to other users, along
+  /// with the user's read state.
   final bool enabled;
 
   /// Serialize to json.
-  Map<String, dynamic> toJson() => _$ReadReceiptsPrivacySettingsToJson(this);
+  Map<String, dynamic> toJson() => _$ReadReceiptsToJson(this);
 
   @override
   List<Object?> get props => [enabled];
