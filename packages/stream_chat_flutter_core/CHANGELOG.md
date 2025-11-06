@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed race condition where `connectUser` could be blocked when connectivity monitoring triggers
+  during initial connection. [[#2409]](https://github.com/GetStream/stream-chat-flutter/issues/2409)
+
 ## 9.19.0
 
 - Updated `stream_chat` dependency to [`9.19.0`](https://pub.dev/packages/stream_chat/changelog).
