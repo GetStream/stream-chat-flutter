@@ -149,15 +149,47 @@ class FakeChatApi extends Fake implements StreamChatApi {
 }
 
 class FakeClientState extends Fake implements ClientState {
+  FakeClientState({
+    OwnUser? currentUser,
+  }) : _currentUser = currentUser;
+
+  OwnUser? _currentUser;
+
   @override
-  OwnUser? get currentUser => OwnUser(id: 'test-user-id', name: 'Test User');
+  OwnUser? get currentUser {
+    return _currentUser ??= OwnUser(
+      id: 'test-user-id',
+      name: 'Test User',
+      privacySettings: const PrivacySettings(
+        typingIndicators: TypingIndicators(),
+        readReceipts: ReadReceipts(),
+      ),
+    );
+  }
+
+  @override
+  void updateUser(User? user) {
+    if (user == null) return;
+    if (_currentUser case final current? when user.id != current.id) return;
+
+    _currentUser = OwnUser.fromUser(user);
+  }
 
   @override
   int totalUnreadCount = 0;
 
   @override
+  Map<String, Channel> get channels => _channels;
+  final _channels = <String, Channel>{};
+
+  @override
+  void addChannels(Map<String, Channel> channelMap) {
+    _channels.addAll(channelMap);
+  }
+
+  @override
   void removeChannel(String channelCid) {
-    return;
+    _channels.remove(channelCid);
   }
 }
 

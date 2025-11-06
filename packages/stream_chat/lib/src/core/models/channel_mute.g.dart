@@ -15,3 +15,12 @@ ChannelMute _$ChannelMuteFromJson(Map<String, dynamic> json) => ChannelMute(
           ? null
           : DateTime.parse(json['expires'] as String),
     );
+
+Map<String, dynamic> _$ChannelMuteToJson(ChannelMute instance) =>
+    <String, dynamic>{
+      'user': instance.user.toJson(),
+      'channel': instance.channel.toJson(),
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
+      'expires': instance.expires?.toIso8601String(),
+    };

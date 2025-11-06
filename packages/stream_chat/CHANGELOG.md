@@ -1,3 +1,20 @@
+## Upcoming
+
+✅ Added
+
+- Added support for user-level privacy settings via `OwnUser.privacySettings`.
+- Added `invisible` field to `User` and `OwnUser` models.
+
+⚠️ Deprecated
+
+- Deprecated `Channel.canSendTypingEvents` in favor of `Channel.canUseTypingEvents`.
+
+🔄 Changed
+
+- Typing and read receipts now respect both channel capabilities and user privacy settings.
+- `markRead`, `markUnread`, `markThreadRead`, and `markThreadUnread` methods now throw
+  `StreamChatError` when channel lacks required capabilities.
+
 ## 9.19.0
 
 - Minor bug fixes and improvements

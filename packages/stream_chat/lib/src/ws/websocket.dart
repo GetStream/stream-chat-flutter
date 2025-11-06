@@ -9,9 +9,10 @@ import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/ws/connect_user_details.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/ws/timer_helper.dart';
 import 'package:web_socket_channel/status.dart' as status;
@@ -99,7 +100,7 @@ class WebSocket with TimerHelper {
   /// Default is 6 attempts. ~30 seconds of reconnection attempts
   final int maxReconnectAttempts;
 
-  User? _user;
+  OwnUser? _user;
   String? _connectionId;
   DateTime? _lastEventAt;
   WebSocketChannel? _webSocketChannel;
@@ -169,11 +170,11 @@ class WebSocket with TimerHelper {
     bool refreshToken = false,
     bool includeUserDetails = true,
   }) async {
-    final user = _user!;
+    final userDetails = ConnectUserDetails.fromOwnUser(_user!);
     final token = await tokenManager.loadToken(refresh: refreshToken);
     final params = {
-      'user_id': user.id,
-      'user_details': includeUserDetails ? user : {'id': user.id},
+      'user_id': userDetails.id,
+      'user_details': includeUserDetails ? userDetails : {'id': userDetails.id},
       'user_token': token.rawValue,
       'server_determines_connection_id': true,
     };
@@ -216,7 +217,7 @@ class WebSocket with TimerHelper {
 
   /// Connect the WS using the parameters passed in the constructor
   Future<Event> connect(
-    User user, {
+    OwnUser user, {
     bool includeUserDetails = false,
   }) {
     if (_connectRequestInProgress) {

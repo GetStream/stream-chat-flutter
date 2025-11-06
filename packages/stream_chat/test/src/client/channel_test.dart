@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars, cascade_invocations
+// ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -209,6 +209,7 @@ void main() {
         channelId,
         channelType,
         mockChannelConfig: true,
+        ownCapabilities: [ChannelCapability.readEvents],
       );
       channel = Channel.fromState(client, channelState);
     });
@@ -2796,20 +2797,6 @@ void main() {
       });
     });
 
-    test('`.markRead`', () async {
-      const messageId = 'test-message-id';
-
-      when(() => client.markChannelRead(channelId, channelType,
-          messageId: messageId)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.markRead(messageId: messageId);
-
-      expect(res, isNotNull);
-
-      verify(() => client.markChannelRead(channelId, channelType,
-          messageId: messageId)).called(1);
-    });
-
     group('`.watch`', () {
       test('should work fine', () async {
         when(() => client.queryChannel(
@@ -3474,97 +3461,6 @@ void main() {
       return expectLater(channel.on(eventType), emitsInOrder([event]));
     });
 
-    group(
-      '`.keyStroke`',
-      () {
-        test('should return if `config.typingEvents` is false', () async {
-          when(() => channel.config?.typingEvents).thenReturn(false);
-
-          final typingEvent = Event(type: EventType.typingStart);
-
-          await channel.keyStroke();
-
-          verifyNever(() => client.sendEvent(
-                channelId,
-                channelType,
-                any(that: isSameEventAs(typingEvent)),
-              ));
-        });
-
-        test(
-          '''should send `typingStart` event if there is not already a typingEvent or the difference between the two is > 3 seconds''',
-          () async {
-            final startTypingEvent = Event(type: EventType.typingStart);
-            final stopTypingEvent = Event(type: EventType.typingStop);
-
-            when(() => channel.config?.typingEvents).thenReturn(true);
-
-            when(() => client.sendEvent(
-                  channelId,
-                  channelType,
-                  any(that: isSameEventAs(startTypingEvent)),
-                )).thenAnswer((_) async => EmptyResponse());
-            when(() => client.sendEvent(
-                  channelId,
-                  channelType,
-                  any(that: isSameEventAs(stopTypingEvent)),
-                )).thenAnswer((_) async => EmptyResponse());
-
-            await channel.keyStroke();
-
-            verify(() => client.sendEvent(
-                  channelId,
-                  channelType,
-                  any(that: isSameEventAs(startTypingEvent)),
-                )).called(1);
-            verify(() => client.sendEvent(
-                  channelId,
-                  channelType,
-                  any(that: isSameEventAs(stopTypingEvent)),
-                )).called(1);
-          },
-        );
-      },
-    );
-
-    group('`.stopTyping`', () {
-      test('should return if `config.typingEvents` is false', () async {
-        when(() => channel.config?.typingEvents).thenReturn(false);
-
-        final typingStopEvent = Event(type: EventType.typingStop);
-
-        await channel.stopTyping();
-
-        verifyNever(() => client.sendEvent(
-              channelId,
-              channelType,
-              any(that: isSameEventAs(typingStopEvent)),
-            ));
-      });
-
-      test('should send `typingStop` successfully', () async {
-        final typingStopEvent = Event(type: EventType.typingStop);
-
-        when(() => channel.config?.typingEvents).thenReturn(true);
-
-        when(() => client.sendEvent(
-              channelId,
-              channelType,
-              any(that: isSameEventAs(typingStopEvent)),
-            )).thenAnswer((_) async => EmptyResponse());
-
-        await channel.stopTyping();
-
-        verify(() => client.sendEvent(
-              channelId,
-              channelType,
-              any(that: isSameEventAs(typingStopEvent)),
-            )).called(1);
-      });
-    });
-
-    // This test verifies that stale error messages (error messages without bounce moderation)
-    // are automatically cleaned up when we send a new message.
     group('stale error message cleanup', () {
       final channelState = _generateChannelState(channelId, channelType);
 
@@ -5797,5 +5693,576 @@ void main() {
         },
       );
     });
+  });
+
+  group('Typing Indicator', () {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    late final client = MockStreamChatClient();
+
+    setUpAll(() {
+      // Fallback values
+      registerFallbackValue(FakeMessage());
+      registerFallbackValue(FakeAttachmentFile());
+      registerFallbackValue(FakeEvent());
+
+      // detached loggers
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+
+      final retryPolicy = RetryPolicy(
+        shouldRetry: (_, __, ___) => false,
+        delayFactor: Duration.zero,
+      );
+      when(() => client.retryPolicy).thenReturn(retryPolicy);
+
+      // fake clientState
+      final clientState = FakeClientState();
+      when(() => client.state).thenReturn(clientState);
+
+      // client logger
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+    });
+
+    test(
+      ".keystore should return if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no typingEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final typingEvent = Event(type: EventType.typingStart);
+
+        await expectLater(channel.keyStroke(), completes);
+
+        verifyNever(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(typingEvent)),
+          ),
+        );
+      },
+    );
+
+    test(
+      '.keystore should return when user privacy settings is disabled',
+      () async {
+        final currentUser = client.state.currentUser;
+        final updatedUser = currentUser?.copyWith(
+          privacySettings: const PrivacySettings(
+            typingIndicators: TypingIndicators(enabled: false),
+          ),
+        );
+
+        client.state.updateUser(updatedUser);
+        addTearDown(() => client.state.updateUser(currentUser));
+
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.typingEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final typingEvent = Event(type: EventType.typingStart);
+
+        await expectLater(channel.keyStroke(), completes);
+
+        verifyNever(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(typingEvent)),
+          ),
+        );
+      },
+    );
+
+    test(
+      ".keystore should send 'typingStart' event if there is not already a typingEvent or the difference between the two is > 3 seconds",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.typingEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final startTypingEvent = Event(type: EventType.typingStart);
+        final stopTypingEvent = Event(type: EventType.typingStop);
+
+        when(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(startTypingEvent)),
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        when(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(stopTypingEvent)),
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(channel.keyStroke(), completes);
+
+        verify(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(startTypingEvent)),
+          ),
+        ).called(1);
+
+        verify(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(stopTypingEvent)),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      ".startTyping should return if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no typingEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final typingStartEvent = Event(type: EventType.typingStart);
+
+        await expectLater(channel.startTyping(), completes);
+
+        verifyNever(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(typingStartEvent)),
+          ),
+        );
+      },
+    );
+
+    test(
+      '.startTyping should return when user privacy settings is disabled',
+      () async {
+        final currentUser = client.state.currentUser;
+        final updatedUser = currentUser?.copyWith(
+          privacySettings: const PrivacySettings(
+            typingIndicators: TypingIndicators(enabled: false),
+          ),
+        );
+
+        client.state.updateUser(updatedUser);
+        addTearDown(() => client.state.updateUser(currentUser));
+
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.typingEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final typingStartEvent = Event(type: EventType.typingStart);
+
+        await expectLater(channel.startTyping(), completes);
+
+        verifyNever(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(typingStartEvent)),
+          ),
+        );
+      },
+    );
+
+    test(".startTyping should send 'typingStart' successfully", () async {
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final typingStartEvent = Event(type: EventType.typingStart);
+
+      when(
+        () => client.sendEvent(
+          channelId,
+          channelType,
+          any(that: isSameEventAs(typingStartEvent)),
+        ),
+      ).thenAnswer((_) async => EmptyResponse());
+
+      await expectLater(channel.startTyping(), completes);
+
+      verify(
+        () => client.sendEvent(
+          channelId,
+          channelType,
+          any(that: isSameEventAs(typingStartEvent)),
+        ),
+      ).called(1);
+    });
+
+    test(".stopTyping should return if we don't have the capability", () async {
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [], // no typingEvents capability
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final typingStopEvent = Event(type: EventType.typingStop);
+
+      await expectLater(channel.stopTyping(), completes);
+
+      verifyNever(
+        () => client.sendEvent(
+          channelId,
+          channelType,
+          any(that: isSameEventAs(typingStopEvent)),
+        ),
+      );
+    });
+
+    test(
+      '.stopTyping should return when user privacy settings is disabled',
+      () async {
+        final currentUser = client.state.currentUser;
+        final updatedUser = currentUser?.copyWith(
+          privacySettings: const PrivacySettings(
+            typingIndicators: TypingIndicators(enabled: false),
+          ),
+        );
+
+        client.state.updateUser(updatedUser);
+        addTearDown(() => client.state.updateUser(currentUser));
+
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.typingEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final typingStopEvent = Event(type: EventType.typingStop);
+
+        await expectLater(channel.stopTyping(), completes);
+
+        verifyNever(
+          () => client.sendEvent(
+            channelId,
+            channelType,
+            any(that: isSameEventAs(typingStopEvent)),
+          ),
+        );
+      },
+    );
+
+    test(".stopTyping should send 'typingStop' successfully", () async {
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final typingStopEvent = Event(type: EventType.typingStop);
+
+      when(
+        () => client.sendEvent(
+          channelId,
+          channelType,
+          any(that: isSameEventAs(typingStopEvent)),
+        ),
+      ).thenAnswer((_) async => EmptyResponse());
+
+      await expectLater(channel.stopTyping(), completes);
+
+      verify(
+        () => client.sendEvent(
+          channelId,
+          channelType,
+          any(that: isSameEventAs(typingStopEvent)),
+        ),
+      ).called(1);
+    });
+  });
+
+  group('Read Receipts', () {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    late final client = MockStreamChatClient();
+
+    setUpAll(() {
+      // detached loggers
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+
+      final retryPolicy = RetryPolicy(
+        shouldRetry: (_, __, ___) => false,
+        delayFactor: Duration.zero,
+      );
+      when(() => client.retryPolicy).thenReturn(retryPolicy);
+
+      // fake clientState
+      final clientState = FakeClientState();
+      when(() => client.state).thenReturn(clientState);
+
+      // client logger
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+    });
+
+    test(
+      ".markRead should throw if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no readEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        await expectLater(
+          channel.markRead(messageId: 'message-id-123'),
+          throwsA(isA<StreamChatError>()),
+        );
+      },
+    );
+
+    test(
+      '.markRead should succeed if we have the capability',
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.readEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        when(
+          () => client.markChannelRead(
+            channelId,
+            channelType,
+            messageId: 'message-id-123',
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(
+          channel.markRead(messageId: 'message-id-123'),
+          completes,
+        );
+
+        verify(
+          () => client.markChannelRead(
+            channelId,
+            channelType,
+            messageId: 'message-id-123',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      ".markUnread should throw if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no readEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        await expectLater(
+          channel.markUnread('message-id-123'),
+          throwsA(isA<StreamChatError>()),
+        );
+      },
+    );
+
+    test(
+      '.markUnread should succeed if we have the capability',
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.readEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        when(
+          () => client.markChannelUnread(
+            channelId,
+            channelType,
+            'message-id-123',
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(
+          channel.markUnread('message-id-123'),
+          completes,
+        );
+
+        verify(
+          () => client.markChannelUnread(
+            channelId,
+            channelType,
+            'message-id-123',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      ".markThreadRead should throw if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no readEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        await expectLater(
+          channel.markThreadRead('thread-id-123'),
+          throwsA(isA<StreamChatError>()),
+        );
+      },
+    );
+
+    test(
+      '.markThreadRead should succeed if we have the capability',
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.readEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        when(
+          () => client.markThreadRead(
+            channelId,
+            channelType,
+            'thread-id-123',
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(
+          channel.markThreadRead('thread-id-123'),
+          completes,
+        );
+
+        verify(
+          () => client.markThreadRead(
+            channelId,
+            channelType,
+            'thread-id-123',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      ".markThreadUnread should throw if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no readEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        await expectLater(
+          channel.markThreadUnread('thread-id-123'),
+          throwsA(isA<StreamChatError>()),
+        );
+      },
+    );
+
+    test(
+      '.markThreadUnread should succeed if we have the capability',
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.readEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        when(
+          () => client.markThreadUnread(
+            channelId,
+            channelType,
+            'thread-id-123',
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(
+          channel.markThreadUnread('thread-id-123'),
+          completes,
+        );
+
+        verify(
+          () => client.markThreadUnread(
+            channelId,
+            channelType,
+            'thread-id-123',
+          ),
+        ).called(1);
+      },
+    );
   });
 }

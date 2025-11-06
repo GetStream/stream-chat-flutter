@@ -54,6 +54,7 @@ export 'src/core/models/poll.dart';
 export 'src/core/models/poll_option.dart';
 export 'src/core/models/poll_vote.dart';
 export 'src/core/models/poll_voting_mode.dart';
+export 'src/core/models/privacy_settings.dart';
 export 'src/core/models/push_preference.dart';
 export 'src/core/models/reaction.dart';
 export 'src/core/models/reaction_group.dart';

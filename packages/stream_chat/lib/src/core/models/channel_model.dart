@@ -320,6 +320,7 @@ extension type const ChannelCapability(String capability) implements String {
   static const searchMessages = ChannelCapability('search-messages');
 
   /// Ability to send typing events.
+  @Deprecated('Use typingEvents instead')
   static const sendTypingEvents = ChannelCapability('send-typing-events');
 
   /// Ability to upload message attachments.

@@ -1230,7 +1230,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       if (channel == null) return;
 
       final value = _effectiveController.text.trim();
-      if (value.isNotEmpty && channel.canSendTypingEvents) {
+      if (value.isNotEmpty && channel.canUseTypingEvents) {
         // Notify the server that the user started typing.
         channel.keyStroke(_effectiveController.message.parentId).onError(
           (error, stackTrace) {

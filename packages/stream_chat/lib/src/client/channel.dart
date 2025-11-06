@@ -1641,6 +1641,14 @@ class Channel {
   /// read from a particular message onwards.
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
+
+    if (!canReceiveReadEvents) {
+      throw const StreamChatError(
+        'Cannot mark as read: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
@@ -1650,19 +1658,43 @@ class Channel {
   /// to be marked as unread.
   Future<EmptyResponse> markUnread(String messageId) async {
     _checkInitialized();
+
+    if (!canReceiveReadEvents) {
+      throw const StreamChatError(
+        'Cannot mark as unread: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
     return _client.markChannelUnread(id!, type, messageId);
   }
 
   /// Mark the thread with [threadId] in the channel as read.
-  Future<EmptyResponse> markThreadRead(String threadId) {
+  Future<EmptyResponse> markThreadRead(String threadId) async {
     _checkInitialized();
-    return client.markThreadRead(id!, type, threadId);
+
+    if (!canReceiveReadEvents) {
+      throw const StreamChatError(
+        'Cannot mark thread as read: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
+    return _client.markThreadRead(id!, type, threadId);
   }
 
   /// Mark the thread with [threadId] in the channel as unread.
-  Future<EmptyResponse> markThreadUnread(String threadId) {
+  Future<EmptyResponse> markThreadUnread(String threadId) async {
     _checkInitialized();
-    return client.markThreadUnread(id!, type, threadId);
+
+    if (!canReceiveReadEvents) {
+      throw const StreamChatError(
+        'Cannot mark thread as unread: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
+    return _client.markThreadUnread(id!, type, threadId);
   }
 
   void _initState(ChannelState channelState) {
@@ -2066,12 +2098,21 @@ class Channel {
     onStopTyping: stopTyping,
   );
 
+  // Whether sending typing events is allowed in the channel and by the user
+  // privacy settings.
+  bool get _canSendTypingEvents {
+    final currentUser = client.state.currentUser;
+    final typingIndicatorsEnabled = currentUser?.isTypingIndicatorsEnabled;
+
+    return canUseTypingEvents && (typingIndicatorsEnabled ?? true);
+  }
+
   /// Sends the [Event.typingStart] event and schedules a timer to invoke the
   /// [Event.typingStop] event.
   ///
   /// This is meant to be called every time the user presses a key.
   Future<void> keyStroke([String? parentId]) async {
-    if (config?.typingEvents == false) return;
+    if (!_canSendTypingEvents) return;
 
     client.logger.info('KeyStroke received');
     return _keyStrokeHandler(parentId);
@@ -2079,7 +2120,7 @@ class Channel {
 
   /// Sends the [EventType.typingStart] event.
   Future<void> startTyping([String? parentId]) async {
-    if (config?.typingEvents == false) return;
+    if (!_canSendTypingEvents) return;
 
     client.logger.info('start typing');
     await sendEvent(Event(
@@ -2090,7 +2131,7 @@ class Channel {
 
   /// Sends the [EventType.typingStop] event.
   Future<void> stopTyping([String? parentId]) async {
-    if (config?.typingEvents == false) return;
+    if (!_canSendTypingEvents) return;
 
     client.logger.info('stop typing');
     await sendEvent(Event(
@@ -3091,8 +3132,6 @@ class ChannelClientState {
   }
 
   void _listenReadEvents() {
-    if (_channelState.channel?.config.readEvents == false) return;
-
     _subscriptions
       ..add(
         _channel
@@ -3489,17 +3528,17 @@ class ChannelClientState {
   final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
 
   void _listenTypingEvents() {
-    if (_channelState.channel?.config.typingEvents == false) return;
-
-    final currentUser = _channel.client.state.currentUser;
-    if (currentUser == null) return;
-
     _subscriptions
       ..add(
         _channel.on(EventType.typingStart).listen(
           (event) {
             final user = event.user;
-            if (user != null && user.id != currentUser.id) {
+            if (user == null) return;
+
+            final currentUser = _channel.client.state.currentUser;
+            if (currentUser == null) return;
+
+            if (user.id != currentUser.id) {
               final events = {...typingEvents};
               events[user] = event;
               _typingEventsController.safeAdd(events);
@@ -3511,7 +3550,12 @@ class ChannelClientState {
         _channel.on(EventType.typingStop).listen(
           (event) {
             final user = event.user;
-            if (user != null && user.id != currentUser.id) {
+            if (user == null) return;
+
+            final currentUser = _channel.client.state.currentUser;
+            if (currentUser == null) return;
+
+            if (user.id != currentUser.id) {
               final events = {...typingEvents}..remove(user);
               _typingEventsController.safeAdd(events);
             }
@@ -3526,8 +3570,6 @@ class ChannelClientState {
   // the sender due to technical difficulties. e.g. process death, loss of
   // Internet connection or custom implementation.
   void _startCleaningStaleTypingEvents() {
-    if (_channelState.channel?.config.typingEvents == false) return;
-
     _staleTypingEventsCleanerTimer = Timer.periodic(
       const Duration(seconds: 1),
       (_) {
@@ -3703,7 +3745,9 @@ extension ChannelCapabilityCheck on Channel {
   }
 
   /// True, if the current user can send typing events.
+  @Deprecated('Use canUseTypingEvents instead')
   bool get canSendTypingEvents {
+    if (canUseTypingEvents) return true;
     return ownCapabilities.contains(ChannelCapability.sendTypingEvents);
   }
 
