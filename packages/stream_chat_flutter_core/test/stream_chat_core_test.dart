@@ -327,5 +327,51 @@ void main() {
         verifyNever(mockClient.closeConnection);
       },
     );
+
+    testWidgets(
+      'should skip initial connectivity event to avoid race with connectUser',
+      (tester) async {
+        // Create a connectivity stream that will emit immediately on subscription
+        final testConnectivityController = BehaviorSubject.seeded(
+          [ConnectivityResult.mobile],
+        );
+
+        // Set up for reconnection scenario
+        when(
+          () => mockClient.wsConnectionStatus,
+        ).thenReturn(ConnectionStatus.disconnected);
+
+        // Clear any previous calls
+        clearInteractions(mockClient);
+
+        // Arrange - pump widget with connectivity stream
+        // The BehaviorSubject will emit [mobile] immediately on subscription
+        // which should be skipped by skip(1)
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChatCore(
+              client: mockClient,
+              connectivityStream: testConnectivityController.stream,
+              child: const SizedBox(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Assert - the initial event from BehaviorSubject should be skipped
+        verifyNever(mockClient.closeConnection);
+        verifyNever(mockClient.openConnection);
+
+        // Now emit a connectivity change (this is the 2nd event, won't be skipped)
+        testConnectivityController.add([ConnectivityResult.wifi]);
+        await tester.pumpAndSettle();
+
+        // Assert - second event should trigger reconnection
+        verify(mockClient.closeConnection).called(1);
+        verify(mockClient.openConnection).called(1);
+
+        testConnectivityController.close();
+      },
+    );
   });
 }
