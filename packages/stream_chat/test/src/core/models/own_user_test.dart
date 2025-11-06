@@ -271,6 +271,289 @@ void main() {
       expect(ownUser.privacySettings?.typingIndicators?.enabled, false);
       expect(ownUser.privacySettings?.readReceipts?.enabled, true);
     });
+
+    test('fromUser should extract push preferences from extraData', () {
+      final userJson = {
+        'id': 'test-user',
+        'push_preferences': {
+          'call_level': 'all',
+          'chat_level': 'mentions',
+          'disabled_until': '2025-12-31T00:00:00.000Z',
+        },
+      };
+
+      final user = User.fromJson(userJson);
+      final ownUser = OwnUser.fromUser(user);
+
+      expect(ownUser.pushPreferences, isNotNull);
+      expect(ownUser.pushPreferences?.callLevel, CallLevel.all);
+      expect(ownUser.pushPreferences?.chatLevel, ChatLevel.mentions);
+      expect(ownUser.pushPreferences?.disabledUntil, isNotNull);
+    });
+
+    test('fromUser should extract devices from extraData', () {
+      final userJson = {
+        'id': 'test-user',
+        'devices': [
+          {
+            'id': 'device-1',
+            'push_provider': 'firebase',
+            'created_at': '2023-01-01T00:00:00.000Z',
+          },
+        ],
+      };
+
+      final user = User.fromJson(userJson);
+      final ownUser = OwnUser.fromUser(user);
+
+      expect(ownUser.devices, hasLength(1));
+      expect(ownUser.devices.first.id, 'device-1');
+      expect(ownUser.devices.first.pushProvider, 'firebase');
+    });
+
+    test('fromUser should extract mutes from extraData', () {
+      final userJson = {
+        'id': 'test-user',
+        'mutes': [
+          {
+            'user': {
+              'id': 'test-user',
+            },
+            'target': {
+              'id': 'muted-user',
+            },
+            'created_at': '2023-01-01T00:00:00.000Z',
+            'updated_at': '2023-01-01T00:00:00.000Z',
+          },
+        ],
+      };
+
+      final user = User.fromJson(userJson);
+      final ownUser = OwnUser.fromUser(user);
+
+      expect(ownUser.mutes, hasLength(1));
+      expect(ownUser.mutes.first.user.id, 'test-user');
+      expect(ownUser.mutes.first.target.id, 'muted-user');
+    });
+
+    test('fromUser should extract channel mutes from extraData', () {
+      final userJson = {
+        'id': 'test-user',
+        'channel_mutes': [
+          {
+            'user': {
+              'id': 'test-user',
+            },
+            'channel': {
+              'cid': 'messaging:test-channel',
+            },
+            'created_at': '2023-01-01T00:00:00.000Z',
+            'updated_at': '2023-01-01T00:00:00.000Z',
+          },
+        ],
+      };
+
+      final user = User.fromJson(userJson);
+      final ownUser = OwnUser.fromUser(user);
+
+      expect(ownUser.channelMutes, hasLength(1));
+      expect(ownUser.channelMutes.first.user.id, 'test-user');
+      expect(ownUser.channelMutes.first.channel.cid, 'messaging:test-channel');
+    });
+
+    test('fromUser should extract unread counts from extraData', () {
+      final userJson = {
+        'id': 'test-user',
+        'total_unread_count': 42,
+        'unread_channels': 5,
+        'unread_threads': 3,
+      };
+
+      final user = User.fromJson(userJson);
+      final ownUser = OwnUser.fromUser(user);
+
+      expect(ownUser.totalUnreadCount, 42);
+      expect(ownUser.unreadChannels, 5);
+      expect(ownUser.unreadThreads, 3);
+    });
+
+    test('fromUser should extract blocked user ids from extraData', () {
+      final userJson = {
+        'id': 'test-user',
+        'blocked_user_ids': ['blocked-1', 'blocked-2', 'blocked-3'],
+      };
+
+      final user = User.fromJson(userJson);
+      final ownUser = OwnUser.fromUser(user);
+
+      expect(ownUser.blockedUserIds, hasLength(3));
+      expect(ownUser.blockedUserIds, contains('blocked-1'));
+      expect(ownUser.blockedUserIds, contains('blocked-2'));
+      expect(ownUser.blockedUserIds, contains('blocked-3'));
+    });
+
+    test('fromUser should handle missing OwnUser-specific fields', () {
+      final userJson = {
+        'id': 'test-user',
+        'name': 'Test User',
+      };
+
+      final user = User.fromJson(userJson);
+      final ownUser = OwnUser.fromUser(user);
+
+      expect(ownUser.devices, isEmpty);
+      expect(ownUser.mutes, isEmpty);
+      expect(ownUser.channelMutes, isEmpty);
+      expect(ownUser.totalUnreadCount, 0);
+      expect(ownUser.unreadChannels, 0);
+      expect(ownUser.unreadThreads, 0);
+      expect(ownUser.blockedUserIds, isEmpty);
+      expect(ownUser.pushPreferences, isNull);
+      expect(ownUser.privacySettings, isNull);
+    });
+
+    test('fromUser should work with OwnUser as input', () {
+      final originalOwnUser = OwnUser(
+        id: 'test-user',
+        name: 'Test User',
+        role: 'admin',
+        image: 'https://example.com/avatar.png',
+        extraData: const {
+          'company': 'Stream',
+          'department': 'Engineering',
+          'custom_field': 'custom_value',
+        },
+        devices: [
+          Device(
+            id: 'device-1',
+            pushProvider: 'firebase',
+          ),
+        ],
+        totalUnreadCount: 10,
+        unreadChannels: 2,
+        unreadThreads: 1,
+        blockedUserIds: const ['blocked-1', 'blocked-2'],
+        pushPreferences: const PushPreference(
+          callLevel: CallLevel.all,
+          chatLevel: ChatLevel.mentions,
+        ),
+        privacySettings: const PrivacySettings(
+          typingIndicators: TypingIndicatorPrivacySettings(enabled: false),
+          readReceipts: ReadReceiptsPrivacySettings(enabled: true),
+        ),
+      );
+
+      final convertedOwnUser = OwnUser.fromUser(originalOwnUser);
+
+      // Verify all fields are preserved
+      expect(convertedOwnUser.id, originalOwnUser.id);
+      expect(convertedOwnUser.name, originalOwnUser.name);
+      expect(convertedOwnUser.role, originalOwnUser.role);
+      expect(convertedOwnUser.image, originalOwnUser.image);
+      expect(convertedOwnUser.extraData['company'], 'Stream');
+      expect(convertedOwnUser.extraData['department'], 'Engineering');
+      expect(convertedOwnUser.extraData['custom_field'], 'custom_value');
+      expect(convertedOwnUser.devices.length, 1);
+      expect(convertedOwnUser.devices.first.id, 'device-1');
+      expect(convertedOwnUser.devices.first.pushProvider, 'firebase');
+      expect(convertedOwnUser.totalUnreadCount, 10);
+      expect(convertedOwnUser.unreadChannels, 2);
+      expect(convertedOwnUser.unreadThreads, 1);
+      expect(convertedOwnUser.blockedUserIds, ['blocked-1', 'blocked-2']);
+      final pushPreferences = convertedOwnUser.pushPreferences;
+      expect(pushPreferences?.callLevel, CallLevel.all);
+      expect(pushPreferences?.chatLevel, ChatLevel.mentions);
+      final privacySettings = convertedOwnUser.privacySettings;
+      expect(privacySettings?.typingIndicators?.enabled, false);
+      expect(privacySettings?.readReceipts?.enabled, true);
+    });
+
+    test(
+        'fromUser should work with JSON round-trip (OwnUser -> JSON -> User -> OwnUser)',
+        () {
+      final originalOwnUser = OwnUser(
+        id: 'test-user',
+        name: 'Test User',
+        role: 'moderator',
+        image: 'https://example.com/profile.jpg',
+        extraData: const {
+          'title': 'Senior Developer',
+          'location': 'Amsterdam',
+          'is_verified': true,
+        },
+        devices: [
+          Device(
+            id: 'device-1',
+            pushProvider: 'firebase',
+          ),
+          Device(
+            id: 'device-2',
+            pushProvider: 'apn',
+          ),
+        ],
+        totalUnreadCount: 25,
+        unreadChannels: 5,
+        unreadThreads: 3,
+        blockedUserIds: const ['blocked-1', 'blocked-2', 'blocked-3'],
+        pushPreferences: const PushPreference(
+          callLevel: CallLevel.none,
+          chatLevel: ChatLevel.all,
+          disabledUntil: null,
+        ),
+        privacySettings: const PrivacySettings(
+          typingIndicators: TypingIndicatorPrivacySettings(enabled: true),
+          readReceipts: ReadReceiptsPrivacySettings(enabled: false),
+        ),
+      );
+
+      // Step 1: OwnUser -> JSON
+      final json = originalOwnUser.toJson();
+
+      // Step 2: JSON -> User
+      final user = User.fromJson(json);
+
+      // Step 3: User -> OwnUser
+      final reconstructedOwnUser = OwnUser.fromUser(user);
+
+      // Verify all fields are preserved through the round-trip
+      expect(reconstructedOwnUser.id, originalOwnUser.id);
+      expect(reconstructedOwnUser.name, originalOwnUser.name);
+      expect(reconstructedOwnUser.role, originalOwnUser.role);
+      expect(reconstructedOwnUser.image, originalOwnUser.image);
+
+      // Verify extraData
+      expect(reconstructedOwnUser.extraData['title'], 'Senior Developer');
+      expect(reconstructedOwnUser.extraData['location'], 'Amsterdam');
+      expect(reconstructedOwnUser.extraData['is_verified'], true);
+
+      // Verify OwnUser-specific fields
+      expect(reconstructedOwnUser.devices.length, 2);
+      expect(reconstructedOwnUser.devices[0].id, 'device-1');
+      expect(reconstructedOwnUser.devices[0].pushProvider, 'firebase');
+      expect(reconstructedOwnUser.devices[1].id, 'device-2');
+      expect(reconstructedOwnUser.devices[1].pushProvider, 'apn');
+
+      expect(reconstructedOwnUser.totalUnreadCount, 25);
+      expect(reconstructedOwnUser.unreadChannels, 5);
+      expect(reconstructedOwnUser.unreadThreads, 3);
+      expect(reconstructedOwnUser.blockedUserIds.length, 3);
+      expect(reconstructedOwnUser.blockedUserIds, contains('blocked-1'));
+      expect(reconstructedOwnUser.blockedUserIds, contains('blocked-2'));
+      expect(reconstructedOwnUser.blockedUserIds, contains('blocked-3'));
+
+      // Verify push preferences
+      final pushPrefs = reconstructedOwnUser.pushPreferences;
+      expect(pushPrefs, isNotNull);
+      expect(pushPrefs?.callLevel, CallLevel.none);
+      expect(pushPrefs?.chatLevel, ChatLevel.all);
+      expect(pushPrefs?.disabledUntil, isNull);
+
+      // Verify privacy settings
+      final privacySettings = reconstructedOwnUser.privacySettings;
+      expect(privacySettings, isNotNull);
+      expect(privacySettings?.typingIndicators?.enabled, true);
+      expect(privacySettings?.readReceipts?.enabled, false);
+    });
   });
 
   group('PrivacySettingsExtension', () {
