@@ -20,12 +20,13 @@ jobs:
         with: 
           scopes: |
             llc
-            persistence
-            core
             ui
-            doc
-            repo
+            core
             localization
+            persistence
+            ci
+            deps
+            repo
             samples
           requireScope: true
         env:
