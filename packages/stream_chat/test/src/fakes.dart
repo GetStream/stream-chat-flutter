@@ -170,7 +170,7 @@ class FakeClientState extends Fake implements ClientState {
   @override
   void updateUser(User? user) {
     if (user == null) return;
-    if (user.id != _currentUser?.id) return;
+    if (_currentUser case final current? when user.id != current.id) return;
 
     _currentUser = OwnUser.fromUser(user);
   }

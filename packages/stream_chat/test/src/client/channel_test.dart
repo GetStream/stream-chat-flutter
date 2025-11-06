@@ -6169,8 +6169,8 @@ void main() {
         final channel = Channel.fromState(client, channelState);
         addTearDown(channel.dispose);
 
-        expect(
-          () => channel.markThreadRead('thread-id-123'),
+        await expectLater(
+          channel.markThreadRead('thread-id-123'),
           throwsA(isA<StreamChatError>()),
         );
       },
@@ -6223,8 +6223,8 @@ void main() {
         final channel = Channel.fromState(client, channelState);
         addTearDown(channel.dispose);
 
-        expect(
-          () => channel.markThreadUnread('thread-id-123'),
+        await expectLater(
+          channel.markThreadUnread('thread-id-123'),
           throwsA(isA<StreamChatError>()),
         );
       },
