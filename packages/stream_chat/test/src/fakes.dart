@@ -178,13 +178,6 @@ class FakeClientState extends Fake implements ClientState {
   @override
   int totalUnreadCount = 0;
 
-  final _channels = <String, Channel>{};
-
-  @override
-  void addChannels(Map<String, Channel> channelMap) {
-    _channels.addAll(channelMap);
-  }
-
   @override
   Map<String, Channel> get channels => _channels;
   final _channels = <String, Channel>{};

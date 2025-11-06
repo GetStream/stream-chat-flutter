@@ -206,4 +206,12 @@ extension PrivacySettingsExtension on OwnUser {
 
     return readIndicators.enabled;
   }
+
+  /// Whether delivery receipts are enabled for the user.
+  bool get isDeliveryReceiptsEnabled {
+    final deliveryIndicators = privacySettings?.deliveryReceipts;
+    if (deliveryIndicators == null) return true;
+
+    return deliveryIndicators.enabled;
+  }
 }

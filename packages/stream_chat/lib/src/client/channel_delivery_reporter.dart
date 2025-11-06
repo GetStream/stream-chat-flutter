@@ -2,7 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/message_delivery_info.dart';
+import 'package:stream_chat/src/core/models/message_delivery.dart';
 import 'package:stream_chat/src/core/util/message_rules.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -11,7 +11,7 @@ import 'package:synchronized/synchronized.dart';
 /// Each [MessageDeliveryInfo] represents an acknowledgment that the current
 /// user has received a message.
 typedef MarkChannelsDelivered = Future<void> Function(
-  Iterable<MessageDeliveryInfo> messages,
+  Iterable<MessageDelivery> deliveries,
 );
 
 /// Manages the delivery reporting for channel messages.
@@ -154,23 +154,23 @@ class ChannelDeliveryReporter {
   Future<void> _markCandidatesAsDelivered() async {
     // We only process at-most 100 channels at a time to avoid large payloads.
     final batch = {..._deliveryCandidates}.entries.take(_maxCandidatesPerBatch);
-    final messageInfoPayload = batch.map(
-      (it) => MessageDeliveryInfo(channelCid: it.key, messageId: it.value.id),
+    final messageDeliveries = batch.map(
+      (it) => MessageDelivery(channelCid: it.key, messageId: it.value.id),
     );
 
-    if (messageInfoPayload.isEmpty) return;
+    if (messageDeliveries.isEmpty) return;
 
-    _logger?.info('Marking ${messageInfoPayload.length} channels as delivered');
+    _logger?.info('Marking ${messageDeliveries.length} channels as delivered');
 
     try {
-      await onMarkChannelsDelivered(messageInfoPayload);
+      await onMarkChannelsDelivered(messageDeliveries);
 
       // Clear the successfully delivered candidates. If a channel's message ID
       // has changed since we started delivery, keep it for the next batch.
       await _deliveryCandidatesLock.synchronized(() {
-        for (final messageInfo in messageInfoPayload) {
-          final deliveredChannelCid = messageInfo.channelCid;
-          final deliveredMessageId = messageInfo.messageId;
+        for (final delivery in messageDeliveries) {
+          final deliveredChannelCid = delivery.channelCid;
+          final deliveredMessageId = delivery.messageId;
 
           final currentMessage = _deliveryCandidates[deliveredChannelCid];
           // Skip removal if a newer message has been added while we were

@@ -1631,7 +1631,7 @@ class Channel {
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
 
-    if (!canReceiveReadEvents) {
+    if (!canUseReadReceipts) {
       throw const StreamChatError(
         'Cannot mark as read: Channel does not support read events. '
         'Enable read_events in your channel type configuration.',
@@ -1648,7 +1648,7 @@ class Channel {
   Future<EmptyResponse> markUnread(String messageId) async {
     _checkInitialized();
 
-    if (!canReceiveReadEvents) {
+    if (!canUseReadReceipts) {
       throw const StreamChatError(
         'Cannot mark as unread: Channel does not support read events. '
         'Enable read_events in your channel type configuration.',
@@ -1662,7 +1662,7 @@ class Channel {
   Future<EmptyResponse> markThreadRead(String threadId) async {
     _checkInitialized();
 
-    if (!canReceiveReadEvents) {
+    if (!canUseReadReceipts) {
       throw const StreamChatError(
         'Cannot mark thread as read: Channel does not support read events. '
         'Enable read_events in your channel type configuration.',
@@ -1676,7 +1676,7 @@ class Channel {
   Future<EmptyResponse> markThreadUnread(String threadId) async {
     _checkInitialized();
 
-    if (!canReceiveReadEvents) {
+    if (!canUseReadReceipts) {
       throw const StreamChatError(
         'Cannot mark thread as unread: Channel does not support read events. '
         'Enable read_events in your channel type configuration.',
@@ -2092,9 +2092,9 @@ class Channel {
   // privacy settings.
   bool get _canSendTypingEvents {
     final currentUser = client.state.currentUser;
-    final typingIndicatorsEnabled = currentUser?.isTypingIndicatorsEnabled;
+    if (currentUser == null) return false;
 
-    return canUseTypingEvents && (typingIndicatorsEnabled ?? true);
+    return canUseTypingEvents && currentUser.isTypingIndicatorsEnabled;
   }
 
   /// Sends the [Event.typingStart] event and schedules a timer to invoke the
@@ -3501,14 +3501,11 @@ class ChannelClientState {
             final user = event.user;
             if (user == null) return;
 
-            final currentUser = _channel.client.state.currentUser;
-            if (currentUser == null) return;
+            final currentUser = _client.state.currentUser;
+            if (event.isFromUser(userId: currentUser?.id)) return;
 
-            if (user.id != currentUser.id) {
-              final events = {...typingEvents};
-              events[user] = event;
-              _typingEventsController.safeAdd(events);
-            }
+            final events = {...typingEvents, user: event};
+            _typingEventsController.safeAdd(events);
           },
         ),
       )
@@ -3518,13 +3515,11 @@ class ChannelClientState {
             final user = event.user;
             if (user == null) return;
 
-            final currentUser = _channel.client.state.currentUser;
-            if (currentUser == null) return;
+            final currentUser = _client.state.currentUser;
+            if (event.isFromUser(userId: currentUser?.id)) return;
 
-            if (user.id != currentUser.id) {
-              final events = {...typingEvents}..remove(user);
-              _typingEventsController.safeAdd(events);
-            }
+            final events = {...typingEvents}..remove(user);
+            _typingEventsController.safeAdd(events);
           },
         ),
       );
@@ -3819,7 +3814,11 @@ extension ChannelCapabilityCheck on Channel {
   }
 
   /// True, if the current user has read events capability.
-  bool get canReceiveReadEvents {
+  @Deprecated('Use canUseReadReceipts instead')
+  bool get canReceiveReadEvents => canUseReadReceipts;
+
+  /// True, if the current user has read events capability.
+  bool get canUseReadReceipts {
     return ownCapabilities.contains(ChannelCapability.readEvents);
   }
 
@@ -3857,5 +3856,10 @@ extension ChannelCapabilityCheck on Channel {
   /// True, if the current user can query poll votes.
   bool get canQueryPollVotes {
     return ownCapabilities.contains(ChannelCapability.queryPollVotes);
+  }
+
+  /// True, if the current user has delivery events capability.
+  bool get canUseDeliveryReceipts {
+    return ownCapabilities.contains(ChannelCapability.deliveryEvents);
   }
 }

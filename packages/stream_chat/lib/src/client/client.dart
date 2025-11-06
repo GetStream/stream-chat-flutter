@@ -28,7 +28,7 @@ import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/message_delivery_info.dart';
+import 'package:stream_chat/src/core/models/message_delivery.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -1692,9 +1692,9 @@ class StreamChatClient {
   ///
   /// Accepts up to 100 channels per call.
   Future<EmptyResponse> markChannelsDelivered(
-    Iterable<MessageDeliveryInfo> messages,
+    Iterable<MessageDelivery> deliveries,
   ) {
-    return _chatApi.channel.markChannelsDelivered(messages);
+    return _chatApi.channel.markChannelsDelivered([...deliveries]);
   }
 
   /// Send an event to a particular channel

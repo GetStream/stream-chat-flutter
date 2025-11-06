@@ -1,15 +1,15 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'message_delivery_info.g.dart';
+part 'message_delivery.g.dart';
 
 /// A delivery receipt for a message in a channel.
 ///
 /// Used to acknowledge that the current user has received a message,
 /// notifying the sender that their message was delivered.
 @JsonSerializable(createFactory: false)
-class MessageDeliveryInfo {
+class MessageDelivery {
   /// Creates a delivery receipt for a message.
-  const MessageDeliveryInfo({
+  const MessageDelivery({
     required this.channelCid,
     required this.messageId,
   });
@@ -22,6 +22,6 @@ class MessageDeliveryInfo {
   @JsonKey(name: 'id')
   final String messageId;
 
-  /// Converts this [MessageDeliveryInfo] to JSON.
-  Map<String, dynamic> toJson() => _$MessageDeliveryInfoToJson(this);
+  /// Converts this [MessageDelivery] to JSON.
+  Map<String, dynamic> toJson() => _$MessageDeliveryToJson(this);
 }

@@ -1,5 +1,6 @@
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/own_user.dart';
 
 /// Provides validation rules for message operations.
 ///
@@ -62,8 +63,15 @@ class MessageRules {
     Message message,
     Channel channel,
   ) {
-    // Don't count if the channel doesn't support read events.
-    if (!channel.canReceiveReadEvents) return false;
+    // Don't count if the current user is not set.
+    final currentUser = channel.client.state.currentUser;
+    if (currentUser == null) return false;
+
+    // Don't count if the user has disabled read receipts.
+    if (!currentUser.isReadReceiptsEnabled) return false;
+
+    // Don't count if the channel doesn't support read receipts.
+    if (!channel.canUseReadReceipts) return false;
 
     // Don't count if the channel is muted.
     if (channel.isMuted) return false;
@@ -81,10 +89,6 @@ class MessageRules {
     // Don't count if the message doesn't have a sender.
     final messageUser = message.user;
     if (messageUser == null) return false;
-
-    // Don't count if the current user is not set.
-    final currentUser = channel.client.state.currentUser;
-    if (currentUser == null) return false;
 
     // Don't count the current user's own messages.
     if (messageUser.id == currentUser.id) return false;
@@ -128,6 +132,19 @@ class MessageRules {
     Message message,
     Channel channel,
   ) {
+    // Don't deliver receipts if the current user is not set.
+    final currentUser = channel.client.state.currentUser;
+    if (currentUser == null) return false;
+
+    // Don't deliver receipts if the user has disabled delivery receipts.
+    if (!currentUser.isDeliveryReceiptsEnabled) return false;
+
+    // Don't deliver receipts if the channel doesn't support delivery receipts.
+    if (!channel.canUseDeliveryReceipts) return false;
+
+    // Don't deliver receipts if the channel is muted.
+    if (channel.isMuted) return false;
+
     // Don't deliver receipts for ephemeral messages.
     if (message.isEphemeral) return false;
 
@@ -139,10 +156,6 @@ class MessageRules {
     // Don't deliver receipts if the message doesn't have a sender.
     final messageUser = message.user;
     if (messageUser == null) return false;
-
-    // Don't deliver receipts if the current user is not set.
-    final currentUser = channel.client.state.currentUser;
-    if (currentUser == null) return false;
 
     // Don't deliver receipts for the current user's own messages.
     if (messageUser.id == currentUser.id) return false;
