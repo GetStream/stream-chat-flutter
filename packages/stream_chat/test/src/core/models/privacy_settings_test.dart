@@ -9,6 +9,7 @@ void main() {
       final json = {
         'typing_indicators': {'enabled': false},
         'read_receipts': {'enabled': false},
+        'delivery_receipts': {'enabled': false},
       };
 
       final privacySettings = PrivacySettings.fromJson(json);
@@ -17,6 +18,8 @@ void main() {
       expect(privacySettings.typingIndicators?.enabled, false);
       expect(privacySettings.readReceipts, isNotNull);
       expect(privacySettings.readReceipts?.enabled, false);
+      expect(privacySettings.deliveryReceipts, isNotNull);
+      expect(privacySettings.deliveryReceipts?.enabled, false);
     });
 
     test('should parse json correctly with null fields', () {
@@ -26,6 +29,7 @@ void main() {
 
       expect(privacySettings.typingIndicators, isNull);
       expect(privacySettings.readReceipts, isNull);
+      expect(privacySettings.deliveryReceipts, isNull);
     });
 
     test('should parse json correctly with partial fields', () {
@@ -38,22 +42,26 @@ void main() {
       expect(privacySettings.typingIndicators, isNotNull);
       expect(privacySettings.typingIndicators?.enabled, true);
       expect(privacySettings.readReceipts, isNull);
+      expect(privacySettings.deliveryReceipts, isNull);
     });
 
     test('equality should work correctly', () {
       const privacySettings1 = PrivacySettings(
         typingIndicators: TypingIndicators(enabled: false),
         readReceipts: ReadReceipts(enabled: false),
+        deliveryReceipts: DeliveryReceipts(enabled: false),
       );
 
       const privacySettings2 = PrivacySettings(
         typingIndicators: TypingIndicators(enabled: false),
         readReceipts: ReadReceipts(enabled: false),
+        deliveryReceipts: DeliveryReceipts(enabled: false),
       );
 
       const privacySettings3 = PrivacySettings(
         typingIndicators: TypingIndicators(enabled: true),
         readReceipts: ReadReceipts(enabled: false),
+        deliveryReceipts: DeliveryReceipts(enabled: false),
       );
 
       expect(privacySettings1, equals(privacySettings2));
@@ -122,6 +130,45 @@ void main() {
 
       expect(settings1, equals(settings2));
       expect(settings1, isNot(equals(settings3)));
+    });
+  });
+
+  group('DeliveryReceiptsPrivacySettings', () {
+    test('should have enabled as true by default', () {
+      const settings = DeliveryReceipts();
+      expect(settings.enabled, true);
+    });
+
+    test('should parse json correctly', () {
+      final json = {'enabled': false};
+
+      final settings = DeliveryReceipts.fromJson(json);
+
+      expect(settings.enabled, false);
+    });
+
+    test('should parse json with enabled as true', () {
+      final json = {'enabled': true};
+
+      final settings = DeliveryReceipts.fromJson(json);
+
+      expect(settings.enabled, true);
+    });
+
+    test('equality should work correctly', () {
+      const settings1 = DeliveryReceipts(enabled: true);
+      const settings2 = DeliveryReceipts(enabled: true);
+      const settings3 = DeliveryReceipts(enabled: false);
+
+      expect(settings1, equals(settings2));
+      expect(settings1, isNot(equals(settings3)));
+    });
+
+    test('toJson should serialize correctly', () {
+      const settings = DeliveryReceipts(enabled: false);
+      final json = settings.toJson();
+
+      expect(json, {'enabled': false});
     });
   });
 }

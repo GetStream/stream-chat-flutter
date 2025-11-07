@@ -644,5 +644,48 @@ void main() {
         expect(user.isReadReceiptsEnabled, true);
       },
     );
+
+    test('isDeliveryReceiptsEnabled should return true when null', () {
+      final user = OwnUser(id: 'test-user');
+
+      expect(user.isDeliveryReceiptsEnabled, true);
+    });
+
+    test('isDeliveryReceiptsEnabled should return true when enabled', () {
+      final user = OwnUser(
+        id: 'test-user',
+        privacySettings: const PrivacySettings(
+          deliveryReceipts: DeliveryReceipts(enabled: true),
+        ),
+      );
+
+      expect(user.isDeliveryReceiptsEnabled, true);
+    });
+
+    test('isDeliveryReceiptsEnabled should return false when disabled', () {
+      final user = OwnUser(
+        id: 'test-user',
+        privacySettings: const PrivacySettings(
+          deliveryReceipts: DeliveryReceipts(enabled: false),
+        ),
+      );
+
+      expect(user.isDeliveryReceiptsEnabled, false);
+    });
+
+    test(
+      'isDeliveryReceiptsEnabled should return true when privacy settings '
+      'exists but delivery receipts is null',
+      () {
+        final user = OwnUser(
+          id: 'test-user',
+          privacySettings: const PrivacySettings(
+            typingIndicators: TypingIndicators(enabled: false),
+          ),
+        );
+
+        expect(user.isDeliveryReceiptsEnabled, true);
+      },
+    );
   });
 }
