@@ -3985,6 +3985,28 @@ void main() {
             },
           );
         });
+
+        test(
+          'should submit channel for delivery when message is received',
+          () async {
+            final message = Message(
+              id: 'test-message-id',
+              user: User(id: 'other-user'),
+              createdAt: initialLastMessageAt.add(const Duration(seconds: 3)),
+            );
+
+            final newMessageEvent = createNewMessageEvent(message);
+            client.addEvent(newMessageEvent);
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            // Verify submitForDelivery was called
+            verify(
+              () => client.channelDeliveryReporter.submitForDelivery([channel]),
+            ).called(1);
+          },
+        );
       },
     );
 
