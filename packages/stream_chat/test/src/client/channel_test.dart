@@ -3143,6 +3143,63 @@ void main() {
           ),
         ).called(1);
       });
+
+      test(
+        'should submit for delivery when querying latest messages (no pagination)',
+        () async {
+          final channelState = _generateChannelState(channelId, channelType);
+
+          when(
+            () => client.queryChannel(
+              channelType,
+              channelId: channelId,
+              channelData: any(named: 'channelData'),
+              messagesPagination: any(named: 'messagesPagination'),
+              membersPagination: any(named: 'membersPagination'),
+              watchersPagination: any(named: 'watchersPagination'),
+            ),
+          ).thenAnswer((_) async => channelState);
+
+          // Query without pagination params (fetching latest messages)
+          await channel.query();
+
+          // Verify submitForDelivery was called
+          verify(
+            () => client.channelDeliveryReporter.submitForDelivery([channel]),
+          ).called(1);
+        },
+      );
+
+      test(
+        'should NOT submit for delivery when querying with pagination (older messages)',
+        () async {
+          final channelState = _generateChannelState(channelId, channelType);
+
+          when(
+            () => client.queryChannel(
+              channelType,
+              channelId: channelId,
+              channelData: any(named: 'channelData'),
+              messagesPagination: any(named: 'messagesPagination'),
+              membersPagination: any(named: 'membersPagination'),
+              watchersPagination: any(named: 'watchersPagination'),
+            ),
+          ).thenAnswer((_) async => channelState);
+
+          // Query with pagination params (fetching older messages)
+          await channel.query(
+            messagesPagination: const PaginationParams(
+              limit: 20,
+              lessThan: 'some-message-id',
+            ),
+          );
+
+          // Verify submitForDelivery was NOT called
+          verifyNever(
+            () => client.channelDeliveryReporter.submitForDelivery([channel]),
+          );
+        },
+      );
     });
 
     test('`.queryMembers`', () async {
