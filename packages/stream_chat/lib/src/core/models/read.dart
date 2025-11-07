@@ -120,14 +120,21 @@ extension ReadIterableExtension on Iterable<Read> {
   ///
   /// The [Read] is considered to have received the message if:
   /// - The read user is not the sender of the message.
-  /// - The read contains a non-null lastDeliveredAt.
-  /// - The read's lastDeliveredAt is after or equal to the message's createdAt
+  /// - The read contains a non-null lastDeliveredAt that is after or equal to
+  ///   the message's createdAt, OR the user has already read the message.
   List<Read> deliveriesOf({required Message message}) {
     final sender = message.user;
     if (sender == null) return <Read>[];
 
     return where((read) {
       if (read.user.id == sender.id) return false;
+
+      // Early check if the message is already read by the user.
+      //
+      // This covers the case where lastDeliveredAt is null but the message
+      // has already been read.
+      final lastReadAt = read.lastRead;
+      if (!lastReadAt.isBefore(message.createdAt)) return true;
 
       final lastDeliveredAt = read.lastDeliveredAt;
       if (lastDeliveredAt == null) return false;
