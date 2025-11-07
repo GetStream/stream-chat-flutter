@@ -175,22 +175,4 @@ class MockRetryQueueChannel extends Mock implements Channel {
 class MockWebSocket extends Mock implements WebSocket {}
 
 class MockChannelDeliveryReporter extends Mock
-    implements ChannelDeliveryReporter {
-  @override
-  Future<void> submitForDelivery(Iterable<Channel> channels) {
-    return Future.value();
-  }
-
-  @override
-  Future<void> reconcileDelivery(Iterable<Channel> channels) {
-    return Future.value();
-  }
-
-  @override
-  Future<void> cancelDelivery(Iterable<String> channels) {
-    return Future.value();
-  }
-
-  @override
-  void cancel() {}
-}
+    implements ChannelDeliveryReporter {}

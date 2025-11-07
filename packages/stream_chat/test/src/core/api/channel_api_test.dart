@@ -809,7 +809,7 @@ void main() {
 
   test('markChannelsDelivered', () async {
     const path = '/channels/delivered';
-    
+
     final deliveries = [
       const MessageDelivery(
         channelCid: 'messaging:test-channel-1',

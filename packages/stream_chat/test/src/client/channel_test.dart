@@ -201,6 +201,11 @@ void main() {
 
       // client logger
       when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+
+      // mock channel delivery reporter
+      when(
+        () => client.channelDeliveryReporter.submitForDelivery(any()),
+      ).thenAnswer((_) async {});
     });
 
     // Setting up a initialized channel
@@ -3532,6 +3537,11 @@ void main() {
 
       // client logger
       when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+
+      // mock channel delivery reporter
+      when(
+        () => client.channelDeliveryReporter.submitForDelivery(any()),
+      ).thenAnswer((_) async {});
     });
 
     group(
@@ -4365,6 +4375,290 @@ void main() {
           final updated = channel.state?.read;
           expect(updated?.length, 1);
           expect(updated?.any((r) => r.user.id == 'non-existing-user'), isTrue);
+        },
+      );
+
+      test(
+        'should preserve delivery info on message read event',
+        () async {
+          final currentUser = User(id: 'test-user');
+          final currentRead = Read(
+            user: currentUser,
+            lastRead: DateTime(2020),
+            unreadMessages: 10,
+            lastDeliveredAt: DateTime(2021),
+            lastDeliveredMessageId: 'delivered-msg-456',
+          );
+
+          // Setup initial read state with delivery info
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              read: [currentRead],
+            ),
+          );
+
+          // Verify initial state
+          final read = channel.state?.read.first;
+          expect(read?.lastDeliveredAt, isNotNull);
+          expect(
+            read?.lastDeliveredAt?.isAtSameMomentAs(DateTime(2021)),
+            isTrue,
+          );
+          expect(read?.lastDeliveredMessageId, 'delivered-msg-456');
+
+          // Create message read event (doesn't include delivery info)
+          final messageReadEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageRead,
+            user: currentUser,
+            createdAt: DateTime(2022),
+            unreadMessages: 0,
+            lastReadMessageId: 'message-123',
+          );
+
+          // Dispatch event
+          client.addEvent(messageReadEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify read state is updated but delivery info is preserved
+          final updatedRead = channel.state?.read.first;
+          expect(updatedRead?.user.id, 'test-user');
+          expect(updatedRead?.unreadMessages, 0);
+          expect(updatedRead?.lastReadMessageId, 'message-123');
+          expect(
+            updatedRead?.lastRead.isAtSameMomentAs(DateTime(2022)),
+            isTrue,
+          );
+          // Delivery info should be preserved
+          expect(updatedRead?.lastDeliveredAt, isNotNull);
+          expect(
+            updatedRead?.lastDeliveredAt?.isAtSameMomentAs(DateTime(2021)),
+            isTrue,
+          );
+          expect(updatedRead?.lastDeliveredMessageId, 'delivered-msg-456');
+        },
+      );
+
+      test(
+        'should reconcile delivery when message read event is from current user',
+        () async {
+          final currentUser = client.state.currentUser;
+          final updatedUser = currentUser?.copyWith(id: 'current-user-id');
+
+          client.state.updateUser(updatedUser);
+          addTearDown(() => client.state.updateUser(currentUser));
+
+          when(
+            () => client.channelDeliveryReporter.reconcileDelivery([channel]),
+          ).thenAnswer((_) => Future.value());
+
+          // Create message read event from current user
+          final messageReadEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageRead,
+            user: currentUser,
+            createdAt: DateTime(2022),
+            unreadMessages: 0,
+            lastReadMessageId: 'message-123',
+          );
+
+          // Dispatch event
+          client.addEvent(messageReadEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify reconcileDelivery was called
+          verify(
+            () => client.channelDeliveryReporter.reconcileDelivery([channel]),
+          ).called(1);
+        },
+      );
+
+      test('should update read state on message delivered event', () async {
+        final currentUser = User(id: 'test-user');
+        final distantPast = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+        final currentRead = Read(
+          user: currentUser,
+          lastRead: distantPast,
+          unreadMessages: 5,
+        );
+
+        // Setup initial read state
+        channel.state?.updateChannelState(
+          channel.state!.channelState.copyWith(
+            read: [currentRead],
+          ),
+        );
+
+        // Verify initial state has no delivery info
+        final read = channel.state?.read.first;
+        expect(read?.user.id, 'test-user');
+        expect(read?.lastDeliveredAt, isNull);
+        expect(read?.lastDeliveredMessageId, isNull);
+
+        // Create message delivered event
+        final messageDeliveredEvent = Event(
+          cid: channel.cid,
+          type: EventType.messageDelivered,
+          user: currentUser,
+          lastDeliveredAt: DateTime(2022),
+          lastDeliveredMessageId: 'message-456',
+        );
+
+        // Dispatch event
+        client.addEvent(messageDeliveredEvent);
+
+        // Wait for event to be processed
+        await Future.delayed(Duration.zero);
+
+        // Verify delivery state is updated
+        final updatedRead = channel.state?.read.first;
+        expect(updatedRead?.user.id, 'test-user');
+        expect(updatedRead?.lastDeliveredAt, isNotNull);
+        expect(
+          updatedRead?.lastDeliveredAt?.isAtSameMomentAs(DateTime(2022)),
+          isTrue,
+        );
+        expect(updatedRead?.lastDeliveredMessageId, 'message-456');
+      });
+
+      test(
+        'should add a new read state if not exist on message delivered event',
+        () async {
+          final newUser = User(id: 'new-user');
+          final distantPast =
+              DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+
+          // Verify initial state
+          final read = channel.state?.read;
+          expect(read, isEmpty);
+
+          // Create message delivered event for new user
+          final messageDeliveredEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageDelivered,
+            user: newUser,
+            lastDeliveredAt: DateTime(2022),
+            lastDeliveredMessageId: 'message-789',
+          );
+
+          // Dispatch event
+          client.addEvent(messageDeliveredEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify read state was created with delivery info
+          final updated = channel.state?.read;
+          expect(updated?.length, 1);
+          final newRead = updated?.first;
+          expect(newRead?.user.id, 'new-user');
+          expect(newRead?.lastDeliveredAt, isNotNull);
+          expect(
+            newRead?.lastDeliveredAt?.isAtSameMomentAs(DateTime(2022)),
+            isTrue,
+          );
+          expect(newRead?.lastDeliveredMessageId, 'message-789');
+          // lastRead should default to distantPast
+          expect(
+            newRead?.lastRead.isAtSameMomentAs(distantPast),
+            isTrue,
+          );
+        },
+      );
+
+      test(
+        'should preserve read info on message delivered event',
+        () async {
+          final currentUser = User(id: 'test-user');
+          final currentRead = Read(
+            user: currentUser,
+            lastRead: DateTime(2020),
+            unreadMessages: 10,
+            lastReadMessageId: 'read-msg-123',
+          );
+
+          // Setup initial read state
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              read: [currentRead],
+            ),
+          );
+
+          // Verify initial state
+          final read = channel.state?.read.first;
+          expect(read?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
+          expect(read?.unreadMessages, 10);
+          expect(read?.lastReadMessageId, 'read-msg-123');
+
+          // Create message delivered event (doesn't include read info)
+          final messageDeliveredEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageDelivered,
+            user: currentUser,
+            lastDeliveredAt: DateTime(2022),
+            lastDeliveredMessageId: 'delivered-msg-456',
+          );
+
+          // Dispatch event
+          client.addEvent(messageDeliveredEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify delivery state is updated but read info is preserved
+          final updatedRead = channel.state?.read.first;
+          expect(updatedRead?.user.id, 'test-user');
+          expect(
+            updatedRead?.lastDeliveredAt?.isAtSameMomentAs(DateTime(2022)),
+            isTrue,
+          );
+          expect(updatedRead?.lastDeliveredMessageId, 'delivered-msg-456');
+          // Read info should be preserved
+          expect(
+            updatedRead?.lastRead.isAtSameMomentAs(DateTime(2020)),
+            isTrue,
+          );
+          expect(updatedRead?.unreadMessages, 10);
+          expect(updatedRead?.lastReadMessageId, 'read-msg-123');
+        },
+      );
+
+      test(
+        'should reconcile delivery when message delivered event is from current user',
+        () async {
+          final currentUser = client.state.currentUser;
+          final updatedUser = currentUser?.copyWith(id: 'current-user-id');
+
+          client.state.updateUser(updatedUser);
+          addTearDown(() => client.state.updateUser(currentUser));
+
+          when(
+            () => client.channelDeliveryReporter.reconcileDelivery([channel]),
+          ).thenAnswer((_) => Future.value());
+
+          // Create message delivered event from current user
+          final messageDeliveredEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageDelivered,
+            user: currentUser,
+            lastDeliveredAt: DateTime(2022),
+            lastDeliveredMessageId: 'message-456',
+          );
+
+          // Dispatch event
+          client.addEvent(messageDeliveredEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify reconcileDelivery was called
+          verify(
+            () => client.channelDeliveryReporter.reconcileDelivery([channel]),
+          ).called(1);
         },
       );
     });
@@ -5634,6 +5928,11 @@ void main() {
 
       // client logger
       when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+
+      // mock channel delivery reporter
+      when(
+        () => client.channelDeliveryReporter.submitForDelivery(any()),
+      ).thenAnswer((_) async {});
     });
 
     group('Non-initialized channel state validation', () {
