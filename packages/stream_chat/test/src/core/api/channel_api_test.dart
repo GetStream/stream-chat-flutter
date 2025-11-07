@@ -806,4 +806,39 @@ void main() {
         })).called(1);
     verifyNoMoreInteractions(client);
   });
+
+  test('markChannelsDelivered', () async {
+    const path = '/channels/delivered';
+    
+    final deliveries = [
+      const MessageDelivery(
+        channelCid: 'messaging:test-channel-1',
+        messageId: 'test-message-id-1',
+      ),
+      const MessageDelivery(
+        channelCid: 'messaging:test-channel-2',
+        messageId: 'test-message-id-2',
+      ),
+    ];
+
+    when(() => client.post(
+          path,
+          data: any(named: 'data'),
+        )).thenAnswer((_) async => successResponse(
+          path,
+          data: <String, dynamic>{},
+        ));
+
+    final res = await channelApi.markChannelsDelivered(deliveries);
+
+    expect(res, isNotNull);
+
+    verify(() => client.post(
+          path,
+          data: jsonEncode({
+            'latest_delivered_messages': deliveries,
+          }),
+        )).called(1);
+    verifyNoMoreInteractions(client);
+  });
 }
