@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added delivered status to `SendingIndicator` (double grey check for delivered, double accentPrimary check for read).
+- Added `isMessageDelivered` parameter to `SendingIndicator` widget.
+
 ## 9.19.0
 
 ✅ Added
