@@ -1,15 +1,4 @@
-import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/client/channel.dart';
-import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
-import 'package:stream_chat/src/core/models/channel_config.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/channel_state.dart';
-import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/models/message_delivery.dart';
-import 'package:stream_chat/src/core/models/own_user.dart';
-import 'package:stream_chat/src/core/models/read.dart';
-import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -130,7 +119,7 @@ void main() {
         final message = _createMessage(
           (m) => m.copyWith(
             id: 'message-1',
-            createdAt: DateTime(2023, 1, 1),
+            createdAt: DateTime(2023),
           ),
         );
 
@@ -155,7 +144,7 @@ void main() {
         final message = _createMessage(
           (m) => m.copyWith(
             id: 'message-1',
-            createdAt: DateTime(2023, 1, 1),
+            createdAt: DateTime(2023),
           ),
         );
 
@@ -239,7 +228,7 @@ void main() {
         final message = _createMessage(
           (m) => m.copyWith(
             id: 'message-1',
-            createdAt: DateTime(2023, 1, 1),
+            createdAt: DateTime(2023),
           ),
         );
 
@@ -271,7 +260,7 @@ void main() {
         final message = _createMessage(
           (m) => m.copyWith(
             id: 'message-1',
-            createdAt: DateTime(2023, 1, 1),
+            createdAt: DateTime(2023),
           ),
         );
 
