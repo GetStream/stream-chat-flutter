@@ -146,9 +146,10 @@ void main() {
       expect(merged.lastRead, read2.lastRead);
       expect(merged.user.id, read2.user.id);
       expect(merged.unreadMessages, 0);
-      expect(merged.lastReadMessageId, isNull);
-      expect(merged.lastDeliveredAt, isNull);
-      expect(merged.lastDeliveredMessageId, isNull);
+      // When merging, null values in read2 should preserve read1's values
+      expect(merged.lastReadMessageId, read1.lastReadMessageId);
+      expect(merged.lastDeliveredAt, read1.lastDeliveredAt);
+      expect(merged.lastDeliveredMessageId, read1.lastDeliveredMessageId);
     });
 
     test('equality should return true for identical reads', () {
@@ -258,23 +259,25 @@ void main() {
       expect(read1, isNot(equals(read2)));
     });
 
-    test('equality should return false for different lastDeliveredMessageId',
-        () {
-      final read1 = Read(
-        lastRead: DateTime.parse('2020-01-28T22:17:30.966485504Z'),
-        user: User(id: 'user-1'),
-        unreadMessages: 10,
-        lastDeliveredMessageId: 'delivered-1',
-      );
+    test(
+      'equality should return false for different lastDeliveredMessageId',
+      () {
+        final read1 = Read(
+          lastRead: DateTime.parse('2020-01-28T22:17:30.966485504Z'),
+          user: User(id: 'user-1'),
+          unreadMessages: 10,
+          lastDeliveredMessageId: 'delivered-1',
+        );
 
-      final read2 = Read(
-        lastRead: DateTime.parse('2020-01-28T22:17:30.966485504Z'),
-        user: User(id: 'user-1'),
-        unreadMessages: 10,
-        lastDeliveredMessageId: 'delivered-2',
-      );
+        final read2 = Read(
+          lastRead: DateTime.parse('2020-01-28T22:17:30.966485504Z'),
+          user: User(id: 'user-1'),
+          unreadMessages: 10,
+          lastDeliveredMessageId: 'delivered-2',
+        );
 
-      expect(read1, isNot(equals(read2)));
-    });
+        expect(read1, isNot(equals(read2)));
+      },
+    );
   });
 }
