@@ -1,26 +1,41 @@
+# See Dependabot documentation for all configuration options:
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
 version: 2
 updates:
+  # GitHub Actions
+  # Updates workflow dependencies and groups them into a single PR
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    # Group all GitHub Actions updates into a single PR
+    groups:
+      all-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+    # Ignore patch updates to reduce noise
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+  
+  # Pub Packages
+  # All packages grouped into a single configuration using multi-directory support
   - package-ecosystem: "pub"
-    directory: "/packages/stream_chat"
+    directories:
+      - "/sample_app"
+      - "/packages/stream_chat"
+      - "/packages/stream_chat_flutter_core"
+      - "/packages/stream_chat_flutter"
+      - "/packages/stream_chat_persistence"
+      - "/packages/stream_chat_localizations"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "pub"
-    directory: "/packages/stream_chat_flutter_core"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "pub"
-    directory: "/packages/stream_chat_flutter"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "pub"
-    directory: "/packages/stream_chat_persistence"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "pub"
-    directory: "/packages/stream_chat_localizations"
-    schedule:
-      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
