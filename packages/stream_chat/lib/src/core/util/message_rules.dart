@@ -97,7 +97,9 @@ class MessageRules {
     if (message.isNotVisibleTo(currentUser.id)) return false;
 
     // Don't count messages from muted users.
-    final isMuted = currentUser.mutes.any((it) => it.user.id == messageUser.id);
+    final isMuted = currentUser.mutes.any((it) {
+      return it.target.id == messageUser.id;
+    });
     if (isMuted) return false;
 
     final currentUserRead = channel.state?.currentUserRead;
