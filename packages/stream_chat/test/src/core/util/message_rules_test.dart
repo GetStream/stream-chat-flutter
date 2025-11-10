@@ -476,7 +476,9 @@ void main() {
       });
 
       test('should return false for ephemeral messages', () {
-        final message = _createMessage((m) => m.copyWith(type: 'ephemeral'));
+        final message = _createMessage(
+          (m) => m.copyWith(type: MessageType.ephemeral),
+        );
 
         expect(MessageRules.canMarkAsDelivered(message, channel), isFalse);
       });
