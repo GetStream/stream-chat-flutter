@@ -138,8 +138,9 @@ class StreamThreadListTileThemeData with Diagnosticable {
             threadLatestReplyMessageStyle ?? this.threadLatestReplyMessageStyle,
         threadLatestReplyTimestampStyle: threadLatestReplyTimestampStyle ??
             this.threadLatestReplyTimestampStyle,
-        threadLatestReplyTimestampFormatter: threadLatestReplyTimestampFormatter ??
-            this.threadLatestReplyTimestampFormatter,
+        threadLatestReplyTimestampFormatter:
+            threadLatestReplyTimestampFormatter ??
+                this.threadLatestReplyTimestampFormatter,
         threadUnreadMessageCountStyle:
             threadUnreadMessageCountStyle ?? this.threadUnreadMessageCountStyle,
         threadUnreadMessageCountBackgroundColor:
@@ -160,7 +161,8 @@ class StreamThreadListTileThemeData with Diagnosticable {
       threadLatestReplyUsernameStyle: other.threadLatestReplyUsernameStyle,
       threadLatestReplyMessageStyle: other.threadLatestReplyMessageStyle,
       threadLatestReplyTimestampStyle: other.threadLatestReplyTimestampStyle,
-      threadLatestReplyTimestampFormatter: other.threadLatestReplyTimestampFormatter,
+      threadLatestReplyTimestampFormatter:
+          other.threadLatestReplyTimestampFormatter,
       threadUnreadMessageCountStyle: other.threadUnreadMessageCountStyle,
       threadUnreadMessageCountBackgroundColor:
           other.threadUnreadMessageCountBackgroundColor,
