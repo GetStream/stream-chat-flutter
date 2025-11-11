@@ -47,23 +47,23 @@ class StreamMessageText extends StatelessWidget {
           messageTheme: messageTheme,
           selectable: isDesktopDeviceOrWeb,
           onTapLink: (
-            String link,
+            String text,
             String? href,
             String title,
           ) {
-            if (link.startsWith('@')) {
+            if (text.startsWith('@')) {
               final mentionedUser = message.mentionedUsers.firstWhereOrNull(
-                (u) => '@${u.name}' == link,
+                (u) => '@${u.name}' == text,
               );
 
               if (mentionedUser == null) return;
 
               onMentionTap?.call(mentionedUser);
-            } else {
+            } else if (href != null) {
               if (onLinkTap != null) {
-                onLinkTap!(link);
+                onLinkTap!(href);
               } else {
-                launchURL(context, link);
+                launchURL(context, href);
               }
             }
           },

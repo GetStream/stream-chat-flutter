@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed mistakenly passing the hyperlink text to the `onLinkTap` callback instead of the actual `href`.
+
 ## 9.19.0
 
 ✅ Added
