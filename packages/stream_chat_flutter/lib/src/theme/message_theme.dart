@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
+import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 
 /// {@template message_theme_data}
 /// Class for getting message theme
@@ -24,6 +25,7 @@ class StreamMessageThemeData with Diagnosticable {
     this.reactionsMaskColor,
     this.avatarTheme,
     this.createdAtStyle,
+    this.createdAtFormatter,
     this.urlAttachmentBackgroundColor,
     this.urlAttachmentHostStyle,
     this.urlAttachmentTitleStyle,
@@ -43,6 +45,21 @@ class StreamMessageThemeData with Diagnosticable {
 
   /// Text style for created at text
   final TextStyle? createdAtStyle;
+
+  /// Formatter for the created at timestamp.
+  ///
+  /// If null, uses the default date formatting.
+  ///
+  /// Example:
+  /// ```dart
+  /// StreamMessageThemeData(
+  ///   createdAtStyle: TextStyle(...),
+  ///   createdAtFormatter: (context, date) {
+  ///     return Jiffy.parseFromDateTime(date).jm; // "2:30 PM"
+  ///   },
+  /// )
+  /// ```
+  final DateFormatter? createdAtFormatter;
 
   /// Text style for the text on a deleted message
   /// If not set [messageTextStyle] is used with [FontStyle.italic] and
@@ -100,6 +117,7 @@ class StreamMessageThemeData with Diagnosticable {
     TextStyle? messageLinksStyle,
     TextStyle? messageDeletedStyle,
     TextStyle? createdAtStyle,
+    DateFormatter? createdAtFormatter,
     TextStyle? repliesStyle,
     Color? messageBackgroundColor,
     Gradient? messageBackgroundGradient,
@@ -120,6 +138,7 @@ class StreamMessageThemeData with Diagnosticable {
       messageAuthorStyle: messageAuthorStyle ?? this.messageAuthorStyle,
       messageLinksStyle: messageLinksStyle ?? this.messageLinksStyle,
       createdAtStyle: createdAtStyle ?? this.createdAtStyle,
+      createdAtFormatter: createdAtFormatter ?? this.createdAtFormatter,
       messageDeletedStyle: messageDeletedStyle ?? this.messageDeletedStyle,
       messageBackgroundColor:
           messageBackgroundColor ?? this.messageBackgroundColor,
@@ -159,6 +178,7 @@ class StreamMessageThemeData with Diagnosticable {
       messageAuthorStyle:
           TextStyle.lerp(a.messageAuthorStyle, b.messageAuthorStyle, t),
       createdAtStyle: TextStyle.lerp(a.createdAtStyle, b.createdAtStyle, t),
+      createdAtFormatter: t < 0.5 ? a.createdAtFormatter : b.createdAtFormatter,
       messageDeletedStyle:
           TextStyle.lerp(a.messageDeletedStyle, b.messageDeletedStyle, t),
       messageBackgroundColor:
@@ -223,6 +243,7 @@ class StreamMessageThemeData with Diagnosticable {
           other.messageLinksStyle,
       createdAtStyle:
           createdAtStyle?.merge(other.createdAtStyle) ?? other.createdAtStyle,
+      createdAtFormatter: other.createdAtFormatter ?? createdAtFormatter,
       messageDeletedStyle:
           messageDeletedStyle?.merge(other.messageDeletedStyle) ??
               other.messageDeletedStyle,
@@ -253,6 +274,7 @@ class StreamMessageThemeData with Diagnosticable {
           messageAuthorStyle == other.messageAuthorStyle &&
           messageLinksStyle == other.messageLinksStyle &&
           createdAtStyle == other.createdAtStyle &&
+          createdAtFormatter == other.createdAtFormatter &&
           messageDeletedStyle == other.messageDeletedStyle &&
           repliesStyle == other.repliesStyle &&
           messageBackgroundColor == other.messageBackgroundColor &&
@@ -275,6 +297,7 @@ class StreamMessageThemeData with Diagnosticable {
       messageAuthorStyle.hashCode ^
       messageLinksStyle.hashCode ^
       createdAtStyle.hashCode ^
+      createdAtFormatter.hashCode ^
       messageDeletedStyle.hashCode ^
       repliesStyle.hashCode ^
       messageBackgroundColor.hashCode ^
@@ -299,6 +322,7 @@ class StreamMessageThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('messageAuthorStyle', messageAuthorStyle))
       ..add(DiagnosticsProperty('messageLinksStyle', messageLinksStyle))
       ..add(DiagnosticsProperty('createdAtStyle', createdAtStyle))
+      ..add(DiagnosticsProperty('createdAtFormatter', createdAtFormatter))
       ..add(DiagnosticsProperty('messageDeletedStyle', messageDeletedStyle))
       ..add(DiagnosticsProperty('repliesStyle', repliesStyle))
       ..add(ColorProperty('messageBackgroundColor', messageBackgroundColor))

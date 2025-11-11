@@ -260,6 +260,7 @@ class ThreadLatestReply extends StatelessWidget {
                   StreamTimestamp(
                     date: latestReply.createdAt.toLocal(),
                     style: theme.threadLatestReplyTimestampStyle,
+                    formatter: theme.threadLatestReplyTimestampFormatter,
                   ),
                 ],
               ),

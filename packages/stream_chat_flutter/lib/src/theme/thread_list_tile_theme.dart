@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 
 /// {@template streamThreadListTileTheme}
 /// Overrides the default style of [StreamThreadListTile] descendants.
@@ -59,6 +60,7 @@ class StreamThreadListTileThemeData with Diagnosticable {
     this.threadLatestReplyUsernameStyle,
     this.threadLatestReplyMessageStyle,
     this.threadLatestReplyTimestampStyle,
+    this.threadLatestReplyTimestampFormatter,
     this.threadUnreadMessageCountStyle,
     this.threadUnreadMessageCountBackgroundColor,
   });
@@ -87,6 +89,21 @@ class StreamThreadListTileThemeData with Diagnosticable {
   /// The style of the latest reply timestamp in the [StreamThreadListTile].
   final TextStyle? threadLatestReplyTimestampStyle;
 
+  /// Formatter for the latest reply timestamp.
+  ///
+  /// If null, uses the default date formatting.
+  ///
+  /// Example:
+  /// ```dart
+  /// StreamThreadListTileThemeData(
+  ///   threadLatestReplyTimestampStyle: TextStyle(...),
+  ///   threadLatestReplyTimestampFormatter: (context, date) {
+  ///     return Jiffy.parseFromDateTime(date).fromNow(); // "2 hours ago"
+  ///   },
+  /// )
+  /// ```
+  final DateFormatter? threadLatestReplyTimestampFormatter;
+
   /// The style of the unread message count in the [StreamThreadListTile].
   final TextStyle? threadUnreadMessageCountStyle;
 
@@ -104,6 +121,7 @@ class StreamThreadListTileThemeData with Diagnosticable {
     TextStyle? threadLatestReplyUsernameStyle,
     TextStyle? threadLatestReplyMessageStyle,
     TextStyle? threadLatestReplyTimestampStyle,
+    DateFormatter? threadLatestReplyTimestampFormatter,
     TextStyle? threadUnreadMessageCountStyle,
     Color? threadUnreadMessageCountBackgroundColor,
   }) =>
@@ -120,6 +138,8 @@ class StreamThreadListTileThemeData with Diagnosticable {
             threadLatestReplyMessageStyle ?? this.threadLatestReplyMessageStyle,
         threadLatestReplyTimestampStyle: threadLatestReplyTimestampStyle ??
             this.threadLatestReplyTimestampStyle,
+        threadLatestReplyTimestampFormatter: threadLatestReplyTimestampFormatter ??
+            this.threadLatestReplyTimestampFormatter,
         threadUnreadMessageCountStyle:
             threadUnreadMessageCountStyle ?? this.threadUnreadMessageCountStyle,
         threadUnreadMessageCountBackgroundColor:
@@ -140,6 +160,7 @@ class StreamThreadListTileThemeData with Diagnosticable {
       threadLatestReplyUsernameStyle: other.threadLatestReplyUsernameStyle,
       threadLatestReplyMessageStyle: other.threadLatestReplyMessageStyle,
       threadLatestReplyTimestampStyle: other.threadLatestReplyTimestampStyle,
+      threadLatestReplyTimestampFormatter: other.threadLatestReplyTimestampFormatter,
       threadUnreadMessageCountStyle: other.threadUnreadMessageCountStyle,
       threadUnreadMessageCountBackgroundColor:
           other.threadUnreadMessageCountBackgroundColor,
@@ -180,6 +201,9 @@ class StreamThreadListTileThemeData with Diagnosticable {
           b?.threadLatestReplyTimestampStyle,
           t,
         ),
+        threadLatestReplyTimestampFormatter: t < 0.5
+            ? a?.threadLatestReplyTimestampFormatter
+            : b?.threadLatestReplyTimestampFormatter,
         threadUnreadMessageCountStyle: TextStyle.lerp(
           a?.threadUnreadMessageCountStyle,
           b?.threadUnreadMessageCountStyle,
@@ -206,6 +230,8 @@ class StreamThreadListTileThemeData with Diagnosticable {
               threadLatestReplyMessageStyle &&
           other.threadLatestReplyTimestampStyle ==
               threadLatestReplyTimestampStyle &&
+          other.threadLatestReplyTimestampFormatter ==
+              threadLatestReplyTimestampFormatter &&
           other.threadUnreadMessageCountStyle ==
               threadUnreadMessageCountStyle &&
           other.threadUnreadMessageCountBackgroundColor ==
@@ -220,6 +246,7 @@ class StreamThreadListTileThemeData with Diagnosticable {
       threadLatestReplyUsernameStyle.hashCode ^
       threadLatestReplyMessageStyle.hashCode ^
       threadLatestReplyTimestampStyle.hashCode ^
+      threadLatestReplyTimestampFormatter.hashCode ^
       threadUnreadMessageCountStyle.hashCode ^
       threadUnreadMessageCountBackgroundColor.hashCode;
 }

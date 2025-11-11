@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 
 /// {@template streamDraftListTileTheme}
 /// Overrides the default style of [StreamDraftListTile] descendants.
@@ -57,6 +58,7 @@ class StreamDraftListTileThemeData with Diagnosticable {
     this.draftChannelNameStyle,
     this.draftMessageStyle,
     this.draftTimestampStyle,
+    this.draftTimestampFormatter,
   });
 
   /// The padding around the [StreamDraftListTile] widget.
@@ -74,6 +76,21 @@ class StreamDraftListTileThemeData with Diagnosticable {
   /// The style of the draft timestamp in the [StreamDraftListTile] widget.
   final TextStyle? draftTimestampStyle;
 
+  /// Formatter for the draft timestamp.
+  ///
+  /// If null, uses the default date formatting.
+  ///
+  /// Example:
+  /// ```dart
+  /// StreamDraftListTileThemeData(
+  ///   draftTimestampStyle: TextStyle(...),
+  ///   draftTimestampFormatter: (context, date) {
+  ///     return Jiffy.parseFromDateTime(date).fromNow(); // "2 hours ago"
+  ///   },
+  /// )
+  /// ```
+  final DateFormatter? draftTimestampFormatter;
+
   /// A copy of [StreamDraftListTileThemeData] with specified attributes
   /// overridden.
   StreamDraftListTileThemeData copyWith({
@@ -82,6 +99,7 @@ class StreamDraftListTileThemeData with Diagnosticable {
     TextStyle? draftChannelNameStyle,
     TextStyle? draftMessageStyle,
     TextStyle? draftTimestampStyle,
+    DateFormatter? draftTimestampFormatter,
     Color? draftIconColor,
   }) =>
       StreamDraftListTileThemeData(
@@ -91,6 +109,8 @@ class StreamDraftListTileThemeData with Diagnosticable {
             draftChannelNameStyle ?? this.draftChannelNameStyle,
         draftMessageStyle: draftMessageStyle ?? this.draftMessageStyle,
         draftTimestampStyle: draftTimestampStyle ?? this.draftTimestampStyle,
+        draftTimestampFormatter:
+            draftTimestampFormatter ?? this.draftTimestampFormatter,
       );
 
   /// Merges this [StreamDraftListTileThemeData] with the [other].
@@ -104,6 +124,7 @@ class StreamDraftListTileThemeData with Diagnosticable {
       draftChannelNameStyle: other.draftChannelNameStyle,
       draftMessageStyle: other.draftMessageStyle,
       draftTimestampStyle: other.draftTimestampStyle,
+      draftTimestampFormatter: other.draftTimestampFormatter,
     );
   }
 
@@ -131,6 +152,8 @@ class StreamDraftListTileThemeData with Diagnosticable {
           b?.draftTimestampStyle,
           t,
         ),
+        draftTimestampFormatter:
+            t < 0.5 ? a?.draftTimestampFormatter : b?.draftTimestampFormatter,
       );
 
   @override
@@ -141,7 +164,8 @@ class StreamDraftListTileThemeData with Diagnosticable {
           other.backgroundColor == backgroundColor &&
           other.draftChannelNameStyle == draftChannelNameStyle &&
           other.draftMessageStyle == draftMessageStyle &&
-          other.draftTimestampStyle == draftTimestampStyle;
+          other.draftTimestampStyle == draftTimestampStyle &&
+          other.draftTimestampFormatter == draftTimestampFormatter;
 
   @override
   int get hashCode =>
@@ -149,5 +173,6 @@ class StreamDraftListTileThemeData with Diagnosticable {
       backgroundColor.hashCode ^
       draftChannelNameStyle.hashCode ^
       draftMessageStyle.hashCode ^
-      draftTimestampStyle.hashCode;
+      draftTimestampStyle.hashCode ^
+      draftTimestampFormatter.hashCode;
 }

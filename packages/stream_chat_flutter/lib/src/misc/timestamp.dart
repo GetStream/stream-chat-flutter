@@ -12,11 +12,11 @@ class StreamTimestamp extends StatelessWidget {
   const StreamTimestamp({
     super.key,
     required this.date,
-    this.formatter = formatDate,
+    DateFormatter? formatter,
     this.style,
     this.textAlign,
     this.textDirection,
-  });
+  }) : formatter = formatter ?? formatDate;
 
   /// The date to show in the timestamp.
   final DateTime date;

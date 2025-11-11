@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/src/channel/stream_draft_message_preview_tex
 import 'package:stream_chat_flutter/src/message_widget/sending_indicator_builder.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
+import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a channel preview.
@@ -174,6 +175,7 @@ class StreamChannelListTile extends StatelessWidget {
         ChannelLastMessageDate(
           channel: channel,
           textStyle: channelPreviewTheme.lastMessageAtStyle,
+          formatter: channelPreviewTheme.lastMessageAtFormatter,
         );
 
     return BetterStreamBuilder<bool>(
@@ -265,6 +267,7 @@ class ChannelLastMessageDate extends StatelessWidget {
     super.key,
     required this.channel,
     this.textStyle,
+    this.formatter,
   }) : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
@@ -276,17 +279,21 @@ class ChannelLastMessageDate extends StatelessWidget {
   /// The style of the text displayed
   final TextStyle? textStyle;
 
+  /// The formatter to format the date.
+  final DateFormatter? formatter;
+
   @override
-  Widget build(BuildContext context) => BetterStreamBuilder<DateTime>(
-        stream: channel.lastMessageAtStream,
-        initialData: channel.lastMessageAt,
-        builder: (context, lastMessageAt) {
-          return StreamTimestamp(
-            date: lastMessageAt.toLocal(),
-            style: textStyle,
-          );
-        },
-      );
+  Widget build(BuildContext context) {
+    return BetterStreamBuilder<DateTime>(
+      stream: channel.lastMessageAtStream,
+      initialData: channel.lastMessageAt,
+      builder: (context, lastMessageAt) => StreamTimestamp(
+        date: lastMessageAt.toLocal(),
+        style: textStyle,
+        formatter: formatter,
+      ),
+    );
+  }
 }
 
 /// A widget that displays the subtitle for [StreamChannelListTile].
