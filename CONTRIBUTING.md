@@ -169,12 +169,6 @@ At Stream, we value testing. Every PR should include passing tests for existing 
 > melos run test:flutter
 ```
 
-### Our Process
-
-By default, our development branch is `develop`. Contributors should create new PRs based on `develop` when working on new features. 
-
-Develop is merged into master after the team performs various automated and QA tests on the branch. Master can be considered our stable branch, it represents the latest published release on pub.dev. 
-
 ---
 
 # Versioning Policy
