@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added formatter properties to theme data classes for customizing date/timestamp
+  formatting. [[#2312]](https://github.com/GetStream/stream-chat-flutter/issues/2312) [[#2406]](https://github.com/GetStream/stream-chat-flutter/issues/2406)
+
 ## 9.19.0
 
 ✅ Added
