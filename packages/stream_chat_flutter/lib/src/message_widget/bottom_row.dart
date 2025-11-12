@@ -215,7 +215,13 @@ class BottomRow extends StatelessWidget {
         StreamTimestamp(
           date: message.createdAt.toLocal(),
           style: messageTheme.createdAtStyle,
-          formatter: (_, date) => Jiffy.parseFromDateTime(date).jm,
+          formatter: (context, date) {
+            if (messageTheme.createdAtFormatter case final formatter?) {
+              return formatter.call(context, date);
+            }
+
+            return Jiffy.parseFromDateTime(date).jm;
+          },
         ),
     ];
 

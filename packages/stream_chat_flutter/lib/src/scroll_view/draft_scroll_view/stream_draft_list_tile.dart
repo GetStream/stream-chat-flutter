@@ -136,6 +136,7 @@ class DraftMessageContent extends StatelessWidget {
         StreamTimestamp(
           date: draft.createdAt.toLocal(),
           style: theme.draftTimestampStyle,
+          formatter: theme.draftTimestampFormatter,
         ),
       ],
     );
