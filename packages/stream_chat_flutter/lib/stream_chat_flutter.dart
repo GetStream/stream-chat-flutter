@@ -103,6 +103,8 @@ export 'src/poll/stream_poll_option_votes_dialog.dart';
 export 'src/poll/stream_poll_options_dialog.dart';
 export 'src/poll/stream_poll_results_dialog.dart';
 export 'src/poll/stream_poll_text_field.dart';
+export 'src/reactions/indicator/reaction_indicator.dart';
+export 'src/reactions/indicator/reaction_indicator_icon_list.dart';
 export 'src/reactions/picker/reaction_picker.dart';
 export 'src/reactions/picker/reaction_picker_icon_list.dart';
 export 'src/reactions/reaction_bubble.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/reactions/picker/reaction_picker.dart';
-import 'package:stream_chat_flutter/src/reactions/picker/reaction_picker_icon_list.dart';
 import 'package:stream_chat_flutter/src/reactions/reaction_bubble_overlay.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';

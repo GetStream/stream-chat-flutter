@@ -63,6 +63,7 @@ class MessageWidgetContent extends StatelessWidget {
     required this.showEditedLabel,
     required this.messageWidget,
     required this.onThreadTap,
+    required this.reactionIndicatorBuilder,
     this.onUserAvatarTap,
     this.borderRadiusGeometry,
     this.borderSide,
@@ -224,6 +225,9 @@ class MessageWidgetContent extends StatelessWidget {
   /// {@macro userAvatarBuilder}
   final Widget Function(BuildContext, User)? userAvatarBuilder;
 
+  /// {@macro reactionIndicatorBuilder}
+  final ReactionIndicatorBuilder reactionIndicatorBuilder;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -273,6 +277,7 @@ class MessageWidgetContent extends StatelessWidget {
                             onTap: onReactionsTap,
                             visible: isMobileDevice && showReactions,
                             anchorOffset: const Offset(0, 36),
+                            reactionIndicatorBuilder: reactionIndicatorBuilder,
                             childSizeDelta: switch (showUserAvatar) {
                               DisplayWidget.gone => Offset.zero,
                               // Size adjustment for the user avatar

@@ -1,8 +1,42 @@
 ## Upcoming Beta
 
+✅ Added
+
+- Added `reactionIndicatorBuilder` parameter to `StreamMessageWidget` for customizing reaction
+  indicators. Users can now display reaction counts alongside emojis on mobile, matching desktop/web
+  behavior. Fixes [#2434](https://github.com/GetStream/stream-chat-flutter/issues/2434).
+  ```dart
+  // Example: Show reaction count next to emoji
+  StreamMessageWidget(
+    message: message,
+    reactionIndicatorBuilder: (context, message, onTap) {
+      return StreamReactionIndicator(
+        message: message,
+        onTap: onTap,
+        reactionIcons: StreamChatConfiguration.of(context).reactionIcons,
+        reactionIconBuilder: (context, icon) {
+          final count = message.reactionGroups?[icon.type]?.count ?? 0;
+          return Row(
+            children: [
+              icon.build(context),
+              const SizedBox(width: 4),
+              Text('$count'),
+            ],
+          );
+        },
+      );
+    },
+  )
+  ```
+
+- Added `reactionIconBuilder` and `backgroundColor` parameters to `StreamReactionPicker`.
+- Exported `StreamReactionIndicator` and related components (`ReactionIndicatorBuilder`,
+  `ReactionIndicatorIconBuilder`, `ReactionIndicatorIcon`, `ReactionIndicatorIconList`).
+
 🛑️ Breaking
 
-- `onAttachmentTap` callback signature has changed to support custom attachment handling with automatic fallback to default behavior. The callback now receives `BuildContext` as the first parameter and returns `FutureOr<bool>` to indicate if the attachment was handled.
+- `onAttachmentTap` callback signature changed to include `BuildContext` as first parameter and
+  returns `FutureOr<bool>` to indicate if handled.
   ```dart
   // Before
   StreamMessageWidget(
@@ -28,6 +62,9 @@
     },
   )
   ```
+
+- `ReactionPickerIconList` constructor changed: removed `message` parameter, changed `reactionIcons`
+  type to `List<ReactionPickerIcon>`, renamed `onReactionPicked` to `onIconPicked`.
 
 For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 

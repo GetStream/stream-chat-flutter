@@ -2,12 +2,11 @@ import 'package:collection/collection.dart';
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/reaction_icon.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// {@template onReactionPressed}
+/// {@template onReactionIconPicked}
 /// Callback called when a reaction icon is pressed.
 /// {@endtemplate}
-typedef OnReactionPicked = ValueSetter<Reaction>;
+typedef OnReactionIconPicked = ValueSetter<ReactionPickerIcon>;
 
 /// {@template onReactionPickerIconPressed}
 /// Callback called when a reaction picker icon is pressed.
@@ -35,13 +34,12 @@ typedef ReactionPickerIconBuilder = Widget Function(
 /// A widget that displays a list of reactionIcons that can be picked by a user.
 ///
 /// This widget shows a row of reaction icons with animated entry. When a user
-/// taps on a reaction icon, the [onReactionPicked] callback is invoked with the
+/// taps on a reaction icon, the [onIconPicked] callback is invoked with the
 /// selected reaction.
 ///
-/// The reactions displayed are configured via [reactionIcons] and the widget
-/// tracks which reactions the current user has already added to the [message].
+/// The reactions displayed are configured via [reactionIcons].
 ///
-/// also see:
+/// See also:
 /// - [StreamReactionPicker], which is a higher-level widget that uses this
 ///   widget to display a reaction picker in a modal or inline.
 /// {@endtemplate}
@@ -49,23 +47,19 @@ class ReactionPickerIconList extends StatefulWidget {
   /// {@macro reactionPickerIconList}
   const ReactionPickerIconList({
     super.key,
-    required this.message,
+    this.onIconPicked,
     required this.reactionIcons,
-    this.iconBuilder = _defaultIconBuilder,
-    this.onReactionPicked,
-  });
-
-  /// The message to display reactions for.
-  final Message message;
+    ReactionPickerIconBuilder? iconBuilder,
+  }) : iconBuilder = iconBuilder ?? _defaultIconBuilder;
 
   /// The list of available reaction picker icons.
-  final List<StreamReactionIcon> reactionIcons;
+  final List<ReactionPickerIcon> reactionIcons;
 
   /// The builder used to create the reaction picker icons.
   final ReactionPickerIconBuilder iconBuilder;
 
-  /// {@macro onReactionPressed}
-  final OnReactionPicked? onReactionPicked;
+  /// {@macro onReactionIconPicked}
+  final OnReactionIconPicked? onIconPicked;
 
   static Widget _defaultIconBuilder(
     BuildContext context,
@@ -161,11 +155,6 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         ...widget.reactionIcons.mapIndexed((index, icon) {
-          bool reactionCheck(Reaction reaction) => reaction.type == icon.type;
-
-          final ownReactions = [...?widget.message.ownReactions];
-          final reaction = ownReactions.firstWhereOrNull(reactionCheck);
-
           final animation = _iconAnimations[index];
           return AnimatedBuilder(
             animation: animation,
@@ -175,22 +164,13 @@ class _ReactionPickerIconListState extends State<ReactionPickerIconList> {
             ),
             child: Builder(
               builder: (context) {
-                final pickerIcon = ReactionPickerIcon(
-                  type: icon.type,
-                  builder: icon.builder,
-                  // If the reaction is present in ownReactions, it is selected.
-                  isSelected: reaction != null,
-                );
-
-                final onPressed = switch (widget.onReactionPicked) {
-                  final onPicked? => () {
-                      final picked = reaction ?? icon.toReaction();
-                      return onPicked(picked);
-                    },
+                final icon = widget.reactionIcons[index];
+                final onPressed = switch (widget.onIconPicked) {
+                  final onPicked? => () => onPicked(icon),
                   _ => null,
                 };
 
-                return widget.iconBuilder(context, pickerIcon, onPressed);
+                return widget.iconBuilder(context, icon, onPressed);
               },
             ),
           );

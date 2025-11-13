@@ -22,6 +22,7 @@ class ReactionIndicatorBubbleOverlay extends StatelessWidget {
     this.reverse = false,
     this.anchorOffset = Offset.zero,
     this.childSizeDelta = Offset.zero,
+    this.reactionIndicatorBuilder = StreamReactionIndicator.builder,
   });
 
   /// Whether the overlay should be visible.
@@ -45,6 +46,9 @@ class ReactionIndicatorBubbleOverlay extends StatelessWidget {
   /// The additional size delta to apply to the child widget for positioning.
   final Offset childSizeDelta;
 
+  /// Builder for the reaction indicator widget.
+  final ReactionIndicatorBuilder reactionIndicatorBuilder;
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
@@ -63,11 +67,7 @@ class ReactionIndicatorBubbleOverlay extends StatelessWidget {
         follower: AlignmentDirectional.bottomCenter,
         target: AlignmentDirectional(reverse ? -1 : 1, -1),
       ),
-      reaction: StreamReactionIndicator(
-        onTap: onTap,
-        message: message,
-        backgroundColor: messageTheme.reactionsBackgroundColor,
-      ),
+      reaction: reactionIndicatorBuilder.call(context, message, onTap),
       child: child,
     );
   }

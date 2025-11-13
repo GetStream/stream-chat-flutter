@@ -139,18 +139,18 @@ void main() {
     testWidgets(
       'renders all reaction icons',
       (WidgetTester tester) async {
-        final message = Message(
-          id: 'test-message',
-          text: 'Hello world',
-          user: User(id: 'test-user'),
-        );
+        final pickerIcons = reactionIcons.map((icon) {
+          return ReactionPickerIcon(
+            type: icon.type,
+            builder: icon.builder,
+          );
+        });
 
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             ReactionPickerIconList(
-              message: message,
-              reactionIcons: reactionIcons,
-              onReactionPicked: (_) {},
+              reactionIcons: [...pickerIcons],
+              onIconPicked: (_) {},
             ),
           ),
         );
@@ -164,24 +164,22 @@ void main() {
     );
 
     testWidgets(
-      'triggers onReactionPicked when a reaction icon is tapped',
+      'triggers onIconPicked when a reaction icon is tapped',
       (WidgetTester tester) async {
-        final message = Message(
-          id: 'test-message',
-          text: 'Hello world',
-          user: User(id: 'test-user'),
-        );
+        final pickerIcons = reactionIcons.map((icon) {
+          return ReactionPickerIcon(
+            type: icon.type,
+            builder: icon.builder,
+          );
+        });
 
-        Reaction? pickedReaction;
+        ReactionPickerIcon? pickedIcon;
 
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             ReactionPickerIconList(
-              message: message,
-              reactionIcons: reactionIcons,
-              onReactionPicked: (reaction) {
-                pickedReaction = reaction;
-              },
+              reactionIcons: [...pickerIcons],
+              onIconPicked: (icon) => pickedIcon = icon,
             ),
           ),
         );
@@ -194,26 +192,26 @@ void main() {
         await tester.pump();
 
         // Verify callback was triggered with correct reaction type
-        expect(pickedReaction, isNotNull);
-        expect(pickedReaction!.type, 'love');
+        expect(pickedIcon, isNotNull);
+        expect(pickedIcon!.type, 'love');
       },
     );
 
     testWidgets(
       'shows reaction icons with animation',
       (WidgetTester tester) async {
-        final message = Message(
-          id: 'test-message',
-          text: 'Hello world',
-          user: User(id: 'test-user'),
-        );
+        final pickerIcons = reactionIcons.map((icon) {
+          return ReactionPickerIcon(
+            type: icon.type,
+            builder: icon.builder,
+          );
+        });
 
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             ReactionPickerIconList(
-              message: message,
-              reactionIcons: reactionIcons,
-              onReactionPicked: (_) {},
+              reactionIcons: [...pickerIcons],
+              onIconPicked: (_) {},
             ),
           ),
         );
@@ -233,29 +231,23 @@ void main() {
     );
 
     testWidgets(
-      'properly handles message with existing reactions',
+      'properly handles icons with selected state',
       (WidgetTester tester) async {
-        // Create a message with an existing reaction
-        final message = Message(
-          id: 'test-message',
-          text: 'Hello world',
-          user: User(id: 'test-user'),
-          ownReactions: [
-            Reaction(
-              type: 'love',
-              messageId: 'test-message',
-              userId: 'test-user',
-            ),
-          ],
-        );
+        // Create icons with one being selected
+        final pickerIcons = reactionIcons.map((icon) {
+          return ReactionPickerIcon(
+            type: icon.type,
+            builder: icon.builder,
+            isSelected: icon.type == 'love', // First icon is selected
+          );
+        });
 
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             Material(
               child: ReactionPickerIconList(
-                message: message,
-                reactionIcons: reactionIcons,
-                onReactionPicked: (_) {},
+                reactionIcons: [...pickerIcons],
+                onIconPicked: (_) {},
               ),
             ),
           ),
@@ -275,20 +267,19 @@ void main() {
     testWidgets(
       'updates when reactionIcons change',
       (WidgetTester tester) async {
-        final message = Message(
-          id: 'test-message',
-          text: 'Hello world',
-          user: User(id: 'test-user'),
-        );
-
         // Build with initial set of reaction icons
+        final initialIcons = reactionIcons.sublist(0, 2).map((icon) {
+          return ReactionPickerIcon(
+            type: icon.type,
+            builder: icon.builder,
+          );
+        });
+
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             ReactionPickerIconList(
-              message: message,
-              // Only first two reactions
-              reactionIcons: reactionIcons.sublist(0, 2),
-              onReactionPicked: (_) {},
+              reactionIcons: [...initialIcons],
+              onIconPicked: (_) {},
             ),
           ),
         );
@@ -297,12 +288,18 @@ void main() {
         expect(find.byType(IconButton), findsNWidgets(2));
 
         // Rebuild with all reaction icons
+        final allIcons = reactionIcons.map((icon) {
+          return ReactionPickerIcon(
+            type: icon.type,
+            builder: icon.builder,
+          );
+        });
+
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             ReactionPickerIconList(
-              message: message,
-              reactionIcons: reactionIcons, // All three reactions
-              onReactionPicked: (_) {},
+              reactionIcons: [...allIcons],
+              onIconPicked: (_) {},
             ),
           ),
         );
@@ -321,18 +318,18 @@ void main() {
           fileName: 'reaction_picker_icon_list_$theme',
           constraints: const BoxConstraints.tightFor(width: 400, height: 100),
           builder: () {
-            final message = Message(
-              id: 'test-message',
-              text: 'Hello world',
-              user: User(id: 'test-user'),
-            );
+            final pickerIcons = reactionIcons.map((icon) {
+              return ReactionPickerIcon(
+                type: icon.type,
+                builder: icon.builder,
+              );
+            });
 
             return _wrapWithMaterialApp(
               brightness: brightness,
               ReactionPickerIconList(
-                message: message,
-                reactionIcons: reactionIcons,
-                onReactionPicked: (_) {},
+                reactionIcons: [...pickerIcons],
+                onIconPicked: (_) {},
               ),
             );
           },
@@ -343,25 +340,19 @@ void main() {
           fileName: 'reaction_picker_icon_list_selected_$theme',
           constraints: const BoxConstraints.tightFor(width: 400, height: 100),
           builder: () {
-            final message = Message(
-              id: 'test-message',
-              text: 'Hello world',
-              user: User(id: 'test-user'),
-              ownReactions: [
-                Reaction(
-                  type: 'love',
-                  messageId: 'test-message',
-                  userId: 'test-user',
-                ),
-              ],
-            );
+            final pickerIcons = reactionIcons.map((icon) {
+              return ReactionPickerIcon(
+                type: icon.type,
+                builder: icon.builder,
+                isSelected: icon.type == 'love', // First icon is selected
+              );
+            });
 
             return _wrapWithMaterialApp(
               brightness: brightness,
               ReactionPickerIconList(
-                message: message,
-                reactionIcons: reactionIcons,
-                onReactionPicked: (_) {},
+                reactionIcons: [...pickerIcons],
+                onIconPicked: (_) {},
               ),
             );
           },
