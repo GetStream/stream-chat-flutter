@@ -11,6 +11,7 @@ This guide includes breaking changes grouped by release phase:
 ### 🚧 Upcoming Beta
 
 - [onAttachmentTap](#-onattachmenttap)
+- [ReactionPickerIconList](#-reactionpickericonlist)
 
 ### 🚧 v10.0.0-beta.8
 
@@ -112,6 +113,62 @@ StreamMessageWidget(
 > - Must return `FutureOr<bool>` - `true` if handled, `false` for default behavior
 > - Default behavior automatically handles URL previews, images, videos, and giphys
 > - Supports both synchronous and asynchronous operations
+
+---
+
+### 🛠 ReactionPickerIconList
+
+#### Key Changes:
+
+- `message` parameter has been removed
+- `reactionIcons` type changed from `List<StreamReactionIcon>` to `List<ReactionPickerIcon>`
+- `onReactionPicked` callback renamed to `onIconPicked` with new signature: `ValueSetter<ReactionPickerIcon>`
+- `iconBuilder` parameter changed from default value to nullable with internal fallback
+- Message-specific logic (checking for own reactions) moved to parent widget
+
+#### Migration Steps:
+
+**Before:**
+```dart
+ReactionPickerIconList(
+  message: message,
+  reactionIcons: icons,
+  onReactionPicked: (reaction) {
+    // Handle reaction
+    channel.sendReaction(message, reaction);
+  },
+)
+```
+
+**After:**
+```dart
+// Map StreamReactionIcon to ReactionPickerIcon with selection state
+final ownReactions = [...?message.ownReactions];
+final ownReactionsMap = {for (final it in ownReactions) it.type: it};
+
+final pickerIcons = icons.map((icon) {
+  return ReactionPickerIcon(
+    type: icon.type,
+    builder: icon.builder,
+    isSelected: ownReactionsMap[icon.type] != null,
+  );
+}).toList();
+
+ReactionPickerIconList(
+  reactionIcons: pickerIcons,
+  onIconPicked: (pickerIcon) {
+    final reaction = ownReactionsMap[pickerIcon.type] ?? 
+                     Reaction(type: pickerIcon.type);
+    // Handle reaction
+    channel.sendReaction(message, reaction);
+  },
+)
+```
+
+> ⚠️ **Important:**  
+> - This is typically an internal widget used by `StreamReactionPicker`
+> - If you were using it directly, you now need to handle reaction selection state externally
+> - Use `StreamReactionPicker` for most use cases instead of `ReactionPickerIconList`
 
 ---
 
@@ -831,6 +888,7 @@ StreamMessageWidget(
 - ✅ Update `onAttachmentTap` callback signature to include `BuildContext` as first parameter
 - ✅ Return `FutureOr<bool>` from `onAttachmentTap` - `true` if handled, `false` for default behavior
 - ✅ Leverage automatic fallback to default handling for standard attachment types (images, videos, URLs)
+- ✅ Update any direct usage of `ReactionPickerIconList` to handle reaction selection state externally
 
 ### For v10.0.0-beta.8:
 - ✅ Replace `customAttachmentPickerOptions` with `attachmentPickerOptionsBuilder` to access and modify default options
