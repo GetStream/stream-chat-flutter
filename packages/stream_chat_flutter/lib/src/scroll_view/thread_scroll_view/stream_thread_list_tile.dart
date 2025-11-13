@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/channel/stream_draft_message_preview_text.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
