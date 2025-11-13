@@ -2,6 +2,10 @@
 
 ✅ Added
 
+- Added `MessagePreviewFormatter` interface and `StreamMessagePreviewFormatter` implementation for
+  customizing message preview text formatting in channel lists and draft messages.
+- Added `messagePreviewFormatter` property to `StreamChatConfigurationData` for global customization
+  of message preview formatting.
 - Added formatter properties to theme data classes for customizing date/timestamp
   formatting. [[#2312]](https://github.com/GetStream/stream-chat-flutter/issues/2312) [[#2406]](https://github.com/GetStream/stream-chat-flutter/issues/2406)
 
