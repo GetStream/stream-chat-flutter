@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// {@template onReactionPicked}
+/// Callback called when a reaction is picked.
+/// {@endtemplate}
+typedef OnReactionPicked = ValueSetter<Reaction>;
+
 /// {@template reactionPickerBuilder}
 /// Function signature for building a custom reaction picker widget.
 ///
@@ -33,9 +38,11 @@ class StreamReactionPicker extends StatelessWidget {
   /// {@macro streamReactionPicker}
   const StreamReactionPicker({
     super.key,
+    this.onReactionPicked,
     required this.message,
     required this.reactionIcons,
-    this.onReactionPicked,
+    this.reactionIconBuilder,
+    this.backgroundColor,
     this.padding = const EdgeInsets.all(4),
     this.scrollable = true,
     this.borderRadius = const BorderRadius.all(Radius.circular(24)),
@@ -83,6 +90,12 @@ class StreamReactionPicker extends StatelessWidget {
   /// {@macro onReactionPressed}
   final OnReactionPicked? onReactionPicked;
 
+  /// Optional custom builder for reaction picker icons.
+  final ReactionPickerIconBuilder? reactionIconBuilder;
+
+  /// Background color for the reaction picker.
+  final Color? backgroundColor;
+
   /// Padding around the reaction picker.
   ///
   /// Defaults to `EdgeInsets.all(4)`.
@@ -102,10 +115,31 @@ class StreamReactionPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
+    final ownReactions = [...?message.ownReactions];
+    final ownReactionsMap = {for (final it in ownReactions) it.type: it};
+
+    final indicatorIcons = reactionIcons.map(
+      (reactionIcon) {
+        final reactionType = reactionIcon.type;
+
+        return ReactionPickerIcon(
+          type: reactionType,
+          builder: reactionIcon.builder,
+          // If the reaction is present in ownReactions, it is selected.
+          isSelected: ownReactionsMap[reactionType] != null,
+        );
+      },
+    );
+
     final reactionPicker = ReactionPickerIconList(
-      message: message,
-      reactionIcons: reactionIcons,
-      onReactionPicked: onReactionPicked,
+      iconBuilder: reactionIconBuilder,
+      reactionIcons: [...indicatorIcons],
+      onIconPicked: (reactionIcon) {
+        final reactionType = reactionIcon.type;
+        final reaction = ownReactionsMap[reactionType];
+
+        return onReactionPicked?.call(reaction ?? Reaction(type: reactionType));
+      },
     );
 
     final isSinglePickerIcon = reactionIcons.length == 1;
@@ -117,7 +151,7 @@ class StreamReactionPicker extends StatelessWidget {
     return Material(
       borderRadius: borderRadius,
       clipBehavior: Clip.antiAlias,
-      color: theme.colorTheme.barsBg,
+      color: backgroundColor ?? theme.colorTheme.barsBg,
       child: Padding(
         padding: padding.add(extraPadding),
         child: switch (scrollable) {

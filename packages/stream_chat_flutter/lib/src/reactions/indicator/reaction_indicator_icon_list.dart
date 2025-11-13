@@ -20,7 +20,7 @@ typedef ReactionIndicatorIconBuilder = Widget Function(
 /// A widget that displays a list of reactionIcons that users have reacted with
 /// on a message.
 ///
-/// also see:
+/// See also:
 /// - [StreamReactionIndicator], which is a higher-level widget that uses this
 ///   widget to display a reaction indicator in a modal or inline.
 /// {@endtemplate}
@@ -29,8 +29,8 @@ class ReactionIndicatorIconList extends StatelessWidget {
   const ReactionIndicatorIconList({
     super.key,
     required this.indicatorIcons,
-    this.iconBuilder = _defaultIconBuilder,
-  });
+    ReactionIndicatorIconBuilder? iconBuilder,
+  }) : iconBuilder = iconBuilder ?? _defaultIconBuilder;
 
   /// The list of available reaction indicator icons.
   final List<ReactionIndicatorIcon> indicatorIcons;

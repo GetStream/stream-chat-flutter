@@ -100,6 +100,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.imageAttachmentThumbnailCropType = 'center',
     this.attachmentActionsModalBuilder,
     this.reactionPickerBuilder = StreamReactionPicker.builder,
+    this.reactionIndicatorBuilder = StreamReactionIndicator.builder,
   });
 
   /// {@template onMentionTap}
@@ -386,6 +387,9 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@macro reactionPickerBuilder}
   final ReactionPickerBuilder reactionPickerBuilder;
 
+  /// {@macro reactionIndicatorBuilder}
+  final ReactionIndicatorBuilder reactionIndicatorBuilder;
+
   /// Size of the image attachment thumbnail.
   final Size imageAttachmentThumbnailSize;
 
@@ -469,6 +473,7 @@ class StreamMessageWidget extends StatefulWidget {
     String? imageAttachmentThumbnailCropType,
     AttachmentActionsBuilder? attachmentActionsModalBuilder,
     ReactionPickerBuilder? reactionPickerBuilder,
+    ReactionIndicatorBuilder? reactionIndicatorBuilder,
   }) {
     return StreamMessageWidget(
       key: key ?? this.key,
@@ -545,6 +550,8 @@ class StreamMessageWidget extends StatefulWidget {
           attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
       reactionPickerBuilder:
           reactionPickerBuilder ?? this.reactionPickerBuilder,
+      reactionIndicatorBuilder:
+          reactionIndicatorBuilder ?? this.reactionIndicatorBuilder,
     );
   }
 
@@ -770,6 +777,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                     widget.bottomRowBuilderWithDefaultWidget,
                 onUserAvatarTap: widget.onUserAvatarTap,
                 userAvatarBuilder: widget.userAvatarBuilder,
+                reactionIndicatorBuilder: widget.reactionIndicatorBuilder,
               ),
             ),
           ),
