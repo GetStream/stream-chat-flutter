@@ -8,7 +8,7 @@ void main() {
     test('toLocation should map the entity into Location', () {
       final createdAt = DateTime.now();
       final updatedAt = DateTime.now();
-      final endAt = DateTime.now().add(const Duration(hours: 1));
+      final endAt = DateTime.timestamp().add(const Duration(hours: 1));
 
       final entity = LocationEntity(
         channelCid: 'testCid',
@@ -37,9 +37,9 @@ void main() {
     });
 
     test('toEntity should map the Location into LocationEntity', () {
-      final createdAt = DateTime.now();
-      final updatedAt = DateTime.now();
-      final endAt = DateTime.now().add(const Duration(hours: 1));
+      final createdAt = DateTime.timestamp();
+      final updatedAt = DateTime.timestamp();
+      final endAt = DateTime.timestamp().add(const Duration(hours: 1));
 
       final location = Location(
         channelCid: 'testCid',
@@ -68,9 +68,9 @@ void main() {
     });
 
     test('roundtrip conversion should preserve data', () {
-      final createdAt = DateTime.now();
-      final updatedAt = DateTime.now();
-      final endAt = DateTime.now().add(const Duration(hours: 1));
+      final createdAt = DateTime.timestamp();
+      final updatedAt = DateTime.timestamp();
+      final endAt = DateTime.timestamp().add(const Duration(hours: 1));
 
       final originalLocation = Location(
         channelCid: 'testCid',
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('should handle live location conversion', () {
-      final endAt = DateTime.now().add(const Duration(hours: 1));
+      final endAt = DateTime.timestamp().add(const Duration(hours: 1));
       final location = Location(
         channelCid: 'testCid',
         userId: 'testUserId',
