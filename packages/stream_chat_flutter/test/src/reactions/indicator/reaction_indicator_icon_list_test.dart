@@ -248,4 +248,3 @@ Widget _wrapWithMaterialApp(
     ),
   );
 }
-
