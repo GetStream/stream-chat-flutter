@@ -18,18 +18,13 @@ class StreamDraftMessagePreviewText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
+    final config = StreamChatConfiguration.of(context);
+    final formatter = config.messagePreviewFormatter;
 
-    final previewTextSpan = TextSpan(
-      text: '${context.translations.draftLabel}: ',
-      style: textStyle?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: colorTheme.accentPrimary,
-      ),
-      children: [
-        TextSpan(text: draftMessage.text, style: textStyle),
-      ],
+    final previewTextSpan = formatter.formatDraftMessage(
+      context,
+      draftMessage,
+      textStyle: textStyle,
     );
 
     return Text.rich(
