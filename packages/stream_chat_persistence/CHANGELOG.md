@@ -1,3 +1,10 @@
+## Upcoming
+
+✅ Added
+
+- Added support for `Read.lastDeliveredAt` and `Read.lastDeliveredMessageId` fields to track message
+  delivery receipts.
+
 ## 9.19.0
 
 - Updated `stream_chat` dependency to [`9.19.0`](https://pub.dev/packages/stream_chat/changelog).

@@ -77,6 +77,10 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
           : ChannelPushPreference.fromJson(
               json['channel_push_preference'] as Map<String, dynamic>),
       channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
+      lastDeliveredAt: json['last_delivered_at'] == null
+          ? null
+          : DateTime.parse(json['last_delivered_at'] as String),
+      lastDeliveredMessageId: json['last_delivered_message_id'] as String?,
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
       isLocal: json['is_local'] as bool? ?? false,
     );
@@ -127,6 +131,10 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
         'channel_push_preference': value,
       if (instance.channelMessageCount case final value?)
         'channel_message_count': value,
+      if (instance.lastDeliveredAt?.toIso8601String() case final value?)
+        'last_delivered_at': value,
+      if (instance.lastDeliveredMessageId case final value?)
+        'last_delivered_message_id': value,
       'extra_data': instance.extraData,
     };
 

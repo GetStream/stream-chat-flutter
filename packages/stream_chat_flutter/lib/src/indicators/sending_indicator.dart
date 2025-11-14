@@ -11,41 +11,59 @@ class StreamSendingIndicator extends StatelessWidget {
     super.key,
     required this.message,
     this.isMessageRead = false,
+    this.isMessageDelivered = false,
     this.size = 12,
   });
 
-  /// Message for sending indicator
+  /// The message whose sending status is to be shown.
   final Message message;
 
-  /// Flag if message is read
+  /// Whether the message is read by the recipient.
   final bool isMessageRead;
 
-  /// Size for message
+  /// Whether the message is delivered to the recipient.
+  final bool isMessageDelivered;
+
+  /// The size of the indicator icon.
   final double? size;
 
   @override
   Widget build(BuildContext context) {
+    final streamChatTheme = StreamChatTheme.of(context);
+    final colorTheme = streamChatTheme.colorTheme;
+
     if (isMessageRead) {
       return StreamSvgIcon(
         size: size,
         icon: StreamSvgIcons.checkAll,
-        color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+        color: colorTheme.accentPrimary,
       );
     }
+
+    if (isMessageDelivered) {
+      return StreamSvgIcon(
+        size: size,
+        icon: StreamSvgIcons.checkAll,
+        color: colorTheme.textLowEmphasis,
+      );
+    }
+
     if (message.state.isCompleted) {
       return StreamSvgIcon(
         size: size,
         icon: StreamSvgIcons.check,
-        color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+        color: colorTheme.textLowEmphasis,
       );
     }
+
     if (message.state.isOutgoing) {
       return StreamSvgIcon(
         size: size,
         icon: StreamSvgIcons.time,
-        color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+        color: colorTheme.textLowEmphasis,
       );
     }
+
     return const Empty();
   }
 }

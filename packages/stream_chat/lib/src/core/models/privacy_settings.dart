@@ -10,6 +10,7 @@ class PrivacySettings extends Equatable {
   const PrivacySettings({
     this.typingIndicators,
     this.readReceipts,
+    this.deliveryReceipts,
   });
 
   /// Create a new instance from json.
@@ -23,11 +24,14 @@ class PrivacySettings extends Equatable {
   /// The settings for the read receipt events.
   final ReadReceipts? readReceipts;
 
+  /// The settings for the delivery receipt events.
+  final DeliveryReceipts? deliveryReceipts;
+
   /// Serialize to json.
   Map<String, dynamic> toJson() => _$PrivacySettingsToJson(this);
 
   @override
-  List<Object?> get props => [typingIndicators, readReceipts];
+  List<Object?> get props => [typingIndicators, readReceipts, deliveryReceipts];
 }
 
 /// The settings for typing indicator events.
@@ -76,6 +80,32 @@ class ReadReceipts extends Equatable {
 
   /// Serialize to json.
   Map<String, dynamic> toJson() => _$ReadReceiptsToJson(this);
+
+  @override
+  List<Object?> get props => [enabled];
+}
+
+/// The settings for the delivery receipt events.
+@JsonSerializable(includeIfNull: false)
+class DeliveryReceipts extends Equatable {
+  /// Create a new instance of [DeliveryReceipts].
+  const DeliveryReceipts({
+    this.enabled = true,
+  });
+
+  /// Create a new instance from json.
+  factory DeliveryReceipts.fromJson(Map<String, dynamic> json) {
+    return _$DeliveryReceiptsFromJson(json);
+  }
+
+  /// Whether the delivery receipt events are enabled for the user.
+  ///
+  /// If False, the user delivery events will not be sent to other users, along
+  /// with the user's delivery state.
+  final bool enabled;
+
+  /// Serialize to json.
+  Map<String, dynamic> toJson() => _$DeliveryReceiptsToJson(this);
 
   @override
   List<Object?> get props => [enabled];

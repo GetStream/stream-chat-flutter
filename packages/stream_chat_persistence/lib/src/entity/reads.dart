@@ -21,6 +21,12 @@ class Reads extends Table {
   /// Id of the last read message
   TextColumn get lastReadMessageId => text().nullable()();
 
+  /// Date of the last delivered message
+  DateTimeColumn get lastDeliveredAt => dateTime().nullable()();
+
+  /// Id of the last delivered message
+  TextColumn get lastDeliveredMessageId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {
         userId,

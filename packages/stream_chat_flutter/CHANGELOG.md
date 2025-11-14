@@ -2,6 +2,8 @@
 
 ✅ Added
 
+- Added delivered status to `SendingIndicator` (double grey check for delivered, double accentPrimary check for read).
+- Added `isMessageDelivered` parameter to `SendingIndicator` widget.
 - Added `MessagePreviewFormatter` interface and `StreamMessagePreviewFormatter` implementation for
   customizing message preview text formatting in channel lists and draft messages.
 - Added `messagePreviewFormatter` property to `StreamChatConfigurationData` for global customization

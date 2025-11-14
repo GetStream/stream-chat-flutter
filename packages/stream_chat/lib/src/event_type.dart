@@ -177,4 +177,7 @@ class EventType {
   /// Local event sent when channel push notification preference is updated.
   static const String channelPushPreferenceUpdated =
       'channel.push_preference.updated';
+
+  /// Event sent when a message is marked as delivered.
+  static const String messageDelivered = 'message.delivered';
 }

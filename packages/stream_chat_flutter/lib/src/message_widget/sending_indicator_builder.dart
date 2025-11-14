@@ -63,15 +63,16 @@ class SendingIndicatorBuilder extends StatelessWidget {
       stream: channel.state?.readStream,
       initialData: channel.state?.read,
       builder: (context, data) {
-        final readList = data.where((it) =>
-            it.user.id != streamChat.currentUser?.id &&
-            (it.lastRead.isAfter(message.createdAt) ||
-                it.lastRead.isAtSameMomentAs(message.createdAt)));
-
+        final readList = data.readsOf(message: message);
         final isMessageRead = readList.isNotEmpty;
+
+        final deliveriesList = data.deliveriesOf(message: message);
+        final isMessageDelivered = deliveriesList.isNotEmpty;
+
         Widget child = StreamSendingIndicator(
           message: message,
           isMessageRead: isMessageRead,
+          isMessageDelivered: isMessageDelivered,
           size: style?.fontSize,
         );
 

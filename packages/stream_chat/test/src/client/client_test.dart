@@ -2917,6 +2917,28 @@ void main() {
       verifyNoMoreInteractions(api.channel);
     });
 
+    test('`.markChannelsDelivered`', () async {
+      final deliveries = [
+        const MessageDelivery(
+          channelCid: 'messaging:test-channel-1',
+          messageId: 'test-message-id-1',
+        ),
+        const MessageDelivery(
+          channelCid: 'messaging:test-channel-2',
+          messageId: 'test-message-id-2',
+        ),
+      ];
+
+      when(() => api.channel.markChannelsDelivered(deliveries))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.markChannelsDelivered(deliveries);
+      expect(res, isNotNull);
+
+      verify(() => api.channel.markChannelsDelivered(deliveries)).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
     test('`.sendEvent`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
