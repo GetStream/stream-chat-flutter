@@ -26,6 +26,7 @@ void main() {
     String? language,
     TextStyle? textStyle,
     ChannelModel? channel,
+    StreamChatConfigurationData? configData,
   }) async {
     final client = MockClient();
     final clientState = MockClientState();
@@ -39,6 +40,7 @@ void main() {
         home: Scaffold(
           body: StreamChat(
             client: client,
+            streamChatConfigData: configData,
             streamChatThemeData: StreamChatThemeData.light(),
             child: Center(
               child: StreamMessagePreviewText(
@@ -539,4 +541,190 @@ void main() {
       );
     });
   });
+
+  group('Custom MessagePreviewFormatter', () {
+    const customFormatter = _CustomMessagePreviewFormatter();
+
+    testWidgets('can override formatCurrentUserMessage', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 3,
+      );
+
+      final message = Message(
+        text: 'Hello everyone',
+        user: User(id: 'test-user-id', name: 'Test User'), // Current user
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        channel: channel,
+        configData: StreamChatConfigurationData(
+          messagePreviewFormatter: customFormatter,
+        ),
+      );
+
+      // Custom formatter removes "You:" prefix
+      expect(find.text('Hello everyone'), findsOneWidget);
+      expect(find.text('You: Hello everyone'), findsNothing);
+    });
+
+    testWidgets('can override formatGroupMessage', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 3,
+      );
+
+      final message = Message(
+        text: 'Hello',
+        user: User(id: 'other-user-id', name: 'John Doe'),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        channel: channel,
+        configData: StreamChatConfigurationData(
+          messagePreviewFormatter: customFormatter,
+        ),
+      );
+
+      // Custom formatter uses "says:" instead of ":"
+      expect(find.text('John Doe says: Hello'), findsOneWidget);
+    });
+
+    testWidgets('can override formatPollMessage', (tester) async {
+      final message = Message(
+        user: User(id: 'other-user-id', name: 'Message Sender'),
+        poll: Poll(
+          name: 'Favorite Color?',
+          options: const [
+            PollOption(id: 'option-1', text: 'Red'),
+            PollOption(id: 'option-2', text: 'Blue'),
+          ],
+        ),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        configData: StreamChatConfigurationData(
+          messagePreviewFormatter: customFormatter,
+        ),
+      );
+
+      // Custom formatter uses different format
+      expect(find.text('📊 Poll: Favorite Color?'), findsOneWidget);
+    });
+
+    testWidgets('can override formatMessageAttachments', (tester) async {
+      final message = Message(
+        text: '',
+        user: User(id: 'user-id'),
+        attachments: [
+          Attachment(
+            type: 'product',
+            extraData: const {'title': 'iPhone'},
+          ),
+        ],
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        configData: StreamChatConfigurationData(
+          messagePreviewFormatter: customFormatter,
+        ),
+      );
+
+      // Custom formatter handles custom attachment type
+      expect(find.text('🛍️ iPhone'), findsOneWidget);
+    });
+
+    testWidgets('can override formatDirectMessage', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 2,
+      );
+
+      final message = Message(
+        text: 'Hey there',
+        user: User(id: 'other-user-id', name: 'Jane Doe'),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        channel: channel,
+        configData: StreamChatConfigurationData(
+          messagePreviewFormatter: customFormatter,
+        ),
+      );
+
+      // Custom formatter adds emoji prefix
+      expect(find.text('💬 Hey there'), findsOneWidget);
+    });
+  });
+}
+
+// Custom formatter for testing overrides
+class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
+  const _CustomMessagePreviewFormatter();
+
+  @override
+  String formatCurrentUserMessage(BuildContext context, String messageText) {
+    // Remove "You:" prefix
+    return messageText;
+  }
+
+  @override
+  String formatGroupMessage(
+    BuildContext context,
+    User? messageAuthor,
+    String messageText,
+  ) {
+    final authorName = messageAuthor?.name;
+    if (authorName == null || authorName.isEmpty) return messageText;
+
+    // Use "says:" instead of ":"
+    return '$authorName says: $messageText';
+  }
+
+  @override
+  String formatPollMessage(
+    BuildContext context,
+    Poll poll,
+    User? currentUser,
+  ) {
+    // Simple format with "Poll:" prefix
+    return poll.name.isEmpty ? '📊 Poll' : '📊 Poll: ${poll.name}';
+  }
+
+  @override
+  String formatDirectMessage(BuildContext context, String messageText) {
+    // Add emoji prefix
+    return '💬 $messageText';
+  }
+
+  @override
+  String? formatMessageAttachments(
+    BuildContext context,
+    String? messageText,
+    Iterable<Attachment> attachments,
+  ) {
+    final attachment = attachments.firstOrNull;
+
+    // Handle custom product attachment type
+    if (attachment?.type == 'product') {
+      final title = attachment?.extraData['title'] as String?;
+      return '🛍️ ${title ?? "Product"}';
+    }
+
+    // Fallback to default implementation
+    return super.formatMessageAttachments(context, messageText, attachments);
+  }
 }
