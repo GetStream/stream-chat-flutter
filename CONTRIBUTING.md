@@ -160,6 +160,10 @@ PR titles should follow the format below:
 4. *types* other than `fix:` and `feat:` are allowed, for example **[@commitlint/config-conventional](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional)** (based on the **[the Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines)**) recommends `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others.
 5. *footers* other than `BREAKING CHANGE: <description>` may be provided and follow a convention similar to **[git trailer format](https://git-scm.com/docs/git-interpret-trailers)**.
 
+### CHANGELOG.md Updates 📝
+
+After making changes, please ensure you update the `CHANGELOG.md` file located in the root of each package you modified.
+
 ### Testing
 
 At Stream, we value testing. Every PR should include passing tests for existing and new features. To run our test suite locally, you can use the following *Melos* command:
@@ -168,12 +172,6 @@ At Stream, we value testing. Every PR should include passing tests for existing 
 > melos run test:dart
 > melos run test:flutter
 ```
-
-### Our Process
-
-By default, our development branch is `develop`. Contributors should create new PRs based on `develop` when working on new features. 
-
-Develop is merged into master after the team performs various automated and QA tests on the branch. Master can be considered our stable branch, it represents the latest published release on pub.dev. 
 
 ---
 

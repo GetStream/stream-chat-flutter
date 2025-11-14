@@ -115,6 +115,7 @@ class StreamChatConfigurationData {
     List<StreamReactionIcon>? reactionIcons,
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = false,
+    MessagePreviewFormatter? messagePreviewFormatter,
   }) {
     return StreamChatConfigurationData._(
       loadingIndicator: loadingIndicator,
@@ -123,6 +124,8 @@ class StreamChatConfigurationData {
       reactionIcons: reactionIcons ?? _defaultReactionIcons,
       enforceUniqueReactions: enforceUniqueReactions ?? true,
       draftMessagesEnabled: draftMessagesEnabled,
+      messagePreviewFormatter:
+          messagePreviewFormatter ?? MessagePreviewFormatter(),
     );
   }
 
@@ -133,6 +136,7 @@ class StreamChatConfigurationData {
     required this.reactionIcons,
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
+    required this.messagePreviewFormatter,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
@@ -144,6 +148,7 @@ class StreamChatConfigurationData {
     List<StreamReactionIcon>? reactionIcons,
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
+    MessagePreviewFormatter? messagePreviewFormatter,
   }) {
     return StreamChatConfigurationData(
       reactionIcons: reactionIcons ?? this.reactionIcons,
@@ -153,6 +158,8 @@ class StreamChatConfigurationData {
       enforceUniqueReactions:
           enforceUniqueReactions ?? this.enforceUniqueReactions,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
+      messagePreviewFormatter:
+          messagePreviewFormatter ?? this.messagePreviewFormatter,
     );
   }
 
@@ -175,6 +182,11 @@ class StreamChatConfigurationData {
 
   /// Whether a new reaction should replace the existing one.
   final bool enforceUniqueReactions;
+
+  /// The formatter used for message previews throughout the application.
+  ///
+  /// Defaults to [MessagePreviewFormatter].
+  final MessagePreviewFormatter messagePreviewFormatter;
 
   static final _defaultReactionIcons = [
     StreamReactionIcon(

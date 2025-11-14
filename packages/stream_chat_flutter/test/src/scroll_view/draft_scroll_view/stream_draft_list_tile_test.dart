@@ -1,5 +1,6 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -31,6 +32,62 @@ void main() {
       ),
     );
   }
+
+  group('Formatter Tests', () {
+    testWidgets(
+      'StreamDraftListTile displays custom formatted timestamp',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            StreamDraftListTileTheme(
+              data: StreamDraftListTileThemeData(
+                draftTimestampFormatter: (context, timestamp) {
+                  return 'CUSTOM_FORMAT_20_07_2022';
+                },
+              ),
+              child: StreamDraftListTile(draft: draft, currentUser: user),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Verify the custom formatted text is visible
+        expect(find.text('CUSTOM_FORMAT_20_07_2022'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'StreamDraftListTile inner theme overrides outer theme',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            StreamDraftListTileTheme(
+              data: StreamDraftListTileThemeData(
+                draftTimestampFormatter: (context, timestamp) {
+                  return 'OUTER_FORMATTER';
+                },
+              ),
+              child: StreamDraftListTileTheme(
+                data: StreamDraftListTileThemeData(
+                  draftTimestampFormatter: (context, timestamp) {
+                    return 'INNER_FORMATTER';
+                  },
+                ),
+                child: StreamDraftListTile(draft: draft, currentUser: user),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Inner formatter should be used
+        expect(find.text('INNER_FORMATTER'), findsOneWidget);
+        expect(find.text('OUTER_FORMATTER'), findsNothing);
+      },
+    );
+  });
 }
 
 Widget _wrapWithMaterialApp(

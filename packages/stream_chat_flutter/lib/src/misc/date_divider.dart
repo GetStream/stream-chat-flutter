@@ -12,6 +12,7 @@ class StreamDateDivider extends StatelessWidget {
     super.key,
     required this.dateTime,
     this.uppercase = false,
+    this.formatter,
   });
 
   /// [DateTime] to display
@@ -19,6 +20,9 @@ class StreamDateDivider extends StatelessWidget {
 
   /// If text is uppercase
   final bool uppercase;
+
+  /// Custom formatter for the date
+  final DateFormatter? formatter;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +40,12 @@ class StreamDateDivider extends StatelessWidget {
             color: chatThemeData.colorTheme.barsBg,
           ),
           formatter: (context, date) {
+            if (formatter case final formatter?) {
+              final timestamp = formatter.call(context, date);
+              if (uppercase) return timestamp.toUpperCase();
+              return timestamp;
+            }
+
             final timestamp = switch (date) {
               _ when date.isToday => context.translations.todayLabel,
               _ when date.isYesterday => context.translations.yesterdayLabel,

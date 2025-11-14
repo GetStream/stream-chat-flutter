@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 
 /// {@template channelPreviewTheme}
 /// Overrides the default style of [ChannelPreview] descendants.
@@ -70,6 +71,7 @@ class StreamChannelPreviewThemeData with Diagnosticable {
     this.avatarTheme,
     this.unreadCounterColor,
     this.indicatorIconSize,
+    this.lastMessageAtFormatter,
   });
 
   /// Theme for title
@@ -90,6 +92,21 @@ class StreamChannelPreviewThemeData with Diagnosticable {
   /// Indicator icon size
   final double? indicatorIconSize;
 
+  /// Formatter for the last message timestamp.
+  ///
+  /// If null, uses the default date formatting.
+  ///
+  /// Example:
+  /// ```dart
+  /// StreamChannelPreviewThemeData(
+  ///   lastMessageAtStyle: TextStyle(...),
+  ///   lastMessageAtFormatter: (context, date) {
+  ///     return Jiffy.parseFromDateTime(date).format('d MMMM'); // "23 May"
+  ///   },
+  /// )
+  /// ```
+  final DateFormatter? lastMessageAtFormatter;
+
   /// Copy with theme
   StreamChannelPreviewThemeData copyWith({
     TextStyle? titleStyle,
@@ -98,6 +115,7 @@ class StreamChannelPreviewThemeData with Diagnosticable {
     StreamAvatarThemeData? avatarTheme,
     Color? unreadCounterColor,
     double? indicatorIconSize,
+    DateFormatter? lastMessageAtFormatter,
   }) {
     return StreamChannelPreviewThemeData(
       titleStyle: titleStyle ?? this.titleStyle,
@@ -106,6 +124,8 @@ class StreamChannelPreviewThemeData with Diagnosticable {
       avatarTheme: avatarTheme ?? this.avatarTheme,
       unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
       indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
+      lastMessageAtFormatter:
+          lastMessageAtFormatter ?? this.lastMessageAtFormatter,
     );
   }
 
@@ -125,6 +145,8 @@ class StreamChannelPreviewThemeData with Diagnosticable {
       titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
       unreadCounterColor:
           Color.lerp(a.unreadCounterColor, b.unreadCounterColor, t),
+      lastMessageAtFormatter:
+          t < 0.5 ? a.lastMessageAtFormatter : b.lastMessageAtFormatter,
     );
   }
 
@@ -139,6 +161,8 @@ class StreamChannelPreviewThemeData with Diagnosticable {
           other.lastMessageAtStyle,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       unreadCounterColor: other.unreadCounterColor,
+      lastMessageAtFormatter:
+          other.lastMessageAtFormatter ?? lastMessageAtFormatter,
     );
   }
 
@@ -152,7 +176,8 @@ class StreamChannelPreviewThemeData with Diagnosticable {
           lastMessageAtStyle == other.lastMessageAtStyle &&
           avatarTheme == other.avatarTheme &&
           unreadCounterColor == other.unreadCounterColor &&
-          indicatorIconSize == other.indicatorIconSize;
+          indicatorIconSize == other.indicatorIconSize &&
+          lastMessageAtFormatter == other.lastMessageAtFormatter;
 
   @override
   int get hashCode =>
@@ -161,7 +186,8 @@ class StreamChannelPreviewThemeData with Diagnosticable {
       lastMessageAtStyle.hashCode ^
       avatarTheme.hashCode ^
       unreadCounterColor.hashCode ^
-      indicatorIconSize.hashCode;
+      indicatorIconSize.hashCode ^
+      lastMessageAtFormatter.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -171,6 +197,8 @@ class StreamChannelPreviewThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('subtitleStyle', subtitleStyle))
       ..add(DiagnosticsProperty('lastMessageAtStyle', lastMessageAtStyle))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
-      ..add(ColorProperty('unreadCounterColor', unreadCounterColor));
+      ..add(ColorProperty('unreadCounterColor', unreadCounterColor))
+      ..add(DiagnosticsProperty(
+          'lastMessageAtFormatter', lastMessageAtFormatter));
   }
 }

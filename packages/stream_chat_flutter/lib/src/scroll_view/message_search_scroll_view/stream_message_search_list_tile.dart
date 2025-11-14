@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
+import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a message search item.
@@ -140,6 +141,7 @@ class StreamMessageSearchListTile extends StatelessWidget {
             MessageSearchTileMessageDate(
               message: message,
               textStyle: channelPreviewTheme.lastMessageAtStyle,
+              formatter: channelPreviewTheme.lastMessageAtFormatter,
             ),
           ],
         );
@@ -212,6 +214,7 @@ class MessageSearchTileMessageDate extends StatelessWidget {
     super.key,
     required this.message,
     this.textStyle,
+    this.formatter,
   });
 
   /// The searched message response.
@@ -220,12 +223,16 @@ class MessageSearchTileMessageDate extends StatelessWidget {
   /// The text style to use for the date.
   final TextStyle? textStyle;
 
+  /// An optional formatter to format the date.
+  final DateFormatter? formatter;
+
   @override
   Widget build(BuildContext context) {
     final createdAt = message.createdAt;
     return StreamTimestamp(
       date: createdAt.toLocal(),
       style: textStyle,
+      formatter: formatter,
     );
   }
 }
