@@ -12,7 +12,7 @@ class StreamImageAttachment extends StatelessWidget {
     required this.image,
     this.shape,
     this.constraints = const BoxConstraints(),
-    this.imageThumbnailSize = const Size(400, 400),
+    this.imageThumbnailSize,
     this.imageThumbnailResizeType = 'clip',
     this.imageThumbnailCropType = 'center',
   });
@@ -32,7 +32,7 @@ class StreamImageAttachment extends StatelessWidget {
   final BoxConstraints constraints;
 
   /// Size of the attachment image thumbnail.
-  final Size imageThumbnailSize;
+  final Size? imageThumbnailSize;
 
   /// Resize type of the image attachment thumbnail.
   ///

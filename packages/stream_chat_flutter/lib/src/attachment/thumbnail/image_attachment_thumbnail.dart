@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_size_calculator.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -72,43 +73,64 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = image.file;
-    if (file != null) {
-      return _LocalImageAttachment(
-        file: file,
-        width: width,
-        height: height,
-        fit: fit,
-        errorBuilder: errorBuilder,
-      );
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate optimal thumbnail size once for all paths
+        final effectiveThumbnailSize = switch (thumbnailSize) {
+          final thumbnailSize? => thumbnailSize,
+          _ => ThumbnailSizeCalculator.calculate(
+              targetSize: constraints.biggest,
+              originalSize: image.originalSize,
+              pixelRatio: MediaQuery.devicePixelRatioOf(context),
+            ),
+        };
 
-    var imageUrl = image.thumbUrl ?? image.imageUrl ?? image.assetUrl;
-    if (imageUrl != null) {
-      final thumbnailSize = this.thumbnailSize;
-      if (thumbnailSize != null) {
-        imageUrl = imageUrl.getResizedImageUrl(
-          width: thumbnailSize.width,
-          height: thumbnailSize.height,
-          resize: thumbnailResizeType,
-          crop: thumbnailCropType,
+        final cacheWidth = effectiveThumbnailSize?.width.round();
+        final cacheHeight = effectiveThumbnailSize?.height.round();
+
+        // If the remote image URL is available, we can directly show it using
+        // the _RemoteImageAttachment widget.
+        if (image.thumbUrl ?? image.imageUrl case final imageUrl?) {
+          var resizedImageUrl = imageUrl;
+          if (effectiveThumbnailSize case final thumbnailSize?) {
+            resizedImageUrl = imageUrl.getResizedImageUrl(
+              crop: thumbnailCropType,
+              resize: thumbnailResizeType,
+              width: thumbnailSize.width,
+              height: thumbnailSize.height,
+            );
+          }
+
+          return _RemoteImageAttachment(
+            url: resizedImageUrl,
+            width: width,
+            height: height,
+            fit: fit,
+            cacheWidth: cacheWidth,
+            cacheHeight: cacheHeight,
+            errorBuilder: errorBuilder,
+          );
+        }
+
+        // Otherwise, we try to show the local image file.
+        if (image.file case final file?) {
+          return _LocalImageAttachment(
+            file: file,
+            width: width,
+            height: height,
+            fit: fit,
+            cacheWidth: cacheWidth,
+            cacheHeight: cacheHeight,
+            errorBuilder: errorBuilder,
+          );
+        }
+
+        return errorBuilder(
+          context,
+          'Image attachment is not valid',
+          StackTrace.current,
         );
-      }
-
-      return _RemoteImageAttachment(
-        url: imageUrl,
-        width: width,
-        height: height,
-        fit: fit,
-        errorBuilder: errorBuilder,
-      );
-    }
-
-    // Return error widget if no image is found.
-    return errorBuilder(
-      context,
-      'Image attachment is not valid',
-      StackTrace.current,
+      },
     );
   }
 }
@@ -119,12 +141,16 @@ class _LocalImageAttachment extends StatelessWidget {
     required this.errorBuilder,
     this.width,
     this.height,
+    this.cacheWidth,
+    this.cacheHeight,
     this.fit,
   });
 
   final AttachmentFile file;
   final double? width;
   final double? height;
+  final int? cacheWidth;
+  final int? cacheHeight;
   final BoxFit? fit;
   final ThumbnailErrorBuilder errorBuilder;
 
@@ -136,6 +162,8 @@ class _LocalImageAttachment extends StatelessWidget {
         bytes,
         width: width,
         height: height,
+        cacheWidth: cacheWidth,
+        cacheHeight: cacheHeight,
         fit: fit,
         errorBuilder: errorBuilder,
       );
@@ -147,6 +175,8 @@ class _LocalImageAttachment extends StatelessWidget {
         File(path),
         width: width,
         height: height,
+        cacheWidth: cacheWidth,
+        cacheHeight: cacheHeight,
         fit: fit,
         errorBuilder: errorBuilder,
       );
@@ -167,12 +197,16 @@ class _RemoteImageAttachment extends StatelessWidget {
     required this.errorBuilder,
     this.width,
     this.height,
+    this.cacheWidth,
+    this.cacheHeight,
     this.fit,
   });
 
   final String url;
   final double? width;
   final double? height;
+  final int? cacheWidth;
+  final int? cacheHeight;
   final BoxFit? fit;
   final ThumbnailErrorBuilder errorBuilder;
 
@@ -182,6 +216,8 @@ class _RemoteImageAttachment extends StatelessWidget {
       imageUrl: url,
       width: width,
       height: height,
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
       fit: fit,
       placeholder: (context, __) {
         final image = Image.asset(

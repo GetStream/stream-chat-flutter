@@ -1,9 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template giphyAttachmentThumbnail}
@@ -58,46 +55,16 @@ class StreamGiphyAttachmentThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // If the giphy info is not available, use the image attachment thumbnail
-    // instead.
+    // Get the giphy info based on the selected type.
     final info = giphy.giphyInfo(type);
-    if (info == null) {
-      return StreamImageAttachmentThumbnail(
-        image: giphy,
-        width: width,
-        height: height,
-        fit: fit,
-      );
-    }
-
-    return CachedNetworkImage(
-      imageUrl: info.url,
+    // Build the image attachment thumbnail using the giphy info url if
+    // available or fallback to the original giphy url.
+    return StreamImageAttachmentThumbnail(
+      image: giphy.copyWith(imageUrl: info?.url),
       width: width,
       height: height,
       fit: fit,
-      placeholder: (context, __) {
-        final image = Image.asset(
-          'lib/assets/images/placeholder.png',
-          width: width,
-          height: height,
-          fit: BoxFit.cover,
-          package: 'stream_chat_flutter',
-        );
-
-        final colorTheme = StreamChatTheme.of(context).colorTheme;
-        return Shimmer.fromColors(
-          baseColor: colorTheme.disabled,
-          highlightColor: colorTheme.inputBg,
-          child: image,
-        );
-      },
-      errorWidget: (context, url, error) {
-        return errorBuilder(
-          context,
-          error,
-          StackTrace.current,
-        );
-      },
+      errorBuilder: errorBuilder,
     );
   }
 }
