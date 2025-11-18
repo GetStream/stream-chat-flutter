@@ -77,60 +77,76 @@ class StreamUserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = user.image != null && user.image!.isNotEmpty;
     final streamChatTheme = StreamChatTheme.of(context);
+    final colorTheme = streamChatTheme.colorTheme;
+    final avatarTheme = streamChatTheme.ownMessageTheme.avatarTheme;
     final streamChatConfig = StreamChatConfiguration.of(context);
 
-    final placeholder =
-        this.placeholder ?? streamChatConfig.placeholderUserImage;
+    final effectivePlaceholder = switch (placeholder) {
+      final placeholder? => placeholder,
+      _ => streamChatConfig.placeholderUserImage,
+    };
+
+    final effectiveBorderRadius = borderRadius ?? avatarTheme?.borderRadius;
 
     final backupGradientAvatar = ClipRRect(
-      borderRadius: borderRadius ??
-          streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius ??
-          BorderRadius.zero,
+      borderRadius: effectiveBorderRadius ?? BorderRadius.zero,
       child: streamChatConfig.defaultUserImage(context, user),
     );
 
     Widget avatar = FittedBox(
       fit: BoxFit.cover,
       child: Container(
-        constraints: constraints ??
-            streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
-        child: hasImage
-            ? CachedNetworkImage(
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-                imageUrl: user.image!,
-                errorWidget: (context, __, ___) => backupGradientAvatar,
-                placeholder: placeholder != null
-                    ? (context, __) => placeholder(context, user)
-                    : null,
-                imageBuilder: (context, imageProvider) => DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: borderRadius ??
-                        streamChatTheme
-                            .ownMessageTheme.avatarTheme?.borderRadius,
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
+        constraints: constraints ?? avatarTheme?.constraints,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final imageUrl = user.image;
+            if (imageUrl == null || imageUrl.isEmpty) {
+              return backupGradientAvatar;
+            }
+
+            // Calculate optimal thumbnail size for the avatar
+            final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+            final thumbnailSize = constraints.biggest * devicePixelRatio;
+
+            final cacheWidth = thumbnailSize.width.round();
+            final cacheHeight = thumbnailSize.height.round();
+
+            return CachedNetworkImage(
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+              imageUrl: imageUrl,
+              errorWidget: (_, __, ___) => backupGradientAvatar,
+              placeholder: switch (effectivePlaceholder) {
+                final holder? => (context, __) => holder(context, user),
+                _ => null,
+              },
+              imageBuilder: (context, imageProvider) => DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius ?? avatarTheme?.borderRadius,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: ResizeImage(
+                      imageProvider,
+                      width: cacheWidth,
+                      height: cacheHeight,
                     ),
                   ),
                 ),
-              )
-            : backupGradientAvatar,
+              ),
+            );
+          },
+        ),
       ),
     );
 
     if (selected) {
       avatar = ClipRRect(
-        borderRadius: (borderRadius ??
-                streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius ??
-                BorderRadius.zero) +
+        borderRadius: (effectiveBorderRadius ?? BorderRadius.zero) +
             BorderRadius.circular(selectionThickness),
         child: Container(
-          constraints: constraints ??
-              streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
-          color: selectionColor ?? streamChatTheme.colorTheme.accentPrimary,
+          constraints: constraints ?? avatarTheme?.constraints,
+          color: selectionColor ?? colorTheme.accentPrimary,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
             child: avatar,
@@ -150,7 +166,7 @@ class StreamUserAvatar extends StatelessWidget {
                 alignment: onlineIndicatorAlignment,
                 child: Material(
                   type: MaterialType.circle,
-                  color: streamChatTheme.colorTheme.barsBg,
+                  color: colorTheme.barsBg,
                   child: Container(
                     margin: const EdgeInsets.all(2),
                     constraints: onlineIndicatorConstraints ??
@@ -160,7 +176,7 @@ class StreamUserAvatar extends StatelessWidget {
                         ),
                     child: Material(
                       shape: const CircleBorder(),
-                      color: streamChatTheme.colorTheme.accentInfo,
+                      color: colorTheme.accentInfo,
                     ),
                   ),
                 ),
