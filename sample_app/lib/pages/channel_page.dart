@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/widgets/message_info_sheet.dart';
 import 'package:sample_app/widgets/location/location_attachment.dart';
 import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:sample_app/widgets/location/location_picker_dialog.dart';
 import 'package:sample_app/widgets/location/location_picker_option.dart';
+import 'package:sample_app/widgets/message_info_sheet.dart';
 import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -253,15 +253,9 @@ class _ChannelPageState extends State<ChannelPage> {
       ],
       if (channelConfig?.deliveryEvents == true)
         StreamMessageAction(
-          leading: Icon(
-            Icons.info_outline_rounded,
-            color: colorTheme.textLowEmphasis,
-          ),
           title: const Text('Message Info'),
-          onTap: (message) {
-            Navigator.of(context).pop();
-            MessageInfoSheet.show(context: context, message: message);
-          },
+          leading: const Icon(Icons.info_outline_rounded),
+          action: ShowMessageInfo(message: message),
         ),
     ];
 
@@ -315,6 +309,7 @@ class _ChannelPageState extends State<ChannelPage> {
               EditReminder() => _editReminder(it.message, it.reminder),
               RemoveReminder() => _removeReminder(it.message, it.reminder),
               DeleteMessageForMe() => _deleteMessageForMe(it.message),
+              ShowMessageInfo() => _showMessageInfo(it.message),
               _ => null,
             },
             attachmentBuilders: [locationAttachmentBuilder],
@@ -406,6 +401,10 @@ class _ChannelPageState extends State<ChannelPage> {
     return channel.deleteMessageForMe(message).ignore();
   }
 
+  Future<void> _showMessageInfo(Message message) async {
+    return MessageInfoSheet.show(context: context, message: message);
+  }
+
   bool defaultFilter(Message m) {
     final currentUser = StreamChat.of(context).currentUser;
     final isMyMessage = m.user?.id == currentUser?.id;
@@ -454,4 +453,8 @@ final class RemoveReminder extends ReminderMessageAction {
 
 final class DeleteMessageForMe extends CustomMessageAction {
   const DeleteMessageForMe({required super.message});
+}
+
+final class ShowMessageInfo extends CustomMessageAction {
+  const ShowMessageInfo({required super.message});
 }

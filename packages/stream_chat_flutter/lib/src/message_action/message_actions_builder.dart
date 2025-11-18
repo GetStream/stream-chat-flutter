@@ -113,7 +113,7 @@ class StreamMessageActionsBuilder {
     final canSendReply = channel.canSendReply;
     final canPinMessage = channel.canPinMessage;
     final canQuoteMessage = channel.canQuoteMessage;
-    final canReceiveReadEvents = channel.canReceiveReadEvents;
+    final canReceiveReadEvents = channel.canUseReadReceipts;
     final canUpdateAnyMessage = channel.canUpdateAnyMessage;
     final canUpdateOwnMessage = channel.canUpdateOwnMessage;
     final canDeleteAnyMessage = channel.canDeleteAnyMessage;

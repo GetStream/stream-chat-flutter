@@ -422,6 +422,37 @@ void main() {
       });
     });
 
+    testWidgets('renders location attachment', (tester) async {
+      final message = Message(
+        text: '',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        sharedLocation: Location(
+          latitude: 37.7749,
+          longitude: -122.4194,
+        ),
+      );
+
+      await pumpMessagePreview(tester, message);
+
+      expect(find.text('📍 Location'), findsOneWidget);
+    });
+
+    testWidgets('renders live location attachment', (tester) async {
+      final message = Message(
+        text: '',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        sharedLocation: Location(
+          latitude: 37.7749,
+          longitude: -122.4194,
+          endAt: DateTime.now().add(const Duration(minutes: 15)),
+        ),
+      );
+
+      await pumpMessagePreview(tester, message);
+
+      expect(find.text('📍 Live Location'), findsOneWidget);
+    });
+
     testWidgets('supports different language for translation', (tester) async {
       final message = Message(
         text: 'Hello, world!',
@@ -620,6 +651,27 @@ void main() {
       expect(find.text('📊 Poll: Favorite Color?'), findsOneWidget);
     });
 
+    testWidgets('can override formatLocationMessage', (tester) async {
+      final message = Message(
+        user: User(id: 'other-user-id', name: 'Message Sender'),
+        sharedLocation: Location(
+          latitude: 37.7749,
+          longitude: -122.4194,
+        ),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        configData: StreamChatConfigurationData(
+          messagePreviewFormatter: customFormatter,
+        ),
+      );
+
+      // Custom formatter uses different format
+      expect(find.text('🗺️ -> Location Shared'), findsOneWidget);
+    });
+
     testWidgets('can override formatMessageAttachments', (tester) async {
       final message = Message(
         text: '',
@@ -702,6 +754,12 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
   ) {
     // Simple format with "Poll:" prefix
     return poll.name.isEmpty ? '📊 Poll' : '📊 Poll: ${poll.name}';
+  }
+
+  @override
+  String formatLocationMessage(BuildContext context, Location location) {
+    // Simple format with custom emoji
+    return '🗺️ -> Location Shared';
   }
 
   @override

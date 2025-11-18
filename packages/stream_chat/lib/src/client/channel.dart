@@ -3142,13 +3142,12 @@ class ChannelClientState {
     // a thread-only message.
     if (isUpToDate || isThreadOnlyMessage) updateMessage(message);
 
-      // Otherwise, check if we can count the message as unread.
-      if (MessageRules.canCountAsUnread(message, _channel)) {
-        unreadCount += 1; // Increment unread count
-      }
+    // Otherwise, check if we can count the message as unread.
+    if (MessageRules.canCountAsUnread(message, _channel)) {
+      unreadCount += 1; // Increment unread count
+    }
 
-      _client.channelDeliveryReporter.submitForDelivery([_channel]);
-    }));
+    _client.channelDeliveryReporter.submitForDelivery([_channel]);
   }
 
   /// Updates the [read] in the state if it exists. Adds it otherwise.
@@ -3870,7 +3869,7 @@ class ChannelClientState {
     // Calculate the new last message at time.
     var lastMessageAt = _channelState.channel?.lastMessageAt;
     for (final message in affectedMessages) {
-      if (_shouldUpdateChannelLastMessageAt(message)) {
+      if (MessageRules.canUpdateChannelLastMessageAt(message, _channel)) {
         lastMessageAt = [lastMessageAt, message.createdAt].nonNulls.max;
       }
     }
