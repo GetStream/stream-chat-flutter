@@ -14,6 +14,8 @@
 🐞 Fixed
 
 - Fixed mistakenly passing the hyperlink text to the `onLinkTap` callback instead of the actual `href`.
+- Fixed high memory usage when displaying multiple image
+  attachments. [[#2228]](https://github.com/GetStream/stream-chat-flutter/issues/2228)
 
 ## 9.19.0
 
