@@ -136,8 +136,11 @@ class StreamChannelAvatar extends StatelessWidget {
                   final devicePixel = MediaQuery.devicePixelRatioOf(context);
                   final thumbnailSize = constraints.biggest * devicePixel;
 
-                  final cacheWidth = thumbnailSize.width.round();
-                  final cacheHeight = thumbnailSize.height.round();
+                  int? cacheWidth, cacheHeight;
+                  if (thumbnailSize.isFinite && !thumbnailSize.isEmpty) {
+                    cacheWidth = thumbnailSize.width.round();
+                    cacheHeight = thumbnailSize.height.round();
+                  }
 
                   return CachedNetworkImage(
                     imageUrl: channelImage,

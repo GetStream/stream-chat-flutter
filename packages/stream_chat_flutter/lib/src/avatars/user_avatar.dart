@@ -109,8 +109,11 @@ class StreamUserAvatar extends StatelessWidget {
             final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
             final thumbnailSize = constraints.biggest * devicePixelRatio;
 
-            final cacheWidth = thumbnailSize.width.round();
-            final cacheHeight = thumbnailSize.height.round();
+            int? cacheWidth, cacheHeight;
+            if (thumbnailSize.isFinite && !thumbnailSize.isEmpty) {
+              cacheWidth = thumbnailSize.width.round();
+              cacheHeight = thumbnailSize.height.round();
+            }
 
             return CachedNetworkImage(
               fit: BoxFit.cover,
@@ -123,7 +126,7 @@ class StreamUserAvatar extends StatelessWidget {
               },
               imageBuilder: (context, imageProvider) => DecoratedBox(
                 decoration: BoxDecoration(
-                  borderRadius: borderRadius ?? avatarTheme?.borderRadius,
+                  borderRadius: effectiveBorderRadius,
                   image: DecorationImage(
                     fit: BoxFit.cover,
                     image: ResizeImage(
