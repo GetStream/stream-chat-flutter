@@ -1,9 +1,11 @@
-## Upcoming Beta
+## 10.0.0-beta.9
 
 🐞 Fixed
 
 - Fixed `Location.endAt` field not being properly converted to UTC, causing "expected date" API
   errors when sending location messages.
+
+- Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.20.0
 
