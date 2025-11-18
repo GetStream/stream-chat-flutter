@@ -1,4 +1,4 @@
-## Upcoming Beta
+## 10.0.0-beta.9
 
 ✅ Added
 
@@ -67,6 +67,8 @@
   type to `List<ReactionPickerIcon>`, renamed `onReactionPicked` to `onIconPicked`.
 
 For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+
+- Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.20.0
 
