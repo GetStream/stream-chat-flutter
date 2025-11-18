@@ -2,6 +2,8 @@ import 'package:flutter/material.dart' hide TextTheme;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+String _dummyFormatter(BuildContext context, DateTime date) => 'formatted';
+
 void main() {
   test('ChannelPreviewThemeData copyWith, ==, hashCode basics', () {
     expect(const StreamChannelPreviewThemeData(),
@@ -69,6 +71,7 @@ final _channelPreviewThemeControl = StreamChannelPreviewThemeData(
         // ignore: deprecated_member_use
         color: const StreamColorTheme.light().textHighEmphasis.withOpacity(0.5),
       ),
+  lastMessageAtFormatter: _dummyFormatter,
   indicatorIconSize: 16,
 );
 
@@ -95,6 +98,7 @@ final _channelPreviewThemeControlMidLerp = StreamChannelPreviewThemeData(
         // ignore: deprecated_member_use
         color: const Color(0x807f7f7f).withOpacity(0.5),
       ),
+  lastMessageAtFormatter: _dummyFormatter,
   indicatorIconSize: 16,
 );
 
@@ -115,5 +119,6 @@ final _channelPreviewThemeControlDark = StreamChannelPreviewThemeData(
         // ignore: deprecated_member_use
         color: const StreamColorTheme.dark().textHighEmphasis.withOpacity(0.5),
       ),
+  lastMessageAtFormatter: _dummyFormatter,
   indicatorIconSize: 16,
 );

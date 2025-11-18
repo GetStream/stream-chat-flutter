@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+String _dummyFormatter(BuildContext context, DateTime date) => 'formatted';
+
 void main() {
   testWidgets('StreamDraftListTileTheme merges with ancestor theme',
       (tester) async {
@@ -49,6 +51,7 @@ void main() {
       draftChannelNameStyle: TextStyle(fontSize: 16),
       draftMessageStyle: TextStyle(fontSize: 14),
       draftTimestampStyle: TextStyle(fontSize: 12),
+      draftTimestampFormatter: _dummyFormatter,
     );
 
     const themeData2 = StreamDraftListTileThemeData(
@@ -57,6 +60,7 @@ void main() {
       draftChannelNameStyle: TextStyle(fontSize: 16),
       draftMessageStyle: TextStyle(fontSize: 14),
       draftTimestampStyle: TextStyle(fontSize: 12),
+      draftTimestampFormatter: _dummyFormatter,
     );
 
     const themeData3 = StreamDraftListTileThemeData(
@@ -65,6 +69,7 @@ void main() {
       draftChannelNameStyle: TextStyle(fontSize: 16),
       draftMessageStyle: TextStyle(fontSize: 14),
       draftTimestampStyle: TextStyle(fontSize: 12),
+      draftTimestampFormatter: _dummyFormatter,
     );
 
     // Same properties should be equal
@@ -83,6 +88,7 @@ void main() {
       draftChannelNameStyle: TextStyle(fontSize: 16),
       draftMessageStyle: TextStyle(fontSize: 14),
       draftTimestampStyle: TextStyle(fontSize: 12),
+      draftTimestampFormatter: _dummyFormatter,
     );
 
     const newBackgroundColor = Colors.blue;
@@ -100,6 +106,7 @@ void main() {
     expect(copied.draftChannelNameStyle, original.draftChannelNameStyle);
     expect(copied.draftMessageStyle, original.draftMessageStyle);
     expect(copied.draftTimestampStyle, original.draftTimestampStyle);
+    expect(copied.draftTimestampFormatter, original.draftTimestampFormatter);
   });
 
   test('StreamDraftListTileThemeData merge', () {
@@ -109,6 +116,7 @@ void main() {
       draftChannelNameStyle: TextStyle(fontSize: 16),
       draftMessageStyle: TextStyle(fontSize: 14),
       draftTimestampStyle: TextStyle(fontSize: 12),
+      draftTimestampFormatter: _dummyFormatter,
     );
 
     const other = StreamDraftListTileThemeData(
@@ -126,6 +134,7 @@ void main() {
     expect(merged.draftChannelNameStyle, original.draftChannelNameStyle);
     expect(merged.draftMessageStyle, original.draftMessageStyle);
     expect(merged.draftTimestampStyle, original.draftTimestampStyle);
+    expect(merged.draftTimestampFormatter, original.draftTimestampFormatter);
 
     // Merging with null should return original
     final mergedWithNull = original.merge(null);

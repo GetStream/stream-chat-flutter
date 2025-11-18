@@ -1,3 +1,10 @@
+## 9.20.0
+
+✅ Added
+
+- Added support for `Read.lastDeliveredAt` and `Read.lastDeliveredMessageId` fields to track message
+  delivery receipts.
+
 ## 10.0.0-beta.8
 
 ✅ Added

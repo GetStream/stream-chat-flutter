@@ -7,7 +7,7 @@ import 'package:stream_chat/src/core/util/serializer.dart';
 part 'user.g.dart';
 
 /// Class that defines a Stream Chat User.
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class User extends Equatable implements ComparableFieldProvider {
   /// Creates a new user.
   ///
@@ -40,14 +40,15 @@ class User extends Equatable implements ComparableFieldProvider {
     this.createdAt,
     this.updatedAt,
     this.lastActive,
-    Map<String, Object?> extraData = const {},
     this.online = false,
     this.banned = false,
     this.banExpires,
     this.teams = const [],
     this.language,
+    this.invisible,
     this.teamsRole,
     this.avgResponseTime,
+    Map<String, Object?> extraData = const {},
   }) :
         // For backwards compatibility, set 'name', 'image' in [extraData].
         extraData = {
@@ -74,6 +75,7 @@ class User extends Equatable implements ComparableFieldProvider {
     'ban_expires',
     'teams',
     'language',
+    'invisible',
     'teams_role',
     'avg_response_time',
   ];
@@ -104,49 +106,41 @@ class User extends Equatable implements ComparableFieldProvider {
   }
 
   /// User role.
-  @JsonKey(includeToJson: false)
   final String? role;
 
   /// User teams
-  @JsonKey(includeToJson: false)
   final List<String> teams;
 
   /// Date of user creation.
-  @JsonKey(includeToJson: false)
   final DateTime? createdAt;
 
   /// Date of last user update.
-  @JsonKey(includeToJson: false)
   final DateTime? updatedAt;
 
   /// Date of last user connection.
-  @JsonKey(includeToJson: false)
   final DateTime? lastActive;
 
   /// True if user is online.
-  @JsonKey(includeToJson: false)
   final bool online;
 
   /// True if user is banned from the chat.
-  @JsonKey(includeToJson: false)
   final bool banned;
 
   /// The date at which the ban will expire.
-  @JsonKey(includeToJson: false)
   final DateTime? banExpires;
 
   /// The language this user prefers.
-  @JsonKey(includeIfNull: false)
   final String? language;
+
+  /// Whether the user is sharing their online presence.
+  final bool? invisible;
 
   /// The roles for the user in the teams.
   ///
   /// eg: `{'teamId': 'role', 'teamId2': 'role2'}`
-  @JsonKey(includeIfNull: false)
   final Map< /*Team*/ String, /*Role*/ String>? teamsRole;
 
   /// The average response time of the user in seconds.
-  @JsonKey(includeToJson: false)
   final int? avgResponseTime;
 
   /// Map of custom user extraData.
@@ -176,6 +170,7 @@ class User extends Equatable implements ComparableFieldProvider {
     DateTime? banExpires,
     List<String>? teams,
     String? language,
+    bool? invisible,
     Map<String, String>? teamsRole,
     int? avgResponseTime,
   }) =>
@@ -196,6 +191,7 @@ class User extends Equatable implements ComparableFieldProvider {
         banExpires: banExpires ?? this.banExpires,
         teams: teams ?? this.teams,
         language: language ?? this.language,
+        invisible: invisible ?? this.invisible,
         teamsRole: teamsRole ?? this.teamsRole,
         avgResponseTime: avgResponseTime ?? this.avgResponseTime,
       );
@@ -211,6 +207,7 @@ class User extends Equatable implements ComparableFieldProvider {
         banExpires,
         teams,
         language,
+        invisible,
         teamsRole,
         avgResponseTime,
       ];

@@ -8339,9 +8339,28 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
   late final GeneratedColumn<String> lastReadMessageId =
       GeneratedColumn<String>('last_read_message_id', aliasedName, true,
           type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _lastDeliveredAtMeta =
+      const VerificationMeta('lastDeliveredAt');
   @override
-  List<GeneratedColumn> get $columns =>
-      [lastRead, userId, channelCid, unreadMessages, lastReadMessageId];
+  late final GeneratedColumn<DateTime> lastDeliveredAt =
+      GeneratedColumn<DateTime>('last_delivered_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _lastDeliveredMessageIdMeta =
+      const VerificationMeta('lastDeliveredMessageId');
+  @override
+  late final GeneratedColumn<String> lastDeliveredMessageId =
+      GeneratedColumn<String>('last_delivered_message_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        lastRead,
+        userId,
+        channelCid,
+        unreadMessages,
+        lastReadMessageId,
+        lastDeliveredAt,
+        lastDeliveredMessageId
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -8384,6 +8403,18 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
           lastReadMessageId.isAcceptableOrUnknown(
               data['last_read_message_id']!, _lastReadMessageIdMeta));
     }
+    if (data.containsKey('last_delivered_at')) {
+      context.handle(
+          _lastDeliveredAtMeta,
+          lastDeliveredAt.isAcceptableOrUnknown(
+              data['last_delivered_at']!, _lastDeliveredAtMeta));
+    }
+    if (data.containsKey('last_delivered_message_id')) {
+      context.handle(
+          _lastDeliveredMessageIdMeta,
+          lastDeliveredMessageId.isAcceptableOrUnknown(
+              data['last_delivered_message_id']!, _lastDeliveredMessageIdMeta));
+    }
     return context;
   }
 
@@ -8403,6 +8434,11 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
           .read(DriftSqlType.int, data['${effectivePrefix}unread_messages'])!,
       lastReadMessageId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}last_read_message_id']),
+      lastDeliveredAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_delivered_at']),
+      lastDeliveredMessageId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}last_delivered_message_id']),
     );
   }
 
@@ -8427,12 +8463,20 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
 
   /// Id of the last read message
   final String? lastReadMessageId;
+
+  /// Date of the last delivered message
+  final DateTime? lastDeliveredAt;
+
+  /// Id of the last delivered message
+  final String? lastDeliveredMessageId;
   const ReadEntity(
       {required this.lastRead,
       required this.userId,
       required this.channelCid,
       required this.unreadMessages,
-      this.lastReadMessageId});
+      this.lastReadMessageId,
+      this.lastDeliveredAt,
+      this.lastDeliveredMessageId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -8442,6 +8486,13 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
     map['unread_messages'] = Variable<int>(unreadMessages);
     if (!nullToAbsent || lastReadMessageId != null) {
       map['last_read_message_id'] = Variable<String>(lastReadMessageId);
+    }
+    if (!nullToAbsent || lastDeliveredAt != null) {
+      map['last_delivered_at'] = Variable<DateTime>(lastDeliveredAt);
+    }
+    if (!nullToAbsent || lastDeliveredMessageId != null) {
+      map['last_delivered_message_id'] =
+          Variable<String>(lastDeliveredMessageId);
     }
     return map;
   }
@@ -8456,6 +8507,9 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
       unreadMessages: serializer.fromJson<int>(json['unreadMessages']),
       lastReadMessageId:
           serializer.fromJson<String?>(json['lastReadMessageId']),
+      lastDeliveredAt: serializer.fromJson<DateTime?>(json['lastDeliveredAt']),
+      lastDeliveredMessageId:
+          serializer.fromJson<String?>(json['lastDeliveredMessageId']),
     );
   }
   @override
@@ -8467,6 +8521,9 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
       'channelCid': serializer.toJson<String>(channelCid),
       'unreadMessages': serializer.toJson<int>(unreadMessages),
       'lastReadMessageId': serializer.toJson<String?>(lastReadMessageId),
+      'lastDeliveredAt': serializer.toJson<DateTime?>(lastDeliveredAt),
+      'lastDeliveredMessageId':
+          serializer.toJson<String?>(lastDeliveredMessageId),
     };
   }
 
@@ -8475,7 +8532,9 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
           String? userId,
           String? channelCid,
           int? unreadMessages,
-          Value<String?> lastReadMessageId = const Value.absent()}) =>
+          Value<String?> lastReadMessageId = const Value.absent(),
+          Value<DateTime?> lastDeliveredAt = const Value.absent(),
+          Value<String?> lastDeliveredMessageId = const Value.absent()}) =>
       ReadEntity(
         lastRead: lastRead ?? this.lastRead,
         userId: userId ?? this.userId,
@@ -8484,6 +8543,12 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
         lastReadMessageId: lastReadMessageId.present
             ? lastReadMessageId.value
             : this.lastReadMessageId,
+        lastDeliveredAt: lastDeliveredAt.present
+            ? lastDeliveredAt.value
+            : this.lastDeliveredAt,
+        lastDeliveredMessageId: lastDeliveredMessageId.present
+            ? lastDeliveredMessageId.value
+            : this.lastDeliveredMessageId,
       );
   ReadEntity copyWithCompanion(ReadsCompanion data) {
     return ReadEntity(
@@ -8497,6 +8562,12 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
       lastReadMessageId: data.lastReadMessageId.present
           ? data.lastReadMessageId.value
           : this.lastReadMessageId,
+      lastDeliveredAt: data.lastDeliveredAt.present
+          ? data.lastDeliveredAt.value
+          : this.lastDeliveredAt,
+      lastDeliveredMessageId: data.lastDeliveredMessageId.present
+          ? data.lastDeliveredMessageId.value
+          : this.lastDeliveredMessageId,
     );
   }
 
@@ -8507,14 +8578,16 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
           ..write('userId: $userId, ')
           ..write('channelCid: $channelCid, ')
           ..write('unreadMessages: $unreadMessages, ')
-          ..write('lastReadMessageId: $lastReadMessageId')
+          ..write('lastReadMessageId: $lastReadMessageId, ')
+          ..write('lastDeliveredAt: $lastDeliveredAt, ')
+          ..write('lastDeliveredMessageId: $lastDeliveredMessageId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      lastRead, userId, channelCid, unreadMessages, lastReadMessageId);
+  int get hashCode => Object.hash(lastRead, userId, channelCid, unreadMessages,
+      lastReadMessageId, lastDeliveredAt, lastDeliveredMessageId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -8523,7 +8596,9 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
           other.userId == this.userId &&
           other.channelCid == this.channelCid &&
           other.unreadMessages == this.unreadMessages &&
-          other.lastReadMessageId == this.lastReadMessageId);
+          other.lastReadMessageId == this.lastReadMessageId &&
+          other.lastDeliveredAt == this.lastDeliveredAt &&
+          other.lastDeliveredMessageId == this.lastDeliveredMessageId);
 }
 
 class ReadsCompanion extends UpdateCompanion<ReadEntity> {
@@ -8532,6 +8607,8 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
   final Value<String> channelCid;
   final Value<int> unreadMessages;
   final Value<String?> lastReadMessageId;
+  final Value<DateTime?> lastDeliveredAt;
+  final Value<String?> lastDeliveredMessageId;
   final Value<int> rowid;
   const ReadsCompanion({
     this.lastRead = const Value.absent(),
@@ -8539,6 +8616,8 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
     this.channelCid = const Value.absent(),
     this.unreadMessages = const Value.absent(),
     this.lastReadMessageId = const Value.absent(),
+    this.lastDeliveredAt = const Value.absent(),
+    this.lastDeliveredMessageId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReadsCompanion.insert({
@@ -8547,6 +8626,8 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
     required String channelCid,
     this.unreadMessages = const Value.absent(),
     this.lastReadMessageId = const Value.absent(),
+    this.lastDeliveredAt = const Value.absent(),
+    this.lastDeliveredMessageId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : lastRead = Value(lastRead),
         userId = Value(userId),
@@ -8557,6 +8638,8 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
     Expression<String>? channelCid,
     Expression<int>? unreadMessages,
     Expression<String>? lastReadMessageId,
+    Expression<DateTime>? lastDeliveredAt,
+    Expression<String>? lastDeliveredMessageId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -8565,6 +8648,9 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
       if (channelCid != null) 'channel_cid': channelCid,
       if (unreadMessages != null) 'unread_messages': unreadMessages,
       if (lastReadMessageId != null) 'last_read_message_id': lastReadMessageId,
+      if (lastDeliveredAt != null) 'last_delivered_at': lastDeliveredAt,
+      if (lastDeliveredMessageId != null)
+        'last_delivered_message_id': lastDeliveredMessageId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -8575,6 +8661,8 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
       Value<String>? channelCid,
       Value<int>? unreadMessages,
       Value<String?>? lastReadMessageId,
+      Value<DateTime?>? lastDeliveredAt,
+      Value<String?>? lastDeliveredMessageId,
       Value<int>? rowid}) {
     return ReadsCompanion(
       lastRead: lastRead ?? this.lastRead,
@@ -8582,6 +8670,9 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
       channelCid: channelCid ?? this.channelCid,
       unreadMessages: unreadMessages ?? this.unreadMessages,
       lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
+      lastDeliveredAt: lastDeliveredAt ?? this.lastDeliveredAt,
+      lastDeliveredMessageId:
+          lastDeliveredMessageId ?? this.lastDeliveredMessageId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -8604,6 +8695,13 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
     if (lastReadMessageId.present) {
       map['last_read_message_id'] = Variable<String>(lastReadMessageId.value);
     }
+    if (lastDeliveredAt.present) {
+      map['last_delivered_at'] = Variable<DateTime>(lastDeliveredAt.value);
+    }
+    if (lastDeliveredMessageId.present) {
+      map['last_delivered_message_id'] =
+          Variable<String>(lastDeliveredMessageId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -8618,6 +8716,8 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
           ..write('channelCid: $channelCid, ')
           ..write('unreadMessages: $unreadMessages, ')
           ..write('lastReadMessageId: $lastReadMessageId, ')
+          ..write('lastDeliveredAt: $lastDeliveredAt, ')
+          ..write('lastDeliveredMessageId: $lastDeliveredMessageId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -14741,6 +14841,8 @@ typedef $$ReadsTableCreateCompanionBuilder = ReadsCompanion Function({
   required String channelCid,
   Value<int> unreadMessages,
   Value<String?> lastReadMessageId,
+  Value<DateTime?> lastDeliveredAt,
+  Value<String?> lastDeliveredMessageId,
   Value<int> rowid,
 });
 typedef $$ReadsTableUpdateCompanionBuilder = ReadsCompanion Function({
@@ -14749,6 +14851,8 @@ typedef $$ReadsTableUpdateCompanionBuilder = ReadsCompanion Function({
   Value<String> channelCid,
   Value<int> unreadMessages,
   Value<String?> lastReadMessageId,
+  Value<DateTime?> lastDeliveredAt,
+  Value<String?> lastDeliveredMessageId,
   Value<int> rowid,
 });
 
@@ -14792,6 +14896,14 @@ class $$ReadsTableFilterComposer
 
   ColumnFilters<String> get lastReadMessageId => $composableBuilder(
       column: $table.lastReadMessageId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastDeliveredAt => $composableBuilder(
+      column: $table.lastDeliveredAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lastDeliveredMessageId => $composableBuilder(
+      column: $table.lastDeliveredMessageId,
       builder: (column) => ColumnFilters(column));
 
   $$ChannelsTableFilterComposer get channelCid {
@@ -14838,6 +14950,14 @@ class $$ReadsTableOrderingComposer
       column: $table.lastReadMessageId,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get lastDeliveredAt => $composableBuilder(
+      column: $table.lastDeliveredAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lastDeliveredMessageId => $composableBuilder(
+      column: $table.lastDeliveredMessageId,
+      builder: (column) => ColumnOrderings(column));
+
   $$ChannelsTableOrderingComposer get channelCid {
     final $$ChannelsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -14879,6 +14999,12 @@ class $$ReadsTableAnnotationComposer
 
   GeneratedColumn<String> get lastReadMessageId => $composableBuilder(
       column: $table.lastReadMessageId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastDeliveredAt => $composableBuilder(
+      column: $table.lastDeliveredAt, builder: (column) => column);
+
+  GeneratedColumn<String> get lastDeliveredMessageId => $composableBuilder(
+      column: $table.lastDeliveredMessageId, builder: (column) => column);
 
   $$ChannelsTableAnnotationComposer get channelCid {
     final $$ChannelsTableAnnotationComposer composer = $composerBuilder(
@@ -14929,6 +15055,8 @@ class $$ReadsTableTableManager extends RootTableManager<
             Value<String> channelCid = const Value.absent(),
             Value<int> unreadMessages = const Value.absent(),
             Value<String?> lastReadMessageId = const Value.absent(),
+            Value<DateTime?> lastDeliveredAt = const Value.absent(),
+            Value<String?> lastDeliveredMessageId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ReadsCompanion(
@@ -14937,6 +15065,8 @@ class $$ReadsTableTableManager extends RootTableManager<
             channelCid: channelCid,
             unreadMessages: unreadMessages,
             lastReadMessageId: lastReadMessageId,
+            lastDeliveredAt: lastDeliveredAt,
+            lastDeliveredMessageId: lastDeliveredMessageId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -14945,6 +15075,8 @@ class $$ReadsTableTableManager extends RootTableManager<
             required String channelCid,
             Value<int> unreadMessages = const Value.absent(),
             Value<String?> lastReadMessageId = const Value.absent(),
+            Value<DateTime?> lastDeliveredAt = const Value.absent(),
+            Value<String?> lastDeliveredMessageId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ReadsCompanion.insert(
@@ -14953,6 +15085,8 @@ class $$ReadsTableTableManager extends RootTableManager<
             channelCid: channelCid,
             unreadMessages: unreadMessages,
             lastReadMessageId: lastReadMessageId,
+            lastDeliveredAt: lastDeliveredAt,
+            lastDeliveredMessageId: lastDeliveredMessageId,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

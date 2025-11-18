@@ -27,6 +27,7 @@ class ChannelConfig {
     this.skipLastMsgUpdateForSystemMsgs = false,
     this.userMessageReminders = false,
     this.markMessagesPending = false,
+    this.deliveryEvents = false,
     this.sharedLocations = false,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
@@ -95,6 +96,9 @@ class ChannelConfig {
 
   /// Whether pending messages are enabled for this channel.
   final bool markMessagesPending;
+
+  /// Whether delivery events are enabled for this channel.
+  final bool deliveryEvents;
 
   /// True if shared locations are enabled for this channel.
   final bool sharedLocations;

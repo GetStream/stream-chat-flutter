@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
@@ -54,36 +54,16 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final thumbUrl = video.thumbUrl;
-    if (thumbUrl != null) {
-      return CachedNetworkImage(
-        imageUrl: thumbUrl,
+    final containsThumbnail = video.thumbUrl != null;
+    // If thumbnail is available, we can directly show it using the
+    // StreamImageAttachmentThumbnail widget.
+    if (containsThumbnail) {
+      return StreamImageAttachmentThumbnail(
+        image: video,
         width: width,
         height: height,
         fit: fit,
-        placeholder: (context, __) {
-          final image = Image.asset(
-            'lib/assets/images/placeholder.png',
-            width: width,
-            height: height,
-            fit: BoxFit.cover,
-            package: 'stream_chat_flutter',
-          );
-
-          final colorTheme = StreamChatTheme.of(context).colorTheme;
-          return Shimmer.fromColors(
-            baseColor: colorTheme.disabled,
-            highlightColor: colorTheme.inputBg,
-            child: image,
-          );
-        },
-        errorWidget: (context, url, error) {
-          return errorBuilder(
-            context,
-            error,
-            StackTrace.current,
-          );
-        },
+        errorBuilder: errorBuilder,
       );
     }
 

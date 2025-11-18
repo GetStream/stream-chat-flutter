@@ -14,11 +14,17 @@ void main() {
       expect(reaction.type, 'wow');
       expect(
         reaction.user?.toJson(),
-        User(
-          id: '2de0297c-f3f2-489d-b930-ef77342edccf',
-          image: 'https://randomuser.me/api/portraits/women/45.jpg',
-          name: 'Daisy Morgan',
-        ).toJson(),
+        {
+          'id': '2de0297c-f3f2-489d-b930-ef77342edccf',
+          'role': 'user',
+          'teams': [],
+          'created_at': '2020-01-28T22:17:30.810011Z',
+          'updated_at': '2020-01-28T22:17:31.077195Z',
+          'online': false,
+          'banned': false,
+          'image': 'https://randomuser.me/api/portraits/women/45.jpg',
+          'name': 'Daisy Morgan'
+        },
       );
       expect(reaction.score, 1);
       expect(reaction.userId, '2de0297c-f3f2-489d-b930-ef77342edccf');
@@ -63,11 +69,17 @@ void main() {
       expect(newReaction.type, 'wow');
       expect(
         newReaction.user?.toJson(),
-        User(
-          id: '2de0297c-f3f2-489d-b930-ef77342edccf',
-          image: 'https://randomuser.me/api/portraits/women/45.jpg',
-          name: 'Daisy Morgan',
-        ).toJson(),
+        {
+          'id': '2de0297c-f3f2-489d-b930-ef77342edccf',
+          'role': 'user',
+          'teams': [],
+          'created_at': '2020-01-28T22:17:30.810011Z',
+          'updated_at': '2020-01-28T22:17:31.077195Z',
+          'online': false,
+          'banned': false,
+          'image': 'https://randomuser.me/api/portraits/women/45.jpg',
+          'name': 'Daisy Morgan'
+        },
       );
       expect(newReaction.score, 1);
       expect(newReaction.userId, '2de0297c-f3f2-489d-b930-ef77342edccf');

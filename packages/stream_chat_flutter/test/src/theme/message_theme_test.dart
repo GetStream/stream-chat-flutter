@@ -2,6 +2,8 @@ import 'package:flutter/material.dart' hide TextTheme;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+String _dummyFormatter(BuildContext context, DateTime date) => 'formatted';
+
 void main() {
   test('MessageThemeData copyWith, ==, hashCode basics', () {
     expect(const StreamMessageThemeData(),
@@ -42,6 +44,7 @@ final _messageThemeControl = StreamMessageThemeData(
   createdAtStyle: const StreamTextTheme.light().footnote.copyWith(
         color: const StreamColorTheme.light().textLowEmphasis,
       ),
+  createdAtFormatter: _dummyFormatter,
   repliesStyle: const StreamTextTheme.light().footnoteBold.copyWith(
         color: const StreamColorTheme.light().accentPrimary,
       ),
@@ -71,6 +74,7 @@ final _messageThemeControlDark = StreamMessageThemeData(
   createdAtStyle: const StreamTextTheme.dark().footnote.copyWith(
         color: const StreamColorTheme.dark().textLowEmphasis,
       ),
+  createdAtFormatter: _dummyFormatter,
   repliesStyle: const StreamTextTheme.dark().footnoteBold.copyWith(
         color: const StreamColorTheme.dark().accentPrimary,
       ),

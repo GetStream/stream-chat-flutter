@@ -128,13 +128,29 @@ class StreamChannelAvatar extends StatelessWidget {
             decoration: BoxDecoration(color: colorTheme.accentPrimary),
             child: InkWell(
               onTap: onTap,
-              child: channelImage.isEmpty
-                  ? fallbackWidget
-                  : CachedNetworkImage(
-                      imageUrl: channelImage,
-                      errorWidget: (_, __, ___) => fallbackWidget,
-                      fit: BoxFit.cover,
-                    ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (channelImage.isEmpty) return fallbackWidget;
+
+                  // Calculate optimal thumbnail size for the avatar
+                  final devicePixel = MediaQuery.devicePixelRatioOf(context);
+                  final thumbnailSize = constraints.biggest * devicePixel;
+
+                  int? cacheWidth, cacheHeight;
+                  if (thumbnailSize.isFinite && !thumbnailSize.isEmpty) {
+                    cacheWidth = thumbnailSize.width.round();
+                    cacheHeight = thumbnailSize.height.round();
+                  }
+
+                  return CachedNetworkImage(
+                    imageUrl: channelImage,
+                    memCacheWidth: cacheWidth,
+                    memCacheHeight: cacheHeight,
+                    errorWidget: (_, __, ___) => fallbackWidget,
+                    fit: BoxFit.cover,
+                  );
+                },
+              ),
             ),
           ),
         );

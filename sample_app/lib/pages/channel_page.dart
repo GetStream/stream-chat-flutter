@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/widgets/message_info_sheet.dart';
 import 'package:sample_app/widgets/location/location_attachment.dart';
 import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:sample_app/widgets/location/location_picker_dialog.dart';
@@ -249,7 +250,19 @@ class _ChannelPageState extends State<ChannelPage> {
             action: CreateBookmark(message: message),
           ),
         ],
-      ]
+      ],
+      if (channelConfig?.deliveryEvents == true)
+        StreamMessageAction(
+          leading: Icon(
+            Icons.info_outline_rounded,
+            color: colorTheme.textLowEmphasis,
+          ),
+          title: const Text('Message Info'),
+          onTap: (message) {
+            Navigator.of(context).pop();
+            MessageInfoSheet.show(context: context, message: message);
+          },
+        ),
     ];
 
     final locationAttachmentBuilder = LocationAttachmentBuilder(

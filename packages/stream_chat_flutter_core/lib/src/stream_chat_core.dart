@@ -237,7 +237,13 @@ class StreamChatCoreState extends State<StreamChatCore>
     _unsubscribeFromConnectivityChange();
 
     final stream = connectivityStream ?? Connectivity().onConnectivityChanged;
-    _connectivitySubscription = stream.listen(
+
+    // Skip the first connectivity event which emits immediately on subscription
+    // to avoid racing with initial connectUser call.
+    // See: https://github.com/GetStream/stream-chat-flutter/issues/2409
+    final skippedStream = stream.skip(1);
+
+    _connectivitySubscription = skippedStream.listen(
       _lifecycleManager.onConnectivityChanged,
     );
   }

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -244,10 +243,8 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                           onTap: () => widget.mediaSelectedCallBack!(index),
                           child: AspectRatio(
                             aspectRatio: 1,
-                            child: CachedNetworkImage(
-                              imageUrl: attachment.imageUrl ??
-                                  attachment.assetUrl ??
-                                  attachment.thumbUrl!,
+                            child: StreamImageAttachmentThumbnail(
+                              image: attachment,
                               fit: BoxFit.cover,
                             ),
                           ),

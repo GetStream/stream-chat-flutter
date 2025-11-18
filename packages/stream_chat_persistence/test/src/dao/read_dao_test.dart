@@ -25,6 +25,8 @@ void main() {
         user: users[index],
         unreadMessages: index + 10,
         lastReadMessageId: 'lastMessageId$index',
+        lastDeliveredAt: DateTime.now(),
+        lastDeliveredMessageId: 'lastDeliveredMessageId$index',
       ),
     );
 
@@ -54,6 +56,10 @@ void main() {
       expect(fetchedRead.user.id, insertedRead.user.id);
       expect(fetchedRead.lastRead, isSameDateAs(insertedRead.lastRead));
       expect(fetchedRead.unreadMessages, insertedRead.unreadMessages);
+      expect(fetchedRead.lastDeliveredAt,
+          isSameDateAs(insertedRead.lastDeliveredAt));
+      expect(fetchedRead.lastDeliveredMessageId,
+          insertedRead.lastDeliveredMessageId);
     }
   });
 
@@ -71,6 +77,8 @@ void main() {
       user: newUser,
       unreadMessages: 30,
       lastReadMessageId: 'lastMessageId3',
+      lastDeliveredAt: DateTime.now(),
+      lastDeliveredMessageId: 'lastDeliveredMessageId3',
     );
     await database.userDao.updateUsers([newUser]);
     await readDao.updateReads(cid, [copyRead, newRead]);

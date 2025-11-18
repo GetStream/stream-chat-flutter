@@ -45,6 +45,8 @@ class Event {
     this.pushPreference,
     this.channelPushPreference,
     this.channelMessageCount,
+    this.lastDeliveredAt,
+    this.lastDeliveredMessageId,
     this.extraData = const {},
     this.isLocal = true,
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
@@ -170,6 +172,12 @@ class Event {
   /// The total number of messages in the channel.
   final int? channelMessageCount;
 
+  /// The date of the last delivered message.
+  final DateTime? lastDeliveredAt;
+
+  /// The id of the last delivered message.
+  final String? lastDeliveredMessageId;
+
   /// Map of custom channel extraData
   final Map<String, Object?> extraData;
 
@@ -213,6 +221,8 @@ class Event {
     'push_preference',
     'channel_push_preference',
     'channel_message_count',
+    'last_delivered_at',
+    'last_delivered_message_id',
   ];
 
   /// Serialize to json
@@ -258,6 +268,8 @@ class Event {
     PushPreference? pushPreference,
     ChannelPushPreference? channelPushPreference,
     int? channelMessageCount,
+    DateTime? lastDeliveredAt,
+    String? lastDeliveredMessageId,
     Map<String, Object?>? extraData,
   }) =>
       Event(
@@ -298,6 +310,9 @@ class Event {
         channelPushPreference:
             channelPushPreference ?? this.channelPushPreference,
         channelMessageCount: channelMessageCount ?? this.channelMessageCount,
+        lastDeliveredAt: lastDeliveredAt ?? this.lastDeliveredAt,
+        lastDeliveredMessageId:
+            lastDeliveredMessageId ?? this.lastDeliveredMessageId,
         isLocal: isLocal,
         extraData: extraData ?? this.extraData,
       );
@@ -329,4 +344,17 @@ enum AITypingState {
   /// The AI assistant is generating a response.
   @JsonValue('AI_STATE_GENERATING')
   generating,
+}
+
+/// Helper extension methods for [Event].
+extension EventExtension on Event {
+  /// Whether the event is from the given user.
+  bool isFromUser({String? userId}) {
+    if (userId == null) return false;
+
+    final eventUserId = this.userId ?? user?.id;
+    if (eventUserId == null) return false;
+
+    return eventUserId == userId;
+  }
 }

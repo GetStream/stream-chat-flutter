@@ -190,6 +190,9 @@ class EventType {
   static const String channelPushPreferenceUpdated =
       'channel.push_preference.updated';
 
+  /// Event sent when a message is marked as delivered.
+  static const String messageDelivered = 'message.delivered';
+
   /// Event sent when all messages of a user are deleted.
   static const String userMessagesDeleted = 'user.messages.deleted';
 }
