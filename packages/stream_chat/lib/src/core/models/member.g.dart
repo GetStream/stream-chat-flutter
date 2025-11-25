@@ -37,6 +37,10 @@ Member _$MemberFromJson(Map<String, dynamic> json) => Member(
       archivedAt: json['archived_at'] == null
           ? null
           : DateTime.parse(json['archived_at'] as String),
+      deletedMessages: (json['deleted_messages'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
     );
 
@@ -55,5 +59,6 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
       'archived_at': instance.archivedAt?.toIso8601String(),
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
+      'deleted_messages': instance.deletedMessages,
       'extra_data': instance.extraData,
     };

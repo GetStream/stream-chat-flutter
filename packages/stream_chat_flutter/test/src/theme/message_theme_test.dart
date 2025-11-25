@@ -37,22 +37,22 @@ void main() {
 }
 
 final _messageThemeControl = StreamMessageThemeData(
-  messageAuthorStyle: StreamTextTheme.light().footnote.copyWith(
-        color: StreamColorTheme.light().textLowEmphasis,
+  messageAuthorStyle: const StreamTextTheme.light().footnote.copyWith(
+        color: const StreamColorTheme.light().textLowEmphasis,
       ),
-  messageTextStyle: StreamTextTheme.light().body,
-  createdAtStyle: StreamTextTheme.light().footnote.copyWith(
-        color: StreamColorTheme.light().textLowEmphasis,
+  messageTextStyle: const StreamTextTheme.light().body,
+  createdAtStyle: const StreamTextTheme.light().footnote.copyWith(
+        color: const StreamColorTheme.light().textLowEmphasis,
       ),
   createdAtFormatter: _dummyFormatter,
-  repliesStyle: StreamTextTheme.light().footnoteBold.copyWith(
-        color: StreamColorTheme.light().accentPrimary,
+  repliesStyle: const StreamTextTheme.light().footnoteBold.copyWith(
+        color: const StreamColorTheme.light().accentPrimary,
       ),
-  messageBackgroundColor: StreamColorTheme.light().disabled,
-  reactionsBackgroundColor: StreamColorTheme.light().barsBg,
-  reactionsBorderColor: StreamColorTheme.light().borders,
-  reactionsMaskColor: StreamColorTheme.light().appBg,
-  messageBorderColor: StreamColorTheme.light().disabled,
+  messageBackgroundColor: const StreamColorTheme.light().disabled,
+  reactionsBackgroundColor: const StreamColorTheme.light().barsBg,
+  reactionsBorderColor: const StreamColorTheme.light().borders,
+  reactionsMaskColor: const StreamColorTheme.light().appBg,
+  messageBorderColor: const StreamColorTheme.light().disabled,
   avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
@@ -61,28 +61,28 @@ final _messageThemeControl = StreamMessageThemeData(
     ),
   ),
   messageLinksStyle: TextStyle(
-    color: StreamColorTheme.light().accentPrimary,
+    color: const StreamColorTheme.light().accentPrimary,
   ),
-  urlAttachmentBackgroundColor: StreamColorTheme.light().linkBg,
+  urlAttachmentBackgroundColor: const StreamColorTheme.light().linkBg,
 );
 
 final _messageThemeControlDark = StreamMessageThemeData(
-  messageAuthorStyle: StreamTextTheme.dark().footnote.copyWith(
-        color: StreamColorTheme.dark().textLowEmphasis,
+  messageAuthorStyle: const StreamTextTheme.dark().footnote.copyWith(
+        color: const StreamColorTheme.dark().textLowEmphasis,
       ),
-  messageTextStyle: StreamTextTheme.dark().body,
-  createdAtStyle: StreamTextTheme.dark().footnote.copyWith(
-        color: StreamColorTheme.dark().textLowEmphasis,
+  messageTextStyle: const StreamTextTheme.dark().body,
+  createdAtStyle: const StreamTextTheme.dark().footnote.copyWith(
+        color: const StreamColorTheme.dark().textLowEmphasis,
       ),
   createdAtFormatter: _dummyFormatter,
-  repliesStyle: StreamTextTheme.dark().footnoteBold.copyWith(
-        color: StreamColorTheme.dark().accentPrimary,
+  repliesStyle: const StreamTextTheme.dark().footnoteBold.copyWith(
+        color: const StreamColorTheme.dark().accentPrimary,
       ),
-  messageBackgroundColor: StreamColorTheme.dark().disabled,
-  reactionsBackgroundColor: StreamColorTheme.dark().barsBg,
-  reactionsBorderColor: StreamColorTheme.dark().borders,
-  reactionsMaskColor: StreamColorTheme.dark().appBg,
-  messageBorderColor: StreamColorTheme.dark().disabled,
+  messageBackgroundColor: const StreamColorTheme.dark().disabled,
+  reactionsBackgroundColor: const StreamColorTheme.dark().barsBg,
+  reactionsBorderColor: const StreamColorTheme.dark().borders,
+  reactionsMaskColor: const StreamColorTheme.dark().appBg,
+  messageBorderColor: const StreamColorTheme.dark().disabled,
   avatarTheme: StreamAvatarThemeData(
     borderRadius: BorderRadius.circular(20),
     constraints: const BoxConstraints.tightFor(
@@ -91,7 +91,7 @@ final _messageThemeControlDark = StreamMessageThemeData(
     ),
   ),
   messageLinksStyle: TextStyle(
-    color: StreamColorTheme.dark().accentPrimary,
+    color: const StreamColorTheme.dark().accentPrimary,
   ),
-  urlAttachmentBackgroundColor: StreamColorTheme.dark().linkBg,
+  urlAttachmentBackgroundColor: const StreamColorTheme.dark().linkBg,
 );

@@ -12,6 +12,7 @@ void main() {
       expect(member.channelRole, 'channel_member');
       expect(member.createdAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
       expect(member.updatedAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
+      expect(member.deletedMessages, ['msg-1', 'msg-2', 'msg-3']);
       expect(member.extraData['some_custom_field'], 'with_custom_data');
     });
 

@@ -34,21 +34,8 @@ enum NullOrdering {
 /// // Sort channels by last message date in descending order
 /// final sort = SortOption<ChannelState>("last_message_at");
 /// ```
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable(createFactory: false, includeIfNull: false)
 class SortOption<T extends ComparableFieldProvider> {
-  /// Creates a new SortOption instance with the specified field and direction.
-  ///
-  /// ```dart
-  /// final sorting = SortOption("last_message_at") // Default: descending order
-  /// ```
-  @Deprecated('Use SortOption.desc or SortOption.asc instead')
-  const SortOption(
-    this.field, {
-    this.direction = SortOption.DESC,
-    this.nullOrdering = NullOrdering.nullsFirst,
-    Comparator<T>? comparator,
-  }) : _comparator = comparator;
-
   /// Creates a SortOption for descending order sorting by the specified field.
   ///
   /// Example:
@@ -76,10 +63,6 @@ class SortOption<T extends ComparableFieldProvider> {
     Comparator<T>? comparator,
   })  : direction = SortOption.ASC,
         _comparator = comparator;
-
-  /// Create a new instance from JSON.
-  factory SortOption.fromJson(Map<String, dynamic> json) =>
-      _$SortOptionFromJson(json);
 
   /// Ascending order (1)
   static const ASC = 1;
