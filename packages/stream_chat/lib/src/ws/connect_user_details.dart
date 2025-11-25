@@ -37,7 +37,7 @@ class ConnectUserDetails {
     return ConnectUserDetails(
       id: user.id,
       // Using extraData value in order to not use id as name.
-      name: user.extraData['name'].safeCast(),
+      name: user.extraData['name'].safeCast<String>(),
       image: user.image,
       language: user.language,
       invisible: user.invisible,
