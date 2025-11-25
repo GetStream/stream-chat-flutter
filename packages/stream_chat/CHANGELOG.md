@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed user's ID from being inadvertently used as their display name during the WebSocket
+  connection process. [[#2447]](https://github.com/GetStream/stream-chat-flutter/issues/2447)
+
 ## 9.20.0
 
 ✅ Added
