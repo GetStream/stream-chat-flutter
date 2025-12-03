@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/privacy_settings.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'connect_user_details.g.dart';
@@ -35,7 +36,8 @@ class ConnectUserDetails {
   factory ConnectUserDetails.fromOwnUser(OwnUser user) {
     return ConnectUserDetails(
       id: user.id,
-      name: user.name,
+      // Using extraData value in order to not use id as name.
+      name: user.extraData['name'].safeCast<String>(),
       image: user.image,
       language: user.language,
       invisible: user.invisible,

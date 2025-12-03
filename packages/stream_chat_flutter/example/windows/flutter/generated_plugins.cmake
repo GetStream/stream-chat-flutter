@@ -13,7 +13,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   sqlite3_flutter_libs
   thumblr_windows
   url_launcher_windows
-  volume_controller
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

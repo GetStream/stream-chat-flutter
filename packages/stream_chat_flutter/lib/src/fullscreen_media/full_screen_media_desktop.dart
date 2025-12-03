@@ -313,73 +313,70 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
               return ValueListenableBuilder(
                 valueListenable: _isDisplayingDetail,
                 builder: (context, isDisplayingDetail, child) {
+                  final padding = MediaQuery.paddingOf(context);
+
                   return AnimatedContainer(
                     duration: kThemeChangeDuration,
-                    color: isDisplayingDetail
-                        ? StreamChannelHeaderTheme.of(context).color
-                        : Colors.black,
-                    child: Builder(
-                      builder: (context) {
-                        if (attachment.type == AttachmentType.image ||
-                            attachment.type == AttachmentType.giphy) {
-                          return PhotoView.customChild(
-                            maxScale: PhotoViewComputedScale.covered,
-                            minScale: PhotoViewComputedScale.contained,
-                            backgroundDecoration: const BoxDecoration(
-                              color: Colors.transparent,
-                            ),
-                            child: StreamMediaAttachmentThumbnail(
-                              media: attachment,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
-                          );
-                        } else if (attachment.type == AttachmentType.video) {
-                          final package = videoPackages[attachment.id]!;
-                          if (package.attachment.assetUrl != null) {
-                            package.player.open(
-                              Playlist(
-                                [
-                                  Media(package.attachment.assetUrl!),
-                                ],
-                              ),
-                              play: widget.autoplayVideos,
-                            );
-                          }
-
-                          final mediaQuery = MediaQuery.of(context);
-                          final bottomPadding = mediaQuery.padding.bottom;
-
-                          return AnimatedPadding(
-                            duration: kThemeChangeDuration,
-                            padding: EdgeInsets.symmetric(
-                              vertical: isDisplayingDetail
-                                  ? kToolbarHeight + bottomPadding
-                                  : 0,
-                            ),
-                            child: ContextMenuRegion(
-                              contextMenuBuilder: (_, anchor) {
-                                return ContextMenu(
-                                  anchor: anchor,
-                                  menuItems: [
-                                    _DownloadMenuItem(
-                                      mediaAttachment: currentAttachmentPackage,
-                                    ),
-                                  ],
-                                );
-                              },
-                              child: Video(
-                                controller: package.controller,
-                              ),
-                            ),
-                          );
-                        }
-
-                        return const Empty();
-                      },
+                    color: switch (isDisplayingDetail) {
+                      true => StreamChannelHeaderTheme.of(context).color,
+                      false => Colors.black,
+                    },
+                    padding: EdgeInsetsDirectional.only(
+                      top: padding.top + kToolbarHeight,
+                      bottom: padding.bottom + kToolbarHeight,
                     ),
+                    child: child,
                   );
                 },
+                child: Builder(
+                  builder: (context) {
+                    if (attachment.type == AttachmentType.image ||
+                        attachment.type == AttachmentType.giphy) {
+                      return PhotoView.customChild(
+                        maxScale: PhotoViewComputedScale.covered,
+                        minScale: PhotoViewComputedScale.contained,
+                        backgroundDecoration: const BoxDecoration(
+                          color: Colors.transparent,
+                        ),
+                        child: StreamMediaAttachmentThumbnail(
+                          media: attachment,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                      );
+                    } else if (attachment.type == AttachmentType.video) {
+                      final package = videoPackages[attachment.id]!;
+                      if (package.attachment.assetUrl != null) {
+                        package.player.open(
+                          Playlist(
+                            [
+                              Media(package.attachment.assetUrl!),
+                            ],
+                          ),
+                          play: widget.autoplayVideos,
+                        );
+                      }
+
+                      return ContextMenuRegion(
+                        contextMenuBuilder: (_, anchor) {
+                          return ContextMenu(
+                            anchor: anchor,
+                            menuItems: [
+                              _DownloadMenuItem(
+                                mediaAttachment: currentAttachmentPackage,
+                              ),
+                            ],
+                          );
+                        },
+                        child: Video(
+                          controller: package.controller,
+                        ),
+                      );
+                    }
+
+                    return const Empty();
+                  },
+                ),
               );
             },
           ),

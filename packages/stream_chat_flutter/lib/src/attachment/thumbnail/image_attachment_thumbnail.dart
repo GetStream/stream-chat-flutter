@@ -90,7 +90,8 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
 
         // If the remote image URL is available, we can directly show it using
         // the _RemoteImageAttachment widget.
-        if (image.thumbUrl ?? image.imageUrl case final imageUrl?) {
+        final imageUrl = image.thumbUrl ?? image.imageUrl ?? image.assetUrl;
+        if (imageUrl case final imageUrl?) {
           var resizedImageUrl = imageUrl;
           if (effectiveThumbnailSize case final thumbnailSize?) {
             resizedImageUrl = imageUrl.getResizedImageUrl(

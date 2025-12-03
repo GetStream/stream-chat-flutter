@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed StreamGallery not respecting the safe area for fullscreen
+  media. [[#2454]](https://github.com/GetStream/stream-chat-flutter/issues/2454)
+
 ## 10.0.0-beta.9
 
 ✅ Added
