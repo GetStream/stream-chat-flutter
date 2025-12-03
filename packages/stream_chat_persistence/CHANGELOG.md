@@ -1,3 +1,7 @@
+## 9.21.0
+
+- Updated `stream_chat` dependency to [`9.21.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.20.0
 
 ✅ Added
