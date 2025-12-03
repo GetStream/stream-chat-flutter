@@ -65,9 +65,9 @@ class UrlAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       final host = Uri.parse(urlPreview.titleLink!).host;
       final splitList = host.split('.');
       final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
-      final hostDisplayName = urlPreview.authorName?.capitalize() ??
+      final hostDisplayName = urlPreview.authorName?.sentenceCase ??
           getWebsiteName(hostName.toLowerCase()) ??
-          hostName.capitalize();
+          hostName.sentenceCase;
 
       return InkWell(
         onTap: onTap,

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -329,10 +331,13 @@ void main() {
             .thenAnswer((_) async => reads);
         when(() => mockDatabase.channelDao.getChannelByCid(cid))
             .thenAnswer((_) async => channel);
-        when(() => mockDatabase.messageDao.getMessagesByCid(cid))
+        when(() => mockDatabase.messageDao.getMessagesByCid(cid,
+                messagePagination: any(named: 'messagePagination')))
             .thenAnswer((_) async => messages);
         when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
             .thenAnswer((_) async => messages);
+        when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
+            .thenAnswer((_) async => null);
 
         final fetchedChannelStates = await client.getChannelStates();
         expect(fetchedChannelStates.length, channelStates.length);
@@ -352,8 +357,11 @@ void main() {
         verify(() => mockDatabase.memberDao.getMembersByCid(cid)).called(3);
         verify(() => mockDatabase.readDao.getReadsByCid(cid)).called(3);
         verify(() => mockDatabase.channelDao.getChannelByCid(cid)).called(3);
-        verify(() => mockDatabase.messageDao.getMessagesByCid(cid)).called(3);
+        verify(() => mockDatabase.messageDao.getMessagesByCid(cid,
+            messagePagination: any(named: 'messagePagination'))).called(3);
         verify(() => mockDatabase.pinnedMessageDao.getMessagesByCid(cid))
+            .called(3);
+        verify(() => mockDatabase.draftMessageDao.getDraftMessageByCid(cid))
             .called(3);
       });
     });
@@ -728,6 +736,211 @@ void main() {
       await client.deleteDraftMessageByCid(cid, parentId: parentId);
       verify(() => mockDatabase.draftMessageDao
           .deleteDraftMessageByCid(cid, parentId: parentId)).called(1);
+    });
+
+    test('getLocationsByCid', () async {
+      const cid = 'testCid';
+      final locations = List.generate(
+        3,
+        (index) => Location(
+          channelCid: cid,
+          messageId: 'testMessageId$index',
+          userId: 'testUserId$index',
+          latitude: 37.7749 + index * 0.001,
+          longitude: -122.4194 + index * 0.001,
+          createdByDeviceId: 'testDevice$index',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      when(() => mockDatabase.locationDao.getLocationsByCid(cid))
+          .thenAnswer((_) async => locations);
+
+      final fetchedLocations = await client.getLocationsByCid(cid);
+      expect(fetchedLocations.length, locations.length);
+      verify(() => mockDatabase.locationDao.getLocationsByCid(cid)).called(1);
+    });
+
+    test('getLocationByMessageId', () async {
+      const messageId = 'testMessageId';
+      final location = Location(
+        channelCid: 'testCid',
+        messageId: messageId,
+        userId: 'testUserId',
+        latitude: 37.7749,
+        longitude: -122.4194,
+        createdByDeviceId: 'testDevice',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      when(() => mockDatabase.locationDao.getLocationByMessageId(messageId))
+          .thenAnswer((_) async => location);
+
+      final fetchedLocation = await client.getLocationByMessageId(messageId);
+      expect(fetchedLocation, isNotNull);
+      expect(fetchedLocation!.messageId, messageId);
+      verify(() => mockDatabase.locationDao.getLocationByMessageId(messageId))
+          .called(1);
+    });
+
+    test('updateLocations', () async {
+      final locations = List.generate(
+        3,
+        (index) => Location(
+          channelCid: 'testCid$index',
+          messageId: 'testMessageId$index',
+          userId: 'testUserId$index',
+          latitude: 37.7749 + index * 0.001,
+          longitude: -122.4194 + index * 0.001,
+          createdByDeviceId: 'testDevice$index',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      when(() => mockDatabase.locationDao.updateLocations(locations))
+          .thenAnswer((_) async {});
+
+      await client.updateLocations(locations);
+      verify(() => mockDatabase.locationDao.updateLocations(locations))
+          .called(1);
+    });
+
+    test('deleteLocationsByCid', () async {
+      const cid = 'testCid';
+      when(() => mockDatabase.locationDao.deleteLocationsByCid(cid))
+          .thenAnswer((_) async {});
+
+      await client.deleteLocationsByCid(cid);
+      verify(() => mockDatabase.locationDao.deleteLocationsByCid(cid))
+          .called(1);
+    });
+
+    test('deleteLocationsByMessageIds', () async {
+      final messageIds = <String>['testMessageId1', 'testMessageId2'];
+      when(
+        () => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds),
+      ).thenAnswer((_) async {});
+
+      await client.deleteLocationsByMessageIds(messageIds);
+      verify(
+        () => mockDatabase.locationDao.deleteLocationsByMessageIds(messageIds),
+      ).called(1);
+    });
+
+    group('deleteMessagesFromUser', () {
+      const userId = 'testUserId';
+      const cid = 'testCid';
+
+      test('calls deleteMessagesByUser on both DAOs with hard delete',
+          () async {
+        when(() => mockDatabase.messageDao.deleteMessagesByUser(
+              cid: cid,
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).thenAnswer((_) async => 1);
+
+        when(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+              cid: cid,
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).thenAnswer((_) async => 1);
+
+        await client.deleteMessagesFromUser(
+          cid: cid,
+          userId: userId,
+          hardDelete: true,
+        );
+
+        verify(() => mockDatabase.messageDao.deleteMessagesByUser(
+              cid: cid,
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).called(1);
+
+        verify(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+              cid: cid,
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).called(1);
+      });
+
+      test('calls deleteMessagesByUser on both DAOs with soft delete',
+          () async {
+        final deletedAt = DateTime.now();
+
+        when(() => mockDatabase.messageDao.deleteMessagesByUser(
+              cid: cid,
+              userId: userId,
+              hardDelete: false,
+              deletedAt: deletedAt,
+            )).thenAnswer((_) async => 1);
+
+        when(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+              cid: cid,
+              userId: userId,
+              hardDelete: false,
+              deletedAt: deletedAt,
+            )).thenAnswer((_) async => 1);
+
+        await client.deleteMessagesFromUser(
+          cid: cid,
+          userId: userId,
+          hardDelete: false,
+          deletedAt: deletedAt,
+        );
+
+        verify(() => mockDatabase.messageDao.deleteMessagesByUser(
+              cid: cid,
+              userId: userId,
+              hardDelete: false,
+              deletedAt: deletedAt,
+            )).called(1);
+
+        verify(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+              cid: cid,
+              userId: userId,
+              hardDelete: false,
+              deletedAt: deletedAt,
+            )).called(1);
+      });
+
+      test('calls deleteMessagesByUser without cid when cid is null', () async {
+        when(() => mockDatabase.messageDao.deleteMessagesByUser(
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).thenAnswer((_) async => 1);
+
+        when(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).thenAnswer((_) async => 1);
+
+        await client.deleteMessagesFromUser(
+          userId: userId,
+          hardDelete: true,
+        );
+
+        verify(() => mockDatabase.messageDao.deleteMessagesByUser(
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).called(1);
+
+        verify(() => mockDatabase.pinnedMessageDao.deleteMessagesByUser(
+              userId: userId,
+              hardDelete: true,
+              deletedAt: any(named: 'deletedAt'),
+            )).called(1);
+      });
     });
 
     tearDown(() async {
