@@ -1,3 +1,15 @@
+## Upcoming
+
+✅ Added
+
+- Added `markUnreadByTimestamp` method to `Channel` and `Client` to mark all messages after a given
+  timestamp as unread.
+
+🔄 Changed
+
+- Made the `messageId` parameter optional in `Channel.markUnread` and `Client.markChannelUnread`
+  methods. If not provided, the entire channel is marked as unread.
+
 ## 9.21.0
 
 🐞 Fixed
