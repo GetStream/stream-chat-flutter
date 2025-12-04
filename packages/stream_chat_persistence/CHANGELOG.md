@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for `ChannelModel.filterTags` field.
+
 ## 9.21.0
 
 - Updated `stream_chat` dependency to [`9.21.0`](https://pub.dev/packages/stream_chat/changelog).
