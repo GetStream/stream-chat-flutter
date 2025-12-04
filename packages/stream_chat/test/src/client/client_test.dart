@@ -2037,6 +2037,25 @@ void main() {
     test('`.markChannelUnread`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
+
+      when(() => api.channel.markUnread(channelId, channelType, null))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.markChannelUnread(
+        channelId,
+        channelType,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.markUnread(channelId, channelType, null))
+          .called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.markChannelUnread` with messageId', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
       const messageId = 'test-message-id';
 
       when(() => api.channel.markUnread(channelId, channelType, messageId))
@@ -2052,6 +2071,33 @@ void main() {
 
       verify(() => api.channel.markUnread(channelId, channelType, messageId))
           .called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.markChannelUnreadByTimestamp`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+      when(() => api.channel.markUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          )).thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.markChannelUnreadByTimestamp(
+        channelId,
+        channelType,
+        timestamp,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.markUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 

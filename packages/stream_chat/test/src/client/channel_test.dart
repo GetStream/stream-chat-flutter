@@ -6731,7 +6731,7 @@ void main() {
         addTearDown(channel.dispose);
 
         await expectLater(
-          channel.markUnread('message-id-123'),
+          channel.markUnread(),
           throwsA(isA<StreamChatError>()),
         );
       },
@@ -6739,6 +6739,39 @@ void main() {
 
     test(
       '.markUnread should succeed if we have the capability',
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.readEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        when(
+          () => client.markChannelUnread(
+            channelId,
+            channelType,
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(
+          channel.markUnread(),
+          completes,
+        );
+
+        verify(
+          () => client.markChannelUnread(
+            channelId,
+            channelType,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      '.markUnread with messageId should succeed if we have the capability',
       () async {
         final channelState = _generateChannelState(
           channelId,
@@ -6767,6 +6800,64 @@ void main() {
             channelId,
             channelType,
             'message-id-123',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      ".markUnreadByTimestamp should throw if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no readEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+        await expectLater(
+          channel.markUnreadByTimestamp(timestamp),
+          throwsA(isA<StreamChatError>()),
+        );
+      },
+    );
+
+    test(
+      '.markUnreadByTimestamp should succeed if we have the capability',
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.readEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+        when(
+          () => client.markChannelUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(
+          channel.markUnreadByTimestamp(timestamp),
+          completes,
+        );
+
+        verify(
+          () => client.markChannelUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
           ),
         ).called(1);
       },

@@ -323,15 +323,33 @@ class ChannelApi {
     return EmptyResponse.fromJson(response.data);
   }
 
-  /// Marks all messages from the provided [messageId] onwards as unread
+  /// Marks the channel as unread.
+  ///
+  /// Optionally provide a [messageId] to only mark messages from that ID
+  /// onwards as unread.
   Future<EmptyResponse> markUnread(
     String channelId,
-    String channelType,
+    String channelType, [
     String? messageId,
+  ]) async {
+    final response = await _client.post(
+      '${_getChannelUrl(channelId, channelType)}/unread',
+      data: {if (messageId != null) 'message_id': messageId},
+    );
+    return EmptyResponse.fromJson(response.data);
+  }
+
+  /// Marks the channel as unread by a given [timestamp].
+  ///
+  /// All messages after the provided timestamp will be marked as unread.
+  Future<EmptyResponse> markUnreadByTimestamp(
+    String channelId,
+    String channelType,
+    DateTime timestamp,
   ) async {
     final response = await _client.post(
       '${_getChannelUrl(channelId, channelType)}/unread',
-      data: {'message_id': messageId},
+      data: {'message_timestamp': timestamp.toUtc().toIso8601String()},
     );
     return EmptyResponse.fromJson(response.data);
   }
