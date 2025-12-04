@@ -325,7 +325,7 @@ class ChannelApi {
 
   /// Marks the channel as unread by a given [messageId].
   ///
-  /// All messages from the provided message ID onwards will be marked as unread.
+  /// All messages from the provided message onwards will be marked as unread.
   Future<EmptyResponse> markUnread(
     String channelId,
     String channelType,
