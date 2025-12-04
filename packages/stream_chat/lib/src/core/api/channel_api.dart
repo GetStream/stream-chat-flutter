@@ -215,12 +215,12 @@ class ChannelApi {
       _getChannelUrl(channelId, channelType),
       data: {
         'add_members': memberIds,
-        'message': message,
+        if (message != null) 'message': message,
         // [hideHistoryBefore] takes precedence over [hideHistory]
-        ...switch (hideHistoryBefore) {
+        ...switch (hideHistoryBefore?.toUtc().toIso8601String()) {
           final hideBefore? => {'hide_history_before': hideBefore},
           _ => {'hide_history': hideHistory},
-        }
+        },
       },
     );
     return AddMembersResponse.fromJson(response.data);
