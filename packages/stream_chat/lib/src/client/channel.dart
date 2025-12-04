@@ -1643,10 +1643,9 @@ class Channel {
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Mark message as unread.
+  /// Marks the channel as unread by a given [messageId].
   ///
-  /// You have to provide a [messageId] from which you want the channel
-  /// to be marked as unread.
+  /// All messages from the provided message onwards will be marked as unread.
   Future<EmptyResponse> markUnread(String messageId) async {
     _checkInitialized();
 
@@ -1658,6 +1657,22 @@ class Channel {
     }
 
     return _client.markChannelUnread(id!, type, messageId);
+  }
+
+  /// Marks the channel as unread by a given [timestamp].
+  ///
+  /// All messages after the provided timestamp will be marked as unread.
+  Future<EmptyResponse> markUnreadByTimestamp(DateTime timestamp) async {
+    _checkInitialized();
+
+    if (!canUseReadReceipts) {
+      throw const StreamChatError(
+        'Cannot mark as unread: Channel does not support read events. '
+        'Enable read_events in your channel type configuration.',
+      );
+    }
+
+    return _client.markChannelUnreadByTimestamp(id!, type, timestamp);
   }
 
   /// Mark the thread with [threadId] in the channel as read.

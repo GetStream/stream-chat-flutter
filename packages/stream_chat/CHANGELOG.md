@@ -2,6 +2,8 @@
 
 ✅ Added
 
+- Added support for `Channel.markUnreadByTimestamp` and `Client.markChannelUnreadByTimestamp`
+  methods to mark all messages after a given timestamp as unread.
 - Added support for `hideHistoryBefore` in `Channel.addMembers` and `Client.addChannelMembers` to
   specify a timestamp before which channel history should be hidden for newly added members. When
   provided, it takes precedence over the `hideHistory` boolean flag.

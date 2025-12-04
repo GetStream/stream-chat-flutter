@@ -2099,6 +2099,33 @@ void main() {
       verifyNoMoreInteractions(api.channel);
     });
 
+    test('`.markChannelUnreadByTimestamp`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+      when(() => api.channel.markUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          )).thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.markChannelUnreadByTimestamp(
+        channelId,
+        channelType,
+        timestamp,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.markUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          )).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
     test('`.createPoll`', () async {
       final poll = Poll(
         name: 'What is your favorite color?',

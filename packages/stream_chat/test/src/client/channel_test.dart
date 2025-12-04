@@ -6820,6 +6820,64 @@ void main() {
     );
 
     test(
+      ".markUnreadByTimestamp should throw if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no readEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+        await expectLater(
+          channel.markUnreadByTimestamp(timestamp),
+          throwsA(isA<StreamChatError>()),
+        );
+      },
+    );
+
+    test(
+      '.markUnreadByTimestamp should succeed if we have the capability',
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.readEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+        when(
+          () => client.markChannelUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(
+          channel.markUnreadByTimestamp(timestamp),
+          completes,
+        );
+
+        verify(
+          () => client.markChannelUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
       ".markThreadRead should throw if we don't have the capability",
       () async {
         final channelState = _generateChannelState(
