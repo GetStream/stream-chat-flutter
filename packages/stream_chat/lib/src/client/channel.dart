@@ -1575,6 +1575,7 @@ class Channel {
     List<String> memberIds, {
     Message? message,
     bool hideHistory = false,
+    DateTime? hideHistoryBefore,
   }) async {
     _checkInitialized();
     return _client.addChannelMembers(
@@ -1583,6 +1584,7 @@ class Channel {
       memberIds,
       message: message,
       hideHistory: hideHistory,
+      hideHistoryBefore: hideHistoryBefore,
     );
   }
 

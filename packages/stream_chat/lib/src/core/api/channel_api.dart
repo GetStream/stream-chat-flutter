@@ -209,13 +209,18 @@ class ChannelApi {
     List<String> memberIds, {
     Message? message,
     bool hideHistory = false,
+    DateTime? hideHistoryBefore,
   }) async {
     final response = await _client.post(
       _getChannelUrl(channelId, channelType),
       data: {
         'add_members': memberIds,
-        'message': message,
-        'hide_history': hideHistory,
+        if (message != null) 'message': message,
+        // [hideHistoryBefore] takes precedence over [hideHistory]
+        ...switch (hideHistoryBefore?.toUtc().toIso8601String()) {
+          final hideBefore? => {'hide_history_before': hideBefore},
+          _ => {'hide_history': hideHistory},
+        },
       },
     );
     return AddMembersResponse.fromJson(response.data);
