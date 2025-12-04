@@ -6310,6 +6310,71 @@ void main() {
     });
   });
 
+  group('Channel filterTags', () {
+    late final client = MockStreamChatClient();
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    setUpAll(() {
+      // detached loggers
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+
+      final retryPolicy = RetryPolicy(
+        shouldRetry: (_, __, ___) => false,
+        delayFactor: Duration.zero,
+      );
+      when(() => client.retryPolicy).thenReturn(retryPolicy);
+
+      // fake clientState
+      final clientState = FakeClientState();
+      when(() => client.state).thenReturn(clientState);
+
+      // client logger
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+    });
+
+    test('should return filterTags from channel state', () {
+      final channelModel = ChannelModel(
+        id: channelId,
+        type: channelType,
+        filterTags: ['tag1', 'tag2'],
+      );
+
+      final channelState = ChannelState(channel: channelModel);
+      final testChannel = Channel.fromState(client, channelState);
+      addTearDown(testChannel.dispose);
+
+      expect(testChannel.filterTags, equals(['tag1', 'tag2']));
+    });
+
+    test('should update filterTags when channel state is updated', () {
+      final channelModel = ChannelModel(
+        id: channelId,
+        type: channelType,
+        filterTags: ['tag1', 'tag2'],
+      );
+
+      final channelState = ChannelState(channel: channelModel);
+      final testChannel = Channel.fromState(client, channelState);
+      addTearDown(testChannel.dispose);
+
+      expect(testChannel.filterTags, equals(['tag1', 'tag2']));
+
+      final updatedChannel = channelModel.copyWith(
+        filterTags: ['tag3', 'tag4', 'tag5'],
+      );
+
+      testChannel.state?.updateChannelState(
+        testChannel.state!.channelState.copyWith(channel: updatedChannel),
+      );
+
+      expect(testChannel.filterTags, equals(['tag3', 'tag4', 'tag5']));
+    });
+  });
+
   group('Typing Indicator', () {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
