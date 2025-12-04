@@ -608,30 +608,6 @@ void main() {
   test('markUnread', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
-
-    final path = '${_getChannelUrl(channelId, channelType)}/unread';
-
-    when(() => client.post(
-              path,
-              data: {},
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
-
-    final res = await channelApi.markUnread(
-      channelId,
-      channelType,
-    );
-
-    expect(res, isNotNull);
-
-    verify(() => client.post(path, data: any(named: 'data'))).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('markUnread with messageId', () async {
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
     const messageId = 'test-message-id';
 
     final path = '${_getChannelUrl(channelId, channelType)}/unread';

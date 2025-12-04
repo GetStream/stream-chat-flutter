@@ -1341,15 +1341,15 @@ class StreamChatClient {
         messageId: messageId,
       );
 
-  /// Marks the [channelId] of type [channelType] as unread.
+  /// Marks the [channelId] of type [channelType] as unread
+  /// by a given [messageId].
   ///
-  /// Optionally provide a [messageId] to only mark messages from that ID
-  /// onwards as unread.
+  /// All messages from the provided message onwards will be marked as unread.
   Future<EmptyResponse> markChannelUnread(
     String channelId,
-    String channelType, [
-    String? messageId,
-  ]) =>
+    String channelType,
+    String messageId,
+  ) =>
       _chatApi.channel.markUnread(
         channelId,
         channelType,

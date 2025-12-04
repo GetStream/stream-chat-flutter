@@ -1641,11 +1641,10 @@ class Channel {
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
-  /// Marks the channel as unread.
+  /// Marks the channel as unread by a given [messageId].
   ///
-  /// Optionally provide a [messageId] to only mark messages from that ID
-  /// onwards as unread.
-  Future<EmptyResponse> markUnread([String? messageId]) async {
+  /// All messages from the provided message onwards will be marked as unread.
+  Future<EmptyResponse> markUnread(String messageId) async {
     _checkInitialized();
 
     if (!canUseReadReceipts) {

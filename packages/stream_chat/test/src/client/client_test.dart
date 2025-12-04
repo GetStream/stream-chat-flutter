@@ -2037,25 +2037,6 @@ void main() {
     test('`.markChannelUnread`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
-
-      when(() => api.channel.markUnread(channelId, channelType, null))
-          .thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.markChannelUnread(
-        channelId,
-        channelType,
-      );
-
-      expect(res, isNotNull);
-
-      verify(() => api.channel.markUnread(channelId, channelType, null))
-          .called(1);
-      verifyNoMoreInteractions(api.channel);
-    });
-
-    test('`.markChannelUnread` with messageId', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
       const messageId = 'test-message-id';
 
       when(() => api.channel.markUnread(channelId, channelType, messageId))

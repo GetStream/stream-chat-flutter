@@ -6731,7 +6731,7 @@ void main() {
         addTearDown(channel.dispose);
 
         await expectLater(
-          channel.markUnread(),
+          channel.markUnread('message-id-123'),
           throwsA(isA<StreamChatError>()),
         );
       },
@@ -6739,39 +6739,6 @@ void main() {
 
     test(
       '.markUnread should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markChannelUnread(
-            channelId,
-            channelType,
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-
-        await expectLater(
-          channel.markUnread(),
-          completes,
-        );
-
-        verify(
-          () => client.markChannelUnread(
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      },
-    );
-
-    test(
-      '.markUnread with messageId should succeed if we have the capability',
       () async {
         final channelState = _generateChannelState(
           channelId,
