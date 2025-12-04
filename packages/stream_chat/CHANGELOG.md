@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for `filterTags` in channels.
+
 ## 9.21.0
 
 🐞 Fixed
