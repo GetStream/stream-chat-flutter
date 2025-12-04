@@ -24,6 +24,7 @@ void main() {
       memberCount: 33,
       messageCount: 42,
       createdById: user.id,
+      filterTags: ['tag1', 'tag2'],
       extraData: {'test_extra_data': 'testData'},
     );
 
@@ -41,8 +42,9 @@ void main() {
       expect(channelModel.cid, entity.cid);
       expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
       expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
-      expect(channelModel.extraData, entity.extraData);
       expect(channelModel.createdBy!.id, entity.createdById);
+      expect(channelModel.filterTags, entity.filterTags);
+      expect(channelModel.extraData, entity.extraData);
     });
 
     test('toChannelState should map entity into ChannelState ', () {
@@ -83,6 +85,7 @@ void main() {
       expect(channelModel.cid, entity.cid);
       expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
       expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
+      expect(channelModel.filterTags, entity.filterTags);
       expect(channelModel.extraData, entity.extraData);
       expect(channelModel.createdBy!.id, entity.createdById);
     });
@@ -104,6 +107,7 @@ void main() {
       memberCount: 33,
       messageCount: 75,
       createdBy: createdBy,
+      filterTags: ['tag1', 'tag2'],
       extraData: {'test_extra_data': 'testData'},
     );
 
@@ -123,6 +127,7 @@ void main() {
     expect(channelEntity.cid, model.cid);
     expect(channelEntity.lastMessageAt, isSameDateAs(model.lastMessageAt));
     expect(channelEntity.deletedAt, isSameDateAs(model.deletedAt));
+    expect(channelEntity.filterTags, model.filterTags);
     expect(channelEntity.extraData, model.extraData);
     expect(channelEntity.createdById, model.createdBy!.id);
   });
