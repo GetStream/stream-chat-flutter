@@ -1266,6 +1266,7 @@ class StreamChatClient {
     List<String> memberIds, {
     Message? message,
     bool hideHistory = false,
+    DateTime? hideHistoryBefore,
   }) =>
       _chatApi.channel.addMembers(
         channelId,
@@ -1273,6 +1274,7 @@ class StreamChatClient {
         memberIds,
         message: message,
         hideHistory: hideHistory,
+        hideHistoryBefore: hideHistoryBefore,
       );
 
   /// Remove members from the channel
@@ -1341,9 +1343,10 @@ class StreamChatClient {
         messageId: messageId,
       );
 
-  /// Mark [channelId] of type [channelType] all messages as read
-  /// Optionally provide a [messageId] if you want to mark a
-  /// particular message as read
+  /// Marks the [channelId] of type [channelType] as unread
+  /// by a given [messageId].
+  ///
+  /// All messages from the provided message onwards will be marked as unread.
   Future<EmptyResponse> markChannelUnread(
     String channelId,
     String channelType,
@@ -1353,6 +1356,21 @@ class StreamChatClient {
         channelId,
         channelType,
         messageId,
+      );
+
+  /// Marks the [channelId] of type [channelType] as unread
+  /// by a given [timestamp].
+  ///
+  /// All messages after the provided timestamp will be marked as unread.
+  Future<EmptyResponse> markChannelUnreadByTimestamp(
+    String channelId,
+    String channelType,
+    DateTime timestamp,
+  ) =>
+      _chatApi.channel.markUnreadByTimestamp(
+        channelId,
+        channelType,
+        timestamp,
       );
 
   /// Mark the thread with [threadId] in the channel with [channelId] of type
