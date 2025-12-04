@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added support for `filterTags` in channels.
 - Added support for `Channel.markUnreadByTimestamp` and `Client.markChannelUnreadByTimestamp`
   methods to mark all messages after a given timestamp as unread.
 - Added support for `hideHistoryBefore` in `Channel.addMembers` and `Client.addChannelMembers` to

@@ -32,6 +32,7 @@ class ChannelModel {
     bool? hidden,
     DateTime? truncatedAt,
     this.messageCount,
+    this.filterTags,
   })  : assert(
           (cid != null && cid.contains(':')) || (id != null && type != null),
           'provide either a cid or an id and type',
@@ -159,6 +160,12 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final int? messageCount;
 
+  /// List of filter tags applied to the channel.
+  ///
+  /// This is generally used for querying filtered channels based on tags.
+  @JsonKey(includeToJson: false)
+  final List<String>? filterTags;
+
   /// Known top level fields.
   /// Useful for [Serializer] methods.
   static const topLevelFields = [
@@ -178,6 +185,7 @@ class ChannelModel {
     'team',
     'cooldown',
     'message_count',
+    'filter_tags',
   ];
 
   /// Serialize to json
@@ -207,6 +215,7 @@ class ChannelModel {
     bool? hidden,
     DateTime? truncatedAt,
     int? messageCount,
+    List<String>? filterTags,
   }) =>
       ChannelModel(
         id: id ?? this.id,
@@ -234,6 +243,7 @@ class ChannelModel {
                 : DateTime.parse(extraData?['truncated_at'] as String)) ??
             this.truncatedAt,
         messageCount: messageCount ?? this.messageCount,
+        filterTags: filterTags ?? this.filterTags,
       );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
@@ -261,6 +271,7 @@ class ChannelModel {
       hidden: other.hidden,
       truncatedAt: other.truncatedAt,
       messageCount: other.messageCount,
+      filterTags: other.filterTags,
     );
   }
 }

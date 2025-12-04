@@ -82,6 +82,7 @@ void main() {
         cid: cids[index],
         createdBy: users[index],
         config: ChannelConfig(),
+        filterTags: ['tag$index'],
         extraData: {'test_custom_field': index + 3},
         createdAt: now,
         memberCount: index + 3,
@@ -122,6 +123,7 @@ void main() {
         expect(updatedChannel.type, insertedChannel.type);
         expect(updatedChannel.cid, insertedChannel.cid);
         expect(updatedChannel.memberCount, insertedChannel.memberCount);
+        expect(updatedChannel.filterTags, insertedChannel.filterTags);
 
         // Should match createdAt date
         expect(

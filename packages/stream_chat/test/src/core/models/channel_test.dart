@@ -317,4 +317,14 @@ void main() {
 
     expect(channel.truncatedAt, isNull);
   });
+
+  test('should parse filterTags from json correctly', () {
+    final channel = ChannelModel.fromJson({
+      'id': 'test',
+      'type': 'livestream',
+      'filter_tags': ['tag1', 'tag2', 'tag3'],
+    });
+
+    expect(channel.filterTags, equals(['tag1', 'tag2', 'tag3']));
+  });
 }

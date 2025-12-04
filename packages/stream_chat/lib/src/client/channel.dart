@@ -432,6 +432,14 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.messageCount);
   }
 
+  /// List of filter tags applied to this channel.
+  ///
+  /// Generally used for filtering channels while querying.
+  List<String>? get filterTags {
+    _checkInitialized();
+    return state!._channelState.channel?.filterTags;
+  }
+
   /// Channel id.
   String? get id => state?._channelState.channel?.id ?? _id;
 

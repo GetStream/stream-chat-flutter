@@ -45,6 +45,9 @@ class Channels extends Table {
   /// The id of the user that created this channel
   TextColumn get createdById => text().nullable()();
 
+  /// List of filter tags for this channel
+  TextColumn get filterTags => text().nullable().map(ListConverter<String>())();
+
   /// Map of custom channel extraData
   TextColumn get extraData => text().nullable().map(MapConverter())();
 
