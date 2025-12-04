@@ -2686,6 +2686,53 @@ void main() {
           message: any(named: 'message'))).called(1);
     });
 
+    test('`.addMembers` with hideHistoryBefore', () async {
+      final members = List.generate(
+        3,
+        (index) => Member(userId: 'test-member-id-$index'),
+      );
+      final memberIds = members
+          .map((it) => it.userId)
+          .whereType<String>()
+          .toList(growable: false);
+      final message = Message(id: 'test-message-id', text: 'Members Added');
+      final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
+
+      final channelModel = ChannelModel(cid: channelCid);
+
+      when(() => client.addChannelMembers(
+            channelId,
+            channelType,
+            memberIds,
+            message: message,
+            hideHistoryBefore: hideHistoryBefore,
+          )).thenAnswer(
+        (_) async => AddMembersResponse()
+          ..channel = channelModel
+          ..members = members
+          ..message = message,
+      );
+
+      final res = await channel.addMembers(
+        memberIds,
+        message: message,
+        hideHistoryBefore: hideHistoryBefore,
+      );
+
+      expect(res, isNotNull);
+      expect(res.channel.cid, channelModel.cid);
+      expect(res.members.length, members.length);
+      expect(res.message?.id, message.id);
+
+      verify(() => client.addChannelMembers(
+            channelId,
+            channelType,
+            memberIds,
+            message: message,
+            hideHistoryBefore: hideHistoryBefore,
+          )).called(1);
+    });
+
     test('`.inviteMembers`', () async {
       final members = List.generate(
         3,

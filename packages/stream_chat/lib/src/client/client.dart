@@ -1266,6 +1266,7 @@ class StreamChatClient {
     List<String> memberIds, {
     Message? message,
     bool hideHistory = false,
+    DateTime? hideHistoryBefore,
   }) =>
       _chatApi.channel.addMembers(
         channelId,
@@ -1273,6 +1274,7 @@ class StreamChatClient {
         memberIds,
         message: message,
         hideHistory: hideHistory,
+        hideHistoryBefore: hideHistoryBefore,
       );
 
   /// Remove members from the channel
