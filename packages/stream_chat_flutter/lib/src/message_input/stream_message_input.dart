@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
+import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_feedback.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
@@ -124,6 +125,7 @@ class StreamMessageInput extends StatefulWidget {
     this.hideSendAsDm = false,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
+    this.voiceRecordingFeedback = const AudioRecorderFeedback(),
     Widget? idleSendIcon,
     @Deprecated("Use 'idleSendIcon' instead") Widget? idleSendButton,
     Widget? activeSendIcon,
@@ -242,6 +244,36 @@ class StreamMessageInput extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool sendVoiceRecordingAutomatically;
+
+  /// The feedback handler for voice recording interactions.
+  ///
+  /// Defaults to [AudioRecorderFeedback] with feedback enabled.
+  ///
+  /// To disable feedback:
+  /// ```dart
+  /// StreamMessageInput(
+  ///   voiceRecordingFeedback: const AudioRecorderFeedback.disabled(),
+  /// )
+  /// ```
+  ///
+  /// To customize feedback, extend [AudioRecorderFeedback] and override
+  /// the desired methods:
+  /// ```dart
+  /// class CustomFeedback extends AudioRecorderFeedback {
+  ///   @override
+  ///   Future<void> onRecordStart(BuildContext context) async {
+  ///     // Haptic feedback
+  ///     await HapticFeedback.heavyImpact();
+  ///     // Or system sound
+  ///     // await SystemSound.play(SystemSoundType.click);
+  ///   }
+  /// }
+  ///
+  /// StreamMessageInput(
+  ///   voiceRecordingFeedback: CustomFeedback(),
+  /// )
+  /// ```
+  final AudioRecorderFeedback voiceRecordingFeedback;
 
   /// The text controller of the TextField.
   final StreamMessageInputController? messageInputController;
@@ -838,6 +870,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 flex: isAudioRecordingFlowActive ? 1 : 0,
                 child: StreamAudioRecorderButton(
                   recordState: state,
+                  feedback: widget.voiceRecordingFeedback,
                   onRecordStart: _audioRecorderController.startRecord,
                   onRecordCancel: _audioRecorderController.cancelRecord,
                   onRecordStop: _audioRecorderController.stopRecord,
@@ -850,7 +883,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     );
                   },
                   onRecordFinish: () async {
-                    //isVoiceRecordingConfirmationRequiredEnabled
                     // Finish the recording session and add the audio to the
                     // message input controller.
                     final audio = await _audioRecorderController.finishRecord();
