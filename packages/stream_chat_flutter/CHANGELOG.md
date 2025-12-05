@@ -1,3 +1,12 @@
+## Upcoming
+
+✅ Added
+
+- Added `AudioRecorderFeedback` class for customizable feedback (haptic feedback, system sounds, etc.)
+  during voice recording interactions. [[#2463]](https://github.com/GetStream/stream-chat-flutter/issues/2463)
+- Added `voiceRecordingFeedback` property to `StreamMessageInput` for configuring feedback behavior
+  during recording lifecycle events (start, lock, cancel, finish, etc.).
+
 ## 9.21.0
 
 🐞 Fixed
