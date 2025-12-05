@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_feedback.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_state.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
@@ -31,6 +32,8 @@ typedef AudioRecorderBuilder = Widget Function(
 ///
 /// Manages different recording states: idle, recording, locked, and stopped.
 /// Provides fine-grained control over recording interactions through callbacks.
+/// Supports feedback (haptic, system sounds, etc.) during recording lifecycle
+/// events.
 ///
 /// {@tool snippet}
 /// Basic usage example:
@@ -39,6 +42,7 @@ typedef AudioRecorderBuilder = Widget Function(
 ///   recordState: _recordState,
 ///   onRecordStart: () => _startRecording(),
 ///   onRecordFinish: () => _finishRecording(),
+///   feedback: const AudioRecorderFeedback(),
 /// )
 /// ```
 /// {@end-tool}
@@ -57,6 +61,7 @@ class StreamAudioRecorderButton extends StatelessWidget {
     this.onRecordFinish,
     this.onRecordStop,
     this.onRecordStartCancel,
+    this.feedback = const AudioRecorderFeedback(),
     this.lockRecordThreshold = 50,
     this.cancelRecordThreshold = 75,
   });
@@ -95,6 +100,21 @@ class StreamAudioRecorderButton extends StatelessWidget {
   /// The callback to call when the recording drag is updated.
   final ValueSetter<Offset>? onRecordDragUpdate;
 
+  /// The feedback handler for audio recorder interactions.
+  ///
+  /// Defaults to [AudioRecorderFeedback] with feedback enabled.
+  ///
+  /// To disable feedback:
+  /// ```dart
+  /// StreamAudioRecorderButton(
+  ///   feedback: const AudioRecorderFeedback.disabled(),
+  ///   // ... other parameters
+  /// )
+  /// ```
+  ///
+  /// See [AudioRecorderFeedback] for customization options.
+  final AudioRecorderFeedback feedback;
+
   /// The threshold to lock the recording.
   final double lockRecordThreshold;
 
@@ -110,15 +130,23 @@ class StreamAudioRecorderButton extends StatelessWidget {
       onLongPressStart: (_) {
         // Return if the recording is already started.
         if (isRecording) return;
+
+        feedback.onRecordStart(context);
         return onRecordStart?.call();
       },
       onLongPressEnd: (_) {
         // Return if the recording not yet started or already locked.
         if (!isRecording || isLocked) return;
+
+        feedback.onRecordFinish(context);
         return onRecordFinish?.call();
       },
       onLongPressCancel: () {
+        // Return if the recording is already started.
+        if (isRecording) return;
+
         // Notify the parent that the recorder is canceled before it starts.
+        feedback.onRecordStartCancel(context);
         return onRecordStartCancel?.call();
       },
       onLongPressMoveUpdate: (details) {
@@ -128,10 +156,12 @@ class StreamAudioRecorderButton extends StatelessWidget {
 
         // Lock recording if the drag offset is greater than the threshold.
         if (dragOffset.dy <= -lockRecordThreshold) {
+          feedback.onRecordLock(context);
           return onRecordLock?.call();
         }
         // Cancel recording if the drag offset is greater than the threshold.
         if (dragOffset.dx <= -cancelRecordThreshold) {
+          feedback.onRecordCancel(context);
           return onRecordCancel?.call();
         }
 
@@ -157,15 +187,33 @@ class StreamAudioRecorderButton extends StatelessWidget {
             ),
           RecordStateRecordingLocked() => RecordStateLockedRecordingContent(
               state: state,
-              onRecordEnd: onRecordFinish,
-              onRecordPause: onRecordPause,
-              onRecordCancel: onRecordCancel,
-              onRecordStop: onRecordStop,
+              onRecordEnd: () {
+                feedback.onRecordFinish(context);
+                return onRecordFinish?.call();
+              },
+              onRecordPause: () {
+                feedback.onRecordPause(context);
+                return onRecordPause?.call();
+              },
+              onRecordCancel: () {
+                feedback.onRecordCancel(context);
+                return onRecordCancel?.call();
+              },
+              onRecordStop: () {
+                feedback.onRecordStop(context);
+                return onRecordStop?.call();
+              },
             ),
           RecordStateStopped() => RecordStateStoppedContent(
               state: state,
-              onRecordCancel: onRecordCancel,
-              onRecordFinish: onRecordFinish,
+              onRecordCancel: () {
+                feedback.onRecordCancel(context);
+                return onRecordCancel?.call();
+              },
+              onRecordFinish: () {
+                feedback.onRecordFinish(context);
+                return onRecordFinish?.call();
+              },
             ),
         },
       ),

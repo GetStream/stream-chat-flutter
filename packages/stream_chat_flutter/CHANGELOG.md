@@ -1,3 +1,11 @@
+## Upcoming
+
+✅ Added
+
+- Added haptic and system sound feedback for voice recording interactions. Feedback can be
+  customized by extending `AudioRecorderFeedback` or using `AudioRecorderFeedbackWrapper` with
+  custom callbacks. [[#2463]](https://github.com/GetStream/stream-chat-flutter/issues/2463)
+
 ## 9.21.0
 
 🐞 Fixed

@@ -321,6 +321,307 @@ void main() {
       },
     );
 
+    testWidgets(
+      'calls feedback.onRecordStart when long pressed',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onStart: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: const RecordStateIdle(),
+              feedback: customFeedback,
+              onRecordStart: () {},
+            ),
+          ),
+        );
+
+        final center = tester.getCenter(find.byType(StreamAudioRecorderButton));
+
+        await tester.startGesture(center);
+        await tester.pump(kLongPressTimeout);
+        await tester.pumpAndSettle();
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordFinish when long press is released',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onFinish: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: const RecordStateRecordingHold(),
+              feedback: customFeedback,
+              onRecordFinish: () {},
+            ),
+          ),
+        );
+
+        final center = tester.getCenter(find.byType(RecordButton));
+        final gesture = await tester.startGesture(center);
+        await tester.pump(kLongPressTimeout);
+        await gesture.up();
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordLock when dragged up beyond threshold',
+      (tester) async {
+        const lockThreshold = 60.0;
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onLock: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: const RecordStateRecordingHold(),
+              lockRecordThreshold: lockThreshold,
+              feedback: customFeedback,
+              onRecordLock: () {},
+            ),
+          ),
+        );
+
+        final center = tester.getCenter(find.byType(RecordButton));
+        final gesture = await tester.startGesture(center);
+        await tester.pump(kLongPressTimeout);
+        await gesture.moveBy(const Offset(0, -lockThreshold));
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordCancel when dragged left beyond threshold',
+      (tester) async {
+        const cancelThreshold = 60.0;
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onCancel: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: const RecordStateRecordingHold(),
+              cancelRecordThreshold: cancelThreshold,
+              feedback: customFeedback,
+              onRecordCancel: () {},
+            ),
+          ),
+        );
+
+        final center = tester.getCenter(find.byType(RecordButton));
+        final gesture = await tester.startGesture(center);
+        await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+        await gesture.moveBy(const Offset(-cancelThreshold, 0));
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordStop when stop is tapped in locked state',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onStop: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: RecordStateRecordingLocked(
+                duration: const Duration(seconds: 5),
+                waveform: List.filled(50, 0.5),
+              ),
+              feedback: customFeedback,
+              onRecordStop: () {},
+            ),
+          ),
+        );
+
+        await tester.tap(find.bySvgIcon(StreamSvgIcons.stop));
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordCancel when delete is tapped in locked state',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onCancel: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: RecordStateRecordingLocked(
+                duration: const Duration(seconds: 5),
+                waveform: List.filled(50, 0.5),
+              ),
+              feedback: customFeedback,
+              onRecordCancel: () {},
+            ),
+          ),
+        );
+
+        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordFinish when checkSend is tapped in locked state',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onFinish: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: RecordStateRecordingLocked(
+                duration: const Duration(seconds: 5),
+                waveform: List.filled(50, 0.5),
+              ),
+              feedback: customFeedback,
+              onRecordFinish: () {},
+            ),
+          ),
+        );
+
+        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordCancel when delete is tapped in stopped state',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onCancel: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: RecordStateStopped(
+                audioRecording: fakeAudioRecording,
+              ),
+              feedback: customFeedback,
+              onRecordCancel: () {},
+            ),
+          ),
+        );
+
+        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordFinish when checkSend is tapped in stopped state',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onFinish: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: RecordStateStopped(
+                audioRecording: fakeAudioRecording,
+              ),
+              feedback: customFeedback,
+              onRecordFinish: () {},
+            ),
+          ),
+        );
+
+        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'calls feedback.onRecordStartCancel when long press is canceled',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          onStartCancel: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: const RecordStateIdle(),
+              feedback: customFeedback,
+              onRecordStartCancel: () {},
+            ),
+          ),
+        );
+
+        final center = tester.getCenter(find.byType(StreamAudioRecorderButton));
+        final gesture = await tester.startGesture(center);
+        // Cancel before long press timeout completes
+        await tester.pump(kLongPressTimeout - const Duration(milliseconds: 50));
+        await gesture.cancel();
+
+        expect(feedbackCalled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'does not call feedback when disabled',
+      (tester) async {
+        var feedbackCalled = false;
+        final customFeedback = _TestFeedback(
+          enableFeedback: false,
+          onStart: () => feedbackCalled = true,
+        );
+
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamAudioRecorderButton(
+              recordState: const RecordStateIdle(),
+              feedback: customFeedback,
+              onRecordStart: () {},
+            ),
+          ),
+        );
+
+        final center = tester.getCenter(find.byType(StreamAudioRecorderButton));
+        await tester.startGesture(center);
+        await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+
+        expect(feedbackCalled, isFalse);
+      },
+    );
+
     for (final brightness in Brightness.values) {
       goldenTest(
         '[${brightness.name}] -> should look fine in idol state',
@@ -415,4 +716,53 @@ Widget _wrapWithStreamChatApp(
       ),
     ),
   );
+}
+
+class _TestFeedback extends AudioRecorderFeedback {
+  _TestFeedback({
+    this.onStart,
+    this.onFinish,
+    this.onLock,
+    this.onCancel,
+    this.onStop,
+    this.onStartCancel,
+    super.enableFeedback = true,
+  });
+
+  final VoidCallback? onStart;
+  final VoidCallback? onFinish;
+  final VoidCallback? onLock;
+  final VoidCallback? onCancel;
+  final VoidCallback? onStop;
+  final VoidCallback? onStartCancel;
+
+  @override
+  Future<void> onRecordStart(BuildContext context) async {
+    if (enableFeedback) onStart?.call();
+  }
+
+  @override
+  Future<void> onRecordFinish(BuildContext context) async {
+    if (enableFeedback) onFinish?.call();
+  }
+
+  @override
+  Future<void> onRecordLock(BuildContext context) async {
+    if (enableFeedback) onLock?.call();
+  }
+
+  @override
+  Future<void> onRecordCancel(BuildContext context) async {
+    if (enableFeedback) onCancel?.call();
+  }
+
+  @override
+  Future<void> onRecordStop(BuildContext context) async {
+    if (enableFeedback) onStop?.call();
+  }
+
+  @override
+  Future<void> onRecordStartCancel(BuildContext context) async {
+    if (enableFeedback) onStartCancel?.call();
+  }
 }

@@ -57,6 +57,7 @@ export 'src/message_actions_modal/message_action.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_bottom_sheet.dart';
 export 'src/message_input/audio_recorder/audio_recorder_controller.dart';
+export 'src/message_input/audio_recorder/audio_recorder_feedback.dart';
 export 'src/message_input/audio_recorder/audio_recorder_state.dart';
 export 'src/message_input/audio_recorder/stream_audio_recorder.dart';
 export 'src/message_input/countdown_button.dart';
