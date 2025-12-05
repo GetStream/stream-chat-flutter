@@ -9,7 +9,6 @@ import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
-import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_feedback.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
