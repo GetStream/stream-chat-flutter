@@ -110,3 +110,116 @@ class AudioRecorderFeedback {
     return Feedback.forTap(context);
   }
 }
+
+// A callback function for providing feedback during audio recorder interaction.
+typedef _FeedbackCallback = Future<void> Function(BuildContext context);
+
+/// A wrapper around [AudioRecorderFeedback] that allows providing custom
+/// callbacks for each feedback event without extending the class.
+///
+/// This is useful when you want to customize feedback behavior using callbacks
+/// rather than extending [AudioRecorderFeedback] and overriding methods.
+///
+/// {@tool snippet}
+/// Basic usage with custom callbacks:
+/// ```dart
+/// AudioRecorderFeedbackWrapper(
+///   onStart: (context) async {
+///     await HapticFeedback.heavyImpact();
+///   },
+///   onFinish: (context) async {
+///     await HapticFeedback.mediumImpact();
+///   },
+/// )
+/// ```
+///
+/// Disable feedback:
+/// ```dart
+/// AudioRecorderFeedbackWrapper(
+///   enableFeedback: false,
+/// )
+/// ```
+/// {@end-tool}
+class AudioRecorderFeedbackWrapper extends AudioRecorderFeedback {
+  /// Creates a new [AudioRecorderFeedbackWrapper] instance.
+  ///
+  /// The [enableFeedback] parameter controls whether feedback is enabled.
+  /// Defaults to `true`.
+  ///
+  /// All callback parameters are optional. If a callback is not provided, the
+  /// default behavior from [AudioRecorderFeedback] will be used.
+  ///
+  /// - [onStart]: Called when recording starts.
+  /// - [onPause]: Called when recording is paused.
+  /// - [onFinish]: Called when recording is finished.
+  /// - [onLock]: Called when recording is locked.
+  /// - [onCancel]: Called when recording is canceled.
+  /// - [onStartCancel]: Called when recording start is canceled.
+  /// - [onStop]: Called when recording stops.
+  const AudioRecorderFeedbackWrapper({
+    super.enableFeedback = true,
+    _FeedbackCallback? onStart,
+    _FeedbackCallback? onPause,
+    _FeedbackCallback? onFinish,
+    _FeedbackCallback? onLock,
+    _FeedbackCallback? onCancel,
+    _FeedbackCallback? onStartCancel,
+    _FeedbackCallback? onStop,
+  })  : _onStop = onStop,
+        _onStartCancel = onStartCancel,
+        _onCancel = onCancel,
+        _onLock = onLock,
+        _onFinish = onFinish,
+        _onPause = onPause,
+        _onStart = onStart;
+
+  // Callback for when recording starts.
+  final _FeedbackCallback? _onStart;
+  // Callback for when recording is paused.
+  final _FeedbackCallback? _onPause;
+  // Callback for when recording is finished.
+  final _FeedbackCallback? _onFinish;
+  // Callback for when recording is locked.
+  final _FeedbackCallback? _onLock;
+  // Callback for when recording is canceled.
+  final _FeedbackCallback? _onCancel;
+  // Callback for when recording start is canceled.
+  final _FeedbackCallback? _onStartCancel;
+  // Callback for when recording stops.
+  final _FeedbackCallback? _onStop;
+
+  @override
+  Future<void> onRecordStart(BuildContext context) {
+    return _onStart?.call(context) ?? super.onRecordStart(context);
+  }
+
+  @override
+  Future<void> onRecordPause(BuildContext context) {
+    return _onPause?.call(context) ?? super.onRecordPause(context);
+  }
+
+  @override
+  Future<void> onRecordFinish(BuildContext context) {
+    return _onFinish?.call(context) ?? super.onRecordFinish(context);
+  }
+
+  @override
+  Future<void> onRecordLock(BuildContext context) {
+    return _onLock?.call(context) ?? super.onRecordLock(context);
+  }
+
+  @override
+  Future<void> onRecordCancel(BuildContext context) {
+    return _onCancel?.call(context) ?? super.onRecordCancel(context);
+  }
+
+  @override
+  Future<void> onRecordStartCancel(BuildContext context) {
+    return _onStartCancel?.call(context) ?? super.onRecordStartCancel(context);
+  }
+
+  @override
+  Future<void> onRecordStop(BuildContext context) {
+    return _onStop?.call(context) ?? super.onRecordStop(context);
+  }
+}
