@@ -325,8 +325,8 @@ void main() {
       'calls feedback.onRecordStart when long pressed',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onStart: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onStart: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -353,8 +353,8 @@ void main() {
       'calls feedback.onRecordFinish when long press is released',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onFinish: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onFinish: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -381,8 +381,8 @@ void main() {
       (tester) async {
         const lockThreshold = 60.0;
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onLock: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onLock: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -410,8 +410,8 @@ void main() {
       (tester) async {
         const cancelThreshold = 60.0;
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onCancel: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onCancel: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -438,8 +438,8 @@ void main() {
       'calls feedback.onRecordStop when stop is tapped in locked state',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onStop: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onStop: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -465,8 +465,8 @@ void main() {
       'calls feedback.onRecordCancel when delete is tapped in locked state',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onCancel: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onCancel: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -492,8 +492,8 @@ void main() {
       'calls feedback.onRecordFinish when checkSend is tapped in locked state',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onFinish: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onFinish: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -519,8 +519,8 @@ void main() {
       'calls feedback.onRecordCancel when delete is tapped in stopped state',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onCancel: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onCancel: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -545,8 +545,8 @@ void main() {
       'calls feedback.onRecordFinish when checkSend is tapped in stopped state',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onFinish: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onFinish: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -571,8 +571,8 @@ void main() {
       'calls feedback.onRecordStartCancel when long press is canceled',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
-          onStartCancel: () => feedbackCalled = true,
+        final customFeedback = AudioRecorderFeedbackWrapper(
+          onStartCancel: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -599,9 +599,9 @@ void main() {
       'does not call feedback when disabled',
       (tester) async {
         var feedbackCalled = false;
-        final customFeedback = _TestFeedback(
+        final customFeedback = AudioRecorderFeedbackWrapper(
           enableFeedback: false,
-          onStart: () => feedbackCalled = true,
+          onStart: (_) async => feedbackCalled = true,
         );
 
         await tester.pumpWidget(
@@ -716,53 +716,4 @@ Widget _wrapWithStreamChatApp(
       ),
     ),
   );
-}
-
-class _TestFeedback extends AudioRecorderFeedback {
-  _TestFeedback({
-    this.onStart,
-    this.onFinish,
-    this.onLock,
-    this.onCancel,
-    this.onStop,
-    this.onStartCancel,
-    super.enableFeedback = true,
-  });
-
-  final VoidCallback? onStart;
-  final VoidCallback? onFinish;
-  final VoidCallback? onLock;
-  final VoidCallback? onCancel;
-  final VoidCallback? onStop;
-  final VoidCallback? onStartCancel;
-
-  @override
-  Future<void> onRecordStart(BuildContext context) async {
-    if (enableFeedback) onStart?.call();
-  }
-
-  @override
-  Future<void> onRecordFinish(BuildContext context) async {
-    if (enableFeedback) onFinish?.call();
-  }
-
-  @override
-  Future<void> onRecordLock(BuildContext context) async {
-    if (enableFeedback) onLock?.call();
-  }
-
-  @override
-  Future<void> onRecordCancel(BuildContext context) async {
-    if (enableFeedback) onCancel?.call();
-  }
-
-  @override
-  Future<void> onRecordStop(BuildContext context) async {
-    if (enableFeedback) onStop?.call();
-  }
-
-  @override
-  Future<void> onRecordStartCancel(BuildContext context) async {
-    if (enableFeedback) onStartCancel?.call();
-  }
 }

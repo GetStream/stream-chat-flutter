@@ -189,37 +189,72 @@ class AudioRecorderFeedbackWrapper extends AudioRecorderFeedback {
   final _FeedbackCallback? _onStop;
 
   @override
-  Future<void> onRecordStart(BuildContext context) {
-    return _onStart?.call(context) ?? super.onRecordStart(context);
+  Future<void> onRecordStart(BuildContext context) async {
+    if (_onStart case final callback?) {
+      if (!enableFeedback) return;
+      return callback.call(context);
+    }
+
+    return super.onRecordStart(context);
   }
 
   @override
-  Future<void> onRecordPause(BuildContext context) {
-    return _onPause?.call(context) ?? super.onRecordPause(context);
+  Future<void> onRecordPause(BuildContext context) async {
+    if (_onPause case final callback?) {
+      if (!enableFeedback) return;
+      return callback.call(context);
+    }
+
+    return super.onRecordPause(context);
   }
 
   @override
-  Future<void> onRecordFinish(BuildContext context) {
-    return _onFinish?.call(context) ?? super.onRecordFinish(context);
+  Future<void> onRecordFinish(BuildContext context) async {
+    if (_onFinish case final callback?) {
+      if (!enableFeedback) return;
+      return callback.call(context);
+    }
+
+    return super.onRecordFinish(context);
   }
 
   @override
-  Future<void> onRecordLock(BuildContext context) {
-    return _onLock?.call(context) ?? super.onRecordLock(context);
+  Future<void> onRecordLock(BuildContext context) async {
+    if (_onLock case final callback?) {
+      if (!enableFeedback) return;
+      return callback.call(context);
+    }
+
+    return super.onRecordLock(context);
   }
 
   @override
-  Future<void> onRecordCancel(BuildContext context) {
-    return _onCancel?.call(context) ?? super.onRecordCancel(context);
+  Future<void> onRecordCancel(BuildContext context) async {
+    if (_onCancel case final callback?) {
+      if (!enableFeedback) return;
+      return callback.call(context);
+    }
+
+    return super.onRecordCancel(context);
   }
 
   @override
-  Future<void> onRecordStartCancel(BuildContext context) {
-    return _onStartCancel?.call(context) ?? super.onRecordStartCancel(context);
+  Future<void> onRecordStartCancel(BuildContext context) async {
+    if (_onStartCancel case final callback?) {
+      if (!enableFeedback) return;
+      return callback.call(context);
+    }
+
+    return super.onRecordStartCancel(context);
   }
 
   @override
-  Future<void> onRecordStop(BuildContext context) {
-    return _onStop?.call(context) ?? super.onRecordStop(context);
+  Future<void> onRecordStop(BuildContext context) async {
+    if (_onStop case final callback?) {
+      if (!enableFeedback) return;
+      return callback.call(context);
+    }
+
+    return super.onRecordStop(context);
   }
 }
