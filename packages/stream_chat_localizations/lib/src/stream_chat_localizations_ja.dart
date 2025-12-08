@@ -543,8 +543,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get deletePollOptionLabel => 'オプションを削除しますか？';
 
   @override
-  String get deletePollOptionQuestion =>
-      'このオプションを削除してもよろしいですか？';
+  String get deletePollOptionQuestion => 'このオプションを削除してもよろしいですか？';
 
   @override
   String get createLabel => '作成';

@@ -286,8 +286,8 @@ class StreamPollCreatorThemeData with Diagnosticable {
           a.switchListTileErrorStyle, b.switchListTileErrorStyle, t),
       switchListTileBorderRadius: BorderRadius.lerp(
           a.switchListTileBorderRadius, b.switchListTileBorderRadius, t),
-      actionDialogTitleStyle: TextStyle.lerp(
-          a.actionDialogTitleStyle, b.actionDialogTitleStyle, t),
+      actionDialogTitleStyle:
+          TextStyle.lerp(a.actionDialogTitleStyle, b.actionDialogTitleStyle, t),
       actionDialogContentStyle: TextStyle.lerp(
           a.actionDialogContentStyle, b.actionDialogContentStyle, t),
     );

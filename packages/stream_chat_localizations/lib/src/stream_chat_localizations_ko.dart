@@ -544,8 +544,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get deletePollOptionLabel => '옵션을 삭제하시겠습니까?';
 
   @override
-  String get deletePollOptionQuestion =>
-      '이 옵션을 삭제하시겠습니까?';
+  String get deletePollOptionQuestion => '이 옵션을 삭제하시겠습니까?';
 
   @override
   String get createLabel => '생성';
