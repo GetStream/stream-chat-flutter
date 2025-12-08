@@ -129,7 +129,8 @@ class PollOptionListItem extends StatelessWidget {
             style: IconButton.styleFrom(
               foregroundColor: colorTheme.textLowEmphasis,
             ),
-            onLongPress: () {/* Consume long press */},
+            // TODO: Enable once we have min SDK set to 3.29.0
+            // onLongPress: () {/* Consume long press */},
             onPressed: switch (onRemove) {
               final onRemove? => () => onRemove.call(option),
               _ => null,
