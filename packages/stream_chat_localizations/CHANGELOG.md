@@ -1,3 +1,8 @@
+## Upcoming
+
+- Added translations for new `deletePollOptionLabel` label.
+- Added translations for new `deletePollOptionQuestion` text.
+
 ## 9.21.0
 
 - Updated `stream_chat_flutter` dependency to [`9.21.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
