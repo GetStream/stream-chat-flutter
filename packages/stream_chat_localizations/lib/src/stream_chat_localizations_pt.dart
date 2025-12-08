@@ -562,7 +562,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
       'Tem certeza de que deseja encerrar a votação?';
 
   @override
-  String get deletePollOptionLabel => 'Excluir opção?';
+  String get deletePollOptionLabel => 'Excluir opção';
 
   @override
   String get deletePollOptionQuestion =>

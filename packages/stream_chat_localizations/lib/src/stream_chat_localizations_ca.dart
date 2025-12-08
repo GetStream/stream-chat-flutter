@@ -563,7 +563,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       'Estàs segur que vols finalitzar la votació?';
 
   @override
-  String get deletePollOptionLabel => 'Eliminar opció?';
+  String get deletePollOptionLabel => 'Eliminar opció';
 
   @override
   String get deletePollOptionQuestion =>

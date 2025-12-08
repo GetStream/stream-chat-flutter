@@ -550,7 +550,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
       'Er du sikker på at du vil avslutte avstemningen?';
 
   @override
-  String get deletePollOptionLabel => 'Slett alternativ?';
+  String get deletePollOptionLabel => 'Slett alternativ';
 
   @override
   String get deletePollOptionQuestion =>

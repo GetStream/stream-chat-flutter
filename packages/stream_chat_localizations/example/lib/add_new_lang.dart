@@ -582,7 +582,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
       'Are you sure you want to end the poll?';
 
   @override
-  String get deletePollOptionLabel => 'Delete option?';
+  String get deletePollOptionLabel => 'Delete Option';
 
   @override
   String get deletePollOptionQuestion =>

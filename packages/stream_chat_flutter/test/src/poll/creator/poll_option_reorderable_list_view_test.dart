@@ -356,7 +356,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify the delete confirmation dialog is shown
-      expect(find.text('Delete option?'), findsOneWidget);
+      expect(find.text('Delete Option'), findsOneWidget);
       expect(
         find.text('Are you sure you want to delete this option?'),
         findsOneWidget,

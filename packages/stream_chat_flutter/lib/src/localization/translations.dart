@@ -1112,7 +1112,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
       'Are you sure you want to end the vote?';
 
   @override
-  String get deletePollOptionLabel => 'Delete option?';
+  String get deletePollOptionLabel => 'Delete Option';
 
   @override
   String get deletePollOptionQuestion =>
