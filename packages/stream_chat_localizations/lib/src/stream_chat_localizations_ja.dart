@@ -540,6 +540,13 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get endVoteConfirmationText => '投票を終了してもよろしいですか？';
 
   @override
+  String get deletePollOptionLabel => 'オプションを削除しますか？';
+
+  @override
+  String get deletePollOptionQuestion =>
+      'このオプションを削除してもよろしいですか？';
+
+  @override
   String get createLabel => '作成';
 
   @override

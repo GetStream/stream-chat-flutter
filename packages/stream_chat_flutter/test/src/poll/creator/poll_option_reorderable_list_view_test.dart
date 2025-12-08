@@ -4,7 +4,9 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../../utils/finders.dart';
 
 void main() {
   for (final brightness in Brightness.values) {
@@ -331,6 +333,147 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(3));
     });
   });
+
+  group('Delete Option Functionality', () {
+    testWidgets('should show delete confirmation dialog', (tester) async {
+      await tester.pumpWidget(_wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          optionsRange: (min: 2, max: null),
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+            PollOptionItem(text: 'Option 3'),
+          ],
+        ),
+      ));
+
+      // Find the delete buttons
+      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      expect(deleteButtons, findsNWidgets(3));
+
+      // Tap the first delete button
+      await tester.tap(deleteButtons.first);
+      await tester.pumpAndSettle();
+
+      // Verify the delete confirmation dialog is shown
+      expect(find.text('Delete option?'), findsOneWidget);
+      expect(
+        find.text('Are you sure you want to delete this option?'),
+        findsOneWidget,
+      );
+      expect(find.text('CANCEL'), findsOneWidget);
+      expect(find.text('DELETE'), findsOneWidget);
+    });
+
+    testWidgets('should delete option when confirmed', (tester) async {
+      var optionsChanged = <PollOptionItem>[];
+
+      await tester.pumpWidget(_wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          optionsRange: (min: 2, max: null),
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+            PollOptionItem(text: 'Option 3'),
+          ],
+          onOptionsChanged: (options) => optionsChanged = options,
+        ),
+      ));
+
+      // Initially should have 3 options
+      expect(find.byType(TextField), findsNWidgets(3));
+
+      // Find and tap the delete button for the first option
+      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      await tester.tap(deleteButtons.first);
+      await tester.pumpAndSettle();
+
+      // Confirm deletion
+      await tester.tap(find.text('DELETE'));
+      await tester.pumpAndSettle();
+
+      // Should now have 2 options
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(optionsChanged.length, 2);
+    });
+
+    testWidgets('should not delete option when cancelled', (tester) async {
+      var optionsChanged = <PollOptionItem>[];
+
+      await tester.pumpWidget(_wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          optionsRange: (min: 2, max: null),
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+            PollOptionItem(text: 'Option 3'),
+          ],
+          onOptionsChanged: (options) => optionsChanged = options,
+        ),
+      ));
+
+      // Initially should have 3 options
+      expect(find.byType(TextField), findsNWidgets(3));
+
+      // Find and tap the delete button for the first option
+      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      await tester.tap(deleteButtons.first);
+      await tester.pumpAndSettle();
+
+      // Cancel deletion
+      await tester.tap(find.text('CANCEL'));
+      await tester.pumpAndSettle();
+
+      // Should still have 3 options
+      expect(find.byType(TextField), findsNWidgets(3));
+      expect(optionsChanged, isEmpty); // No change callback
+    });
+
+    testWidgets(
+      'should maintain minimum options when deleting',
+      (tester) async {
+        var optionsChanged = <PollOptionItem>[];
+        final option1 = PollOptionItem(text: 'Option 1');
+        final option2 = PollOptionItem(text: 'Option 2');
+
+        await tester.pumpWidget(_wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            optionsRange: (min: 2, max: null),
+            initialOptions: [option1, option2],
+            onOptionsChanged: (options) => optionsChanged = options,
+          ),
+        ));
+
+        // Should have 2 options (minimum)
+        expect(find.byType(TextField), findsNWidgets(2));
+
+        // Try to delete the first option
+        final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+        await tester.tap(deleteButtons.first);
+        await tester.pumpAndSettle();
+
+        // Confirm deletion
+        await tester.tap(find.text('DELETE'));
+        await tester.pumpAndSettle();
+
+        // Should still have 2 options (minimum enforced)
+        expect(find.byType(TextField), findsNWidgets(2));
+
+        // Verify the correct behavior: option1 deleted, option2 remains,
+        // and a new empty option was auto-added
+        final optionIds = optionsChanged.map((e) => e.id).toList();
+
+        expect(optionsChanged.length, 2);
+        expect(optionIds, isNot(contains(option1.id))); // option1 deleted
+        expect(optionIds, contains(option2.id)); // option2 remains
+
+        // Verify new option is empty and has a new ID (not recycled)
+        final newOption = optionsChanged.firstWhere((e) => e.id != option2.id);
+        expect(newOption.id, isNot(option1.id));
+        expect(newOption.text, isEmpty);
+      },
+    );
+  });
 }
 
 Widget _wrapWithMaterialApp(
@@ -338,22 +481,25 @@ Widget _wrapWithMaterialApp(
   Brightness? brightness,
 }) {
   return MaterialApp(
-    home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
-      child: Builder(
-        builder: (context) {
-          final theme = StreamChatTheme.of(context);
-          return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: widget,
-              ),
+    builder: (context, child) {
+      return StreamChatTheme(
+        data: StreamChatThemeData(brightness: brightness),
+        child: child!,
+      );
+    },
+    home: Builder(
+      builder: (context) {
+        final theme = StreamChatTheme.of(context);
+        return Scaffold(
+          backgroundColor: theme.colorTheme.appBg,
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: widget,
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     ),
   );
 }
