@@ -297,7 +297,7 @@ class _PollOptionReorderableListViewState
 
   Future<void> _onOptionRemoved(PollOptionItem option) async {
     final confirm = await showPollDeleteOptionDialog(context: context);
-    if (confirm == null || !confirm) return;
+    if (!mounted || confirm != true) return;
 
     setState(() {
       _options.remove(option.id);

@@ -90,6 +90,7 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.tapAt(Offset.zero);
+        await tester.pumpAndSettle();
 
         expect(value, isNull);
       },
