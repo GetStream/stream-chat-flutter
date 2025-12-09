@@ -1,4 +1,5 @@
-import 'package:flutter/gestures.dart';
+import 'dart:ui';
+
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// The state of the audio recorder.
