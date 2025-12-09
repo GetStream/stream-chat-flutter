@@ -76,6 +76,8 @@ void main() {
     expect(translations.deleteLabel, isNotNull);
     expect(translations.deleteMessageLabel, isNotNull);
     expect(translations.deleteMessageQuestion, isNotNull);
+    expect(translations.deletePollOptionLabel, isNotNull);
+    expect(translations.deletePollOptionQuestion, isNotNull);
     expect(translations.operationCouldNotBeCompletedText, isNotNull);
     expect(translations.replyLabel, isNotNull);
     // pinned

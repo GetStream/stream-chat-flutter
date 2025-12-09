@@ -567,6 +567,13 @@ Attenzione: il limite massimo di $limit file è stato superato.
       'Sei sicuro di voler terminare il voto?';
 
   @override
+  String get deletePollOptionLabel => "Elimina l'opzione";
+
+  @override
+  String get deletePollOptionQuestion =>
+      'Sei sicuro di voler eliminare questa opzione?';
+
+  @override
   String get createLabel => 'Crea';
 
   @override

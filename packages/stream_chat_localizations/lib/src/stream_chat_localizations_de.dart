@@ -557,6 +557,13 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Sind Sie sicher, dass Sie die Abstimmung beenden möchten?';
 
   @override
+  String get deletePollOptionLabel => 'Option löschen';
+
+  @override
+  String get deletePollOptionQuestion =>
+      'Sind Sie sicher, dass Sie diese Option löschen möchten?';
+
+  @override
   String get createLabel => 'Erstellen';
 
   @override

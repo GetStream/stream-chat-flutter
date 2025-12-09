@@ -87,6 +87,8 @@ void main() {
       expect(localizations.deleteLabel, isNotNull);
       expect(localizations.deleteMessageLabel, isNotNull);
       expect(localizations.deleteMessageQuestion, isNotNull);
+      expect(localizations.deletePollOptionLabel, isNotNull);
+      expect(localizations.deletePollOptionQuestion, isNotNull);
       expect(localizations.operationCouldNotBeCompletedText, isNotNull);
       expect(localizations.replyLabel, isNotNull);
       // pinned
