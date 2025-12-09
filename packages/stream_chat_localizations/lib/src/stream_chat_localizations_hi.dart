@@ -551,6 +551,13 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       'क्या आप वाकई मतदान समाप्त करना चाहते हैं?';
 
   @override
+  String get deletePollOptionLabel => 'विकल्प हटाएं';
+
+  @override
+  String get deletePollOptionQuestion =>
+      'क्या आप वाकई इस विकल्प को हटाना चाहते हैं?';
+
+  @override
   String get endLabel => 'समाप्त';
 
   @override

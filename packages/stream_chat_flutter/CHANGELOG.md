@@ -1,3 +1,15 @@
+## Upcoming
+
+✅ Added
+
+- Added support for deleting options while creating a poll in
+  `StreamPollCreator`. [[#2453]](https://github.com/GetStream/stream-chat-flutter/issues/2453)
+
+🐞 Fixed
+
+- Fixed focus randomly shifting to poll title while editing option text in poll
+  creator. [[#2464]](https://github.com/GetStream/stream-chat-flutter/issues/2464)
+
 ## 9.21.0
 
 🐞 Fixed

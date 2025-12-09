@@ -76,6 +76,8 @@ class StreamPollCreatorThemeData with Diagnosticable {
     this.switchListTileTitleStyle,
     this.switchListTileErrorStyle,
     this.switchListTileBorderRadius,
+    this.actionDialogTitleStyle,
+    this.actionDialogContentStyle,
   });
 
   /// The background color of the poll creator.
@@ -133,6 +135,12 @@ class StreamPollCreatorThemeData with Diagnosticable {
   /// The border radius of the switch list tile.
   final BorderRadius? switchListTileBorderRadius;
 
+  /// The text style of the action dialog title.
+  final TextStyle? actionDialogTitleStyle;
+
+  /// The text style of the action dialog content.
+  final TextStyle? actionDialogContentStyle;
+
   /// Copies this [StreamPollCreatorThemeData] with some new values.
   StreamPollCreatorThemeData copyWith({
     Color? backgroundColor,
@@ -153,6 +161,8 @@ class StreamPollCreatorThemeData with Diagnosticable {
     TextStyle? switchListTileTitleStyle,
     TextStyle? switchListTileErrorStyle,
     BorderRadius? switchListTileBorderRadius,
+    TextStyle? actionDialogTitleStyle,
+    TextStyle? actionDialogContentStyle,
   }) {
     return StreamPollCreatorThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -186,6 +196,10 @@ class StreamPollCreatorThemeData with Diagnosticable {
           switchListTileErrorStyle ?? this.switchListTileErrorStyle,
       switchListTileBorderRadius:
           switchListTileBorderRadius ?? this.switchListTileBorderRadius,
+      actionDialogTitleStyle:
+          actionDialogTitleStyle ?? this.actionDialogTitleStyle,
+      actionDialogContentStyle:
+          actionDialogContentStyle ?? this.actionDialogContentStyle,
     );
   }
 
@@ -224,6 +238,10 @@ class StreamPollCreatorThemeData with Diagnosticable {
           other.switchListTileErrorStyle ?? switchListTileErrorStyle,
       switchListTileBorderRadius:
           other.switchListTileBorderRadius ?? switchListTileBorderRadius,
+      actionDialogTitleStyle:
+          other.actionDialogTitleStyle ?? actionDialogTitleStyle,
+      actionDialogContentStyle:
+          other.actionDialogContentStyle ?? actionDialogContentStyle,
     );
   }
 
@@ -268,6 +286,10 @@ class StreamPollCreatorThemeData with Diagnosticable {
           a.switchListTileErrorStyle, b.switchListTileErrorStyle, t),
       switchListTileBorderRadius: BorderRadius.lerp(
           a.switchListTileBorderRadius, b.switchListTileBorderRadius, t),
+      actionDialogTitleStyle:
+          TextStyle.lerp(a.actionDialogTitleStyle, b.actionDialogTitleStyle, t),
+      actionDialogContentStyle: TextStyle.lerp(
+          a.actionDialogContentStyle, b.actionDialogContentStyle, t),
     );
   }
 
@@ -293,7 +315,9 @@ class StreamPollCreatorThemeData with Diagnosticable {
           other.switchListTileFillColor == switchListTileFillColor &&
           other.switchListTileTitleStyle == switchListTileTitleStyle &&
           other.switchListTileErrorStyle == switchListTileErrorStyle &&
-          other.switchListTileBorderRadius == switchListTileBorderRadius;
+          other.switchListTileBorderRadius == switchListTileBorderRadius &&
+          other.actionDialogTitleStyle == actionDialogTitleStyle &&
+          other.actionDialogContentStyle == actionDialogContentStyle;
 
   @override
   int get hashCode =>
@@ -314,5 +338,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
       switchListTileFillColor.hashCode ^
       switchListTileTitleStyle.hashCode ^
       switchListTileErrorStyle.hashCode ^
-      switchListTileBorderRadius.hashCode;
+      switchListTileBorderRadius.hashCode ^
+      actionDialogTitleStyle.hashCode ^
+      actionDialogContentStyle.hashCode;
 }
