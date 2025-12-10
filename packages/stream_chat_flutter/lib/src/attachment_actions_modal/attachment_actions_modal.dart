@@ -195,7 +195,7 @@ class AttachmentActionsModal extends StatelessWidget {
                       showDelete)
                     _buildButton(
                       context,
-                      context.translations.deleteLabel.capitalize(),
+                      context.translations.deleteLabel.sentenceCase,
                       StreamSvgIcon(
                         size: 24,
                         icon: StreamSvgIcons.delete,

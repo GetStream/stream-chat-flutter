@@ -3,5 +3,8 @@ export 'file_attachment.dart';
 export 'gallery_attachment.dart';
 export 'giphy_attachment.dart';
 export 'image_attachment.dart';
+export 'poll_attachment.dart';
 export 'url_attachment.dart';
 export 'video_attachment.dart';
+export 'voice_recording_attachment.dart';
+export 'voice_recording_attachment_playlist.dart';

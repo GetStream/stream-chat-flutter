@@ -36,6 +36,7 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) =>
       userMessageReminders: json['user_message_reminders'] as bool? ?? false,
       markMessagesPending: json['mark_messages_pending'] as bool? ?? false,
       deliveryEvents: json['delivery_events'] as bool? ?? false,
+      sharedLocations: json['shared_locations'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) =>
@@ -61,4 +62,5 @@ Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) =>
       'user_message_reminders': instance.userMessageReminders,
       'mark_messages_pending': instance.markMessagesPending,
       'delivery_events': instance.deliveryEvents,
+      'shared_locations': instance.sharedLocations,
     };

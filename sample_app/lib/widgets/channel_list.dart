@@ -61,7 +61,7 @@ class _ChannelList extends State<ChannelList> {
         ChannelSortKey.pinnedAt,
         nullOrdering: NullOrdering.nullsLast,
       ),
-      const SortOption.desc(ChannelSortKey.lastMessageAt),
+      const SortOption.desc(ChannelSortKey.lastUpdated),
     ],
     limit: 30,
   );
