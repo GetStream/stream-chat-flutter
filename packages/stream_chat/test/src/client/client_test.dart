@@ -1975,6 +1975,50 @@ void main() {
       verifyNoMoreInteractions(api.channel);
     });
 
+    test('`.addChannelMembers` with hideHistoryBefore', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      const channelCid = '$channelType:$channelId';
+
+      final members = List.generate(
+        3,
+        (index) => Member(userId: 'test-user-id-$index'),
+      );
+
+      final memberIds = members.map((e) => e.userId!).toList(growable: false);
+      final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
+
+      when(() => api.channel.addMembers(
+            channelId,
+            channelType,
+            memberIds,
+            hideHistoryBefore: hideHistoryBefore,
+          )).thenAnswer((_) async => AddMembersResponse()
+        ..channel = ChannelModel(cid: channelCid)
+        ..members = members);
+
+      final res = await client.addChannelMembers(
+        channelId,
+        channelType,
+        memberIds,
+        hideHistoryBefore: hideHistoryBefore,
+      );
+
+      expect(res, isNotNull);
+      expect(res.channel.cid, channelCid);
+      expect(res.members.length, memberIds.length);
+
+      verify(
+        () => api.channel.addMembers(
+          channelId,
+          channelType,
+          memberIds,
+          hideHistoryBefore: hideHistoryBefore,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
     test('`.removeChannelMembers`', () async {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
@@ -2112,6 +2156,33 @@ void main() {
 
       verify(() => api.channel.markUnread(channelId, channelType, messageId))
           .called(1);
+      verifyNoMoreInteractions(api.channel);
+    });
+
+    test('`.markChannelUnreadByTimestamp`', () async {
+      const channelType = 'test-channel-type';
+      const channelId = 'test-channel-id';
+      final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+      when(() => api.channel.markUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          )).thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.markChannelUnreadByTimestamp(
+        channelId,
+        channelType,
+        timestamp,
+      );
+
+      expect(res, isNotNull);
+
+      verify(() => api.channel.markUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          )).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 

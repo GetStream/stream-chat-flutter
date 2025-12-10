@@ -447,6 +447,12 @@ abstract class Translations {
   /// The confirmation text shown when the user tries to end a poll.
   String get endVoteConfirmationText;
 
+  /// The label for "delete poll option"
+  String get deletePollOptionLabel;
+
+  /// The question asked while showing delete poll option dialog
+  String get deletePollOptionQuestion;
+
   /// The label for "Create".
   String get createLabel;
 
@@ -1110,6 +1116,13 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   @override
   String get endVoteConfirmationText =>
       'Are you sure you want to end the vote?';
+
+  @override
+  String get deletePollOptionLabel => 'Delete Option';
+
+  @override
+  String get deletePollOptionQuestion =>
+      'Are you sure you want to delete this option?';
 
   @override
   String get createLabel => 'Create';

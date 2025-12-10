@@ -94,6 +94,11 @@ class $ChannelsTable extends Channels
       'created_by_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+      filterTags = GeneratedColumn<String>('filter_tags', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>($ChannelsTable.$converterfilterTagsn);
+  @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
@@ -114,6 +119,7 @@ class $ChannelsTable extends Channels
         memberCount,
         messageCount,
         createdById,
+        filterTags,
         extraData
       ];
   @override
@@ -220,6 +226,9 @@ class $ChannelsTable extends Channels
           .read(DriftSqlType.int, data['${effectivePrefix}message_count']),
       createdById: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}created_by_id']),
+      filterTags: $ChannelsTable.$converterfilterTagsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}filter_tags'])),
       extraData: $ChannelsTable.$converterextraDatan.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
@@ -237,6 +246,10 @@ class $ChannelsTable extends Channels
       NullAwareTypeConverter.wrap($converterownCapabilities);
   static TypeConverter<Map<String, dynamic>, String> $converterconfig =
       MapConverter();
+  static TypeConverter<List<String>, String> $converterfilterTags =
+      ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $converterfilterTagsn =
+      NullAwareTypeConverter.wrap($converterfilterTags);
   static TypeConverter<Map<String, dynamic>, String> $converterextraData =
       MapConverter();
   static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
@@ -283,6 +296,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   /// The id of the user that created this channel
   final String? createdById;
 
+  /// List of filter tags for this channel
+  final List<String>? filterTags;
+
   /// Map of custom channel extraData
   final Map<String, dynamic>? extraData;
   const ChannelEntity(
@@ -299,6 +315,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       required this.memberCount,
       this.messageCount,
       this.createdById,
+      this.filterTags,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -330,6 +347,10 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     if (!nullToAbsent || createdById != null) {
       map['created_by_id'] = Variable<String>(createdById);
     }
+    if (!nullToAbsent || filterTags != null) {
+      map['filter_tags'] = Variable<String>(
+          $ChannelsTable.$converterfilterTagsn.toSql(filterTags));
+    }
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
           $ChannelsTable.$converterextraDatan.toSql(extraData));
@@ -355,6 +376,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       memberCount: serializer.fromJson<int>(json['memberCount']),
       messageCount: serializer.fromJson<int?>(json['messageCount']),
       createdById: serializer.fromJson<String?>(json['createdById']),
+      filterTags: serializer.fromJson<List<String>?>(json['filterTags']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
   }
@@ -375,6 +397,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       'memberCount': serializer.toJson<int>(memberCount),
       'messageCount': serializer.toJson<int?>(messageCount),
       'createdById': serializer.toJson<String?>(createdById),
+      'filterTags': serializer.toJson<List<String>?>(filterTags),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
@@ -393,6 +416,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           int? memberCount,
           Value<int?> messageCount = const Value.absent(),
           Value<String?> createdById = const Value.absent(),
+          Value<List<String>?> filterTags = const Value.absent(),
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       ChannelEntity(
         id: id ?? this.id,
@@ -412,6 +436,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
         messageCount:
             messageCount.present ? messageCount.value : this.messageCount,
         createdById: createdById.present ? createdById.value : this.createdById,
+        filterTags: filterTags.present ? filterTags.value : this.filterTags,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
   ChannelEntity copyWithCompanion(ChannelsCompanion data) {
@@ -437,6 +462,8 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           : this.messageCount,
       createdById:
           data.createdById.present ? data.createdById.value : this.createdById,
+      filterTags:
+          data.filterTags.present ? data.filterTags.value : this.filterTags,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -457,6 +484,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           ..write('memberCount: $memberCount, ')
           ..write('messageCount: $messageCount, ')
           ..write('createdById: $createdById, ')
+          ..write('filterTags: $filterTags, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -477,6 +505,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       memberCount,
       messageCount,
       createdById,
+      filterTags,
       extraData);
   @override
   bool operator ==(Object other) =>
@@ -495,6 +524,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           other.memberCount == this.memberCount &&
           other.messageCount == this.messageCount &&
           other.createdById == this.createdById &&
+          other.filterTags == this.filterTags &&
           other.extraData == this.extraData);
 }
 
@@ -512,6 +542,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   final Value<int> memberCount;
   final Value<int?> messageCount;
   final Value<String?> createdById;
+  final Value<List<String>?> filterTags;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
   const ChannelsCompanion({
@@ -528,6 +559,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.memberCount = const Value.absent(),
     this.messageCount = const Value.absent(),
     this.createdById = const Value.absent(),
+    this.filterTags = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -545,6 +577,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.memberCount = const Value.absent(),
     this.messageCount = const Value.absent(),
     this.createdById = const Value.absent(),
+    this.filterTags = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -565,6 +598,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<int>? memberCount,
     Expression<int>? messageCount,
     Expression<String>? createdById,
+    Expression<String>? filterTags,
     Expression<String>? extraData,
     Expression<int>? rowid,
   }) {
@@ -582,6 +616,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       if (memberCount != null) 'member_count': memberCount,
       if (messageCount != null) 'message_count': messageCount,
       if (createdById != null) 'created_by_id': createdById,
+      if (filterTags != null) 'filter_tags': filterTags,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -601,6 +636,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       Value<int>? memberCount,
       Value<int?>? messageCount,
       Value<String?>? createdById,
+      Value<List<String>?>? filterTags,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
     return ChannelsCompanion(
@@ -617,6 +653,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       memberCount: memberCount ?? this.memberCount,
       messageCount: messageCount ?? this.messageCount,
       createdById: createdById ?? this.createdById,
+      filterTags: filterTags ?? this.filterTags,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
     );
@@ -667,6 +704,10 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     if (createdById.present) {
       map['created_by_id'] = Variable<String>(createdById.value);
     }
+    if (filterTags.present) {
+      map['filter_tags'] = Variable<String>(
+          $ChannelsTable.$converterfilterTagsn.toSql(filterTags.value));
+    }
     if (extraData.present) {
       map['extra_data'] = Variable<String>(
           $ChannelsTable.$converterextraDatan.toSql(extraData.value));
@@ -693,6 +734,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
           ..write('memberCount: $memberCount, ')
           ..write('messageCount: $messageCount, ')
           ..write('createdById: $createdById, ')
+          ..write('filterTags: $filterTags, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -9463,6 +9505,7 @@ typedef $$ChannelsTableCreateCompanionBuilder = ChannelsCompanion Function({
   Value<int> memberCount,
   Value<int?> messageCount,
   Value<String?> createdById,
+  Value<List<String>?> filterTags,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -9480,6 +9523,7 @@ typedef $$ChannelsTableUpdateCompanionBuilder = ChannelsCompanion Function({
   Value<int> memberCount,
   Value<int?> messageCount,
   Value<String?> createdById,
+  Value<List<String>?> filterTags,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -9617,6 +9661,11 @@ class $$ChannelsTableFilterComposer
 
   ColumnFilters<String> get createdById => $composableBuilder(
       column: $table.createdById, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get filterTags => $composableBuilder(
+          column: $table.filterTags,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
   ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
           String>
@@ -9781,6 +9830,9 @@ class $$ChannelsTableOrderingComposer
   ColumnOrderings<String> get createdById => $composableBuilder(
       column: $table.createdById, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get filterTags => $composableBuilder(
+      column: $table.filterTags, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get extraData => $composableBuilder(
       column: $table.extraData, builder: (column) => ColumnOrderings(column));
 }
@@ -9833,6 +9885,10 @@ class $$ChannelsTableAnnotationComposer
 
   GeneratedColumn<String> get createdById => $composableBuilder(
       column: $table.createdById, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get filterTags =>
+      $composableBuilder(
+          column: $table.filterTags, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       get extraData => $composableBuilder(
@@ -9985,6 +10041,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             Value<int> memberCount = const Value.absent(),
             Value<int?> messageCount = const Value.absent(),
             Value<String?> createdById = const Value.absent(),
+            Value<List<String>?> filterTags = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -10002,6 +10059,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             memberCount: memberCount,
             messageCount: messageCount,
             createdById: createdById,
+            filterTags: filterTags,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -10019,6 +10077,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             Value<int> memberCount = const Value.absent(),
             Value<int?> messageCount = const Value.absent(),
             Value<String?> createdById = const Value.absent(),
+            Value<List<String>?> filterTags = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -10036,6 +10095,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             memberCount: memberCount,
             messageCount: messageCount,
             createdById: createdById,
+            filterTags: filterTags,
             extraData: extraData,
             rowid: rowid,
           ),

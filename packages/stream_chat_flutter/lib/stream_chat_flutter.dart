@@ -59,6 +59,7 @@ export 'src/message_input/attachment_picker/stream_attachment_picker_controller.
 export 'src/message_input/attachment_picker/stream_attachment_picker_option.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_result.dart';
 export 'src/message_input/audio_recorder/audio_recorder_controller.dart';
+export 'src/message_input/audio_recorder/audio_recorder_feedback.dart';
 export 'src/message_input/audio_recorder/audio_recorder_state.dart';
 export 'src/message_input/audio_recorder/stream_audio_recorder.dart';
 export 'src/message_input/countdown_button.dart';

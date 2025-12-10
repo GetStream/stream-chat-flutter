@@ -3601,6 +3601,53 @@ void main() {
           message: any(named: 'message'))).called(1);
     });
 
+    test('`.addMembers` with hideHistoryBefore', () async {
+      final members = List.generate(
+        3,
+        (index) => Member(userId: 'test-member-id-$index'),
+      );
+      final memberIds = members
+          .map((it) => it.userId)
+          .whereType<String>()
+          .toList(growable: false);
+      final message = Message(id: 'test-message-id', text: 'Members Added');
+      final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
+
+      final channelModel = ChannelModel(cid: channelCid);
+
+      when(() => client.addChannelMembers(
+            channelId,
+            channelType,
+            memberIds,
+            message: message,
+            hideHistoryBefore: hideHistoryBefore,
+          )).thenAnswer(
+        (_) async => AddMembersResponse()
+          ..channel = channelModel
+          ..members = members
+          ..message = message,
+      );
+
+      final res = await channel.addMembers(
+        memberIds,
+        message: message,
+        hideHistoryBefore: hideHistoryBefore,
+      );
+
+      expect(res, isNotNull);
+      expect(res.channel.cid, channelModel.cid);
+      expect(res.members.length, members.length);
+      expect(res.message?.id, message.id);
+
+      verify(() => client.addChannelMembers(
+            channelId,
+            channelType,
+            memberIds,
+            message: message,
+            hideHistoryBefore: hideHistoryBefore,
+          )).called(1);
+    });
+
     test('`.inviteMembers`', () async {
       final members = List.generate(
         3,
@@ -8196,6 +8243,71 @@ void main() {
     });
   });
 
+  group('Channel filterTags', () {
+    late final client = MockStreamChatClient();
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    setUpAll(() {
+      // detached loggers
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+
+      final retryPolicy = RetryPolicy(
+        shouldRetry: (_, __, ___) => false,
+        delayFactor: Duration.zero,
+      );
+      when(() => client.retryPolicy).thenReturn(retryPolicy);
+
+      // fake clientState
+      final clientState = FakeClientState();
+      when(() => client.state).thenReturn(clientState);
+
+      // client logger
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+    });
+
+    test('should return filterTags from channel state', () {
+      final channelModel = ChannelModel(
+        id: channelId,
+        type: channelType,
+        filterTags: ['tag1', 'tag2'],
+      );
+
+      final channelState = ChannelState(channel: channelModel);
+      final testChannel = Channel.fromState(client, channelState);
+      addTearDown(testChannel.dispose);
+
+      expect(testChannel.filterTags, equals(['tag1', 'tag2']));
+    });
+
+    test('should update filterTags when channel state is updated', () {
+      final channelModel = ChannelModel(
+        id: channelId,
+        type: channelType,
+        filterTags: ['tag1', 'tag2'],
+      );
+
+      final channelState = ChannelState(channel: channelModel);
+      final testChannel = Channel.fromState(client, channelState);
+      addTearDown(testChannel.dispose);
+
+      expect(testChannel.filterTags, equals(['tag1', 'tag2']));
+
+      final updatedChannel = channelModel.copyWith(
+        filterTags: ['tag3', 'tag4', 'tag5'],
+      );
+
+      testChannel.state?.updateChannelState(
+        testChannel.state!.channelState.copyWith(channel: updatedChannel),
+      );
+
+      expect(testChannel.filterTags, equals(['tag3', 'tag4', 'tag5']));
+    });
+  });
+
   group('Typing Indicator', () {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
@@ -8653,6 +8765,64 @@ void main() {
             channelId,
             channelType,
             'message-id-123',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      ".markUnreadByTimestamp should throw if we don't have the capability",
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [], // no readEvents capability
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+        await expectLater(
+          channel.markUnreadByTimestamp(timestamp),
+          throwsA(isA<StreamChatError>()),
+        );
+      },
+    );
+
+    test(
+      '.markUnreadByTimestamp should succeed if we have the capability',
+      () async {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          ownCapabilities: [ChannelCapability.readEvents],
+        );
+
+        final channel = Channel.fromState(client, channelState);
+        addTearDown(channel.dispose);
+
+        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+
+        when(
+          () => client.markChannelUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
+          ),
+        ).thenAnswer((_) async => EmptyResponse());
+
+        await expectLater(
+          channel.markUnreadByTimestamp(timestamp),
+          completes,
+        );
+
+        verify(
+          () => client.markChannelUnreadByTimestamp(
+            channelId,
+            channelType,
+            timestamp,
           ),
         ).called(1);
       },

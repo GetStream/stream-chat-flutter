@@ -565,6 +565,13 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
       'Êtes-vous sûr de vouloir terminer le vote?';
 
   @override
+  String get deletePollOptionLabel => "Supprimer l'option";
+
+  @override
+  String get deletePollOptionQuestion =>
+      'Êtes-vous sûr de vouloir supprimer cette option ?';
+
+  @override
   String get createLabel => 'Créer';
 
   @override

@@ -370,6 +370,12 @@ class StreamChatThemeData {
           color: colorTheme.accentError,
         ),
         switchListTileBorderRadius: BorderRadius.circular(12),
+        actionDialogTitleStyle: textTheme.headlineBold.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
+        actionDialogContentStyle: textTheme.body.copyWith(
+          color: colorTheme.textHighEmphasis,
+        ),
       ),
       pollInteractorTheme: StreamPollInteractorThemeData(
         pollTitleStyle: textTheme.headlineBold.copyWith(

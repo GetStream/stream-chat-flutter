@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/separated_reorderable_list_view.dart';
+import 'package:stream_chat_flutter/src/poll/creator/stream_delete_option_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class _NullConst {
@@ -57,6 +58,7 @@ class PollOptionListItem extends StatelessWidget {
     required this.option,
     this.hintText,
     this.focusNode,
+    this.onRemove,
     this.onChanged,
   });
 
@@ -69,6 +71,9 @@ class PollOptionListItem extends StatelessWidget {
   /// The focus node for the text field.
   final FocusNode? focusNode;
 
+  /// Callback called when the poll option item is removed.
+  final ValueSetter<PollOptionItem>? onRemove;
+
   /// Callback called when the poll option item is changed.
   final ValueSetter<PollOptionItem>? onChanged;
 
@@ -78,6 +83,8 @@ class PollOptionListItem extends StatelessWidget {
     final fillColor = theme.optionsTextFieldFillColor;
     final borderRadius = theme.optionsTextFieldBorderRadius;
 
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: fillColor,
@@ -85,6 +92,17 @@ class PollOptionListItem extends StatelessWidget {
       ),
       child: Row(
         children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.all(16),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.grab,
+              child: Icon(
+                size: 24,
+                Icons.drag_handle_rounded,
+                color: colorTheme.textLowEmphasis,
+              ),
+            ),
+          ),
           Expanded(
             child: StreamPollTextField(
               initialValue: option.text,
@@ -95,13 +113,28 @@ class PollOptionListItem extends StatelessWidget {
               errorText: option.error,
               errorStyle: theme.optionsTextFieldErrorStyle,
               focusNode: focusNode,
-              onChanged: (text) => onChanged?.call(option.copyWith(text: text)),
+              contentPadding: const EdgeInsets.symmetric(vertical: 18),
+              onChanged: switch (onChanged) {
+                final onChanged? => (text) {
+                    final updated = option.copyWith(text: text);
+                    return onChanged.call(updated);
+                  },
+                _ => null,
+              },
             ),
           ),
-          const SizedBox(
-            width: 48,
-            height: 48,
-            child: Icon(Icons.drag_handle_rounded),
+          IconButton(
+            iconSize: 24,
+            icon: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+            style: IconButton.styleFrom(
+              foregroundColor: colorTheme.textLowEmphasis,
+            ),
+            // TODO: Enable once we have min SDK set to 3.29.0
+            // onLongPress: () {/* Consume long press */},
+            onPressed: switch (onRemove) {
+              final onRemove? => () => onRemove.call(option),
+              _ => null,
+            },
           ),
         ],
       ),
@@ -217,7 +250,7 @@ class _PollOptionReorderableListViewState
     final newOptions = widget.initialOptions;
 
     final optionItemEquality = ListEquality<PollOptionItem>(
-      EqualityBy((it) => (it.id, it.text)),
+      EqualityBy((it) => it.id),
     );
 
     if (optionItemEquality.equals(currOptions, newOptions) case false) {
@@ -261,6 +294,24 @@ class _PollOptionReorderableListViewState
     }
 
     return null;
+  }
+
+  Future<void> _onOptionRemoved(PollOptionItem option) async {
+    final confirm = await showPollDeleteOptionDialog(context: context);
+    if (!mounted || confirm != true) return;
+
+    setState(() {
+      _options.remove(option.id);
+      _focusNodes.remove(option.id)?.dispose();
+    });
+
+    // Ensure we have at least the minimum number of options
+    _ensureMinimumOptions();
+
+    // Notify the parent widget about the change
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onOptionsChanged?.call([..._options.values]);
+    });
   }
 
   void _onOptionChanged(PollOptionItem option) {
@@ -370,6 +421,7 @@ class _PollOptionReorderableListViewState
                 option: option,
                 hintText: widget.itemHintText,
                 focusNode: _focusNodes[option.id],
+                onRemove: _onOptionRemoved,
                 onChanged: _onOptionChanged,
               );
             },

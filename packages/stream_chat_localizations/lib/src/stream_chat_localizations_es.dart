@@ -564,6 +564,13 @@ No es posible añadir más de $limit archivos adjuntos
       '¿Estás seguro de que quieres finalizar la votación?';
 
   @override
+  String get deletePollOptionLabel => 'Eliminar opción';
+
+  @override
+  String get deletePollOptionQuestion =>
+      '¿Estás seguro de que quieres eliminar esta opción?';
+
+  @override
   String get createLabel => 'Crear';
 
   @override

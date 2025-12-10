@@ -1,3 +1,18 @@
+## 9.22.0
+
+✅ Added
+
+- Added haptic and system sound feedback for voice recording interactions. Feedback can be
+  customized by extending `AudioRecorderFeedback` or using `AudioRecorderFeedbackWrapper` with
+  custom callbacks. [[#2463]](https://github.com/GetStream/stream-chat-flutter/issues/2463)
+- Added support for deleting options while creating a poll in
+  `StreamPollCreator`. [[#2453]](https://github.com/GetStream/stream-chat-flutter/issues/2453)
+
+🐞 Fixed
+
+- Fixed focus randomly shifting to poll title while editing option text in poll
+  creator. [[#2464]](https://github.com/GetStream/stream-chat-flutter/issues/2464)
+
 ## 10.0.0-beta.10
 
 - Included the changes from version [`9.21.0`](https://pub.dev/packages/stream_chat_flutter/changelog).

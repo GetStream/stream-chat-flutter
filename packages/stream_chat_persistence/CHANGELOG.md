@@ -1,3 +1,9 @@
+## 9.22.0
+
+✅ Added
+
+- Added support for `ChannelModel.filterTags` field.
+
 ## 10.0.0-beta.10
 
 - Included the changes from version [`9.21.0`](https://pub.dev/packages/stream_chat_persistence/changelog).

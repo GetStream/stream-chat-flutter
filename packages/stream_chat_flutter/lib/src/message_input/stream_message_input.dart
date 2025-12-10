@@ -124,6 +124,7 @@ class StreamMessageInput extends StatefulWidget {
     this.hideSendAsDm = false,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
+    this.voiceRecordingFeedback = const AudioRecorderFeedback(),
     this.idleSendIcon,
     this.activeSendIcon,
     this.showCommandsButton = true,
@@ -226,6 +227,36 @@ class StreamMessageInput extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool sendVoiceRecordingAutomatically;
+
+  /// The feedback handler for voice recording interactions.
+  ///
+  /// Defaults to [AudioRecorderFeedback] with feedback enabled.
+  ///
+  /// To disable feedback:
+  /// ```dart
+  /// StreamMessageInput(
+  ///   voiceRecordingFeedback: const AudioRecorderFeedback.disabled(),
+  /// )
+  /// ```
+  ///
+  /// To customize feedback, extend [AudioRecorderFeedback] and override
+  /// the desired methods:
+  /// ```dart
+  /// class CustomFeedback extends AudioRecorderFeedback {
+  ///   @override
+  ///   Future<void> onRecordStart(BuildContext context) async {
+  ///     // Haptic feedback
+  ///     await HapticFeedback.heavyImpact();
+  ///     // Or system sound
+  ///     // await SystemSound.play(SystemSoundType.click);
+  ///   }
+  /// }
+  ///
+  /// StreamMessageInput(
+  ///   voiceRecordingFeedback: CustomFeedback(),
+  /// )
+  /// ```
+  final AudioRecorderFeedback voiceRecordingFeedback;
 
   /// The text controller of the TextField.
   final StreamMessageInputController? messageInputController;
@@ -826,6 +857,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 flex: isAudioRecordingFlowActive ? 1 : 0,
                 child: StreamAudioRecorderButton(
                   recordState: state,
+                  feedback: widget.voiceRecordingFeedback,
                   onRecordStart: _audioRecorderController.startRecord,
                   onRecordCancel: _audioRecorderController.cancelRecord,
                   onRecordStop: _audioRecorderController.stopRecord,
@@ -838,7 +870,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
                     );
                   },
                   onRecordFinish: () async {
-                    //isVoiceRecordingConfirmationRequiredEnabled
                     // Finish the recording session and add the audio to the
                     // message input controller.
                     final audio = await _audioRecorderController.finishRecord();
