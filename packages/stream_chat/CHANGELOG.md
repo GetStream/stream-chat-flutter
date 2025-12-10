@@ -1,3 +1,7 @@
+## 10.0.0-beta.11
+
+- Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.22.0
 
 ✅ Added
