@@ -1,4 +1,4 @@
-## Upcoming
+## 9.22.0
 
 - Added translations for new `deletePollOptionLabel` label.
 - Added translations for new `deletePollOptionQuestion` text.
