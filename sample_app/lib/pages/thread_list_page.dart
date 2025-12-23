@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -50,7 +51,16 @@ class _ThreadListPageState extends State<ThreadListPage> {
                     return StreamChannel(
                       channel: channel,
                       initialMessageId: thread.draft?.parentId,
-                      child: ThreadPage(parent: thread.parentMessage!),
+                      child: BetterStreamBuilder(
+                        stream: channel.state?.messagesStream.map(
+                          (messages) => messages.firstWhereOrNull(
+                            (m) => m.id == thread.parentMessage?.id,
+                          ),
+                        ),
+                        builder: (_, parentMessage) {
+                          return ThreadPage(parent: parentMessage);
+                        },
+                      ),
                     );
                   },
                 ),
