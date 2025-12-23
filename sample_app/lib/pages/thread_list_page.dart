@@ -50,7 +50,16 @@ class _ThreadListPageState extends State<ThreadListPage> {
                     return StreamChannel(
                       channel: channel,
                       initialMessageId: thread.draft?.parentId,
-                      child: ThreadPage(parent: thread.parentMessage!),
+                      child: BetterStreamBuilder(
+                        stream: channel.state?.messagesStream.map(
+                          (messages) => messages.firstWhere(
+                            (m) => m.id == thread.parentMessage!.id,
+                          ),
+                        ),
+                        builder: (_, parentMessage) {
+                          return ThreadPage(parent: parentMessage);
+                        },
+                      ),
                     );
                   },
                 ),
