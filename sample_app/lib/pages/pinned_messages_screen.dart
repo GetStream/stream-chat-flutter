@@ -25,10 +25,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
       true,
     ),
     sort: [
-      const SortOption(
-        'created_at',
-        direction: SortOption.ASC,
-      ),
+      const SortOption.asc('created_at'),
     ],
     limit: 20,
   );

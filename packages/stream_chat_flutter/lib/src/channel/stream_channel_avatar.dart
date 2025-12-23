@@ -108,7 +108,7 @@ class StreamChannelAvatar extends StatelessWidget {
 
     final fallbackWidget = Center(
       child: Text(
-        channel.name?[0] ?? '',
+        channel.name?.characters.firstOrNull ?? '',
         style: TextStyle(
           color: colorTheme.barsBg,
           fontWeight: FontWeight.bold,
