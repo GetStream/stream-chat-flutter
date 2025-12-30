@@ -125,6 +125,7 @@ class StreamReactionPicker extends StatelessWidget {
         return ReactionPickerIcon(
           type: reactionType,
           builder: reactionIcon.builder,
+          emojiCode: reactionIcon.emojiCode,
           // If the reaction is present in ownReactions, it is selected.
           isSelected: ownReactionsMap[reactionType] != null,
         );
@@ -136,9 +137,13 @@ class StreamReactionPicker extends StatelessWidget {
       reactionIcons: [...indicatorIcons],
       onIconPicked: (reactionIcon) {
         final reactionType = reactionIcon.type;
-        final reaction = ownReactionsMap[reactionType];
+        final reactionEmojiCode = reactionIcon.emojiCode;
+        final pickedReaction = switch (ownReactionsMap[reactionType]) {
+          final reaction? => reaction,
+          _ => Reaction(type: reactionType, emojiCode: reactionEmojiCode),
+        };
 
-        return onReactionPicked?.call(reaction ?? Reaction(type: reactionType));
+        return onReactionPicked?.call(pickedReaction);
       },
     );
 
