@@ -1,3 +1,7 @@
+## Upcoming Beta
+
+- Fixed regression in `emoji_code` support for reactions.
+
 ## 10.0.0-beta.11
 
 - Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat_flutter/changelog).

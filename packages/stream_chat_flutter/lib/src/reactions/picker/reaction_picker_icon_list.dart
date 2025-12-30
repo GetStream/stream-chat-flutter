@@ -201,6 +201,7 @@ class ReactionPickerIcon {
   /// {@macro reactionPickerIcon}
   const ReactionPickerIcon({
     required this.type,
+    this.emojiCode,
     this.isSelected = false,
     this.iconSize = 24,
     required ReactionIconBuilder builder,
@@ -208,6 +209,11 @@ class ReactionPickerIcon {
 
   /// The unique identifier for the reaction type (e.g., "like", "love").
   final String type;
+
+  /// Optional emoji code for the reaction.
+  ///
+  /// Used to display a custom emoji in the notification.
+  final String? emojiCode;
 
   /// A boolean indicating whether this reaction is currently selected by the
   /// user.
