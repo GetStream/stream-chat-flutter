@@ -53,9 +53,7 @@ class StreamAttachmentPickerController
   @override
   set value(AttachmentPickerValue newValue) {
     if (newValue.attachments.length > maxAttachmentCount) {
-      throw ArgumentError(
-        'The maximum number of attachments is $maxAttachmentCount.',
-      );
+      throw AttachmentLimitReachedError(maxCount: maxAttachmentCount);
     }
     super.value = newValue;
   }
@@ -89,9 +87,9 @@ class StreamAttachmentPickerController
   Future<void> addAttachment(Attachment attachment) async {
     assert(attachment.fileSize != null, '');
     if (attachment.fileSize! > maxAttachmentSize) {
-      throw ArgumentError(
-        'The size of the attachment is ${attachment.fileSize} bytes, '
-        'but the maximum size allowed is $maxAttachmentSize bytes.',
+      throw AttachmentTooLargeError(
+        fileSize: attachment.fileSize!,
+        maxSize: maxAttachmentSize,
       );
     }
 
@@ -256,4 +254,59 @@ class AttachmentPickerValue {
 
     return poll.hashCode ^ attachmentsHash ^ extraDataHash;
   }
+}
+
+/// Error thrown when an attachment exceeds the maximum allowed file size.
+///
+/// This occurs when calling [StreamAttachmentPickerController.addAttachment]
+/// with a file whose size is greater than [maxAttachmentSize].
+///
+/// The error includes both the actual file size and the configured limit,
+/// allowing you to provide specific feedback about the size violation.
+class AttachmentTooLargeError extends StreamChatError {
+  /// Creates a new [AttachmentTooLargeError].
+  const AttachmentTooLargeError({
+    required this.fileSize,
+    required this.maxSize,
+  }) : super(
+          'The size of the attachment is $fileSize bytes, '
+          'but the maximum size allowed is $maxSize bytes.',
+        );
+
+  /// The actual size of the attachment in bytes.
+  final int fileSize;
+
+  /// The maximum allowed size in bytes.
+  final int maxSize;
+
+  @override
+  List<Object?> get props => [...super.props, fileSize, maxSize];
+
+  @override
+  String toString() => 'AttachmentTooLargeError: '
+      'The size of the attachment is $fileSize bytes, '
+      'but the maximum size allowed is $maxSize bytes.';
+}
+
+/// Error thrown when the attachment count exceeds the maximum allowed.
+///
+/// This occurs when setting [StreamAttachmentPickerController.value] with
+/// more attachments than [maxAttachmentCount] allows.
+///
+/// The error includes the configured attachment limit.
+class AttachmentLimitReachedError extends StreamChatError {
+  /// Creates a new [AttachmentLimitReachedError].
+  const AttachmentLimitReachedError({
+    required this.maxCount,
+  }) : super('The maximum number of attachments is $maxCount.');
+
+  /// The maximum allowed number of attachments.
+  final int maxCount;
+
+  @override
+  List<Object?> get props => [...super.props, maxCount];
+
+  @override
+  String toString() => 'AttachmentLimitReachedError: '
+      'The maximum number of attachments is $maxCount.';
 }

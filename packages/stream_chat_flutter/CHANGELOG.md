@@ -1,5 +1,13 @@
 ## Upcoming Beta
 
+🛑️ Breaking
+
+- Replaced `ArgumentError` with typed errors in `StreamAttachmentPickerController`:
+  `AttachmentTooLargeError` (file size exceeds limit) and `AttachmentLimitReachedError`
+  (attachment count exceeds limit). [[#2476]](https://github.com/GetStream/stream-chat-flutter/issues/2476)
+
+🐞 Fixed
+
 - Fixed regression in `emoji_code` support for reactions.
 
 ## 10.0.0-beta.11
