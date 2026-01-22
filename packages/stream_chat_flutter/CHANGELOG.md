@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamChannelAvatar` crashing with `RangeError` when user/channel name is empty.
+
 ## 9.22.0
 
 ✅ Added
