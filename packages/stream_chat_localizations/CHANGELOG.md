@@ -1,3 +1,7 @@
+## Upcoming
+
+- Fixed Italian translation for `unreadMessagesSeparatorText` (was incorrectly showing French text "Nouveaux messages" instead of Italian "Nuovi messaggi").
+
 ## 9.22.0
 
 - Added translations for new `deletePollOptionLabel` label.
