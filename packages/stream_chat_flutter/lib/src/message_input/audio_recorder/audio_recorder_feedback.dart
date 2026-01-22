@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 /// A feedback handler for audio recorder interactions.
@@ -55,7 +57,7 @@ class AudioRecorderFeedback {
   /// recording actually begins.
   Future<void> onRecordStart(BuildContext context) async {
     if (!enableFeedback) return;
-    return Feedback.forLongPress(context);
+    return unawaited(Feedback.forLongPress(context));
   }
 
   /// Provides platform-specific feedback when recording is paused.
@@ -63,7 +65,7 @@ class AudioRecorderFeedback {
   /// This is called when the user pauses the ongoing recording.
   Future<void> onRecordPause(BuildContext context) async {
     if (!enableFeedback) return;
-    return Feedback.forTap(context);
+    return unawaited(Feedback.forTap(context));
   }
 
   /// Provides platform-specific feedback when recording is finished.
@@ -71,7 +73,7 @@ class AudioRecorderFeedback {
   /// This is called when the user finishes the recording.
   Future<void> onRecordFinish(BuildContext context) async {
     if (!enableFeedback) return;
-    return Feedback.forTap(context);
+    return unawaited(Feedback.forTap(context));
   }
 
   /// Provides platform-specific feedback when the recording is locked.
@@ -80,7 +82,7 @@ class AudioRecorderFeedback {
   /// holding the record button.
   Future<void> onRecordLock(BuildContext context) async {
     if (!enableFeedback) return;
-    return Feedback.forLongPress(context);
+    return unawaited(Feedback.forLongPress(context));
   }
 
   /// Provides platform-specific feedback when recording is canceled.
@@ -88,7 +90,7 @@ class AudioRecorderFeedback {
   /// This is called when the user cancels an ongoing recording.
   Future<void> onRecordCancel(BuildContext context) async {
     if (!enableFeedback) return;
-    return Feedback.forTap(context);
+    return unawaited(Feedback.forTap(context));
   }
 
   /// Provides platform-specific feedback when recording is canceled before
@@ -98,7 +100,7 @@ class AudioRecorderFeedback {
   /// the recording actually starts.
   Future<void> onRecordStartCancel(BuildContext context) async {
     if (!enableFeedback) return;
-    return Feedback.forTap(context);
+    return unawaited(Feedback.forTap(context));
   }
 
   /// Provides platform-specific feedback when recording stops.
@@ -107,7 +109,7 @@ class AudioRecorderFeedback {
   /// is now ready to be used.
   Future<void> onRecordStop(BuildContext context) async {
     if (!enableFeedback) return;
-    return Feedback.forTap(context);
+    return unawaited(Feedback.forTap(context));
   }
 }
 
