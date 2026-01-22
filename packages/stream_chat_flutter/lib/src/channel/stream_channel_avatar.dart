@@ -106,10 +106,9 @@ class StreamChannelAvatar extends StatelessWidget {
     final colorTheme = chatThemeData.colorTheme;
     final previewTheme = chatThemeData.channelPreviewTheme.avatarTheme;
 
-    final channelName = channel.name;
     final fallbackWidget = Center(
       child: Text(
-        channelName != null && channelName.isNotEmpty ? channelName[0] : '',
+        channel.name?.characters.firstOrNull ?? '',
         style: TextStyle(
           color: colorTheme.barsBg,
           fontWeight: FontWeight.bold,
