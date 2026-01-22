@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed audio tone bleeding into recorded voice message when playing custom feedback sound on recording
+  start.
+
 ## 9.22.0
 
 ✅ Added

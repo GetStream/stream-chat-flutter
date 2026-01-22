@@ -127,41 +127,41 @@ class StreamAudioRecorderButton extends StatelessWidget {
     final isLocked = isRecording && recordState is! RecordStateRecordingHold;
 
     return GestureDetector(
-      onLongPressStart: (_) {
+      onLongPressStart: (_) async {
         // Return if the recording is already started.
         if (isRecording) return;
 
-        feedback.onRecordStart(context);
+        await feedback.onRecordStart(context);
         return onRecordStart?.call();
       },
-      onLongPressEnd: (_) {
+      onLongPressEnd: (_) async {
         // Return if the recording not yet started or already locked.
         if (!isRecording || isLocked) return;
 
-        feedback.onRecordFinish(context);
+        await feedback.onRecordFinish(context);
         return onRecordFinish?.call();
       },
-      onLongPressCancel: () {
+      onLongPressCancel: () async {
         // Return if the recording is already started.
         if (isRecording) return;
 
         // Notify the parent that the recorder is canceled before it starts.
-        feedback.onRecordStartCancel(context);
+        await feedback.onRecordStartCancel(context);
         return onRecordStartCancel?.call();
       },
-      onLongPressMoveUpdate: (details) {
+      onLongPressMoveUpdate: (details) async {
         // Return if the recording not yet started or already locked.
         if (!isRecording || isLocked) return;
         final dragOffset = details.offsetFromOrigin;
 
         // Lock recording if the drag offset is greater than the threshold.
         if (dragOffset.dy <= -lockRecordThreshold) {
-          feedback.onRecordLock(context);
+          await feedback.onRecordLock(context);
           return onRecordLock?.call();
         }
         // Cancel recording if the drag offset is greater than the threshold.
         if (dragOffset.dx <= -cancelRecordThreshold) {
-          feedback.onRecordCancel(context);
+          await feedback.onRecordCancel(context);
           return onRecordCancel?.call();
         }
 
@@ -187,31 +187,31 @@ class StreamAudioRecorderButton extends StatelessWidget {
             ),
           RecordStateRecordingLocked() => RecordStateLockedRecordingContent(
               state: state,
-              onRecordEnd: () {
-                feedback.onRecordFinish(context);
+              onRecordEnd: () async {
+                await feedback.onRecordFinish(context);
                 return onRecordFinish?.call();
               },
-              onRecordPause: () {
-                feedback.onRecordPause(context);
+              onRecordPause: () async {
+                await feedback.onRecordPause(context);
                 return onRecordPause?.call();
               },
-              onRecordCancel: () {
-                feedback.onRecordCancel(context);
+              onRecordCancel: () async {
+                await feedback.onRecordCancel(context);
                 return onRecordCancel?.call();
               },
-              onRecordStop: () {
-                feedback.onRecordStop(context);
+              onRecordStop: () async {
+                await feedback.onRecordStop(context);
                 return onRecordStop?.call();
               },
             ),
           RecordStateStopped() => RecordStateStoppedContent(
               state: state,
-              onRecordCancel: () {
-                feedback.onRecordCancel(context);
+              onRecordCancel: () async {
+                await feedback.onRecordCancel(context);
                 return onRecordCancel?.call();
               },
-              onRecordFinish: () {
-                feedback.onRecordFinish(context);
+              onRecordFinish: () async {
+                await feedback.onRecordFinish(context);
                 return onRecordFinish?.call();
               },
             ),
