@@ -24,6 +24,8 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String> cid = GeneratedColumn<String>(
       'cid', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _ownCapabilitiesMeta =
+      const VerificationMeta('ownCapabilities');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       ownCapabilities = GeneratedColumn<String>(
@@ -31,6 +33,7 @@ class $ChannelsTable extends Channels
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>(
               $ChannelsTable.$converterownCapabilitiesn);
+  static const VerificationMeta _configMeta = const VerificationMeta('config');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       config = GeneratedColumn<String>('config', aliasedName, false,
@@ -93,11 +96,15 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String> createdById = GeneratedColumn<String>(
       'created_by_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _filterTagsMeta =
+      const VerificationMeta('filterTags');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       filterTags = GeneratedColumn<String>('filter_tags', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>($ChannelsTable.$converterfilterTagsn);
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -149,6 +156,8 @@ class $ChannelsTable extends Channels
     } else if (isInserting) {
       context.missing(_cidMeta);
     }
+    context.handle(_ownCapabilitiesMeta, const VerificationResult.success());
+    context.handle(_configMeta, const VerificationResult.success());
     if (data.containsKey('frozen')) {
       context.handle(_frozenMeta,
           frozen.isAcceptableOrUnknown(data['frozen']!, _frozenMeta));
@@ -189,6 +198,8 @@ class $ChannelsTable extends Channels
           createdById.isAcceptableOrUnknown(
               data['created_by_id']!, _createdByIdMeta));
     }
+    context.handle(_filterTagsMeta, const VerificationResult.success());
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -759,6 +770,8 @@ class $MessagesTable extends Messages
   late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _attachmentsMeta =
+      const VerificationMeta('attachments');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
@@ -776,12 +789,16 @@ class $MessagesTable extends Messages
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
+  static const VerificationMeta _mentionedUsersMeta =
+      const VerificationMeta('mentionedUsers');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       mentionedUsers = GeneratedColumn<String>(
               'mentioned_users', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($MessagesTable.$convertermentionedUsers);
+  static const VerificationMeta _reactionGroupsMeta =
+      const VerificationMeta('reactionGroups');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?,
       String> reactionGroups = GeneratedColumn<String>(
@@ -926,11 +943,14 @@ class $MessagesTable extends Messages
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES channels (cid) ON DELETE CASCADE'));
+  static const VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
       i18n = GeneratedColumn<String>('i18n', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<Map<String, String>?>($MessagesTable.$converteri18n);
+  static const VerificationMeta _restrictedVisibilityMeta =
+      const VerificationMeta('restrictedVisibility');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       restrictedVisibility = GeneratedColumn<String>(
@@ -938,6 +958,8 @@ class $MessagesTable extends Messages
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>(
               $MessagesTable.$converterrestrictedVisibilityn);
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -999,6 +1021,7 @@ class $MessagesTable extends Messages
           messageText.isAcceptableOrUnknown(
               data['message_text']!, _messageTextMeta));
     }
+    context.handle(_attachmentsMeta, const VerificationResult.success());
     if (data.containsKey('state')) {
       context.handle(
           _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
@@ -1009,6 +1032,8 @@ class $MessagesTable extends Messages
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     }
+    context.handle(_mentionedUsersMeta, const VerificationResult.success());
+    context.handle(_reactionGroupsMeta, const VerificationResult.success());
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
@@ -1123,6 +1148,10 @@ class $MessagesTable extends Messages
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
+    context.handle(_i18nMeta, const VerificationResult.success());
+    context.handle(
+        _restrictedVisibilityMeta, const VerificationResult.success());
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -2203,6 +2232,8 @@ class $DraftMessagesTable extends DraftMessages
   late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _attachmentsMeta =
+      const VerificationMeta('attachments');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
@@ -2216,6 +2247,8 @@ class $DraftMessagesTable extends DraftMessages
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
+  static const VerificationMeta _mentionedUsersMeta =
+      const VerificationMeta('mentionedUsers');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       mentionedUsers = GeneratedColumn<String>(
@@ -2284,6 +2317,8 @@ class $DraftMessagesTable extends DraftMessages
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES channels (cid) ON DELETE CASCADE'));
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -2328,10 +2363,12 @@ class $DraftMessagesTable extends DraftMessages
           messageText.isAcceptableOrUnknown(
               data['message_text']!, _messageTextMeta));
     }
+    context.handle(_attachmentsMeta, const VerificationResult.success());
     if (data.containsKey('type')) {
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     }
+    context.handle(_mentionedUsersMeta, const VerificationResult.success());
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
@@ -2372,6 +2409,7 @@ class $DraftMessagesTable extends DraftMessages
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -2909,6 +2947,8 @@ class $PinnedMessagesTable extends PinnedMessages
   late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _attachmentsMeta =
+      const VerificationMeta('attachments');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
@@ -2927,6 +2967,8 @@ class $PinnedMessagesTable extends PinnedMessages
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
+  static const VerificationMeta _mentionedUsersMeta =
+      const VerificationMeta('mentionedUsers');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       mentionedUsers = GeneratedColumn<String>(
@@ -2934,6 +2976,8 @@ class $PinnedMessagesTable extends PinnedMessages
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>(
               $PinnedMessagesTable.$convertermentionedUsers);
+  static const VerificationMeta _reactionGroupsMeta =
+      const VerificationMeta('reactionGroups');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?,
       String> reactionGroups = GeneratedColumn<String>(
@@ -3075,12 +3119,15 @@ class $PinnedMessagesTable extends PinnedMessages
   late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
       i18n = GeneratedColumn<String>('i18n', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<Map<String, String>?>(
               $PinnedMessagesTable.$converteri18n);
+  static const VerificationMeta _restrictedVisibilityMeta =
+      const VerificationMeta('restrictedVisibility');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       restrictedVisibility = GeneratedColumn<String>(
@@ -3088,6 +3135,8 @@ class $PinnedMessagesTable extends PinnedMessages
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>(
               $PinnedMessagesTable.$converterrestrictedVisibilityn);
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -3150,6 +3199,7 @@ class $PinnedMessagesTable extends PinnedMessages
           messageText.isAcceptableOrUnknown(
               data['message_text']!, _messageTextMeta));
     }
+    context.handle(_attachmentsMeta, const VerificationResult.success());
     if (data.containsKey('state')) {
       context.handle(
           _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
@@ -3160,6 +3210,8 @@ class $PinnedMessagesTable extends PinnedMessages
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     }
+    context.handle(_mentionedUsersMeta, const VerificationResult.success());
+    context.handle(_reactionGroupsMeta, const VerificationResult.success());
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
@@ -3274,6 +3326,10 @@ class $PinnedMessagesTable extends PinnedMessages
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
+    context.handle(_i18nMeta, const VerificationResult.success());
+    context.handle(
+        _restrictedVisibilityMeta, const VerificationResult.success());
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -4363,11 +4419,15 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _optionsMeta =
+      const VerificationMeta('options');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String> options =
       GeneratedColumn<String>('options', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($PollsTable.$converteroptions);
+  static const VerificationMeta _votingVisibilityMeta =
+      const VerificationMeta('votingVisibility');
   @override
   late final GeneratedColumnWithTypeConverter<VotingVisibility, String>
       votingVisibility = GeneratedColumn<String>(
@@ -4431,6 +4491,8 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _voteCountsByOptionMeta =
+      const VerificationMeta('voteCountsByOption');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, int>, String>
       voteCountsByOption = GeneratedColumn<String>(
@@ -4468,6 +4530,8 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -4521,6 +4585,8 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
           description.isAcceptableOrUnknown(
               data['description']!, _descriptionMeta));
     }
+    context.handle(_optionsMeta, const VerificationResult.success());
+    context.handle(_votingVisibilityMeta, const VerificationResult.success());
     if (data.containsKey('enforce_unique_vote')) {
       context.handle(
           _enforceUniqueVoteMeta,
@@ -4556,6 +4622,7 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
           answersCount.isAcceptableOrUnknown(
               data['answers_count']!, _answersCountMeta));
     }
+    context.handle(_voteCountsByOptionMeta, const VerificationResult.success());
     if (data.containsKey('vote_count')) {
       context.handle(_voteCountMeta,
           voteCount.isAcceptableOrUnknown(data['vote_count']!, _voteCountMeta));
@@ -4574,6 +4641,7 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -5626,6 +5694,8 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -5672,6 +5742,7 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
       context.handle(
           _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
     }
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -5982,6 +6053,8 @@ class $ReactionsTable extends Reactions
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -6027,6 +6100,7 @@ class $ReactionsTable extends Reactions
       context.handle(
           _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
     }
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -6349,6 +6423,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("banned" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _teamsRoleMeta =
+      const VerificationMeta('teamsRole');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
       teamsRole = GeneratedColumn<String>('teams_role', aliasedName, true,
@@ -6361,6 +6437,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   late final GeneratedColumn<int> avgResponseTime = GeneratedColumn<int>(
       'avg_response_time', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, false,
@@ -6425,12 +6503,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       context.handle(_bannedMeta,
           banned.isAcceptableOrUnknown(data['banned']!, _bannedMeta));
     }
+    context.handle(_teamsRoleMeta, const VerificationResult.success());
     if (data.containsKey('avg_response_time')) {
       context.handle(
           _avgResponseTimeMeta,
           avgResponseTime.isAcceptableOrUnknown(
               data['avg_response_time']!, _avgResponseTimeMeta));
     }
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -6939,6 +7019,8 @@ class $MembersTable extends Members
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("is_moderator" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -7050,6 +7132,7 @@ class $MembersTable extends Members
           isModerator.isAcceptableOrUnknown(
               data['is_moderator']!, _isModeratorMeta));
     }
+    context.handle(_extraDataMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -8196,6 +8279,8 @@ class $ConnectionEventsTable extends ConnectionEvents
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _ownUserMeta =
+      const VerificationMeta('ownUser');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       ownUser = GeneratedColumn<String>('own_user', aliasedName, true,
@@ -8256,6 +8341,7 @@ class $ConnectionEventsTable extends ConnectionEvents
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    context.handle(_ownUserMeta, const VerificationResult.success());
     if (data.containsKey('total_unread_count')) {
       context.handle(
           _totalUnreadCountMeta,
@@ -8741,8 +8827,8 @@ final class $$ChannelsTableReferences
                   db.channels.cid, db.messages.channelCid));
 
   $$MessagesTableProcessedTableManager get messagesRefs {
-    final manager = $$MessagesTableTableManager($_db, $_db.messages).filter(
-        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+    final manager = $$MessagesTableTableManager($_db, $_db.messages)
+        .filter((f) => f.channelCid.cid($_item.cid));
 
     final cache = $_typedResult.readTableOrNull(_messagesRefsTable($_db));
     return ProcessedTableManager(
@@ -8757,8 +8843,7 @@ final class $$ChannelsTableReferences
 
   $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
     final manager = $$DraftMessagesTableTableManager($_db, $_db.draftMessages)
-        .filter(
-            (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+        .filter((f) => f.channelCid.cid($_item.cid));
 
     final cache = $_typedResult.readTableOrNull(_draftMessagesRefsTable($_db));
     return ProcessedTableManager(
@@ -8772,8 +8857,8 @@ final class $$ChannelsTableReferences
                   $_aliasNameGenerator(db.channels.cid, db.members.channelCid));
 
   $$MembersTableProcessedTableManager get membersRefs {
-    final manager = $$MembersTableTableManager($_db, $_db.members).filter(
-        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+    final manager = $$MembersTableTableManager($_db, $_db.members)
+        .filter((f) => f.channelCid.cid($_item.cid));
 
     final cache = $_typedResult.readTableOrNull(_membersRefsTable($_db));
     return ProcessedTableManager(
@@ -8787,8 +8872,8 @@ final class $$ChannelsTableReferences
               $_aliasNameGenerator(db.channels.cid, db.reads.channelCid));
 
   $$ReadsTableProcessedTableManager get readsRefs {
-    final manager = $$ReadsTableTableManager($_db, $_db.reads).filter(
-        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
+    final manager = $$ReadsTableTableManager($_db, $_db.reads)
+        .filter((f) => f.channelCid.cid($_item.cid));
 
     final cache = $_typedResult.readTableOrNull(_readsRefsTable($_db));
     return ProcessedTableManager(
@@ -9264,8 +9349,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (messagesRefs)
-                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
-                            MessageEntity>(
+                    await $_getPrefetchedData(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._messagesRefsTable(db),
@@ -9277,8 +9361,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
                                 .where((e) => e.channelCid == item.cid),
                         typedResults: items),
                   if (draftMessagesRefs)
-                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
-                            DraftMessageEntity>(
+                    await $_getPrefetchedData(
                         currentTable: table,
                         referencedTable: $$ChannelsTableReferences
                             ._draftMessagesRefsTable(db),
@@ -9290,8 +9373,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
                                 .where((e) => e.channelCid == item.cid),
                         typedResults: items),
                   if (membersRefs)
-                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
-                            MemberEntity>(
+                    await $_getPrefetchedData(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._membersRefsTable(db),
@@ -9303,8 +9385,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
                                 .where((e) => e.channelCid == item.cid),
                         typedResults: items),
                   if (readsRefs)
-                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
-                            ReadEntity>(
+                    await $_getPrefetchedData(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._readsRefsTable(db),
@@ -9415,10 +9496,8 @@ final class $$MessagesTableReferences
           $_aliasNameGenerator(db.messages.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
-    final $_column = $_itemColumn<String>('channel_cid')!;
-
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid.sqlEquals($_column));
+        .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -9433,7 +9512,7 @@ final class $$MessagesTableReferences
 
   $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
     final manager = $$DraftMessagesTableTableManager($_db, $_db.draftMessages)
-        .filter((f) => f.parentId.id.sqlEquals($_itemColumn<String>('id')!));
+        .filter((f) => f.parentId.id($_item.id));
 
     final cache = $_typedResult.readTableOrNull(_draftMessagesRefsTable($_db));
     return ProcessedTableManager(
@@ -9448,7 +9527,7 @@ final class $$MessagesTableReferences
 
   $$ReactionsTableProcessedTableManager get reactionsRefs {
     final manager = $$ReactionsTableTableManager($_db, $_db.reactions)
-        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
+        .filter((f) => f.messageId.id($_item.id));
 
     final cache = $_typedResult.readTableOrNull(_reactionsRefsTable($_db));
     return ProcessedTableManager(
@@ -10146,8 +10225,7 @@ class $$MessagesTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (draftMessagesRefs)
-                    await $_getPrefetchedData<MessageEntity, $MessagesTable,
-                            DraftMessageEntity>(
+                    await $_getPrefetchedData(
                         currentTable: table,
                         referencedTable: $$MessagesTableReferences
                             ._draftMessagesRefsTable(db),
@@ -10159,8 +10237,7 @@ class $$MessagesTableTableManager extends RootTableManager<
                             referencedItems.where((e) => e.parentId == item.id),
                         typedResults: items),
                   if (reactionsRefs)
-                    await $_getPrefetchedData<MessageEntity, $MessagesTable,
-                            ReactionEntity>(
+                    await $_getPrefetchedData(
                         currentTable: table,
                         referencedTable:
                             $$MessagesTableReferences._reactionsRefsTable(db),
@@ -10238,10 +10315,9 @@ final class $$DraftMessagesTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.draftMessages.parentId, db.messages.id));
 
   $$MessagesTableProcessedTableManager? get parentId {
-    final $_column = $_itemColumn<String>('parent_id');
-    if ($_column == null) return null;
+    if ($_item.parentId == null) return null;
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.id.sqlEquals($_column));
+        .filter((f) => f.id($_item.parentId!));
     final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10253,10 +10329,8 @@ final class $$DraftMessagesTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.draftMessages.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
-    final $_column = $_itemColumn<String>('channel_cid')!;
-
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid.sqlEquals($_column));
+        .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10780,7 +10854,7 @@ final class $$PinnedMessagesTableReferences extends BaseReferences<
       get pinnedMessageReactionsRefs {
     final manager = $$PinnedMessageReactionsTableTableManager(
             $_db, $_db.pinnedMessageReactions)
-        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
+        .filter((f) => f.messageId.id($_item.id));
 
     final cache =
         $_typedResult.readTableOrNull(_pinnedMessageReactionsRefsTable($_db));
@@ -11363,8 +11437,7 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (pinnedMessageReactionsRefs)
-                    await $_getPrefetchedData<PinnedMessageEntity,
-                            $PinnedMessagesTable, PinnedMessageReactionEntity>(
+                    await $_getPrefetchedData(
                         currentTable: table,
                         referencedTable: $$PinnedMessagesTableReferences
                             ._pinnedMessageReactionsRefsTable(db),
@@ -11447,7 +11520,7 @@ final class $$PollsTableReferences
 
   $$PollVotesTableProcessedTableManager get pollVotesRefs {
     final manager = $$PollVotesTableTableManager($_db, $_db.pollVotes)
-        .filter((f) => f.pollId.id.sqlEquals($_itemColumn<String>('id')!));
+        .filter((f) => f.pollId.id($_item.id));
 
     final cache = $_typedResult.readTableOrNull(_pollVotesRefsTable($_db));
     return ProcessedTableManager(
@@ -11816,8 +11889,7 @@ class $$PollsTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (pollVotesRefs)
-                    await $_getPrefetchedData<PollEntity, $PollsTable,
-                            PollVoteEntity>(
+                    await $_getPrefetchedData(
                         currentTable: table,
                         referencedTable:
                             $$PollsTableReferences._pollVotesRefsTable(db),
@@ -11875,10 +11947,9 @@ final class $$PollVotesTableReferences extends BaseReferences<
       .createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
 
   $$PollsTableProcessedTableManager? get pollId {
-    final $_column = $_itemColumn<String>('poll_id');
-    if ($_column == null) return null;
+    if ($_item.pollId == null) return null;
     final manager = $$PollsTableTableManager($_db, $_db.polls)
-        .filter((f) => f.id.sqlEquals($_column));
+        .filter((f) => f.id($_item.pollId!));
     final item = $_typedResult.readTableOrNull(_pollIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -12181,10 +12252,8 @@ final class $$PinnedMessageReactionsTableReferences extends BaseReferences<
           db.pinnedMessageReactions.messageId, db.pinnedMessages.id));
 
   $$PinnedMessagesTableProcessedTableManager get messageId {
-    final $_column = $_itemColumn<String>('message_id')!;
-
     final manager = $$PinnedMessagesTableTableManager($_db, $_db.pinnedMessages)
-        .filter((f) => f.id.sqlEquals($_column));
+        .filter((f) => f.id($_item.messageId!));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -12479,10 +12548,8 @@ final class $$ReactionsTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.reactions.messageId, db.messages.id));
 
   $$MessagesTableProcessedTableManager get messageId {
-    final $_column = $_itemColumn<String>('message_id')!;
-
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.id.sqlEquals($_column));
+        .filter((f) => f.id($_item.messageId!));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -13052,10 +13119,8 @@ final class $$MembersTableReferences
           $_aliasNameGenerator(db.members.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
-    final $_column = $_itemColumn<String>('channel_cid')!;
-
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid.sqlEquals($_column));
+        .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -13452,10 +13517,8 @@ final class $$ReadsTableReferences
       .createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
-    final $_column = $_itemColumn<String>('channel_cid')!;
-
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid.sqlEquals($_column));
+        .filter((f) => f.cid($_item.channelCid!));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
