@@ -85,6 +85,7 @@ class StreamPollOptionsDialog extends StatelessWidget {
       appBar: AppBar(
         elevation: theme.appBarElevation,
         backgroundColor: theme.appBarBackgroundColor,
+        foregroundColor: theme.appBarForegroundColor,
         title: Text(
           context.translations.pollOptionsLabel,
           style: theme.appBarTitleTextStyle,

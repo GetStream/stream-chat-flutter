@@ -57,6 +57,7 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
     this.backgroundColor,
     this.appBarElevation,
     this.appBarBackgroundColor,
+    this.appBarForegroundColor,
     this.appBarTitleTextStyle,
     this.pollOptionVoteCountTextStyle,
     this.pollOptionWinnerVoteCountTextStyle,
@@ -72,6 +73,9 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
 
   /// The background color of the app bar.
   final Color? appBarBackgroundColor;
+
+  /// The foreground color of the app bar (icon and text color).
+  final Color? appBarForegroundColor;
 
   /// The text style of the app bar title.
   final TextStyle? appBarTitleTextStyle;
@@ -93,6 +97,7 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
     Color? backgroundColor,
     double? appBarElevation,
     Color? appBarBackgroundColor,
+    Color? appBarForegroundColor,
     TextStyle? appBarTitleTextStyle,
     TextStyle? pollOptionVoteCountTextStyle,
     TextStyle? pollOptionWinnerVoteCountTextStyle,
@@ -104,6 +109,8 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
         appBarElevation: appBarElevation ?? this.appBarElevation,
         appBarBackgroundColor:
             appBarBackgroundColor ?? this.appBarBackgroundColor,
+        appBarForegroundColor:
+            appBarForegroundColor ?? this.appBarForegroundColor,
         appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
         pollOptionVoteCountTextStyle:
             pollOptionVoteCountTextStyle ?? this.pollOptionVoteCountTextStyle,
@@ -125,6 +132,7 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
       backgroundColor: other.backgroundColor,
       appBarElevation: other.appBarElevation,
       appBarBackgroundColor: other.appBarBackgroundColor,
+      appBarForegroundColor: other.appBarForegroundColor,
       appBarTitleTextStyle: other.appBarTitleTextStyle,
       pollOptionVoteCountTextStyle: other.pollOptionVoteCountTextStyle,
       pollOptionWinnerVoteCountTextStyle:
@@ -146,6 +154,8 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
       appBarElevation: lerpDouble(a?.appBarElevation, b?.appBarElevation, t),
       appBarBackgroundColor:
           Color.lerp(a?.appBarBackgroundColor, b?.appBarBackgroundColor, t),
+      appBarForegroundColor:
+          Color.lerp(a?.appBarForegroundColor, b?.appBarForegroundColor, t),
       appBarTitleTextStyle:
           TextStyle.lerp(a?.appBarTitleTextStyle, b?.appBarTitleTextStyle, t),
       pollOptionVoteCountTextStyle: TextStyle.lerp(
@@ -178,6 +188,7 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
           other.backgroundColor == backgroundColor &&
           other.appBarElevation == appBarElevation &&
           other.appBarBackgroundColor == appBarBackgroundColor &&
+          other.appBarForegroundColor == appBarForegroundColor &&
           other.appBarTitleTextStyle == appBarTitleTextStyle &&
           other.pollOptionVoteCountTextStyle == pollOptionVoteCountTextStyle &&
           other.pollOptionWinnerVoteCountTextStyle ==
@@ -192,6 +203,7 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
       backgroundColor.hashCode ^
       appBarElevation.hashCode ^
       appBarBackgroundColor.hashCode ^
+      appBarForegroundColor.hashCode ^
       appBarTitleTextStyle.hashCode ^
       pollOptionVoteCountTextStyle.hashCode ^
       pollOptionWinnerVoteCountTextStyle.hashCode ^
