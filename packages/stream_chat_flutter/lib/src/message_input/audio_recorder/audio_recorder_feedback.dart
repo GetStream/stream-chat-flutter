@@ -19,13 +19,21 @@ import 'package:flutter/widgets.dart';
 /// ```
 ///
 /// Custom feedback (haptic or system sounds):
+///
+/// **Note:** Generally, you should not await feedback to avoid blocking the
+/// recorder. However, if you play sound-based feedback (e.g., custom tones or
+/// system sounds) and notice audio bleeding into the recorded voice message,
+/// try awaiting it to ensure the sound completes before recording begins.
+///
 /// ```dart
 /// class CustomFeedback extends AudioRecorderFeedback {
 ///   @override
 ///   Future<void> onRecordStart(BuildContext context) async {
-///     // Haptic feedback
-///     await HapticFeedback.heavyImpact();
-///     // Or system sound
+///     // Haptic feedback - no need to await (doesn't produce sound)
+///     HapticFeedback.heavyImpact();
+///
+///     // System sound - await only if it bleeds into the recording
+///     SystemSound.play(SystemSoundType.click);
 ///     // await SystemSound.play(SystemSoundType.click);
 ///   }
 /// }
