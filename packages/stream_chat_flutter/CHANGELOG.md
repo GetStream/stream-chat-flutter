@@ -4,6 +4,7 @@
 
 - Fixed `StreamChannelAvatar` crashing with `RangeError` when user/channel name is empty.
 - Fixed audio tone bleeding into recorded voice message when playing custom feedback sound on recording start.
+- Fixed poll dialog AppBar back button color not being themeable. [[#2484]](https://github.com/GetStream/stream-chat-flutter/issues/2484)
 
 ## 9.22.0
 
