@@ -66,8 +66,8 @@ abstract class AttachmentFileUploader {
 
   /// Uploads an image file to the CDN.
   ///
-  /// Upload progress can be tracked using [onSendProgress], and the operation can
-  /// be cancelled using [cancelToken].
+  /// Upload progress can be tracked using [onSendProgress], and the operation
+  /// can be cancelled using [cancelToken].
   ///
   /// Returns a [UploadImageResponse] once uploaded successfully.
   Future<UploadImageResponse> uploadImage(
@@ -78,8 +78,8 @@ abstract class AttachmentFileUploader {
 
   /// Uploads a file to the CDN.
   ///
-  /// Upload progress can be tracked using [onSendProgress], and the operation can
-  /// be cancelled using [cancelToken].
+  /// Upload progress can be tracked using [onSendProgress], and the operation
+  /// can be cancelled using [cancelToken].
   ///
   /// Returns a [UploadFileResponse] once uploaded successfully.
   Future<UploadFileResponse> uploadFile(
