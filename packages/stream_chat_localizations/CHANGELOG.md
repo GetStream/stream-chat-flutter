@@ -1,4 +1,4 @@
-## Upcoming
+## 9.23.0
 
 - Fixed Italian translation for `unreadMessagesSeparatorText` (was incorrectly showing French text "Nouveaux messages" instead of Italian "Nuovi messaggi").
 
