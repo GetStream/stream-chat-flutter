@@ -10,7 +10,7 @@ const _kDefaultPollMessageConstraints = BoxConstraints(
 /// This builder is used when a message contains a poll.
 /// {@endtemplate}
 class PollAttachmentBuilder extends StreamAttachmentWidgetBuilder {
-  /// {@macro urlAttachmentBuilder}
+  /// {@macro pollAttachmentBuilder}
   const PollAttachmentBuilder({
     this.shape,
     this.padding = const EdgeInsets.all(8),

@@ -179,6 +179,8 @@ class StreamAttachmentPickerController
   }
 }
 
+const _nullConst = Object();
+
 /// Value class for [AttachmentPickerController].
 ///
 /// This class holds the list of [Poll] and [Attachment] objects.
@@ -211,12 +213,12 @@ class AttachmentPickerValue {
 
   /// Returns a copy of this object with the provided values.
   AttachmentPickerValue copyWith({
-    Poll? poll,
+    Object? poll = _nullConst,
     List<Attachment>? attachments,
     Map<String, Object?>? extraData,
   }) {
     return AttachmentPickerValue(
-      poll: poll ?? this.poll,
+      poll: poll == _nullConst ? this.poll : poll as Poll?,
       attachments: attachments ?? this.attachments,
       extraData: extraData ?? this.extraData,
     );

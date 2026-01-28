@@ -36,7 +36,7 @@ Event? pollAnswerCastedResolver(Event event) {
   if (!validTypes.contains(event.type)) return null;
 
   final pollVote = event.pollVote;
-  if (pollVote?.isAnswer == false) return null;
+  if (pollVote?.isAnswer != true) return null;
 
   // If the event is a poll vote casted or changed and it's an answer
   // we can resolve it to a poll answer casted event.
@@ -56,7 +56,7 @@ Event? pollAnswerRemovedResolver(Event event) {
   if (event.type != EventType.pollVoteRemoved) return null;
 
   final pollVote = event.pollVote;
-  if (pollVote?.isAnswer == false) return null;
+  if (pollVote?.isAnswer != true) return null;
 
   // If the event is a poll vote removed and it's an answer
   // we can resolve it to a poll answer removed event.

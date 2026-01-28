@@ -379,7 +379,7 @@ void main() {
     );
 
     test(
-      'MessageState.partialUpdatingFailed should create a MessageFailed instance with UpdatingFailed state',
+      'MessageState.partialUpdatingFailed should create a MessageFailed instance with PartialUpdatingFailed state',
       () {
         final messageState = MessageState.partialUpdatingFailed(
           skipEnrichUrl: false,

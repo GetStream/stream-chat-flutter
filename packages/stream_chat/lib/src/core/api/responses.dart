@@ -822,7 +822,7 @@ class UpsertPushPreferencesResponse extends _BaseResponse {
       _$UpsertPushPreferencesResponseFromJson(json);
 }
 
-/// Model response for [StreamChatClient.updateDraft] api call
+/// Model response for [StreamChatClient.getActiveLiveLocations] api call
 @JsonSerializable(createToJson: false)
 class GetActiveLiveLocationsResponse extends _BaseResponse {
   /// List of active live locations returned by the api call
