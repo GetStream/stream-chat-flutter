@@ -1,3 +1,7 @@
+## 9.23.0
+
+- Minor bug fixes and improvements
+
 ## 9.22.0
 
 ✅ Added
