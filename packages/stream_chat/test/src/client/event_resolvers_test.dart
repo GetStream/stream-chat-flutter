@@ -191,7 +191,7 @@ void main() {
         expect(resolved, isNull);
       });
 
-      test('should return resolved event for event with null pollVote', () {
+      test('should return null for event with null pollVote', () {
         final event = Event(
           type: EventType.pollVoteCasted,
           pollVote: null,
@@ -200,9 +200,7 @@ void main() {
 
         final resolved = pollAnswerCastedResolver(event);
 
-        expect(resolved, isNotNull);
-        expect(resolved!.type, EventType.pollAnswerCasted);
-        expect(resolved.pollVote, isNull);
+        expect(resolved, isNull);
       });
     });
 
@@ -267,7 +265,7 @@ void main() {
         expect(resolved, isNull);
       });
 
-      test('should return resolved event for event with null pollVote', () {
+      test('should return null for event with null pollVote', () {
         final event = Event(
           type: EventType.pollVoteRemoved,
           pollVote: null,
@@ -276,9 +274,7 @@ void main() {
 
         final resolved = pollAnswerRemovedResolver(event);
 
-        expect(resolved, isNotNull);
-        expect(resolved!.type, EventType.pollAnswerRemoved);
-        expect(resolved.pollVote, isNull);
+        expect(resolved, isNull);
       });
     });
   });
