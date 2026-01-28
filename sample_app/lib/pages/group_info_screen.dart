@@ -105,10 +105,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ],
       ),
       sort: [
-        const SortOption(
-          'name',
-          direction: 1,
-        ),
+        const SortOption.asc(UserSortKey.name),
       ],
     );
     super.didChangeDependencies();
@@ -194,8 +191,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               ),
               centerTitle: true,
               actions: [
-                if (channel.ownCapabilities
-                    .contains(PermissionType.updateChannelMembers))
+                if (channel.canUpdateChannelMembers)
                   StreamNeumorphicButton(
                     child: InkWell(
                       onTap: () {
@@ -220,9 +216,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   height: 8,
                   color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
-                if (channel.ownCapabilities
-                    .contains(PermissionType.updateChannel))
-                  _buildNameTile(),
+                if (channel.canUpdateChannel) _buildNameTile(),
                 _buildOptionListTiles(),
               ],
             ),
@@ -415,8 +409,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             ),
             Expanded(
               child: TextField(
-                enabled: channel.ownCapabilities
-                    .contains(PermissionType.updateChannel),
+                enabled: channel.canUpdateChannel,
                 focusNode: _focusNode,
                 controller: _nameController,
                 cursorColor:
@@ -482,7 +475,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   Widget _buildOptionListTiles() {
     return Column(
       children: [
-        if (channel.ownCapabilities.contains(PermissionType.muteChannel))
+        if (channel.canMuteChannel)
           _GroupInfoToggle(
             title: AppLocalizations.of(context).muteGroup,
             icon: StreamSvgIcons.mute,
@@ -568,8 +561,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           },
         ),
-        if (!channel.isDistinct &&
-            channel.ownCapabilities.contains(PermissionType.leaveChannel))
+        if (!channel.isDistinct && channel.canLeaveChannel)
           StreamOptionListTile(
             tileColor: StreamChatTheme.of(context).colorTheme.appBg,
             separatorColor: StreamChatTheme.of(context).colorTheme.disabled,

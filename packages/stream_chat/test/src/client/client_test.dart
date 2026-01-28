@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
@@ -614,6 +614,7 @@ void main() {
 
           when(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
+                messageLimit: any(named: 'messageLimit'),
                 channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).thenAnswer((_) async => persistentChannelStates);
@@ -671,6 +672,7 @@ void main() {
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
+                messageLimit: any(named: 'messageLimit'),
                 channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).called(1);
@@ -709,6 +711,7 @@ void main() {
 
           when(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
+                messageLimit: any(named: 'messageLimit'),
                 channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).thenAnswer((_) async => persistentChannelStates);
@@ -752,6 +755,7 @@ void main() {
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
+                messageLimit: any(named: 'messageLimit'),
                 channelStateSort: any(named: 'channelStateSort'),
                 paginationParams: any(named: 'paginationParams'),
               )).called(1);
@@ -1106,6 +1110,62 @@ void main() {
       verify(
         () => api.fileUploader.deleteImage(imageUrl, channelId, channelType),
       ).called(1);
+      verifyNoMoreInteractions(api.fileUploader);
+    });
+
+    test('`.uploadImage`', () async {
+      final image = AttachmentFile(size: 33, path: 'test-image-path');
+      const fileUrl = 'test-image-url';
+
+      when(() => api.fileUploader.uploadImage(image))
+          .thenAnswer((_) async => UploadImageResponse()..file = fileUrl);
+
+      final res = await client.uploadImage(image);
+      expect(res, isNotNull);
+      expect(res.file, fileUrl);
+
+      verify(() => api.fileUploader.uploadImage(image)).called(1);
+      verifyNoMoreInteractions(api.fileUploader);
+    });
+
+    test('`.uploadFile`', () async {
+      final file = AttachmentFile(size: 33, path: 'test-file-path');
+      const fileUrl = 'test-file-url';
+
+      when(() => api.fileUploader.uploadFile(file))
+          .thenAnswer((_) async => UploadFileResponse()..file = fileUrl);
+
+      final res = await client.uploadFile(file);
+      expect(res, isNotNull);
+      expect(res.file, fileUrl);
+
+      verify(() => api.fileUploader.uploadFile(file)).called(1);
+      verifyNoMoreInteractions(api.fileUploader);
+    });
+
+    test('`.removeImage`', () async {
+      const imageUrl = 'test-image-url';
+
+      when(() => api.fileUploader.removeImage(imageUrl))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.removeImage(imageUrl);
+      expect(res, isNotNull);
+
+      verify(() => api.fileUploader.removeImage(imageUrl)).called(1);
+      verifyNoMoreInteractions(api.fileUploader);
+    });
+
+    test('`.removeFile`', () async {
+      const fileUrl = 'test-file-url';
+
+      when(() => api.fileUploader.removeFile(fileUrl))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.removeFile(fileUrl);
+      expect(res, isNotNull);
+
+      verify(() => api.fileUploader.removeFile(fileUrl)).called(1);
       verifyNoMoreInteractions(api.fileUploader);
     });
 
@@ -2977,6 +3037,361 @@ void main() {
       verifyNoMoreInteractions(api.moderation);
     });
 
+    test('`.getActiveLiveLocations`', () async {
+      final locations = [
+        Location(
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        ),
+        Location(
+          latitude: 34.0522,
+          longitude: -118.2437,
+          createdByDeviceId: 'device-2',
+          endAt: DateTime.now().add(const Duration(hours: 2)),
+        ),
+      ];
+
+      when(() => api.user.getActiveLiveLocations()).thenAnswer(
+        (_) async => GetActiveLiveLocationsResponse() //
+          ..activeLiveLocations = locations,
+      );
+
+      // Initial state should be empty
+      expect(client.state.activeLiveLocations, isEmpty);
+
+      final res = await client.getActiveLiveLocations();
+
+      expect(res, isNotNull);
+      expect(res.activeLiveLocations, hasLength(2));
+      expect(res.activeLiveLocations, equals(locations));
+      expect(client.state.activeLiveLocations, equals(locations));
+
+      verify(() => api.user.getActiveLiveLocations()).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.updateLiveLocation`', () async {
+      const messageId = 'test-message-id';
+      const createdByDeviceId = 'test-device-id';
+      final endAt = DateTime.timestamp().add(const Duration(hours: 1));
+      const location = LocationCoordinates(
+        latitude: 40.7128,
+        longitude: -74.0060,
+      );
+
+      final expectedLocation = Location(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        createdByDeviceId: createdByDeviceId,
+        endAt: endAt,
+      );
+
+      when(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          location: location,
+          endAt: endAt,
+        ),
+      ).thenAnswer((_) async => expectedLocation);
+
+      final res = await client.updateLiveLocation(
+        messageId: messageId,
+        createdByDeviceId: createdByDeviceId,
+        location: location,
+        endAt: endAt,
+      );
+
+      expect(res, isNotNull);
+      expect(res, equals(expectedLocation));
+
+      verify(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          location: location,
+          endAt: endAt,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    test('`.stopLiveLocation`', () async {
+      const messageId = 'test-message-id';
+      const createdByDeviceId = 'test-device-id';
+
+      final expectedLocation = Location(
+        latitude: 40.7128,
+        longitude: -74.0060,
+        createdByDeviceId: createdByDeviceId,
+        endAt: DateTime.now(), // Should be expired
+      );
+
+      when(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          endAt: any(named: 'endAt'),
+        ),
+      ).thenAnswer((_) async => expectedLocation);
+
+      final res = await client.stopLiveLocation(
+        messageId: messageId,
+        createdByDeviceId: createdByDeviceId,
+      );
+
+      expect(res, isNotNull);
+      expect(res, equals(expectedLocation));
+
+      verify(
+        () => api.user.updateLiveLocation(
+          messageId: messageId,
+          createdByDeviceId: createdByDeviceId,
+          endAt: any(named: 'endAt'),
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.user);
+    });
+
+    group('Live Location Event Handling', () {
+      test('should handle location.shared event', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location,
+          ),
+        );
+
+        // Initially empty
+        expect(client.state.activeLiveLocations, isEmpty);
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should add location to active live locations
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.messageId, equals('message-123'));
+      });
+
+      test('should handle location.updated event', () async {
+        final initialLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Set initial location
+        client.state.activeLiveLocations = [initialLocation];
+
+        final updatedLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7500, // Updated latitude
+          longitude: -74.1000, // Updated longitude
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationUpdated,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: updatedLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should update the location
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.latitude, equals(40.7500));
+        expect(activeLiveLocations.first.longitude, equals(-74.1000));
+      });
+
+      test('should handle location.expired event', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        // Set initial location
+        client.state.activeLiveLocations = [location];
+        expect(client.state.activeLiveLocations, hasLength(1));
+
+        final expiredLocation = location.copyWith(
+          endAt: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationExpired,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: expiredLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should remove the location
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should ignore location events for other users', () async {
+        final location = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: 'other-user', // Different user
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should not add location from other user
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should ignore static location events', () async {
+        final staticLocation = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          // No endAt means it's static
+        );
+
+        final event = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: staticLocation,
+          ),
+        );
+
+        // Trigger the event
+        client.handleEvent(event);
+
+        // Wait for the event to get processed
+        await Future.delayed(Duration.zero);
+
+        // Should not add static location
+        expect(client.state.activeLiveLocations, isEmpty);
+      });
+
+      test('should merge locations with same key', () async {
+        final location1 = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-123',
+          userId: userId,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device-1',
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final location2 = Location(
+          channelCid: 'test-channel:123',
+          messageId: 'message-456',
+          userId: userId,
+          latitude: 40.7500,
+          longitude: -74.1000,
+          createdByDeviceId: 'device-1', // Same device, should merge
+          endAt: DateTime.now().add(const Duration(hours: 1)),
+        );
+
+        final event1 = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-123',
+            sharedLocation: location1,
+          ),
+        );
+
+        final event2 = Event(
+          type: EventType.locationShared,
+          cid: 'test-channel:123',
+          message: Message(
+            id: 'message-456',
+            sharedLocation: location2,
+          ),
+        );
+
+        // Trigger first event
+        client.handleEvent(event1);
+        await Future.delayed(Duration.zero);
+
+        final activeLiveLocations = client.state.activeLiveLocations;
+        expect(activeLiveLocations, hasLength(1));
+        expect(activeLiveLocations.first.messageId, equals('message-123'));
+
+        // Trigger second event - should merge/update
+        client.handleEvent(event2);
+        await Future.delayed(Duration.zero);
+
+        final activeLiveLocations2 = client.state.activeLiveLocations;
+        expect(activeLiveLocations2, hasLength(1));
+        expect(activeLiveLocations2.first.messageId, equals('message-456'));
+      });
+    });
+
     test('`.markAllRead`', () async {
       when(() => api.channel.markAllRead())
           .thenAnswer((_) async => EmptyResponse());
@@ -3034,109 +3449,35 @@ void main() {
       verifyNoMoreInteractions(api.channel);
     });
 
-    group('`.sendReaction`', () {
-      test('`.sendReaction with default params`', () async {
-        const messageId = 'test-message-id';
-        const reactionType = 'like';
-        const extraData = {'score': 1};
+    test('`.sendReaction`', () async {
+      const messageId = 'test-message-id';
+      const reactionType = 'like';
+      const emojiCode = '👍';
+      const score = 4;
 
-        when(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).thenAnswer((_) async => SendReactionResponse()
+      final reaction = Reaction(
+        type: reactionType,
+        messageId: messageId,
+        emojiCode: emojiCode,
+        score: score,
+      );
+
+      when(() => api.message.sendReaction(messageId, reaction)).thenAnswer(
+        (_) async => SendReactionResponse()
           ..message = Message(id: messageId)
-          ..reaction = Reaction(type: reactionType, messageId: messageId));
+          ..reaction = reaction,
+      );
 
-        final res = await client.sendReaction(messageId, reactionType);
-        expect(res, isNotNull);
-        expect(res.message.id, messageId);
-        expect(res.reaction.type, reactionType);
-        expect(res.reaction.messageId, messageId);
+      final res = await client.sendReaction(messageId, reaction);
+      expect(res, isNotNull);
+      expect(res.message.id, messageId);
+      expect(res.reaction.type, reactionType);
+      expect(res.reaction.emojiCode, emojiCode);
+      expect(res.reaction.score, score);
+      expect(res.reaction.messageId, messageId);
 
-        verify(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).called(1);
-        verifyNoMoreInteractions(api.message);
-      });
-
-      test('`.sendReaction with score`', () async {
-        const messageId = 'test-message-id';
-        const reactionType = 'like';
-        const score = 3;
-        const extraData = {'score': score};
-
-        when(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).thenAnswer((_) async => SendReactionResponse()
-          ..message = Message(id: messageId)
-          ..reaction = Reaction(
-            type: reactionType,
-            messageId: messageId,
-            score: score,
-          ));
-
-        final res = await client.sendReaction(
-          messageId,
-          reactionType,
-          score: score,
-        );
-        expect(res, isNotNull);
-        expect(res.message.id, messageId);
-        expect(res.reaction.type, reactionType);
-        expect(res.reaction.messageId, messageId);
-        expect(res.reaction.score, score);
-
-        verify(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).called(1);
-        verifyNoMoreInteractions(api.message);
-      });
-
-      test('`.sendReaction with score passed in extradata also`', () async {
-        const messageId = 'test-message-id';
-        const reactionType = 'like';
-        const score = 3;
-        const extraDataScore = 5;
-        const extraData = {'score': extraDataScore};
-
-        when(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).thenAnswer((_) async => SendReactionResponse()
-          ..message = Message(id: messageId)
-          ..reaction = Reaction(
-            type: reactionType,
-            messageId: messageId,
-            score: extraDataScore,
-          ));
-
-        final res = await client.sendReaction(
-          messageId,
-          reactionType,
-          score: score,
-          extraData: extraData,
-        );
-        expect(res, isNotNull);
-        expect(res.message.id, messageId);
-        expect(res.reaction.type, reactionType);
-        expect(res.reaction.messageId, messageId);
-        expect(res.reaction.score, extraDataScore);
-
-        verify(() => api.message.sendReaction(
-              messageId,
-              reactionType,
-              extraData: extraData,
-            )).called(1);
-        verifyNoMoreInteractions(api.message);
-      });
+      verify(() => api.message.sendReaction(messageId, reaction)).called(1);
+      verifyNoMoreInteractions(api.message);
     });
 
     test('`.deleteReaction`', () async {
@@ -3343,6 +3684,20 @@ void main() {
       expect(res, isNotNull);
 
       verify(() => api.message.deleteMessage(messageId, hard: false)).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.deleteMessageForMe`', () async {
+      const messageId = 'test-message-id';
+
+      when(() => api.message.deleteMessage(messageId, deleteForMe: true))
+          .thenAnswer((_) async => EmptyResponse());
+
+      final res = await client.deleteMessageForMe(messageId);
+      expect(res, isNotNull);
+
+      verify(() => api.message.deleteMessage(messageId, deleteForMe: true))
+          .called(1);
       verifyNoMoreInteractions(api.message);
     });
 
@@ -3826,6 +4181,165 @@ void main() {
 
         verify(() => api.general.sync(cids, lastSyncAt)).called(1);
       });
+    });
+  });
+
+  group('WS events', () {
+    late StreamChatClient client;
+
+    setUp(() async {
+      final ws = FakeWebSocket();
+      client = StreamChatClient('test-api-key', ws: ws);
+
+      final user = User(id: 'test-user-id');
+      final token = Token.development(user.id).rawValue;
+
+      await client.connectUser(user, token);
+      await delay(300);
+      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+    });
+
+    tearDown(() async {
+      await client.dispose();
+    });
+
+    group('User messages deleted event', () {
+      test(
+        'should broadcast global user.messages.deleted event to all channels',
+        () async {
+          // Add messages from the user to be deleted
+          final bannedUser = User(id: 'banned-user', name: 'Banned User');
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message in channel 1',
+            user: bannedUser,
+          );
+          final message2 = Message(
+            id: 'msg-2',
+            text: 'Message in channel 2',
+            user: bannedUser,
+          );
+
+          // Setup: Create multiple channels with state
+          final channelState1 = ChannelState(
+            channel: ChannelModel(id: 'channel-1', type: 'messaging'),
+            messages: [message1],
+          );
+          final channelState2 = ChannelState(
+            channel: ChannelModel(id: 'channel-2', type: 'messaging'),
+            messages: [message2],
+          );
+
+          final channel1 = Channel.fromState(client, channelState1);
+          final channel2 = Channel.fromState(client, channelState2);
+
+          // Register channels in client state
+          client.state.addChannels({
+            'messaging:channel-1': channel1,
+            'messaging:channel-2': channel2,
+          });
+
+          // Verify initial state
+          expect(channel1.state?.messages.length, equals(1));
+          expect(channel2.state?.messages.length, equals(1));
+
+          // Simulate global user.messages.deleted event being broadcast to channels
+          // (In production, ClientState._listenUserMessagesDeleted does this)
+          final event = Event(
+            type: EventType.userMessagesDeleted,
+            user: bannedUser,
+            hardDelete: false,
+          );
+
+          client.handleEvent(event);
+
+          // Wait for the events to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify messages are soft deleted in all channels
+          final channel1Message = channel1.state?.messages.first;
+          expect(channel1Message?.type, equals(MessageType.deleted));
+          expect(channel1Message?.state.isDeleted, isTrue);
+
+          final channel2Message = channel2.state?.messages.first;
+          expect(channel2Message?.type, equals(MessageType.deleted));
+          expect(channel2Message?.state.isDeleted, isTrue);
+        },
+      );
+
+      test(
+        'should broadcast global hard delete to all channels',
+        () async {
+          // Add messages from the user to be deleted
+          final bannedUser = User(id: 'banned-user', name: 'Banned User');
+          final otherUser = User(id: 'other-user', name: 'Other User');
+
+          final message1 = Message(
+            id: 'msg-1',
+            text: 'Message in channel 1',
+            user: bannedUser,
+          );
+          final message2 = Message(
+            id: 'msg-2',
+            text: 'Message in channel 2',
+            user: bannedUser,
+          );
+          final message3 = Message(
+            id: 'msg-3',
+            text: 'Safe message',
+            user: otherUser,
+          );
+
+          // Setup: Create multiple channels with state
+          final channelState1 = ChannelState(
+            channel: ChannelModel(id: 'channel-1', type: 'messaging'),
+            messages: [message1, message3],
+          );
+          final channelState2 = ChannelState(
+            channel: ChannelModel(id: 'channel-2', type: 'messaging'),
+            messages: [message2],
+          );
+
+          final channel1 = Channel.fromState(client, channelState1);
+          final channel2 = Channel.fromState(client, channelState2);
+
+          // Register channels in client state
+          client.state.addChannels({
+            'messaging:channel-1': channel1,
+            'messaging:channel-2': channel2,
+          });
+
+          // Verify initial state
+          expect(channel1.state?.messages.length, equals(2));
+          expect(channel2.state?.messages.length, equals(1));
+
+          // Simulate global user.messages.deleted event being broadcast to channels
+          // (In production, ClientState._listenUserMessagesDeleted does this)
+          final event = Event(
+            type: EventType.userMessagesDeleted,
+            user: bannedUser,
+            hardDelete: true,
+          );
+
+          client.handleEvent(event);
+
+          // Wait for the events to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify banned user's messages are removed from all channels
+          expect(channel1.state?.messages.length, equals(1));
+          expect(
+            channel1.state?.messages.any((m) => m.user?.id == 'banned-user'),
+            isFalse,
+          );
+          expect(channel2.state?.messages.length, equals(0));
+
+          // Verify other user's message is unaffected
+          final safeMessage =
+              channel1.state?.messages.firstWhere((m) => m.id == 'msg-3');
+          expect(safeMessage?.user?.id, equals('other-user'));
+        },
+      );
     });
   });
 }

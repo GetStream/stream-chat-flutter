@@ -122,6 +122,9 @@ class EventType {
   /// Event sent when the AI indicator is cleared
   static const String aiIndicatorClear = 'ai_indicator.clear';
 
+  /// Event sent when a new poll is created.
+  static const String pollCreated = 'poll.created';
+
   /// Event sent when a poll is updated.
   static const String pollUpdated = 'poll.updated';
 
@@ -171,6 +174,15 @@ class EventType {
   /// Event sent when a message reminder is due.
   static const String notificationReminderDue = 'notification.reminder_due';
 
+  /// Event sent when a new shared location is created.
+  static const String locationShared = 'location.shared';
+
+  /// Event sent when a live shared location is updated.
+  static const String locationUpdated = 'location.updated';
+
+  /// Event sent when a live shared location is expired.
+  static const String locationExpired = 'location.expired';
+
   /// Local event sent when push notification preference is updated.
   static const String pushPreferenceUpdated = 'push_preference.updated';
 
@@ -180,4 +192,7 @@ class EventType {
 
   /// Event sent when a message is marked as delivered.
   static const String messageDelivered = 'message.delivered';
+
+  /// Event sent when all messages of a user are deleted.
+  static const String userMessagesDeleted = 'user.messages.deleted';
 }

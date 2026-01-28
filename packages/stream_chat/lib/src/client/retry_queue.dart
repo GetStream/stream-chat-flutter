@@ -119,10 +119,11 @@ class RetryQueue {
   }
 
   static DateTime? _getMessageDate(Message message) {
-    return message.state.maybeWhen(
-      failed: (state, _) => state.when(
-        sendingFailed: () => message.createdAt,
-        updatingFailed: () => message.updatedAt,
+    return message.state.maybeMap(
+      failed: (it) => it.state.map(
+        sendingFailed: (_) => message.createdAt,
+        updatingFailed: (_) => message.updatedAt,
+        partialUpdatingFailed: (_) => message.updatedAt,
         deletingFailed: (_) => message.deletedAt,
       ),
       orElse: () => null,

@@ -1,16 +1,11 @@
-import 'package:flutter/material.dart' hide ButtonStyle;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
-import 'package:stream_chat_flutter/src/context_menu_items/context_menu_reaction_picker.dart';
-import 'package:stream_chat_flutter/src/context_menu_items/stream_chat_context_menu_item.dart';
-import 'package:stream_chat_flutter/src/dialogs/dialogs.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/message_actions_modal.dart';
-import 'package:stream_chat_flutter/src/message_actions_modal/moderated_message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
+import 'package:stream_chat_flutter/src/misc/flexible_fractionally_sized_box.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The display behaviour of a widget
@@ -56,7 +51,6 @@ class StreamMessageWidget extends StatefulWidget {
     this.onReactionsTap,
     this.onReactionsHover,
     this.showReactionPicker = true,
-    this.showReactionTail,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
     this.showThreadReplyIndicator = false,
@@ -85,6 +79,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.onShowMessage,
     this.userAvatarBuilder,
     this.quotedMessageBuilder,
+    this.deletedMessageBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
     this.bottomRowBuilderWithDefaultWidget,
@@ -98,11 +93,14 @@ class StreamMessageWidget extends StatefulWidget {
     this.widthFactor = 0.78,
     this.onQuotedMessageTap,
     this.customActions = const [],
+    this.onCustomActionTap,
     this.onAttachmentTap,
     this.imageAttachmentThumbnailSize = const Size(400, 400),
     this.imageAttachmentThumbnailResizeType = 'clip',
     this.imageAttachmentThumbnailCropType = 'center',
     this.attachmentActionsModalBuilder,
+    this.reactionPickerBuilder = StreamReactionPicker.builder,
+    this.reactionIndicatorBuilder = StreamReactionIndicator.builder,
   });
 
   /// {@template onMentionTap}
@@ -164,6 +162,11 @@ class StreamMessageWidget extends StatefulWidget {
   /// Widget builder for building quoted message
   /// {@endtemplate}
   final Widget Function(BuildContext, Message)? quotedMessageBuilder;
+
+  /// {@template deletedMessageBuilder}
+  /// Widget builder for building deleted message
+  /// {@endtemplate}
+  final Widget Function(BuildContext, Message)? deletedMessageBuilder;
 
   /// {@template message}
   /// The message to display.
@@ -257,15 +260,9 @@ class StreamMessageWidget extends StatefulWidget {
 
   /// {@template showReactionPicker}
   /// Whether or not to show the reaction picker.
-  /// Used in [StreamMessageReactionsModal] and [MessageActionsModal].
+  /// Used in [StreamMessageReactionsModal] and [StreamMessageActionsModal].
   /// {@endtemplate}
   final bool showReactionPicker;
-
-  /// {@template showReactionPickerTail}
-  /// Whether or not to show the reaction picker tail.
-  /// This is calculated internally in most cases and does not need to be set.
-  /// {@endtemplate}
-  final bool? showReactionTail;
 
   /// {@template onShowMessage}
   /// Callback when show message is tapped
@@ -376,11 +373,22 @@ class StreamMessageWidget extends StatefulWidget {
   /// {@endtemplate}
   final List<StreamMessageAction> customActions;
 
-  /// {@macro onMessageWidgetAttachmentTap}
-  final StreamAttachmentWidgetTapCallback? onAttachmentTap;
+  /// Callback for when a custom message action is tapped.
+  ///
+  /// {@macro onMessageActionTap}
+  final OnMessageActionTap<CustomMessageAction>? onCustomActionTap;
+
+  /// {@macro onAttachmentWidgetTap}
+  final OnAttachmentWidgetTap? onAttachmentTap;
 
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
+
+  /// {@macro reactionPickerBuilder}
+  final ReactionPickerBuilder reactionPickerBuilder;
+
+  /// {@macro reactionIndicatorBuilder}
+  final ReactionIndicatorBuilder reactionIndicatorBuilder;
 
   /// Size of the image attachment thumbnail.
   final Size imageAttachmentThumbnailSize;
@@ -409,6 +417,7 @@ class StreamMessageWidget extends StatefulWidget {
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
     Widget Function(BuildContext, Message)? quotedMessageBuilder,
+    Widget Function(BuildContext, Message)? deletedMessageBuilder,
     BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget,
     void Function(BuildContext, Message)? onMessageActions,
     void Function(BuildContext, Message)? onBouncedErrorMessageActions,
@@ -433,7 +442,6 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(String)? onLinkTap,
     bool? showReactionBrowser,
     bool? showReactionPicker,
-    bool? showReactionTail,
     List<Read>? readList,
     ShowMessageCallback? onShowMessage,
     bool? showUsername,
@@ -457,12 +465,15 @@ class StreamMessageWidget extends StatefulWidget {
     OnReactionsTap? onReactionsTap,
     OnReactionsHover? onReactionsHover,
     List<StreamMessageAction>? customActions,
-    void Function(Message message, Attachment attachment)? onAttachmentTap,
+    OnMessageActionTap<CustomMessageAction>? onCustomActionTap,
+    OnAttachmentWidgetTap? onAttachmentTap,
     Widget Function(BuildContext, User)? userAvatarBuilder,
     Size? imageAttachmentThumbnailSize,
     String? imageAttachmentThumbnailResizeType,
     String? imageAttachmentThumbnailCropType,
     AttachmentActionsBuilder? attachmentActionsModalBuilder,
+    ReactionPickerBuilder? reactionPickerBuilder,
+    ReactionIndicatorBuilder? reactionIndicatorBuilder,
   }) {
     return StreamMessageWidget(
       key: key ?? this.key,
@@ -474,6 +485,8 @@ class StreamMessageWidget extends StatefulWidget {
           editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
       quotedMessageBuilder: quotedMessageBuilder ?? this.quotedMessageBuilder,
+      deletedMessageBuilder:
+          deletedMessageBuilder ?? this.deletedMessageBuilder,
       bottomRowBuilderWithDefaultWidget: bottomRowBuilderWithDefaultWidget ??
           this.bottomRowBuilderWithDefaultWidget,
       onMessageActions: onMessageActions ?? this.onMessageActions,
@@ -501,7 +514,6 @@ class StreamMessageWidget extends StatefulWidget {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
-      showReactionTail: showReactionTail ?? this.showReactionTail,
       onShowMessage: onShowMessage ?? this.onShowMessage,
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
@@ -525,6 +537,7 @@ class StreamMessageWidget extends StatefulWidget {
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
       onReactionsHover: onReactionsHover ?? this.onReactionsHover,
       customActions: customActions ?? this.customActions,
+      onCustomActionTap: onCustomActionTap ?? this.onCustomActionTap,
       onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
       userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
       imageAttachmentThumbnailSize:
@@ -535,6 +548,10 @@ class StreamMessageWidget extends StatefulWidget {
           this.imageAttachmentThumbnailCropType,
       attachmentActionsModalBuilder:
           attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
+      reactionPickerBuilder:
+          reactionPickerBuilder ?? this.reactionPickerBuilder,
+      reactionIndicatorBuilder:
+          reactionIndicatorBuilder ?? this.reactionIndicatorBuilder,
     );
   }
 
@@ -598,11 +615,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   bool get hasNonUrlAttachments => widget.message.attachments
       .any((it) => it.type != AttachmentType.urlPreview);
 
-  /// {@template hasPoll}
-  /// `true` if the [message] contains a poll.
-  /// {@endtemplate}
-  bool get hasPoll => widget.message.poll != null;
-
   /// {@template hasUrlAttachments}
   /// `true` if any of the [message]'s attachments are a giphy with a
   /// [Attachment.titleLink].
@@ -641,181 +653,180 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       (widget.message.latestReactions?.isNotEmpty == true) &&
       !widget.message.isDeleted;
 
-  bool get shouldShowReplyAction =>
-      widget.showReplyMessage && !isFailedState && widget.onReplyTap != null;
-
-  bool get shouldShowEditAction =>
-      widget.showEditMessage &&
-      !isDeleteFailed &&
-      !hasPoll &&
-      !widget.message.attachments
-          .any((element) => element.type == AttachmentType.giphy);
-
-  bool get shouldShowResendAction =>
-      widget.showResendMessage && (isSendFailed || isUpdateFailed);
-
-  bool get shouldShowCopyAction =>
-      widget.showCopyMessage &&
-      !isFailedState &&
-      widget.message.text?.trim().isNotEmpty == true;
-
-  bool get shouldShowThreadReplyAction =>
-      widget.showThreadReplyMessage &&
-      !isFailedState &&
-      widget.onThreadTap != null;
-
-  bool get shouldShowDeleteAction => widget.showDeleteMessage || isDeleteFailed;
-
   @override
   bool get wantKeepAlive => widget.message.attachments.isNotEmpty;
-
-  late StreamChatThemeData _streamChatTheme;
-  late StreamChatState _streamChat;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _streamChatTheme = StreamChatTheme.of(context);
-    _streamChat = StreamChat.of(context);
-  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final theme = StreamChatTheme.of(context);
+    final streamChat = StreamChat.of(context);
+
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
     final bottomRowPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
-    final showReactions = shouldShowReactions;
-
-    return ConditionalParentBuilder(
-      builder: (context, child) {
-        final message = widget.message;
-
-        // If the message is deleted or not yet sent, we don't want to show any
-        // context menu actions.
-        if (message.state.isDeleted || message.state.isOutgoing) return child;
-
-        final menuItems = _buildDesktopOrWebActions(context, message);
-        if (menuItems.isEmpty) return child;
-
-        return ContextMenuRegion(
-          contextMenuBuilder: (_, anchor) => ContextMenu(
-            anchor: anchor,
-            menuItems: menuItems,
-          ),
-          child: child,
-        );
-      },
+    return Portal(
       child: Material(
-        type: MaterialType.transparency,
-        child: AnimatedContainer(
-          duration: const Duration(seconds: 1),
-          color: isPinned && widget.showPinHighlight
-              ? _streamChatTheme.colorTheme.highlight
-              // ignore: deprecated_member_use
-              : _streamChatTheme.colorTheme.barsBg.withOpacity(0),
-          child: Portal(
-            child: PlatformWidgetBuilder(
-              mobile: (context, child) {
-                final message = widget.message;
-                return InkWell(
-                  onTap: switch (widget.onMessageTap) {
-                    final onTap? => () => onTap(message),
-                    _ => null,
-                  },
-                  onLongPress: switch (widget.onMessageLongPress) {
-                    final onLongPress? => () => onLongPress(message),
-                    // If the message is not yet sent or deleted, we don't want
-                    // to handle long press events by default.
-                    _ when message.state.isDeleted => null,
-                    _ when message.state.isOutgoing => null,
-                    _ => () => _onMessageLongPressed(context, message),
-                  },
-                  child: child,
-                );
+        color: switch (isPinned && widget.showPinHighlight) {
+          true => theme.colorTheme.highlight,
+          false => Colors.transparent,
+        },
+        child: PlatformWidgetBuilder(
+          mobile: (context, child) {
+            final message = widget.message;
+            return InkWell(
+              onTap: switch (widget.onMessageTap) {
+                final onTap? => () => onTap(message),
+                _ => null,
               },
-              desktop: (_, child) => MouseRegion(child: child),
-              web: (_, child) => MouseRegion(child: child),
-              child: Padding(
-                padding: widget.padding ?? const EdgeInsets.all(8),
-                child: FractionallySizedBox(
-                  alignment: widget.reverse
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  widthFactor: widget.widthFactor,
-                  child: Builder(builder: (context) {
-                    return MessageWidgetContent(
-                      streamChatTheme: _streamChatTheme,
-                      showUsername: showUsername,
-                      showTimeStamp: showTimeStamp,
-                      showEditedLabel: showEditedLabel,
-                      showThreadReplyIndicator: showThreadReplyIndicator,
-                      showSendingIndicator: showSendingIndicator,
-                      showInChannel: showInChannel,
-                      isGiphy: isGiphy,
-                      isOnlyEmoji: isOnlyEmoji,
-                      hasUrlAttachments: hasUrlAttachments,
-                      messageTheme: widget.messageTheme,
-                      reverse: widget.reverse,
-                      message: widget.message,
-                      hasNonUrlAttachments: hasNonUrlAttachments,
-                      hasPoll: hasPoll,
-                      hasQuotedMessage: hasQuotedMessage,
-                      textPadding: widget.textPadding,
-                      attachmentBuilders: widget.attachmentBuilders,
-                      attachmentPadding: widget.attachmentPadding,
-                      attachmentShape: widget.attachmentShape,
-                      onAttachmentTap: widget.onAttachmentTap,
-                      onReplyTap: widget.onReplyTap,
-                      onThreadTap: widget.onThreadTap,
-                      onShowMessage: widget.onShowMessage,
-                      attachmentActionsModalBuilder:
-                          widget.attachmentActionsModalBuilder,
-                      avatarWidth: avatarWidth,
-                      bottomRowPadding: bottomRowPadding,
-                      isFailedState: isFailedState,
-                      isPinned: isPinned,
-                      messageWidget: widget,
-                      showBottomRow: showBottomRow,
-                      showPinHighlight: widget.showPinHighlight,
-                      showReactionPickerTail: calculateReactionTailEnabled(
-                        ReactionTailType.list,
-                      ),
-                      showReactions: showReactions,
-                      onReactionsTap: () {
-                        final message = widget.message;
-                        return switch (widget.onReactionsTap) {
-                          final onReactionsTap? => onReactionsTap(message),
-                          _ => _showMessageReactionsModal(context, message),
-                        };
-                      },
-                      onReactionsHover: widget.onReactionsHover,
-                      showUserAvatar: widget.showUserAvatar,
-                      streamChat: _streamChat,
-                      translateUserAvatar: widget.translateUserAvatar,
-                      shape: widget.shape,
-                      borderSide: widget.borderSide,
-                      borderRadiusGeometry: widget.borderRadiusGeometry,
-                      textBuilder: widget.textBuilder,
-                      quotedMessageBuilder: widget.quotedMessageBuilder,
-                      onLinkTap: widget.onLinkTap,
-                      onMentionTap: widget.onMentionTap,
-                      onQuotedMessageTap: widget.onQuotedMessageTap,
-                      bottomRowBuilderWithDefaultWidget:
-                          widget.bottomRowBuilderWithDefaultWidget,
-                      onUserAvatarTap: widget.onUserAvatarTap,
-                      userAvatarBuilder: widget.userAvatarBuilder,
-                    );
-                  }),
-                ),
+              onLongPress: switch (widget.onMessageLongPress) {
+                final onLongPress? => () => onLongPress(message),
+                // If the message is not yet sent or deleted, we don't want
+                // to handle long press events by default.
+                _ when message.state.isDeleted => null,
+                _ when message.state.isOutgoing => null,
+                _ => () => _onMessageLongPressed(context, message),
+              },
+              child: child,
+            );
+          },
+          desktopOrWeb: (context, child) {
+            final message = widget.message;
+            final messageState = message.state;
+
+            // If the message is deleted or not yet sent, we don't want to
+            // show any context menu actions.
+            if (messageState.isDeleted || messageState.isOutgoing) return child;
+
+            final menuItems = _buildDesktopOrWebActions(context, message);
+            if (menuItems.isEmpty) return MouseRegion(child: child);
+
+            return ContextMenuRegion(
+              contextMenuBuilder: (_, anchor) => ContextMenu(
+                anchor: anchor,
+                menuItems: menuItems,
+              ),
+              child: MouseRegion(child: child),
+            );
+          },
+          child: FlexibleFractionallySizedBox(
+            widthFactor: widget.widthFactor,
+            alignment: switch (widget.reverse) {
+              true => AlignmentDirectional.centerEnd,
+              false => AlignmentDirectional.centerStart,
+            },
+            child: Padding(
+              padding: widget.padding ?? const EdgeInsets.all(8),
+              child: MessageWidgetContent(
+                streamChatTheme: theme,
+                showUsername: showUsername,
+                showTimeStamp: showTimeStamp,
+                showEditedLabel: showEditedLabel,
+                showThreadReplyIndicator: showThreadReplyIndicator,
+                showSendingIndicator: showSendingIndicator,
+                showInChannel: showInChannel,
+                isGiphy: isGiphy,
+                isOnlyEmoji: isOnlyEmoji,
+                hasUrlAttachments: hasUrlAttachments,
+                messageTheme: widget.messageTheme,
+                reverse: widget.reverse,
+                message: widget.message,
+                hasNonUrlAttachments: hasNonUrlAttachments,
+                hasQuotedMessage: hasQuotedMessage,
+                textPadding: widget.textPadding,
+                attachmentBuilders: widget.attachmentBuilders,
+                attachmentPadding: widget.attachmentPadding,
+                attachmentShape: widget.attachmentShape,
+                onAttachmentTap: widget.onAttachmentTap,
+                onReplyTap: widget.onReplyTap,
+                onThreadTap: widget.onThreadTap,
+                onShowMessage: widget.onShowMessage,
+                attachmentActionsModalBuilder:
+                    widget.attachmentActionsModalBuilder,
+                avatarWidth: avatarWidth,
+                bottomRowPadding: bottomRowPadding,
+                isFailedState: isFailedState,
+                isPinned: isPinned,
+                messageWidget: widget,
+                showBottomRow: showBottomRow,
+                showPinHighlight: widget.showPinHighlight,
+                showReactions: shouldShowReactions,
+                onReactionsTap: () {
+                  final message = widget.message;
+                  return switch (widget.onReactionsTap) {
+                    final onReactionsTap? => onReactionsTap(message),
+                    _ => _showMessageReactionsModal(context, message),
+                  };
+                },
+                onReactionsHover: widget.onReactionsHover,
+                showUserAvatar: widget.showUserAvatar,
+                streamChat: streamChat,
+                translateUserAvatar: widget.translateUserAvatar,
+                shape: widget.shape,
+                borderSide: widget.borderSide,
+                borderRadiusGeometry: widget.borderRadiusGeometry,
+                textBuilder: widget.textBuilder,
+                quotedMessageBuilder: widget.quotedMessageBuilder,
+                deletedMessageBuilder: widget.deletedMessageBuilder,
+                onLinkTap: widget.onLinkTap,
+                onMentionTap: widget.onMentionTap,
+                onQuotedMessageTap: widget.onQuotedMessageTap,
+                bottomRowBuilderWithDefaultWidget:
+                    widget.bottomRowBuilderWithDefaultWidget,
+                onUserAvatarTap: widget.onUserAvatarTap,
+                userAvatarBuilder: widget.userAvatarBuilder,
+                reactionIndicatorBuilder: widget.reactionIndicatorBuilder,
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  List<StreamMessageAction> _buildBouncedErrorMessageActions({
+    required BuildContext context,
+    required Message message,
+  }) {
+    final actions = StreamMessageActionsBuilder.buildBouncedErrorActions(
+      context: context,
+      message: message,
+    );
+
+    return actions;
+  }
+
+  List<StreamMessageAction> _buildMessageActions({
+    required BuildContext context,
+    required Message message,
+    required Channel channel,
+    OwnUser? currentUser,
+    List<StreamMessageAction>? customActions,
+  }) {
+    final actions = StreamMessageActionsBuilder.buildActions(
+      context: context,
+      message: message,
+      channel: channel,
+      currentUser: currentUser,
+      customActions: customActions,
+    )..retainWhere(
+        (it) => switch (it.action) {
+          QuotedReply() => widget.showReplyMessage,
+          ThreadReply() => widget.showThreadReplyMessage,
+          MarkUnread() => widget.showMarkUnreadMessage,
+          ResendMessage() => widget.showResendMessage,
+          EditMessage() => widget.showEditMessage,
+          CopyMessage() => widget.showCopyMessage,
+          FlagMessage() => widget.showFlagButton,
+          PinMessage() => widget.showPinButton,
+          DeleteMessage() => widget.showDeleteMessage,
+          _ => true, // Retain all the remaining actions.
+        },
+      );
+
+    return actions;
   }
 
   List<Widget> _buildDesktopOrWebActions(
@@ -833,48 +844,23 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     BuildContext context,
     Message message,
   ) {
-    final theme = StreamChatTheme.of(context);
     final channel = StreamChannel.of(context).channel;
 
+    final actions = _buildBouncedErrorMessageActions(
+      context: context,
+      message: message,
+    );
+
     return [
-      StreamChatContextMenuItem(
-        leading: StreamSvgIcon(
-          icon: StreamSvgIcons.circleUp,
-          color: theme.colorTheme.accentPrimary,
-        ),
-        title: Text(context.translations.sendAnywayLabel),
-        onClick: () {
-          Navigator.of(context, rootNavigator: true).pop();
-          channel.sendMessage(message).ignore();
-        },
-      ),
-      StreamChatContextMenuItem(
-        leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
-        title: Text(context.translations.editMessageLabel),
-        onClick: () {
-          Navigator.of(context, rootNavigator: true).pop();
-          showEditMessageSheet(
-            context: context,
-            channel: channel,
-            message: message,
-            editMessageInputBuilder: widget.editMessageInputBuilder,
-          );
-        },
-      ),
-      StreamChatContextMenuItem(
-        leading: StreamSvgIcon(
-          icon: StreamSvgIcons.delete,
-          color: theme.colorTheme.accentError,
-        ),
-        title: Text(
-          context.translations.deleteMessageLabel,
-          style: TextStyle(color: theme.colorTheme.accentError),
-        ),
-        onClick: () {
-          Navigator.of(context, rootNavigator: true).pop();
-          channel.deleteMessage(message, hard: true).ignore();
-        },
-      ),
+      ...actions.map((action) {
+        return StreamMessageActionItem(
+          action: action,
+          onTap: (action) async {
+            final popped = await Navigator.of(context).maybePop();
+            if (popped) return _onActionTap(context, channel, action).ignore();
+          },
+        );
+      }),
     ];
   }
 
@@ -882,203 +868,91 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     BuildContext context,
     Message message,
   ) {
-    final theme = StreamChatTheme.of(context);
     final channel = StreamChannel.of(context).channel;
+    final currentUser = channel.client.state.currentUser;
+    final showPicker = widget.showReactionPicker && channel.canSendReaction;
+
+    final actions = _buildMessageActions(
+      context: context,
+      message: message,
+      channel: channel,
+      currentUser: currentUser,
+      customActions: widget.customActions,
+    );
+
+    void onActionTap(MessageAction action) async {
+      final popped = await Navigator.of(context).maybePop();
+      if (popped) return _onActionTap(context, channel, action).ignore();
+    }
 
     return [
-      if (widget.showReactionPicker)
-        StreamChatContextMenuItem(
-          child: StreamChannel(
-            channel: channel,
-            child: ContextMenuReactionPicker(message: message),
+      if (showPicker)
+        widget.reactionPickerBuilder(
+          context,
+          message,
+          (reaction) => onActionTap(
+            SelectReaction(message: message, reaction: reaction),
           ),
         ),
-      if (shouldShowReplyAction) ...[
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
-          title: Text(context.translations.replyLabel),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            widget.onReplyTap?.call(message);
-          },
-        ),
-      ],
-      if (widget.showMarkUnreadMessage)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.messageUnread),
-          title: Text(context.translations.markAsUnreadLabel),
-          onClick: () async {
-            Navigator.of(context, rootNavigator: true).pop();
-            try {
-              await channel.markUnread(message.id);
-            } catch (ex) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    context.translations.markUnreadError,
-                  ),
-                ),
-              );
-            }
-          },
-        ),
-      if (shouldShowThreadReplyAction)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
-          title: Text(context.translations.threadReplyLabel),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            widget.onThreadTap?.call(message);
-          },
-        ),
-      if (shouldShowCopyAction)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
-          title: Text(context.translations.copyMessageLabel),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            final copiedMessage = message.replaceMentions(linkify: false);
-            if (copiedMessage.text case final text?) {
-              Clipboard.setData(ClipboardData(text: text));
-            }
-          },
-        ),
-      if (shouldShowEditAction) ...[
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
-          title: Text(context.translations.editMessageLabel),
-          onClick: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            showEditMessageSheet(
-              context: context,
-              channel: channel,
-              message: message,
-              editMessageInputBuilder: widget.editMessageInputBuilder,
-            );
-          },
-        ),
-      ],
-      if (widget.showPinButton)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.pin),
-          title: Text(
-            context.translations.togglePinUnpinText(pinned: isPinned),
-          ),
-          onClick: () async {
-            Navigator.of(context, rootNavigator: true).pop();
-            try {
-              await switch (isPinned) {
-                true => channel.unpinMessage(message),
-                false => channel.pinMessage(message),
-              };
-            } catch (e) {
-              throw Exception(e);
-            }
-          },
-        ),
-      if (shouldShowResendAction)
-        StreamChatContextMenuItem(
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
-          title: Text(
-            context.translations.toggleResendOrResendEditedMessage(
-              isUpdateFailed: message.state.isUpdatingFailed,
-            ),
-          ),
-          onClick: () async {
-            Navigator.of(context, rootNavigator: true).pop();
-            await channel.retryMessage(message);
-          },
-        ),
-      if (shouldShowDeleteAction)
-        StreamChatContextMenuItem(
-          leading: StreamSvgIcon(
-            color: theme.colorTheme.accentError,
-            icon: StreamSvgIcons.delete,
-          ),
-          title: Text(
-            context.translations.deleteMessageLabel,
-            style: TextStyle(color: theme.colorTheme.accentError),
-          ),
-          onClick: () async {
-            Navigator.of(context, rootNavigator: true).pop();
-            final deleted = await showDialog<bool?>(
-              context: context,
-              barrierDismissible: false,
-              builder: (_) => const DeleteMessageDialog(),
-            );
-            if (deleted == true) {
-              try {
-                await switch (widget.onConfirmDeleteTap) {
-                  final onConfirmDeleteTap? => onConfirmDeleteTap(message),
-                  _ => channel.deleteMessage(message),
-                };
-              } catch (e) {
-                showDialog(
-                  context: context,
-                  builder: (_) => const MessageDialog(),
-                );
-              }
-            }
-          },
-        ),
-      ...widget.customActions.map(
-        (e) => StreamChatContextMenuItem(
-          leading: e.leading,
-          title: e.title,
-          onClick: () => e.onTap?.call(message),
-        ),
-      ),
+      ...actions.map((action) {
+        return StreamMessageActionItem(
+          action: action,
+          onTap: onActionTap,
+        );
+      }),
     ];
   }
 
-  void _showMessageReactionsModal(
+  Future<void> _showMessageReactionsModal(
     BuildContext context,
     Message message,
   ) {
     final channel = StreamChannel.of(context).channel;
+    final showPicker = widget.showReactionPicker && channel.canSendReaction;
 
-    showDialog(
-      useRootNavigator: false,
+    void onReactionPicked(SelectReaction action) async {
+      final popped = await Navigator.of(context).maybePop();
+      if (popped) return _onActionTap(context, channel, action).ignore();
+    }
+
+    return showStreamDialog(
       context: context,
-      useSafeArea: false,
-      barrierColor: _streamChatTheme.colorTheme.overlay,
-      builder: (context) => StreamChannel(
-        channel: channel,
+      useRootNavigator: false,
+      builder: (_) => StreamChatConfiguration(
+        // This is needed to provide the nearest reaction icons to the
+        // StreamMessageReactionsModal.
+        data: StreamChatConfiguration.of(context),
         child: StreamMessageReactionsModal(
           message: message,
-          showReactionPicker: widget.showReactionPicker,
-          messageWidget: widget.copyWith(
-            key: const Key('MessageWidget'),
-            message: message.copyWith(
-              text: (message.text?.length ?? 0) > 200
-                  ? '${message.text!.substring(0, 200)}...'
-                  : message.text,
-            ),
-            showReactions: false,
-            showReactionTail: calculateReactionTailEnabled(
-              ReactionTailType.reactions,
-            ),
-            showUsername: false,
-            showTimestamp: false,
-            translateUserAvatar: false,
-            showSendingIndicator: false,
-            padding: EdgeInsets.zero,
-            showReactionPicker: widget.showReactionPicker,
-            showPinHighlight: false,
-            showUserAvatar:
-                message.user!.id == channel.client.state.currentUser!.id
-                    ? DisplayWidget.gone
-                    : DisplayWidget.show,
-          ),
-          onUserAvatarTap: widget.onUserAvatarTap,
-          messageTheme: widget.messageTheme,
           reverse: widget.reverse,
+          onUserAvatarTap: widget.onUserAvatarTap,
+          showReactionPicker: showPicker,
+          reactionPickerBuilder: widget.reactionPickerBuilder,
+          onReactionPicked: onReactionPicked,
+          messageWidget: StreamChannel(
+            channel: channel,
+            child: widget.copyWith(
+              key: const Key('MessageWidget'),
+              message: message.trimmed,
+              showReactions: false,
+              showUsername: false,
+              showTimestamp: false,
+              translateUserAvatar: false,
+              showSendingIndicator: false,
+              padding: EdgeInsets.zero,
+              showPinHighlight: false,
+              showUserAvatar: switch (widget.reverse) {
+                true => DisplayWidget.gone,
+                false => DisplayWidget.show,
+              },
+            ),
+          ),
         ),
       ),
     );
   }
 
-  void _onMessageLongPressed(
+  Future<void> _onMessageLongPressed(
     BuildContext context,
     Message message,
   ) {
@@ -1089,10 +963,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return _onMessageActions(context, message);
   }
 
-  void _onBouncedErrorMessageActions(
+  Future<void> _onBouncedErrorMessageActions(
     BuildContext context,
     Message message,
-  ) {
+  ) async {
     if (widget.onBouncedErrorMessageActions case final onActions?) {
       return onActions(context, message);
     }
@@ -1100,42 +974,37 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return _showBouncedErrorMessageActionsDialog(context, message);
   }
 
-  void _showBouncedErrorMessageActionsDialog(
+  Future<void> _showBouncedErrorMessageActionsDialog(
     BuildContext context,
     Message message,
-  ) {
+  ) async {
     final channel = StreamChannel.of(context).channel;
 
-    showDialog(
+    final actions = _buildBouncedErrorMessageActions(
       context: context,
-      builder: (context) {
-        return ModeratedMessageActionsModal(
-          onSendAnyway: () {
-            Navigator.of(context).pop();
-            channel.sendMessage(widget.message).ignore();
-          },
-          onEditMessage: () {
-            Navigator.of(context).pop();
-            showEditMessageSheet(
-              context: context,
-              channel: channel,
-              message: widget.message,
-              editMessageInputBuilder: widget.editMessageInputBuilder,
-            );
-          },
-          onDeleteMessage: () {
-            Navigator.of(context).pop();
-            channel.deleteMessage(message, hard: true).ignore();
-          },
-        );
-      },
+      message: message,
+    );
+
+    void onActionTap(MessageAction action) async {
+      final popped = await Navigator.of(context).maybePop();
+      if (popped) return _onActionTap(context, channel, action).ignore();
+    }
+
+    return showStreamDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (_) => ModeratedMessageActionsModal(
+        message: message,
+        messageActions: actions,
+        onActionTap: onActionTap,
+      ),
     );
   }
 
-  void _onMessageActions(
+  Future<void> _onMessageActions(
     BuildContext context,
     Message message,
-  ) {
+  ) async {
     if (widget.onMessageActions case final onActions?) {
       return onActions(context, message);
     }
@@ -1143,107 +1012,203 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return _showMessageActionModalDialog(context, message);
   }
 
-  void _showMessageActionModalDialog(
+  Future<void> _showMessageActionModalDialog(
     BuildContext context,
     Message message,
   ) {
     final channel = StreamChannel.of(context).channel;
+    final currentUser = channel.client.state.currentUser;
+    final showPicker = widget.showReactionPicker && channel.canSendReaction;
 
-    showDialog(
-      useRootNavigator: false,
+    final actions = _buildMessageActions(
       context: context,
-      useSafeArea: false,
-      barrierColor: _streamChatTheme.colorTheme.overlay,
-      builder: (context) {
-        return StreamChannel(
-          channel: channel,
-          child: MessageActionsModal(
-            message: message,
-            messageWidget: widget.copyWith(
+      message: message,
+      channel: channel,
+      currentUser: currentUser,
+      customActions: widget.customActions,
+    );
+
+    void onActionTap(MessageAction action) async {
+      final popped = await Navigator.of(context).maybePop();
+      if (popped) return _onActionTap(context, channel, action).ignore();
+    }
+
+    return showStreamDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (_) => StreamChatConfiguration(
+        // This is needed to provide the nearest reaction icons to the
+        // StreamMessageActionsModal.
+        data: StreamChatConfiguration.of(context),
+        child: StreamMessageActionsModal(
+          message: message,
+          reverse: widget.reverse,
+          messageActions: actions,
+          showReactionPicker: showPicker,
+          reactionPickerBuilder: widget.reactionPickerBuilder,
+          onActionTap: onActionTap,
+          messageWidget: StreamChannel(
+            channel: channel,
+            child: widget.copyWith(
               key: const Key('MessageWidget'),
-              message: message.copyWith(
-                text: (message.text?.length ?? 0) > 200
-                    ? '${message.text!.substring(0, 200)}...'
-                    : message.text,
-              ),
+              message: message.trimmed,
               showReactions: false,
-              showReactionTail: calculateReactionTailEnabled(
-                ReactionTailType.messageActions,
-              ),
               showUsername: false,
               showTimestamp: false,
               translateUserAvatar: false,
               showSendingIndicator: false,
               padding: EdgeInsets.zero,
               showPinHighlight: false,
-              showUserAvatar:
-                  message.user!.id == channel.client.state.currentUser!.id
-                      ? DisplayWidget.gone
-                      : DisplayWidget.show,
+              showUserAvatar: switch (widget.reverse) {
+                true => DisplayWidget.gone,
+                false => DisplayWidget.show,
+              },
             ),
-            onEditMessageTap: (message) {
-              Navigator.of(context).pop();
-              showEditMessageSheet(
-                context: context,
-                channel: channel,
-                message: message,
-                editMessageInputBuilder: widget.editMessageInputBuilder,
-              );
-            },
-            onCopyTap: (message) {
-              Navigator.of(context).pop();
-              final copiedMessage = message.replaceMentions(linkify: false);
-              if (copiedMessage.text case final text?) {
-                Clipboard.setData(ClipboardData(text: text));
-              }
-            },
-            messageTheme: widget.messageTheme,
-            reverse: widget.reverse,
-            showDeleteMessage: shouldShowDeleteAction,
-            onConfirmDeleteTap: widget.onConfirmDeleteTap,
-            editMessageInputBuilder: widget.editMessageInputBuilder,
-            onReplyTap: widget.onReplyTap,
-            onThreadReplyTap: widget.onThreadTap,
-            showResendMessage: shouldShowResendAction,
-            showCopyMessage: shouldShowCopyAction,
-            showEditMessage: shouldShowEditAction,
-            showReactionPicker: widget.showReactionPicker,
-            showReplyMessage: shouldShowReplyAction,
-            showThreadReplyMessage: shouldShowThreadReplyAction,
-            showFlagButton: widget.showFlagButton,
-            showPinButton: widget.showPinButton,
-            showMarkUnreadMessage: widget.showMarkUnreadMessage,
-            customActions: widget.customActions,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  /// Calculates if the reaction picker tail should be enabled.
-  bool calculateReactionTailEnabled(ReactionTailType type) {
-    if (widget.showReactionTail != null) return widget.showReactionTail!;
+  Future<void> _onActionTap(
+    BuildContext context,
+    Channel channel,
+    MessageAction action,
+  ) async {
+    return switch (action) {
+      SelectReaction() =>
+        _selectReaction(context, action.message, channel, action.reaction),
+      CopyMessage() => _copyMessage(action.message, channel),
+      DeleteMessage() => _maybeDeleteMessage(context, action.message, channel),
+      HardDeleteMessage() => channel.deleteMessage(action.message, hard: true),
+      EditMessage() => _editMessage(context, action.message, channel),
+      FlagMessage() => _maybeFlagMessage(context, action.message, channel),
+      MarkUnread() => channel.markUnread(action.message.id),
+      MuteUser() => channel.client.muteUser(action.user.id),
+      UnmuteUser() => channel.client.unmuteUser(action.user.id),
+      PinMessage() => channel.pinMessage(action.message),
+      UnpinMessage() => channel.unpinMessage(action.message),
+      ResendMessage() => channel.retryMessage(action.message),
+      QuotedReply() => widget.onReplyTap?.call(action.message),
+      ThreadReply() => widget.onThreadTap?.call(action.message),
+      CustomMessageAction() => widget.onCustomActionTap?.call(action),
+    };
+  }
 
-    switch (type) {
-      case ReactionTailType.list:
-        return false;
-      case ReactionTailType.messageActions:
-        return widget.showReactionPicker;
-      case ReactionTailType.reactions:
-        return widget.showReactionPicker;
+  Future<void> _copyMessage(
+    Message message,
+    Channel channel,
+  ) async {
+    final presentableMessage = message.replaceMentions(linkify: false);
+
+    final messageText = presentableMessage.text;
+    if (messageText == null || messageText.isEmpty) return;
+
+    return Clipboard.setData(ClipboardData(text: messageText));
+  }
+
+  Future<EmptyResponse?> _maybeDeleteMessage(
+    BuildContext context,
+    Message message,
+    Channel channel,
+  ) async {
+    final confirmDelete = await showStreamDialog<bool>(
+      context: context,
+      builder: (context) => StreamMessageActionConfirmationModal(
+        title: Text(context.translations.deleteMessageLabel),
+        content: Text(context.translations.deleteMessageQuestion),
+        cancelActionTitle: Text(context.translations.cancelLabel.sentenceCase),
+        confirmActionTitle: Text(context.translations.deleteLabel.sentenceCase),
+        isDestructiveAction: true,
+      ),
+    );
+
+    if (confirmDelete != true) return null;
+
+    return channel.deleteMessage(message);
+  }
+
+  Future<void> _editMessage(
+    BuildContext context,
+    Message message,
+    Channel channel,
+  ) {
+    return showEditMessageSheet(
+      context: context,
+      channel: channel,
+      message: message,
+      editMessageInputBuilder: widget.editMessageInputBuilder,
+    );
+  }
+
+  Future<EmptyResponse?> _maybeFlagMessage(
+    BuildContext context,
+    Message message,
+    Channel channel,
+  ) async {
+    final confirmFlag = await showStreamDialog<bool>(
+      context: context,
+      builder: (context) => StreamMessageActionConfirmationModal(
+        title: Text(context.translations.flagMessageLabel),
+        content: Text(context.translations.flagMessageQuestion),
+        cancelActionTitle: Text(context.translations.cancelLabel.sentenceCase),
+        confirmActionTitle: Text(context.translations.flagLabel.sentenceCase),
+        isDestructiveAction: true,
+      ),
+    );
+
+    if (confirmFlag != true) return null;
+
+    final messageId = message.id;
+    return channel.client.flagMessage(messageId);
+  }
+
+  Future<Object> _selectReaction(
+    BuildContext context,
+    Message message,
+    Channel channel,
+    Reaction reaction,
+  ) {
+    final ownReactions = [...?message.ownReactions];
+    final shouldDelete = ownReactions.any((it) => it.type == reaction.type);
+
+    if (shouldDelete) {
+      return channel.deleteReaction(message, reaction);
     }
+
+    final configurations = StreamChatConfiguration.of(context);
+    final enforceUnique = configurations.enforceUniqueReactions;
+
+    return channel.sendReaction(
+      message,
+      reaction,
+      enforceUnique: enforceUnique,
+    );
   }
 }
 
-/// Enum for declaring the location of the message for which the reaction picker
-/// is to be enabled.
-enum ReactionTailType {
-  /// Message is in the [StreamMessageListView]
-  list,
+extension on Message {
+  Message get trimmed {
+    final trimmedText = switch (text) {
+      final text? when text.length > 100 => '${text.substring(0, 100)}...',
+      _ => text,
+    };
 
-  /// Message is in the [MessageActionsModal]
-  messageActions,
+    return copyWith(
+      text: trimmedText,
+      poll: poll?.trimmed,
+      quotedMessage: quotedMessage?.trimmed,
+    );
+  }
+}
 
-  /// Message is in the message reactions modal
-  reactions,
+extension on Poll {
+  Poll get trimmed {
+    final trimmedName = switch (name) {
+      final name when name.length > 100 => '${name.substring(0, 100)}...',
+      _ => name,
+    };
+
+    return copyWith(name: trimmedName);
+  }
 }

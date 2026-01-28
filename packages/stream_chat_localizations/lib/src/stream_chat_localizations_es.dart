@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Spanish (`es`).
@@ -173,8 +175,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Por favor, permita el acceso a sus fotos'
-      '\ny vídeos para que pueda compartirlos con sus amigos.';
+      'Por favor, permita el acceso a sus fotos y vídeos para que pueda compartirlos con sus amigos.';
 
   @override
   String get allowGalleryAccessMessage => 'Permitir el acceso a su galería';
@@ -184,8 +185,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      '¿Quiere enviar una copia de este mensaje a un'
-      '\nmoderador para una mayor investigación?';
+      '¿Quiere enviar una copia de este mensaje a un moderador para una mayor investigación?';
 
   @override
   String get flagLabel => 'REPORTAR';
@@ -208,7 +208,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      '¿Estás seguro de que quieres borrar este\nmensaje de forma permanente?';
+      '¿Estás seguro de que quieres borrar este mensaje de forma permanente?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -451,8 +451,8 @@ No es posible añadir más de $limit archivos adjuntos
   String unreadMessagesSeparatorText() => 'Nuevos mensajes';
 
   @override
-  String get enableFileAccessMessage => 'Habilite el acceso a los archivos'
-      '\npara poder compartirlos con amigos.';
+  String get enableFileAccessMessage =>
+      'Habilite el acceso a los archivos para poder compartirlos con amigos.';
 
   @override
   String get allowFileAccessMessage => 'Permitir el acceso a los archivos';
@@ -683,4 +683,10 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get draftLabel => 'Borrador';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Ubicación en vivo';
+    return '📍 Ubicación';
+  }
 }

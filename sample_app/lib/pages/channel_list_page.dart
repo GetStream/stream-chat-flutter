@@ -13,6 +13,7 @@ import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/pages/user_mentions_page.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/utils/shared_location_service.dart';
 import 'package:sample_app/widgets/channel_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
@@ -43,7 +44,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                   ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
                   : Colors.grey,
             ),
-            PositionedDirectional(
+            const PositionedDirectional(
               top: -4,
               start: 12,
               child: StreamUnreadIndicator(),
@@ -101,6 +102,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
     ];
   }
 
+  late final _locationService = SharedLocationService(
+    client: StreamChat.of(context).client,
+  );
+
   @override
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).currentUser;
@@ -152,6 +157,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   void initState() {
+    super.initState();
     if (!kIsWeb) {
       badgeListener = StreamChat.of(context)
           .client
@@ -165,12 +171,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
         }
       });
     }
-    super.initState();
+
+    _locationService.initialize();
   }
 
   @override
   void dispose() {
     badgeListener?.cancel();
+    _locationService.dispose();
     super.dispose();
   }
 }

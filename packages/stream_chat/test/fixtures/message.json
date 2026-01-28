@@ -54,11 +54,13 @@
     }
   ],
   "own_reactions": [],
-  "reaction_counts": {
-    "love": 1
-  },
-  "reaction_scores": {
-    "love": 1
+  "reaction_groups": {
+    "love": {
+      "count": 1,
+      "sum_scores": 1,
+      "first_reaction_at": "2020-01-28T22:17:31.107978Z",
+      "last_reaction_at": "2020-01-28T22:17:31.107978Z"
+    }
   },
   "pinned": false,
   "pinned_at": null,

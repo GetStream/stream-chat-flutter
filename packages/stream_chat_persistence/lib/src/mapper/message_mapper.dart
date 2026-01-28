@@ -14,6 +14,7 @@ extension MessageEntityX on MessageEntity {
     Message? quotedMessage,
     Poll? poll,
     Draft? draft,
+    Location? sharedLocation,
   }) =>
       Message(
         shadowed: shadowed,
@@ -30,6 +31,7 @@ extension MessageEntityX on MessageEntity {
         localUpdatedAt: localUpdatedAt,
         deletedAt: remoteDeletedAt,
         localDeletedAt: localDeletedAt,
+        deletedForMe: deletedForMe,
         messageTextUpdatedAt: messageTextUpdatedAt,
         id: id,
         type: type,
@@ -55,6 +57,7 @@ extension MessageEntityX on MessageEntity {
         i18n: i18n,
         restrictedVisibility: restrictedVisibility,
         draft: draft,
+        sharedLocation: sharedLocation,
       );
 }
 
@@ -77,7 +80,7 @@ extension MessageX on Message {
         replyCount: replyCount,
         reactionGroups: reactionGroups,
         mentionedUsers: mentionedUsers.map(jsonEncode).toList(),
-        state: jsonEncode(state),
+        state: jsonEncode(state.toJson()),
         remoteUpdatedAt: remoteUpdatedAt,
         localUpdatedAt: localUpdatedAt,
         extraData: extraData,
@@ -85,6 +88,7 @@ extension MessageX on Message {
         channelRole: channelRole,
         remoteDeletedAt: remoteDeletedAt,
         localDeletedAt: localDeletedAt,
+        deletedForMe: deletedForMe,
         messageTextUpdatedAt: messageTextUpdatedAt,
         messageText: text,
         pinned: pinned,

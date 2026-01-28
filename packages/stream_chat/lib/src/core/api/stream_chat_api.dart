@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
-import 'package:stream_chat/src/core/api/call_api.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
@@ -69,12 +68,6 @@ class StreamChatApi {
   /// Api dedicated to threads operations
   ThreadsApi get threads => _threads ??= ThreadsApi(_client);
   ThreadsApi? _threads;
-
-  /// Api dedicated to call operations
-  @Deprecated('Will be removed in the next major version')
-  CallApi get call => _call ??= CallApi(_client);
-  @Deprecated('Will be removed in the next major version')
-  CallApi? _call;
 
   /// Api dedicated to channel operations
   ChannelApi get channel => _channel ??= ChannelApi(_client);
