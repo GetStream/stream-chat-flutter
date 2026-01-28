@@ -1,3 +1,45 @@
+## 10.0.0
+
+🛑️ Breaking
+
+- **Changed `MessageState` factory constructors**: The `deleting`, `deleted`, and `deletingFailed` 
+  factory constructors now accept a `MessageDeleteScope` parameter instead of `bool hard`. 
+  Pattern matching callbacks also receive `MessageDeleteScope scope` instead of `bool hard`.
+- **Added new abstract methods to `AttachmentFileUploader`**: The `AttachmentFileUploader` interface
+  now includes four new abstract methods (`uploadImage`, `uploadFile`, `removeImage`, `removeFile`).
+  Custom implementations must implement these methods.
+- **Changed `sendReaction` method signature**: The `sendReaction` method on both `Client` and
+  `Channel` now accepts a full `Reaction` object instead of individual parameters (`type`, `score`,
+  `extraData`). This change provides more flexibility and better type safety.
+- **Deprecated API Cleanup**: Removed all deprecated classes, methods, and properties for the v10 major release:
+  - **Removed Classes**: `PermissionType` (use string constants like `'delete-channel'`, `'update-channel'`), `CallApi`, `CallPayload`, `CallTokenPayload`, `CreateCallPayload`
+  - **Removed Methods**: `cooldownStartedAt` getter from `Channel`, `getCallToken` and `createCall` from `StreamChatClient`
+  - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
+  - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
+
+For more details, please refer to the [migration guide](../../migrations/v10.0.0-migration.md).
+
+✅ Added
+
+- Added support for deleting messages only for the current user:
+  - `Channel.deleteMessageForMe()` - Delete a message only for the current user
+  - `StreamChatClient.deleteMessageForMe()` - Delete a message only for the current user via client
+  - `MessageDeleteScope` - New sealed class to represent deletion scope
+  - `MessageState.deletingForMe`, `MessageState.deletedForMe`, `MessageState.deletingForMeFailed` states
+  - `Message.deletedOnlyForMe`, `Event.deletedForMe`, `Member.deletedMessages` model fields
+- Added standalone file and image upload/removal methods for CDN operations:
+  - `StreamChatClient.uploadImage()` - Upload an image to the Stream CDN
+  - `StreamChatClient.uploadFile()` - Upload a file to the Stream CDN
+  - `StreamChatClient.removeImage()` - Remove an image from the Stream CDN
+  - `StreamChatClient.removeFile()` - Remove a file from the Stream CDN
+- Added comprehensive location sharing support with static and live location features:
+  - `Channel.sendStaticLocation()` - Send a static location message to the channel
+  - `Channel.startLiveLocationSharing()` - Start sharing live location with automatic updates
+  - `Channel.activeLiveLocations` - Track members active live location shares in the channel
+  - `Client.activeLiveLocations` - Access current user active live location shares across channels
+  - Location event listeners for `locationShared`, `locationUpdated`, and `locationExpired` events
+- Added support for `user.messages.deleted` event.
+
 ## 10.0.0-beta.12
 
 - Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
