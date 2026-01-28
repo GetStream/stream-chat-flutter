@@ -17,7 +17,7 @@
   - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
   - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
 
-For more details, please refer to the [migration guide](../../migrations/v10.0.0-migration.md).
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 ✅ Added
 

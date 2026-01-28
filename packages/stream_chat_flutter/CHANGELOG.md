@@ -27,7 +27,7 @@
   - **Removed Methods**: `lastUnreadMessage()` from message list extensions (use `StreamChannel.getFirstUnreadMessage`), `loadBuffer()` and `_loadAsync()` from `StreamVideoThumbnailImage`
   - **StreamSvgIcon Refactoring**: Removed 80+ deprecated factory constructors. Use `StreamSvgIcon(icon: StreamSvgIcons.iconName)` instead of factory constructors like `StreamSvgIcon.add()`
 
-For more details, please refer to the [migration guide](../../migrations/v10.0.0-migration.md).
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 ✅ Added
 
