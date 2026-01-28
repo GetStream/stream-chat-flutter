@@ -1,4 +1,8 @@
-## Upcoming Beta
+## 10.0.0-beta.12
+
+🐞 Fixed
+
+- Fixed regression in `emoji_code` support for reactions.
 
 🛑️ Breaking
 
@@ -6,9 +10,9 @@
   `AttachmentTooLargeError` (file size exceeds limit) and `AttachmentLimitReachedError`
   (attachment count exceeds limit). [[#2476]](https://github.com/GetStream/stream-chat-flutter/issues/2476)
 
-🐞 Fixed
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
-- Fixed regression in `emoji_code` support for reactions.
+- Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.23.0
 
