@@ -228,6 +228,7 @@ class _StreamPollCreatorFullScreenDialogState
       appBar: AppBar(
         elevation: theme.appBarElevation,
         backgroundColor: theme.appBarBackgroundColor,
+        foregroundColor: theme.appBarForegroundColor,
         title: Text(
           context.translations.createPollLabel(),
           style: theme.appBarTitleStyle,

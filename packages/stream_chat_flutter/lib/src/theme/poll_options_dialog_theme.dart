@@ -56,6 +56,7 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
     this.backgroundColor,
     this.appBarElevation,
     this.appBarBackgroundColor,
+    this.appBarForegroundColor,
     this.appBarTitleTextStyle,
     this.pollTitleTextStyle,
     this.pollTitleDecoration,
@@ -70,6 +71,9 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
 
   /// The background color of the app bar.
   final Color? appBarBackgroundColor;
+
+  /// The foreground color of the app bar (icon and text color).
+  final Color? appBarForegroundColor;
 
   /// The text style of the app bar title.
   final TextStyle? appBarTitleTextStyle;
@@ -89,6 +93,7 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
     Color? backgroundColor,
     double? appBarElevation,
     Color? appBarBackgroundColor,
+    Color? appBarForegroundColor,
     TextStyle? appBarTitleTextStyle,
     TextStyle? pollTitleTextStyle,
     Decoration? pollTitleDecoration,
@@ -99,6 +104,8 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
         appBarElevation: appBarElevation ?? this.appBarElevation,
         appBarBackgroundColor:
             appBarBackgroundColor ?? this.appBarBackgroundColor,
+        appBarForegroundColor:
+            appBarForegroundColor ?? this.appBarForegroundColor,
         appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
         pollTitleTextStyle: pollTitleTextStyle ?? this.pollTitleTextStyle,
         pollTitleDecoration: pollTitleDecoration ?? this.pollTitleDecoration,
@@ -115,6 +122,7 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
       backgroundColor: other.backgroundColor,
       appBarElevation: other.appBarElevation,
       appBarBackgroundColor: other.appBarBackgroundColor,
+      appBarForegroundColor: other.appBarForegroundColor,
       appBarTitleTextStyle: other.appBarTitleTextStyle,
       pollTitleTextStyle: other.pollTitleTextStyle,
       pollTitleDecoration: other.pollTitleDecoration,
@@ -133,6 +141,8 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
         appBarElevation: lerpDouble(a.appBarElevation, b.appBarElevation, t),
         appBarBackgroundColor:
             Color.lerp(a.appBarBackgroundColor, b.appBarBackgroundColor, t),
+        appBarForegroundColor:
+            Color.lerp(a.appBarForegroundColor, b.appBarForegroundColor, t),
         appBarTitleTextStyle:
             TextStyle.lerp(a.appBarTitleTextStyle, b.appBarTitleTextStyle, t),
         pollTitleTextStyle:
@@ -153,6 +163,7 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
           other.backgroundColor == backgroundColor &&
           other.appBarElevation == appBarElevation &&
           other.appBarBackgroundColor == appBarBackgroundColor &&
+          other.appBarForegroundColor == appBarForegroundColor &&
           other.appBarTitleTextStyle == appBarTitleTextStyle &&
           other.pollTitleTextStyle == pollTitleTextStyle &&
           other.pollTitleDecoration == pollTitleDecoration &&
@@ -163,6 +174,7 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
       backgroundColor.hashCode ^
       appBarElevation.hashCode ^
       appBarBackgroundColor.hashCode ^
+      appBarForegroundColor.hashCode ^
       appBarTitleTextStyle.hashCode ^
       pollTitleTextStyle.hashCode ^
       pollTitleDecoration.hashCode ^

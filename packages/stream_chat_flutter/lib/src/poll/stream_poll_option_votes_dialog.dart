@@ -115,6 +115,7 @@ class _StreamPollOptionVotesDialogState
       appBar: AppBar(
         elevation: theme.appBarElevation,
         backgroundColor: theme.appBarBackgroundColor,
+        foregroundColor: theme.appBarForegroundColor,
         title: Text(
           widget.option.text,
           maxLines: 2,

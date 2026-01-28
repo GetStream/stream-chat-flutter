@@ -122,6 +122,7 @@ class _StreamPollCommentsDialogState extends State<StreamPollCommentsDialog> {
       appBar: AppBar(
         elevation: theme.appBarElevation,
         backgroundColor: theme.appBarBackgroundColor,
+        foregroundColor: theme.appBarForegroundColor,
         title: Text(
           context.translations.pollCommentsLabel,
           style: theme.appBarTitleTextStyle,

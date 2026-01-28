@@ -56,6 +56,7 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
     this.backgroundColor,
     this.appBarElevation,
     this.appBarBackgroundColor,
+    this.appBarForegroundColor,
     this.appBarTitleTextStyle,
     this.pollCommentItemBackgroundColor,
     this.pollCommentItemBorderRadius,
@@ -70,6 +71,9 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
 
   /// The background color of the app bar.
   final Color? appBarBackgroundColor;
+
+  /// The foreground color of the app bar (icon and text color).
+  final Color? appBarForegroundColor;
 
   /// The text style of the app bar title.
   final TextStyle? appBarTitleTextStyle;
@@ -88,6 +92,7 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
     Color? backgroundColor,
     double? appBarElevation,
     Color? appBarBackgroundColor,
+    Color? appBarForegroundColor,
     TextStyle? appBarTitleTextStyle,
     Color? pollCommentItemBackgroundColor,
     BorderRadius? pollCommentItemBorderRadius,
@@ -98,6 +103,8 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
         appBarElevation: appBarElevation ?? this.appBarElevation,
         appBarBackgroundColor:
             appBarBackgroundColor ?? this.appBarBackgroundColor,
+        appBarForegroundColor:
+            appBarForegroundColor ?? this.appBarForegroundColor,
         appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
         pollCommentItemBackgroundColor: pollCommentItemBackgroundColor ??
             this.pollCommentItemBackgroundColor,
@@ -116,6 +123,7 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
       backgroundColor: other.backgroundColor,
       appBarElevation: other.appBarElevation,
       appBarBackgroundColor: other.appBarBackgroundColor,
+      appBarForegroundColor: other.appBarForegroundColor,
       appBarTitleTextStyle: other.appBarTitleTextStyle,
       pollCommentItemBackgroundColor: other.pollCommentItemBackgroundColor,
       pollCommentItemBorderRadius: other.pollCommentItemBorderRadius,
@@ -134,6 +142,8 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
       appBarElevation: lerpDouble(a?.appBarElevation, b?.appBarElevation, t),
       appBarBackgroundColor:
           Color.lerp(a?.appBarBackgroundColor, b?.appBarBackgroundColor, t),
+      appBarForegroundColor:
+          Color.lerp(a?.appBarForegroundColor, b?.appBarForegroundColor, t),
       appBarTitleTextStyle:
           TextStyle.lerp(a?.appBarTitleTextStyle, b?.appBarTitleTextStyle, t),
       pollCommentItemBackgroundColor: Color.lerp(
@@ -161,6 +171,7 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
           other.backgroundColor == backgroundColor &&
           other.appBarElevation == appBarElevation &&
           other.appBarBackgroundColor == appBarBackgroundColor &&
+          other.appBarForegroundColor == appBarForegroundColor &&
           other.appBarTitleTextStyle == appBarTitleTextStyle &&
           other.pollCommentItemBackgroundColor ==
               pollCommentItemBackgroundColor &&
@@ -172,6 +183,7 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
       backgroundColor.hashCode ^
       appBarElevation.hashCode ^
       appBarBackgroundColor.hashCode ^
+      appBarForegroundColor.hashCode ^
       appBarTitleTextStyle.hashCode ^
       pollCommentItemBackgroundColor.hashCode ^
       pollCommentItemBorderRadius.hashCode ^

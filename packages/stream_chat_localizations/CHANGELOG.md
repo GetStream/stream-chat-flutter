@@ -1,3 +1,7 @@
+## 9.23.0
+
+- Fixed Italian translation for `unreadMessagesSeparatorText` (was incorrectly showing French text "Nouveaux messages" instead of Italian "Nuovi messaggi").
+
 ## 10.0.0-beta.11
 
 - Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat_localizations/changelog).

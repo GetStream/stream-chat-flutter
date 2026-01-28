@@ -451,7 +451,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get linkDisabledError => 'I links sono disattivati';
 
   @override
-  String unreadMessagesSeparatorText() => 'Nouveaux messages';
+  String unreadMessagesSeparatorText() => 'Nuovi messaggi';
 
   @override
   String get enableFileAccessMessage =>
