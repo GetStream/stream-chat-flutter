@@ -8,7 +8,11 @@
 
 This guide includes breaking changes grouped by release phase:
 
-### 🚧 Upcoming Beta
+### 🚧 v10.0.0-beta.12
+
+- [StreamAttachmentPickerController](#-streamattachmentpickercontroller)
+
+### 🚧 v10.0.0-beta.9
 
 - [onAttachmentTap](#-onattachmenttap)
 - [ReactionPickerIconList](#-reactionpickericonlist)
@@ -43,7 +47,48 @@ This guide includes breaking changes grouped by release phase:
 
 ---
 
-## 🧪 Migration for Upcoming Beta
+## 🧪 Migration for v10.0.0-beta.12
+
+### 🛠 StreamAttachmentPickerController
+
+#### Key Changes:
+
+- Replaced `ArgumentError('The size of the attachment is...')` with `AttachmentTooLargeError`.
+- Replaced `ArgumentError('The maximum number of attachments is...')` with `AttachmentLimitReachedError`.
+
+#### Migration Steps:
+
+**Before:**
+```dart
+try {
+  await controller.addAttachment(attachment);
+} on ArgumentError catch (e) {
+  // Generic error handling
+  showError(e.message);
+}
+```
+
+**After:**
+```dart
+try {
+  await controller.addAttachment(attachment);
+} on AttachmentTooLargeError catch (e) {
+  // File size exceeded
+  showError('File is too large. Max size is ${e.maxSize} bytes.');
+} on AttachmentLimitReachedError catch (e) {
+  // Too many attachments
+  showError('Cannot add more attachments. Maximum is ${e.maxCount}.');
+}
+```
+
+> ⚠️ **Important:**  
+> - Replace `ArgumentError` catches with the specific typed errors
+> - `AttachmentTooLargeError` provides `fileSize` and `maxSize` properties
+> - `AttachmentLimitReachedError` provides `maxCount` property
+
+---
+
+## 🧪 Migration for v10.0.0-beta.9
 
 ### 🛠 onAttachmentTap
 
@@ -884,7 +929,11 @@ StreamMessageWidget(
 
 ## 🎉 You're Ready to Migrate!
 
-### For Upcoming Beta:
+### For v10.0.0-beta.12:
+- ✅ Replace `ArgumentError('The size of the attachment is...')` with `AttachmentTooLargeError` (provides `fileSize` and `maxSize` properties)
+- ✅ Replace `ArgumentError('The maximum number of attachments is...')` with `AttachmentLimitReachedError` (provides `maxCount` property)
+
+### For v10.0.0-beta.9:
 - ✅ Update `onAttachmentTap` callback signature to include `BuildContext` as first parameter
 - ✅ Return `FutureOr<bool>` from `onAttachmentTap` - `true` if handled, `false` for default behavior
 - ✅ Leverage automatic fallback to default handling for standard attachment types (images, videos, URLs)

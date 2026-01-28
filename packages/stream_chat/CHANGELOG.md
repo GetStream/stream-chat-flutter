@@ -1,3 +1,7 @@
+## 10.0.0-beta.12
+
+- Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.23.0
 
 - Minor bug fixes and improvements

@@ -9,4 +9,4 @@
 
 /// Current package version
 /// Used in [SystemEnvironmentManager] to build the `x-stream-client` header
-const PACKAGE_VERSION = '10.0.0-beta.11';
+const PACKAGE_VERSION = '10.0.0-beta.12';
