@@ -1001,7 +1001,7 @@ This appendix provides a chronological reference of breaking changes by beta ver
 - [StreamMessageAction](#-streammessageaction)
 - [StreamMessageReactionsModal](#-streammessagereactionsmodal)
 - [StreamMessageWidget](#-streammessagewidget)
-l
+
 ### 🚧 v10.0.0-beta.3
 
 - [AttachmentPickerType](#-attachmentpickertype)
@@ -1053,9 +1053,9 @@ l
 ### For v10.0.0-beta.7:
 - [ ] Update custom `AttachmentFileUploader` implementations to include the four new abstract methods: `uploadImage`, `uploadFile`, `removeImage`, and `removeFile`
 - [ ] Update `MessageState` factory constructors to use `MessageDeleteScope` parameter
-- [ ] Update pattern matching callbacks to handle `MessageDeleteScope` instead of `bool hard`
+- [ ] Update pattern-matching callbacks to handle `MessageDeleteScope` instead of `bool hard`
 - [ ] Leverage new delete-for-me functionality with `deleteMessageForMe` methods
-- [ ] Use new state checking methods for delete-for-me operations
+- [ ] Use new state-checking methods for delete-for-me operations
 
 ### For v10.0.0-beta.4:
 - [ ] Update `sendReaction` method calls to use `Reaction` object instead of individual parameters

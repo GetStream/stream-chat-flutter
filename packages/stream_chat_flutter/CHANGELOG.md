@@ -27,7 +27,7 @@
   - **Removed Methods**: `lastUnreadMessage()` from message list extensions (use `StreamChannel.getFirstUnreadMessage`), `loadBuffer()` and `_loadAsync()` from `StreamVideoThumbnailImage`
   - **StreamSvgIcon Refactoring**: Removed 80+ deprecated factory constructors. Use `StreamSvgIcon(icon: StreamSvgIcons.iconName)` instead of factory constructors like `StreamSvgIcon.add()`
 
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
 
 ✅ Added
 
@@ -165,7 +165,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 - `ReactionPickerIconList` constructor changed: removed `message` parameter, changed `reactionIcons`
   type to `List<ReactionPickerIcon>`, renamed `onReactionPicked` to `onIconPicked`.
 
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
 
 - Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
@@ -245,7 +245,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
   )
   ```
   
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
 
 - Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
@@ -353,7 +353,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 - `showStreamAttachmentPickerModalBottomSheet` now returns a `StreamAttachmentPickerResult` instead of `AttachmentPickerValue` for improved type safety and clearer intent handling.
 - `StreamMobileAttachmentPickerBottomSheet` has been renamed to `StreamTabbedAttachmentPickerBottomSheet`, and `StreamWebOrDesktopAttachmentPickerBottomSheet` has been renamed to `StreamSystemAttachmentPickerBottomSheet` to better reflect their respective layouts.
 
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
 
 ✅ Added
 
@@ -392,7 +392,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 - `StreamMessageReactionsModal` no longer requires the `messageTheme` parameter. The theme now automatically derives from the `reverse` property.
 - `StreamMessageWidget` no longer requires the `showReactionTail` parameter. The reaction picker tail is now always shown when the reaction picker is visible.
 
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
 
 ✅ Added
 

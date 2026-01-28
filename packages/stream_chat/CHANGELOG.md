@@ -17,7 +17,7 @@
   - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
   - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
 
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
 
 ✅ Added
 
@@ -130,7 +130,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
   now includes four new abstract methods (`uploadImage`, `uploadFile`, `removeImage`, `removeFile`).
   Custom implementations must implement these methods.
 
-For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
 
 ✅ Added
 
