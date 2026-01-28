@@ -1,75 +1,75 @@
-# 🚀 Stream Chat Flutter SDK v10.0.0 Migration Guide
+# Stream Chat Flutter SDK v10.0.0 Migration Guide
 
 This guide covers all breaking changes in **Stream Chat Flutter SDK v10.0.0**. Whether you're upgrading from v9.x or from a v10 beta, this document provides the complete migration path.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Who Should Read This](#-who-should-read-this)
-- [Quick Reference](#-quick-reference)
-- [Attachment Picker](#-attachment-picker)
-  - [AttachmentPickerType](#-attachmentpickertype)
-  - [StreamAttachmentPickerOption](#-streamattachmentpickeroption)
-  - [showStreamAttachmentPickerModalBottomSheet](#-showstreamattachmentpickermodalbottomsheet)
-  - [AttachmentPickerBottomSheet](#-attachmentpickerbottomsheet)
-  - [customAttachmentPickerOptions](#-customattachmentpickeroptions)
-  - [onCustomAttachmentPickerResult](#-oncustomattachmentpickerresult)
-  - [StreamAttachmentPickerController](#-streamattachmentpickercontroller)
-- [Reactions](#-reactions)
-  - [SendReaction](#-sendreaction)
-  - [StreamReactionPicker](#-streamreactionpicker)
-  - [ReactionPickerIconList](#-reactionpickericonlist)
-  - [StreamMessageReactionsModal](#-streammessagereactionsmodal)
-- [Message UI](#-message-ui)
-  - [onAttachmentTap](#-onattachmenttap)
-  - [StreamMessageWidget](#-streammessagewidget)
-  - [StreamMessageAction](#-streammessageaction)
-- [Message State & Deletion](#️-message-state--deletion)
-  - [MessageState](#-messagestate)
-- [File Upload](#-file-upload)
-  - [AttachmentFileUploader](#-attachmentfileuploader)
-- [Appendix: Beta Release Timeline](#-appendix-beta-release-timeline)
-- [Migration Checklist](#-migration-checklist)
+- [Who Should Read This](#who-should-read-this)
+- [Quick Reference](#quick-reference)
+- [Attachment Picker](#attachment-picker)
+  - [AttachmentPickerType](#attachmentpickertype)
+  - [StreamAttachmentPickerOption](#streamattachmentpickeroption)
+  - [showStreamAttachmentPickerModalBottomSheet](#showstreamattachmentpickermodalbottomsheet)
+  - [AttachmentPickerBottomSheet](#attachmentpickerbottomsheet)
+  - [customAttachmentPickerOptions](#customattachmentpickeroptions)
+  - [onCustomAttachmentPickerResult](#oncustomattachmentpickerresult)
+  - [StreamAttachmentPickerController](#streamattachmentpickercontroller)
+- [Reactions](#reactions)
+  - [SendReaction](#sendreaction)
+  - [StreamReactionPicker](#streamreactionpicker)
+  - [ReactionPickerIconList](#reactionpickericonlist)
+  - [StreamMessageReactionsModal](#streammessagereactionsmodal)
+- [Message UI](#message-ui)
+  - [onAttachmentTap](#onattachmenttap)
+  - [StreamMessageWidget](#streammessagewidget)
+  - [StreamMessageAction](#streammessageaction)
+- [Message State & Deletion](#message-state--deletion)
+  - [MessageState](#messagestate)
+- [File Upload](#file-upload)
+  - [AttachmentFileUploader](#attachmentfileuploader)
+- [Appendix: Beta Release Timeline](#appendix-beta-release-timeline)
+- [Migration Checklist](#migration-checklist)
 
 ---
 
-## 👥 Who Should Read This
+## Who Should Read This
 
 | Upgrading From | Sections to Review |
 |----------------|-------------------|
 | **v9.x** | All sections |
-| [**v10.0.0-beta.1**](#-v1000-beta1) | All sections introduced after beta.1 |
-| [**v10.0.0-beta.3**](#-v1000-beta3) | Sections introduced in beta.4 and later |
-| [**v10.0.0-beta.4**](#-v1000-beta4) | Sections introduced in beta.7 and later |
-| [**v10.0.0-beta.7**](#-v1000-beta7) | Sections introduced in beta.8 and later |
-| [**v10.0.0-beta.8**](#-v1000-beta8) | Sections introduced in beta.9 and later |
-| [**v10.0.0-beta.9**](#-v1000-beta9) | Sections introduced in beta.12 |
-| [**v10.0.0-beta.12**](#-v1000-beta12) | No additional changes |
+| [**v10.0.0-beta.1**](#v1000-beta1) | All sections introduced after beta.1 |
+| [**v10.0.0-beta.3**](#v1000-beta3) | Sections introduced in beta.4 and later |
+| [**v10.0.0-beta.4**](#v1000-beta4) | Sections introduced in beta.7 and later |
+| [**v10.0.0-beta.7**](#v1000-beta7) | Sections introduced in beta.8 and later |
+| [**v10.0.0-beta.8**](#v1000-beta8) | Sections introduced in beta.9 and later |
+| [**v10.0.0-beta.9**](#v1000-beta9) | Sections introduced in beta.12 |
+| [**v10.0.0-beta.12**](#v1000-beta12) | No additional changes |
 
 Each breaking change section includes an **"Introduced in"** tag so you can quickly identify which changes apply to your upgrade path.
 
 ---
 
-## ⚡ Quick Reference
+## Quick Reference
 
 | Feature Area | Key Changes |
 |-------------|-------------|
-| [**Attachment Picker**](#-attachment-picker) | Sealed class hierarchy, builder pattern for options, typed result handling |
-| [**Reactions**](#-reactions) | `Reaction` object API, explicit `onReactionPicked` callbacks required |
-| [**Message UI**](#-message-ui) | New `onAttachmentTap` signature with fallback support, generic `StreamMessageAction` |
-| [**Message State**](#️-message-state--deletion) | `MessageDeleteScope` replaces `bool hard`, delete-for-me support |
-| [**File Upload**](#-file-upload) | Four new abstract methods on `AttachmentFileUploader` |
+| [**Attachment Picker**](#attachment-picker) | Sealed class hierarchy, builder pattern for options, typed result handling |
+| [**Reactions**](#reactions) | `Reaction` object API, explicit `onReactionPicked` callbacks required |
+| [**Message UI**](#message-ui) | New `onAttachmentTap` signature with fallback support, generic `StreamMessageAction` |
+| [**Message State**](#message-state--deletion) | `MessageDeleteScope` replaces `bool hard`, delete-for-me support |
+| [**File Upload**](#file-upload) | Four new abstract methods on `AttachmentFileUploader` |
 
 ---
 
-## 📎 Attachment Picker
+## Attachment Picker
 
 The attachment picker system has been redesigned with a sealed class hierarchy, improved type safety, and a flexible builder pattern for customization.
 
 ---
 
-### 🛠 AttachmentPickerType
+### AttachmentPickerType
 
 > **Introduced in:** [v10.0.0-beta.3](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.3)
 
@@ -98,12 +98,12 @@ class LocationAttachmentPickerType extends CustomAttachmentPickerType {
 }
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > The enum is now a sealed class, but the basic usage remains the same for built-in types.
 
 ---
 
-### 🛠 StreamAttachmentPickerOption
+### StreamAttachmentPickerOption
 
 > **Introduced in:** [v10.0.0-beta.3](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.3)
 
@@ -154,13 +154,13 @@ final systemOption = SystemAttachmentPickerOption(
 );
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - Use `SystemAttachmentPickerOption` for system pickers (camera, file dialogs)
 > - Use `TabbedAttachmentPickerOption` for custom UI pickers (gallery, polls)
 
 ---
 
-### 🛠 showStreamAttachmentPickerModalBottomSheet
+### showStreamAttachmentPickerModalBottomSheet
 
 > **Introduced in:** [v10.0.0-beta.3](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.3)
 
@@ -201,12 +201,12 @@ switch (result) {
 }
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > Always handle the new `StreamAttachmentPickerResult` return type with proper switch cases.
 
 ---
 
-### 🛠 AttachmentPickerBottomSheet
+### AttachmentPickerBottomSheet
 
 > **Introduced in:** [v10.0.0-beta.3](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.3)
 
@@ -247,12 +247,12 @@ StreamSystemAttachmentPickerBottomSheet(
 );
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > The new names better reflect their respective layouts and functionality.
 
 ---
 
-### 🛠 customAttachmentPickerOptions
+### customAttachmentPickerOptions
 
 > **Introduced in:** [v10.0.0-beta.8](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.8)
 
@@ -339,13 +339,13 @@ final result = await showStreamAttachmentPickerModalBottomSheet(
 );
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - The builder pattern gives you access to default options, allowing more flexible customization
 > - The builder works with both mobile (tabbed) and desktop (system) pickers
 
 ---
 
-### 🛠 onCustomAttachmentPickerResult
+### onCustomAttachmentPickerResult
 
 > **Introduced in:** [v10.0.0-beta.8](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.8)
 
@@ -382,14 +382,14 @@ StreamMessageInput(
 )
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - `onAttachmentPickerResult` replaces `onCustomAttachmentPickerResult` and must return a boolean
 > - Return `true` from `onAttachmentPickerResult` to skip default handling
 > - Return `false` to allow the default handler to process the result
 
 ---
 
-### 🛠 StreamAttachmentPickerController
+### StreamAttachmentPickerController
 
 > **Introduced in:** [v10.0.0-beta.12](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.12)
 
@@ -423,20 +423,20 @@ try {
 }
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - Replace `ArgumentError` catches with the specific typed errors
 > - `AttachmentTooLargeError` provides `fileSize` and `maxSize` properties
 > - `AttachmentLimitReachedError` provides `maxCount` property
 
 ---
 
-## 😍 Reactions
+## Reactions
 
 The reaction system has been updated to use explicit callbacks and a unified `Reaction` object API.
 
 ---
 
-### 🛠 SendReaction
+### SendReaction
 
 > **Introduced in:** [v10.0.0-beta.4](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.4)
 
@@ -488,14 +488,14 @@ client.sendReaction(
 );
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - The `sendReaction` method now requires a `Reaction` object
 > - Optional parameters like `enforceUnique` and `skipPush` remain as method parameters
 > - You can now specify custom emoji codes for reactions using the `emojiCode` field
 
 ---
 
-### 🛠 StreamReactionPicker
+### StreamReactionPicker
 
 > **Introduced in:** [v10.0.0-beta.1](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.1)
 
@@ -539,12 +539,12 @@ StreamReactionPicker(
 );
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > Automatic reaction handling has been removed. You must explicitly handle reactions using `onReactionPicked`.
 
 ---
 
-### 🛠 ReactionPickerIconList
+### ReactionPickerIconList
 
 > **Introduced in:** [v10.0.0-beta.9](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.9)
 
@@ -595,14 +595,14 @@ ReactionPickerIconList(
 )
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - This is typically an internal widget used by `StreamReactionPicker`
 > - If you were using it directly, you now need to handle reaction selection state externally
 > - Use `StreamReactionPicker` for most use cases instead of `ReactionPickerIconList`
 
 ---
 
-### 🛠 StreamMessageReactionsModal
+### StreamMessageReactionsModal
 
 > **Introduced in:** [v10.0.0-beta.1](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.1)
 
@@ -636,18 +636,18 @@ StreamMessageReactionsModal(
 );
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > `messageTheme` has been removed. Reaction handling must now be explicit using `onReactionPicked`.
 
 ---
 
-## 💬 Message UI
+## Message UI
 
 Updates to message widgets, attachment handling, and custom action patterns.
 
 ---
 
-### 🛠 onAttachmentTap
+### onAttachmentTap
 
 > **Introduced in:** [v10.0.0-beta.9](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.9)
 
@@ -712,7 +712,7 @@ StreamMessageWidget(
 )
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - The callback now requires `BuildContext` as the first parameter
 > - Must return `FutureOr<bool>` - `true` if handled, `false` for default behavior
 > - Default behavior automatically handles URL previews, images, videos, and giphys
@@ -720,7 +720,7 @@ StreamMessageWidget(
 
 ---
 
-### 🛠 StreamMessageWidget
+### StreamMessageWidget
 
 > **Introduced in:** [v10.0.0-beta.1](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.1)
 
@@ -746,12 +746,12 @@ StreamMessageWidget(
 );
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > The `showReactionTail` parameter is no longer supported. Tail is now always shown when the picker is visible.
 
 ---
 
-### 🛠 StreamMessageAction
+### StreamMessageAction
 
 > **Introduced in:** [v10.0.0-beta.1](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.1)
 
@@ -796,18 +796,18 @@ StreamMessageWidget(
 );
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > Individual `onTap` callbacks have been removed. Always handle actions using the centralized `onCustomActionTap`.
 
 ---
 
-## 🗑️ Message State & Deletion
+## Message State & Deletion
 
 Message deletion now supports scoped deletion modes including delete-for-me functionality.
 
 ---
 
-### 🛠 MessageState
+### MessageState
 
 > **Introduced in:** [v10.0.0-beta.7](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.7)
 
@@ -870,7 +870,7 @@ if (message.state.isDeletingForMeFailed) {
 }
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - All `MessageState` factory constructors now require `MessageDeleteScope` parameter
 > - Pattern matching callbacks receive `MessageDeleteScope` instead of `bool hard`
 > - Use `scope.hard` to access the hard delete boolean value
@@ -878,13 +878,13 @@ if (message.state.isDeletingForMeFailed) {
 
 ---
 
-## 📤 File Upload
+## File Upload
 
 The file uploader interface has been expanded with standalone upload and removal methods.
 
 ---
 
-### 🛠 AttachmentFileUploader
+### AttachmentFileUploader
 
 > **Introduced in:** [v10.0.0-beta.7](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.7)
 
@@ -984,57 +984,57 @@ class CustomAttachmentFileUploader implements AttachmentFileUploader {
 }
 ```
 
-> ⚠️ **Important:**  
+> **Important:**  
 > - Custom `AttachmentFileUploader` implementations must now implement four additional methods
 > - The new methods support standalone uploads/removals without requiring channel context
 > - `UploadImageResponse` and `UploadFileResponse` are aliases for `SendAttachmentResponse`
 
 ---
 
-## 📅 Appendix: Beta Release Timeline
+## Appendix: Beta Release Timeline
 
 This appendix provides a chronological reference of breaking changes by beta version for users upgrading from specific pre-release versions.
 
-### 🚧 v10.0.0-beta.1
+### v10.0.0-beta.1
 
-- [StreamReactionPicker](#-streamreactionpicker)
-- [StreamMessageAction](#-streammessageaction)
-- [StreamMessageReactionsModal](#-streammessagereactionsmodal)
-- [StreamMessageWidget](#-streammessagewidget)
+- [StreamReactionPicker](#streamreactionpicker)
+- [StreamMessageAction](#streammessageaction)
+- [StreamMessageReactionsModal](#streammessagereactionsmodal)
+- [StreamMessageWidget](#streammessagewidget)
 
-### 🚧 v10.0.0-beta.3
+### v10.0.0-beta.3
 
-- [AttachmentPickerType](#-attachmentpickertype)
-- [StreamAttachmentPickerOption](#-streamattachmentpickeroption)
-- [showStreamAttachmentPickerModalBottomSheet](#-showstreamattachmentpickermodalbottomsheet)
-- [AttachmentPickerBottomSheet](#-attachmentpickerbottomsheet)
+- [AttachmentPickerType](#attachmentpickertype)
+- [StreamAttachmentPickerOption](#streamattachmentpickeroption)
+- [showStreamAttachmentPickerModalBottomSheet](#showstreamattachmentpickermodalbottomsheet)
+- [AttachmentPickerBottomSheet](#attachmentpickerbottomsheet)
 
-### 🚧 v10.0.0-beta.4
+### v10.0.0-beta.4
 
-- [SendReaction](#-sendreaction)
+- [SendReaction](#sendreaction)
 
-### 🚧 v10.0.0-beta.7
+### v10.0.0-beta.7
 
-- [AttachmentFileUploader](#-attachmentfileuploader)
-- [MessageState](#-messagestate)
+- [AttachmentFileUploader](#attachmentfileuploader)
+- [MessageState](#messagestate)
 
-### 🚧 v10.0.0-beta.8
+### v10.0.0-beta.8
 
-- [customAttachmentPickerOptions](#-customattachmentpickeroptions)
-- [onCustomAttachmentPickerResult](#-oncustomattachmentpickerresult)
+- [customAttachmentPickerOptions](#customattachmentpickeroptions)
+- [onCustomAttachmentPickerResult](#oncustomattachmentpickerresult)
 
-### 🚧 v10.0.0-beta.9
+### v10.0.0-beta.9
 
-- [onAttachmentTap](#-onattachmenttap)
-- [ReactionPickerIconList](#-reactionpickericonlist)
+- [onAttachmentTap](#onattachmenttap)
+- [ReactionPickerIconList](#reactionpickericonlist)
 
-### 🚧 v10.0.0-beta.12
+### v10.0.0-beta.12
 
-- [StreamAttachmentPickerController](#-streamattachmentpickercontroller)
+- [StreamAttachmentPickerController](#streamattachmentpickercontroller)
 
 ---
 
-## ✅ Migration Checklist
+## Migration Checklist
 
 ### For v10.0.0-beta.12:
 - [ ] Replace `ArgumentError('The size of the attachment is...')` with `AttachmentTooLargeError` (provides `fileSize` and `maxSize` properties)
@@ -1073,4 +1073,4 @@ This appendix provides a chronological reference of breaking changes by beta ver
 
 ---
 
-🎉 **You're ready to migrate!** For additional help, visit the [Stream Chat Flutter documentation](https://getstream.io/chat/docs/sdk/flutter/) or open an issue on [GitHub](https://github.com/GetStream/stream-chat-flutter/issues).
+**You're ready to migrate!** For additional help, visit the [Stream Chat Flutter documentation](https://getstream.io/chat/docs/sdk/flutter/) or open an issue on [GitHub](https://github.com/GetStream/stream-chat-flutter/issues).
