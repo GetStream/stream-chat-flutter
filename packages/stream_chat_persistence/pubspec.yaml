@@ -22,7 +22,7 @@ environment:
   flutter: ">=3.27.4"
 
 dependencies:
-  drift: ^2.22.1
+  drift: ^2.28.0
   flutter:
     sdk: flutter
   logging: ^1.2.0
@@ -34,7 +34,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.4.9
-  drift_dev: ^2.22.1
+  drift_dev: ^2.28.0
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.0
