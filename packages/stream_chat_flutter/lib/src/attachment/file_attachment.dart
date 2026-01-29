@@ -59,7 +59,8 @@ class StreamFileAttachment extends StatelessWidget {
     final colorTheme = chatTheme.colorTheme;
 
     final backgroundColor = this.backgroundColor ?? colorTheme.barsBg;
-    final shape = this.shape ??
+    final shape =
+        this.shape ??
         RoundedRectangleBorder(
           side: BorderSide(
             color: colorTheme.borders,
@@ -103,7 +104,8 @@ class StreamFileAttachment extends StatelessWidget {
           const SizedBox(width: 8),
           Material(
             type: MaterialType.transparency,
-            child: trailing ??
+            child:
+                trailing ??
                 _Trailing(
                   attachment: file,
                   message: message,

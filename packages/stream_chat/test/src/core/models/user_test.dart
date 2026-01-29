@@ -9,8 +9,7 @@ void main() {
   const id = 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e';
   const role = 'test-role';
   const name = 'John';
-  const image =
-      'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow';
+  const image = 'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow';
   const extraDataStringTest = 'Extra data test';
   const extraDataIntTest = 1;
   const extraDataDoubleTest = 1.1;
@@ -352,15 +351,11 @@ void main() {
           lastActive: DateTime(2023, 6, 10),
         );
 
-        final field1 =
-            recentlyActive.getComparableField(UserSortKey.lastActive);
-        final field2 =
-            lessRecentlyActive.getComparableField(UserSortKey.lastActive);
+        final field1 = recentlyActive.getComparableField(UserSortKey.lastActive);
+        final field2 = lessRecentlyActive.getComparableField(UserSortKey.lastActive);
 
-        expect(field1!.compareTo(field2!),
-            greaterThan(0)); // More recent > Less recent
-        expect(
-            field2.compareTo(field1), lessThan(0)); // Less recent < More recent
+        expect(field1!.compareTo(field2!), greaterThan(0)); // More recent > Less recent
+        expect(field2.compareTo(field1), lessThan(0)); // Less recent < More recent
       });
 
       test('should compare two users correctly using banned status', () {

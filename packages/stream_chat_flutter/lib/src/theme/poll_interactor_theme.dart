@@ -37,19 +37,15 @@ class StreamPollInteractorTheme extends InheritedTheme {
   /// StreamPollInteractorTheme theme = StreamPollInteractorTheme.of(context);
   /// ```
   static StreamPollInteractorThemeData of(BuildContext context) {
-    final pollInteractorTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamPollInteractorTheme>();
-    return pollInteractorTheme?.data ??
-        StreamChatTheme.of(context).pollInteractorTheme;
+    final pollInteractorTheme = context.dependOnInheritedWidgetOfExactType<StreamPollInteractorTheme>();
+    return pollInteractorTheme?.data ?? StreamChatTheme.of(context).pollInteractorTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamPollInteractorTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamPollInteractorTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamPollInteractorTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamPollInteractorTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamPollInteractorThemeData}
@@ -160,42 +156,27 @@ class StreamPollInteractorThemeData with Diagnosticable {
       pollTitleStyle: pollTitleStyle ?? this.pollTitleStyle,
       pollSubtitleStyle: pollSubtitleStyle ?? this.pollSubtitleStyle,
       pollOptionTextStyle: pollOptionTextStyle ?? this.pollOptionTextStyle,
-      pollOptionVoteCountTextStyle:
-          pollOptionVoteCountTextStyle ?? this.pollOptionVoteCountTextStyle,
-      pollOptionCheckboxShape:
-          pollOptionCheckboxShape ?? this.pollOptionCheckboxShape,
-      pollOptionCheckboxCheckColor:
-          pollOptionCheckboxCheckColor ?? this.pollOptionCheckboxCheckColor,
-      pollOptionCheckboxActiveColor:
-          pollOptionCheckboxActiveColor ?? this.pollOptionCheckboxActiveColor,
-      pollOptionCheckboxBorderSide:
-          pollOptionCheckboxBorderSide ?? this.pollOptionCheckboxBorderSide,
+      pollOptionVoteCountTextStyle: pollOptionVoteCountTextStyle ?? this.pollOptionVoteCountTextStyle,
+      pollOptionCheckboxShape: pollOptionCheckboxShape ?? this.pollOptionCheckboxShape,
+      pollOptionCheckboxCheckColor: pollOptionCheckboxCheckColor ?? this.pollOptionCheckboxCheckColor,
+      pollOptionCheckboxActiveColor: pollOptionCheckboxActiveColor ?? this.pollOptionCheckboxActiveColor,
+      pollOptionCheckboxBorderSide: pollOptionCheckboxBorderSide ?? this.pollOptionCheckboxBorderSide,
       pollOptionVotesProgressBarMinHeight:
-          pollOptionVotesProgressBarMinHeight ??
-              this.pollOptionVotesProgressBarMinHeight,
+          pollOptionVotesProgressBarMinHeight ?? this.pollOptionVotesProgressBarMinHeight,
       pollOptionVotesProgressBarTrackColor:
-          pollOptionVotesProgressBarTrackColor ??
-              this.pollOptionVotesProgressBarTrackColor,
+          pollOptionVotesProgressBarTrackColor ?? this.pollOptionVotesProgressBarTrackColor,
       pollOptionVotesProgressBarValueColor:
-          pollOptionVotesProgressBarValueColor ??
-              this.pollOptionVotesProgressBarValueColor,
+          pollOptionVotesProgressBarValueColor ?? this.pollOptionVotesProgressBarValueColor,
       pollOptionVotesProgressBarWinnerColor:
-          pollOptionVotesProgressBarWinnerColor ??
-              this.pollOptionVotesProgressBarWinnerColor,
+          pollOptionVotesProgressBarWinnerColor ?? this.pollOptionVotesProgressBarWinnerColor,
       pollOptionVotesProgressBarBorderRadius:
-          pollOptionVotesProgressBarBorderRadius ??
-              this.pollOptionVotesProgressBarBorderRadius,
-      pollActionButtonStyle:
-          pollActionButtonStyle ?? this.pollActionButtonStyle,
-      pollActionDialogTitleStyle:
-          pollActionDialogTitleStyle ?? this.pollActionDialogTitleStyle,
-      pollActionDialogTextFieldStyle:
-          pollActionDialogTextFieldStyle ?? this.pollActionDialogTextFieldStyle,
-      pollActionDialogTextFieldFillColor: pollActionDialogTextFieldFillColor ??
-          this.pollActionDialogTextFieldFillColor,
+          pollOptionVotesProgressBarBorderRadius ?? this.pollOptionVotesProgressBarBorderRadius,
+      pollActionButtonStyle: pollActionButtonStyle ?? this.pollActionButtonStyle,
+      pollActionDialogTitleStyle: pollActionDialogTitleStyle ?? this.pollActionDialogTitleStyle,
+      pollActionDialogTextFieldStyle: pollActionDialogTextFieldStyle ?? this.pollActionDialogTextFieldStyle,
+      pollActionDialogTextFieldFillColor: pollActionDialogTextFieldFillColor ?? this.pollActionDialogTextFieldFillColor,
       pollActionDialogTextFieldBorderRadius:
-          pollActionDialogTextFieldBorderRadius ??
-              this.pollActionDialogTextFieldBorderRadius,
+          pollActionDialogTextFieldBorderRadius ?? this.pollActionDialogTextFieldBorderRadius,
     );
   }
 
@@ -206,43 +187,28 @@ class StreamPollInteractorThemeData with Diagnosticable {
       pollTitleStyle: other.pollTitleStyle ?? pollTitleStyle,
       pollSubtitleStyle: other.pollSubtitleStyle ?? pollSubtitleStyle,
       pollOptionTextStyle: other.pollOptionTextStyle ?? pollOptionTextStyle,
-      pollOptionVoteCountTextStyle:
-          other.pollOptionVoteCountTextStyle ?? pollOptionVoteCountTextStyle,
-      pollOptionCheckboxShape:
-          other.pollOptionCheckboxShape ?? pollOptionCheckboxShape,
-      pollOptionCheckboxCheckColor:
-          other.pollOptionCheckboxCheckColor ?? pollOptionCheckboxCheckColor,
-      pollOptionCheckboxActiveColor:
-          other.pollOptionCheckboxActiveColor ?? pollOptionCheckboxActiveColor,
-      pollOptionCheckboxBorderSide:
-          other.pollOptionCheckboxBorderSide ?? pollOptionCheckboxBorderSide,
+      pollOptionVoteCountTextStyle: other.pollOptionVoteCountTextStyle ?? pollOptionVoteCountTextStyle,
+      pollOptionCheckboxShape: other.pollOptionCheckboxShape ?? pollOptionCheckboxShape,
+      pollOptionCheckboxCheckColor: other.pollOptionCheckboxCheckColor ?? pollOptionCheckboxCheckColor,
+      pollOptionCheckboxActiveColor: other.pollOptionCheckboxActiveColor ?? pollOptionCheckboxActiveColor,
+      pollOptionCheckboxBorderSide: other.pollOptionCheckboxBorderSide ?? pollOptionCheckboxBorderSide,
       pollOptionVotesProgressBarMinHeight:
-          other.pollOptionVotesProgressBarMinHeight ??
-              pollOptionVotesProgressBarMinHeight,
+          other.pollOptionVotesProgressBarMinHeight ?? pollOptionVotesProgressBarMinHeight,
       pollOptionVotesProgressBarTrackColor:
-          other.pollOptionVotesProgressBarTrackColor ??
-              pollOptionVotesProgressBarTrackColor,
+          other.pollOptionVotesProgressBarTrackColor ?? pollOptionVotesProgressBarTrackColor,
       pollOptionVotesProgressBarValueColor:
-          other.pollOptionVotesProgressBarValueColor ??
-              pollOptionVotesProgressBarValueColor,
+          other.pollOptionVotesProgressBarValueColor ?? pollOptionVotesProgressBarValueColor,
       pollOptionVotesProgressBarWinnerColor:
-          other.pollOptionVotesProgressBarWinnerColor ??
-              pollOptionVotesProgressBarWinnerColor,
+          other.pollOptionVotesProgressBarWinnerColor ?? pollOptionVotesProgressBarWinnerColor,
       pollOptionVotesProgressBarBorderRadius:
-          other.pollOptionVotesProgressBarBorderRadius ??
-              pollOptionVotesProgressBarBorderRadius,
-      pollActionButtonStyle:
-          other.pollActionButtonStyle ?? pollActionButtonStyle,
-      pollActionDialogTitleStyle:
-          other.pollActionDialogTitleStyle ?? pollActionDialogTitleStyle,
-      pollActionDialogTextFieldStyle: other.pollActionDialogTextFieldStyle ??
-          pollActionDialogTextFieldStyle,
+          other.pollOptionVotesProgressBarBorderRadius ?? pollOptionVotesProgressBarBorderRadius,
+      pollActionButtonStyle: other.pollActionButtonStyle ?? pollActionButtonStyle,
+      pollActionDialogTitleStyle: other.pollActionDialogTitleStyle ?? pollActionDialogTitleStyle,
+      pollActionDialogTextFieldStyle: other.pollActionDialogTextFieldStyle ?? pollActionDialogTextFieldStyle,
       pollActionDialogTextFieldFillColor:
-          other.pollActionDialogTextFieldFillColor ??
-              pollActionDialogTextFieldFillColor,
+          other.pollActionDialogTextFieldFillColor ?? pollActionDialogTextFieldFillColor,
       pollActionDialogTextFieldBorderRadius:
-          other.pollActionDialogTextFieldBorderRadius ??
-              pollActionDialogTextFieldBorderRadius,
+          other.pollActionDialogTextFieldBorderRadius ?? pollActionDialogTextFieldBorderRadius,
     );
   }
 
@@ -254,56 +220,55 @@ class StreamPollInteractorThemeData with Diagnosticable {
   ) {
     return StreamPollInteractorThemeData(
       pollTitleStyle: TextStyle.lerp(a.pollTitleStyle, b.pollTitleStyle, t),
-      pollSubtitleStyle:
-          TextStyle.lerp(a.pollSubtitleStyle, b.pollSubtitleStyle, t),
-      pollOptionTextStyle:
-          TextStyle.lerp(a.pollOptionTextStyle, b.pollOptionTextStyle, t),
-      pollOptionVoteCountTextStyle: TextStyle.lerp(
-          a.pollOptionVoteCountTextStyle, b.pollOptionVoteCountTextStyle, t),
-      pollOptionCheckboxShape: OutlinedBorder.lerp(
-          a.pollOptionCheckboxShape, b.pollOptionCheckboxShape, t),
-      pollOptionCheckboxCheckColor: Color.lerp(
-          a.pollOptionCheckboxCheckColor, b.pollOptionCheckboxCheckColor, t),
-      pollOptionCheckboxActiveColor: Color.lerp(
-          a.pollOptionCheckboxActiveColor, b.pollOptionCheckboxActiveColor, t),
-      pollOptionCheckboxBorderSide: _lerpSides(
-          a.pollOptionCheckboxBorderSide, b.pollOptionCheckboxBorderSide, t),
+      pollSubtitleStyle: TextStyle.lerp(a.pollSubtitleStyle, b.pollSubtitleStyle, t),
+      pollOptionTextStyle: TextStyle.lerp(a.pollOptionTextStyle, b.pollOptionTextStyle, t),
+      pollOptionVoteCountTextStyle: TextStyle.lerp(a.pollOptionVoteCountTextStyle, b.pollOptionVoteCountTextStyle, t),
+      pollOptionCheckboxShape: OutlinedBorder.lerp(a.pollOptionCheckboxShape, b.pollOptionCheckboxShape, t),
+      pollOptionCheckboxCheckColor: Color.lerp(a.pollOptionCheckboxCheckColor, b.pollOptionCheckboxCheckColor, t),
+      pollOptionCheckboxActiveColor: Color.lerp(a.pollOptionCheckboxActiveColor, b.pollOptionCheckboxActiveColor, t),
+      pollOptionCheckboxBorderSide: _lerpSides(a.pollOptionCheckboxBorderSide, b.pollOptionCheckboxBorderSide, t),
       pollOptionVotesProgressBarMinHeight: lerpDouble(
-          a.pollOptionVotesProgressBarMinHeight,
-          b.pollOptionVotesProgressBarMinHeight,
-          t),
+        a.pollOptionVotesProgressBarMinHeight,
+        b.pollOptionVotesProgressBarMinHeight,
+        t,
+      ),
       pollOptionVotesProgressBarTrackColor: Color.lerp(
-          a.pollOptionVotesProgressBarTrackColor,
-          b.pollOptionVotesProgressBarTrackColor,
-          t),
+        a.pollOptionVotesProgressBarTrackColor,
+        b.pollOptionVotesProgressBarTrackColor,
+        t,
+      ),
       pollOptionVotesProgressBarValueColor: Color.lerp(
-          a.pollOptionVotesProgressBarValueColor,
-          b.pollOptionVotesProgressBarValueColor,
-          t),
+        a.pollOptionVotesProgressBarValueColor,
+        b.pollOptionVotesProgressBarValueColor,
+        t,
+      ),
       pollOptionVotesProgressBarWinnerColor: Color.lerp(
-          a.pollOptionVotesProgressBarWinnerColor,
-          b.pollOptionVotesProgressBarWinnerColor,
-          t),
+        a.pollOptionVotesProgressBarWinnerColor,
+        b.pollOptionVotesProgressBarWinnerColor,
+        t,
+      ),
       pollOptionVotesProgressBarBorderRadius: BorderRadius.lerp(
-          a.pollOptionVotesProgressBarBorderRadius,
-          b.pollOptionVotesProgressBarBorderRadius,
-          t),
-      pollActionButtonStyle:
-          ButtonStyle.lerp(a.pollActionButtonStyle, b.pollActionButtonStyle, t),
-      pollActionDialogTitleStyle: TextStyle.lerp(
-          a.pollActionDialogTitleStyle, b.pollActionDialogTitleStyle, t),
+        a.pollOptionVotesProgressBarBorderRadius,
+        b.pollOptionVotesProgressBarBorderRadius,
+        t,
+      ),
+      pollActionButtonStyle: ButtonStyle.lerp(a.pollActionButtonStyle, b.pollActionButtonStyle, t),
+      pollActionDialogTitleStyle: TextStyle.lerp(a.pollActionDialogTitleStyle, b.pollActionDialogTitleStyle, t),
       pollActionDialogTextFieldStyle: TextStyle.lerp(
-          a.pollActionDialogTextFieldStyle,
-          b.pollActionDialogTextFieldStyle,
-          t),
+        a.pollActionDialogTextFieldStyle,
+        b.pollActionDialogTextFieldStyle,
+        t,
+      ),
       pollActionDialogTextFieldFillColor: Color.lerp(
-          a.pollActionDialogTextFieldFillColor,
-          b.pollActionDialogTextFieldFillColor,
-          t),
+        a.pollActionDialogTextFieldFillColor,
+        b.pollActionDialogTextFieldFillColor,
+        t,
+      ),
       pollActionDialogTextFieldBorderRadius: BorderRadius.lerp(
-          a.pollActionDialogTextFieldBorderRadius,
-          b.pollActionDialogTextFieldBorderRadius,
-          t),
+        a.pollActionDialogTextFieldBorderRadius,
+        b.pollActionDialogTextFieldBorderRadius,
+        t,
+      ),
     );
   }
 
@@ -332,27 +297,18 @@ class StreamPollInteractorThemeData with Diagnosticable {
           other.pollOptionVoteCountTextStyle == pollOptionVoteCountTextStyle &&
           other.pollOptionCheckboxShape == pollOptionCheckboxShape &&
           other.pollOptionCheckboxCheckColor == pollOptionCheckboxCheckColor &&
-          other.pollOptionCheckboxActiveColor ==
-              pollOptionCheckboxActiveColor &&
+          other.pollOptionCheckboxActiveColor == pollOptionCheckboxActiveColor &&
           other.pollOptionCheckboxBorderSide == pollOptionCheckboxBorderSide &&
-          other.pollOptionVotesProgressBarMinHeight ==
-              pollOptionVotesProgressBarMinHeight &&
-          other.pollOptionVotesProgressBarTrackColor ==
-              pollOptionVotesProgressBarTrackColor &&
-          other.pollOptionVotesProgressBarValueColor ==
-              pollOptionVotesProgressBarValueColor &&
-          other.pollOptionVotesProgressBarWinnerColor ==
-              pollOptionVotesProgressBarWinnerColor &&
-          other.pollOptionVotesProgressBarBorderRadius ==
-              pollOptionVotesProgressBarBorderRadius &&
+          other.pollOptionVotesProgressBarMinHeight == pollOptionVotesProgressBarMinHeight &&
+          other.pollOptionVotesProgressBarTrackColor == pollOptionVotesProgressBarTrackColor &&
+          other.pollOptionVotesProgressBarValueColor == pollOptionVotesProgressBarValueColor &&
+          other.pollOptionVotesProgressBarWinnerColor == pollOptionVotesProgressBarWinnerColor &&
+          other.pollOptionVotesProgressBarBorderRadius == pollOptionVotesProgressBarBorderRadius &&
           other.pollActionButtonStyle == pollActionButtonStyle &&
           other.pollActionDialogTitleStyle == pollActionDialogTitleStyle &&
-          other.pollActionDialogTextFieldStyle ==
-              pollActionDialogTextFieldStyle &&
-          other.pollActionDialogTextFieldFillColor ==
-              pollActionDialogTextFieldFillColor &&
-          other.pollActionDialogTextFieldBorderRadius ==
-              pollActionDialogTextFieldBorderRadius;
+          other.pollActionDialogTextFieldStyle == pollActionDialogTextFieldStyle &&
+          other.pollActionDialogTextFieldFillColor == pollActionDialogTextFieldFillColor &&
+          other.pollActionDialogTextFieldBorderRadius == pollActionDialogTextFieldBorderRadius;
 
   @override
   int get hashCode =>

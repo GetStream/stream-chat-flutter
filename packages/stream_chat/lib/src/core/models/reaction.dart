@@ -19,16 +19,17 @@ class Reaction extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.extraData = const {},
-  })  : userId = userId ?? user?.id,
-        createdAt = createdAt ?? DateTime.timestamp(),
-        updatedAt = updatedAt ?? DateTime.timestamp();
+  }) : userId = userId ?? user?.id,
+       createdAt = createdAt ?? DateTime.timestamp(),
+       updatedAt = updatedAt ?? DateTime.timestamp();
 
   /// Create a new instance from a json
-  factory Reaction.fromJson(Map<String, dynamic> json) =>
-      _$ReactionFromJson(Serializer.moveToExtraDataFromRoot(
-        json,
-        topLevelFields,
-      ));
+  factory Reaction.fromJson(Map<String, dynamic> json) => _$ReactionFromJson(
+    Serializer.moveToExtraDataFromRoot(
+      json,
+      topLevelFields,
+    ),
+  );
 
   /// The messageId to which the reaction belongs
   @JsonKey(includeToJson: false)
@@ -77,8 +78,8 @@ class Reaction extends Equatable {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$ReactionToJson(this),
-      );
+    _$ReactionToJson(this),
+  );
 
   /// Creates a copy of [Reaction] with specified attributes overridden.
   Reaction copyWith({
@@ -91,43 +92,42 @@ class Reaction extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     Map<String, Object?>? extraData,
-  }) =>
-      Reaction(
-        messageId: messageId ?? this.messageId,
-        type: type ?? this.type,
-        user: user ?? this.user,
-        userId: userId ?? this.userId,
-        score: score ?? this.score,
-        emojiCode: emojiCode ?? this.emojiCode,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        extraData: extraData ?? this.extraData,
-      );
+  }) => Reaction(
+    messageId: messageId ?? this.messageId,
+    type: type ?? this.type,
+    user: user ?? this.user,
+    userId: userId ?? this.userId,
+    score: score ?? this.score,
+    emojiCode: emojiCode ?? this.emojiCode,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    extraData: extraData ?? this.extraData,
+  );
 
   /// Returns a new [Reaction] that is a combination of this reaction and the
   /// given [other] reaction.
   Reaction merge(Reaction other) => copyWith(
-        messageId: other.messageId,
-        type: other.type,
-        user: other.user,
-        userId: other.userId,
-        score: other.score,
-        emojiCode: other.emojiCode,
-        createdAt: other.createdAt,
-        updatedAt: other.updatedAt,
-        extraData: other.extraData,
-      );
+    messageId: other.messageId,
+    type: other.type,
+    user: other.user,
+    userId: other.userId,
+    score: other.score,
+    emojiCode: other.emojiCode,
+    createdAt: other.createdAt,
+    updatedAt: other.updatedAt,
+    extraData: other.extraData,
+  );
 
   @override
   List<Object?> get props => [
-        messageId,
-        type,
-        user,
-        userId,
-        score,
-        emojiCode,
-        createdAt,
-        updatedAt,
-        extraData,
-      ];
+    messageId,
+    type,
+    user,
+    userId,
+    score,
+    emojiCode,
+    createdAt,
+    updatedAt,
+    extraData,
+  ];
 }

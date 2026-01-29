@@ -28,16 +28,15 @@ class DraftMessage extends Equatable {
     this.poll,
     String? pollId,
     this.extraData = const {},
-  })  : id = id ?? const Uuid().v4(),
-        type = MessageType(type),
-        _quotedMessageId = quotedMessageId,
-        _pollId = pollId;
+  }) : id = id ?? const Uuid().v4(),
+       type = MessageType(type),
+       _quotedMessageId = quotedMessageId,
+       _pollId = pollId;
 
   /// Create a new instance from JSON.
-  factory DraftMessage.fromJson(Map<String, dynamic> json) =>
-      _$DraftMessageFromJson(
-        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-      );
+  factory DraftMessage.fromJson(Map<String, dynamic> json) => _$DraftMessageFromJson(
+    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+  );
 
   /// The message ID. This is either created by Stream or set client side when
   /// the message is added.
@@ -167,19 +166,19 @@ class DraftMessage extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        text,
-        type,
-        attachments,
-        parentId,
-        showInChannel,
-        mentionedUsers,
-        quotedMessageId,
-        silent,
-        command,
-        pollId,
-        extraData,
-      ];
+    id,
+    text,
+    type,
+    attachments,
+    parentId,
+    showInChannel,
+    mentionedUsers,
+    quotedMessageId,
+    silent,
+    command,
+    pollId,
+    extraData,
+  ];
 }
 
 /// Extension on [Message] to convert it to a [DraftMessage].

@@ -51,9 +51,7 @@ class ItemPosition {
           itemTrailingEdge == other.itemTrailingEdge;
 
   @override
-  int get hashCode =>
-      31 * (31 * (index.hashCode + 7) + itemLeadingEdge.hashCode) +
-      itemTrailingEdge.hashCode;
+  int get hashCode => 31 * (31 * (index.hashCode + 7) + itemLeadingEdge.hashCode) + itemTrailingEdge.hashCode;
 
   @override
   String toString() =>

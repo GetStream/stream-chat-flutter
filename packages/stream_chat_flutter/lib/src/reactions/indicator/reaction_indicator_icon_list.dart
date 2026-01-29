@@ -11,10 +11,11 @@ import 'package:stream_chat_flutter/src/misc/reaction_icon.dart';
 /// - [context]: The build context.
 /// - [icon]: The reaction icon data containing type and selection state.
 /// {@endtemplate}
-typedef ReactionIndicatorIconBuilder = Widget Function(
-  BuildContext context,
-  ReactionIndicatorIcon icon,
-);
+typedef ReactionIndicatorIconBuilder =
+    Widget Function(
+      BuildContext context,
+      ReactionIndicatorIcon icon,
+    );
 
 /// {@template reactionIndicatorIconList}
 /// A widget that displays a list of reactionIcons that users have reacted with

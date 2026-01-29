@@ -51,5 +51,6 @@ class RetryPolicy {
     StreamChatClient client,
     int attempt,
     StreamChatError? error,
-  ) shouldRetry;
+  )
+  shouldRetry;
 }

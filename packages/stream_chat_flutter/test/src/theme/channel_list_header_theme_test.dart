@@ -4,27 +4,26 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('ChannelListHeaderThemeData copyWith, ==, hashCode basics', () {
-    expect(const StreamChannelListHeaderThemeData(),
-        const StreamChannelListHeaderThemeData().copyWith());
-    expect(const StreamChannelListHeaderThemeData().hashCode,
-        const StreamChannelListHeaderThemeData().copyWith().hashCode);
+    expect(const StreamChannelListHeaderThemeData(), const StreamChannelListHeaderThemeData().copyWith());
+    expect(
+      const StreamChannelListHeaderThemeData().hashCode,
+      const StreamChannelListHeaderThemeData().copyWith().hashCode,
+    );
   });
 
   group('ChannelListHeaderThemeData lerps', () {
-    test(
-        '''Light ChannelListHeaderThemeData lerps completely to dark ChannelListHeaderThemeData''',
-        () {
+    test('''Light ChannelListHeaderThemeData lerps completely to dark ChannelListHeaderThemeData''', () {
       expect(
-          const StreamChannelListHeaderThemeData().lerp(
-              _channelListHeaderThemeControl,
-              _channelListHeaderThemeControlDark,
-              1),
-          _channelListHeaderThemeControlDark);
+        const StreamChannelListHeaderThemeData().lerp(
+          _channelListHeaderThemeControl,
+          _channelListHeaderThemeControlDark,
+          1,
+        ),
+        _channelListHeaderThemeControlDark,
+      );
     });
 
-    test(
-        '''Light ChannelListHeaderThemeData lerps halfway to dark ChannelListHeaderThemeData''',
-        () {
+    test('''Light ChannelListHeaderThemeData lerps halfway to dark ChannelListHeaderThemeData''', () {
       expect(
         const StreamChannelListHeaderThemeData().lerp(
           _channelListHeaderThemeControl,
@@ -38,23 +37,23 @@ void main() {
       );
     });
 
-    test(
-        '''Dark ChannelListHeaderThemeData lerps completely to light ChannelListHeaderThemeData''',
-        () {
+    test('''Dark ChannelListHeaderThemeData lerps completely to light ChannelListHeaderThemeData''', () {
       expect(
-          const StreamChannelListHeaderThemeData().lerp(
-              _channelListHeaderThemeControlDark,
-              _channelListHeaderThemeControl,
-              1),
-          _channelListHeaderThemeControl);
+        const StreamChannelListHeaderThemeData().lerp(
+          _channelListHeaderThemeControlDark,
+          _channelListHeaderThemeControl,
+          1,
+        ),
+        _channelListHeaderThemeControl,
+      );
     });
   });
 
   test('Merging dark and light themes results in a dark theme', () {
     expect(
-        _channelListHeaderThemeControl
-            .merge(_channelListHeaderThemeControlDark),
-        _channelListHeaderThemeControlDark);
+      _channelListHeaderThemeControl.merge(_channelListHeaderThemeControlDark),
+      _channelListHeaderThemeControlDark,
+    );
   });
 }
 

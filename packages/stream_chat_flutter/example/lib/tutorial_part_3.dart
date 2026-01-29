@@ -96,21 +96,21 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: StreamChannelListView(
-          controller: _listController,
-          itemBuilder: _channelPreviewBuilder,
-          onChannelTap: (channel) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => StreamChannel(
-                  channel: channel,
-                  child: const ChannelPage(),
-                ),
-              ),
-            );
-          },
-        ),
-      );
+    body: StreamChannelListView(
+      controller: _listController,
+      itemBuilder: _channelPreviewBuilder,
+      onChannelTap: (channel) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => StreamChannel(
+              channel: channel,
+              child: const ChannelPage(),
+            ),
+          ),
+        );
+      },
+    ),
+  );
 
   Widget _channelPreviewBuilder(
     BuildContext context,
@@ -143,12 +143,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       title: StreamChannelName(
         textStyle: StreamChannelPreviewTheme.of(context).titleStyle!.copyWith(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  // ignore: deprecated_member_use
-                  .withOpacity(opacity),
-            ),
+          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis
+              // ignore: deprecated_member_use
+              .withOpacity(opacity),
+        ),
         channel: channel,
       ),
       subtitle: Text(subtitle),

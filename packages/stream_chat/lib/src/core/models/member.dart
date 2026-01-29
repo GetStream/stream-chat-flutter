@@ -28,14 +28,14 @@ class Member extends Equatable implements ComparableFieldProvider {
     this.archivedAt,
     this.deletedMessages = const [],
     this.extraData = const {},
-  })  : userId = userId ?? user?.id,
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : userId = userId ?? user?.id,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
-        Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
-      );
+    Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
+  );
 
   /// Known top level fields.
   ///
@@ -128,50 +128,49 @@ class Member extends Equatable implements ComparableFieldProvider {
     bool? shadowBanned,
     List<String>? deletedMessages,
     Map<String, Object?>? extraData,
-  }) =>
-      Member(
-        user: user ?? this.user,
-        inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
-        inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
-        invited: invited ?? this.invited,
-        banned: banned ?? this.banned,
-        banExpires: banExpires ?? this.banExpires,
-        shadowBanned: shadowBanned ?? this.shadowBanned,
-        channelRole: channelRole ?? this.channelRole,
-        userId: userId ?? this.userId,
-        isModerator: isModerator ?? this.isModerator,
-        pinnedAt: pinnedAt ?? this.pinnedAt,
-        archivedAt: archivedAt ?? this.archivedAt,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        deletedMessages: deletedMessages ?? this.deletedMessages,
-        extraData: extraData ?? this.extraData,
-      );
+  }) => Member(
+    user: user ?? this.user,
+    inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
+    inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
+    invited: invited ?? this.invited,
+    banned: banned ?? this.banned,
+    banExpires: banExpires ?? this.banExpires,
+    shadowBanned: shadowBanned ?? this.shadowBanned,
+    channelRole: channelRole ?? this.channelRole,
+    userId: userId ?? this.userId,
+    isModerator: isModerator ?? this.isModerator,
+    pinnedAt: pinnedAt ?? this.pinnedAt,
+    archivedAt: archivedAt ?? this.archivedAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedMessages: deletedMessages ?? this.deletedMessages,
+    extraData: extraData ?? this.extraData,
+  );
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$MemberToJson(this),
-      );
+    _$MemberToJson(this),
+  );
 
   @override
   List<Object?> get props => [
-        user,
-        inviteAcceptedAt,
-        inviteRejectedAt,
-        invited,
-        channelRole,
-        userId,
-        isModerator,
-        banned,
-        banExpires,
-        shadowBanned,
-        pinnedAt,
-        archivedAt,
-        createdAt,
-        updatedAt,
-        deletedMessages,
-        extraData,
-      ];
+    user,
+    inviteAcceptedAt,
+    inviteRejectedAt,
+    invited,
+    channelRole,
+    userId,
+    isModerator,
+    banned,
+    banExpires,
+    shadowBanned,
+    pinnedAt,
+    archivedAt,
+    createdAt,
+    updatedAt,
+    deletedMessages,
+    extraData,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

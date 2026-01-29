@@ -90,9 +90,9 @@ class _StreamPollTextFieldState extends State<StreamPollTextField> {
     if (currValue != newValue) {
       _controller.value = switch (newValue) {
         final value? => TextEditingValue(
-            text: value,
-            selection: TextSelection.collapsed(offset: value.length),
-          ),
+          text: value,
+          selection: TextSelection.collapsed(offset: value.length),
+        ),
         _ => TextEditingValue.empty,
       };
     }
@@ -129,7 +129,8 @@ class _StreamPollTextFieldState extends State<StreamPollTextField> {
             right: horizontalPadding / 2,
           ),
           errorText: widget.errorText,
-          errorStyle: widget.errorStyle ??
+          errorStyle:
+              widget.errorStyle ??
               theme.textTheme.footnote.copyWith(
                 color: theme.colorTheme.accentError,
               ),

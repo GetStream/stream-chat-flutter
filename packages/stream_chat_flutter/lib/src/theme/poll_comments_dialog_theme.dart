@@ -30,19 +30,15 @@ class StreamPollCommentsDialogTheme extends InheritedTheme {
   /// If there is no enclosing [StreamPollCommentsDialogTheme] widget, then
   /// [StreamChatThemeData.pollCommentsDialogTheme] is used.
   static StreamPollCommentsDialogThemeData of(BuildContext context) {
-    final pollCommentsDialogTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamPollCommentsDialogTheme>();
-    return pollCommentsDialogTheme?.data ??
-        StreamChatTheme.of(context).pollCommentsDialogTheme;
+    final pollCommentsDialogTheme = context.dependOnInheritedWidgetOfExactType<StreamPollCommentsDialogTheme>();
+    return pollCommentsDialogTheme?.data ?? StreamChatTheme.of(context).pollCommentsDialogTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamPollCommentsDialogTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamPollCommentsDialogTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamPollCommentsDialogTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamPollCommentsDialogTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamPollCommentsDialogThemeData}
@@ -97,22 +93,16 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
     Color? pollCommentItemBackgroundColor,
     BorderRadius? pollCommentItemBorderRadius,
     ButtonStyle? updateYourCommentButtonStyle,
-  }) =>
-      StreamPollCommentsDialogThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        appBarElevation: appBarElevation ?? this.appBarElevation,
-        appBarBackgroundColor:
-            appBarBackgroundColor ?? this.appBarBackgroundColor,
-        appBarForegroundColor:
-            appBarForegroundColor ?? this.appBarForegroundColor,
-        appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
-        pollCommentItemBackgroundColor: pollCommentItemBackgroundColor ??
-            this.pollCommentItemBackgroundColor,
-        pollCommentItemBorderRadius:
-            pollCommentItemBorderRadius ?? this.pollCommentItemBorderRadius,
-        updateYourCommentButtonStyle:
-            updateYourCommentButtonStyle ?? this.updateYourCommentButtonStyle,
-      );
+  }) => StreamPollCommentsDialogThemeData(
+    backgroundColor: backgroundColor ?? this.backgroundColor,
+    appBarElevation: appBarElevation ?? this.appBarElevation,
+    appBarBackgroundColor: appBarBackgroundColor ?? this.appBarBackgroundColor,
+    appBarForegroundColor: appBarForegroundColor ?? this.appBarForegroundColor,
+    appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
+    pollCommentItemBackgroundColor: pollCommentItemBackgroundColor ?? this.pollCommentItemBackgroundColor,
+    pollCommentItemBorderRadius: pollCommentItemBorderRadius ?? this.pollCommentItemBorderRadius,
+    updateYourCommentButtonStyle: updateYourCommentButtonStyle ?? this.updateYourCommentButtonStyle,
+  );
 
   /// Merges this [StreamPollCommentsDialogThemeData] with the [other].
   StreamPollCommentsDialogThemeData merge(
@@ -140,12 +130,9 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
     return StreamPollCommentsDialogThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       appBarElevation: lerpDouble(a?.appBarElevation, b?.appBarElevation, t),
-      appBarBackgroundColor:
-          Color.lerp(a?.appBarBackgroundColor, b?.appBarBackgroundColor, t),
-      appBarForegroundColor:
-          Color.lerp(a?.appBarForegroundColor, b?.appBarForegroundColor, t),
-      appBarTitleTextStyle:
-          TextStyle.lerp(a?.appBarTitleTextStyle, b?.appBarTitleTextStyle, t),
+      appBarBackgroundColor: Color.lerp(a?.appBarBackgroundColor, b?.appBarBackgroundColor, t),
+      appBarForegroundColor: Color.lerp(a?.appBarForegroundColor, b?.appBarForegroundColor, t),
+      appBarTitleTextStyle: TextStyle.lerp(a?.appBarTitleTextStyle, b?.appBarTitleTextStyle, t),
       pollCommentItemBackgroundColor: Color.lerp(
         a?.pollCommentItemBackgroundColor,
         b?.pollCommentItemBackgroundColor,
@@ -173,8 +160,7 @@ class StreamPollCommentsDialogThemeData with Diagnosticable {
           other.appBarBackgroundColor == appBarBackgroundColor &&
           other.appBarForegroundColor == appBarForegroundColor &&
           other.appBarTitleTextStyle == appBarTitleTextStyle &&
-          other.pollCommentItemBackgroundColor ==
-              pollCommentItemBackgroundColor &&
+          other.pollCommentItemBackgroundColor == pollCommentItemBackgroundColor &&
           other.pollCommentItemBorderRadius == pollCommentItemBorderRadius &&
           other.updateYourCommentButtonStyle == updateYourCommentButtonStyle;
 

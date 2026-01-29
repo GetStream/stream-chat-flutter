@@ -40,8 +40,8 @@ class OwnUser extends User {
 
   /// Create a new instance from json.
   factory OwnUser.fromJson(Map<String, dynamic> json) => _$OwnUserFromJson(
-        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-      );
+    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+  );
 
   /// Create a new instance from [User] object.
   factory OwnUser.fromUser(User user) => OwnUser.fromJson(user.toJson());
@@ -74,37 +74,37 @@ class OwnUser extends User {
     int? avgResponseTime,
     PushPreference? pushPreferences,
     PrivacySettings? privacySettings,
-  }) =>
-      OwnUser(
-        id: id ?? this.id,
-        role: role ?? this.role,
-        name: name ??
-            extraData?['name'] as String? ??
-            // Using extraData value in order to not use id as name.
-            this.extraData['name'] as String?,
-        image: image ?? extraData?['image'] as String? ?? this.image,
-        banned: banned ?? this.banned,
-        banExpires: banExpires ?? this.banExpires,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        lastActive: lastActive ?? this.lastActive,
-        online: online ?? this.online,
-        extraData: extraData ?? this.extraData,
-        teams: teams ?? this.teams,
-        channelMutes: channelMutes ?? this.channelMutes,
-        devices: devices ?? this.devices,
-        mutes: mutes ?? this.mutes,
-        totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
-        unreadChannels: unreadChannels ?? this.unreadChannels,
-        unreadThreads: unreadThreads ?? this.unreadThreads,
-        blockedUserIds: blockedUserIds ?? this.blockedUserIds,
-        language: language ?? this.language,
-        invisible: invisible ?? this.invisible,
-        teamsRole: teamsRole ?? this.teamsRole,
-        avgResponseTime: avgResponseTime ?? this.avgResponseTime,
-        pushPreferences: pushPreferences ?? this.pushPreferences,
-        privacySettings: privacySettings ?? this.privacySettings,
-      );
+  }) => OwnUser(
+    id: id ?? this.id,
+    role: role ?? this.role,
+    name:
+        name ??
+        extraData?['name'] as String? ??
+        // Using extraData value in order to not use id as name.
+        this.extraData['name'] as String?,
+    image: image ?? extraData?['image'] as String? ?? this.image,
+    banned: banned ?? this.banned,
+    banExpires: banExpires ?? this.banExpires,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    lastActive: lastActive ?? this.lastActive,
+    online: online ?? this.online,
+    extraData: extraData ?? this.extraData,
+    teams: teams ?? this.teams,
+    channelMutes: channelMutes ?? this.channelMutes,
+    devices: devices ?? this.devices,
+    mutes: mutes ?? this.mutes,
+    totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
+    unreadChannels: unreadChannels ?? this.unreadChannels,
+    unreadThreads: unreadThreads ?? this.unreadThreads,
+    blockedUserIds: blockedUserIds ?? this.blockedUserIds,
+    language: language ?? this.language,
+    invisible: invisible ?? this.invisible,
+    teamsRole: teamsRole ?? this.teamsRole,
+    avgResponseTime: avgResponseTime ?? this.avgResponseTime,
+    pushPreferences: pushPreferences ?? this.pushPreferences,
+    privacySettings: privacySettings ?? this.privacySettings,
+  );
 
   /// Returns a new [OwnUser] that is a combination of this ownUser
   /// and the given [other] ownUser.

@@ -12,8 +12,7 @@ class Reads extends Table {
   TextColumn get userId => text()();
 
   /// The channel cid of which this read belongs
-  TextColumn get channelCid =>
-      text().references(Channels, #cid, onDelete: KeyAction.cascade)();
+  TextColumn get channelCid => text().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
   /// Number of unread messages
   IntColumn get unreadMessages => integer().withDefault(const Constant(0))();
@@ -29,7 +28,7 @@ class Reads extends Table {
 
   @override
   Set<Column> get primaryKey => {
-        userId,
-        channelCid,
-      };
+    userId,
+    channelCid,
+  };
 }

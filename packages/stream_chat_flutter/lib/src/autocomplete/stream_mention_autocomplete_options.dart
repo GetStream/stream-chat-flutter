@@ -16,14 +16,14 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
     this.mentionAllAppUsers = false,
     this.mentionsTileBuilder,
     this.onMentionUserTap,
-  })  : assert(
-          channel.state != null,
-          'Channel ${channel.cid} is not yet initialized',
-        ),
-        assert(
-          !mentionAllAppUsers || (mentionAllAppUsers && client != null),
-          'StreamChatClient is required in order to use mentionAllAppUsers',
-        );
+  }) : assert(
+         channel.state != null,
+         'Channel ${channel.cid} is not yet initialized',
+       ),
+       assert(
+         !mentionAllAppUsers || (mentionAllAppUsers && client != null),
+         'StreamChatClient is required in order to use mentionAllAppUsers',
+       );
 
   /// Query for searching users.
   final String query;
@@ -49,12 +49,10 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
   final ValueSetter<User>? onMentionUserTap;
 
   @override
-  _StreamMentionAutocompleteOptionsState createState() =>
-      _StreamMentionAutocompleteOptionsState();
+  _StreamMentionAutocompleteOptionsState createState() => _StreamMentionAutocompleteOptionsState();
 }
 
-class _StreamMentionAutocompleteOptionsState
-    extends State<StreamMentionAutocompleteOptions> {
+class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocompleteOptions> {
   late Future<List<User>> userMentionsFuture;
 
   @override
@@ -90,11 +88,8 @@ class _StreamMentionAutocompleteOptionsState
             return Material(
               color: colorTheme.barsBg,
               child: InkWell(
-                onTap: widget.onMentionUserTap == null
-                    ? null
-                    : () => widget.onMentionUserTap!(user),
-                child: widget.mentionsTileBuilder?.call(context, user) ??
-                    StreamUserMentionTile(user),
+                onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
+                child: widget.mentionsTileBuilder?.call(context, user) ?? StreamUserMentionTile(user),
               ),
             );
           },
@@ -131,18 +126,13 @@ class _StreamMentionAutocompleteOptionsState
     }
 
     final result = await _queryMembers(query);
-    return result
-        .map((it) => it.user)
-        .whereType<User>()
-        .toList(growable: false);
+    return result.map((it) => it.user).whereType<User>().toList(growable: false);
   }
 
   Future<List<Member>> _queryMembers(String query) async {
     final response = await widget.channel.queryMembers(
       pagination: PaginationParams(limit: widget.limit),
-      filter: query.isEmpty
-          ? const Filter.empty()
-          : Filter.autoComplete('name', query),
+      filter: query.isEmpty ? const Filter.empty() : Filter.autoComplete('name', query),
     );
     return response.members;
   }

@@ -52,9 +52,7 @@ class UrlAttachmentBuilder extends StreamAttachmentWidgetBuilder {
     final isMyMessage = message.user?.id == client.state.currentUser?.id;
 
     final streamChatTheme = StreamChatTheme.of(context);
-    final messageTheme = isMyMessage
-        ? streamChatTheme.ownMessageTheme
-        : streamChatTheme.otherMessageTheme;
+    final messageTheme = isMyMessage ? streamChatTheme.ownMessageTheme : streamChatTheme.otherMessageTheme;
 
     Widget _buildUrlPreview(Attachment urlPreview) {
       VoidCallback? onTap;
@@ -65,9 +63,8 @@ class UrlAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       final host = Uri.parse(urlPreview.titleLink!).host;
       final splitList = host.split('.');
       final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
-      final hostDisplayName = urlPreview.authorName?.sentenceCase ??
-          getWebsiteName(hostName.toLowerCase()) ??
-          hostName.sentenceCase;
+      final hostDisplayName =
+          urlPreview.authorName?.sentenceCase ?? getWebsiteName(hostName.toLowerCase()) ?? hostName.sentenceCase;
 
       return InkWell(
         onTap: onTap,

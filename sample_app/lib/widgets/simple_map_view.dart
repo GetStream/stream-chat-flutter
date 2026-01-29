@@ -4,11 +4,12 @@ import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-typedef MarkerBuilder = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
-  double markerSize,
-);
+typedef MarkerBuilder =
+    Widget Function(
+      BuildContext context,
+      Animation<double> animation,
+      double markerSize,
+    );
 
 class SimpleMapView extends StatefulWidget {
   const SimpleMapView({
@@ -39,8 +40,7 @@ class SimpleMapView extends StatefulWidget {
   State<SimpleMapView> createState() => _SimpleMapViewState();
 }
 
-class _SimpleMapViewState extends State<SimpleMapView>
-    with TickerProviderStateMixin<SimpleMapView> {
+class _SimpleMapViewState extends State<SimpleMapView> with TickerProviderStateMixin<SimpleMapView> {
   late final _mapController = AnimatedMapController(vsync: this);
   late final _initialCenter = widget.coordinates.toLatLng();
 

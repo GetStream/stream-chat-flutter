@@ -21,11 +21,12 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 ///   - [StreamAudioRecorderButton], which uses this builder function.
 ///   - [StreamAudioRecorderState], which provides the state of the recorder.
 /// {@endtemplate}
-typedef AudioRecorderBuilder = Widget Function(
-  BuildContext,
-  AudioRecorderState,
-  Widget,
-);
+typedef AudioRecorderBuilder =
+    Widget Function(
+      BuildContext,
+      AudioRecorderState,
+      Widget,
+    );
 
 /// {@template streamAudioRecorderButton}
 /// A configurable audio recording button with interactive states and gestures.
@@ -177,44 +178,44 @@ class StreamAudioRecorderButton extends StatelessWidget {
         builder: (context, state, recordButton) => switch (state) {
           // Show only the record button if the recording is not in progress.
           RecordStateIdle() => RecordStateIdleContent(
-              state: state,
-              recordButton: recordButton,
-            ),
+            state: state,
+            recordButton: recordButton,
+          ),
           RecordStateRecordingHold() => RecordStateHoldRecordingContent(
-              state: state,
-              recordButton: recordButton,
-              cancelThreshold: cancelRecordThreshold,
-            ),
+            state: state,
+            recordButton: recordButton,
+            cancelThreshold: cancelRecordThreshold,
+          ),
           RecordStateRecordingLocked() => RecordStateLockedRecordingContent(
-              state: state,
-              onRecordEnd: () async {
-                await feedback.onRecordFinish(context);
-                return onRecordFinish?.call();
-              },
-              onRecordPause: () async {
-                await feedback.onRecordPause(context);
-                return onRecordPause?.call();
-              },
-              onRecordCancel: () async {
-                await feedback.onRecordCancel(context);
-                return onRecordCancel?.call();
-              },
-              onRecordStop: () async {
-                await feedback.onRecordStop(context);
-                return onRecordStop?.call();
-              },
-            ),
+            state: state,
+            onRecordEnd: () async {
+              await feedback.onRecordFinish(context);
+              return onRecordFinish?.call();
+            },
+            onRecordPause: () async {
+              await feedback.onRecordPause(context);
+              return onRecordPause?.call();
+            },
+            onRecordCancel: () async {
+              await feedback.onRecordCancel(context);
+              return onRecordCancel?.call();
+            },
+            onRecordStop: () async {
+              await feedback.onRecordStop(context);
+              return onRecordStop?.call();
+            },
+          ),
           RecordStateStopped() => RecordStateStoppedContent(
-              state: state,
-              onRecordCancel: () async {
-                await feedback.onRecordCancel(context);
-                return onRecordCancel?.call();
-              },
-              onRecordFinish: () async {
-                await feedback.onRecordFinish(context);
-                return onRecordFinish?.call();
-              },
-            ),
+            state: state,
+            onRecordCancel: () async {
+              await feedback.onRecordCancel(context);
+              return onRecordCancel?.call();
+            },
+            onRecordFinish: () async {
+              await feedback.onRecordFinish(context);
+              return onRecordFinish?.call();
+            },
+          ),
         },
       ),
     );
@@ -461,7 +462,7 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
                 icon: const StreamSvgIcon(icon: StreamSvgIcons.checkSend),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordEnd,
-              )
+              ),
             ],
           ),
         ],
@@ -498,8 +499,7 @@ class RecordStateStoppedContent extends StatefulWidget {
   final VoidCallback? onRecordFinish;
 
   @override
-  State<RecordStateStoppedContent> createState() =>
-      _RecordStateStoppedContentState();
+  State<RecordStateStoppedContent> createState() => _RecordStateStoppedContentState();
 }
 
 class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
@@ -615,7 +615,7 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
                 icon: const StreamSvgIcon(icon: StreamSvgIcons.checkSend),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordFinish,
-              )
+              ),
             ],
           ),
         ],
@@ -718,21 +718,21 @@ class PlaybackControlButton extends StatelessWidget {
       },
       icon: switch (state) {
         TrackState.loading => Builder(
-            builder: (context) {
-              final iconTheme = IconTheme.of(context);
-              return SizedBox.fromSize(
-                size: Size.square(iconTheme.size!),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: CircularProgressIndicator.adaptive(
-                    valueColor: AlwaysStoppedAnimation(
-                      theme.colorTheme.accentPrimary,
-                    ),
+          builder: (context) {
+            final iconTheme = IconTheme.of(context);
+            return SizedBox.fromSize(
+              size: Size.square(iconTheme.size!),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: CircularProgressIndicator.adaptive(
+                  valueColor: AlwaysStoppedAnimation(
+                    theme.colorTheme.accentPrimary,
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
+        ),
         TrackState.idle => const StreamSvgIcon(icon: StreamSvgIcons.play),
         TrackState.paused => const StreamSvgIcon(icon: StreamSvgIcons.play),
         TrackState.playing => const StreamSvgIcon(icon: StreamSvgIcons.pause),
@@ -949,13 +949,16 @@ class _SlideTransitionWidgetState extends State<SlideTransitionWidget>
 
   @override
   Widget build(BuildContext context) {
-    final position = Tween<Offset>(
-      begin: widget.begin,
-      end: widget.end,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    ));
+    final position =
+        Tween<Offset>(
+          begin: widget.begin,
+          end: widget.end,
+        ).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: widget.curve,
+          ),
+        );
 
     return SlideTransition(
       position: position,
@@ -985,8 +988,8 @@ class HoldToRecordInfoTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
-    const recordButtonWidth = kDefaultMessageInputIconSize +
-        kDefaultMessageInputIconPadding * 2; // right, left padding.
+    const recordButtonWidth =
+        kDefaultMessageInputIconSize + kDefaultMessageInputIconPadding * 2; // right, left padding.
 
     const arrowSize = Size(recordButtonWidth / 2, 6);
 

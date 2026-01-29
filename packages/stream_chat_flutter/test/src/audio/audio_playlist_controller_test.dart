@@ -52,12 +52,9 @@ void main() {
       speedController = PublishSubject<double>();
 
       // Default mock behaviors
-      when(() => mockPlayer.playerStateStream)
-          .thenAnswer((_) => stateController.stream);
-      when(() => mockPlayer.positionStream)
-          .thenAnswer((_) => positionController.stream);
-      when(() => mockPlayer.speedStream)
-          .thenAnswer((_) => speedController.stream);
+      when(() => mockPlayer.playerStateStream).thenAnswer((_) => stateController.stream);
+      when(() => mockPlayer.positionStream).thenAnswer((_) => positionController.stream);
+      when(() => mockPlayer.speedStream).thenAnswer((_) => speedController.stream);
 
       controller = StreamAudioPlaylistController.raw(
         player: mockPlayer,
@@ -124,7 +121,7 @@ void main() {
           PlaylistTrack(
             title: 'new-track.mp3',
             uri: Uri.parse('https://example.com/new-track.mp3'),
-          )
+          ),
         ];
 
         await controller.updatePlaylist(newTracks);

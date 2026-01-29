@@ -4,25 +4,19 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('ChannelHeaderThemeData copyWith, ==, hashCode basics', () {
-    expect(const StreamChannelHeaderThemeData(),
-        const StreamChannelHeaderThemeData().copyWith());
-    expect(const StreamChannelHeaderThemeData().hashCode,
-        const StreamChannelHeaderThemeData().copyWith().hashCode);
+    expect(const StreamChannelHeaderThemeData(), const StreamChannelHeaderThemeData().copyWith());
+    expect(const StreamChannelHeaderThemeData().hashCode, const StreamChannelHeaderThemeData().copyWith().hashCode);
   });
 
   group('ChannelHeaderThemeData lerps', () {
-    test(
-        '''Light ChannelHeaderThemeData lerps completely to dark ChannelHeaderThemeData''',
-        () {
+    test('''Light ChannelHeaderThemeData lerps completely to dark ChannelHeaderThemeData''', () {
       expect(
-          const StreamChannelHeaderThemeData()
-              .lerp(_channelThemeControl, _channelThemeControlDark, 1),
-          _channelThemeControlDark);
+        const StreamChannelHeaderThemeData().lerp(_channelThemeControl, _channelThemeControlDark, 1),
+        _channelThemeControlDark,
+      );
     });
 
-    test(
-        '''Light ChannelHeaderThemeData lerps halfway to dark ChannelHeaderThemeData''',
-        () {
+    test('''Light ChannelHeaderThemeData lerps halfway to dark ChannelHeaderThemeData''', () {
       expect(
         const StreamChannelHeaderThemeData().lerp(
           _channelThemeControl,
@@ -36,19 +30,16 @@ void main() {
       );
     });
 
-    test(
-        '''Dark ChannelHeaderThemeData lerps completely to light ChannelHeaderThemeData''',
-        () {
+    test('''Dark ChannelHeaderThemeData lerps completely to light ChannelHeaderThemeData''', () {
       expect(
-          const StreamChannelHeaderThemeData()
-              .lerp(_channelThemeControlDark, _channelThemeControl, 1),
-          _channelThemeControl);
+        const StreamChannelHeaderThemeData().lerp(_channelThemeControlDark, _channelThemeControl, 1),
+        _channelThemeControl,
+      );
     });
   });
 
   test('Merging dark and light themes results in a dark theme', () {
-    expect(_channelThemeControl.merge(_channelThemeControlDark),
-        _channelThemeControlDark);
+    expect(_channelThemeControl.merge(_channelThemeControlDark), _channelThemeControlDark);
   });
 }
 
@@ -62,11 +53,11 @@ final _channelThemeControl = StreamChannelHeaderThemeData(
   ),
   color: const Color(0xff101418),
   titleStyle: const StreamTextTheme.light().headlineBold.copyWith(
-        color: const Color(0xffffffff),
-      ),
+    color: const Color(0xffffffff),
+  ),
   subtitleStyle: const StreamTextTheme.light().footnote.copyWith(
-        color: const Color(0xff7a7a7a),
-      ),
+    color: const Color(0xff7a7a7a),
+  ),
 );
 
 final _channelThemeControlMidLerp = StreamChannelHeaderThemeData(
@@ -84,8 +75,8 @@ final _channelThemeControlMidLerp = StreamChannelHeaderThemeData(
     fontSize: 16,
   ),
   subtitleStyle: const StreamTextTheme.light().footnote.copyWith(
-        color: const Color(0xff7a7a7a),
-      ),
+    color: const Color(0xff7a7a7a),
+  ),
 );
 
 final _channelThemeControlDark = StreamChannelHeaderThemeData(
@@ -99,6 +90,6 @@ final _channelThemeControlDark = StreamChannelHeaderThemeData(
   color: const StreamColorTheme.dark().barsBg,
   titleStyle: const StreamTextTheme.dark().headlineBold,
   subtitleStyle: const StreamTextTheme.dark().footnote.copyWith(
-        color: const Color(0xff7A7A7A),
-      ),
+    color: const Color(0xff7A7A7A),
+  ),
 );

@@ -82,20 +82,20 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: StreamChannelListView(
-          controller: _listController,
-          onChannelTap: (channel) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => StreamChannel(
-                  channel: channel,
-                  child: const ChannelPage(),
-                ),
-              ),
-            );
-          },
-        ),
-      );
+    body: StreamChannelListView(
+      controller: _listController,
+      onChannelTap: (channel) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => StreamChannel(
+              channel: channel,
+              child: const ChannelPage(),
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }
 
 class ChannelPage extends StatelessWidget {

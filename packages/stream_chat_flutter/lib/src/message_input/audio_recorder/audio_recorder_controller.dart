@@ -30,9 +30,9 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
       config: switch (config) {
         final config? => config,
         _ => const RecordConfig(
-            numChannels: 1,
-            encoder: kIsWeb ? AudioEncoder.wav : AudioEncoder.aacLc,
-          ),
+          numChannels: 1,
+          encoder: kIsWeb ? AudioEncoder.wav : AudioEncoder.aacLc,
+        ),
       },
     );
   }
@@ -44,8 +44,8 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
     required AudioRecorder recorder,
     AudioRecorderState initialState = const RecordStateIdle(),
     Duration amplitudeInterval = const Duration(milliseconds: 100),
-  })  : _recorder = recorder,
-        super(initialState) {
+  }) : _recorder = recorder,
+       super(initialState) {
     // Listen to the recorder amplitude changes
     _recorderAmplitudeSubscription = _recorder
         .onAmplitudeChanged(amplitudeInterval) //

@@ -23,8 +23,7 @@ class StreamVersion extends StatelessWidget {
 
           final pubspec = snapshot.data!;
           final yaml = loadYaml(pubspec);
-          final streamChatDep =
-              yaml['packages']['stream_chat_flutter']['version'];
+          final streamChatDep = yaml['packages']['stream_chat_flutter']['version'];
 
           return Text(
             '${AppLocalizations.of(context).streamSDK} v $streamChatDep',

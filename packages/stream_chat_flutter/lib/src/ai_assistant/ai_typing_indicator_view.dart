@@ -145,25 +145,25 @@ class _AnimatedDot extends StatefulWidget {
   State<_AnimatedDot> createState() => _AnimatedDotState();
 }
 
-class _AnimatedDotState extends State<_AnimatedDot>
-    with SingleTickerProviderStateMixin<_AnimatedDot> {
+class _AnimatedDotState extends State<_AnimatedDot> with SingleTickerProviderStateMixin<_AnimatedDot> {
   late final AnimationController _repeatingController;
 
   @override
   void initState() {
     super.initState();
-    _repeatingController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    )..addStatusListener(
-        (status) {
-          if (status == AnimationStatus.completed) {
-            if (mounted) _repeatingController.reverse();
-          } else if (status == AnimationStatus.dismissed) {
-            if (mounted) _repeatingController.forward();
-          }
-        },
-      );
+    _repeatingController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 800),
+        )..addStatusListener(
+          (status) {
+            if (status == AnimationStatus.completed) {
+              if (mounted) _repeatingController.reverse();
+            } else if (status == AnimationStatus.dismissed) {
+              if (mounted) _repeatingController.forward();
+            }
+          },
+        );
 
     Future.delayed(
       Duration(milliseconds: 200 * widget.index),

@@ -66,12 +66,10 @@ class StreamPollOptionVotesDialog extends StatefulWidget {
   final int? pollVotesCount;
 
   @override
-  State<StreamPollOptionVotesDialog> createState() =>
-      _StreamPollOptionVotesDialogState();
+  State<StreamPollOptionVotesDialog> createState() => _StreamPollOptionVotesDialogState();
 }
 
-class _StreamPollOptionVotesDialogState
-    extends State<StreamPollOptionVotesDialog> {
+class _StreamPollOptionVotesDialogState extends State<StreamPollOptionVotesDialog> {
   late StreamPollVoteListController _controller;
 
   @override
@@ -83,8 +81,7 @@ class _StreamPollOptionVotesDialogState
   @override
   void didUpdateWidget(covariant StreamPollOptionVotesDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.poll.id != widget.poll.id ||
-        oldWidget.option.id != widget.option.id) {
+    if (oldWidget.poll.id != widget.poll.id || oldWidget.option.id != widget.option.id) {
       _controller.dispose(); // Dispose the old controller.
       _initializeController(); // Initialize a new controller.
     }
@@ -141,9 +138,7 @@ class _StreamPollOptionVotesDialogState
                   context.translations.voteCountLabel(
                     count: widget.pollVotesCount,
                   ),
-                  style: isOptionWinner
-                      ? theme.pollOptionWinnerVoteCountTextStyle
-                      : theme.pollOptionVoteCountTextStyle,
+                  style: isOptionWinner ? theme.pollOptionWinnerVoteCountTextStyle : theme.pollOptionVoteCountTextStyle,
                 ),
               ],
             ),

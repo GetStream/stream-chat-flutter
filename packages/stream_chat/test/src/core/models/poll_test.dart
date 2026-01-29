@@ -63,7 +63,7 @@ void main() {
       expect(json['name'], 'test');
       expect(json['description'], isNull);
       expect(json['options'], [
-        {'text': 'option1 text'}
+        {'text': 'option1 text'},
       ]);
       expect(json['voting_visibility'], 'public');
       expect(json['enforce_unique_vote'], true);

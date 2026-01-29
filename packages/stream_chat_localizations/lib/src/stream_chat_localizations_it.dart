@@ -56,8 +56,7 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      'Caricamento $remaining/$total ...';
+  }) => 'Caricamento $remaining/$total ...';
 
   @override
   String pinnedByUserText({
@@ -70,8 +69,7 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get sendMessagePermissionError =>
-      "Non hai l'autorizzazione per inviare messaggi";
+  String get sendMessagePermissionError => "Non hai l'autorizzazione per inviare messaggi";
 
   @override
   String get emptyMessagesText => "Non c'é nessun messaggio al momento";
@@ -80,8 +78,7 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get genericErrorText => 'Qualcosa è andato storto';
 
   @override
-  String get loadingMessagesError =>
-      'Errore durante il caricamento dei messaggi';
+  String get loadingMessagesError => 'Errore durante il caricamento dei messaggi';
 
   @override
   String resultCountText(int count) => '$count risultati';
@@ -120,8 +117,7 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get reconnectingLabel => 'Riconnessione in corso...';
 
   @override
-  String get alsoSendAsDirectMessageLabel =>
-      'Manda anche come messaggio diretto';
+  String get alsoSendAsDirectMessageLabel => 'Manda anche come messaggio diretto';
 
   @override
   String get addACommentOrSendLabel => 'Aggiungi un commento o invia';
@@ -146,8 +142,7 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
 Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      'Impossibile leggere i byte dal file.';
+  String get couldNotReadBytesFromFileError => 'Impossibile leggere i byte dal file.';
 
   @override
   String get addAFileLabel => 'Aggiungi un file';
@@ -187,8 +182,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get flagMessageLabel => 'Segnala messaggio';
 
   @override
-  String get flagMessageQuestion =>
-      'Vuoi mandare una copia di questo messaggio ad un moderatore?';
+  String get flagMessageQuestion => 'Vuoi mandare una copia di questo messaggio ad un moderatore?';
 
   @override
   String get flagLabel => 'SEGNALA';
@@ -200,8 +194,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get flagMessageSuccessfulLabel => 'Messaggio segnalato';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'Questo messaggio è stato segnalato ad un moderatore.';
+  String get flagMessageSuccessfulText => 'Questo messaggio è stato segnalato ad un moderatore.';
 
   @override
   String get deleteLabel => 'CANCELLA';
@@ -210,12 +203,10 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get deleteMessageLabel => 'Cancella messaggio';
 
   @override
-  String get deleteMessageQuestion =>
-      'Sei sicuro di voler definitivamente cancellare questo messaggio?';
+  String get deleteMessageQuestion => 'Sei sicuro di voler definitivamente cancellare questo messaggio?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      'Non è stato possibile completare questa operazione.';
+  String get operationCouldNotBeCompletedText => 'Non è stato possibile completare questa operazione.';
 
   @override
   String get replyLabel => 'Rispondi';
@@ -285,8 +276,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get letsStartChattingLabel => 'Inizia una conversazione!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'Che ne dici di mandare il tuo primo messaggio ad un amico?';
+  String get sendingFirstMessageLabel => 'Che ne dici di mandare il tuo primo messaggio ad un amico?';
 
   @override
   String get startAChatLabel => 'Inizia una conversazione';
@@ -298,8 +288,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get deleteConversationLabel => 'Elimina conversazione';
 
   @override
-  String get deleteConversationQuestion =>
-      'Sei sicuro di voler eliminare questa conversazione?';
+  String get deleteConversationQuestion => 'Sei sicuro di voler eliminare questa conversazione?';
 
   @override
   String get streamChatLabel => 'Stream Chat';
@@ -338,8 +327,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get leaveConversationLabel => 'Esci dalla conversazione';
 
   @override
-  String get leaveConversationQuestion =>
-      'Sei sicuro di voler lasciare questa conversazione?';
+  String get leaveConversationQuestion => 'Sei sicuro di voler lasciare questa conversazione?';
 
   @override
   String get showInChatLabel => 'Mostra nella chat';
@@ -375,8 +363,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} di $totalPages';
+  }) => '${currentPage + 1} di $totalPages';
 
   @override
   String get fileText => 'file';
@@ -385,7 +372,8 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get replyToMessageLabel => 'Rispondi al messaggio';
 
   @override
-  String attachmentLimitExceedError(int limit) => '''
+  String attachmentLimitExceedError(int limit) =>
+      '''
 Attenzione: il limite massimo di $limit file è stato superato.
   ''';
 
@@ -444,8 +432,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   }
 
   @override
-  String get linkDisabledDetails =>
-      'Non è permesso condividere link in questa convesazione.';
+  String get linkDisabledDetails => 'Non è permesso condividere link in questa convesazione.';
 
   @override
   String get linkDisabledError => 'I links sono disattivati';
@@ -564,15 +551,13 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get enterYourCommentLabel => 'Inserisci il tuo commento';
 
   @override
-  String get endVoteConfirmationText =>
-      'Sei sicuro di voler terminare il voto?';
+  String get endVoteConfirmationText => 'Sei sicuro di voler terminare il voto?';
 
   @override
   String get deletePollOptionLabel => "Elimina l'opzione";
 
   @override
-  String get deletePollOptionQuestion =>
-      'Sei sicuro di voler eliminare questa opzione?';
+  String get deletePollOptionQuestion => 'Sei sicuro di voler eliminare questa opzione?';
 
   @override
   String get createLabel => 'Crea';
@@ -616,17 +601,16 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 voti',
-        1 => '1 voto',
-        _ => '$count voti',
-      };
+    null || < 1 => '0 voti',
+    1 => '1 voto',
+    _ => '$count voti',
+  };
 
   @override
   String get noPollVotesLabel => 'Attualmente non ci sono voti nel sondaggio';
 
   @override
-  String get loadingPollVotesError =>
-      'Errore durante il caricamento dei voti del sondaggio';
+  String get loadingPollVotesError => 'Errore durante il caricamento dei voti del sondaggio';
 
   @override
   String get repliedToLabel => 'risposto a:';
@@ -641,15 +625,13 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get slideToCancelLabel => 'Scorri per annullare';
 
   @override
-  String get holdToRecordLabel =>
-      'Tieni premuto per registrare, rilascia per inviare';
+  String get holdToRecordLabel => 'Tieni premuto per registrare, rilascia per inviare';
 
   @override
   String get sendAnywayLabel => 'Invia comunque';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Messaggio bloccato dalle politiche di moderazione';
+  String get moderatedMessageBlockedText => 'Messaggio bloccato dalle politiche di moderazione';
 
   @override
   String get moderationReviewModalTitle => 'Sei sicuro?';

@@ -51,8 +51,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      'Uploading $remaining/$total ...';
+  }) => 'Uploading $remaining/$total ...';
 
   @override
   String pinnedByUserText({
@@ -65,8 +64,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get sendMessagePermissionError =>
-      "You don't have permission to send messages";
+  String get sendMessagePermissionError => "You don't have permission to send messages";
 
   @override
   String get emptyMessagesText => 'There are no messages currently';
@@ -139,8 +137,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
       'The file is too large to upload. The file size limit is $limitInMB MB.';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      'Could not read bytes from file.';
+  String get couldNotReadBytesFromFileError => 'Could not read bytes from file.';
 
   @override
   String get addAFileLabel => 'Add a file';
@@ -193,8 +190,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulLabel => 'Message flagged';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'The message has been reported to a moderator.';
+  String get flagMessageSuccessfulText => 'The message has been reported to a moderator.';
 
   @override
   String get deleteLabel => 'DELETE';
@@ -203,12 +199,10 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get deleteMessageLabel => 'Delete Message';
 
   @override
-  String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this message?';
+  String get deleteMessageQuestion => 'Are you sure you want to permanently delete this message?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      "The operation couldn't be completed.";
+  String get operationCouldNotBeCompletedText => "The operation couldn't be completed.";
 
   @override
   String get replyLabel => 'Reply';
@@ -278,8 +272,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'Let’s start chatting!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'How about sending your first message to a friend?';
+  String get sendingFirstMessageLabel => 'How about sending your first message to a friend?';
 
   @override
   String get startAChatLabel => 'Start a chat';
@@ -291,8 +284,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => 'Delete Conversation';
 
   @override
-  String get deleteConversationQuestion =>
-      'Are you sure you want to delete this conversation?';
+  String get deleteConversationQuestion => 'Are you sure you want to delete this conversation?';
 
   @override
   String get streamChatLabel => 'Stream Chat';
@@ -331,8 +323,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => 'Leave conversation';
 
   @override
-  String get leaveConversationQuestion =>
-      'Are you sure you want to leave this conversation?';
+  String get leaveConversationQuestion => 'Are you sure you want to leave this conversation?';
 
   @override
   String get showInChatLabel => 'Show in Chat';
@@ -368,8 +359,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} of $totalPages';
+  }) => '${currentPage + 1} of $totalPages';
 
   @override
   String get fileText => 'File';
@@ -378,8 +368,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'Reply to Message';
 
   @override
-  String attachmentLimitExceedError(int limit) =>
-      'Attachment limit exceeded, limit: $limit';
+  String attachmentLimitExceedError(int limit) => 'Attachment limit exceeded, limit: $limit';
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
@@ -433,8 +422,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get linkDisabledDetails =>
-      'Sending links is not allowed in this conversation.';
+  String get linkDisabledDetails => 'Sending links is not allowed in this conversation.';
 
   @override
   String get linkDisabledError => 'Links are disabled';
@@ -446,8 +434,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
-  String get enableFileAccessMessage =>
-      'Please enable access to files so you can share them with friends.';
+  String get enableFileAccessMessage => 'Please enable access to files so you can share them with friends.';
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
@@ -555,15 +542,13 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
-  String get endVoteConfirmationText =>
-      'Are you sure you want to end the vote?';
+  String get endVoteConfirmationText => 'Are you sure you want to end the vote?';
 
   @override
   String get deletePollOptionLabel => 'Delete Option';
 
   @override
-  String get deletePollOptionQuestion =>
-      'Are you sure you want to delete this option?';
+  String get deletePollOptionQuestion => 'Are you sure you want to delete this option?';
 
   @override
   String get createLabel => 'Create';
@@ -607,10 +592,10 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 votes',
-        1 => '1 vote',
-        _ => '$count votes',
-      };
+    null || < 1 => '0 votes',
+    1 => '1 vote',
+    _ => '$count votes',
+  };
 
   @override
   String get noPollVotesLabel => 'There are no poll votes currently';
@@ -637,8 +622,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get sendAnywayLabel => 'Send Anyway';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Message was blocked by moderation policies';
+  String get moderatedMessageBlockedText => 'Message was blocked by moderation policies';
 
   @override
   String get moderationReviewModalTitle => 'Are you sure?';
