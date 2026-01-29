@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 /// {@template parentBuilder}
 /// A function that provides the [BuildContext] and the [child] widget.
 /// {@endtemplate}
-typedef ParentBuilder = Widget Function(
-  BuildContext context,
-  Widget child,
-);
+typedef ParentBuilder =
+    Widget Function(
+      BuildContext context,
+      Widget child,
+    );
 
 /// {@template conditionalParentBuilder}
 /// A widget that allows developers to conditionally wrap the [child] widget

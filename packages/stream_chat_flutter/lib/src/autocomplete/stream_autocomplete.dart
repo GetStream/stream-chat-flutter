@@ -19,7 +19,8 @@ enum OptionsAlignment {
   /// The options are displayed above the field.
   ///
   /// This is the default.
-  above;
+  above
+  ;
 
   Anchor _toAnchor() {
     switch (this) {
@@ -45,11 +46,12 @@ enum OptionsAlignment {
 /// See also:
 ///
 ///   * [StreamAutocomplete.fieldViewBuilder], which is of this type.
-typedef StreamAutocompleteFieldViewBuilder = Widget Function(
-  BuildContext context,
-  StreamMessageEditingController messageEditingController,
-  FocusNode focusNode,
-);
+typedef StreamAutocompleteFieldViewBuilder =
+    Widget Function(
+      BuildContext context,
+      StreamMessageEditingController messageEditingController,
+      FocusNode focusNode,
+    );
 
 /// The type of the [StreamAutocompleteTrigger] callback which returns a
 /// [Widget] that displays the specified [options].
@@ -57,11 +59,12 @@ typedef StreamAutocompleteFieldViewBuilder = Widget Function(
 /// See also:
 ///
 ///   * [StreamAutocompleteTrigger.optionsViewBuilder], which is of this type.
-typedef StreamAutocompleteOptionsViewBuilder = Widget Function(
-  BuildContext context,
-  StreamAutocompleteQuery autocompleteQuery,
-  StreamMessageEditingController messageEditingController,
-);
+typedef StreamAutocompleteOptionsViewBuilder =
+    Widget Function(
+      BuildContext context,
+      StreamAutocompleteQuery autocompleteQuery,
+      StreamMessageEditingController messageEditingController,
+    );
 
 /// The query to determine the autocomplete options.
 class StreamAutocompleteQuery {
@@ -148,8 +151,7 @@ class StreamAutocompleteTrigger {
     final cursorPosition = textEditingValue.selection.baseOffset;
 
     // Find the first [trigger] location before the input cursor.
-    final firstTriggerIndexBeforeCursor =
-        text.substring(0, cursorPosition).lastIndexOf(trigger);
+    final firstTriggerIndexBeforeCursor = text.substring(0, cursorPosition).lastIndexOf(trigger);
 
     // If the [trigger] is not found before the cursor, then it's not a trigger.
     if (firstTriggerIndexBeforeCursor == -1) return null;
@@ -164,9 +166,7 @@ class StreamAutocompleteTrigger {
     // valid examples: "@user", "Hello @user"
     // invalid examples: "Hello@user"
     final textBeforeTrigger = text.substring(0, firstTriggerIndexBeforeCursor);
-    if (triggerOnlyAfterSpace &&
-        textBeforeTrigger.isNotEmpty &&
-        !textBeforeTrigger.endsWith(' ')) {
+    if (triggerOnlyAfterSpace && textBeforeTrigger.isNotEmpty && !textBeforeTrigger.endsWith(' ')) {
       return null;
     }
 
@@ -287,10 +287,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
 
   // True if the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    return !_hideOptions &&
-        _focusNode.hasFocus &&
-        _currentQuery != null &&
-        _currentTrigger != null;
+    return !_hideOptions && _focusNode.hasFocus && _currentQuery != null && _currentTrigger != null;
   }
 
   /// Accepts and replaces the current query with the given [option] and closes
@@ -467,8 +464,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   @override
   void initState() {
     super.initState();
-    _messageEditingController =
-        widget.messageEditingController ?? StreamMessageEditingController();
+    _messageEditingController = widget.messageEditingController ?? StreamMessageEditingController();
     _messageEditingController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);

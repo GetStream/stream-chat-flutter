@@ -4,6 +4,10 @@ analyzer:
     - packages/*/lib/scrollable_positioned_list/**
     - packages/*/lib/**/*.freezed.dart
 
+formatter:
+  page_width: 120
+  trailing_commas: preserve
+
 linter:
   rules:
     # these rules are documented on and in the same order as
@@ -64,7 +68,6 @@ linter:
     - leading_newlines_in_multiline_strings
     - library_names
     - library_prefixes
-    - lines_longer_than_80_chars
     - missing_whitespace_between_adjacent_strings
     - non_constant_identifier_names
     - null_closures

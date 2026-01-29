@@ -7,14 +7,10 @@ import 'package:stream_chat_persistence/src/entity/messages.dart';
 @DataClassName('LocationEntity')
 class Locations extends Table {
   /// The channel CID where the location is shared
-  TextColumn get channelCid => text()
-      .nullable()
-      .references(Channels, #cid, onDelete: KeyAction.cascade)();
+  TextColumn get channelCid => text().nullable().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
   /// The ID of the message that contains this shared location
-  TextColumn get messageId => text()
-      .nullable()
-      .references(Messages, #id, onDelete: KeyAction.cascade)();
+  TextColumn get messageId => text().nullable().references(Messages, #id, onDelete: KeyAction.cascade)();
 
   /// The ID of the user who shared the location
   TextColumn get userId => text().nullable()();

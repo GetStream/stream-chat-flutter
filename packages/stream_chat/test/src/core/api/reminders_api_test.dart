@@ -15,10 +15,10 @@ import '../../mocks.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late RemindersApi remindersApi;
@@ -50,10 +50,14 @@ void main() {
         ),
       ];
 
-      when(() => client.post(path, data: jsonEncode({})))
-          .thenAnswer((_) async => successResponse(path, data: {
-                'reminders': reminders.map((r) => r.toJson()).toList(),
-              }));
+      when(() => client.post(path, data: jsonEncode({}))).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'reminders': reminders.map((r) => r.toJson()).toList(),
+          },
+        ),
+      );
 
       final res = await remindersApi.queryReminders();
 
@@ -89,10 +93,14 @@ void main() {
         ),
       );
 
-      when(() => client.post(path, data: expectedPayload))
-          .thenAnswer((_) async => successResponse(path, data: {
-                'reminders': reminders.map((r) => r.toJson()).toList(),
-              }));
+      when(() => client.post(path, data: expectedPayload)).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'reminders': reminders.map((r) => r.toJson()).toList(),
+          },
+        ),
+      );
 
       final res = await remindersApi.queryReminders(
         filter: filter,
@@ -122,10 +130,14 @@ void main() {
         updatedAt: DateTime(2024, 1, 1),
       );
 
-      when(() => client.post(path, data: jsonEncode({})))
-          .thenAnswer((_) async => successResponse(path, data: {
-                'reminder': reminder.toJson(),
-              }));
+      when(() => client.post(path, data: jsonEncode({}))).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'reminder': reminder.toJson(),
+          },
+        ),
+      );
 
       final res = await remindersApi.createReminder(messageId);
 
@@ -154,13 +166,16 @@ void main() {
         'remind_at': remindAt.toUtc().toIso8601String(),
       });
 
-      when(() => client.post(path, data: expectedPayload))
-          .thenAnswer((_) async => successResponse(path, data: {
-                'reminder': reminder.toJson(),
-              }));
+      when(() => client.post(path, data: expectedPayload)).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'reminder': reminder.toJson(),
+          },
+        ),
+      );
 
-      final res =
-          await remindersApi.createReminder(messageId, remindAt: remindAt);
+      final res = await remindersApi.createReminder(messageId, remindAt: remindAt);
 
       expect(res, isNotNull);
       expect(res.reminder.messageId, messageId);
@@ -185,10 +200,14 @@ void main() {
         updatedAt: DateTime(2024, 1, 2),
       );
 
-      when(() => client.patch(path, data: jsonEncode({})))
-          .thenAnswer((_) async => successResponse(path, data: {
-                'reminder': reminder.toJson(),
-              }));
+      when(() => client.patch(path, data: jsonEncode({}))).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'reminder': reminder.toJson(),
+          },
+        ),
+      );
 
       final res = await remindersApi.updateReminder(messageId);
 
@@ -217,13 +236,16 @@ void main() {
         'remind_at': remindAt.toUtc().toIso8601String(),
       });
 
-      when(() => client.patch(path, data: expectedPayload))
-          .thenAnswer((_) async => successResponse(path, data: {
-                'reminder': reminder.toJson(),
-              }));
+      when(() => client.patch(path, data: expectedPayload)).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'reminder': reminder.toJson(),
+          },
+        ),
+      );
 
-      final res =
-          await remindersApi.updateReminder(messageId, remindAt: remindAt);
+      final res = await remindersApi.updateReminder(messageId, remindAt: remindAt);
 
       expect(res, isNotNull);
       expect(res.reminder.messageId, messageId);
@@ -239,8 +261,7 @@ void main() {
       const messageId = 'test-message-id';
       const path = '/messages/$messageId/reminders';
 
-      when(() => client.delete(path)).thenAnswer(
-          (_) async => successResponse(path, data: <String, dynamic>{}));
+      when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
       final res = await remindersApi.deleteReminder(messageId);
 

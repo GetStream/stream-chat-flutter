@@ -22,8 +22,7 @@ Future<void> main() async {
   await client.connectUser(
     User(
       id: 'cool-shadow-7',
-      image:
-          'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
+      image: 'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
     ),
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.'
     'gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo',
@@ -95,31 +94,32 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: StreamBuilder<ChannelState?>(
           stream: messages,
-          builder: (
-            BuildContext context,
-            AsyncSnapshot<ChannelState?> snapshot,
-          ) {
-            if (snapshot.hasData && snapshot.data != null) {
-              final _messages = snapshot.data!.messages ?? [];
-              return MessageView(
-                messages: _messages.reversed.toList(),
-                channel: channel,
-              );
-            } else if (snapshot.hasError) {
-              return const Center(
-                child: Text(
-                  'There was an error loading messages. Please see logs.',
-                ),
-              );
-            }
-            return const Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
-                child: CircularProgressIndicator(),
-              ),
-            );
-          },
+          builder:
+              (
+                BuildContext context,
+                AsyncSnapshot<ChannelState?> snapshot,
+              ) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  final _messages = snapshot.data!.messages ?? [];
+                  return MessageView(
+                    messages: _messages.reversed.toList(),
+                    channel: channel,
+                  );
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text(
+                      'There was an error loading messages. Please see logs.',
+                    ),
+                  );
+                }
+                return const Center(
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
         ),
       ),
     );

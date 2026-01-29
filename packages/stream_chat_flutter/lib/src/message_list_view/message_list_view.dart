@@ -207,7 +207,8 @@ class StreamMessageListView extends StatefulWidget {
   final Widget Function(
     int unreadCount,
     Future<void> Function(int) scrollToBottomDefaultTapAction,
-  )? scrollToBottomBuilder;
+  )?
+  scrollToBottomBuilder;
 
   /// If true will show an indicator with number of unread messages
   /// that will scroll to latest read message when tapped and mark
@@ -323,12 +324,10 @@ class StreamMessageListView extends StatefulWidget {
   final OnMessageLongPress? onMessageLongPress;
 
   /// Builder used to build the thread separator in case it's a thread view
-  final Function(BuildContext context, Message parentMessage)?
-      threadSeparatorBuilder;
+  final Function(BuildContext context, Message parentMessage)? threadSeparatorBuilder;
 
   /// Builder used to build the unread message separator
-  final Widget Function(BuildContext context, int unreadCount)?
-      unreadMessagesSeparatorBuilder;
+  final Widget Function(BuildContext context, int unreadCount)? unreadMessagesSeparatorBuilder;
 
   /// A [MessageListController] allows pagination.
   ///
@@ -394,8 +393,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   late final _defaultController = MessageListController();
 
-  MessageListController get _messageListController =>
-      widget.messageListController ?? _defaultController;
+  MessageListController get _messageListController => widget.messageListController ?? _defaultController;
 
   StreamSubscription? _messageNewListener;
   StreamSubscription? _userReadListener;
@@ -407,10 +405,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     super.initState();
 
     _scrollController = widget.scrollController ?? ItemScrollController();
-    _itemPositionListener =
-        widget.itemPositionListener ?? ItemPositionsListener.create();
-    _itemPositionListener.itemPositions
-        .addListener(_handleItemPositionsChanged);
+    _itemPositionListener = widget.itemPositionListener ?? ItemPositionsListener.create();
+    _itemPositionListener.itemPositions.addListener(_handleItemPositionsChanged);
 
     _getOnThreadTap();
   }
@@ -448,14 +444,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         );
       }
 
-      _messageNewListener =
-          streamChannel!.channel.on(EventType.messageNew).listen((event) {
+      _messageNewListener = streamChannel!.channel.on(EventType.messageNew).listen((event) {
         if (_upToDate) {
           _bottomPaginationActive = false;
         }
         if (event.message?.parentId == widget.parentMessage?.id &&
-            event.message!.user!.id ==
-                streamChannel!.channel.client.state.currentUser!.id) {
+            event.message!.user!.id == streamChannel!.channel.client.state.currentUser!.id) {
           setState(() => unreadCount = 0);
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -481,8 +475,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     debouncedMarkThreadRead.cancel();
     _messageNewListener?.cancel();
     _userReadListener?.cancel();
-    _itemPositionListener.itemPositions
-        .removeListener(_handleItemPositionsChanged);
+    _itemPositionListener.itemPositions.removeListener(_handleItemPositionsChanged);
     super.dispose();
   }
 
@@ -494,36 +487,38 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         child: MessageListCore(
           paginationLimit: widget.paginationLimit,
           messageFilter: widget.messageFilter,
-          loadingBuilder: widget.loadingBuilder ??
+          loadingBuilder:
+              widget.loadingBuilder ??
               (context) => const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
-          emptyBuilder: widget.emptyBuilder ??
+                child: CircularProgressIndicator.adaptive(),
+              ),
+          emptyBuilder:
+              widget.emptyBuilder ??
               (context) => Center(
-                    child: Text(
-                      context.translations.emptyChatMessagesText,
-                      style: _streamTheme.textTheme.footnote.copyWith(
-                        color: _streamTheme.colorTheme.textHighEmphasis
-                            // ignore: deprecated_member_use
-                            .withOpacity(0.5),
-                      ),
-                    ),
+                child: Text(
+                  context.translations.emptyChatMessagesText,
+                  style: _streamTheme.textTheme.footnote.copyWith(
+                    color: _streamTheme.colorTheme.textHighEmphasis
+                        // ignore: deprecated_member_use
+                        .withOpacity(0.5),
                   ),
-          messageListBuilder: widget.messageListBuilder ??
-              (context, list) => _buildListView(list),
+                ),
+              ),
+          messageListBuilder: widget.messageListBuilder ?? (context, list) => _buildListView(list),
           messageListController: _messageListController,
           parentMessage: widget.parentMessage,
-          errorBuilder: widget.errorBuilder ??
+          errorBuilder:
+              widget.errorBuilder ??
               (BuildContext context, Object error) => Center(
-                    child: Text(
-                      context.translations.genericErrorText,
-                      style: _streamTheme.textTheme.footnote.copyWith(
-                        color: _streamTheme.colorTheme.textHighEmphasis
-                            // ignore: deprecated_member_use
-                            .withOpacity(0.5),
-                      ),
-                    ),
+                child: Text(
+                  context.translations.genericErrorText,
+                  style: _streamTheme.textTheme.footnote.copyWith(
+                    color: _streamTheme.colorTheme.textHighEmphasis
+                        // ignore: deprecated_member_use
+                        .withOpacity(0.5),
                   ),
+                ),
+              ),
         ),
       ),
     );
@@ -543,8 +538,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           final first = _itemPositionListener.itemPositions.value.first;
           final diff = newMessagesListLength - _messageListLength!;
           if (diff > 0) {
-            if (messages[0].user?.id !=
-                streamChannel!.channel.client.state.currentUser?.id) {
+            if (messages[0].user?.id != streamChannel!.channel.client.state.currentUser?.id) {
               initialIndex = first.index + diff;
               initialAlignment = first.itemLeadingEdge;
             }
@@ -555,10 +549,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     _messageListLength = newMessagesListLength;
 
-    final itemCount = messages.length + // total messages
-            2 + // top + bottom loading indicator
-            2 + // header + footer
-            1 // parent message
+    final itemCount =
+        messages.length + // total messages
+        2 + // top + bottom loading indicator
+        2 + // header + footer
+        1 // parent message
         ;
 
     final child = Stack(
@@ -666,7 +661,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   //     BottomLoader   ->        1                                             (count-7)
                   //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
                   //     Footer         ->        0                                             (count-8)
-
                   separatorBuilder: (context, i) {
                     Widget maybeBuildWithUnreadMessagesSeparator({
                       required Message message,
@@ -693,8 +687,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       }
 
                       if (widget.threadSeparatorBuilder != null) {
-                        return widget.threadSeparatorBuilder!
-                            .call(context, widget.parentMessage!);
+                        return widget.threadSeparatorBuilder!.call(context, widget.parentMessage!);
                       }
 
                       return ThreadSeparator(
@@ -702,9 +695,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       );
                     }
                     if (i == itemCount - 3) {
-                      if (widget.reverse
-                          ? widget.headerBuilder == null
-                          : widget.footerBuilder == null) {
+                      if (widget.reverse ? widget.headerBuilder == null : widget.footerBuilder == null) {
                         if (messages.isNotEmpty) {
                           final message = messages.last;
                           return maybeBuildWithUnreadMessagesSeparator(
@@ -719,9 +710,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       return const SizedBox(height: 8);
                     }
                     if (i == 0) {
-                      if (widget.reverse
-                          ? widget.footerBuilder == null
-                          : widget.headerBuilder == null) {
+                      if (widget.reverse ? widget.footerBuilder == null : widget.headerBuilder == null) {
                         return const SizedBox(height: 30);
                       }
                       return const SizedBox(height: 8);
@@ -740,8 +729,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
                     Widget separator;
 
-                    final isPartOfThread = message.replyCount! > 0 ||
-                        message.showInChannel == true;
+                    final isPartOfThread = message.replyCount! > 0 || message.showInChannel == true;
 
                     final createdAt = Jiffy.parseFromDateTime(
                       message.createdAt.toLocal(),
@@ -759,8 +747,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                         unit: Unit.minute,
                       );
 
-                      final isNextUserSame =
-                          message.user!.id == nextMessage.user?.id;
+                      final isNextUserSame = message.user!.id == nextMessage.user?.id;
                       final isDeleted = message.isDeleted;
 
                       final spacingRules = [
@@ -795,16 +782,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
                     if (i == itemCount - 2) {
                       if (widget.reverse) {
-                        return widget.headerBuilder?.call(context) ??
-                            const Empty();
+                        return widget.headerBuilder?.call(context) ?? const Empty();
                       } else {
-                        return widget.footerBuilder?.call(context) ??
-                            const Empty();
+                        return widget.footerBuilder?.call(context) ?? const Empty();
                       }
                     }
 
-                    final indicatorBuilder =
-                        widget.paginationLoadingIndicatorBuilder;
+                    final indicatorBuilder = widget.paginationLoadingIndicatorBuilder;
 
                     if (i == itemCount - 3) {
                       return LoadingIndicator(
@@ -828,11 +812,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
                     if (i == 0) {
                       if (widget.reverse) {
-                        return widget.footerBuilder?.call(context) ??
-                            const Empty();
+                        return widget.footerBuilder?.call(context) ?? const Empty();
                       } else {
-                        return widget.headerBuilder?.call(context) ??
-                            const Empty();
+                        return widget.headerBuilder?.call(context) ?? const Empty();
                       }
                     }
 
@@ -892,10 +874,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ],
     );
 
-    final backgroundColor =
-        StreamMessageListViewTheme.of(context).backgroundColor;
-    final backgroundImage =
-        StreamMessageListViewTheme.of(context).backgroundImage;
+    final backgroundColor = StreamMessageListViewTheme.of(context).backgroundColor;
+    final backgroundImage = StreamMessageListViewTheme.of(context).backgroundImage;
 
     if (backgroundColor != null || backgroundImage != null) {
       return DecoratedBox(
@@ -913,15 +893,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget _buildUnreadMessagesSeparator(int unreadCount) {
     final unreadMessagesSeparator =
         widget.unreadMessagesSeparatorBuilder?.call(context, unreadCount) ??
-            UnreadMessagesSeparator(unreadCount: unreadCount);
+        UnreadMessagesSeparator(unreadCount: unreadCount);
     return unreadMessagesSeparator;
   }
 
   Future<void> _paginateData(
     StreamChannelState? channel,
     QueryDirection direction,
-  ) =>
-      _messageListController.paginateData!(direction: direction);
+  ) => _messageListController.paginateData!(direction: direction);
 
   Future<void> scrollToBottomDefaultTapAction(int unreadCount) async {
     // If the channel is not up to date, we need to reload it before scrolling
@@ -992,30 +971,27 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     return switch (widget.dateDividerBuilder) {
       final builder? => builder(createdAt),
       _ => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: StreamDateDivider(dateTime: createdAt),
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: StreamDateDivider(dateTime: createdAt),
+      ),
     };
   }
 
   Widget buildParentMessage(
     Message message,
   ) {
-    final isMyMessage =
-        message.user!.id == StreamChat.of(context).currentUser!.id;
+    final isMyMessage = message.user!.id == StreamChat.of(context).currentUser!.id;
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
 
-    final hasFileAttachment =
-        message.attachments.any((it) => it.type == AttachmentType.file);
+    final hasFileAttachment = message.attachments.any((it) => it.type == AttachmentType.file);
 
-    final hasUrlAttachment =
-        message.attachments.any((it) => it.type == AttachmentType.urlPreview);
+    final hasUrlAttachment = message.attachments.any((it) => it.type == AttachmentType.urlPreview);
 
     final attachmentBorderRadius = hasUrlAttachment
         ? 8.0
         : hasFileAttachment
-            ? 12.0
-            : 14.0;
+        ? 12.0
+        : 14.0;
 
     final borderSide = isOnlyEmoji ? BorderSide.none : null;
 
@@ -1038,8 +1014,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         hasUrlAttachment
             ? 8
             : hasFileAttachment
-                ? 4
-                : 2,
+            ? 4
+            : 2,
       ),
       attachmentShape: RoundedRectangleBorder(
         side: BorderSide(
@@ -1048,13 +1024,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         ),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(attachmentBorderRadius),
-          bottomLeft: isMyMessage
-              ? Radius.circular(attachmentBorderRadius)
-              : Radius.zero,
+          bottomLeft: isMyMessage ? Radius.circular(attachmentBorderRadius) : Radius.zero,
           topRight: Radius.circular(attachmentBorderRadius),
-          bottomRight: isMyMessage
-              ? Radius.zero
-              : Radius.circular(attachmentBorderRadius),
+          bottomRight: isMyMessage ? Radius.zero : Radius.circular(attachmentBorderRadius),
         ),
       ),
       borderRadiusGeometry: BorderRadius.only(
@@ -1069,9 +1041,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ),
       borderSide: borderSide,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
-      messageTheme: isMyMessage
-          ? _streamTheme.ownMessageTheme
-          : _streamTheme.otherMessageTheme,
+      messageTheme: isMyMessage ? _streamTheme.ownMessageTheme : _streamTheme.otherMessageTheme,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
     );
@@ -1103,10 +1073,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             scrollToBottomDefaultTapAction,
           );
         }
-        final showUnreadCount = unreadCount > 0 &&
-            streamChannel!.channel.state!.members.any((e) =>
-                e.userId ==
-                streamChannel!.channel.client.state.currentUser!.id);
+        final showUnreadCount =
+            unreadCount > 0 &&
+            streamChannel!.channel.state!.members.any(
+              (e) => e.userId == streamChannel!.channel.client.state.currentUser!.id,
+            );
 
         return Positioned(
           bottom: 8,
@@ -1139,8 +1110,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   child: Center(
                     child: Material(
                       borderRadius: BorderRadius.circular(8),
-                      color:
-                          StreamChatTheme.of(context).colorTheme.accentPrimary,
+                      color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                       child: Padding(
                         padding: const EdgeInsets.only(
                           left: 5,
@@ -1215,8 +1185,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final userId = StreamChat.of(context).currentUser!.id;
     final isMyMessage = message.user?.id == userId;
     final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
-    final isNextUserSame =
-        nextMessage != null && message.user!.id == nextMessage.user!.id;
+    final isNextUserSame = nextMessage != null && message.user!.id == nextMessage.user!.id;
 
     var hasTimeDiff = false;
     if (nextMessage != null) {
@@ -1228,47 +1197,40 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       hasTimeDiff = !createdAt.isSame(nextCreatedAt, unit: Unit.minute);
     }
 
-    final hasVoiceRecordingAttachment = message.attachments
-        .any((it) => it.type == AttachmentType.voiceRecording);
+    final hasVoiceRecordingAttachment = message.attachments.any((it) => it.type == AttachmentType.voiceRecording);
 
-    final hasFileAttachment =
-        message.attachments.any((it) => it.type == AttachmentType.file);
+    final hasFileAttachment = message.attachments.any((it) => it.type == AttachmentType.file);
 
-    final hasUrlAttachment =
-        message.attachments.any((it) => it.type == AttachmentType.urlPreview);
+    final hasUrlAttachment = message.attachments.any((it) => it.type == AttachmentType.urlPreview);
 
-    final isThreadMessage =
-        message.parentId != null && message.showInChannel == true;
+    final isThreadMessage = message.parentId != null && message.showInChannel == true;
 
     final hasReplies = message.replyCount! > 0;
 
     final attachmentBorderRadius = hasUrlAttachment
         ? 8.0
         : hasFileAttachment
-            ? 12.0
-            : 14.0;
+        ? 12.0
+        : 14.0;
 
-    final showTimeStamp = (!isThreadMessage || _isThreadConversation) &&
-        !hasReplies &&
-        (hasTimeDiff || !isNextUserSame);
+    final showTimeStamp =
+        (!isThreadMessage || _isThreadConversation) && !hasReplies && (hasTimeDiff || !isNextUserSame);
 
-    final showUsername = !isMyMessage &&
-        (!isThreadMessage || _isThreadConversation) &&
-        !hasReplies &&
-        (hasTimeDiff || !isNextUserSame);
+    final showUsername =
+        !isMyMessage && (!isThreadMessage || _isThreadConversation) && !hasReplies && (hasTimeDiff || !isNextUserSame);
 
-    final showMarkUnread = streamChannel?.channel.config?.readEvents == true &&
+    final showMarkUnread =
+        streamChannel?.channel.config?.readEvents == true &&
         !isMyMessage &&
         (!isThreadMessage || _isThreadConversation);
 
     final showUserAvatar = isMyMessage
         ? DisplayWidget.gone
         : (hasTimeDiff || !isNextUserSame)
-            ? DisplayWidget.show
-            : DisplayWidget.hide;
+        ? DisplayWidget.show
+        : DisplayWidget.hide;
 
-    final showSendingIndicator =
-        isMyMessage && (index == 0 || hasTimeDiff || !isNextUserSame);
+    final showSendingIndicator = isMyMessage && (index == 0 || hasTimeDiff || !isNextUserSame);
 
     final showInChannelIndicator = !_isThreadConversation && isThreadMessage;
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
@@ -1299,9 +1261,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             alignment: 0.1,
           );
         } else {
-          await streamChannel!
-              .loadChannelAtMessage(quotedMessageId)
-              .then((_) async {
+          await streamChannel!.loadChannelAtMessage(quotedMessageId).then((_) async {
             initialIndex = 21; // 19 + 2 | 19 is the index of the message
             initialAlignment = 0.1;
           });
@@ -1309,8 +1269,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       },
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
-      showThreadReplyMessage:
-          !isThreadMessage && streamChannel?.channel.canSendReply == true,
+      showThreadReplyMessage: !isThreadMessage && streamChannel?.channel.canSendReply == true,
       showFlagButton: !isMyMessage,
       borderSide: borderSide,
       onThreadTap: _onThreadTap,
@@ -1325,10 +1284,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               ? Radius.circular(attachmentBorderRadius)
               : Radius.circular(
                   (hasTimeDiff || !isNextUserSame) &&
-                          !(hasReplies ||
-                              isThreadMessage ||
-                              hasFileAttachment ||
-                              hasVoiceRecordingAttachment)
+                          !(hasReplies || isThreadMessage || hasFileAttachment || hasVoiceRecordingAttachment)
                       ? 0
                       : attachmentBorderRadius,
                 ),
@@ -1336,10 +1292,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           bottomRight: isMyMessage
               ? Radius.circular(
                   (hasTimeDiff || !isNextUserSame) &&
-                          !(hasReplies ||
-                              isThreadMessage ||
-                              hasFileAttachment ||
-                              hasVoiceRecordingAttachment)
+                          !(hasReplies || isThreadMessage || hasFileAttachment || hasVoiceRecordingAttachment)
                       ? 0
                       : attachmentBorderRadius,
                 )
@@ -1350,26 +1303,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         hasUrlAttachment
             ? 8
             : hasFileAttachment || hasVoiceRecordingAttachment
-                ? 4
-                : 2,
+            ? 4
+            : 2,
       ),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: const Radius.circular(16),
         bottomLeft: isMyMessage
             ? const Radius.circular(16)
             : Radius.circular(
-                (hasTimeDiff || !isNextUserSame) &&
-                        !(hasReplies || isThreadMessage)
-                    ? 0
-                    : 16,
+                (hasTimeDiff || !isNextUserSame) && !(hasReplies || isThreadMessage) ? 0 : 16,
               ),
         topRight: const Radius.circular(16),
         bottomRight: isMyMessage
             ? Radius.circular(
-                (hasTimeDiff || !isNextUserSame) &&
-                        !(hasReplies || isThreadMessage)
-                    ? 0
-                    : 16,
+                (hasTimeDiff || !isNextUserSame) && !(hasReplies || isThreadMessage) ? 0 : 16,
               )
             : const Radius.circular(16),
       ),
@@ -1377,9 +1324,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         vertical: 8,
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
-      messageTheme: isMyMessage
-          ? _streamTheme.ownMessageTheme
-          : _streamTheme.otherMessageTheme,
+      messageTheme: isMyMessage ? _streamTheme.ownMessageTheme : _streamTheme.otherMessageTheme,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
     );
@@ -1403,8 +1348,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         widget.highlightInitialMessage &&
         isInitialMessage(message.id, streamChannel)) {
       final colorTheme = _streamTheme.colorTheme;
-      final highlightColor =
-          widget.messageHighlightColor ?? colorTheme.highlight;
+      final highlightColor = widget.messageHighlightColor ?? colorTheme.highlight;
       child = TweenAnimationBuilder<Color?>(
         tween: ColorTween(
           begin: highlightColor,
@@ -1503,35 +1447,35 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // The created callback will use widget.onThreadTap, passing the result
       // of widget.threadBuilder (if provided) as the second argument.
       (final onThreadTap?, final threadBuilder) => (Message message) {
-          onThreadTap(
-            message,
-            threadBuilder?.call(context, message),
-          );
-        },
+        onThreadTap(
+          message,
+          threadBuilder?.call(context, message),
+        );
+      },
       // Case 2: widget.onThreadTap is null, but widget.threadBuilder is provided.
       // The created callback will perform the default navigation action,
       // using widget.threadBuilder to build the thread page.
       (null, final threadBuilder?) => (Message message) {
-          final threadPage = StreamChatConfiguration(
-            // This is needed to provide the nearest reaction icons to the
-            // StreamMessageReactionsModal.
-            data: StreamChatConfiguration.of(context),
-            child: StreamChannel(
-              channel: streamChannel!.channel,
-              child: BetterStreamBuilder<Message>(
-                initialData: message,
-                stream: streamChannel!.channel.state?.messagesStream.map(
-                  (it) => it.firstWhere((m) => m.id == message.id),
-                ),
-                builder: (_, data) => threadBuilder(context, data),
+        final threadPage = StreamChatConfiguration(
+          // This is needed to provide the nearest reaction icons to the
+          // StreamMessageReactionsModal.
+          data: StreamChatConfiguration.of(context),
+          child: StreamChannel(
+            channel: streamChannel!.channel,
+            child: BetterStreamBuilder<Message>(
+              initialData: message,
+              stream: streamChannel!.channel.state?.messagesStream.map(
+                (it) => it.firstWhere((m) => m.id == message.id),
               ),
+              builder: (_, data) => threadBuilder(context, data),
             ),
-          );
+          ),
+        );
 
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => threadPage),
-          );
-        },
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => threadPage),
+        );
+      },
       _ => null,
     };
   }

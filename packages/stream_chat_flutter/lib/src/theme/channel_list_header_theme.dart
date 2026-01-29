@@ -35,19 +35,15 @@ class StreamChannelListHeaderTheme extends InheritedTheme {
   /// final theme = ChannelListHeaderTheme.of(context);
   /// ```
   static StreamChannelListHeaderThemeData of(BuildContext context) {
-    final channelListHeaderTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamChannelListHeaderTheme>();
-    return channelListHeaderTheme?.data ??
-        StreamChatTheme.of(context).channelListHeaderTheme;
+    final channelListHeaderTheme = context.dependOnInheritedWidgetOfExactType<StreamChannelListHeaderTheme>();
+    return channelListHeaderTheme?.data ?? StreamChatTheme.of(context).channelListHeaderTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamChannelListHeaderTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamChannelListHeaderTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamChannelListHeaderTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamChannelListHeaderTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template channel_list_header_theme_data}
@@ -92,8 +88,7 @@ class StreamChannelListHeaderThemeData with Diagnosticable {
     double t,
   ) {
     return StreamChannelListHeaderThemeData(
-      avatarTheme:
-          const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      avatarTheme: const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
       color: Color.lerp(a.color, b.color, t),
       titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
     );
@@ -121,8 +116,7 @@ class StreamChannelListHeaderThemeData with Diagnosticable {
           color == other.color;
 
   @override
-  int get hashCode =>
-      titleStyle.hashCode ^ avatarTheme.hashCode ^ color.hashCode;
+  int get hashCode => titleStyle.hashCode ^ avatarTheme.hashCode ^ color.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

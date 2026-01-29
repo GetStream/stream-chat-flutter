@@ -121,19 +121,21 @@ Widget _wrapWithMaterialApp(
     debugShowCheckedModeBanner: false,
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: ColoredBox(
-            color: theme.colorTheme.overlay,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: child,
+      child: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            body: ColoredBox(
+              color: theme.colorTheme.overlay,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: child,
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     ),
   );
 }

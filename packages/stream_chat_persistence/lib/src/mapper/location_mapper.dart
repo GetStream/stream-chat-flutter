@@ -7,34 +7,33 @@ extension LocationEntityX on LocationEntity {
   Location toLocation({
     ChannelModel? channel,
     Message? message,
-  }) =>
-      Location(
-        channelCid: channelCid,
-        channel: channel,
-        messageId: messageId,
-        message: message,
-        userId: userId,
-        latitude: latitude,
-        longitude: longitude,
-        createdByDeviceId: createdByDeviceId,
-        endAt: endAt,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-      );
+  }) => Location(
+    channelCid: channelCid,
+    channel: channel,
+    messageId: messageId,
+    message: message,
+    userId: userId,
+    latitude: latitude,
+    longitude: longitude,
+    createdByDeviceId: createdByDeviceId,
+    endAt: endAt,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
 }
 
 /// Useful mapping functions for [Location]
 extension LocationX on Location {
   /// Maps a [Location] into [LocationEntity]
   LocationEntity toEntity() => LocationEntity(
-        channelCid: channelCid,
-        messageId: messageId,
-        userId: userId,
-        latitude: latitude,
-        longitude: longitude,
-        createdByDeviceId: createdByDeviceId,
-        endAt: endAt,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-      );
+    channelCid: channelCid,
+    messageId: messageId,
+    userId: userId,
+    latitude: latitude,
+    longitude: longitude,
+    createdByDeviceId: createdByDeviceId,
+    endAt: endAt,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
 }

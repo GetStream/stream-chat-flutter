@@ -62,7 +62,8 @@ class _PollAttachmentState extends State<PollAttachment> {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
-    final shape = widget.shape ??
+    final shape =
+        widget.shape ??
         RoundedRectangleBorder(
           side: BorderSide(
             color: theme.colorTheme.borders,

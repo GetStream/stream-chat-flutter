@@ -32,8 +32,12 @@ class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   bool canHandle(Message message, _) => message.sharedLocation != null;
 
   @override
-  Widget build(BuildContext context, Message message, _) {
-    assert(debugAssertCanHandle(message, _), '');
+  Widget build(
+    BuildContext context,
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    assert(debugAssertCanHandle(message, attachments), '');
 
     final user = message.user;
     final location = message.sharedLocation!;

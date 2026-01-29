@@ -49,8 +49,7 @@ void main() {
             child: Scaffold(
               body: StreamDateDivider(
                 dateTime: testDate,
-                formatter: (context, date) =>
-                    'Custom: ${date.day}/${date.month}',
+                formatter: (context, date) => 'Custom: ${date.day}/${date.month}',
               ),
             ),
           ),

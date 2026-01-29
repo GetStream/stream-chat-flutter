@@ -74,14 +74,16 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
 
     final errorIcon = AnimatedSwitcher(
       duration: kThemeChangeDuration,
-      child: this.errorIcon ??
+      child:
+          this.errorIcon ??
           const StreamSvgIcon(
             color: Colors.white,
             icon: StreamSvgIcons.retry,
           ),
     );
 
-    final backgroundColor = this.backgroundColor ??
+    final backgroundColor =
+        this.backgroundColor ??
         // ignore: deprecated_member_use
         theme.colorTheme.textLowEmphasis.withOpacity(0.9);
 

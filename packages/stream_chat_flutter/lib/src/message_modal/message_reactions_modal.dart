@@ -72,10 +72,10 @@ class StreamMessageReactionsModal extends StatelessWidget {
     final onReactionPicked = switch (this.onReactionPicked) {
       null => null,
       final onPicked => (reaction) {
-          return onPicked.call(
-            SelectReaction(message: message, reaction: reaction),
-          );
-        },
+        return onPicked.call(
+          SelectReaction(message: message, reaction: reaction),
+        );
+      },
     };
 
     return StreamMessageDialog(

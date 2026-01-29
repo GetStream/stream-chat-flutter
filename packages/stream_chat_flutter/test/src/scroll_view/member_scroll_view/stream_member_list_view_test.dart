@@ -16,17 +16,14 @@ void main() {
     clientState = MockClientState();
     when(() => client.state).thenAnswer((_) => clientState);
     when(() => clientState.currentUser).thenReturn(OwnUser(id: 'testid'));
-    when(() => clientState.currentUserStream)
-        .thenAnswer((_) => Stream.value(OwnUser(id: 'testid')));
+    when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(OwnUser(id: 'testid')));
     channel = MockChannel();
-    when(() => channel.on(any(), any(), any(), any()))
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channel.on(any(), any(), any(), any())).thenAnswer((_) => const Stream.empty());
     channelClientState = MockChannelState();
     when(() => channel.client).thenReturn(client);
     when(() => channel.state).thenReturn(channelClientState);
 
-    when(() => channelClientState.membersStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.members).thenReturn([]);
   });
 

@@ -78,9 +78,7 @@ void main() {
       home: Scaffold(
         body: Center(
           child: AttachmentButton(
-            color: StreamChatThemeData.light()
-                .messageInputTheme
-                .actionButtonIdleColor,
+            color: StreamChatThemeData.light().messageInputTheme.actionButtonIdleColor,
             onPressed: () {},
           ),
         ),

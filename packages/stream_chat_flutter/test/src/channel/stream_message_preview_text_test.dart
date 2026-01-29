@@ -293,8 +293,7 @@ void main() {
     });
 
     group('Poll Tests', () {
-      testWidgets('renders poll with latest voter (current user)',
-          (tester) async {
+      testWidgets('renders poll with latest voter (current user)', (tester) async {
         final voterPoll = Poll(
           name: 'Favorite Color?',
           options: const [
@@ -321,8 +320,7 @@ void main() {
         expect(find.text('📊 You voted: "Favorite Color?"'), findsOneWidget);
       });
 
-      testWidgets('renders poll with latest voter (another user)',
-          (tester) async {
+      testWidgets('renders poll with latest voter (another user)', (tester) async {
         final voter = User(id: 'voter-id', name: 'Voter');
         final voterPoll = Poll(
           name: 'Favorite Color?',

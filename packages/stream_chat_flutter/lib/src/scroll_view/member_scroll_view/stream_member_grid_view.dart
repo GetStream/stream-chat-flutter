@@ -7,13 +7,11 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_w
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default grid delegate  for [StreamMemberGridView].
-const defaultMemberGridViewDelegate =
-    SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
+const defaultMemberGridViewDelegate = SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
 
 /// Signature for the item builder that creates the children of the
 /// [StreamMemberGridView].
-typedef StreamMemberGridViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<Member, StreamMemberGridTile>;
+typedef StreamMemberGridViewIndexedWidgetBuilder = StreamScrollViewIndexedWidgetBuilder<Member, StreamMemberGridTile>;
 
 /// Signature for the member grid tile, currently equal to [StreamUserGridTile].
 typedef StreamMemberGridTile = StreamUserGridTile;
@@ -365,8 +363,7 @@ class StreamMemberGridView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.grid(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.grid(
         onTap: controller.retry,
         error: Text(
           context.translations.loadingUsersError,

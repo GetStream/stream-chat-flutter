@@ -28,8 +28,7 @@ sealed class MessageDeleteScope with _$MessageDeleteScope {
   }) = DeleteForAll;
 
   /// Creates a instance of [MessageDeleteScope] from a JSON map.
-  factory MessageDeleteScope.fromJson(Map<String, dynamic> json) =>
-      _$MessageDeleteScopeFromJson(json);
+  factory MessageDeleteScope.fromJson(Map<String, dynamic> json) => _$MessageDeleteScopeFromJson(json);
 
   // region Predefined Scopes
 

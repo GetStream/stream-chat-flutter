@@ -33,53 +33,51 @@ class SeparatedReorderableListView extends ReorderableListView {
     super.restorationId,
     super.clipBehavior,
   }) : super.builder(
-          buildDefaultDragHandles: false,
-          itemCount: math.max(0, itemCount * 2 - 1),
-          itemBuilder: (BuildContext context, int index) {
-            final itemIndex = index ~/ 2;
-            if (index.isEven) {
-              final listItem = itemBuilder(context, itemIndex);
-              return ReorderableDelayedDragStartListener(
-                key: listItem.key,
-                index: index,
-                child: listItem,
-              );
-            }
+         buildDefaultDragHandles: false,
+         itemCount: math.max(0, itemCount * 2 - 1),
+         itemBuilder: (BuildContext context, int index) {
+           final itemIndex = index ~/ 2;
+           if (index.isEven) {
+             final listItem = itemBuilder(context, itemIndex);
+             return ReorderableDelayedDragStartListener(
+               key: listItem.key,
+               index: index,
+               child: listItem,
+             );
+           }
 
-            final separator = separatorBuilder(context, itemIndex);
-            if (separator.key == null) {
-              return KeyedSubtree(
-                key: ValueKey('reorderable_separator_$itemIndex'),
-                child: IgnorePointer(child: separator),
-              );
-            }
+           final separator = separatorBuilder(context, itemIndex);
+           if (separator.key == null) {
+             return KeyedSubtree(
+               key: ValueKey('reorderable_separator_$itemIndex'),
+               child: IgnorePointer(child: separator),
+             );
+           }
 
-            return separator;
-          },
-          onReorder: (int oldIndex, int newIndex) {
-            // Adjust the indexes due to an issue in the ReorderableListView
-            // which isn't going to be fixed in the near future.
-            //
-            // issue: https://github.com/flutter/flutter/issues/24786
-            if (newIndex > oldIndex) {
-              newIndex -= 1;
-            }
+           return separator;
+         },
+         onReorder: (int oldIndex, int newIndex) {
+           // Adjust the indexes due to an issue in the ReorderableListView
+           // which isn't going to be fixed in the near future.
+           //
+           // issue: https://github.com/flutter/flutter/issues/24786
+           if (newIndex > oldIndex) {
+             newIndex -= 1;
+           }
 
-            // Ideally should never happen as separators are wrapped in the
-            // IgnorePointer widget. This is just a safety check.
-            if (oldIndex % 2 == 1) return;
+           // Ideally should never happen as separators are wrapped in the
+           // IgnorePointer widget. This is just a safety check.
+           if (oldIndex % 2 == 1) return;
 
-            // The item moved behind the top/bottom separator we should not
-            // reorder it.
-            if ((oldIndex - newIndex).abs() == 1) return;
+           // The item moved behind the top/bottom separator we should not
+           // reorder it.
+           if ((oldIndex - newIndex).abs() == 1) return;
 
-            // Calculate the updated indexes
-            final updatedOldIndex = oldIndex ~/ 2;
-            final updatedNewIndex = oldIndex > newIndex && newIndex % 2 == 1
-                ? (newIndex + 1) ~/ 2
-                : newIndex ~/ 2;
+           // Calculate the updated indexes
+           final updatedOldIndex = oldIndex ~/ 2;
+           final updatedNewIndex = oldIndex > newIndex && newIndex % 2 == 1 ? (newIndex + 1) ~/ 2 : newIndex ~/ 2;
 
-            return onReorder(updatedOldIndex, updatedNewIndex);
-          },
-        );
+           return onReorder(updatedOldIndex, updatedNewIndex);
+         },
+       );
 }

@@ -77,8 +77,7 @@ class StreamPollCommentsDialog extends StatefulWidget {
   final VoidCallback? onUpdateComment;
 
   @override
-  State<StreamPollCommentsDialog> createState() =>
-      _StreamPollCommentsDialogState();
+  State<StreamPollCommentsDialog> createState() => _StreamPollCommentsDialogState();
 }
 
 class _StreamPollCommentsDialogState extends State<StreamPollCommentsDialog> {

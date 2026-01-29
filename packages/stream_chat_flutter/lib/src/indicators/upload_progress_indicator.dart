@@ -59,7 +59,8 @@ class StreamUploadProgressIndicator extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             '${_percentage.toInt()}%',
-            style: textStyle ??
+            style:
+                textStyle ??
                 theme.textTheme.footnote.copyWith(
                   color: theme.colorTheme.barsBg,
                 ),

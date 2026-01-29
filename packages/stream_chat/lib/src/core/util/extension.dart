@@ -14,8 +14,7 @@ extension IterableX<T> on Iterable<T?> {
 extension MapX<K, V> on Map<K?, V?> {
   /// Returns a new map with null keys or values removed
   Map<K, V> get nullProtected {
-    final nullProtected = {...this}
-      ..removeWhere((key, value) => key == null || value == null);
+    final nullProtected = {...this}..removeWhere((key, value) => key == null || value == null);
     return nullProtected.cast();
   }
 }

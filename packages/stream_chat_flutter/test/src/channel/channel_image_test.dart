@@ -21,8 +21,7 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream)
-          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
 
       await tester.pumpWidget(
@@ -42,8 +41,7 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      final image =
-          tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
+      final image = tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
       expect(image.imageUrl, 'https://bit.ly/321RmWb');
     },
   );
@@ -76,7 +74,7 @@ void main() {
               id: 'user-id2',
               image: 'testimage',
             ),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -90,7 +88,7 @@ void main() {
         Member(
           userId: 'user-id',
           user: User(id: 'user-id'),
-        )
+        ),
       ]);
       when(() => clientState.usersStream).thenAnswer(
         (i) => Stream.value({
@@ -121,8 +119,7 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      final image =
-          tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
+      final image = tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
       expect(image.imageUrl, 'testimage');
     },
   );
@@ -167,8 +164,7 @@ void main() {
         ),
       ];
       when(() => channelState.members).thenReturn(members);
-      when(() => channelState.membersStream)
-          .thenAnswer((_) => Stream.value(members));
+      when(() => channelState.membersStream).thenAnswer((_) => Stream.value(members));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -187,8 +183,7 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      final image =
-          tester.widget<StreamGroupAvatar>(find.byType(StreamGroupAvatar));
+      final image = tester.widget<StreamGroupAvatar>(find.byType(StreamGroupAvatar));
       final otherMembers = members.where((it) => it.userId != currentUser.id);
       expect(
         image.members.map((it) => it.user?.id),
@@ -211,8 +206,7 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream)
-          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
 
       await tester.pumpWidget(

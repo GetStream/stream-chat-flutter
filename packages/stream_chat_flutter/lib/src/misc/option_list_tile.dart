@@ -60,15 +60,13 @@ class StreamOptionListTile extends StatelessWidget {
               onTap: onTap,
               child: Row(
                 children: [
-                  if (leading != null)
-                    Center(child: leading)
-                  else
-                    const SizedBox(width: 16),
+                  if (leading != null) Center(child: leading) else const SizedBox(width: 16),
                   Expanded(
                     flex: 4,
                     child: Text(
                       title,
-                      style: titleTextStyle ??
+                      style:
+                          titleTextStyle ??
                           (titleColor == null
                               ? chatThemeData.textTheme.bodyBold
                               : chatThemeData.textTheme.bodyBold.copyWith(

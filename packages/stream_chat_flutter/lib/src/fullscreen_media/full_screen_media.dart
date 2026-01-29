@@ -81,17 +81,16 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
       return;
     }
 
-    final currentAttachment =
-        widget.mediaAttachmentPackages[widget.startIndex].attachment;
+    final currentAttachment = widget.mediaAttachmentPackages[widget.startIndex].attachment;
 
-    await Future.wait(videoPackages.values.map(
-      (it) => it.initialize(),
-    ));
+    await Future.wait(
+      videoPackages.values.map(
+        (it) => it.initialize(),
+      ),
+    );
 
-    if (widget.autoplayVideos &&
-        currentAttachment.type == AttachmentType.video) {
-      final package = videoPackages.values
-          .firstWhere((e) => e._attachment == currentAttachment);
+    if (widget.autoplayVideos && currentAttachment.type == AttachmentType.video) {
+      final package = videoPackages.values.firstWhere((e) => e._attachment == currentAttachment);
       package._chewieController?.play();
     }
     setState(() {}); // ignore: no-empty-block
@@ -115,8 +114,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
       body: ValueListenableBuilder<int>(
         valueListenable: _currentPage,
         builder: (context, currentPage, child) {
-          final _currentAttachmentPackage =
-              widget.mediaAttachmentPackages[currentPage];
+          final _currentAttachmentPackage = widget.mediaAttachmentPackages[currentPage];
           final _currentMessage = _currentAttachmentPackage.message;
           final _currentAttachment = _currentAttachmentPackage.attachment;
           return Stack(
@@ -130,8 +128,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                   return AnimatedPositionedDirectional(
                     duration: kThemeAnimationDuration,
                     curve: Curves.easeInOut,
-                    top:
-                        isDisplayingDetail ? 0 : -(topPadding + kToolbarHeight),
+                    top: isDisplayingDetail ? 0 : -(topPadding + kToolbarHeight),
                     start: 0,
                     end: 0,
                     height: topPadding + kToolbarHeight,
@@ -163,8 +160,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                               );
                             }
                           : null,
-                      attachmentActionsModalBuilder:
-                          widget.attachmentActionsModalBuilder,
+                      attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
                     ),
                   );
                 },
@@ -178,9 +174,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                     return AnimatedPositionedDirectional(
                       duration: kThemeAnimationDuration,
                       curve: Curves.easeInOut,
-                      bottom: isDisplayingDetail
-                          ? 0
-                          : -(bottomPadding + kToolbarHeight),
+                      bottom: isDisplayingDetail ? 0 : -(bottomPadding + kToolbarHeight),
                       start: 0,
                       end: 0,
                       height: bottomPadding + kToolbarHeight,
@@ -246,8 +240,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
               }
             },
             onRightArrowKeypress: () {
-              if (_currentPage.value <
-                  widget.mediaAttachmentPackages.length - 1) {
+              if (_currentPage.value < widget.mediaAttachmentPackages.length - 1) {
                 _currentPage.value++;
                 _pageController.nextPage(
                   duration: const Duration(milliseconds: 300),
@@ -261,22 +254,19 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
               onPageChanged: (val) {
                 _currentPage.value = val;
                 if (videoPackages.isEmpty) return;
-                final currentAttachment =
-                    widget.mediaAttachmentPackages[val].attachment;
+                final currentAttachment = widget.mediaAttachmentPackages[val].attachment;
                 for (final e in videoPackages.values) {
                   if (e._attachment != currentAttachment) {
                     e._chewieController?.pause();
                   }
                 }
-                if (widget.autoplayVideos &&
-                    currentAttachment.type == AttachmentType.video) {
+                if (widget.autoplayVideos && currentAttachment.type == AttachmentType.video) {
                   final controller = videoPackages[currentAttachment.id]!;
                   controller._chewieController?.play();
                 }
               },
               itemBuilder: (context, index) {
-                final currentAttachmentPackage =
-                    widget.mediaAttachmentPackages[index];
+                final currentAttachmentPackage = widget.mediaAttachmentPackages[index];
                 final attachment = currentAttachmentPackage.attachment;
                 return ValueListenableBuilder(
                   valueListenable: _isDisplayingDetail,
@@ -298,8 +288,7 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                   },
                   child: Builder(
                     builder: (context) {
-                      if (attachment.type == AttachmentType.image ||
-                          attachment.type == AttachmentType.giphy) {
+                      if (attachment.type == AttachmentType.image || attachment.type == AttachmentType.giphy) {
                         return PhotoView.customChild(
                           maxScale: PhotoViewComputedScale.covered,
                           minScale: PhotoViewComputedScale.contained,
@@ -345,15 +334,15 @@ class VideoPackage {
     this._attachment, {
     bool showControls = false,
     bool autoInitialize = true,
-  })  : _showControls = showControls,
-        _autoInitialize = autoInitialize,
-        _videoPlayerController = _attachment.localUri != null
-            ? VideoPlayerController.file(
-                File.fromUri(_attachment.localUri!),
-              )
-            : VideoPlayerController.networkUrl(
-                Uri.parse(_attachment.assetUrl!),
-              );
+  }) : _showControls = showControls,
+       _autoInitialize = autoInitialize,
+       _videoPlayerController = _attachment.localUri != null
+           ? VideoPlayerController.file(
+               File.fromUri(_attachment.localUri!),
+             )
+           : VideoPlayerController.networkUrl(
+               Uri.parse(_attachment.assetUrl!),
+             );
 
   final Attachment _attachment;
   final bool _showControls;
@@ -384,12 +373,10 @@ class VideoPackage {
   }
 
   /// Add a listener to video player controller
-  void addListener(VoidCallback listener) =>
-      _videoPlayerController.addListener(listener);
+  void addListener(VoidCallback listener) => _videoPlayerController.addListener(listener);
 
   /// Remove a listener to video player controller
-  void removeListener(VoidCallback listener) =>
-      _videoPlayerController.removeListener(listener);
+  void removeListener(VoidCallback listener) => _videoPlayerController.removeListener(listener);
 
   /// Dispose controllers
   Future<void> dispose() {

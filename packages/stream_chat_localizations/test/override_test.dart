@@ -16,8 +16,7 @@ class FooStreamChatLocalizations extends StreamChatLocalizationsEn {
   final String launchUrlError;
 }
 
-class FooStreamChatLocalizationsDelegate
-    extends LocalizationsDelegate<StreamChatLocalizations> {
+class FooStreamChatLocalizationsDelegate extends LocalizationsDelegate<StreamChatLocalizations> {
   const FooStreamChatLocalizationsDelegate({
     this.supportedLanguage = 'en',
     this.launchUrlError = 'foo',
@@ -27,15 +26,12 @@ class FooStreamChatLocalizationsDelegate
   final String launchUrlError;
 
   @override
-  bool isSupported(Locale locale) =>
-      supportedLanguage == 'allLanguages' ||
-      locale.languageCode == supportedLanguage;
+  bool isSupported(Locale locale) => supportedLanguage == 'allLanguages' || locale.languageCode == supportedLanguage;
 
   @override
-  Future<FooStreamChatLocalizations> load(Locale locale) =>
-      SynchronousFuture<FooStreamChatLocalizations>(
-        FooStreamChatLocalizations(locale, launchUrlError),
-      );
+  Future<FooStreamChatLocalizations> load(Locale locale) => SynchronousFuture<FooStreamChatLocalizations>(
+    FooStreamChatLocalizations(locale, launchUrlError),
+  );
 
   @override
   bool shouldReload(FooStreamChatLocalizationsDelegate old) => false;
@@ -43,24 +39,22 @@ class FooStreamChatLocalizationsDelegate
 
 Widget buildFrame({
   Locale? locale,
-  Iterable<LocalizationsDelegate> delegates =
-      GlobalStreamChatLocalizations.delegates,
+  Iterable<LocalizationsDelegate> delegates = GlobalStreamChatLocalizations.delegates,
   required WidgetBuilder buildContent,
   LocaleResolutionCallback? localeResolutionCallback,
   Iterable<Locale> supportedLocales = const <Locale>[
     Locale('en', 'US'),
     Locale('hi', 'IN'),
   ],
-}) =>
-    MaterialApp(
-      color: const Color(0xFFFFFFFF),
-      locale: locale,
-      supportedLocales: supportedLocales,
-      localizationsDelegates: delegates,
-      localeResolutionCallback: localeResolutionCallback,
-      onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(
-          builder: (BuildContext context) => buildContent(context)),
-    );
+}) => MaterialApp(
+  color: const Color(0xFFFFFFFF),
+  locale: locale,
+  supportedLocales: supportedLocales,
+  localizationsDelegates: delegates,
+  localeResolutionCallback: localeResolutionCallback,
+  onGenerateRoute: (RouteSettings settings) =>
+      MaterialPageRoute<void>(builder: (BuildContext context) => buildContent(context)),
+);
 
 void main() {
   testWidgets(
@@ -104,23 +98,23 @@ void main() {
     "Localizations.override widget tracks parent's locale",
     (WidgetTester tester) async {
       Widget buildLocaleFrame(Locale locale) => buildFrame(
-            locale: locale,
-            supportedLocales: <Locale>[locale],
-            buildContent: (BuildContext context) => Localizations.override(
-              context: context,
-              child: Builder(
-                builder: (BuildContext context) {
-                  // No StreamChatLocalizations are defined for the first
-                  // Localizations ancestor, so we should get the values from
-                  // the default one, i.e. the one created by WidgetsApp via
-                  // the LocalizationsDelegate provided by MaterialApp.
-                  return Text(
-                    StreamChatLocalizations.of(context)!.launchUrlError,
-                  );
-                },
-              ),
-            ),
-          );
+        locale: locale,
+        supportedLocales: <Locale>[locale],
+        buildContent: (BuildContext context) => Localizations.override(
+          context: context,
+          child: Builder(
+            builder: (BuildContext context) {
+              // No StreamChatLocalizations are defined for the first
+              // Localizations ancestor, so we should get the values from
+              // the default one, i.e. the one created by WidgetsApp via
+              // the LocalizationsDelegate provided by MaterialApp.
+              return Text(
+                StreamChatLocalizations.of(context)!.launchUrlError,
+              );
+            },
+          ),
+        ),
+      );
 
       await tester.pumpWidget(buildLocaleFrame(const Locale('en', 'US')));
       expect(find.text('Cannot launch the url'), findsOneWidget);
@@ -130,28 +124,27 @@ void main() {
     },
   );
 
-  testWidgets('Localizations.override widget with hardwired locale',
-      (WidgetTester tester) async {
+  testWidgets('Localizations.override widget with hardwired locale', (WidgetTester tester) async {
     Widget buildLocaleFrame(Locale locale) => buildFrame(
-          locale: locale,
-          buildContent: (BuildContext context) {
-            return Localizations.override(
-              context: context,
-              locale: const Locale('en', 'US'),
-              child: Builder(
-                builder: (BuildContext context) {
-                  // No StreamChatLocalizations are defined for the first
-                  // Localizations ancestor, so we should get the values from
-                  // the default one, i.e. the one created by WidgetsApp via
-                  // the LocalizationsDelegate provided by MaterialApp.
-                  return Text(
-                    StreamChatLocalizations.of(context)!.launchUrlError,
-                  );
-                },
-              ),
-            );
-          },
+      locale: locale,
+      buildContent: (BuildContext context) {
+        return Localizations.override(
+          context: context,
+          locale: const Locale('en', 'US'),
+          child: Builder(
+            builder: (BuildContext context) {
+              // No StreamChatLocalizations are defined for the first
+              // Localizations ancestor, so we should get the values from
+              // the default one, i.e. the one created by WidgetsApp via
+              // the LocalizationsDelegate provided by MaterialApp.
+              return Text(
+                StreamChatLocalizations.of(context)!.launchUrlError,
+              );
+            },
+          ),
         );
+      },
+    );
 
     await tester.pumpWidget(buildLocaleFrame(const Locale('en', 'US')));
     expect(find.text('Cannot launch the url'), findsOneWidget);
@@ -165,30 +158,32 @@ void main() {
     (WidgetTester tester) async {
       final Key textKey = UniqueKey();
 
-      await tester.pumpWidget(buildFrame(
-        delegates: <LocalizationsDelegate>[
-          ...GlobalStreamChatLocalizations.delegates,
-          const FooStreamChatLocalizationsDelegate(
-            supportedLanguage: 'fr',
-            launchUrlError: "Impossible de lancer l'url",
+      await tester.pumpWidget(
+        buildFrame(
+          delegates: <LocalizationsDelegate>[
+            ...GlobalStreamChatLocalizations.delegates,
+            const FooStreamChatLocalizationsDelegate(
+              supportedLanguage: 'fr',
+              launchUrlError: "Impossible de lancer l'url",
+            ),
+            const FooStreamChatLocalizationsDelegate(
+              supportedLanguage: 'uz',
+              launchUrlError: 'test',
+            ),
+          ],
+          supportedLocales: const <Locale>[
+            Locale('en'),
+            Locale('hi'),
+            Locale('fr'),
+            Locale('de'),
+            Locale('uz'),
+          ],
+          buildContent: (BuildContext context) => Text(
+            StreamChatLocalizations.of(context)!.launchUrlError,
+            key: textKey,
           ),
-          const FooStreamChatLocalizationsDelegate(
-            supportedLanguage: 'uz',
-            launchUrlError: 'test',
-          ),
-        ],
-        supportedLocales: const <Locale>[
-          Locale('en'),
-          Locale('hi'),
-          Locale('fr'),
-          Locale('de'),
-          Locale('uz'),
-        ],
-        buildContent: (BuildContext context) => Text(
-          StreamChatLocalizations.of(context)!.launchUrlError,
-          key: textKey,
         ),
-      ));
+      );
 
       expect(
         tester.widget<Text>(find.byKey(textKey)).data,
@@ -214,24 +209,25 @@ void main() {
     (WidgetTester tester) async {
       final Key textKey = UniqueKey();
 
-      await tester.pumpWidget(buildFrame(
-        // Accept whatever locale we're given
-        localeResolutionCallback:
-            (Locale? locale, Iterable<Locale> supportedLocales) => locale,
-        delegates: [
-          const FooStreamChatLocalizationsDelegate(
-            supportedLanguage: 'allLanguages',
-          ),
-          ...GlobalStreamChatLocalizations.delegates,
-        ],
-        buildContent: (BuildContext context) {
-          // Should always be 'foo', no matter what the locale is
-          return Text(
-            StreamChatLocalizations.of(context)!.launchUrlError,
-            key: textKey,
-          );
-        },
-      ));
+      await tester.pumpWidget(
+        buildFrame(
+          // Accept whatever locale we're given
+          localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => locale,
+          delegates: [
+            const FooStreamChatLocalizationsDelegate(
+              supportedLanguage: 'allLanguages',
+            ),
+            ...GlobalStreamChatLocalizations.delegates,
+          ],
+          buildContent: (BuildContext context) {
+            // Should always be 'foo', no matter what the locale is
+            return Text(
+              StreamChatLocalizations.of(context)!.launchUrlError,
+              key: textKey,
+            );
+          },
+        ),
+      );
 
       expect(tester.widget<Text>(find.byKey(textKey)).data, 'foo');
 
@@ -250,16 +246,18 @@ void main() {
     (WidgetTester tester) async {
       final Key textKey = UniqueKey();
 
-      await tester.pumpWidget(buildFrame(
-        delegates: <FooStreamChatLocalizationsDelegate>[
-          const FooStreamChatLocalizationsDelegate(),
-        ],
-        // supportedLocales not specified, so all locales resolve to 'en'
-        buildContent: (BuildContext context) => Text(
-          StreamChatLocalizations.of(context)!.launchUrlError,
-          key: textKey,
+      await tester.pumpWidget(
+        buildFrame(
+          delegates: <FooStreamChatLocalizationsDelegate>[
+            const FooStreamChatLocalizationsDelegate(),
+          ],
+          // supportedLocales not specified, so all locales resolve to 'en'
+          buildContent: (BuildContext context) => Text(
+            StreamChatLocalizations.of(context)!.launchUrlError,
+            key: textKey,
+          ),
         ),
-      ));
+      );
 
       // Unsupported locale '_' (the widget tester's default) resolves to 'en'.
       expect(tester.widget<Text>(find.byKey(textKey)).data, 'foo');

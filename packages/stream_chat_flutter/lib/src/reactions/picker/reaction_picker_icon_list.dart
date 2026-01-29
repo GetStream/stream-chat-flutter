@@ -24,11 +24,12 @@ typedef OnReactionPickerIconPressed = ValueSetter<String>;
 /// - [icon]: The reaction icon data containing type and selection state.
 /// - [onPressed]: Callback when the reaction icon is pressed.
 /// {@endtemplate}
-typedef ReactionPickerIconBuilder = Widget Function(
-  BuildContext context,
-  ReactionPickerIcon icon,
-  VoidCallback? onPressed,
-);
+typedef ReactionPickerIconBuilder =
+    Widget Function(
+      BuildContext context,
+      ReactionPickerIcon icon,
+      VoidCallback? onPressed,
+    );
 
 /// {@template reactionPickerIconList}
 /// A widget that displays a list of reactionIcons that can be picked by a user.

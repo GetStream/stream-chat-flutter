@@ -10,8 +10,7 @@ const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 const kDefaultMaxAttachmentCount = 10;
 
 /// Controller class for [StreamAttachmentPicker].
-class StreamAttachmentPickerController
-    extends ValueNotifier<AttachmentPickerValue> {
+class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerValue> {
   /// Creates a new instance of [StreamAttachmentPickerController].
   factory StreamAttachmentPickerController({
     Poll? initialPoll,
@@ -35,11 +34,11 @@ class StreamAttachmentPickerController
     this.initialValue, {
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.maxAttachmentCount = kDefaultMaxAttachmentCount,
-  })  : assert(
-          (initialValue.attachments.length) <= maxAttachmentCount,
-          '''The initial attachments count must be less than or equal to maxAttachmentCount''',
-        ),
-        super(initialValue);
+  }) : assert(
+         (initialValue.attachments.length) <= maxAttachmentCount,
+         '''The initial attachments count must be less than or equal to maxAttachmentCount''',
+       ),
+       super(initialValue);
 
   /// Initial value for the controller.
   final AttachmentPickerValue initialValue;
@@ -106,14 +105,16 @@ class StreamAttachmentPickerController
     // Cache the attachment in a temporary file.
     final tempFilePath = await _saveToCache(file);
 
-    value = value.copyWith(attachments: [
-      ...value.attachments,
-      attachment.copyWith(
-        file: file.copyWith(
-          path: tempFilePath,
+    value = value.copyWith(
+      attachments: [
+        ...value.attachments,
+        attachment.copyWith(
+          file: file.copyWith(
+            path: tempFilePath,
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   /// Removes the specified [attachment] from the message.
@@ -271,9 +272,9 @@ class AttachmentTooLargeError extends StreamChatError {
     required this.fileSize,
     required this.maxSize,
   }) : super(
-          'The size of the attachment is $fileSize bytes, '
-          'but the maximum size allowed is $maxSize bytes.',
-        );
+         'The size of the attachment is $fileSize bytes, '
+         'but the maximum size allowed is $maxSize bytes.',
+       );
 
   /// The actual size of the attachment in bytes.
   final int fileSize;
@@ -285,7 +286,8 @@ class AttachmentTooLargeError extends StreamChatError {
   List<Object?> get props => [...super.props, fileSize, maxSize];
 
   @override
-  String toString() => 'AttachmentTooLargeError: '
+  String toString() =>
+      'AttachmentTooLargeError: '
       'The size of the attachment is $fileSize bytes, '
       'but the maximum size allowed is $maxSize bytes.';
 }
@@ -309,6 +311,7 @@ class AttachmentLimitReachedError extends StreamChatError {
   List<Object?> get props => [...super.props, maxCount];
 
   @override
-  String toString() => 'AttachmentLimitReachedError: '
+  String toString() =>
+      'AttachmentLimitReachedError: '
       'The maximum number of attachments is $maxCount.';
 }
