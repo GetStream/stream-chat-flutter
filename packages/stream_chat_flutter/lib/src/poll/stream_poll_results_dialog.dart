@@ -270,9 +270,7 @@ class PollVotesByOptionItem extends StatelessWidget {
         vertical: 12,
         horizontal: 16,
       ),
-      decoration: isOptionWinner
-          ? theme.pollOptionsWinnerDecoration
-          : theme.pollOptionsDecoration,
+      decoration: isOptionWinner ? theme.pollOptionsWinnerDecoration : theme.pollOptionsDecoration,
       child: Column(
         spacing: 16,
         mainAxisSize: MainAxisSize.min,
@@ -283,9 +281,7 @@ class PollVotesByOptionItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   option.text,
-                  style: isOptionWinner
-                      ? theme.pollOptionsWinnerTextStyle
-                      : theme.pollOptionsTextStyle,
+                  style: isOptionWinner ? theme.pollOptionsWinnerTextStyle : theme.pollOptionsTextStyle,
                 ),
               ),
               const SizedBox(width: 8),
@@ -298,9 +294,7 @@ class PollVotesByOptionItem extends StatelessWidget {
               ],
               Text(
                 context.translations.voteCountLabel(count: pollVotesCount),
-                style: isOptionWinner
-                    ? theme.pollOptionsWinnerVoteCountTextStyle
-                    : theme.pollOptionsVoteCountTextStyle,
+                style: isOptionWinner ? theme.pollOptionsWinnerVoteCountTextStyle : theme.pollOptionsVoteCountTextStyle,
               ),
             ],
           ),

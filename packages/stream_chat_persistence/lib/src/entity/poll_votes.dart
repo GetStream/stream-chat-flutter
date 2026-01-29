@@ -9,8 +9,7 @@ class PollVotes extends Table {
   TextColumn get id => text().nullable()();
 
   /// The unique identifier of the poll the vote belongs to.
-  TextColumn get pollId =>
-      text().nullable().references(Polls, #id, onDelete: KeyAction.cascade)();
+  TextColumn get pollId => text().nullable().references(Polls, #id, onDelete: KeyAction.cascade)();
 
   /// The unique identifier of the option selected in the poll.
   ///

@@ -33,19 +33,15 @@ class StreamGalleryHeaderTheme extends InheritedTheme {
   /// ImageHeaderTheme theme = ImageHeaderTheme.of(context);
   /// ```
   static StreamGalleryHeaderThemeData of(BuildContext context) {
-    final galleryHeaderTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamGalleryHeaderTheme>();
-    return galleryHeaderTheme?.data ??
-        StreamChatTheme.of(context).galleryHeaderTheme;
+    final galleryHeaderTheme = context.dependOnInheritedWidgetOfExactType<StreamGalleryHeaderTheme>();
+    return galleryHeaderTheme?.data ?? StreamChatTheme.of(context).galleryHeaderTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamGalleryHeaderTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamGalleryHeaderTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamGalleryHeaderTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamGalleryHeaderTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template galleryHeaderThemeData}
@@ -111,8 +107,7 @@ class StreamGalleryHeaderThemeData with Diagnosticable {
       iconMenuPointColor: iconMenuPointColor ?? this.iconMenuPointColor,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
-      bottomSheetBarrierColor:
-          bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+      bottomSheetBarrierColor: bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
     );
   }
 
@@ -127,13 +122,10 @@ class StreamGalleryHeaderThemeData with Diagnosticable {
     return StreamGalleryHeaderThemeData(
       closeButtonColor: Color.lerp(a.closeButtonColor, b.closeButtonColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      iconMenuPointColor:
-          Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
+      iconMenuPointColor: Color.lerp(a.iconMenuPointColor, b.iconMenuPointColor, t),
       titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-      subtitleTextStyle:
-          TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
-      bottomSheetBarrierColor:
-          Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+      subtitleTextStyle: TextStyle.lerp(a.subtitleTextStyle, b.subtitleTextStyle, t),
+      bottomSheetBarrierColor: Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
     );
   }
 

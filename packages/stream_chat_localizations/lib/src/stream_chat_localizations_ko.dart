@@ -49,8 +49,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      '$remaining/${total}mb를 업로드중...';
+  }) => '$remaining/${total}mb를 업로드중...';
 
   @override
   String pinnedByUserText({
@@ -129,8 +128,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
       '우리는 압축해 보았지만 충분하지 않았습니다.';
 
   @override
-  String fileTooLargeError(double limitInMB) =>
-      '파일이 너무 커서 업로드할 수 없습니다. 파일 크기 제한은 ${limitInMB}MB입니다.';
+  String fileTooLargeError(double limitInMB) => '파일이 너무 커서 업로드할 수 없습니다. 파일 크기 제한은 ${limitInMB}MB입니다.';
 
   @override
   String get couldNotReadBytesFromFileError => '파일에서 바이트를 읽을 수 없습니다.';
@@ -163,8 +161,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get addMoreFilesLabel => '파일을 추가함';
 
   @override
-  String get enablePhotoAndVideoAccessMessage =>
-      '친구와 공유할 수 있도록 사진과 동영상에 액세스할 수 있도록 설정하십시오.';
+  String get enablePhotoAndVideoAccessMessage => '친구와 공유할 수 있도록 사진과 동영상에 액세스할 수 있도록 설정하십시오.';
 
   @override
   String get allowGalleryAccessMessage => '갤러리에 대한 액세스를 허용합니다';
@@ -350,8 +347,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} / $totalPages';
+  }) => '${currentPage + 1} / $totalPages';
 
   //3 / 11
 
@@ -369,8 +365,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get viewLibrary => '라이브러리 보기';
 
   @override
-  String attachmentLimitExceedError(int limit) =>
-      '첨부 파일 제한 초과: $limit 이상의 첨부 파일을 추가할 수 없습니다';
+  String attachmentLimitExceedError(int limit) => '첨부 파일 제한 초과: $limit 이상의 첨부 파일을 추가할 수 없습니다';
 
   @override
   String get downloadLabel => '다운로드';
@@ -588,10 +583,10 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 표',
-        1 => '1 표',
-        _ => '$count 표',
-      };
+    null || < 1 => '0 표',
+    1 => '1 표',
+    _ => '$count 표',
+  };
 
   @override
   String get noPollVotesLabel => '현재 투표가 없습니다';
@@ -623,8 +618,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get moderationReviewModalTitle => '확실합니까?';
 
   @override
-  String get moderationReviewModalDescription =>
-      '''귀하의 댓글이 다른 사람들에게 어떤 영향을 미칠 수 있는지 고려하고 커뮤니티 가이드라인을 준수하세요.''';
+  String get moderationReviewModalDescription => '''귀하의 댓글이 다른 사람들에게 어떤 영향을 미칠 수 있는지 고려하고 커뮤니티 가이드라인을 준수하세요.''';
 
   @override
   String get emptyMessagePreviewText => '';

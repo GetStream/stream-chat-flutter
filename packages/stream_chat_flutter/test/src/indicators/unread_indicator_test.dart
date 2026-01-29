@@ -30,20 +30,21 @@ void main() {
       });
 
       when(() => clientState.totalUnreadCount).thenReturn(10);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(10));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: StreamUnreadIndicator(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(
+                body: StreamUnreadIndicator(),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
@@ -70,22 +71,23 @@ void main() {
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channelState.unreadCount).thenReturn(0);
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(0));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(0));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: StreamUnreadIndicator.channels(
-                cid: channel.cid,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamUnreadIndicator.channels(
+                  cid: channel.cid,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
@@ -112,22 +114,23 @@ void main() {
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channelState.unreadCount).thenReturn(100);
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(100));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(100));
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: StreamUnreadIndicator.channels(
-                cid: channel.cid,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamUnreadIndicator.channels(
+                  cid: channel.cid,
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();

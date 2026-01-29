@@ -4,18 +4,16 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   test('MessageInputThemeData copyWith, ==, hashCode basics', () {
-    expect(const StreamMessageInputThemeData(),
-        const StreamMessageInputThemeData().copyWith());
-    expect(const StreamMessageInputThemeData().hashCode,
-        const StreamMessageInputThemeData().copyWith().hashCode);
+    expect(const StreamMessageInputThemeData(), const StreamMessageInputThemeData().copyWith());
+    expect(const StreamMessageInputThemeData().hashCode, const StreamMessageInputThemeData().copyWith().hashCode);
   });
 
   group('MessageInputThemeData lerps correctly', () {
     test('Lerp completely from light to dark', () {
       expect(
-          const StreamMessageInputThemeData().lerp(
-              _messageInputThemeControl, _messageInputThemeControlDark, 1),
-          _messageInputThemeControlDark);
+        const StreamMessageInputThemeData().lerp(_messageInputThemeControl, _messageInputThemeControlDark, 1),
+        _messageInputThemeControlDark,
+      );
     });
 
     test('Lerp halfway from light to dark', () {
@@ -34,15 +32,14 @@ void main() {
 
     test('Lerp completely from dark to light', () {
       expect(
-          const StreamMessageInputThemeData().lerp(
-              _messageInputThemeControlDark, _messageInputThemeControl, 1),
-          _messageInputThemeControl);
+        const StreamMessageInputThemeData().lerp(_messageInputThemeControlDark, _messageInputThemeControl, 1),
+        _messageInputThemeControl,
+      );
     });
   });
 
   test('Merging two MessageInputThemeData results in the latter', () {
-    expect(_messageInputThemeControl.merge(_messageInputThemeControlDark),
-        _messageInputThemeControlDark);
+    expect(_messageInputThemeControl.merge(_messageInputThemeControlDark), _messageInputThemeControlDark);
   });
 }
 

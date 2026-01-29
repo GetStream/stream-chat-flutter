@@ -75,8 +75,7 @@ void main() {
         final user = User(id: 'test-user-id');
         final token = Token.development(user.id).rawValue;
 
-        when(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
-            .thenAnswer(
+        when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
           (_) async => ConnectGuestUserResponse()
             ..user = user
             ..accessToken = token,
@@ -103,8 +102,9 @@ void main() {
       test('should throw if `.getGuestUser` fails', () async {
         final user = User(id: 'test-user-id');
 
-        when(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
-            .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+        when(
+          () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+        ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
         expectLater(
           client.wsConnectionStatusStream,
@@ -247,8 +247,7 @@ void main() {
       final user = User(id: 'test-user-id');
       final token = Token.development(user.id).rawValue;
 
-      when(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
-          .thenAnswer(
+      when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
         (_) async => ConnectGuestUserResponse()
           ..user = user
           ..accessToken = token,
@@ -331,8 +330,7 @@ void main() {
       final user = User(id: 'test-user-id');
       final token = Token.development(user.id).rawValue;
 
-      when(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
-          .thenAnswer(
+      when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
         (_) async => ConnectGuestUserResponse()
           ..user = user
           ..accessToken = token,
@@ -377,8 +375,7 @@ void main() {
 
     setUp(() {
       final ws = FakeWebSocketWithConnectionError();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws)
-        ..chatPersistenceClient = persistence;
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws)..chatPersistenceClient = persistence;
     });
 
     tearDown(() {
@@ -392,9 +389,10 @@ void main() {
         final token = Token.development(user.id).rawValue;
 
         final event = Event(
-            type: EventType.healthCheck,
-            connectionId: 'test-connection-id',
-            me: OwnUser.fromUser(user));
+          type: EventType.healthCheck,
+          connectionId: 'test-connection-id',
+          me: OwnUser.fromUser(user),
+        );
         when(persistence.getConnectionInfo).thenAnswer((_) async => event);
 
         final res = await client.connectUser(user, token);
@@ -416,9 +414,10 @@ void main() {
         }
 
         final event = Event(
-            type: EventType.healthCheck,
-            connectionId: 'test-connection-id',
-            me: OwnUser.fromUser(user));
+          type: EventType.healthCheck,
+          connectionId: 'test-connection-id',
+          me: OwnUser.fromUser(user),
+        );
         when(persistence.getConnectionInfo).thenAnswer((_) async => event);
 
         final res = await client.connectUserWithProvider(user, tokenProvider);
@@ -437,13 +436,13 @@ void main() {
         final token = Token.development(user.id).rawValue;
 
         final event = Event(
-            type: EventType.healthCheck,
-            connectionId: 'test-connection-id',
-            me: OwnUser.fromUser(user));
+          type: EventType.healthCheck,
+          connectionId: 'test-connection-id',
+          me: OwnUser.fromUser(user),
+        );
         when(persistence.getConnectionInfo).thenAnswer((_) async => event);
 
-        when(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
-            .thenAnswer(
+        when(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).thenAnswer(
           (_) async => ConnectGuestUserResponse()
             ..user = user
             ..accessToken = token,
@@ -455,8 +454,7 @@ void main() {
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
-        verify(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
-            .called(1);
+        verify(() => api.guest.getGuestUser(any(that: isSameUserAs(user)))).called(1);
         verifyNoMoreInteractions(api.guest);
       },
     );
@@ -501,12 +499,10 @@ void main() {
     });
 
     setUp(() async {
-      when(() => persistence.updateLastSyncAt(any()))
-          .thenAnswer((_) => Future.value());
+      when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
       when(persistence.getLastSyncAt).thenAnswer((_) async => null);
       final ws = FakeWebSocket();
-      client = StreamChatClient(apiKey, chatApi: api, ws: ws)
-        ..chatPersistenceClient = persistence;
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws)..chatPersistenceClient = persistence;
       await client.connectUser(user, token);
       await delay(300);
       expect(client.persistenceEnabled, isTrue);
@@ -527,26 +523,25 @@ void main() {
           reset(persistence);
           const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
           final lastSyncAt = DateTime.now();
-          when(() => api.general.sync(cids, lastSyncAt))
-              .thenAnswer((_) async => SyncResponse()
-                ..events = [
-                  Event(
-                    isLocal: false,
-                    type: EventType.healthCheck,
-                    connectionId: 'test-connection-id',
-                    me: OwnUser.fromUser(user),
-                  ),
-                  Event(
-                    isLocal: false,
-                    type: EventType.messageDeleted,
-                    message: Message(id: 'test-message-id'),
-                  ),
-                ]);
+          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+            (_) async => SyncResponse()
+              ..events = [
+                Event(
+                  isLocal: false,
+                  type: EventType.healthCheck,
+                  connectionId: 'test-connection-id',
+                  me: OwnUser.fromUser(user),
+                ),
+                Event(
+                  isLocal: false,
+                  type: EventType.messageDeleted,
+                  message: Message(id: 'test-message-id'),
+                ),
+              ],
+          );
 
-          when(() => persistence.updateConnectionInfo(any()))
-              .thenAnswer((_) => Future.value());
-          when(() => persistence.updateLastSyncAt(any()))
-              .thenAnswer((_) => Future.value());
+          when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
+          when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
 
           await client.sync(cids: cids, lastSyncAt: lastSyncAt);
 
@@ -569,26 +564,25 @@ void main() {
           when(persistence.getChannelCids).thenAnswer((_) async => cids);
           when(persistence.getLastSyncAt).thenAnswer((_) async => lastSyncAt);
 
-          when(() => api.general.sync(cids, lastSyncAt))
-              .thenAnswer((_) async => SyncResponse()
-                ..events = [
-                  Event(
-                    isLocal: false,
-                    type: EventType.healthCheck,
-                    connectionId: 'test-connection-id',
-                    me: OwnUser.fromUser(user),
-                  ),
-                  Event(
-                    isLocal: false,
-                    type: EventType.messageDeleted,
-                    message: Message(id: 'test-message-id', text: 'Hey!'),
-                  ),
-                ]);
+          when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+            (_) async => SyncResponse()
+              ..events = [
+                Event(
+                  isLocal: false,
+                  type: EventType.healthCheck,
+                  connectionId: 'test-connection-id',
+                  me: OwnUser.fromUser(user),
+                ),
+                Event(
+                  isLocal: false,
+                  type: EventType.messageDeleted,
+                  message: Message(id: 'test-message-id', text: 'Hey!'),
+                ),
+              ],
+          );
 
-          when(() => persistence.updateConnectionInfo(any()))
-              .thenAnswer((_) => Future.value());
-          when(() => persistence.updateLastSyncAt(any()))
-              .thenAnswer((_) => Future.value());
+          when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
+          when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
 
           await client.sync();
 
@@ -612,12 +606,14 @@ void main() {
             ),
           );
 
-          when(() => persistence.getChannelStates(
-                filter: any(named: 'filter'),
-                messageLimit: any(named: 'messageLimit'),
-                channelStateSort: any(named: 'channelStateSort'),
-                paginationParams: any(named: 'paginationParams'),
-              )).thenAnswer((_) async => persistentChannelStates);
+          when(
+            () => persistence.getChannelStates(
+              filter: any(named: 'filter'),
+              messageLimit: any(named: 'messageLimit'),
+              channelStateSort: any(named: 'channelStateSort'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer((_) async => persistentChannelStates);
 
           final channelStates = List.generate(
             3,
@@ -626,35 +622,33 @@ void main() {
             ),
           );
 
-          when(() => api.channel.queryChannels(
-                filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
-                state: any(named: 'state'),
-                watch: any(named: 'watch'),
-                presence: any(named: 'presence'),
-                memberLimit: any(named: 'memberLimit'),
-                messageLimit: any(named: 'messageLimit'),
-                paginationParams: any(named: 'paginationParams'),
-              )).thenAnswer(
+          when(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer(
             (_) async => QueryChannelsResponse()..channels = channelStates,
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer(
             (_) async => <String, List<Message>>{
               for (final channelState in channelStates)
-                channelState.channel!.cid: [
-                  Message(id: 'test-message-id', text: 'Test message')
-                ],
+                channelState.channel!.cid: [Message(id: 'test-message-id', text: 'Test message')],
             },
           );
 
-          when(() => persistence.updateChannelState(any()))
-              .thenAnswer((_) async {});
-          when(() => persistence.updateChannelThreads(any(), any()))
-              .thenAnswer((_) async {});
-          when(() => persistence.updateChannelQueries(any(), any(),
-                  clearQueryCache: any(named: 'clearQueryCache')))
-              .thenAnswer((_) => Future.value());
+          when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+          when(
+            () => persistence.updateChannelQueries(any(), any(), clearQueryCache: any(named: 'clearQueryCache')),
+          ).thenAnswer((_) => Future.value());
 
           expectLater(
             client.queryChannels(),
@@ -670,32 +664,34 @@ void main() {
           // before our stream starts emitting data
           await delay(1050);
 
-          verify(() => persistence.getChannelStates(
-                filter: any(named: 'filter'),
-                messageLimit: any(named: 'messageLimit'),
-                channelStateSort: any(named: 'channelStateSort'),
-                paginationParams: any(named: 'paginationParams'),
-              )).called(1);
+          verify(
+            () => persistence.getChannelStates(
+              filter: any(named: 'filter'),
+              messageLimit: any(named: 'messageLimit'),
+              channelStateSort: any(named: 'channelStateSort'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(1);
 
-          verify(() => api.channel.queryChannels(
-                filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
-                state: any(named: 'state'),
-                watch: any(named: 'watch'),
-                presence: any(named: 'presence'),
-                memberLimit: any(named: 'memberLimit'),
-                messageLimit: any(named: 'messageLimit'),
-                paginationParams: any(named: 'paginationParams'),
-              )).called(1);
+          verify(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(1);
 
-          verify(() => persistence.getChannelThreads(any()))
-              .called(channelStates.length);
-          verify(() => persistence.updateChannelState(any()))
-              .called(channelStates.length);
-          verify(() => persistence.updateChannelThreads(any(), any()))
-              .called(channelStates.length);
-          verify(() => persistence.updateChannelQueries(any(), any(),
-              clearQueryCache: any(named: 'clearQueryCache'))).called(1);
+          verify(() => persistence.getChannelThreads(any())).called(channelStates.length);
+          verify(() => persistence.updateChannelState(any())).called(channelStates.length);
+          verify(() => persistence.updateChannelThreads(any(), any())).called(channelStates.length);
+          verify(
+            () => persistence.updateChannelQueries(any(), any(), clearQueryCache: any(named: 'clearQueryCache')),
+          ).called(1);
         },
       );
 
@@ -709,37 +705,37 @@ void main() {
             ),
           );
 
-          when(() => persistence.getChannelStates(
-                filter: any(named: 'filter'),
-                messageLimit: any(named: 'messageLimit'),
-                channelStateSort: any(named: 'channelStateSort'),
-                paginationParams: any(named: 'paginationParams'),
-              )).thenAnswer((_) async => persistentChannelStates);
+          when(
+            () => persistence.getChannelStates(
+              filter: any(named: 'filter'),
+              messageLimit: any(named: 'messageLimit'),
+              channelStateSort: any(named: 'channelStateSort'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer((_) async => persistentChannelStates);
 
-          when(() => api.channel.queryChannels(
-                filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
-                state: any(named: 'state'),
-                watch: any(named: 'watch'),
-                presence: any(named: 'presence'),
-                memberLimit: any(named: 'memberLimit'),
-                messageLimit: any(named: 'messageLimit'),
-                paginationParams: any(named: 'paginationParams'),
-              )).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          when(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
           when(() => persistence.getChannelThreads(any())).thenAnswer(
             (_) async => <String, List<Message>>{
               for (final channelState in persistentChannelStates)
-                channelState.channel!.cid: [
-                  Message(id: 'test-message-id', text: 'Test message')
-                ],
+                channelState.channel!.cid: [Message(id: 'test-message-id', text: 'Test message')],
             },
           );
 
-          when(() => persistence.updateChannelState(any()))
-              .thenAnswer((_) async => {});
-          when(() => persistence.updateChannelThreads(any(), any()))
-              .thenAnswer((_) async => {});
+          when(() => persistence.updateChannelState(any())).thenAnswer((_) async => {});
+          when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async => {});
 
           expectLater(
             client.queryChannels(),
@@ -753,30 +749,31 @@ void main() {
           // before our stream starts emitting data
           await delay(1050);
 
-          verify(() => persistence.getChannelStates(
-                filter: any(named: 'filter'),
-                messageLimit: any(named: 'messageLimit'),
-                channelStateSort: any(named: 'channelStateSort'),
-                paginationParams: any(named: 'paginationParams'),
-              )).called(1);
+          verify(
+            () => persistence.getChannelStates(
+              filter: any(named: 'filter'),
+              messageLimit: any(named: 'messageLimit'),
+              channelStateSort: any(named: 'channelStateSort'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(1);
 
-          verify(() => api.channel.queryChannels(
-                filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
-                state: any(named: 'state'),
-                watch: any(named: 'watch'),
-                presence: any(named: 'presence'),
-                memberLimit: any(named: 'memberLimit'),
-                messageLimit: any(named: 'messageLimit'),
-                paginationParams: any(named: 'paginationParams'),
-              )).called(1);
+          verify(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(1);
 
-          verify(() => persistence.getChannelThreads(any()))
-              .called(persistentChannelStates.length);
-          verify(() => persistence.updateChannelState(any()))
-              .called(persistentChannelStates.length);
-          verify(() => persistence.updateChannelThreads(any(), any()))
-              .called(persistentChannelStates.length);
+          verify(() => persistence.getChannelThreads(any())).called(persistentChannelStates.length);
+          verify(() => persistence.updateChannelState(any())).called(persistentChannelStates.length);
+          verify(() => persistence.updateChannelThreads(any(), any())).called(persistentChannelStates.length);
         },
       );
     });
@@ -835,21 +832,22 @@ void main() {
         const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
         final lastSyncAt = DateTime.now();
 
-        when(() => api.general.sync(cids, lastSyncAt))
-            .thenAnswer((_) async => SyncResponse()
-              ..events = [
-                Event(
-                  isLocal: false,
-                  type: EventType.healthCheck,
-                  connectionId: 'test-connection-id',
-                  me: OwnUser.fromUser(user),
-                ),
-                Event(
-                  isLocal: false,
-                  type: EventType.messageDeleted,
-                  message: Message(id: 'test-message-id'),
-                ),
-              ]);
+        when(() => api.general.sync(cids, lastSyncAt)).thenAnswer(
+          (_) async => SyncResponse()
+            ..events = [
+              Event(
+                isLocal: false,
+                type: EventType.healthCheck,
+                connectionId: 'test-connection-id',
+                me: OwnUser.fromUser(user),
+              ),
+              Event(
+                isLocal: false,
+                type: EventType.messageDeleted,
+                message: Message(id: 'test-message-id'),
+              ),
+            ],
+        );
 
         await client.sync(cids: cids, lastSyncAt: lastSyncAt);
 
@@ -876,16 +874,18 @@ void main() {
           ),
         );
 
-        when(() => api.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            )).thenAnswer(
+        when(
+          () => api.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer(
           (_) async => QueryChannelsResponse()..channels = channelStates,
         );
 
@@ -898,7 +898,25 @@ void main() {
         // before our stream starts emitting data
         await delay(300);
 
-        verify(() => api.channel.queryChannels(
+        verify(
+          () => api.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+      });
+
+      test(
+        '''should rethrow if `.queryChannelsOnline` throws and persistence channels are empty''',
+        () async {
+          when(
+            () => api.channel.queryChannels(
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
               state: any(named: 'state'),
@@ -907,22 +925,8 @@ void main() {
               memberLimit: any(named: 'memberLimit'),
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
-            )).called(1);
-      });
-
-      test(
-        '''should rethrow if `.queryChannelsOnline` throws and persistence channels are empty''',
-        () async {
-          when(() => api.channel.queryChannels(
-                filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
-                state: any(named: 'state'),
-                watch: any(named: 'watch'),
-                presence: any(named: 'presence'),
-                memberLimit: any(named: 'memberLimit'),
-                messageLimit: any(named: 'messageLimit'),
-                paginationParams: any(named: 'paginationParams'),
-              )).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+            ),
+          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
           expectLater(
             client.queryChannels(),
@@ -933,16 +937,18 @@ void main() {
           // before our stream starts emitting data
           await delay(300);
 
-          verify(() => api.channel.queryChannels(
-                filter: any(named: 'filter'),
-                sort: any(named: 'sort'),
-                state: any(named: 'state'),
-                watch: any(named: 'watch'),
-                presence: any(named: 'presence'),
-                memberLimit: any(named: 'memberLimit'),
-                messageLimit: any(named: 'messageLimit'),
-                paginationParams: any(named: 'paginationParams'),
-              )).called(1);
+          verify(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(1);
         },
       );
     });
@@ -953,12 +959,14 @@ void main() {
         (index) => User(id: 'test-user-id-$index'),
       );
 
-      when(() => api.user.queryUsers(
-            presence: any(named: 'presence'),
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(
+        () => api.user.queryUsers(
+          presence: any(named: 'presence'),
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       expectLater(
         // skipping initial seed event -> {} users
@@ -972,12 +980,14 @@ void main() {
       expect(res, isNotNull);
       expect(res.users.length, users.length);
 
-      verify(() => api.user.queryUsers(
-            presence: any(named: 'presence'),
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).called(1);
+      verify(
+        () => api.user.queryUsers(
+          presence: any(named: 'presence'),
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.user);
     });
 
@@ -993,21 +1003,25 @@ void main() {
       const cid = 'message:nice-channel';
       final filter = Filter.equal('channel_cid', cid);
 
-      when(() => api.moderation.queryBannedUsers(
-            filter: filter,
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).thenAnswer((_) async => QueryBannedUsersResponse()..bans = bans);
+      when(
+        () => api.moderation.queryBannedUsers(
+          filter: filter,
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((_) async => QueryBannedUsersResponse()..bans = bans);
 
       final res = await client.queryBannedUsers(filter: filter);
       expect(res, isNotNull);
       expect(res.bans.length, bans.length);
 
-      verify(() => api.moderation.queryBannedUsers(
-            filter: filter,
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).called(1);
+      verify(
+        () => api.moderation.queryBannedUsers(
+          filter: filter,
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.moderation);
     });
 
@@ -1022,23 +1036,29 @@ void main() {
           ..message = Message(id: 'test-message-id-$index'),
       );
 
-      when(() => api.general.searchMessages(filter,
-              query: any(named: 'query'),
-              sort: any(named: 'sort'),
-              pagination: any(named: 'pagination'),
-              messageFilters: any(named: 'messageFilters')))
-          .thenAnswer(
-              (_) async => SearchMessagesResponse()..results = messages);
+      when(
+        () => api.general.searchMessages(
+          filter,
+          query: any(named: 'query'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+          messageFilters: any(named: 'messageFilters'),
+        ),
+      ).thenAnswer((_) async => SearchMessagesResponse()..results = messages);
 
       final res = await client.search(filter);
       expect(res, isNotNull);
       expect(res.results.length, messages.length);
 
-      verify(() => api.general.searchMessages(filter,
+      verify(
+        () => api.general.searchMessages(
+          filter,
           query: any(named: 'query'),
           sort: any(named: 'sort'),
           pagination: any(named: 'pagination'),
-          messageFilters: any(named: 'messageFilters'))).called(1);
+          messageFilters: any(named: 'messageFilters'),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.general);
     });
 
@@ -1049,15 +1069,15 @@ void main() {
 
       const fileUrl = 'test-file-url';
 
-      when(() => api.fileUploader.sendFile(file, channelId, channelType))
-          .thenAnswer((_) async => SendFileResponse()..file = fileUrl);
+      when(
+        () => api.fileUploader.sendFile(file, channelId, channelType),
+      ).thenAnswer((_) async => SendFileResponse()..file = fileUrl);
 
       final res = await client.sendFile(file, channelId, channelType);
       expect(res, isNotNull);
       expect(res.file, fileUrl);
 
-      verify(() => api.fileUploader.sendFile(file, channelId, channelType))
-          .called(1);
+      verify(() => api.fileUploader.sendFile(file, channelId, channelType)).called(1);
       verifyNoMoreInteractions(api.fileUploader);
     });
 
@@ -1068,15 +1088,15 @@ void main() {
 
       const fileUrl = 'test-image-url';
 
-      when(() => api.fileUploader.sendImage(image, channelId, channelType))
-          .thenAnswer((_) async => SendImageResponse()..file = fileUrl);
+      when(
+        () => api.fileUploader.sendImage(image, channelId, channelType),
+      ).thenAnswer((_) async => SendImageResponse()..file = fileUrl);
 
       final res = await client.sendImage(image, channelId, channelType);
       expect(res, isNotNull);
       expect(res.file, fileUrl);
 
-      verify(() => api.fileUploader.sendImage(image, channelId, channelType))
-          .called(1);
+      verify(() => api.fileUploader.sendImage(image, channelId, channelType)).called(1);
       verifyNoMoreInteractions(api.fileUploader);
     });
 
@@ -1085,14 +1105,12 @@ void main() {
       const channelType = 'test-channel-type';
       const fileUrl = 'test-file-url';
 
-      when(() => api.fileUploader.deleteFile(fileUrl, channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.fileUploader.deleteFile(fileUrl, channelId, channelType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deleteFile(fileUrl, channelId, channelType);
       expect(res, isNotNull);
 
-      verify(() => api.fileUploader.deleteFile(fileUrl, channelId, channelType))
-          .called(1);
+      verify(() => api.fileUploader.deleteFile(fileUrl, channelId, channelType)).called(1);
       verifyNoMoreInteractions(api.fileUploader);
     });
 
@@ -1101,8 +1119,9 @@ void main() {
       const channelType = 'test-channel-type';
       const imageUrl = 'test-image-url';
 
-      when(() => api.fileUploader.deleteImage(imageUrl, channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(
+        () => api.fileUploader.deleteImage(imageUrl, channelId, channelType),
+      ).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deleteImage(imageUrl, channelId, channelType);
       expect(res, isNotNull);
@@ -1117,8 +1136,7 @@ void main() {
       final image = AttachmentFile(size: 33, path: 'test-image-path');
       const fileUrl = 'test-image-url';
 
-      when(() => api.fileUploader.uploadImage(image))
-          .thenAnswer((_) async => UploadImageResponse()..file = fileUrl);
+      when(() => api.fileUploader.uploadImage(image)).thenAnswer((_) async => UploadImageResponse()..file = fileUrl);
 
       final res = await client.uploadImage(image);
       expect(res, isNotNull);
@@ -1132,8 +1150,7 @@ void main() {
       final file = AttachmentFile(size: 33, path: 'test-file-path');
       const fileUrl = 'test-file-url';
 
-      when(() => api.fileUploader.uploadFile(file))
-          .thenAnswer((_) async => UploadFileResponse()..file = fileUrl);
+      when(() => api.fileUploader.uploadFile(file)).thenAnswer((_) async => UploadFileResponse()..file = fileUrl);
 
       final res = await client.uploadFile(file);
       expect(res, isNotNull);
@@ -1146,8 +1163,7 @@ void main() {
     test('`.removeImage`', () async {
       const imageUrl = 'test-image-url';
 
-      when(() => api.fileUploader.removeImage(imageUrl))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.fileUploader.removeImage(imageUrl)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.removeImage(imageUrl);
       expect(res, isNotNull);
@@ -1159,8 +1175,7 @@ void main() {
     test('`.removeFile`', () async {
       const fileUrl = 'test-file-url';
 
-      when(() => api.fileUploader.removeFile(fileUrl))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.fileUploader.removeFile(fileUrl)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.removeFile(fileUrl);
       expect(res, isNotNull);
@@ -1174,21 +1189,21 @@ void main() {
       const channelType = 'test-channel-type';
       const data = {'name': 'test-channel'};
 
-      when(() => api.channel.updateChannel(channelId, channelType, data))
-          .thenAnswer((invocation) async => UpdateChannelResponse()
-            ..channel = ChannelModel(
-              id: channelId,
-              type: channelType,
-              extraData: {...data},
-            ));
+      when(() => api.channel.updateChannel(channelId, channelType, data)).thenAnswer(
+        (invocation) async => UpdateChannelResponse()
+          ..channel = ChannelModel(
+            id: channelId,
+            type: channelType,
+            extraData: {...data},
+          ),
+      );
 
       final res = await client.updateChannel(channelId, channelType, data);
       expect(res, isNotNull);
       expect(res.channel.cid, '$channelType:$channelId');
       expect(res.channel.extraData['name'], 'test-channel');
 
-      verify(() => api.channel.updateChannel(channelId, channelType, data))
-          .called(1);
+      verify(() => api.channel.updateChannel(channelId, channelType, data)).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1201,14 +1216,14 @@ void main() {
       };
       const unset = ['tag', 'last_name'];
 
-      when(() => api.channel.updateChannelPartial(channelId, channelType,
-              set: set, unset: unset))
-          .thenAnswer((invocation) async => PartialUpdateChannelResponse()
-            ..channel = ChannelModel(
-              id: channelId,
-              type: channelType,
-              extraData: {...set},
-            ));
+      when(() => api.channel.updateChannelPartial(channelId, channelType, set: set, unset: unset)).thenAnswer(
+        (invocation) async => PartialUpdateChannelResponse()
+          ..channel = ChannelModel(
+            id: channelId,
+            type: channelType,
+            extraData: {...set},
+          ),
+      );
 
       final res = await client.updateChannelPartial(
         channelId,
@@ -1220,8 +1235,7 @@ void main() {
       expect(res.channel.cid, '$channelType:$channelId');
       expect(res.channel.extraData, set);
 
-      verify(() => api.channel.updateChannelPartial(channelId, channelType,
-          set: set, unset: unset)).called(1);
+      verify(() => api.channel.updateChannelPartial(channelId, channelType, set: set, unset: unset)).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1229,8 +1243,7 @@ void main() {
       const id = 'test-device-id';
       const provider = PushProvider.firebase;
 
-      when(() => api.device.addDevice(id, provider))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.device.addDevice(id, provider)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.addDevice(id, provider);
       expect(res, isNotNull);
@@ -1259,11 +1272,13 @@ void main() {
       );
       expect(res, isNotNull);
 
-      verify(() => api.device.addDevice(
-            id,
-            provider,
-            pushProviderName: pushProviderName,
-          )).called(1);
+      verify(
+        () => api.device.addDevice(
+          id,
+          provider,
+          pushProviderName: pushProviderName,
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.device);
     });
 
@@ -1276,8 +1291,7 @@ void main() {
         ),
       );
 
-      when(() => api.device.getDevices())
-          .thenAnswer((_) async => ListDevicesResponse()..devices = devices);
+      when(() => api.device.getDevices()).thenAnswer((_) async => ListDevicesResponse()..devices = devices);
 
       final res = await client.getDevices();
       expect(res, isNotNull);
@@ -1290,8 +1304,7 @@ void main() {
     test('`.removeDevice`', () async {
       const deviceId = 'test-device-id';
 
-      when(() => api.device.removeDevice(deviceId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.device.removeDevice(deviceId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.removeDevice(deviceId);
       expect(res, isNotNull);
@@ -1411,8 +1424,7 @@ void main() {
         expect(channel.extraData, channelData);
       });
 
-      test('should return back in memory channel instance if available',
-          () async {
+      test('should return back in memory channel instance if available', () async {
         const channelType = 'test-channel-type';
         const channelId = 'test-channel-id';
         const channelData = {'name': 'test-channel-name'};
@@ -1428,22 +1440,24 @@ void main() {
           channel: ChannelModel(cid: channelCid),
         );
 
-        when(() => api.channel.queryChannel(
-              channelType,
-              channelId: channelId,
-              channelData: channelData,
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              messagesPagination: any(named: 'messagesPagination'),
-              membersPagination: any(named: 'membersPagination'),
-              watchersPagination: any(named: 'watchersPagination'),
-            )).thenAnswer((_) async => channelState);
+        when(
+          () => api.channel.queryChannel(
+            channelType,
+            channelId: channelId,
+            channelData: channelData,
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).thenAnswer((_) async => channelState);
 
         expectLater(
           client.state.channelsStream.skip(1),
           emitsInOrder([
-            {channelCid: isCorrectChannelFor(channelState)}
+            {channelCid: isCorrectChannelFor(channelState)},
           ]),
         );
 
@@ -1452,17 +1466,19 @@ void main() {
         final newChannel = client.channel(channelType, id: channelId);
         expect(newChannel, channel);
 
-        verify(() => api.channel.queryChannel(
-              channelType,
-              channelId: channelId,
-              channelData: channelData,
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              messagesPagination: any(named: 'messagesPagination'),
-              membersPagination: any(named: 'membersPagination'),
-              watchersPagination: any(named: 'watchersPagination'),
-            )).called(1);
+        verify(
+          () => api.channel.queryChannel(
+            channelType,
+            channelId: channelId,
+            channelData: channelData,
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).called(1);
       });
     });
 
@@ -1476,17 +1492,19 @@ void main() {
         channel: ChannelModel(cid: channelCid, extraData: channelData),
       );
 
-      when(() => api.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => channelState);
+      when(
+        () => api.channel.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: channelData,
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer((_) async => channelState);
 
       final res = await client.createChannel(
         channelType,
@@ -1502,17 +1520,19 @@ void main() {
       expect(channel.cid, '$channelType:$channelId');
       expect(channel.extraData, channelData);
 
-      verify(() => api.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).called(1);
+      verify(
+        () => api.channel.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: channelData,
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1526,17 +1546,19 @@ void main() {
         channel: ChannelModel(cid: channelCid, extraData: channelData),
       );
 
-      when(() => api.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => channelState);
+      when(
+        () => api.channel.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: channelData,
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer((_) async => channelState);
 
       final res = await client.watchChannel(
         channelType,
@@ -1552,17 +1574,19 @@ void main() {
       expect(channel.cid, '$channelType:$channelId');
       expect(channel.extraData, channelData);
 
-      verify(() => api.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).called(1);
+      verify(
+        () => api.channel.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: channelData,
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1576,17 +1600,19 @@ void main() {
         channel: ChannelModel(cid: channelCid, extraData: channelData),
       );
 
-      when(() => api.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => channelState);
+      when(
+        () => api.channel.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: channelData,
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer((_) async => channelState);
 
       final res = await client.queryChannel(
         channelType,
@@ -1602,17 +1628,19 @@ void main() {
       expect(channel.cid, '$channelType:$channelId');
       expect(channel.extraData, channelData);
 
-      verify(() => api.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).called(1);
+      verify(
+        () => api.channel.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: channelData,
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1640,8 +1668,7 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.hideChannel(channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.hideChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.hideChannel(channelId, channelType);
 
@@ -1655,8 +1682,7 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.showChannel(channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.showChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.showChannel(channelId, channelType);
 
@@ -1670,8 +1696,7 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.deleteChannel(channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.deleteChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deleteChannel(channelId, channelType);
 
@@ -1685,8 +1710,7 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.truncateChannel(channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.truncateChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.truncateChannel(channelId, channelType);
 
@@ -1703,8 +1727,7 @@ void main() {
       const channelId = 'test-channel-id';
       const channelCid = '$channelType:$channelId';
 
-      when(() => api.moderation.muteChannel(channelCid))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.muteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.muteChannel(channelCid);
 
@@ -1719,8 +1742,7 @@ void main() {
       const channelId = 'test-channel-id';
       const channelCid = '$channelType:$channelId';
 
-      when(() => api.moderation.unmuteChannel(channelCid))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.unmuteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.unmuteChannel(channelCid);
 
@@ -1737,14 +1759,18 @@ void main() {
       const set = {'pinned': true};
       const unset = ['pinned'];
 
-      when(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            set: set,
-            unset: unset,
-          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
-            channelMember: Member(userId: otherUserId),
-          ));
+      when(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          set: set,
+          unset: unset,
+        ),
+      ).thenAnswer(
+        (_) async => FakePartialUpdateMemberResponse(
+          channelMember: Member(userId: otherUserId),
+        ),
+      );
 
       final res = await client.partialMemberUpdate(
         channelId: channelId,
@@ -1756,12 +1782,14 @@ void main() {
       expect(res, isNotNull);
       expect(res.channelMember.userId, otherUserId);
 
-      verify(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            set: set,
-            unset: unset,
-          )).called(1);
+      verify(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          set: set,
+          unset: unset,
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1771,14 +1799,18 @@ void main() {
       const set = {'pinned': true};
       const unset = ['pinned'];
 
-      when(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            set: set,
-            unset: unset,
-          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
-            channelMember: Member(userId: userId),
-          ));
+      when(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          set: set,
+          unset: unset,
+        ),
+      ).thenAnswer(
+        (_) async => FakePartialUpdateMemberResponse(
+          channelMember: Member(userId: userId),
+        ),
+      );
 
       final res = await client.partialMemberUpdate(
         channelId: channelId,
@@ -1789,12 +1821,14 @@ void main() {
 
       expect(res, isNotNull);
       expect(res.channelMember.userId, userId);
-      verify(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            set: set,
-            unset: unset,
-          )).called(1);
+      verify(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          set: set,
+          unset: unset,
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1802,13 +1836,17 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            set: const MemberUpdatePayload(pinned: true).toJson(),
-          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
-            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-          ));
+      when(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          set: const MemberUpdatePayload(pinned: true).toJson(),
+        ),
+      ).thenAnswer(
+        (_) async => FakePartialUpdateMemberResponse(
+          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+        ),
+      );
 
       final res = await client.pinChannel(
         channelId: channelId,
@@ -1817,11 +1855,13 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            set: const MemberUpdatePayload(pinned: true).toJson(),
-          )).called(1);
+      verify(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          set: const MemberUpdatePayload(pinned: true).toJson(),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1829,13 +1869,17 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            unset: [MemberUpdateType.pinned.name],
-          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
-            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-          ));
+      when(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          unset: [MemberUpdateType.pinned.name],
+        ),
+      ).thenAnswer(
+        (_) async => FakePartialUpdateMemberResponse(
+          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+        ),
+      );
 
       final res = await client.unpinChannel(
         channelId: channelId,
@@ -1844,11 +1888,13 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            unset: [MemberUpdateType.pinned.name],
-          )).called(1);
+      verify(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          unset: [MemberUpdateType.pinned.name],
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1856,13 +1902,17 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            set: const MemberUpdatePayload(archived: true).toJson(),
-          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
-            channelMember: Member(userId: userId, archivedAt: DateTime.now()),
-          ));
+      when(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          set: const MemberUpdatePayload(archived: true).toJson(),
+        ),
+      ).thenAnswer(
+        (_) async => FakePartialUpdateMemberResponse(
+          channelMember: Member(userId: userId, archivedAt: DateTime.now()),
+        ),
+      );
 
       final res = await client.archiveChannel(
         channelId: channelId,
@@ -1871,11 +1921,13 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            set: const MemberUpdatePayload(archived: true).toJson(),
-          )).called(1);
+      verify(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          set: const MemberUpdatePayload(archived: true).toJson(),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1883,13 +1935,17 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            unset: [MemberUpdateType.archived.name],
-          )).thenAnswer((_) async => FakePartialUpdateMemberResponse(
-            channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
-          ));
+      when(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          unset: [MemberUpdateType.archived.name],
+        ),
+      ).thenAnswer(
+        (_) async => FakePartialUpdateMemberResponse(
+          channelMember: Member(userId: userId, pinnedAt: DateTime.now()),
+        ),
+      );
 
       final res = await client.unarchiveChannel(
         channelId: channelId,
@@ -1898,11 +1954,13 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.updateMemberPartial(
-            channelId: channelId,
-            channelType: channelType,
-            unset: [MemberUpdateType.archived.name],
-          )).called(1);
+      verify(
+        () => api.channel.updateMemberPartial(
+          channelId: channelId,
+          channelType: channelType,
+          unset: [MemberUpdateType.archived.name],
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1911,16 +1969,15 @@ void main() {
       const channelId = 'test-channel-id';
       const channelCid = '$channelType:$channelId';
 
-      when(() => api.channel.acceptChannelInvite(channelId, channelType))
-          .thenAnswer((_) async =>
-              AcceptInviteResponse()..channel = ChannelModel(cid: channelCid));
+      when(
+        () => api.channel.acceptChannelInvite(channelId, channelType),
+      ).thenAnswer((_) async => AcceptInviteResponse()..channel = ChannelModel(cid: channelCid));
 
       final res = await client.acceptChannelInvite(channelId, channelType);
       expect(res, isNotNull);
       expect(res.channel.cid, channelCid);
 
-      verify(() => api.channel.acceptChannelInvite(channelId, channelType))
-          .called(1);
+      verify(() => api.channel.acceptChannelInvite(channelId, channelType)).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1929,16 +1986,15 @@ void main() {
       const channelId = 'test-channel-id';
       const channelCid = '$channelType:$channelId';
 
-      when(() => api.channel.rejectChannelInvite(channelId, channelType))
-          .thenAnswer((_) async =>
-              RejectInviteResponse()..channel = ChannelModel(cid: channelCid));
+      when(
+        () => api.channel.rejectChannelInvite(channelId, channelType),
+      ).thenAnswer((_) async => RejectInviteResponse()..channel = ChannelModel(cid: channelCid));
 
       final res = await client.rejectChannelInvite(channelId, channelType);
       expect(res, isNotNull);
       expect(res.channel.cid, channelCid);
 
-      verify(() => api.channel.rejectChannelInvite(channelId, channelType))
-          .called(1);
+      verify(() => api.channel.rejectChannelInvite(channelId, channelType)).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -1954,10 +2010,11 @@ void main() {
 
       final memberIds = members.map((e) => e.userId!).toList(growable: false);
 
-      when(() => api.channel.addMembers(channelId, channelType, memberIds))
-          .thenAnswer((_) async => AddMembersResponse()
-            ..channel = ChannelModel(cid: channelCid)
-            ..members = members);
+      when(() => api.channel.addMembers(channelId, channelType, memberIds)).thenAnswer(
+        (_) async => AddMembersResponse()
+          ..channel = ChannelModel(cid: channelCid)
+          ..members = members,
+      );
 
       final res = await client.addChannelMembers(
         channelId,
@@ -1988,14 +2045,18 @@ void main() {
       final memberIds = members.map((e) => e.userId!).toList(growable: false);
       final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
 
-      when(() => api.channel.addMembers(
-            channelId,
-            channelType,
-            memberIds,
-            hideHistoryBefore: hideHistoryBefore,
-          )).thenAnswer((_) async => AddMembersResponse()
-        ..channel = ChannelModel(cid: channelCid)
-        ..members = members);
+      when(
+        () => api.channel.addMembers(
+          channelId,
+          channelType,
+          memberIds,
+          hideHistoryBefore: hideHistoryBefore,
+        ),
+      ).thenAnswer(
+        (_) async => AddMembersResponse()
+          ..channel = ChannelModel(cid: channelCid)
+          ..members = members,
+      );
 
       final res = await client.addChannelMembers(
         channelId,
@@ -2031,10 +2092,11 @@ void main() {
 
       final memberIds = members.map((e) => e.userId!).toList(growable: false);
 
-      when(() => api.channel.removeMembers(channelId, channelType, memberIds))
-          .thenAnswer((_) async => RemoveMembersResponse()
-            ..channel = ChannelModel(cid: channelCid)
-            ..members = members);
+      when(() => api.channel.removeMembers(channelId, channelType, memberIds)).thenAnswer(
+        (_) async => RemoveMembersResponse()
+          ..channel = ChannelModel(cid: channelCid)
+          ..members = members,
+      );
 
       final res = await client.removeChannelMembers(
         channelId,
@@ -2064,11 +2126,11 @@ void main() {
 
       final memberIds = members.map((e) => e.userId!).toList(growable: false);
 
-      when(() => api.channel
-              .inviteChannelMembers(channelId, channelType, memberIds))
-          .thenAnswer((_) async => InviteMembersResponse()
-            ..channel = ChannelModel(cid: channelCid)
-            ..members = members);
+      when(() => api.channel.inviteChannelMembers(channelId, channelType, memberIds)).thenAnswer(
+        (_) async => InviteMembersResponse()
+          ..channel = ChannelModel(cid: channelCid)
+          ..members = members,
+      );
 
       final res = await client.inviteChannelMembers(
         channelId,
@@ -2080,8 +2142,7 @@ void main() {
       expect(res.channel.cid, channelCid);
       expect(res.members.length, memberIds.length);
 
-      verify(() => api.channel
-          .inviteChannelMembers(channelId, channelType, memberIds)).called(1);
+      verify(() => api.channel.inviteChannelMembers(channelId, channelType, memberIds)).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -2089,8 +2150,7 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.stopWatching(channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.stopWatching(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.stopChannelWatching(channelId, channelType);
       expect(res, isNotNull);
@@ -2105,9 +2165,9 @@ void main() {
       const messageId = 'test-message-id';
       const formData = {'key': 'value'};
 
-      when(() => api.message
-              .sendAction(channelId, channelType, messageId, formData))
-          .thenAnswer((_) async => SendActionResponse());
+      when(
+        () => api.message.sendAction(channelId, channelType, messageId, formData),
+      ).thenAnswer((_) async => SendActionResponse());
 
       final res = await client.sendAction(
         channelId,
@@ -2118,8 +2178,7 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.message
-          .sendAction(channelId, channelType, messageId, formData)).called(1);
+      verify(() => api.message.sendAction(channelId, channelType, messageId, formData)).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
@@ -2127,8 +2186,7 @@ void main() {
       const channelType = 'test-channel-type';
       const channelId = 'test-channel-id';
 
-      when(() => api.channel.markRead(channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.markRead(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.markChannelRead(channelId, channelType);
 
@@ -2143,8 +2201,7 @@ void main() {
       const channelId = 'test-channel-id';
       const messageId = 'test-message-id';
 
-      when(() => api.channel.markUnread(channelId, channelType, messageId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.markUnread(channelId, channelType, messageId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.markChannelUnread(
         channelId,
@@ -2154,8 +2211,7 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.markUnread(channelId, channelType, messageId))
-          .called(1);
+      verify(() => api.channel.markUnread(channelId, channelType, messageId)).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -2164,11 +2220,13 @@ void main() {
       const channelId = 'test-channel-id';
       final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
 
-      when(() => api.channel.markUnreadByTimestamp(
-            channelId,
-            channelType,
-            timestamp,
-          )).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => api.channel.markUnreadByTimestamp(
+          channelId,
+          channelType,
+          timestamp,
+        ),
+      ).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.markChannelUnreadByTimestamp(
         channelId,
@@ -2178,11 +2236,13 @@ void main() {
 
       expect(res, isNotNull);
 
-      verify(() => api.channel.markUnreadByTimestamp(
-            channelId,
-            channelType,
-            timestamp,
-          )).called(1);
+      verify(
+        () => api.channel.markUnreadByTimestamp(
+          channelId,
+          channelType,
+          timestamp,
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -2266,25 +2326,23 @@ void main() {
         ],
       );
 
-      when(() => api.polls.partialUpdatePoll(pollId, set: set, unset: unset))
-          .thenAnswer((_) async => UpdatePollResponse()..poll = poll);
+      when(
+        () => api.polls.partialUpdatePoll(pollId, set: set, unset: unset),
+      ).thenAnswer((_) async => UpdatePollResponse()..poll = poll);
 
-      final res =
-          await client.partialUpdatePoll(pollId, set: set, unset: unset);
+      final res = await client.partialUpdatePoll(pollId, set: set, unset: unset);
       expect(res, isNotNull);
       expect(res.poll.id, pollId);
       expect(res.poll.name, set['name']);
 
-      verify(() => api.polls.partialUpdatePoll(pollId, set: set, unset: unset))
-          .called(1);
+      verify(() => api.polls.partialUpdatePoll(pollId, set: set, unset: unset)).called(1);
       verifyNoMoreInteractions(api.polls);
     });
 
     test('`.deletePoll`', () async {
       const pollId = 'test-poll-id';
 
-      when(() => api.polls.deletePoll(pollId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.polls.deletePoll(pollId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deletePoll(pollId);
       expect(res, isNotNull);
@@ -2296,15 +2354,14 @@ void main() {
     test('`.closePoll`', () async {
       const pollId = 'test-poll-id';
 
-      when(() => api.polls.partialUpdatePoll(pollId, set: {'is_closed': true}))
-          .thenAnswer((_) async => UpdatePollResponse());
+      when(
+        () => api.polls.partialUpdatePoll(pollId, set: {'is_closed': true}),
+      ).thenAnswer((_) async => UpdatePollResponse());
 
       final res = await client.closePoll(pollId);
       expect(res, isNotNull);
 
-      verify(() =>
-              api.polls.partialUpdatePoll(pollId, set: {'is_closed': true}))
-          .called(1);
+      verify(() => api.polls.partialUpdatePoll(pollId, set: {'is_closed': true})).called(1);
       verifyNoMoreInteractions(api.polls);
     });
 
@@ -2312,8 +2369,9 @@ void main() {
       const pollId = 'test-poll-id';
       const option = PollOption(text: 'Red');
 
-      when(() => api.polls.createPollOption(pollId, option)).thenAnswer(
-          (_) async => CreatePollOptionResponse()..pollOption = option);
+      when(
+        () => api.polls.createPollOption(pollId, option),
+      ).thenAnswer((_) async => CreatePollOptionResponse()..pollOption = option);
 
       final res = await client.createPollOption(pollId, option);
       expect(res, isNotNull);
@@ -2328,8 +2386,9 @@ void main() {
       const optionId = 'test-option-id';
       const option = PollOption(id: optionId, text: 'Red');
 
-      when(() => api.polls.getPollOption(pollId, optionId)).thenAnswer(
-          (_) async => GetPollOptionResponse()..pollOption = option);
+      when(
+        () => api.polls.getPollOption(pollId, optionId),
+      ).thenAnswer((_) async => GetPollOptionResponse()..pollOption = option);
 
       final res = await client.getPollOption(pollId, optionId);
       expect(res, isNotNull);
@@ -2343,8 +2402,9 @@ void main() {
       const pollId = 'test-poll-id';
       const option = PollOption(id: 'test-option-id', text: 'Red');
 
-      when(() => api.polls.updatePollOption(pollId, option)).thenAnswer(
-          (_) async => UpdatePollOptionResponse()..pollOption = option);
+      when(
+        () => api.polls.updatePollOption(pollId, option),
+      ).thenAnswer((_) async => UpdatePollOptionResponse()..pollOption = option);
 
       final res = await client.updatePollOption(pollId, option);
       expect(res, isNotNull);
@@ -2358,8 +2418,7 @@ void main() {
       const pollId = 'test-poll-id';
       const optionId = 'test-option-id';
 
-      when(() => api.polls.deletePollOption(pollId, optionId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.polls.deletePollOption(pollId, optionId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deletePollOption(pollId, optionId);
       expect(res, isNotNull);
@@ -2376,21 +2435,19 @@ void main() {
 
       // Custom matcher to check if the Vote object has the specified id
       Matcher matchesVoteOption(String expected) => predicate<PollVote>(
-            (vote) => vote.optionId == expected,
-            'Vote with option $expected',
-          );
+        (vote) => vote.optionId == expected,
+        'Vote with option $expected',
+      );
 
-      when(() => api.polls.castPollVote(
-              messageId, pollId, any(that: matchesVoteOption(optionId))))
-          .thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
+      when(
+        () => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteOption(optionId))),
+      ).thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
 
-      final res =
-          await client.castPollVote(messageId, pollId, optionId: optionId);
+      final res = await client.castPollVote(messageId, pollId, optionId: optionId);
       expect(res, isNotNull);
       expect(res.vote, vote);
 
-      verify(() => api.polls.castPollVote(
-          messageId, pollId, any(that: matchesVoteOption(optionId)))).called(1);
+      verify(() => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteOption(optionId)))).called(1);
       verifyNoMoreInteractions(api.polls);
     });
 
@@ -2402,22 +2459,19 @@ void main() {
 
       // Custom matcher to check if the Vote object has the specified id
       Matcher matchesVoteAnswer(String expected) => predicate<PollVote>(
-            (vote) => vote.answerText == expected,
-            'Vote with answer $expected',
-          );
+        (vote) => vote.answerText == expected,
+        'Vote with answer $expected',
+      );
 
-      when(() => api.polls.castPollVote(
-              messageId, pollId, any(that: matchesVoteAnswer(answerText))))
-          .thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
+      when(
+        () => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteAnswer(answerText))),
+      ).thenAnswer((_) async => CastPollVoteResponse()..vote = vote);
 
-      final res =
-          await client.addPollAnswer(messageId, pollId, answerText: answerText);
+      final res = await client.addPollAnswer(messageId, pollId, answerText: answerText);
       expect(res, isNotNull);
       expect(res.vote, vote);
 
-      verify(() => api.polls.castPollVote(
-              messageId, pollId, any(that: matchesVoteAnswer(answerText))))
-          .called(1);
+      verify(() => api.polls.castPollVote(messageId, pollId, any(that: matchesVoteAnswer(answerText)))).called(1);
       verifyNoMoreInteractions(api.polls);
     });
 
@@ -2426,14 +2480,12 @@ void main() {
       const pollId = 'test-poll-id';
       const voteId = 'test-vote-id';
 
-      when(() => api.polls.removePollVote(messageId, pollId, voteId))
-          .thenAnswer((_) async => RemovePollVoteResponse());
+      when(() => api.polls.removePollVote(messageId, pollId, voteId)).thenAnswer((_) async => RemovePollVoteResponse());
 
       final res = await client.removePollVote(messageId, pollId, voteId);
       expect(res, isNotNull);
 
-      verify(() => api.polls.removePollVote(messageId, pollId, voteId))
-          .called(1);
+      verify(() => api.polls.removePollVote(messageId, pollId, voteId)).called(1);
       verifyNoMoreInteractions(api.polls);
     });
 
@@ -2454,11 +2506,13 @@ void main() {
         ),
       );
 
-      when(() => api.polls.queryPolls(
-            filter: filter,
-            sort: sort,
-            pagination: pagination,
-          )).thenAnswer(
+      when(
+        () => api.polls.queryPolls(
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        ),
+      ).thenAnswer(
         (_) async => QueryPollsResponse()..polls = polls,
       );
 
@@ -2470,11 +2524,13 @@ void main() {
       expect(res, isNotNull);
       expect(res.polls.length, polls.length);
 
-      verify(() => api.polls.queryPolls(
-            filter: filter,
-            sort: sort,
-            pagination: pagination,
-          )).called(1);
+      verify(
+        () => api.polls.queryPolls(
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.polls);
     });
 
@@ -2489,12 +2545,14 @@ void main() {
         (index) => PollVote(id: 'test-vote-id-$index', answerText: 'Red'),
       );
 
-      when(() => api.polls.queryPollVotes(
-            pollId,
-            filter: filter,
-            sort: sort,
-            pagination: pagination,
-          )).thenAnswer(
+      when(
+        () => api.polls.queryPollVotes(
+          pollId,
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        ),
+      ).thenAnswer(
         (_) async => QueryPollVotesResponse()..votes = votes,
       );
 
@@ -2507,12 +2565,14 @@ void main() {
       expect(res, isNotNull);
       expect(res.votes.length, votes.length);
 
-      verify(() => api.polls.queryPollVotes(
-            pollId,
-            filter: filter,
-            sort: sort,
-            pagination: pagination,
-          )).called(1);
+      verify(
+        () => api.polls.queryPollVotes(
+          pollId,
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.polls);
     });
 
@@ -2522,8 +2582,7 @@ void main() {
         extraData: const {'name': 'test-user'},
       );
 
-      when(() => api.user.updateUsers([user])).thenAnswer(
-          (_) async => UpdateUsersResponse()..users = {user.id: user});
+      when(() => api.user.updateUsers([user])).thenAnswer((_) async => UpdateUsersResponse()..users = {user.id: user});
 
       final res = await client.updateUser(user);
 
@@ -2551,8 +2610,7 @@ void main() {
         extraData: {'color': set['color']},
       );
 
-      when(() => api.user.partialUpdateUsers([partialUpdateRequest]))
-          .thenAnswer(
+      when(() => api.user.partialUpdateUsers([partialUpdateRequest])).thenAnswer(
         (_) async => UpdateUsersResponse()
           ..users = {
             updatedUser.id: updatedUser,
@@ -2577,8 +2635,9 @@ void main() {
     test('`.banUser`', () async {
       const userId = 'test-user-id';
 
-      when(() => api.moderation.banUser(userId, options: any(named: 'options')))
-          .thenAnswer((_) async => EmptyResponse());
+      when(
+        () => api.moderation.banUser(userId, options: any(named: 'options')),
+      ).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.banUser(userId);
 
@@ -2593,9 +2652,9 @@ void main() {
     test('`.unbanUser`', () async {
       const userId = 'test-user-id';
 
-      when(() =>
-              api.moderation.unbanUser(userId, options: any(named: 'options')))
-          .thenAnswer((_) async => EmptyResponse());
+      when(
+        () => api.moderation.unbanUser(userId, options: any(named: 'options')),
+      ).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.unbanUser(userId);
 
@@ -2631,8 +2690,7 @@ void main() {
     test('`.unblockUser`', () async {
       const userId = 'test-user-id';
 
-      when(() => api.user.unblockUser(userId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.user.unblockUser(userId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.unblockUser(userId);
 
@@ -2772,10 +2830,8 @@ void main() {
           await client.unblockUser(nonBlockedUserId);
 
           // Verify - should remain unchanged
-          expect(client.state.currentUser?.blockedUserIds,
-              contains(otherBlockedId));
-          expect(client.state.currentUser?.blockedUserIds,
-              isNot(contains(nonBlockedUserId)));
+          expect(client.state.currentUser?.blockedUserIds, contains(otherBlockedId));
+          expect(client.state.currentUser?.blockedUserIds, isNot(contains(nonBlockedUserId)));
           verify(() => api.user.unblockUser(nonBlockedUserId)).called(1);
           verifyNoMoreInteractions(api.user);
         },
@@ -2924,8 +2980,7 @@ void main() {
     test('`.shadowBan`', () async {
       const userId = 'test-user-id';
 
-      when(() => api.moderation.banUser(userId, options: {'shadow': true}))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.banUser(userId, options: {'shadow': true})).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.shadowBan(userId);
 
@@ -2940,8 +2995,7 @@ void main() {
     test('`.removeShadowBan`', () async {
       const userId = 'test-user-id';
 
-      when(() => api.moderation.unbanUser(userId, options: {'shadow': true}))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.unbanUser(userId, options: {'shadow': true})).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.removeShadowBan(userId);
 
@@ -2956,8 +3010,7 @@ void main() {
     test('`.muteUser`', () async {
       const userId = 'test-user-id';
 
-      when(() => api.moderation.muteUser(userId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.muteUser(userId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.muteUser(userId);
 
@@ -2970,8 +3023,7 @@ void main() {
     test('`.unmuteUser`', () async {
       const userId = 'test-user-id';
 
-      when(() => api.moderation.unmuteUser(userId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.unmuteUser(userId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.unmuteUser(userId);
 
@@ -2984,8 +3036,7 @@ void main() {
     test('`.flagMessage`', () async {
       const messageId = 'test-message-id';
 
-      when(() => api.moderation.flagMessage(messageId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.flagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.flagMessage(messageId);
 
@@ -2998,8 +3049,7 @@ void main() {
     test('`.unflagMessage`', () async {
       const messageId = 'test-message-id';
 
-      when(() => api.moderation.unflagMessage(messageId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.unflagMessage(messageId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.unflagMessage(messageId);
 
@@ -3012,8 +3062,7 @@ void main() {
     test('`.flagUser`', () async {
       const userId = 'test-message-id';
 
-      when(() => api.moderation.flagUser(userId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.flagUser(userId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.flagUser(userId);
 
@@ -3026,8 +3075,7 @@ void main() {
     test('`.unflagUser`', () async {
       const userId = 'test-message-id';
 
-      when(() => api.moderation.unflagUser(userId))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.moderation.unflagUser(userId)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.unflagUser(userId);
 
@@ -3054,8 +3102,9 @@ void main() {
       ];
 
       when(() => api.user.getActiveLiveLocations()).thenAnswer(
-        (_) async => GetActiveLiveLocationsResponse() //
-          ..activeLiveLocations = locations,
+        (_) async =>
+            GetActiveLiveLocationsResponse() //
+              ..activeLiveLocations = locations,
       );
 
       // Initial state should be empty
@@ -3393,8 +3442,7 @@ void main() {
     });
 
     test('`.markAllRead`', () async {
-      when(() => api.channel.markAllRead())
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.markAllRead()).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.markAllRead();
       expect(res, isNotNull);
@@ -3415,8 +3463,7 @@ void main() {
         ),
       ];
 
-      when(() => api.channel.markChannelsDelivered(deliveries))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.channel.markChannelsDelivered(deliveries)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.markChannelsDelivered(deliveries);
       expect(res, isNotNull);
@@ -3441,11 +3488,13 @@ void main() {
       final res = await client.sendEvent(channelId, channelType, event);
       expect(res, isNotNull);
 
-      verify(() => api.channel.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(event)),
-          )).called(1);
+      verify(
+        () => api.channel.sendEvent(
+          channelId,
+          channelType,
+          any(that: isSameEventAs(event)),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.channel);
     });
 
@@ -3484,8 +3533,7 @@ void main() {
       const messageId = 'test-message-id';
       const reactionType = 'like';
 
-      when(() => api.message.deleteReaction(messageId, reactionType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.message.deleteReaction(messageId, reactionType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deleteReaction(messageId, reactionType);
       expect(res, isNotNull);
@@ -3501,19 +3549,21 @@ void main() {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 
-      when(() => api.message.sendMessage(
-              channelId, channelType, any(that: isSameMessageAs(message))))
-          .thenAnswer((_) async => SendMessageResponse()..message = message);
+      when(
+        () => api.message.sendMessage(channelId, channelType, any(that: isSameMessageAs(message))),
+      ).thenAnswer((_) async => SendMessageResponse()..message = message);
 
       final res = await client.sendMessage(message, channelId, channelType);
       expect(res, isNotNull);
       expect(res.message, isSameMessageAs(message));
 
-      verify(() => api.message.sendMessage(
-            channelId,
-            channelType,
-            any(that: isSameMessageAs(message)),
-          )).called(1);
+      verify(
+        () => api.message.sendMessage(
+          channelId,
+          channelType,
+          any(that: isSameMessageAs(message)),
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
@@ -3546,11 +3596,13 @@ void main() {
       expect(res, isNotNull);
       expect(res.draft.message, isSameDraftMessageAs(message));
 
-      verify(() => api.message.createDraft(
-            channelId,
-            channelType,
-            any(that: isSameDraftMessageAs(message)),
-          )).called(1);
+      verify(
+        () => api.message.createDraft(
+          channelId,
+          channelType,
+          any(that: isSameDraftMessageAs(message)),
+        ),
+      ).called(1);
 
       verifyNoMoreInteractions(api.message);
     });
@@ -3559,8 +3611,7 @@ void main() {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 
-      when(() => api.message.deleteDraft(channelId, channelType))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.message.deleteDraft(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deleteDraft(channelId, channelType);
       expect(res, isNotNull);
@@ -3575,13 +3626,14 @@ void main() {
 
       final message = DraftMessage(id: 'test-message-id', text: 'Hello!');
 
-      when(() => api.message.getDraft(channelId, channelType))
-          .thenAnswer((_) async => GetDraftResponse()
-            ..draft = Draft(
-              channelCid: '$channelType:$channelId',
-              createdAt: DateTime.now(),
-              message: message,
-            ));
+      when(() => api.message.getDraft(channelId, channelType)).thenAnswer(
+        (_) async => GetDraftResponse()
+          ..draft = Draft(
+            channelCid: '$channelType:$channelId',
+            createdAt: DateTime.now(),
+            message: message,
+          ),
+      );
 
       final res = await client.getDraft(channelId, channelType);
 
@@ -3601,11 +3653,10 @@ void main() {
           channelCid: '$channelType:$channelId',
           createdAt: DateTime.now(),
           message: DraftMessage(id: 'test-message-id', text: 'Hello!'),
-        )
+        ),
       ];
 
-      when(() => api.message.queryDrafts())
-          .thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
+      when(() => api.message.queryDrafts()).thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
 
       final res = await client.queryDrafts();
 
@@ -3624,8 +3675,7 @@ void main() {
         (index) => Message(id: 'test-message-id-$index'),
       );
 
-      when(() => api.message.getReplies(parentId))
-          .thenAnswer((_) async => QueryRepliesResponse()..messages = messages);
+      when(() => api.message.getReplies(parentId)).thenAnswer((_) async => QueryRepliesResponse()..messages = messages);
 
       final res = await client.getReplies(parentId);
       expect(res, isNotNull);
@@ -3646,8 +3696,9 @@ void main() {
         ),
       );
 
-      when(() => api.message.getReactions(messageId)).thenAnswer(
-          (_) async => QueryReactionsResponse()..reactions = reactions);
+      when(
+        () => api.message.getReactions(messageId),
+      ).thenAnswer((_) async => QueryReactionsResponse()..reactions = reactions);
 
       final res = await client.getReactions(messageId);
       expect(res, isNotNull);
@@ -3661,8 +3712,9 @@ void main() {
     test('`.updateMessage`', () async {
       final message = Message(id: 'test-message-id', text: 'Hello!');
 
-      when(() => api.message.updateMessage(any(that: isSameMessageAs(message))))
-          .thenAnswer((_) async => UpdateMessageResponse()..message = message);
+      when(
+        () => api.message.updateMessage(any(that: isSameMessageAs(message))),
+      ).thenAnswer((_) async => UpdateMessageResponse()..message = message);
 
       final res = await client.updateMessage(message);
       expect(res, isNotNull);
@@ -3677,8 +3729,7 @@ void main() {
     test('`.deleteMessage`', () async {
       const messageId = 'test-message-id';
 
-      when(() => api.message.deleteMessage(messageId, hard: false))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.message.deleteMessage(messageId, hard: false)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deleteMessage(messageId);
       expect(res, isNotNull);
@@ -3690,14 +3741,12 @@ void main() {
     test('`.deleteMessageForMe`', () async {
       const messageId = 'test-message-id';
 
-      when(() => api.message.deleteMessage(messageId, deleteForMe: true))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => api.message.deleteMessage(messageId, deleteForMe: true)).thenAnswer((_) async => EmptyResponse());
 
       final res = await client.deleteMessageForMe(messageId);
       expect(res, isNotNull);
 
-      verify(() => api.message.deleteMessage(messageId, deleteForMe: true))
-          .called(1);
+      verify(() => api.message.deleteMessage(messageId, deleteForMe: true)).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
@@ -3705,8 +3754,7 @@ void main() {
       const messageId = 'test-message-id';
       final message = Message(id: messageId);
 
-      when(() => api.message.getMessage(messageId))
-          .thenAnswer((_) async => GetMessageResponse()..message = message);
+      when(() => api.message.getMessage(messageId)).thenAnswer((_) async => GetMessageResponse()..message = message);
 
       final res = await client.getMessage(messageId);
       expect(res, isNotNull);
@@ -3774,11 +3822,13 @@ void main() {
       final updateMessageResponse = UpdateMessageResponse()
         ..message = message.copyWith(text: set['text'], pinExpires: null);
 
-      when(() => api.message.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-          )).thenAnswer((_) async => updateMessageResponse);
+      when(
+        () => api.message.partialUpdateMessage(
+          message.id,
+          set: set,
+          unset: unset,
+        ),
+      ).thenAnswer((_) async => updateMessageResponse);
 
       final res = await client.partialUpdateMessage(
         messageId,
@@ -3792,30 +3842,35 @@ void main() {
       expect(res.message.text, set['text']);
       expect(res.message.pinExpires, isNull);
 
-      verify(() => api.message.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-          )).called(1);
+      verify(
+        () => api.message.partialUpdateMessage(
+          message.id,
+          set: set,
+          unset: unset,
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
     group('`.pinMessage`', () {
-      test('should work fine without passing timeoutOrExpirationDate',
-          () async {
+      test('should work fine without passing timeoutOrExpirationDate', () async {
         const messageId = 'test-message-id';
         final message = Message(id: messageId);
 
-        when(() => api.message.partialUpdateMessage(
-              messageId,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
-            )).thenAnswer((_) async => UpdateMessageResponse()
-          ..message = message.copyWith(
-            pinned: true,
-            pinExpires: null,
-            state: MessageState.sent,
-          ));
+        when(
+          () => api.message.partialUpdateMessage(
+            messageId,
+            set: any(named: 'set'),
+            unset: any(named: 'unset'),
+          ),
+        ).thenAnswer(
+          (_) async => UpdateMessageResponse()
+            ..message = message.copyWith(
+              pinned: true,
+              pinExpires: null,
+              state: MessageState.sent,
+            ),
+        );
 
         final res = await client.pinMessage(messageId);
 
@@ -3823,11 +3878,13 @@ void main() {
         expect(res.message.pinned, isTrue);
         expect(res.message.pinExpires, isNull);
 
-        verify(() => api.message.partialUpdateMessage(
-              messageId,
-              set: any(named: 'set'),
-              unset: any(named: 'unset'),
-            )).called(1);
+        verify(
+          () => api.message.partialUpdateMessage(
+            messageId,
+            set: any(named: 'set'),
+            unset: any(named: 'unset'),
+          ),
+        ).called(1);
         verifyNoMoreInteractions(api.message);
       });
 
@@ -3838,18 +3895,22 @@ void main() {
           final message = Message(id: messageId);
           const timeoutOrExpirationDate = 300; // 300 seconds
 
-          when(() => api.message.partialUpdateMessage(
-                message.id,
-                set: any(named: 'set'),
-                unset: any(named: 'unset'),
-              )).thenAnswer((_) async => UpdateMessageResponse()
-            ..message = message.copyWith(
-              pinned: true,
-              pinExpires: DateTime.now().add(
-                const Duration(seconds: timeoutOrExpirationDate),
+          when(
+            () => api.message.partialUpdateMessage(
+              message.id,
+              set: any(named: 'set'),
+              unset: any(named: 'unset'),
+            ),
+          ).thenAnswer(
+            (_) async => UpdateMessageResponse()
+              ..message = message.copyWith(
+                pinned: true,
+                pinExpires: DateTime.now().add(
+                  const Duration(seconds: timeoutOrExpirationDate),
+                ),
+                state: MessageState.sent,
               ),
-              state: MessageState.sent,
-            ));
+          );
 
           final res = await client.pinMessage(
             messageId,
@@ -3860,11 +3921,13 @@ void main() {
           expect(res.message.pinned, isTrue);
           expect(res.message.pinExpires, isNotNull);
 
-          verify(() => api.message.partialUpdateMessage(
-                messageId,
-                set: any(named: 'set'),
-                unset: any(named: 'unset'),
-              )).called(1);
+          verify(
+            () => api.message.partialUpdateMessage(
+              messageId,
+              set: any(named: 'set'),
+              unset: any(named: 'unset'),
+            ),
+          ).called(1);
           verifyNoMoreInteractions(api.message);
         },
       );
@@ -3874,19 +3937,22 @@ void main() {
         () async {
           const messageId = 'test-message-id';
           final message = Message(id: messageId);
-          final timeoutOrExpirationDate =
-              DateTime.now().add(const Duration(days: 3)); // 3 days
+          final timeoutOrExpirationDate = DateTime.now().add(const Duration(days: 3)); // 3 days
 
-          when(() => api.message.partialUpdateMessage(
-                messageId,
-                set: any(named: 'set'),
-                unset: any(named: 'unset'),
-              )).thenAnswer((_) async => UpdateMessageResponse()
-            ..message = message.copyWith(
-              pinned: true,
-              pinExpires: timeoutOrExpirationDate,
-              state: MessageState.sent,
-            ));
+          when(
+            () => api.message.partialUpdateMessage(
+              messageId,
+              set: any(named: 'set'),
+              unset: any(named: 'unset'),
+            ),
+          ).thenAnswer(
+            (_) async => UpdateMessageResponse()
+              ..message = message.copyWith(
+                pinned: true,
+                pinExpires: timeoutOrExpirationDate,
+                state: MessageState.sent,
+              ),
+          );
 
           final res = await client.pinMessage(
             messageId,
@@ -3898,11 +3964,13 @@ void main() {
           expect(res.message.pinExpires, isNotNull);
           expect(res.message.pinExpires, timeoutOrExpirationDate.toUtc());
 
-          verify(() => api.message.partialUpdateMessage(
-                messageId,
-                set: any(named: 'set'),
-                unset: any(named: 'unset'),
-              )).called(1);
+          verify(
+            () => api.message.partialUpdateMessage(
+              messageId,
+              set: any(named: 'set'),
+              unset: any(named: 'unset'),
+            ),
+          ).called(1);
           verifyNoMoreInteractions(api.message);
         },
       );
@@ -3929,30 +3997,35 @@ void main() {
       const messageId = 'test-message-id';
       final message = Message(id: messageId, pinned: true);
 
-      when(() => api.message.partialUpdateMessage(
-            messageId,
-            set: {'pinned': false},
-          )).thenAnswer((_) async => UpdateMessageResponse()
-        ..message = message.copyWith(
-          pinned: false,
-          state: MessageState.sent,
-        ));
+      when(
+        () => api.message.partialUpdateMessage(
+          messageId,
+          set: {'pinned': false},
+        ),
+      ).thenAnswer(
+        (_) async => UpdateMessageResponse()
+          ..message = message.copyWith(
+            pinned: false,
+            state: MessageState.sent,
+          ),
+      );
 
       final res = await client.unpinMessage(messageId);
 
       expect(res, isNotNull);
       expect(res.message.pinned, isFalse);
 
-      verify(() => api.message.partialUpdateMessage(
-            messageId,
-            set: {'pinned': false},
-          )).called(1);
+      verify(
+        () => api.message.partialUpdateMessage(
+          messageId,
+          set: {'pinned': false},
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
     test('`.enrichUrl`', () async {
-      const url =
-          'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
+      const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
 
       when(() => api.general.enrichUrl(url)).thenAnswer(
         (_) async => OGAttachmentResponse()
@@ -4335,8 +4408,7 @@ void main() {
           expect(channel2.state?.messages.length, equals(0));
 
           // Verify other user's message is unaffected
-          final safeMessage =
-              channel1.state?.messages.firstWhere((m) => m.id == 'msg-3');
+          final safeMessage = channel1.state?.messages.firstWhere((m) => m.id == 'msg-3');
           expect(safeMessage?.user?.id, equals('other-user'));
         },
       );

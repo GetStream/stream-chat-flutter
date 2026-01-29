@@ -52,7 +52,8 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
 
     final errorIcon = AnimatedSwitcher(
       duration: kThemeChangeDuration,
-      child: this.errorIcon ??
+      child:
+          this.errorIcon ??
           Icon(
             Icons.error_outline_rounded,
             size: 148,
@@ -67,7 +68,8 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
     );
 
     final retryButtonText = AnimatedDefaultTextStyle(
-      style: errorTitleStyle ??
+      style:
+          errorTitleStyle ??
           chatThemeData.textTheme.headline.copyWith(
             color: Colors.white,
           ),

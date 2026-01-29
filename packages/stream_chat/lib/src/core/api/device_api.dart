@@ -37,8 +37,7 @@ class DeviceApi {
       data: {
         'id': deviceId,
         'push_provider': pushProvider.name,
-        if (pushProviderName != null && pushProviderName.isNotEmpty)
-          'push_provider_name': pushProviderName,
+        if (pushProviderName != null && pushProviderName.isNotEmpty) 'push_provider_name': pushProviderName,
       },
     );
     return EmptyResponse.fromJson(response.data);

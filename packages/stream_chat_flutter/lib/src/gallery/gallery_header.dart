@@ -11,8 +11,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// {@template streamGalleryHeader}
 /// Header/AppBar widget for media display screen
 /// {@endtemplate}
-class StreamGalleryHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamGalleryHeader}
   const StreamGalleryHeader({
     super.key,
@@ -83,9 +82,7 @@ class StreamGalleryHeader extends StatelessWidget
     return AppBar(
       toolbarTextStyle: theme.textTheme.bodyMedium,
       titleTextStyle: theme.textTheme.titleLarge,
-      systemOverlayStyle: theme.brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
+      systemOverlayStyle: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       elevation: elevation,
       leading: showBackButton
           ? IconButton(
@@ -97,10 +94,8 @@ class StreamGalleryHeader extends StatelessWidget
               onPressed: onBackPressed,
             )
           : const Empty(),
-      surfaceTintColor:
-          backgroundColor ?? galleryHeaderThemeData.backgroundColor,
-      backgroundColor:
-          backgroundColor ?? galleryHeaderThemeData.backgroundColor,
+      surfaceTintColor: backgroundColor ?? galleryHeaderThemeData.backgroundColor,
+      backgroundColor: backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
         if (!message.isEphemeral)
           IconButton(
@@ -143,8 +138,7 @@ class StreamGalleryHeader extends StatelessWidget
 
   Future<void> _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
-    final galleryHeaderThemeData =
-        StreamChatTheme.of(context).galleryHeaderTheme;
+    final galleryHeaderThemeData = StreamChatTheme.of(context).galleryHeaderTheme;
 
     final defaultModal = AttachmentActionsModal(
       attachment: attachment,
@@ -153,7 +147,8 @@ class StreamGalleryHeader extends StatelessWidget
       onReply: onReplyMessage,
     );
 
-    final effectiveModal = attachmentActionsModalBuilder?.call(
+    final effectiveModal =
+        attachmentActionsModalBuilder?.call(
           context,
           attachment,
           defaultModal,

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// WidgetBuilder for [StreamGroupAvatar].
-typedef StreamGroupAvatarBuilder = Widget Function(
-  BuildContext context,
-  List<Member> members,
-  // ignore: avoid_positional_boolean_parameters
-  bool isSelected,
-);
+typedef StreamGroupAvatarBuilder =
+    Widget Function(
+      BuildContext context,
+      List<Member> members,
+      // ignore: avoid_positional_boolean_parameters
+      bool isSelected,
+    );
 
 /// {@template streamGroupAvatar}
 /// Widget for constructing a group of images
@@ -66,8 +67,7 @@ class StreamGroupAvatar extends StatelessWidget {
     Widget avatar = GestureDetector(
       onTap: onTap,
       child: ClipRRect(
-        borderRadius:
-            borderRadius ?? previewTheme?.borderRadius ?? BorderRadius.zero,
+        borderRadius: borderRadius ?? previewTheme?.borderRadius ?? BorderRadius.zero,
         child: Container(
           constraints: constraints ?? previewTheme?.constraints,
           decoration: BoxDecoration(color: colorTheme.accentPrimary),
@@ -136,8 +136,7 @@ class StreamGroupAvatar extends StatelessWidget {
                                     ),
                                   ),
                                   initialData: member,
-                                  builder: (context, member) =>
-                                      StreamUserAvatar(
+                                  builder: (context, member) => StreamUserAvatar(
                                     showOnlineStatus: false,
                                     user: member.user!,
                                     borderRadius: BorderRadius.zero,
@@ -158,7 +157,8 @@ class StreamGroupAvatar extends StatelessWidget {
 
     if (selected) {
       avatar = ClipRRect(
-        borderRadius: BorderRadius.circular(selectionThickness) +
+        borderRadius:
+            BorderRadius.circular(selectionThickness) +
             (borderRadius ?? previewTheme?.borderRadius ?? BorderRadius.zero),
         child: Container(
           constraints: constraints ?? previewTheme?.constraints,

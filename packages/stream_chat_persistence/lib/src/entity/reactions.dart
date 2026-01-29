@@ -10,9 +10,7 @@ class Reactions extends Table {
   TextColumn get userId => text().nullable()();
 
   /// The messageId to which the reaction belongs
-  TextColumn get messageId => text()
-      .nullable()
-      .references(Messages, #id, onDelete: KeyAction.cascade)();
+  TextColumn get messageId => text().nullable().references(Messages, #id, onDelete: KeyAction.cascade)();
 
   /// The type of the reaction
   TextColumn get type => text()();
@@ -34,8 +32,8 @@ class Reactions extends Table {
 
   @override
   Set<Column> get primaryKey => {
-        messageId,
-        type,
-        userId,
-      };
+    messageId,
+    type,
+    userId,
+  };
 }

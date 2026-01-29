@@ -6,10 +6,11 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// The function receives the [BuildContext] and the [Offset] where
 /// the menu should appear.
-typedef ContextMenuBuilder = Widget Function(
-  BuildContext context,
-  Offset offset,
-);
+typedef ContextMenuBuilder =
+    Widget Function(
+      BuildContext context,
+      Offset offset,
+    );
 
 /// Displays a custom context menu as a general dialog.
 ///

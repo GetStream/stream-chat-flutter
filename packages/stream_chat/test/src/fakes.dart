@@ -34,8 +34,7 @@ class FakeTokenManager extends Fake implements TokenManager {
     String userId, {
     Token? token,
     TokenProvider? provider,
-  }) async =>
-      this.token;
+  }) async => this.token;
 
   @override
   void reset() {}
@@ -48,8 +47,8 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   FakePersistenceClient({
     DateTime? lastSyncAt,
     List<String>? channelCids,
-  })  : _lastSyncAt = lastSyncAt,
-        _channelCids = channelCids ?? [];
+  }) : _lastSyncAt = lastSyncAt,
+       _channelCids = channelCids ?? [];
 
   String? _userId;
   bool _isConnected = false;
@@ -144,8 +143,7 @@ class FakeChatApi extends Fake implements StreamChatApi {
   AttachmentFileUploader? _fileUploader;
 
   @override
-  AttachmentFileUploader get fileUploader =>
-      _fileUploader ??= MockAttachmentFileUploader();
+  AttachmentFileUploader get fileUploader => _fileUploader ??= MockAttachmentFileUploader();
 }
 
 class FakeClientState extends Fake implements ClientState {
@@ -218,8 +216,7 @@ class FakeWebSocket extends Fake implements WebSocket {
   ConnectionStatus get connectionStatus => _connectionStatusController.value;
 
   @override
-  Stream<ConnectionStatus> get connectionStatusStream =>
-      _connectionStatusController.stream;
+  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
 
   @override
   Completer<Event>? connectionCompleter;
@@ -265,8 +262,7 @@ class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
   ConnectionStatus get connectionStatus => _connectionStatusController.value;
 
   @override
-  Stream<ConnectionStatus> get connectionStatusStream =>
-      _connectionStatusController.stream;
+  Stream<ConnectionStatus> get connectionStatusStream => _connectionStatusController.stream;
 
   @override
   Completer<Event>? connectionCompleter;
@@ -296,8 +292,7 @@ class FakeWebSocketWithConnectionError extends Fake implements WebSocket {
 
 class FakeChannelState extends Fake implements ChannelState {}
 
-class FakePartialUpdateMemberResponse extends Fake
-    implements PartialUpdateMemberResponse {
+class FakePartialUpdateMemberResponse extends Fake implements PartialUpdateMemberResponse {
   FakePartialUpdateMemberResponse({
     Member? channelMember,
   }) : _channelMember = channelMember ?? Member();

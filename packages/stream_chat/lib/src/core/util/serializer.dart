@@ -11,12 +11,10 @@ class Serializer {
       ..removeWhere(
         (key, value) => topLevelFields.contains(key),
       );
-    final rootFields = jsonClone
-      ..removeWhere((key, value) => extraDataMap.keys.contains(key));
-    return rootFields
-      ..addAll({
-        'extra_data': extraDataMap,
-      });
+    final rootFields = jsonClone..removeWhere((key, value) => extraDataMap.keys.contains(key));
+    return rootFields..addAll({
+      'extra_data': extraDataMap,
+    });
   }
 
   /// Takes values in `extra_data` key and puts them on the root level of

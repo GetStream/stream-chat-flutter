@@ -2,9 +2,7 @@
 extension TLDString on String {
   /// Returns true if the string is a valid TLD.
   bool isValidTLD() =>
-      isNotEmpty &&
-      tlds.containsKey(this[0].toUpperCase()) &&
-      tlds[this[0].toUpperCase()]!.contains(toUpperCase());
+      isNotEmpty && tlds.containsKey(this[0].toUpperCase()) && tlds[this[0].toUpperCase()]!.contains(toUpperCase());
 }
 
 /// List of valid TLDs.

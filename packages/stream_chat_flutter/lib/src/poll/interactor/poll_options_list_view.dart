@@ -198,9 +198,7 @@ class PollOptionItem extends StatelessWidget {
                   if (showProgressBar)
                     OptionVotesProgressBar(
                       value: poll.voteRatioFor(option),
-                      borderRadius:
-                          theme.pollOptionVotesProgressBarBorderRadius ??
-                              BorderRadius.circular(4),
+                      borderRadius: theme.pollOptionVotesProgressBarBorderRadius ?? BorderRadius.circular(4),
                       trackColor: theme.pollOptionVotesProgressBarTrackColor,
                       valueColor: switch (poll.isOptionWinner(option)) {
                         true => theme.pollOptionVotesProgressBarWinnerColor,
@@ -209,7 +207,7 @@ class PollOptionItem extends StatelessWidget {
                     ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -230,9 +228,9 @@ class OptionVoters extends StatelessWidget {
     this.overlap = 0.5,
     required this.voters,
   }) : assert(
-          overlap >= 0 && overlap <= 1,
-          'Overlap must be between 0 and 1',
-        );
+         overlap >= 0 && overlap <= 1,
+         'Overlap must be between 0 and 1',
+       );
 
   /// The radius of the avatars.
   final double radius;

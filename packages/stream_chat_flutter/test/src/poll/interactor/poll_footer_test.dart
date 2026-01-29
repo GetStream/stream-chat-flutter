@@ -20,13 +20,15 @@ void main() async {
   testWidgets(
     'End Vote button is visible and enabled for the creator on open poll',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(createdBy: currentUser),
-          currentUser: currentUser,
-          onEndVote: () {},
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll.copyWith(createdBy: currentUser),
+            currentUser: currentUser,
+            onEndVote: () {},
+          ),
         ),
-      ));
+      );
 
       final endVoteButton = find.ancestor(
         of: find.text('End Vote'),
@@ -45,13 +47,15 @@ void main() async {
   testWidgets(
     'End Vote button is not visible for non-creator',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll,
-          currentUser: currentUser,
-          onEndVote: () {},
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll,
+            currentUser: currentUser,
+            onEndVote: () {},
+          ),
         ),
-      ));
+      );
 
       final endVoteButton = find.ancestor(
         of: find.text('End Vote'),
@@ -65,16 +69,18 @@ void main() async {
   testWidgets(
     'End Vote button is not visible for closed poll',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(
-            isClosed: true,
-            createdBy: currentUser,
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll.copyWith(
+              isClosed: true,
+              createdBy: currentUser,
+            ),
+            currentUser: currentUser,
+            onEndVote: () {},
           ),
-          currentUser: currentUser,
-          onEndVote: () {},
         ),
-      ));
+      );
 
       final endVoteButton = find.ancestor(
         of: find.text('End Vote'),
@@ -88,13 +94,15 @@ void main() async {
   testWidgets(
     'Add Comment button is visible and enabled when poll allows answers',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(allowAnswers: true),
-          currentUser: currentUser,
-          onAddComment: () {},
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll.copyWith(allowAnswers: true),
+            currentUser: currentUser,
+            onAddComment: () {},
+          ),
         ),
-      ));
+      );
 
       final addCommentButton = find.ancestor(
         of: find.text('Add a comment'),
@@ -112,16 +120,18 @@ void main() async {
   testWidgets(
     'Add Comment button is not visible when poll is closed',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(
-            isClosed: true,
-            allowAnswers: true,
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll.copyWith(
+              isClosed: true,
+              allowAnswers: true,
+            ),
+            currentUser: currentUser,
+            onAddComment: () {},
           ),
-          currentUser: currentUser,
-          onAddComment: () {},
         ),
-      ));
+      );
 
       final addCommentButton = find.ancestor(
         of: find.text('Add a comment'),
@@ -135,13 +145,15 @@ void main() async {
   testWidgets(
     'View Comments button is visible and enabled if there are answers',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(answersCount: 1),
-          currentUser: currentUser,
-          onViewComments: () {},
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll.copyWith(answersCount: 1),
+            currentUser: currentUser,
+            onViewComments: () {},
+          ),
         ),
-      ));
+      );
 
       final viewCommentsButton = find.ancestor(
         of: find.text('View Comments'),
@@ -159,15 +171,17 @@ void main() async {
   testWidgets(
     'View Comments button is not visible when there are no answers',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(
-            answersCount: 0,
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll.copyWith(
+              answersCount: 0,
+            ),
+            currentUser: currentUser,
+            onViewComments: () {},
           ),
-          currentUser: currentUser,
-          onViewComments: () {},
         ),
-      ));
+      );
 
       final viewCommentsButton = find.ancestor(
         of: find.text('View Comments'),
@@ -181,15 +195,17 @@ void main() async {
   testWidgets(
     'Suggest Option button is visible and enabled when allowed',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(
-            allowUserSuggestedOptions: true,
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll.copyWith(
+              allowUserSuggestedOptions: true,
+            ),
+            currentUser: currentUser,
+            onSuggestOption: () {},
           ),
-          currentUser: currentUser,
-          onSuggestOption: () {},
         ),
-      ));
+      );
 
       final suggestOptionButton = find.ancestor(
         of: find.text('Suggest an option'),
@@ -207,16 +223,18 @@ void main() async {
   testWidgets(
     'Suggest Option button is not visible when poll is closed',
     (WidgetTester tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollFooter(
-          poll: poll.copyWith(
-            isClosed: true,
-            allowUserSuggestedOptions: true,
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollFooter(
+            poll: poll.copyWith(
+              isClosed: true,
+              allowUserSuggestedOptions: true,
+            ),
+            currentUser: currentUser,
+            onSuggestOption: () {},
           ),
-          currentUser: currentUser,
-          onSuggestOption: () {},
         ),
-      ));
+      );
 
       final suggestOptionButton = find.ancestor(
         of: find.text('Suggest an option'),

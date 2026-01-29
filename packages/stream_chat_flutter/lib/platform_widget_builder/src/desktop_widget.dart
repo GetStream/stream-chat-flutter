@@ -26,14 +26,11 @@ class DesktopWidget extends DesktopWidgetBase<Widget, Widget, Widget> {
   final PlatformBuilder<Widget?>? linux;
 
   @override
-  Widget createMacosWidget(BuildContext context) =>
-      macOS?.call(context) ?? const Empty();
+  Widget createMacosWidget(BuildContext context) => macOS?.call(context) ?? const Empty();
 
   @override
-  Widget createWindowsWidget(BuildContext context) =>
-      windows?.call(context) ?? const Empty();
+  Widget createWindowsWidget(BuildContext context) => windows?.call(context) ?? const Empty();
 
   @override
-  Widget createLinuxWidget(BuildContext context) =>
-      linux?.call(context) ?? const Empty();
+  Widget createLinuxWidget(BuildContext context) => linux?.call(context) ?? const Empty();
 }

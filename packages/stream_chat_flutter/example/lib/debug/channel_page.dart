@@ -39,8 +39,7 @@ class _DebugChannelPageState extends State<DebugChannelPage> {
     _channelSubscription = _channel.state!.channelStateStream.listen((state) {
       setState(() => _channelState = state);
     });
-    _ownUserSubscription =
-        _channel.client.state.currentUserStream.listen((ownUser) {
+    _ownUserSubscription = _channel.client.state.currentUserStream.listen((ownUser) {
       setState(() => _ownUser = ownUser);
     });
   }
@@ -54,10 +53,8 @@ class _DebugChannelPageState extends State<DebugChannelPage> {
 
   @override
   Widget build(BuildContext context) {
-    final members =
-        _channelState?.members ?? _channel.state?.members ?? const [];
-    final mutes =
-        _ownUser?.mutes ?? _channel.client.state.currentUser?.mutes ?? const [];
+    final members = _channelState?.members ?? _channel.state?.members ?? const [];
+    final mutes = _ownUser?.mutes ?? _channel.client.state.currentUser?.mutes ?? const [];
     //SingleChildScrollView
     return Scaffold(
       appBar: AppBar(

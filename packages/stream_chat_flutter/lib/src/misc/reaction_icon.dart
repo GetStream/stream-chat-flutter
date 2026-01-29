@@ -8,11 +8,12 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// {@template reactionIconBuilder}
 /// Signature for a function that builds a reaction icon.
 /// {@endtemplate}
-typedef ReactionIconBuilder = Widget Function(
-  BuildContext context,
-  bool isHighlighted,
-  double iconSize,
-);
+typedef ReactionIconBuilder =
+    Widget Function(
+      BuildContext context,
+      bool isHighlighted,
+      double iconSize,
+    );
 
 /// {@template streamReactionIcon}
 /// Reaction icon data
@@ -26,10 +27,7 @@ class StreamReactionIcon {
   });
 
   /// Creates a reaction icon with a default unknown icon.
-  const StreamReactionIcon.unknown()
-      : type = 'unknown',
-        emojiCode = null,
-        builder = _unknownBuilder;
+  const StreamReactionIcon.unknown() : type = 'unknown', emojiCode = null, builder = _unknownBuilder;
 
   /// Converts this [StreamReactionIcon] to a [Reaction] object.
   Reaction toReaction() => Reaction(type: type, emojiCode: emojiCode);

@@ -58,9 +58,9 @@ class StreamChannelAvatar extends StatelessWidget {
     this.oneToOneAvatarBuilder,
     this.groupAvatarBuilder,
   }) : assert(
-          channel.state != null,
-          'Channel ${channel.id} is not initialized',
-        );
+         channel.state != null,
+         'Channel ${channel.id} is not initialized',
+       );
 
   /// [BorderRadius] to display the widget
   final BorderRadius? borderRadius;
@@ -121,8 +121,7 @@ class StreamChannelAvatar extends StatelessWidget {
       initialData: channel.image,
       builder: (context, channelImage) {
         Widget child = ClipRRect(
-          borderRadius:
-              borderRadius ?? previewTheme?.borderRadius ?? BorderRadius.zero,
+          borderRadius: borderRadius ?? previewTheme?.borderRadius ?? BorderRadius.zero,
           child: Container(
             constraints: constraints ?? previewTheme?.constraints,
             decoration: BoxDecoration(color: colorTheme.accentPrimary),
@@ -158,10 +157,9 @@ class StreamChannelAvatar extends StatelessWidget {
         if (selected) {
           child = ClipRRect(
             key: const Key('selectedImage'),
-            borderRadius: BorderRadius.circular(selectionThickness) +
-                (borderRadius ??
-                    previewTheme?.borderRadius ??
-                    BorderRadius.zero),
+            borderRadius:
+                BorderRadius.circular(selectionThickness) +
+                (borderRadius ?? previewTheme?.borderRadius ?? BorderRadius.zero),
             child: Container(
               constraints: constraints ?? previewTheme?.constraints,
               color: selectionColor ?? colorTheme.accentPrimary,
@@ -176,9 +174,7 @@ class StreamChannelAvatar extends StatelessWidget {
       },
       noDataBuilder: (context) {
         final currentUser = client.currentUser!;
-        final otherMembers = channel.state!.members
-            .where((it) => it.userId != currentUser.id)
-            .toList(growable: false);
+        final otherMembers = channel.state!.members.where((it) => it.userId != currentUser.id).toList(growable: false);
 
         // our own space, no other members
         if (otherMembers.isEmpty) {

@@ -16,8 +16,12 @@ void main() {
   late MockChannel channel;
   late MockChannelState channelState;
 
-  late final member = Member(user: User(id: 'alice', name: 'Alice'));
-  late final member2 = Member(user: User(id: 'bob', name: 'Bob'));
+  late final member = Member(
+    user: User(id: 'alice', name: 'Alice'),
+  );
+  late final member2 = Member(
+    user: User(id: 'bob', name: 'Bob'),
+  );
 
   setUpAll(() {
     client = MockClient();

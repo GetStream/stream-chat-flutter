@@ -37,11 +37,10 @@ class UserAvatarTransform extends StatelessWidget {
     return Transform.translate(
       offset: Offset(
         0,
-        translateUserAvatar
-            ? (messageTheme.avatarTheme?.constraints.maxHeight ?? 40) / 2
-            : 0,
+        translateUserAvatar ? (messageTheme.avatarTheme?.constraints.maxHeight ?? 40) / 2 : 0,
       ),
-      child: userAvatarBuilder?.call(context, message.user!) ??
+      child:
+          userAvatarBuilder?.call(context, message.user!) ??
           StreamUserAvatar(
             user: message.user!,
             onTap: onUserAvatarTap,

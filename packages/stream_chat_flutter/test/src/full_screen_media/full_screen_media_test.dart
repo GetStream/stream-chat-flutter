@@ -36,7 +36,7 @@ void main() {
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -49,24 +49,24 @@ void main() {
         Message(
           text: 'hello',
           user: User(id: 'other-user'),
-        )
+        ),
       ]);
       when(() => channelState.messagesStream).thenAnswer(
         (i) => Stream.value([
           Message(
             text: 'hello',
             user: User(id: 'other-user'),
-          )
+          ),
         ]),
       );
-      when(() => channelState.typingEvents).thenAnswer((i) => {
-            User(id: 'other-user', extraData: const {'name': 'demo'}):
-                Event(type: EventType.typingStart),
-          });
+      when(() => channelState.typingEvents).thenAnswer(
+        (i) => {
+          User(id: 'other-user', extraData: const {'name': 'demo'}): Event(type: EventType.typingStart),
+        },
+      );
       when(() => channelState.typingEventsStream).thenAnswer(
         (i) => Stream.value({
-          User(id: 'other-user', extraData: const {'name': 'demo'}):
-              Event(type: EventType.typingStart),
+          User(id: 'other-user', extraData: const {'name': 'demo'}): Event(type: EventType.typingStart),
         }),
       );
 
@@ -81,22 +81,24 @@ void main() {
           attachment,
         ],
       );
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: StreamFullScreenMedia(
-              mediaAttachmentPackages: [
-                StreamAttachmentPackage(
-                  attachment: attachment,
-                  message: message,
-                ),
-              ],
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: StreamFullScreenMedia(
+                mediaAttachmentPackages: [
+                  StreamAttachmentPackage(
+                    attachment: attachment,
+                    message: message,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       // wait for the initial state to be rendered.
       await tester.pump(Duration.zero);

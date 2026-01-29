@@ -10,10 +10,10 @@ import '../../mocks.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late GeneralApi generalApi;
@@ -28,20 +28,26 @@ void main() {
 
     const path = '/sync';
 
-    final events =
-        List.generate(3, (index) => Event(type: 'test-event-type-$index'));
+    final events = List.generate(3, (index) => Event(type: 'test-event-type-$index'));
 
     final data = {
       'channel_cids': cids,
       'last_sync_at': lastSyncAt.toUtc().toIso8601String(),
     };
 
-    when(() => client.post(
-          path,
-          data: data,
-        )).thenAnswer((_) async => successResponse(path, data: {
-          'events': [...events.map((it) => it.toJson())]
-        }));
+    when(
+      () => client.post(
+        path,
+        data: data,
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'events': [...events.map((it) => it.toJson())],
+        },
+      ),
+    );
 
     final res = await generalApi.sync(cids, lastSyncAt);
 
@@ -204,14 +210,21 @@ void main() {
         ...pagination.toJson(),
       });
 
-      when(() => client.get(
-            path,
-            queryParameters: {
-              'payload': payload,
-            },
-          )).thenAnswer((_) async => successResponse(path, data: {
-            'members': [...members.map((it) => it.toJson())]
-          }));
+      when(
+        () => client.get(
+          path,
+          queryParameters: {
+            'payload': payload,
+          },
+        ),
+      ).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'members': [...members.map((it) => it.toJson())],
+          },
+        ),
+      );
 
       final res = await generalApi.queryMembers(
         channelType,
@@ -251,14 +264,21 @@ void main() {
         ...pagination.toJson(),
       });
 
-      when(() => client.get(
-            path,
-            queryParameters: {
-              'payload': payload,
-            },
-          )).thenAnswer((_) async => successResponse(path, data: {
-            'members': [...members.map((it) => it.toJson())]
-          }));
+      when(
+        () => client.get(
+          path,
+          queryParameters: {
+            'payload': payload,
+          },
+        ),
+      ).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'members': [...members.map((it) => it.toJson())],
+          },
+        ),
+      );
 
       final res = await generalApi.queryMembers(
         channelType,
@@ -280,18 +300,24 @@ void main() {
 
   test('enrichUrl', () async {
     const path = '/og';
-    const url =
-        'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
+    const url = 'https://www.techyourchance.com/finite-state-machine-with-unit-tests-real-world-example';
 
-    when(() => client.get(
-          path,
-          queryParameters: {'url': url},
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.get(
+        path,
+        queryParameters: {'url': url},
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'type': 'image',
           'og_scrape_url': url,
           'author_name': 'TechYourChance',
           'title': 'Finite State Machine with Unit Tests: Real World Example',
-        }));
+        },
+      ),
+    );
 
     final res = await generalApi.enrichUrl(url);
 

@@ -21,8 +21,7 @@ class ChannelList extends StatefulWidget {
 class _ChannelList extends State<ChannelList> {
   final ScrollController _scrollController = ScrollController();
 
-  late final StreamMessageSearchListController _messageSearchListController =
-      StreamMessageSearchListController(
+  late final StreamMessageSearchListController _messageSearchListController = StreamMessageSearchListController(
     client: StreamChat.of(context).client,
     filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
     limit: 5,
@@ -33,8 +32,7 @@ class _ChannelList extends State<ChannelList> {
     ],
   );
 
-  late final TextEditingController _controller = TextEditingController()
-    ..addListener(_channelQueryListener);
+  late final TextEditingController _controller = TextEditingController()..addListener(_channelQueryListener);
 
   bool _isSearchActive = false;
 
@@ -86,8 +84,7 @@ class _ChannelList extends State<ChannelList> {
       },
       child: NotificationListener<ScrollUpdateNotification>(
         onNotification: (ScrollNotification scrollInfo) {
-          if (_scrollController.position.userScrollDirection ==
-              ScrollDirection.reverse) {
+          if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
             FocusScope.of(context).unfocus();
           }
           return true;
@@ -147,25 +144,19 @@ class _ChannelListDefault extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) {
-                                final isOneToOne = channel.memberCount == 2 &&
-                                    channel.isDistinct;
+                                final isOneToOne = channel.memberCount == 2 && channel.isDistinct;
                                 return StreamChannel(
                                   channel: channel,
                                   child: isOneToOne
                                       ? ChatInfoScreen(
-                                          messageTheme:
-                                              chatTheme.ownMessageTheme,
+                                          messageTheme: chatTheme.ownMessageTheme,
                                           user: channel.state!.members
-                                              .where((m) =>
-                                                  m.userId !=
-                                                  channel.client.state
-                                                      .currentUser!.id)
+                                              .where((m) => m.userId != channel.client.state.currentUser!.id)
                                               .first
                                               .user,
                                         )
                                       : GroupInfoScreen(
-                                          messageTheme:
-                                              chatTheme.ownMessageTheme,
+                                          messageTheme: chatTheme.ownMessageTheme,
                                         ),
                                 );
                               },
@@ -187,8 +178,7 @@ class _ChannelListDefault extends StatelessWidget {
                         final res = await showConfirmationBottomSheet(
                           context,
                           title: 'Delete Conversation',
-                          question:
-                              'Are you sure you want to delete this conversation?',
+                          question: 'Are you sure you want to delete this conversation?',
                           okText: 'Delete',
                           cancelText: 'Cancel',
                           icon: StreamSvgIcon(
@@ -204,9 +194,7 @@ class _ChannelListDefault extends StatelessWidget {
                 ],
               ),
               child: ColoredBox(
-                color: channel.isPinned
-                    ? chatTheme.colorTheme.highlight
-                    : Colors.transparent,
+                color: channel.isPinned ? chatTheme.colorTheme.highlight : Colors.transparent,
                 child: defaultWidget,
               ),
             );
@@ -233,14 +221,9 @@ class _ChannelListDefault extends StatelessWidget {
                     },
                     child: Text(
                       'Start a chat',
-                      style: StreamChatTheme.of(context)
-                          .textTheme
-                          .bodyBold
-                          .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentPrimary,
-                          ),
+                      style: StreamChatTheme.of(context).textTheme.bodyBold.copyWith(
+                        color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+                      ),
                     ),
                   ),
                 ),
@@ -293,35 +276,36 @@ class _ChannelListSearch extends StatelessWidget {
           },
         );
       },
-      itemBuilder: (
-        context,
-        messageResponses,
-        index,
-        defaultWidget,
-      ) {
-        final messageResponse = messageResponses[index];
+      itemBuilder:
+          (
+            context,
+            messageResponses,
+            index,
+            defaultWidget,
+          ) {
+            final messageResponse = messageResponses[index];
 
-        return defaultWidget.copyWith(
-          onTap: () async {
-            FocusScope.of(context).requestFocus(FocusNode());
-            final client = StreamChat.of(context).client;
-            final router = GoRouter.of(context);
-            final message = messageResponse.message;
-            final channel = client.channel(
-              messageResponse.channel!.type,
-              id: messageResponse.channel!.id,
-            );
-            if (channel.state == null) {
-              await channel.watch();
-            }
-            router.pushNamed(
-              Routes.CHANNEL_PAGE.name,
-              pathParameters: Routes.CHANNEL_PAGE.params(channel),
-              queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
+            return defaultWidget.copyWith(
+              onTap: () async {
+                FocusScope.of(context).requestFocus(FocusNode());
+                final client = StreamChat.of(context).client;
+                final router = GoRouter.of(context);
+                final message = messageResponse.message;
+                final channel = client.channel(
+                  messageResponse.channel!.type,
+                  id: messageResponse.channel!.id,
+                );
+                if (channel.state == null) {
+                  await channel.watch();
+                }
+                router.pushNamed(
+                  Routes.CHANNEL_PAGE.name,
+                  pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                  queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
+                );
+              },
             );
           },
-        );
-      },
     );
   }
 }

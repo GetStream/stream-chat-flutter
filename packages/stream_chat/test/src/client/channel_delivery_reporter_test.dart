@@ -59,15 +59,13 @@ void main() {
         expect(capturedDeliveries, hasLength(2));
         expect(
           capturedDeliveries.any(
-            (d) =>
-                d.channelCid == 'test:channel-1' && d.messageId == 'message-1',
+            (d) => d.channelCid == 'test:channel-1' && d.messageId == 'message-1',
           ),
           isTrue,
         );
         expect(
           capturedDeliveries.any(
-            (d) =>
-                d.channelCid == 'test:channel-2' && d.messageId == 'message-2',
+            (d) => d.channelCid == 'test:channel-2' && d.messageId == 'message-2',
           ),
           isTrue,
         );

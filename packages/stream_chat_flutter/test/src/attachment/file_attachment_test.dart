@@ -25,10 +25,12 @@ void main() {
               channel: channel,
               child: SizedBox(
                 child: StreamFileAttachment(
-                  constraints: BoxConstraints.tight(const Size(
-                    300,
-                    300,
-                  )),
+                  constraints: BoxConstraints.tight(
+                    const Size(
+                      300,
+                      300,
+                    ),
+                  ),
                   message: Message(),
                   file: Attachment(
                     type: 'file',

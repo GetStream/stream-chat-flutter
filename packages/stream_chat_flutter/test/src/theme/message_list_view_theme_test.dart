@@ -9,26 +9,22 @@ class MockStreamChatClient extends Mock implements StreamChatClient {}
 
 void main() {
   test('MessageListViewThemeData copyWith, ==, hashCode basics', () {
-    expect(const StreamMessageListViewThemeData(),
-        const StreamMessageListViewThemeData().copyWith());
-    expect(const StreamMessageListViewThemeData().hashCode,
-        const StreamMessageListViewThemeData().copyWith().hashCode);
+    expect(const StreamMessageListViewThemeData(), const StreamMessageListViewThemeData().copyWith());
+    expect(const StreamMessageListViewThemeData().hashCode, const StreamMessageListViewThemeData().copyWith().hashCode);
   });
 
-  test(
-      '''Light MessageListViewThemeData lerps completely to dark MessageListViewThemeData''',
-      () {
+  test('''Light MessageListViewThemeData lerps completely to dark MessageListViewThemeData''', () {
     expect(
-        const StreamMessageListViewThemeData().lerp(
-            _messageListViewThemeDataControl,
-            _messageListViewThemeDataControlDark,
-            1),
-        _messageListViewThemeDataControlDark);
+      const StreamMessageListViewThemeData().lerp(
+        _messageListViewThemeDataControl,
+        _messageListViewThemeDataControlDark,
+        1,
+      ),
+      _messageListViewThemeDataControlDark,
+    );
   });
 
-  test(
-      '''Light MessageListViewThemeData lerps halfway to dark MessageListViewThemeData''',
-      () {
+  test('''Light MessageListViewThemeData lerps halfway to dark MessageListViewThemeData''', () {
     expect(
       const StreamMessageListViewThemeData().lerp(
         _messageListViewThemeDataControl,
@@ -42,27 +38,25 @@ void main() {
     );
   });
 
-  test(
-      '''Dark MessageListViewThemeData lerps completely to light MessageListViewThemeData''',
-      () {
+  test('''Dark MessageListViewThemeData lerps completely to light MessageListViewThemeData''', () {
     expect(
-        const StreamMessageListViewThemeData().lerp(
-            _messageListViewThemeDataControlDark,
-            _messageListViewThemeDataControl,
-            1),
-        _messageListViewThemeDataControl);
+      const StreamMessageListViewThemeData().lerp(
+        _messageListViewThemeDataControlDark,
+        _messageListViewThemeDataControl,
+        1,
+      ),
+      _messageListViewThemeDataControl,
+    );
   });
 
   test('Merging dark and light themes results in a dark theme', () {
     expect(
-        _messageListViewThemeDataControl
-            .merge(_messageListViewThemeDataControlDark),
-        _messageListViewThemeDataControlDark);
+      _messageListViewThemeDataControl.merge(_messageListViewThemeDataControlDark),
+      _messageListViewThemeDataControlDark,
+    );
   });
 
-  testWidgets(
-      'Passing no MessageListViewThemeData returns default light theme values',
-      (WidgetTester tester) async {
+  testWidgets('Passing no MessageListViewThemeData returns default light theme values', (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
       MaterialApp(
@@ -80,13 +74,10 @@ void main() {
     );
 
     final messageListViewTheme = StreamMessageListViewTheme.of(_context);
-    expect(messageListViewTheme.backgroundColor,
-        _messageListViewThemeDataControl.backgroundColor);
+    expect(messageListViewTheme.backgroundColor, _messageListViewThemeDataControl.backgroundColor);
   });
 
-  testWidgets(
-      'Passing no MessageListViewThemeData returns default dark theme values',
-      (WidgetTester tester) async {
+  testWidgets('Passing no MessageListViewThemeData returns default dark theme values', (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
       MaterialApp(
@@ -105,20 +96,18 @@ void main() {
     );
 
     final messageListViewTheme = StreamMessageListViewTheme.of(_context);
-    expect(messageListViewTheme.backgroundColor,
-        _messageListViewThemeDataControlDark.backgroundColor);
+    expect(messageListViewTheme.backgroundColor, _messageListViewThemeDataControlDark.backgroundColor);
   });
 
-  testWidgets(
-      'Pass backgroundImage to MessageListViewThemeData return backgroundImage',
-      (WidgetTester tester) async {
+  testWidgets('Pass backgroundImage to MessageListViewThemeData return backgroundImage', (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => StreamChat(
           client: MockStreamChatClient(),
-          streamChatThemeData: StreamChatThemeData.light()
-              .copyWith(messageListViewTheme: _messageListViewThemeDataImage),
+          streamChatThemeData: StreamChatThemeData.light().copyWith(
+            messageListViewTheme: _messageListViewThemeDataImage,
+          ),
           child: child,
         ),
         home: Builder(
@@ -136,8 +125,7 @@ void main() {
     );
 
     final messageListViewTheme = StreamMessageListViewTheme.of(_context);
-    expect(messageListViewTheme.backgroundImage,
-        _messageListViewThemeDataImage.backgroundImage);
+    expect(messageListViewTheme.backgroundImage, _messageListViewThemeDataImage.backgroundImage);
   });
 }
 

@@ -79,12 +79,10 @@ class StreamTabbedAttachmentPickerBottomSheet extends StatefulWidget {
   final ValueSetter<StreamAttachmentPickerResult>? onSendValue;
 
   @override
-  State<StreamTabbedAttachmentPickerBottomSheet> createState() =>
-      _StreamTabbedAttachmentPickerBottomSheetState();
+  State<StreamTabbedAttachmentPickerBottomSheet> createState() => _StreamTabbedAttachmentPickerBottomSheetState();
 }
 
-class _StreamTabbedAttachmentPickerBottomSheetState
-    extends State<StreamTabbedAttachmentPickerBottomSheet> {
+class _StreamTabbedAttachmentPickerBottomSheetState extends State<StreamTabbedAttachmentPickerBottomSheet> {
   // The current option selected in the tabbed attachment picker.
   late var _currentOption = _calculateInitialOption();
   TabbedAttachmentPickerOption _calculateInitialOption() {
@@ -196,11 +194,11 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
 
                 final onPressed = switch (onSendValue) {
                   final onSendValue? when isValueChanged => () {
-                      final result = AttachmentsPicked(
-                        attachments: value.attachments,
-                      );
-                      return onSendValue(result);
-                    },
+                    final result = AttachmentsPicked(
+                      attachments: value.attachments,
+                    );
+                    return onSendValue(result);
+                  },
                   _ => null,
                 };
 
@@ -223,11 +221,12 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
 
 /// Signature used by [EndOfFrameCallbackWidget.errorBuilder] to create a
 /// replacement widget to render.
-typedef EndOfFrameCallbackErrorWidgetBuilder = Widget Function(
-  BuildContext context,
-  Object error,
-  StackTrace? stackTrace,
-);
+typedef EndOfFrameCallbackErrorWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      Object error,
+      StackTrace? stackTrace,
+    );
 
 /// Function signature for a callback that is called when the end of the frame
 /// is reached.
@@ -255,8 +254,7 @@ class EndOfFrameCallbackWidget extends StatefulWidget {
   final EndOfFrameCallbackErrorWidgetBuilder? errorBuilder;
 
   @override
-  State<EndOfFrameCallbackWidget> createState() =>
-      _EndOfFrameCallbackWidgetState();
+  State<EndOfFrameCallbackWidget> createState() => _EndOfFrameCallbackWidgetState();
 }
 
 class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {

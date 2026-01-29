@@ -92,8 +92,7 @@ void main() {
       expect(convertedLocation.messageId, originalLocation.messageId);
       expect(convertedLocation.latitude, originalLocation.latitude);
       expect(convertedLocation.longitude, originalLocation.longitude);
-      expect(convertedLocation.createdByDeviceId,
-          originalLocation.createdByDeviceId);
+      expect(convertedLocation.createdByDeviceId, originalLocation.createdByDeviceId);
       expect(convertedLocation.endAt, originalLocation.endAt);
       expect(convertedLocation.createdAt, originalLocation.createdAt);
       expect(convertedLocation.updatedAt, originalLocation.updatedAt);

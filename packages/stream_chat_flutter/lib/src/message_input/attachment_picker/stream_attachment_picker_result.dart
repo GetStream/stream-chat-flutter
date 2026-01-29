@@ -4,8 +4,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Signature for a function that is called when a attachment picker result
 /// is received.
-typedef OnAttachmentPickerResult<T extends StreamAttachmentPickerResult>
-    = FutureOr<bool> Function(T result);
+typedef OnAttachmentPickerResult<T extends StreamAttachmentPickerResult> = FutureOr<bool> Function(T result);
 
 /// {@template streamAttachmentPickerAction}
 /// A sealed class that represents different results that can be returned

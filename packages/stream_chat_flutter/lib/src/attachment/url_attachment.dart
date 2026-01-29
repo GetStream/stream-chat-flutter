@@ -40,7 +40,8 @@ class StreamUrlAttachment extends StatelessWidget {
   Widget build(BuildContext context) {
     final chatTheme = StreamChatTheme.of(context);
     final colorTheme = chatTheme.colorTheme;
-    final shape = this.shape ??
+    final shape =
+        this.shape ??
         RoundedRectangleBorder(
           side: BorderSide(
             color: colorTheme.borders,
@@ -105,37 +106,41 @@ class StreamUrlAttachment extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 if (urlAttachment.title != null)
-                  Builder(builder: (context) {
-                    final maxLines = messageTheme.urlAttachmentTitleMaxLine;
+                  Builder(
+                    builder: (context) {
+                      final maxLines = messageTheme.urlAttachmentTitleMaxLine;
 
-                    TextOverflow? overflow;
-                    if (maxLines != null && maxLines > 0) {
-                      overflow = TextOverflow.ellipsis;
-                    }
+                      TextOverflow? overflow;
+                      if (maxLines != null && maxLines > 0) {
+                        overflow = TextOverflow.ellipsis;
+                      }
 
-                    return Text(
-                      urlAttachment.title!.trim(),
-                      maxLines: maxLines,
-                      overflow: overflow,
-                      style: messageTheme.urlAttachmentTitleStyle,
-                    );
-                  }),
+                      return Text(
+                        urlAttachment.title!.trim(),
+                        maxLines: maxLines,
+                        overflow: overflow,
+                        style: messageTheme.urlAttachmentTitleStyle,
+                      );
+                    },
+                  ),
                 if (urlAttachment.text != null)
-                  Builder(builder: (context) {
-                    final maxLines = messageTheme.urlAttachmentTextMaxLine;
+                  Builder(
+                    builder: (context) {
+                      final maxLines = messageTheme.urlAttachmentTextMaxLine;
 
-                    TextOverflow? overflow;
-                    if (maxLines != null && maxLines > 0) {
-                      overflow = TextOverflow.ellipsis;
-                    }
+                      TextOverflow? overflow;
+                      if (maxLines != null && maxLines > 0) {
+                        overflow = TextOverflow.ellipsis;
+                      }
 
-                    return Text(
-                      urlAttachment.text!,
-                      maxLines: maxLines,
-                      overflow: overflow,
-                      style: messageTheme.urlAttachmentTextStyle,
-                    );
-                  }),
+                      return Text(
+                        urlAttachment.text!,
+                        maxLines: maxLines,
+                        overflow: overflow,
+                        style: messageTheme.urlAttachmentTextStyle,
+                      );
+                    },
+                  ),
               ],
             ),
           ),

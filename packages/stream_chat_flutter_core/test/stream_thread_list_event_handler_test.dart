@@ -5,8 +5,7 @@ import 'package:stream_chat_flutter_core/src/stream_thread_list_controller.dart'
 import 'package:stream_chat_flutter_core/src/stream_thread_list_event_handler.dart';
 
 // Mock classes
-class MockStreamThreadListController extends Mock
-    implements StreamThreadListController {}
+class MockStreamThreadListController extends Mock implements StreamThreadListController {}
 
 class MockEvent extends Mock implements Event {}
 
@@ -83,8 +82,7 @@ void main() {
       () {
         when(() => mockEvent.message).thenReturn(mockMessage);
         when(() => mockMessage.parentId).thenReturn('parent-id');
-        when(() => mockController.getThread(
-            parentMessageId: any(named: 'parentMessageId'))).thenReturn(null);
+        when(() => mockController.getThread(parentMessageId: any(named: 'parentMessageId'))).thenReturn(null);
 
         handler.onNotificationThreadMessageNew(mockEvent, mockController);
         verify(() => mockController.addUnseenThreadId('parent-id'));
@@ -108,12 +106,10 @@ void main() {
         when(() => mockMessage.parentId).thenReturn(null);
         when(() => mockEvent.message).thenReturn(mockMessage);
         when(() => mockEvent.hardDelete).thenReturn(true);
-        when(() => mockController.deleteThread(parentMessageId: 'message-id'))
-            .thenReturn(true);
+        when(() => mockController.deleteThread(parentMessageId: 'message-id')).thenReturn(true);
 
         handler.onMessageDeleted(mockEvent, mockController);
-        verify(
-            () => mockController.deleteThread(parentMessageId: 'message-id'));
+        verify(() => mockController.deleteThread(parentMessageId: 'message-id'));
         verifyNever(() => mockController.deleteReply(any()));
       },
     );
@@ -178,27 +174,23 @@ void main() {
       when(() => mockEvent.cid).thenReturn('channel-cid');
 
       handler.onChannelDeleted(mockEvent, mockController);
-      verify(() =>
-          mockController.deleteThreadByChannelCid(channelCid: 'channel-cid'));
+      verify(() => mockController.deleteThreadByChannelCid(channelCid: 'channel-cid'));
     });
 
     test('onChannelTruncated deletes threads by channel cid', () {
       when(() => mockEvent.cid).thenReturn('channel-cid');
 
       handler.onChannelTruncated(mockEvent, mockController);
-      verify(() =>
-          mockController.deleteThreadByChannelCid(channelCid: 'channel-cid'));
+      verify(() => mockController.deleteThreadByChannelCid(channelCid: 'channel-cid'));
     });
 
     test('onMessageRead marks thread as read', () {
-      when(() => mockThread.copyWith(read: any(named: 'read')))
-          .thenReturn(mockThread);
+      when(() => mockThread.copyWith(read: any(named: 'read'))).thenReturn(mockThread);
       when(() => mockThread.parentMessageId).thenReturn('parent-id');
       when(() => mockEvent.thread).thenReturn(mockThread);
       when(() => mockEvent.user).thenReturn(mockUser);
       when(() => mockEvent.createdAt).thenReturn(DateTime.now());
-      when(() => mockController.getThread(parentMessageId: 'parent-id'))
-          .thenReturn(mockThread);
+      when(() => mockController.getThread(parentMessageId: 'parent-id')).thenReturn(mockThread);
       when(() => mockController.updateThread(mockThread)).thenReturn(true);
 
       handler.onMessageRead(mockEvent, mockController);
@@ -208,14 +200,12 @@ void main() {
     });
 
     test('onNotificationMarkUnread marks thread as unread', () {
-      when(() => mockThread.copyWith(read: any(named: 'read')))
-          .thenReturn(mockThread);
+      when(() => mockThread.copyWith(read: any(named: 'read'))).thenReturn(mockThread);
       when(() => mockThread.parentMessageId).thenReturn('parent-id');
       when(() => mockEvent.thread).thenReturn(mockThread);
       when(() => mockEvent.user).thenReturn(mockUser);
       when(() => mockEvent.createdAt).thenReturn(DateTime.now());
-      when(() => mockController.getThread(parentMessageId: 'parent-id'))
-          .thenReturn(mockThread);
+      when(() => mockController.getThread(parentMessageId: 'parent-id')).thenReturn(mockThread);
       when(() => mockController.updateThread(mockThread)).thenReturn(true);
 
       handler.onNotificationMarkUnread(mockEvent, mockController);

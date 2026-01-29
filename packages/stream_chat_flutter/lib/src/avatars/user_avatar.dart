@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// WidgetBuilder for [StreamUserAvatar].
-typedef StreamUserAvatarBuilder = Widget Function(
-  BuildContext context,
-  User user,
-  // ignore: avoid_positional_boolean_parameters
-  bool isSelected,
-);
+typedef StreamUserAvatarBuilder =
+    Widget Function(
+      BuildContext context,
+      User user,
+      // ignore: avoid_positional_boolean_parameters
+      bool isSelected,
+    );
 
 /// {@template streamUserAvatar}
 /// Displays a user's avatar.
@@ -145,8 +146,7 @@ class StreamUserAvatar extends StatelessWidget {
 
     if (selected) {
       avatar = ClipRRect(
-        borderRadius: (effectiveBorderRadius ?? BorderRadius.zero) +
-            BorderRadius.circular(selectionThickness),
+        borderRadius: (effectiveBorderRadius ?? BorderRadius.zero) + BorderRadius.circular(selectionThickness),
         child: Container(
           constraints: constraints ?? avatarTheme?.constraints,
           color: selectionColor ?? colorTheme.accentPrimary,
@@ -172,7 +172,8 @@ class StreamUserAvatar extends StatelessWidget {
                   color: colorTheme.barsBg,
                   child: Container(
                     margin: const EdgeInsets.all(2),
-                    constraints: onlineIndicatorConstraints ??
+                    constraints:
+                        onlineIndicatorConstraints ??
                         const BoxConstraints.tightFor(
                           width: 8,
                           height: 8,

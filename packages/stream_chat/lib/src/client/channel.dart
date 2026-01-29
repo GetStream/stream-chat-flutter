@@ -75,25 +75,25 @@ class Channel {
     String? name,
     String? image,
     Map<String, Object?>? extraData,
-  })  : _cid = _id != null ? '$_type:$_id' : null,
-        _extraData = {
-          ...?extraData,
-          if (name != null) 'name': name,
-          if (image != null) 'image': image,
-        } {
+  }) : _cid = _id != null ? '$_type:$_id' : null,
+       _extraData = {
+         ...?extraData,
+         if (name != null) 'name': name,
+         if (image != null) 'image': image,
+       } {
     _client.logger.info('New Channel instance created, not yet initialized');
   }
 
   /// Create a channel client instance from a [ChannelState] object.
   Channel.fromState(this._client, ChannelState channelState)
-      : assert(
-          channelState.channel != null,
-          'No channel found inside channel state',
-        ),
-        _id = channelState.channel!.id,
-        _type = channelState.channel!.type,
-        _cid = channelState.channel!.cid,
-        _extraData = channelState.channel!.extraData {
+    : assert(
+        channelState.channel != null,
+        'No channel found inside channel state',
+      ),
+      _id = channelState.channel!.id,
+      _type = channelState.channel!.type,
+      _cid = channelState.channel!.cid,
+      _extraData = channelState.channel!.extraData {
     _initState(channelState); // Initialize the state immediately.
   }
 
@@ -144,16 +144,11 @@ class Channel {
   }
 
   /// Returns true if the channel is muted.
-  bool get isMuted =>
-      _client.state.currentUser?.channelMutes
-          .any((element) => element.channel.cid == cid) ==
-      true;
+  bool get isMuted => _client.state.currentUser?.channelMutes.any((element) => element.channel.cid == cid) == true;
 
   /// Returns true if the channel is muted, as a stream.
   Stream<bool> get isMutedStream => _client.state.currentUserStream
-      .map((event) =>
-          event?.channelMutes.any((element) => element.channel.cid == cid) ==
-          true)
+      .map((event) => event?.channelMutes.any((element) => element.channel.cid == cid) == true)
       .distinct();
 
   /// True if the channel is a group.
@@ -456,15 +451,12 @@ class Channel {
   }
 
   /// List of user permissions on this channel
-  List<ChannelCapability> get ownCapabilities =>
-      state?._channelState.channel?.ownCapabilities ?? [];
+  List<ChannelCapability> get ownCapabilities => state?._channelState.channel?.ownCapabilities ?? [];
 
   /// List of user permissions on this channel
   Stream<List<ChannelCapability>> get ownCapabilitiesStream {
     _checkInitialized();
-    return state!.channelStateStream
-        .map((cs) => cs.channel?.ownCapabilities ?? [])
-        .distinct();
+    return state!.channelStateStream.map((cs) => cs.channel?.ownCapabilities ?? []).distinct();
   }
 
   /// Channel extra data as a stream.
@@ -593,80 +585,85 @@ class Channel {
       }
     }
 
-    return Future.wait(attachments.map((it) {
-      client.logger.info('Uploading ${it.id} attachment...');
+    return Future.wait(
+      attachments.map((it) {
+        client.logger.info('Uploading ${it.id} attachment...');
 
-      final throttledUpdateAttachment = updateAttachment.throttled(
-        const Duration(milliseconds: 500),
-      );
-
-      void onSendProgress(int sent, int total) {
-        throttledUpdateAttachment([
-          it.copyWith(
-            uploadState: UploadState.inProgress(uploaded: sent, total: total),
-          ),
-        ]);
-      }
-
-      final isImage = it.type == AttachmentType.image;
-      final cancelToken = CancelToken();
-      Future<SendAttachmentResponse> future;
-      if (isImage) {
-        future = sendImage(
-          it.file!,
-          onSendProgress: onSendProgress,
-          cancelToken: cancelToken,
-          extraData: it.extraData,
+        final throttledUpdateAttachment = updateAttachment.throttled(
+          const Duration(milliseconds: 500),
         );
-      } else {
-        future = sendFile(
-          it.file!,
-          onSendProgress: onSendProgress,
-          cancelToken: cancelToken,
-          extraData: it.extraData,
-        );
-      }
-      _cancelableAttachmentUploadRequest[it.id] = cancelToken;
-      return future.then((response) {
-        client.logger.info('Attachment ${it.id} uploaded successfully...');
 
-        // If the response is SendFileResponse, then we might also be getting
-        // thumbUrl in case of video. So we need to update the attachment with
-        // both the assetUrl and thumbUrl.
-        if (response is SendFileResponse) {
-          updateAttachment(
+        void onSendProgress(int sent, int total) {
+          throttledUpdateAttachment([
             it.copyWith(
-              assetUrl: response.file,
-              thumbUrl: response.thumbUrl,
-              uploadState: const UploadState.success(),
+              uploadState: UploadState.inProgress(uploaded: sent, total: total),
             ),
+          ]);
+        }
+
+        final isImage = it.type == AttachmentType.image;
+        final cancelToken = CancelToken();
+        Future<SendAttachmentResponse> future;
+        if (isImage) {
+          future = sendImage(
+            it.file!,
+            onSendProgress: onSendProgress,
+            cancelToken: cancelToken,
+            extraData: it.extraData,
           );
         } else {
-          updateAttachment(
-            it.copyWith(
-              imageUrl: response.file,
-              uploadState: const UploadState.success(),
-            ),
+          future = sendFile(
+            it.file!,
+            onSendProgress: onSendProgress,
+            cancelToken: cancelToken,
+            extraData: it.extraData,
           );
         }
-      }).catchError((e, stk) {
-        if (e is StreamChatNetworkError && e.isRequestCancelledError) {
-          client.logger.info('Attachment ${it.id} upload cancelled');
+        _cancelableAttachmentUploadRequest[it.id] = cancelToken;
+        return future
+            .then((response) {
+              client.logger.info('Attachment ${it.id} uploaded successfully...');
 
-          // remove attachment from message if cancelled.
-          updateAttachment(it, remove: true);
-          return;
-        }
+              // If the response is SendFileResponse, then we might also be getting
+              // thumbUrl in case of video. So we need to update the attachment with
+              // both the assetUrl and thumbUrl.
+              if (response is SendFileResponse) {
+                updateAttachment(
+                  it.copyWith(
+                    assetUrl: response.file,
+                    thumbUrl: response.thumbUrl,
+                    uploadState: const UploadState.success(),
+                  ),
+                );
+              } else {
+                updateAttachment(
+                  it.copyWith(
+                    imageUrl: response.file,
+                    uploadState: const UploadState.success(),
+                  ),
+                );
+              }
+            })
+            .catchError((e, stk) {
+              if (e is StreamChatNetworkError && e.isRequestCancelledError) {
+                client.logger.info('Attachment ${it.id} upload cancelled');
 
-        client.logger.severe('error uploading the attachment', e, stk);
-        updateAttachment(
-          it.copyWith(uploadState: UploadState.failed(error: e.toString())),
-        );
-      }).whenComplete(() {
-        throttledUpdateAttachment.cancel();
-        _cancelableAttachmentUploadRequest.remove(it.id);
-      });
-    })).whenComplete(() {
+                // remove attachment from message if cancelled.
+                updateAttachment(it, remove: true);
+                return;
+              }
+
+              client.logger.severe('error uploading the attachment', e, stk);
+              updateAttachment(
+                it.copyWith(uploadState: UploadState.failed(error: e.toString())),
+              );
+            })
+            .whenComplete(() {
+              throttledUpdateAttachment.cancel();
+              _cancelableAttachmentUploadRequest.remove(it.id);
+            });
+      }),
+    ).whenComplete(() {
       if (message!.attachments.every((it) => it.uploadState.isSuccess)) {
         _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
       }
@@ -693,9 +690,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter
-        .remove(message.id)
-        ?.completeError(const StreamChatError('Message cancelled'));
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
 
     final quotedMessage = state!.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
@@ -719,8 +714,7 @@ class Channel {
     try {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
         final attachmentsUploadCompleter = Completer<Message>();
-        _messageAttachmentsUploadCompleter[message.id] =
-            attachmentsUploadCompleter;
+        _messageAttachmentsUploadCompleter[message.id] = attachmentsUploadCompleter;
 
         _uploadAttachments(
           message.id,
@@ -752,7 +746,9 @@ class Channel {
         ),
       );
 
-      final sentMessage = response.message.syncWith(message).copyWith(
+      final sentMessage = response.message
+          .syncWith(message)
+          .copyWith(
             // Update the message state to sent.
             state: MessageState.sent,
           );
@@ -794,9 +790,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter
-        .remove(message.id)
-        ?.completeError(const StreamChatError('Message cancelled'));
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -815,8 +809,7 @@ class Channel {
     try {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
         final attachmentsUploadCompleter = Completer<Message>();
-        _messageAttachmentsUploadCompleter[message.id] =
-            attachmentsUploadCompleter;
+        _messageAttachmentsUploadCompleter[message.id] = attachmentsUploadCompleter;
 
         _uploadAttachments(
           message.id,
@@ -837,7 +830,9 @@ class Channel {
         ),
       );
 
-      final updateMessage = response.message.syncWith(message).copyWith(
+      final updateMessage = response.message
+          .syncWith(message)
+          .copyWith(
             // Update the message state to updated.
             state: MessageState.updated,
             ownReactions: message.ownReactions,
@@ -880,9 +875,7 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter
-        .remove(message.id)
-        ?.completeError(const StreamChatError('Message cancelled'));
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(const StreamChatError('Message cancelled'));
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -904,7 +897,9 @@ class Channel {
         ),
       );
 
-      final updatedMessage = response.message.syncWith(message).copyWith(
+      final updatedMessage = response.message
+          .syncWith(message)
+          .copyWith(
             // Update the message state to updated.
             state: MessageState.updated,
             ownReactions: message.ownReactions,
@@ -1128,9 +1123,7 @@ class Channel {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,
   }) {
     assert(() {
-      if (timeoutOrExpirationDate is! DateTime &&
-          timeoutOrExpirationDate != null &&
-          timeoutOrExpirationDate is! num) {
+      if (timeoutOrExpirationDate is! DateTime && timeoutOrExpirationDate != null && timeoutOrExpirationDate is! num) {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;
@@ -1154,13 +1147,12 @@ class Channel {
   }
 
   /// Unpins provided message.
-  Future<UpdateMessageResponse> unpinMessage(Message message) =>
-      partialUpdateMessage(
-        message,
-        set: {
-          'pinned': false,
-        },
-      );
+  Future<UpdateMessageResponse> unpinMessage(Message message) => partialUpdateMessage(
+    message,
+    set: {
+      'pinned': false,
+    },
+  );
 
   /// Creates or updates a new [draft] for this channel.
   Future<CreateDraftResponse> createDraft(
@@ -1605,8 +1597,7 @@ class Channel {
   /// ```dart
   /// channel.updateName('Updated channel name');
   /// ```
-  Future<PartialUpdateChannelResponse> updateName(String name) =>
-      updatePartial(set: {'name': name});
+  Future<PartialUpdateChannelResponse> updateName(String name) => updatePartial(set: {'name': name});
 
   /// Update the channel's [image].
   ///
@@ -1623,8 +1614,7 @@ class Channel {
   /// ```dart
   /// channel.updateImage('https://getstream.io/new-image');
   /// ```
-  Future<PartialUpdateChannelResponse> updateImage(String image) =>
-      updatePartial(set: {'image': image});
+  Future<PartialUpdateChannelResponse> updateImage(String image) => updatePartial(set: {'image': image});
 
   /// Update the channel custom data. This replaces all of the channel data
   /// with the given [channelData].
@@ -1929,11 +1919,10 @@ class Channel {
   Future<QueryReactionsResponse> getReactions(
     String messageId, {
     PaginationParams? pagination,
-  }) =>
-      _client.getReactions(
-        messageId,
-        pagination: pagination,
-      );
+  }) => _client.getReactions(
+    messageId,
+    pagination: pagination,
+  );
 
   /// Retrieves a list of messages by given [messageIDs].
   Future<GetMessagesByIdResponse> getMessagesById(
@@ -1950,11 +1939,10 @@ class Channel {
   Future<TranslateMessageResponse> translateMessage(
     String messageId,
     String language,
-  ) =>
-      _client.translateMessage(
-        messageId,
-        language,
-      );
+  ) => _client.translateMessage(
+    messageId,
+    language,
+  );
 
   /// Creates a new channel.
   Future<ChannelState> create() => query(state: false);
@@ -2061,15 +2049,14 @@ class Channel {
     Filter? filter,
     SortOrder<Member>? sort,
     PaginationParams? pagination,
-  }) =>
-      _client.queryMembers(
-        type,
-        channelId: id,
-        filter: filter,
-        members: state?.members,
-        sort: sort,
-        pagination: pagination,
-      );
+  }) => _client.queryMembers(
+    type,
+    channelId: id,
+    filter: filter,
+    members: state?.members,
+    sort: sort,
+    pagination: pagination,
+  );
 
   /// Query channel banned users.
   Future<QueryBannedUsersResponse> queryBannedUsers({
@@ -2237,15 +2224,14 @@ class Channel {
     String? eventType2,
     String? eventType3,
     String? eventType4,
-  ]) =>
-      _client
-          .on(
-            eventType,
-            eventType2,
-            eventType3,
-            eventType4,
-          )
-          .where((e) => e.cid == cid);
+  ]) => _client
+      .on(
+        eventType,
+        eventType2,
+        eventType3,
+        eventType4,
+      )
+      .where((e) => e.cid == cid);
 
   late final _keyStrokeHandler = KeyStrokeHandler(
     onStartTyping: startTyping,
@@ -2277,10 +2263,12 @@ class Channel {
     if (!_canSendTypingEvents) return;
 
     client.logger.info('start typing');
-    await sendEvent(Event(
-      type: EventType.typingStart,
-      parentId: parentId,
-    ));
+    await sendEvent(
+      Event(
+        type: EventType.typingStart,
+        parentId: parentId,
+      ),
+    );
   }
 
   /// Sends the [EventType.typingStop] event.
@@ -2288,10 +2276,12 @@ class Channel {
     if (!_canSendTypingEvents) return;
 
     client.logger.info('stop typing');
-    await sendEvent(Event(
-      type: EventType.typingStop,
-      parentId: parentId,
-    ));
+    await sendEvent(
+      Event(
+        type: EventType.typingStop,
+        parentId: parentId,
+      ),
+    );
   }
 
   /// Call this method to dispose the channel client.
@@ -2411,10 +2401,13 @@ class ChannelClientState {
     _listenChannelPushPreferenceUpdated();
 
     final persistenceClient = _client.chatPersistenceClient;
-    persistenceClient?.getChannelThreads(_channel.cid!).then((threads) {
-      // Load all the threads for the channel from the offline storage.
-      if (threads.isNotEmpty) _threads = threads;
-    }).then((_) => retryFailedMessages());
+    persistenceClient
+        ?.getChannelThreads(_channel.cid!)
+        .then((threads) {
+          // Load all the threads for the channel from the offline storage.
+          if (threads.isNotEmpty) _threads = threads;
+        })
+        .then((_) => retryFailedMessages());
   }
 
   final Channel _channel;
@@ -2423,35 +2416,34 @@ class ChannelClientState {
 
   void _checkExpiredAttachmentMessages(ChannelState channelState) async {
     final expiredAttachmentMessagesId = channelState.messages
-        ?.where((m) =>
-            !_updatedMessagesIds.contains(m.id) &&
-            m.attachments.isNotEmpty &&
-            m.attachments.any((e) {
-              final url = e.imageUrl ?? e.assetUrl;
-              if (url == null || !url.contains('')) {
-                return false;
-              }
-              try {
-                final uri = Uri.parse(url);
-                if (!uri.host.endsWith('stream-io-cdn.com') ||
-                    uri.queryParameters['Expires'] == null) {
+        ?.where(
+          (m) =>
+              !_updatedMessagesIds.contains(m.id) &&
+              m.attachments.isNotEmpty &&
+              m.attachments.any((e) {
+                final url = e.imageUrl ?? e.assetUrl;
+                if (url == null || !url.contains('')) {
                   return false;
                 }
-                final secondsFromEpoch =
-                    int.parse(uri.queryParameters['Expires']!);
-                final expiration = DateTime.fromMillisecondsSinceEpoch(
-                  secondsFromEpoch * 1000,
-                );
-                return expiration.isBefore(DateTime.now());
-              } catch (_) {
-                return false;
-              }
-            }))
+                try {
+                  final uri = Uri.parse(url);
+                  if (!uri.host.endsWith('stream-io-cdn.com') || uri.queryParameters['Expires'] == null) {
+                    return false;
+                  }
+                  final secondsFromEpoch = int.parse(uri.queryParameters['Expires']!);
+                  final expiration = DateTime.fromMillisecondsSinceEpoch(
+                    secondsFromEpoch * 1000,
+                  );
+                  return expiration.isBefore(DateTime.now());
+                } catch (_) {
+                  return false;
+                }
+              }),
+        )
         .map((e) => e.id)
         .toList();
 
-    if (expiredAttachmentMessagesId != null &&
-        expiredAttachmentMessagesId.isNotEmpty) {
+    if (expiredAttachmentMessagesId != null && expiredAttachmentMessagesId.isNotEmpty) {
       await _channel.initialized;
       _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
       _channel.getMessagesById(expiredAttachmentMessagesId);
@@ -2459,141 +2451,156 @@ class ChannelClientState {
   }
 
   void _listenMemberAdded() {
-    _subscriptions.add(_channel.on(EventType.memberAdded).listen((Event e) {
-      final member = e.member!;
-      final existingMembers = channelState.members ?? [];
+    _subscriptions.add(
+      _channel.on(EventType.memberAdded).listen((Event e) {
+        final member = e.member!;
+        final existingMembers = channelState.members ?? [];
 
-      updateChannelState(
-        channelState.copyWith(
-          members: [...existingMembers, member],
-        ),
-      );
-    }));
+        updateChannelState(
+          channelState.copyWith(
+            members: [...existingMembers, member],
+          ),
+        );
+      }),
+    );
   }
 
   void _listenMemberRemoved() {
-    _subscriptions.add(_channel.on(EventType.memberRemoved).listen((Event e) {
-      final user = e.user!;
-      final existingRead = channelState.read ?? [];
-      final existingMembers = channelState.members ?? [];
+    _subscriptions.add(
+      _channel.on(EventType.memberRemoved).listen((Event e) {
+        final user = e.user!;
+        final existingRead = channelState.read ?? [];
+        final existingMembers = channelState.members ?? [];
 
-      updateChannelState(
-        channelState.copyWith(
-          read: [...existingRead.where((r) => r.user.id != user.id)],
-          members: [...existingMembers.where((m) => m.userId != user.id)],
-        ),
-      );
-    }));
+        updateChannelState(
+          channelState.copyWith(
+            read: [...existingRead.where((r) => r.user.id != user.id)],
+            members: [...existingMembers.where((m) => m.userId != user.id)],
+          ),
+        );
+      }),
+    );
   }
 
   void _listenMemberUpdated() {
     _subscriptions
       // Listen to events containing member users
-      ..add(_channel.on().listen(
-        (event) {
-          final user = event.user;
-          if (user == null) return;
+      ..add(
+        _channel.on().listen(
+          (event) {
+            final user = event.user;
+            if (user == null) return;
 
-          final existingMembers = [...?channelState.members];
-          final existingMembership = channelState.membership;
+            final existingMembers = [...?channelState.members];
+            final existingMembership = channelState.membership;
 
-          // Return if the user is not a existing member of the channel.
-          if (!existingMembers.any((m) => m.userId == user.id)) return;
+            // Return if the user is not a existing member of the channel.
+            if (!existingMembers.any((m) => m.userId == user.id)) return;
 
-          Member? maybeUpdateMemberUser(Member? existingMember) {
-            if (existingMember == null) return null;
-            if (existingMember.userId == user.id) {
-              return existingMember.copyWith(user: user);
+            Member? maybeUpdateMemberUser(Member? existingMember) {
+              if (existingMember == null) return null;
+              if (existingMember.userId == user.id) {
+                return existingMember.copyWith(user: user);
+              }
+              return existingMember;
             }
-            return existingMember;
-          }
 
-          updateChannelState(
-            channelState.copyWith(
-              membership: maybeUpdateMemberUser(existingMembership),
-              members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
-            ),
-          );
-        },
-      ))
-
+            updateChannelState(
+              channelState.copyWith(
+                membership: maybeUpdateMemberUser(existingMembership),
+                members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
+              ),
+            );
+          },
+        ),
+      )
       // Listen to member updated events.
-      ..add(_channel.on(EventType.memberUpdated).listen(
-        (Event e) {
-          final member = e.member!;
-          final existingMembers = channelState.members ?? [];
-          final existingMembership = channelState.membership;
+      ..add(
+        _channel.on(EventType.memberUpdated).listen(
+          (Event e) {
+            final member = e.member!;
+            final existingMembers = channelState.members ?? [];
+            final existingMembership = channelState.membership;
 
-          Member? maybeUpdateMember(Member? existingMember) {
-            if (existingMember == null) return null;
-            if (existingMember.userId == member.userId) return member;
-            return existingMember;
-          }
+            Member? maybeUpdateMember(Member? existingMember) {
+              if (existingMember == null) return null;
+              if (existingMember.userId == member.userId) return member;
+              return existingMember;
+            }
 
-          updateChannelState(
-            channelState.copyWith(
-              membership: maybeUpdateMember(existingMembership),
-              members: [...existingMembers.map(maybeUpdateMember).nonNulls],
-            ),
-          );
-        },
-      ));
+            updateChannelState(
+              channelState.copyWith(
+                membership: maybeUpdateMember(existingMembership),
+                members: [...existingMembers.map(maybeUpdateMember).nonNulls],
+              ),
+            );
+          },
+        ),
+      );
   }
 
   void _listenChannelUpdated() {
-    _subscriptions.add(_channel.on(EventType.channelUpdated).listen((Event e) {
-      final channel = e.channel!;
-      updateChannelState(channelState.copyWith(
-        channel: channelState.channel?.merge(channel),
-        members: channel.members,
-      ));
-    }));
+    _subscriptions.add(
+      _channel.on(EventType.channelUpdated).listen((Event e) {
+        final channel = e.channel!;
+        updateChannelState(
+          channelState.copyWith(
+            channel: channelState.channel?.merge(channel),
+            members: channel.members,
+          ),
+        );
+      }),
+    );
   }
 
   void _listenChannelMessageCount() {
-    _subscriptions.add(_channel.on().listen(
-      (Event e) {
-        final messageCount = e.channelMessageCount;
-        if (messageCount == null) return;
+    _subscriptions.add(
+      _channel.on().listen(
+        (Event e) {
+          final messageCount = e.channelMessageCount;
+          if (messageCount == null) return;
 
-        updateChannelState(
-          channelState.copyWith(
-            channel: channelState.channel?.copyWith(
-              messageCount: messageCount,
+          updateChannelState(
+            channelState.copyWith(
+              channel: channelState.channel?.copyWith(
+                messageCount: messageCount,
+              ),
             ),
-          ),
-        );
-      },
-    ));
+          );
+        },
+      ),
+    );
   }
 
   void _listenChannelTruncated() {
-    _subscriptions.add(_channel
-        .on(EventType.channelTruncated, EventType.notificationChannelTruncated)
-        .listen((event) async {
-      final channel = event.channel!;
-      await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
-      truncate();
-      if (event.message != null) {
-        updateMessage(event.message!);
-      }
-    }));
+    _subscriptions.add(
+      _channel.on(EventType.channelTruncated, EventType.notificationChannelTruncated).listen((event) async {
+        final channel = event.channel!;
+        await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
+        truncate();
+        if (event.message != null) {
+          updateMessage(event.message!);
+        }
+      }),
+    );
   }
 
   void _listenMemberBanned() {
-    _subscriptions.add(_channel
-        .on(EventType.userBanned)
-        .where((it) => it.cid != null) // filters channel ban from app ban
-        .listen(
-      (event) async {
-        final user = event.user!;
-        final member = await _channel
-            .queryMembers(filter: Filter.equal('id', user.id))
-            .then((it) => it.members.first);
+    _subscriptions.add(
+      _channel
+          .on(EventType.userBanned)
+          .where((it) => it.cid != null) // filters channel ban from app ban
+          .listen(
+            (event) async {
+              final user = event.user!;
+              final member = await _channel
+                  .queryMembers(filter: Filter.equal('id', user.id))
+                  .then((it) => it.members.first);
 
-        _updateMember(member);
-      },
-    ));
+              _updateMember(member);
+            },
+          ),
+    );
   }
 
   void _listenUserStartWatching() {
@@ -2602,12 +2609,14 @@ class ChannelClientState {
         final watcher = event.user;
         if (watcher != null) {
           final existingWatchers = channelState.watchers;
-          updateChannelState(channelState.copyWith(
-            watchers: [
-              watcher,
-              ...?existingWatchers?.where((user) => user.id != watcher.id),
-            ],
-          ));
+          updateChannelState(
+            channelState.copyWith(
+              watchers: [
+                watcher,
+                ...?existingWatchers?.where((user) => user.id != watcher.id),
+              ],
+            ),
+          );
         }
       }),
     );
@@ -2619,30 +2628,32 @@ class ChannelClientState {
         final watcher = event.user;
         if (watcher != null) {
           final existingWatchers = channelState.watchers;
-          updateChannelState(channelState.copyWith(
-            watchers: [
-              ...?existingWatchers?.where((user) => user.id != watcher.id)
-            ],
-          ));
+          updateChannelState(
+            channelState.copyWith(
+              watchers: [...?existingWatchers?.where((user) => user.id != watcher.id)],
+            ),
+          );
         }
       }),
     );
   }
 
   void _listenMemberUnbanned() {
-    _subscriptions.add(_channel
-        .on(EventType.userUnbanned)
-        .where((it) => it.cid != null) // filters channel ban from app ban
-        .listen(
-      (event) async {
-        final user = event.user!;
-        final member = await _channel
-            .queryMembers(filter: Filter.equal('id', user.id))
-            .then((it) => it.members.first);
+    _subscriptions.add(
+      _channel
+          .on(EventType.userUnbanned)
+          .where((it) => it.cid != null) // filters channel ban from app ban
+          .listen(
+            (event) async {
+              final user = event.user!;
+              final member = await _channel
+                  .queryMembers(filter: Filter.equal('id', user.id))
+                  .then((it) => it.members.first);
 
-        _updateMember(member);
-      },
-    ));
+              _updateMember(member);
+            },
+          ),
+    );
   }
 
   void _updateMember(Member member) {
@@ -2710,184 +2721,194 @@ class ChannelClientState {
   }
 
   void _listenPollUpdated() {
-    _subscriptions.add(_channel.on(EventType.pollUpdated).listen((event) {
-      final eventPoll = event.poll;
-      if (eventPoll == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.pollUpdated).listen((event) {
+        final eventPoll = event.poll;
+        if (eventPoll == null) return;
 
-      final pollMessage = _findPollMessage(eventPoll.id);
-      if (pollMessage == null) return;
+        final pollMessage = _findPollMessage(eventPoll.id);
+        if (pollMessage == null) return;
 
-      final oldPoll = pollMessage.poll;
+        final oldPoll = pollMessage.poll;
 
-      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-      final ownVotesAndAnswers =
-          oldPoll?.ownVotesAndAnswers ?? eventPoll.ownVotesAndAnswers;
+        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
+        final ownVotesAndAnswers = oldPoll?.ownVotesAndAnswers ?? eventPoll.ownVotesAndAnswers;
 
-      final poll = eventPoll.copyWith(
-        latestAnswers: latestAnswers,
-        ownVotesAndAnswers: ownVotesAndAnswers,
-      );
+        final poll = eventPoll.copyWith(
+          latestAnswers: latestAnswers,
+          ownVotesAndAnswers: ownVotesAndAnswers,
+        );
 
-      final message = pollMessage.copyWith(poll: poll);
-      updateMessage(message);
-    }));
+        final message = pollMessage.copyWith(poll: poll);
+        updateMessage(message);
+      }),
+    );
   }
 
   void _listenPollClosed() {
-    _subscriptions.add(_channel.on(EventType.pollClosed).listen((event) {
-      final eventPoll = event.poll;
-      if (eventPoll == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.pollClosed).listen((event) {
+        final eventPoll = event.poll;
+        if (eventPoll == null) return;
 
-      final pollMessage = _findPollMessage(eventPoll.id);
-      if (pollMessage == null) return;
+        final pollMessage = _findPollMessage(eventPoll.id);
+        if (pollMessage == null) return;
 
-      final oldPoll = pollMessage.poll;
-      final poll = oldPoll?.copyWith(isClosed: true) ?? eventPoll;
+        final oldPoll = pollMessage.poll;
+        final poll = oldPoll?.copyWith(isClosed: true) ?? eventPoll;
 
-      final message = pollMessage.copyWith(poll: poll);
-      updateMessage(message);
-    }));
+        final message = pollMessage.copyWith(poll: poll);
+        updateMessage(message);
+      }),
+    );
   }
 
   void _listenPollAnswerCasted() {
-    _subscriptions.add(_channel.on(EventType.pollAnswerCasted).listen((event) {
-      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-      if (eventPoll == null || eventPollVote == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.pollAnswerCasted).listen((event) {
+        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+        if (eventPoll == null || eventPollVote == null) return;
 
-      final pollMessage = _findPollMessage(eventPoll.id);
-      if (pollMessage == null) return;
+        final pollMessage = _findPollMessage(eventPoll.id);
+        if (pollMessage == null) return;
 
-      final oldPoll = pollMessage.poll;
+        final oldPoll = pollMessage.poll;
 
-      final latestAnswers = <String, PollVote>{
-        for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
-        eventPollVote.id!: eventPollVote,
-      };
-
-      final currentUserId = _client.state.currentUser?.id;
-      final ownVotesAndAnswers = <String, PollVote>{
-        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-        if (eventPollVote.userId == currentUserId)
+        final latestAnswers = <String, PollVote>{
+          for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
           eventPollVote.id!: eventPollVote,
-      };
+        };
 
-      final poll = eventPoll.copyWith(
-        latestAnswers: [...latestAnswers.values],
-        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-      );
+        final currentUserId = _client.state.currentUser?.id;
+        final ownVotesAndAnswers = <String, PollVote>{
+          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
+        };
 
-      final message = pollMessage.copyWith(poll: poll);
-      updateMessage(message);
-    }));
+        final poll = eventPoll.copyWith(
+          latestAnswers: [...latestAnswers.values],
+          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+        );
+
+        final message = pollMessage.copyWith(poll: poll);
+        updateMessage(message);
+      }),
+    );
   }
 
   void _listenPollVoteCasted() {
-    _subscriptions.add(_channel.on(EventType.pollVoteCasted).listen((event) {
-      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-      if (eventPoll == null || eventPollVote == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.pollVoteCasted).listen((event) {
+        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+        if (eventPoll == null || eventPollVote == null) return;
 
-      final pollMessage = _findPollMessage(eventPoll.id);
-      if (pollMessage == null) return;
+        final pollMessage = _findPollMessage(eventPoll.id);
+        if (pollMessage == null) return;
 
-      final oldPoll = pollMessage.poll;
+        final oldPoll = pollMessage.poll;
 
-      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-      final currentUserId = _client.state.currentUser?.id;
-      final ownVotesAndAnswers = <String, PollVote>{
-        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-        if (eventPollVote.userId == currentUserId)
-          eventPollVote.id!: eventPollVote,
-      };
+        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
+        final currentUserId = _client.state.currentUser?.id;
+        final ownVotesAndAnswers = <String, PollVote>{
+          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
+        };
 
-      final poll = eventPoll.copyWith(
-        latestAnswers: latestAnswers,
-        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-      );
+        final poll = eventPoll.copyWith(
+          latestAnswers: latestAnswers,
+          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+        );
 
-      final message = pollMessage.copyWith(poll: poll);
-      updateMessage(message);
-    }));
+        final message = pollMessage.copyWith(poll: poll);
+        updateMessage(message);
+      }),
+    );
   }
 
   void _listenPollAnswerRemoved() {
-    _subscriptions.add(_channel.on(EventType.pollAnswerRemoved).listen((event) {
-      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-      if (eventPoll == null || eventPollVote == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.pollAnswerRemoved).listen((event) {
+        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+        if (eventPoll == null || eventPollVote == null) return;
 
-      final pollMessage = _findPollMessage(eventPoll.id);
-      if (pollMessage == null) return;
+        final pollMessage = _findPollMessage(eventPoll.id);
+        if (pollMessage == null) return;
 
-      final oldPoll = pollMessage.poll;
+        final oldPoll = pollMessage.poll;
 
-      final latestAnswers = <String, PollVote>{
-        for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
-      }..remove(eventPollVote.id);
+        final latestAnswers = <String, PollVote>{
+          for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
+        }..remove(eventPollVote.id);
 
-      final ownVotesAndAnswers = <String, PollVote>{
-        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-      }..remove(eventPollVote.id);
+        final ownVotesAndAnswers = <String, PollVote>{
+          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+        }..remove(eventPollVote.id);
 
-      final poll = eventPoll.copyWith(
-        latestAnswers: [...latestAnswers.values],
-        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-      );
+        final poll = eventPoll.copyWith(
+          latestAnswers: [...latestAnswers.values],
+          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+        );
 
-      final message = pollMessage.copyWith(poll: poll);
-      updateMessage(message);
-    }));
+        final message = pollMessage.copyWith(poll: poll);
+        updateMessage(message);
+      }),
+    );
   }
 
   void _listenPollVoteRemoved() {
-    _subscriptions.add(_channel.on(EventType.pollVoteRemoved).listen((event) {
-      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-      if (eventPoll == null || eventPollVote == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.pollVoteRemoved).listen((event) {
+        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+        if (eventPoll == null || eventPollVote == null) return;
 
-      final pollMessage = _findPollMessage(eventPoll.id);
-      if (pollMessage == null) return;
+        final pollMessage = _findPollMessage(eventPoll.id);
+        if (pollMessage == null) return;
 
-      final oldPoll = pollMessage.poll;
+        final oldPoll = pollMessage.poll;
 
-      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-      final ownVotesAndAnswers = <String, PollVote>{
-        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-      }..remove(eventPollVote.id);
+        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
+        final ownVotesAndAnswers = <String, PollVote>{
+          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+        }..remove(eventPollVote.id);
 
-      final poll = eventPoll.copyWith(
-        latestAnswers: latestAnswers,
-        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-      );
+        final poll = eventPoll.copyWith(
+          latestAnswers: latestAnswers,
+          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+        );
 
-      final message = pollMessage.copyWith(poll: poll);
-      updateMessage(message);
-    }));
+        final message = pollMessage.copyWith(poll: poll);
+        updateMessage(message);
+      }),
+    );
   }
 
   void _listenPollVoteChanged() {
-    _subscriptions.add(_channel.on(EventType.pollVoteChanged).listen((event) {
-      final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-      if (eventPoll == null || eventPollVote == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.pollVoteChanged).listen((event) {
+        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
+        if (eventPoll == null || eventPollVote == null) return;
 
-      final pollMessage = _findPollMessage(eventPoll.id);
-      if (pollMessage == null) return;
+        final pollMessage = _findPollMessage(eventPoll.id);
+        if (pollMessage == null) return;
 
-      final oldPoll = pollMessage.poll;
+        final oldPoll = pollMessage.poll;
 
-      final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-      final currentUserId = _client.state.currentUser?.id;
-      final ownVotesAndAnswers = <String, PollVote>{
-        for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-        if (eventPollVote.userId == currentUserId)
-          eventPollVote.id!: eventPollVote,
-      };
+        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
+        final currentUserId = _client.state.currentUser?.id;
+        final ownVotesAndAnswers = <String, PollVote>{
+          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
+          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
+        };
 
-      final poll = eventPoll.copyWith(
-        latestAnswers: latestAnswers,
-        ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-      );
+        final poll = eventPoll.copyWith(
+          latestAnswers: latestAnswers,
+          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
+        );
 
-      final message = pollMessage.copyWith(poll: poll);
-      updateMessage(message);
-    }));
+        final message = pollMessage.copyWith(poll: poll);
+        updateMessage(message);
+      }),
+    );
   }
 
   void _listenDraftUpdated() {
@@ -3046,8 +3067,9 @@ class ChannelClientState {
             final currentUserId = _channel.client.state.currentUser?.id;
 
             final currentMessage = switch (currentUserId) {
-              final userId? when userId == eventReaction.userId =>
-                message.deleteMyReaction(reactionType: eventReaction.type),
+              final userId? when userId == eventReaction.userId => message.deleteMyReaction(
+                reactionType: eventReaction.type,
+              ),
               _ => message,
             };
 
@@ -3063,31 +3085,32 @@ class ChannelClientState {
   }
 
   void _listenReactionNew() {
-    _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
-      final (eventReaction, eventMessage) = (event.reaction, event.message);
-      if (eventReaction == null || eventMessage == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.reactionNew).listen((event) {
+        final (eventReaction, eventMessage) = (event.reaction, event.message);
+        if (eventReaction == null || eventMessage == null) return;
 
-      final messageId = eventMessage.id;
-      final parentId = eventMessage.parentId;
+        final messageId = eventMessage.id;
+        final parentId = eventMessage.parentId;
 
-      for (final message in [...messages, ...?threads[parentId]]) {
-        if (message.id == messageId) {
-          final currentUserId = _channel.client.state.currentUser?.id;
+        for (final message in [...messages, ...?threads[parentId]]) {
+          if (message.id == messageId) {
+            final currentUserId = _channel.client.state.currentUser?.id;
 
-          final currentMessage = switch (currentUserId) {
-            final userId? when userId == eventReaction.userId =>
-              message.addMyReaction(eventReaction),
-            _ => message,
-          };
+            final currentMessage = switch (currentUserId) {
+              final userId? when userId == eventReaction.userId => message.addMyReaction(eventReaction),
+              _ => message,
+            };
 
-          return updateMessage(
-            eventMessage.copyWith(
-              ownReactions: currentMessage.ownReactions,
-            ),
-          );
+            return updateMessage(
+              eventMessage.copyWith(
+                ownReactions: currentMessage.ownReactions,
+              ),
+            );
+          }
         }
-      }
-    }));
+      }),
+    );
   }
 
   void _listenReactionUpdated() {
@@ -3122,39 +3145,45 @@ class ChannelClientState {
   }
 
   void _listenMessageUpdated() {
-    _subscriptions.add(_channel.on(EventType.messageUpdated).listen((event) {
-      final message = event.message;
-      if (message == null) return;
+    _subscriptions.add(
+      _channel.on(EventType.messageUpdated).listen((event) {
+        final message = event.message;
+        if (message == null) return;
 
-      return updateMessage(message);
-    }));
+        return updateMessage(message);
+      }),
+    );
   }
 
   void _listenMessageDeleted() {
-    _subscriptions.add(_channel.on(EventType.messageDeleted).listen((event) {
-      final hardDelete = event.hardDelete ?? false;
+    _subscriptions.add(
+      _channel.on(EventType.messageDeleted).listen((event) {
+        final hardDelete = event.hardDelete ?? false;
 
-      final message = event.message!.copyWith(
-        // TODO: Remove once deletedForMe is properly enriched on the backend.
-        deletedForMe: event.deletedForMe,
-      );
+        final message = event.message!.copyWith(
+          // TODO: Remove once deletedForMe is properly enriched on the backend.
+          deletedForMe: event.deletedForMe,
+        );
 
-      return deleteMessage(message, hardDelete: hardDelete);
-    }));
+        return deleteMessage(message, hardDelete: hardDelete);
+      }),
+    );
   }
 
   void _listenMessageNew() {
-    _subscriptions.add(_channel
-        .on(
-      EventType.messageNew,
-      EventType.notificationMessageNew,
-    )
-        .listen((event) {
-      final message = event.message;
-      if (message == null) return;
+    _subscriptions.add(
+      _channel
+          .on(
+            EventType.messageNew,
+            EventType.notificationMessageNew,
+          )
+          .listen((event) {
+            final message = event.message;
+            if (message == null) return;
 
-      return addNewMessage(message);
-    }));
+            return addNewMessage(message);
+          }),
+    );
   }
 
   /// Adds a new message to the channel state and updates the unread count.
@@ -3345,27 +3374,22 @@ class ChannelClientState {
   List<Message> get messages => _channelState.messages ?? <Message>[];
 
   /// Channel message list as a stream.
-  Stream<List<Message>> get messagesStream => channelStateStream
-      .map((cs) => cs.messages ?? <Message>[])
-      .distinct(const ListEquality().equals);
+  Stream<List<Message>> get messagesStream =>
+      channelStateStream.map((cs) => cs.messages ?? <Message>[]).distinct(const ListEquality().equals);
 
   /// Channel pinned message list.
-  List<Message> get pinnedMessages =>
-      _channelState.pinnedMessages ?? <Message>[];
+  List<Message> get pinnedMessages => _channelState.pinnedMessages ?? <Message>[];
 
   /// Channel pinned message list as a stream.
-  Stream<List<Message>> get pinnedMessagesStream => channelStateStream
-      .map((cs) => cs.pinnedMessages ?? <Message>[])
-      .distinct(const ListEquality().equals);
+  Stream<List<Message>> get pinnedMessagesStream =>
+      channelStateStream.map((cs) => cs.pinnedMessages ?? <Message>[]).distinct(const ListEquality().equals);
 
   /// Channel pending message list.
-  List<Message> get pendingMessages =>
-      _channelState.pendingMessages ?? <Message>[];
+  List<Message> get pendingMessages => _channelState.pendingMessages ?? <Message>[];
 
   /// Channel pending message list as a stream.
-  Stream<List<Message>> get pendingMessagesStream => channelStateStream
-      .map((cs) => cs.pendingMessages ?? <Message>[])
-      .distinct(const ListEquality().equals);
+  Stream<List<Message>> get pendingMessagesStream =>
+      channelStateStream.map((cs) => cs.pendingMessages ?? <Message>[]).distinct(const ListEquality().equals);
 
   /// Get channel last message.
   Message? get lastMessage => messages.lastOrNull;
@@ -3376,38 +3400,32 @@ class ChannelClientState {
   }
 
   /// Channel members list.
-  List<Member> get members => (_channelState.members ?? <Member>[])
-      .map((e) => e.copyWith(user: _client.state.users[e.user!.id]))
-      .toList();
+  List<Member> get members =>
+      (_channelState.members ?? <Member>[]).map((e) => e.copyWith(user: _client.state.users[e.user!.id])).toList();
 
   /// Channel members list as a stream.
-  Stream<List<Member>> get membersStream => CombineLatestStream.combine2<
-          List<Member?>?, Map<String?, User?>, List<Member>>(
+  Stream<List<Member>> get membersStream =>
+      CombineLatestStream.combine2<List<Member?>?, Map<String?, User?>, List<Member>>(
         channelStateStream.map((cs) => cs.members),
         _client.state.usersStream,
-        (members, users) =>
-            [...?members?.map((e) => e!.copyWith(user: users[e.user!.id]))],
+        (members, users) => [...?members?.map((e) => e!.copyWith(user: users[e.user!.id]))],
       ).distinct(const ListEquality().equals);
 
   /// Channel watcher count.
   int? get watcherCount => _channelState.watcherCount;
 
   /// Channel watcher count as a stream.
-  Stream<int?> get watcherCountStream =>
-      channelStateStream.map((cs) => cs.watcherCount);
+  Stream<int?> get watcherCountStream => channelStateStream.map((cs) => cs.watcherCount);
 
   /// Channel watchers list.
-  List<User> get watchers => (_channelState.watchers ?? <User>[])
-      .map((e) => _client.state.users[e.id] ?? e)
-      .toList();
+  List<User> get watchers => (_channelState.watchers ?? <User>[]).map((e) => _client.state.users[e.id] ?? e).toList();
 
   /// Channel watchers list as a stream.
-  Stream<List<User>> get watchersStream => CombineLatestStream.combine2<
-          List<User>?, Map<String?, User?>, List<User>>(
-        channelStateStream.map((cs) => cs.watchers),
-        _client.state.usersStream,
-        (watchers, users) => [...?watchers?.map((e) => users[e.id] ?? e)],
-      ).distinct(const ListEquality().equals);
+  Stream<List<User>> get watchersStream => CombineLatestStream.combine2<List<User>?, Map<String?, User?>, List<User>>(
+    channelStateStream.map((cs) => cs.watchers),
+    _client.state.usersStream,
+    (watchers, users) => [...?watchers?.map((e) => users[e.id] ?? e)],
+  ).distinct(const ListEquality().equals);
 
   /// Channel active live locations.
   List<Location> get activeLiveLocations {
@@ -3415,9 +3433,8 @@ class ChannelClientState {
   }
 
   /// Channel active live locations as a stream.
-  Stream<List<Location>> get activeLiveLocationsStream => channelStateStream
-      .map((cs) => cs.activeLiveLocations ?? <Location>[])
-      .distinct(const ListEquality().equals);
+  Stream<List<Location>> get activeLiveLocationsStream =>
+      channelStateStream.map((cs) => cs.activeLiveLocations ?? <Location>[]).distinct(const ListEquality().equals);
 
   /// Channel draft.
   Draft? get draft => _channelState.draft;
@@ -3429,8 +3446,8 @@ class ChannelClientState {
 
   /// Channel member for the current user.
   Member? get currentUserMember => members.firstWhereOrNull(
-        (m) => m.user?.id == _client.state.currentUser?.id,
-      );
+    (m) => m.user?.id == _client.state.currentUser?.id,
+  );
 
   /// Channel role for the current user
   String? get currentUserChannelRole => currentUserMember?.channelRole;
@@ -3554,8 +3571,7 @@ class ChannelClientState {
     );
   }
 
-  int _sortByCreatedAt(Message a, Message b) =>
-      a.createdAt.compareTo(b.createdAt);
+  int _sortByCreatedAt(Message a, Message b) => a.createdAt.compareTo(b.createdAt);
 
   /// The channel state related to this client.
   ChannelState get _channelState => _channelStateController.value;
@@ -3639,13 +3655,11 @@ class ChannelClientState {
   ///
   /// This stream emits a new value whenever the draft associated with the
   /// specified thread is updated or removed.
-  Stream<Draft?> threadDraftStream(String parentId) => channelStateStream
-      .map((cs) => _getThreadDraft(parentId, cs.messages))
-      .distinct();
+  Stream<Draft?> threadDraftStream(String parentId) =>
+      channelStateStream.map((cs) => _getThreadDraft(parentId, cs.messages)).distinct();
 
   /// Channel related typing users stream.
-  Stream<Map<User, Event>> get typingEventsStream =>
-      _typingEventsController.stream;
+  Stream<Map<User, Event>> get typingEventsStream => _typingEventsController.stream;
 
   /// Channel related typing users last value.
   Map<User, Event> get typingEvents => _typingEventsController.value;
@@ -3694,8 +3708,7 @@ class ChannelClientState {
       (_) {
         final now = DateTime.now();
         typingEvents.forEach((user, event) {
-          if (now.difference(event.createdAt).inSeconds >
-              incomingTypingStartEventTimeout) {
+          if (now.difference(event.createdAt).inSeconds > incomingTypingStartEventTimeout) {
             _client.handleEvent(
               Event(
                 type: EventType.typingStop,
@@ -3718,21 +3731,23 @@ class ChannelClientState {
       const Duration(seconds: 30),
       (_) {
         final now = DateTime.now();
-        var expiredMessages = channelState.pinnedMessages
-            ?.where((m) => m.pinExpires?.isBefore(now) == true)
-            .toList();
+        var expiredMessages = channelState.pinnedMessages?.where((m) => m.pinExpires?.isBefore(now) == true).toList();
         if (expiredMessages != null && expiredMessages.isNotEmpty) {
           expiredMessages = expiredMessages
-              .map((m) => m.copyWith(
-                    pinExpires: null,
-                    pinned: false,
-                  ))
+              .map(
+                (m) => m.copyWith(
+                  pinExpires: null,
+                  pinned: false,
+                ),
+              )
               .toList();
 
-          updateChannelState(_channelState.copyWith(
-            pinnedMessages: pinnedMessages.where(_pinIsValid).toList(),
-            messages: expiredMessages,
-          ));
+          updateChannelState(
+            _channelState.copyWith(
+              pinnedMessages: pinnedMessages.where(_pinIsValid).toList(),
+              messages: expiredMessages,
+            ),
+          );
         }
       },
     );
@@ -4140,16 +4155,18 @@ class ChannelClientState {
     if (toRemove.isEmpty) return existing;
 
     final toRemoveIds = toRemove.map((m) => m.id).toSet();
-    final updatedMessages = existing.where((it) {
-      // Remove the message if it's in the toRemove list.
-      return !toRemoveIds.contains(it.id);
-    }).map((it) {
-      // Continue if the message doesn't quote any of the deleted messages.
-      if (!toRemoveIds.contains(it.quotedMessageId)) return it;
+    final updatedMessages = existing
+        .where((it) {
+          // Remove the message if it's in the toRemove list.
+          return !toRemoveIds.contains(it.id);
+        })
+        .map((it) {
+          // Continue if the message doesn't quote any of the deleted messages.
+          if (!toRemoveIds.contains(it.quotedMessageId)) return it;
 
-      // Setting it to null will remove the quoted message from the message.
-      return it.copyWith(quotedMessageId: null, quotedMessage: null);
-    });
+          // Setting it to null will remove the quoted message from the message.
+          return it.copyWith(quotedMessageId: null, quotedMessage: null);
+        });
 
     return updatedMessages;
   }

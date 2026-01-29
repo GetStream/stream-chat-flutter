@@ -30,19 +30,15 @@ class StreamPollOptionsDialogTheme extends InheritedTheme {
   /// If there is no enclosing [StreamPollOptionsDialogTheme] widget, then
   /// [StreamChatThemeData.pollOptionsDialogTheme] is used.
   static StreamPollOptionsDialogThemeData of(BuildContext context) {
-    final pollOptionsDialogTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamPollOptionsDialogTheme>();
-    return pollOptionsDialogTheme?.data ??
-        StreamChatTheme.of(context).pollOptionsDialogTheme;
+    final pollOptionsDialogTheme = context.dependOnInheritedWidgetOfExactType<StreamPollOptionsDialogTheme>();
+    return pollOptionsDialogTheme?.data ?? StreamChatTheme.of(context).pollOptionsDialogTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamPollOptionsDialogTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamPollOptionsDialogTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamPollOptionsDialogTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamPollOptionsDialogTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamPollOptionsDialogThemeData}
@@ -98,20 +94,16 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
     TextStyle? pollTitleTextStyle,
     Decoration? pollTitleDecoration,
     Decoration? pollOptionsListViewDecoration,
-  }) =>
-      StreamPollOptionsDialogThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        appBarElevation: appBarElevation ?? this.appBarElevation,
-        appBarBackgroundColor:
-            appBarBackgroundColor ?? this.appBarBackgroundColor,
-        appBarForegroundColor:
-            appBarForegroundColor ?? this.appBarForegroundColor,
-        appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
-        pollTitleTextStyle: pollTitleTextStyle ?? this.pollTitleTextStyle,
-        pollTitleDecoration: pollTitleDecoration ?? this.pollTitleDecoration,
-        pollOptionsListViewDecoration:
-            pollOptionsListViewDecoration ?? this.pollOptionsListViewDecoration,
-      );
+  }) => StreamPollOptionsDialogThemeData(
+    backgroundColor: backgroundColor ?? this.backgroundColor,
+    appBarElevation: appBarElevation ?? this.appBarElevation,
+    appBarBackgroundColor: appBarBackgroundColor ?? this.appBarBackgroundColor,
+    appBarForegroundColor: appBarForegroundColor ?? this.appBarForegroundColor,
+    appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
+    pollTitleTextStyle: pollTitleTextStyle ?? this.pollTitleTextStyle,
+    pollTitleDecoration: pollTitleDecoration ?? this.pollTitleDecoration,
+    pollOptionsListViewDecoration: pollOptionsListViewDecoration ?? this.pollOptionsListViewDecoration,
+  );
 
   /// Merges this [StreamPollOptionsDialogThemeData] with the [other].
   StreamPollOptionsDialogThemeData merge(
@@ -135,26 +127,20 @@ class StreamPollOptionsDialogThemeData with Diagnosticable {
     StreamPollOptionsDialogThemeData a,
     StreamPollOptionsDialogThemeData b,
     double t,
-  ) =>
-      StreamPollOptionsDialogThemeData(
-        backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-        appBarElevation: lerpDouble(a.appBarElevation, b.appBarElevation, t),
-        appBarBackgroundColor:
-            Color.lerp(a.appBarBackgroundColor, b.appBarBackgroundColor, t),
-        appBarForegroundColor:
-            Color.lerp(a.appBarForegroundColor, b.appBarForegroundColor, t),
-        appBarTitleTextStyle:
-            TextStyle.lerp(a.appBarTitleTextStyle, b.appBarTitleTextStyle, t),
-        pollTitleTextStyle:
-            TextStyle.lerp(a.pollTitleTextStyle, b.pollTitleTextStyle, t),
-        pollTitleDecoration:
-            Decoration.lerp(a.pollTitleDecoration, b.pollTitleDecoration, t),
-        pollOptionsListViewDecoration: Decoration.lerp(
-          a.pollOptionsListViewDecoration,
-          b.pollOptionsListViewDecoration,
-          t,
-        ),
-      );
+  ) => StreamPollOptionsDialogThemeData(
+    backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+    appBarElevation: lerpDouble(a.appBarElevation, b.appBarElevation, t),
+    appBarBackgroundColor: Color.lerp(a.appBarBackgroundColor, b.appBarBackgroundColor, t),
+    appBarForegroundColor: Color.lerp(a.appBarForegroundColor, b.appBarForegroundColor, t),
+    appBarTitleTextStyle: TextStyle.lerp(a.appBarTitleTextStyle, b.appBarTitleTextStyle, t),
+    pollTitleTextStyle: TextStyle.lerp(a.pollTitleTextStyle, b.pollTitleTextStyle, t),
+    pollTitleDecoration: Decoration.lerp(a.pollTitleDecoration, b.pollTitleDecoration, t),
+    pollOptionsListViewDecoration: Decoration.lerp(
+      a.pollOptionsListViewDecoration,
+      b.pollOptionsListViewDecoration,
+      t,
+    ),
+  );
 
   @override
   bool operator ==(Object other) =>

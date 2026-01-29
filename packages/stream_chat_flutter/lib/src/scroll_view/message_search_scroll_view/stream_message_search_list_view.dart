@@ -11,14 +11,12 @@ Widget defaultMessageSearchListViewSeparatorBuilder(
   BuildContext context,
   List<GetMessageResponse> responses,
   int index,
-) =>
-    const StreamMessageSearchListSeparator();
+) => const StreamMessageSearchListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamMessageSearchListView].
-typedef StreamMessageSearchListViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<GetMessageResponse,
-        StreamMessageSearchListTile>;
+typedef StreamMessageSearchListViewIndexedWidgetBuilder =
+    StreamScrollViewIndexedWidgetBuilder<GetMessageResponse, StreamMessageSearchListTile>;
 
 /// A [ListView] that shows a list of [GetMessageResponse]s,
 /// it uses [StreamMessageSearchListTile] as a default item.
@@ -81,8 +79,7 @@ class StreamMessageSearchListView extends StatelessWidget {
   final StreamMessageSearchListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
-  final PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse>
-      separatorBuilder;
+  final PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse> separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
   final WidgetBuilder? emptyBuilder;
@@ -308,8 +305,7 @@ class StreamMessageSearchListView extends StatelessWidget {
         final streamMessageSearchListTile = StreamMessageSearchListTile(
           messageResponse: messageResponse,
           onTap: onTap == null ? null : () => onTap(messageResponse),
-          onLongPress:
-              onLongPress == null ? null : () => onLongPress(messageResponse),
+          onLongPress: onLongPress == null ? null : () => onLongPress(messageResponse),
         );
 
         return itemBuilder?.call(
@@ -340,8 +336,7 @@ class StreamMessageSearchListView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.list(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
       ),

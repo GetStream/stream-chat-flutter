@@ -24,10 +24,11 @@ typedef EventHandler = void Function(Event);
 /// Typedef used for connecting to a websocket. Method returns a
 /// [WebSocketChannel] and accepts a connection [url] and an optional
 /// [Iterable] of `protocols`.
-typedef WebSocketChannelProvider = WebSocketChannel Function(
-  Uri uri, {
-  Iterable<String>? protocols,
-});
+typedef WebSocketChannelProvider =
+    WebSocketChannel Function(
+      Uri uri, {
+      Iterable<String>? protocols,
+    });
 
 /// A WebSocket connection that reconnects upon failure.
 class WebSocket with TimerHelper {
@@ -132,8 +133,7 @@ class WebSocket with TimerHelper {
     if (_webSocketChannel != null) {
       _closeWebSocketChannel();
     }
-    _webSocketChannel =
-        webSocketChannelProvider?.call(uri) ?? WebSocketChannel.connect(uri);
+    _webSocketChannel = webSocketChannelProvider?.call(uri) ?? WebSocketChannel.connect(uri);
     _subscribeToWebSocketChannel();
   }
 
@@ -409,8 +409,7 @@ class WebSocket with TimerHelper {
   }
 
   void _onConnectionError(error, [stacktrace]) {
-    _logger?.warning(
-        '[onConnectionError] #ws; error occurred', error, stacktrace);
+    _logger?.warning('[onConnectionError] #ws; error occurred', error, stacktrace);
 
     StreamWebSocketError wsError;
     if (error is WebSocketChannelException) {

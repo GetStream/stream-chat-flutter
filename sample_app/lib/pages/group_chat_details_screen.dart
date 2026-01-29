@@ -19,8 +19,7 @@ class GroupChatDetailsScreen extends StatefulWidget {
 }
 
 class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
-  late final TextEditingController _groupNameController =
-      TextEditingController()..addListener(_groupNameListener);
+  late final TextEditingController _groupNameController = TextEditingController()..addListener(_groupNameListener);
 
   bool _isGroupNameEmpty = true;
 
@@ -74,9 +73,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                     AppLocalizations.of(context).name.toUpperCase(),
                     style: TextStyle(
                       fontSize: 12,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textLowEmphasis,
+                      color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -91,13 +88,10 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         errorBorder: InputBorder.none,
                         disabledBorder: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
-                        hintText:
-                            AppLocalizations.of(context).chooseAGroupChatName,
+                        hintText: AppLocalizations.of(context).chooseAGroupChatName,
                         hintStyle: TextStyle(
                           fontSize: 14,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textLowEmphasis,
+                          color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                         ),
                       ),
                     ),
@@ -122,16 +116,17 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                           final groupName = _groupNameController.text;
                           final client = StreamChat.of(context).client;
                           final router = GoRouter.of(context);
-                          final channel = client.channel('messaging',
-                              id: const Uuid().v4(),
-                              extraData: {
-                                'members': [
-                                  client.state.currentUser!.id,
-                                  ...widget.groupChatState.users
-                                      .map((e) => e.id),
-                                ],
-                                'name': groupName,
-                              });
+                          final channel = client.channel(
+                            'messaging',
+                            id: const Uuid().v4(),
+                            extraData: {
+                              'members': [
+                                client.state.currentUser!.id,
+                                ...widget.groupChatState.users.map((e) => e.id),
+                              ],
+                              'name': groupName,
+                            },
+                          );
                           await channel.watch();
                           router.goNamed(
                             Routes.CHANNEL_PAGE.name,
@@ -172,8 +167,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                   Container(
                     width: double.maxFinite,
                     decoration: BoxDecoration(
-                      gradient:
-                          StreamChatTheme.of(context).colorTheme.bgGradient,
+                      gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -183,80 +177,70 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                       child: Text(
                         '$_totalUsers ${_totalUsers > 1 ? AppLocalizations.of(context).members : AppLocalizations.of(context).member}',
                         style: TextStyle(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textLowEmphasis,
+                          color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                         ),
                       ),
                     ),
                   ),
                   AnimatedBuilder(
-                      animation: widget.groupChatState,
-                      builder: (context, child) {
-                        return Expanded(
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onPanDown: (_) => FocusScope.of(context).unfocus(),
-                            child: ListView.separated(
-                              itemCount: widget.groupChatState.users.length + 1,
-                              separatorBuilder: (_, __) => Container(
-                                height: 1,
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .borders,
-                              ),
-                              itemBuilder: (_, index) {
-                                if (index ==
-                                    widget.groupChatState.users.length) {
-                                  return Container(
-                                    height: 1,
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .borders,
-                                  );
-                                }
-                                final user = widget.groupChatState.users
-                                    .elementAt(index);
-                                return ListTile(
-                                  key: ObjectKey(user),
-                                  leading: StreamUserAvatar(
-                                    user: user,
-                                    constraints: const BoxConstraints.tightFor(
-                                      width: 40,
-                                      height: 40,
-                                    ),
-                                  ),
-                                  title: Text(
-                                    user.name,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  trailing: IconButton(
-                                    icon: Icon(
-                                      Icons.clear_rounded,
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .textHighEmphasis,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    splashRadius: 24,
-                                    onPressed: () {
-                                      widget.groupChatState.removeUser(user);
-                                      if (widget.groupChatState.users.isEmpty) {
-                                        GoRouter.of(context).pop();
-                                      }
-                                    },
-                                  ),
-                                );
-                              },
+                    animation: widget.groupChatState,
+                    builder: (context, child) {
+                      return Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onPanDown: (_) => FocusScope.of(context).unfocus(),
+                          child: ListView.separated(
+                            itemCount: widget.groupChatState.users.length + 1,
+                            separatorBuilder: (_, __) => Container(
+                              height: 1,
+                              color: StreamChatTheme.of(context).colorTheme.borders,
                             ),
+                            itemBuilder: (_, index) {
+                              if (index == widget.groupChatState.users.length) {
+                                return Container(
+                                  height: 1,
+                                  color: StreamChatTheme.of(context).colorTheme.borders,
+                                );
+                              }
+                              final user = widget.groupChatState.users.elementAt(index);
+                              return ListTile(
+                                key: ObjectKey(user),
+                                leading: StreamUserAvatar(
+                                  user: user,
+                                  constraints: const BoxConstraints.tightFor(
+                                    width: 40,
+                                    height: 40,
+                                  ),
+                                ),
+                                title: Text(
+                                  user.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                trailing: IconButton(
+                                  icon: Icon(
+                                    Icons.clear_rounded,
+                                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  splashRadius: 24,
+                                  onPressed: () {
+                                    widget.groupChatState.removeUser(user);
+                                    if (widget.groupChatState.users.isEmpty) {
+                                      GoRouter.of(context).pop();
+                                    }
+                                  },
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      }),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             );
@@ -271,10 +255,11 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
       backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       context: context,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
-      )),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
       builder: (context) {
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -302,10 +287,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               height: 36,
             ),
             Container(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  .withOpacity(.08),
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.08),
               height: 1,
             ),
             Row(
@@ -315,13 +297,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                   onPressed: GoRouter.of(context).pop,
                   child: Text(
                     AppLocalizations.of(context).ok,
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .bodyBold
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentPrimary),
+                    style: StreamChatTheme.of(
+                      context,
+                    ).textTheme.bodyBold.copyWith(color: StreamChatTheme.of(context).colorTheme.accentPrimary),
                   ),
                 ),
               ],

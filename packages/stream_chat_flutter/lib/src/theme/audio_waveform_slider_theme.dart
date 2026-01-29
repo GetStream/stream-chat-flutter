@@ -36,19 +36,15 @@ class StreamAudioWaveformSliderTheme extends InheritedTheme {
   /// StreamAudioWaveformSliderTheme.of(context);
   /// ```
   static StreamAudioWaveformSliderThemeData of(BuildContext context) {
-    final audioWaveformSliderTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamAudioWaveformSliderTheme>();
-    return audioWaveformSliderTheme?.data ??
-        StreamChatTheme.of(context).audioWaveformSliderTheme;
+    final audioWaveformSliderTheme = context.dependOnInheritedWidgetOfExactType<StreamAudioWaveformSliderTheme>();
+    return audioWaveformSliderTheme?.data ?? StreamChatTheme.of(context).audioWaveformSliderTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamAudioWaveformSliderTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamAudioWaveformSliderTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamAudioWaveformSliderTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamAudioWaveformSliderTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamAudioWaveformSliderThemeData}
@@ -105,13 +101,11 @@ class StreamAudioWaveformSliderThemeData with Diagnosticable {
     StreamAudioWaveformSliderThemeData a,
     StreamAudioWaveformSliderThemeData b,
     double t,
-  ) =>
-      StreamAudioWaveformSliderThemeData(
-        audioWaveformTheme: StreamAudioWaveformThemeData.lerp(
-            a.audioWaveformTheme!, b.audioWaveformTheme!, t),
-        thumbColor: Color.lerp(a.thumbColor, b.thumbColor, t),
-        thumbBorderColor: Color.lerp(a.thumbBorderColor, b.thumbBorderColor, t),
-      );
+  ) => StreamAudioWaveformSliderThemeData(
+    audioWaveformTheme: StreamAudioWaveformThemeData.lerp(a.audioWaveformTheme!, b.audioWaveformTheme!, t),
+    thumbColor: Color.lerp(a.thumbColor, b.thumbColor, t),
+    thumbBorderColor: Color.lerp(a.thumbBorderColor, b.thumbBorderColor, t),
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -122,17 +116,13 @@ class StreamAudioWaveformSliderThemeData with Diagnosticable {
           other.thumbBorderColor == thumbBorderColor;
 
   @override
-  int get hashCode =>
-      audioWaveformTheme.hashCode ^
-      thumbColor.hashCode ^
-      thumbBorderColor.hashCode;
+  int get hashCode => audioWaveformTheme.hashCode ^ thumbColor.hashCode ^ thumbBorderColor.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty<StreamAudioWaveformThemeData>(
-          'audioWaveformTheme', audioWaveformTheme))
+      ..add(DiagnosticsProperty<StreamAudioWaveformThemeData>('audioWaveformTheme', audioWaveformTheme))
       ..add(ColorProperty('thumbColor', thumbColor))
       ..add(ColorProperty('thumbBorderColor', thumbBorderColor));
   }

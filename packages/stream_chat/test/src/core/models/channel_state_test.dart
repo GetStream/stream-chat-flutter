@@ -6,8 +6,7 @@ import '../../utils.dart';
 void main() {
   group('src/models/channel_state', () {
     test('should parse json correctly', () {
-      final channelState =
-          ChannelState.fromJson(jsonFixture('channel_state.json'));
+      final channelState = ChannelState.fromJson(jsonFixture('channel_state.json'));
       expect(channelState.channel?.cid, 'team:dev');
       expect(channelState.channel?.id, 'dev');
       expect(channelState.channel?.team, 'test');
@@ -16,12 +15,9 @@ void main() {
       expect(channelState.channel?.config, isNotNull);
       expect(channelState.channel?.config.commands, hasLength(1));
       expect(channelState.channel?.config.commands[0], isA<Command>());
-      expect(channelState.channel?.lastMessageAt,
-          DateTime.parse('2020-01-30T13:43:41.062362Z'));
-      expect(channelState.channel?.createdAt,
-          DateTime.parse('2019-04-03T18:43:33.213373Z'));
-      expect(channelState.channel?.updatedAt,
-          DateTime.parse('2019-04-03T18:43:33.213374Z'));
+      expect(channelState.channel?.lastMessageAt, DateTime.parse('2020-01-30T13:43:41.062362Z'));
+      expect(channelState.channel?.createdAt, DateTime.parse('2019-04-03T18:43:33.213373Z'));
+      expect(channelState.channel?.updatedAt, DateTime.parse('2019-04-03T18:43:33.213374Z'));
       expect(channelState.channel?.createdBy, isA<User>());
       expect(channelState.channel?.frozen, true);
       expect(channelState.channel?.extraData['example'], 1);
@@ -147,8 +143,7 @@ void main() {
           memberCount: 42,
         );
 
-        final field =
-            channelState.getComparableField(ChannelSortKey.memberCount);
+        final field = channelState.getComparableField(ChannelSortKey.memberCount);
         expect(field, isNotNull);
         expect(field!.value, equals(42));
       });

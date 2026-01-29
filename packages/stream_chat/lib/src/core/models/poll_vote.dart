@@ -20,17 +20,16 @@ class PollVote extends Equatable implements ComparableFieldProvider {
     DateTime? updatedAt,
     this.userId,
     this.user,
-  })  : assert(
-          optionId != null || answerText != null,
-          'Either optionId or answerText must be provided',
-        ),
-        isAnswer = answerText != null,
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : assert(
+         optionId != null || answerText != null,
+         'Either optionId or answerText must be provided',
+       ),
+       isAnswer = answerText != null,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory PollVote.fromJson(Map<String, dynamic> json) =>
-      _$PollVoteFromJson(json);
+  factory PollVote.fromJson(Map<String, dynamic> json) => _$PollVoteFromJson(json);
 
   /// The unique identifier of the poll vote.
   @JsonKey(includeIfNull: false)
@@ -81,30 +80,29 @@ class PollVote extends Equatable implements ComparableFieldProvider {
     DateTime? updatedAt,
     String? userId,
     User? user,
-  }) =>
-      PollVote(
-        id: id ?? this.id,
-        pollId: pollId ?? this.pollId,
-        optionId: optionId ?? this.optionId,
-        answerText: answerText ?? this.answerText,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        userId: userId ?? this.userId,
-        user: user ?? this.user,
-      );
+  }) => PollVote(
+    id: id ?? this.id,
+    pollId: pollId ?? this.pollId,
+    optionId: optionId ?? this.optionId,
+    answerText: answerText ?? this.answerText,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    userId: userId ?? this.userId,
+    user: user ?? this.user,
+  );
 
   @override
   List<Object?> get props => [
-        id,
-        pollId,
-        optionId,
-        isAnswer,
-        answerText,
-        createdAt,
-        updatedAt,
-        userId,
-        user,
-      ];
+    id,
+    pollId,
+    optionId,
+    isAnswer,
+    answerText,
+    createdAt,
+    updatedAt,
+    userId,
+    user,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

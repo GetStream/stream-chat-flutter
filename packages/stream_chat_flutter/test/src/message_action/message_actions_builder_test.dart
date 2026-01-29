@@ -30,9 +30,9 @@ Message createTestMessage({
     replyCount: replyCount,
     moderation: switch (type) {
       MessageType.error => const Moderation(
-          action: ModerationAction.bounce,
-          originalText: 'Original message text that violated policy',
-        ),
+        action: ModerationAction.bounce,
+        originalText: 'Original message text that violated policy',
+      ),
       _ => null,
     },
   );
@@ -83,10 +83,12 @@ void main() {
     await tester.pumpWidget(
       StreamChatTheme(
         data: StreamChatThemeData.light(),
-        child: Builder(builder: (ctx) {
-          context = ctx;
-          return const SizedBox.shrink();
-        }),
+        child: Builder(
+          builder: (ctx) {
+            context = ctx;
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
     return context;
@@ -437,8 +439,7 @@ void main() {
         // Thread message
         final channel = _getChannelWithCapabilities(allChannelCapabilities);
         final threadMessage = createTestMessage(parentId: 'parent-message-id');
-        final actionsForThreadMessage =
-            StreamMessageActionsBuilder.buildActions(
+        final actionsForThreadMessage = StreamMessageActionsBuilder.buildActions(
           context: context,
           message: threadMessage,
           channel: channel,
