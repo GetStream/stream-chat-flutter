@@ -63,7 +63,6 @@ void main() {
           chatLevel: ChatLevel.all,
           disabledUntil: DateTime.parse('2020-01-30T13:43:41.062362Z'),
         ),
-        activeLiveLocations: [],
       );
 
       expect(

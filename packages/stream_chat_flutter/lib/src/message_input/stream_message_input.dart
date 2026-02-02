@@ -125,8 +125,10 @@ class StreamMessageInput extends StatefulWidget {
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
-    this.idleSendIcon,
-    this.activeSendIcon,
+    Widget? idleSendIcon,
+    @Deprecated("Use 'idleSendIcon' instead") Widget? idleSendButton,
+    Widget? activeSendIcon,
+    @Deprecated("Use 'activeSendIcon' instead") Widget? activeSendButton,
     this.showCommandsButton = true,
     this.userMentionsTileBuilder,
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
@@ -157,13 +159,27 @@ class StreamMessageInput extends StatefulWidget {
     this.ogPreviewFilter = _defaultOgPreviewFilter,
     this.hintGetter = _defaultHintGetter,
     this.contentInsertionConfiguration,
-    this.useSystemAttachmentPicker = false,
+    bool useSystemAttachmentPicker = false,
+    @Deprecated(
+      'Use useSystemAttachmentPicker instead. '
+      'This feature was deprecated after v9.4.0',
+    )
+    bool useNativeAttachmentPickerOnMobile = false,
     this.pollConfig,
-    this.attachmentPickerOptionsBuilder,
-    this.onAttachmentPickerResult,
     this.padding = const EdgeInsets.all(8),
     this.textInputMargin,
-  });
+  })  : assert(
+          idleSendIcon == null || idleSendButton == null,
+          'idleSendIcon and idleSendButton cannot be used together',
+        ),
+        idleSendIcon = idleSendIcon ?? idleSendButton,
+        assert(
+          activeSendIcon == null || activeSendButton == null,
+          'activeSendIcon and activeSendButton cannot be used together',
+        ),
+        activeSendIcon = activeSendIcon ?? activeSendButton,
+        useSystemAttachmentPicker = useSystemAttachmentPicker || //
+            useNativeAttachmentPickerOnMobile;
 
   /// The predicate used to send a message on desktop/web
   final KeyEventPredicate sendMessageKeyPredicate;
@@ -322,8 +338,16 @@ class StreamMessageInput extends StatefulWidget {
   /// Send button widget in an idle state
   final Widget? idleSendIcon;
 
+  /// Send button widget in an idle state
+  @Deprecated("Use 'idleSendIcon' instead")
+  Widget? get idleSendButton => idleSendIcon;
+
   /// Send button widget in an active state
   final Widget? activeSendIcon;
+
+  /// Send button widget in an active state
+  @Deprecated("Use 'activeSendIcon' instead")
+  Widget? get activeSendButton => activeSendIcon;
 
   /// Customize the tile for the mentions overlay.
   final UserMentionTileBuilder? userMentionsTileBuilder;
@@ -420,24 +444,18 @@ class StreamMessageInput extends StatefulWidget {
   /// functionality of the system media picker.
   final bool useSystemAttachmentPicker;
 
+  /// Forces use of native attachment picker on mobile instead of the custom
+  /// Stream attachment picker.
+  @Deprecated(
+    'Use useSystemAttachmentPicker instead. '
+    'This feature was deprecated after v9.4.0',
+  )
+  bool get useNativeAttachmentPickerOnMobile => useSystemAttachmentPicker;
+
   /// The configuration to use while creating a poll.
   ///
   /// If not provided, the default configuration is used.
   final PollConfig? pollConfig;
-
-  /// Builder for customizing the attachment picker options.
-  ///
-  /// The builder receives the [BuildContext] and a list of default options
-  /// that can be modified or extended.
-  ///
-  /// If not provided, the default options are presented.
-  final AttachmentPickerOptionsBuilder? attachmentPickerOptionsBuilder;
-
-  /// Callback that is called when the attachment picker result is received.
-  ///
-  /// Return `true` if the result is handled. Otherwise, return `false` to
-  /// allow the result to be handled internally.
-  final OnAttachmentPickerResult? onAttachmentPickerResult;
 
   /// Padding for the message input.
   ///
@@ -654,12 +672,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Widget build(BuildContext context) {
     bool canSendOrUpdateMessage(List<ChannelCapability> capabilities) {
       var result = capabilities.contains(ChannelCapability.sendMessage);
-
-      final insideThread = _effectiveController.message.parentId != null;
-      if (insideThread) {
-        result |= capabilities.contains(ChannelCapability.sendReply);
-      }
-
       if (_isEditing) {
         result |= capabilities.contains(ChannelCapability.updateOwnMessage);
         result |= capabilities.contains(ChannelCapability.updateAnyMessage);
@@ -979,30 +991,36 @@ class StreamMessageInputState extends State<StreamMessageInput>
         defaultButton;
   }
 
-  Future<void> _onPollCreated(Poll poll) async {
+  Future<void> _sendPoll(Poll poll, Channel channel) {
+    return channel.sendPoll(poll);
+  }
+
+  Future<void> _updatePoll(Poll poll, Channel channel) {
+    return channel.updatePoll(poll);
+  }
+
+  Future<void> _deletePoll(Poll poll, Channel channel) {
+    return channel.deletePoll(poll);
+  }
+
+  Future<void> _createOrUpdatePoll(
+    Poll? old,
+    Poll? current,
+  ) async {
     final channel = StreamChannel.maybeOf(context)?.channel;
     if (channel == null) return;
 
-    return channel.sendPoll(poll).ignore();
-  }
+    // If both are null or the same, return
+    if ((old == null && current == null) || old == current) return;
 
-  // Returns the list of allowed attachment picker types based on the
-  // current channel configuration and context.
-  List<AttachmentPickerType> _getAllowedAttachmentPickerTypes() {
-    final allowedTypes = widget.allowedAttachmentPickerTypes.where((type) {
-      if (type != AttachmentPickerType.poll) return true;
+    // If old is null, i.e., there was no poll before, create the poll.
+    if (old == null) return _sendPoll(current!, channel);
 
-      // We don't allow editing polls.
-      if (_isEditing) return false;
-      // We don't allow creating polls in threads.
-      if (_effectiveController.message.parentId != null) return false;
+    // If current is null, i.e., the poll is removed, delete the poll.
+    if (current == null) return _deletePoll(old, channel);
 
-      // Otherwise, check if the user has the permission to send polls.
-      final channel = StreamChannel.of(context).channel;
-      return channel.config?.polls == true && channel.canSendPoll;
-    });
-
-    return allowedTypes.toList(growable: false);
+    // Otherwise, update the poll.
+    return _updatePoll(current, channel);
   }
 
   /// Handle the platform-specific logic for selecting files.
@@ -1013,45 +1031,43 @@ class StreamMessageInputState extends State<StreamMessageInput>
   Future<void> _onAttachmentButtonPressed() async {
     final initialPoll = _effectiveController.poll;
     final initialAttachments = _effectiveController.attachments;
-    final allowedTypes = _getAllowedAttachmentPickerTypes();
+
+    // Remove AttachmentPickerType.poll if the user doesn't have the permission
+    // to send a poll or if this is a thread message.
+    final allowedTypes = [...widget.allowedAttachmentPickerTypes]
+      ..removeWhere((it) {
+        if (it != AttachmentPickerType.poll) return false;
+        if (_effectiveController.message.parentId != null) return true;
+
+        final channel = StreamChannel.maybeOf(context)?.channel;
+        if (channel == null) return true;
+
+        if (channel.config?.polls == true && channel.canSendPoll) return false;
+
+        return true;
+      });
 
     final messageInputTheme = StreamMessageInputTheme.of(context);
     final useSystemPicker = widget.useSystemAttachmentPicker ||
         (messageInputTheme.useSystemAttachmentPicker ?? false);
 
-    final result = await showStreamAttachmentPickerModalBottomSheet(
+    final value = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
+      onError: widget.onError,
       allowedTypes: allowedTypes,
-      initialPoll: initialPoll,
       pollConfig: widget.pollConfig,
+      initialPoll: initialPoll,
       initialAttachments: initialAttachments,
       useSystemAttachmentPicker: useSystemPicker,
-      optionsBuilder: widget.attachmentPickerOptionsBuilder,
     );
 
-    if (result == null || result is! StreamAttachmentPickerResult) return;
+    if (value == null || value is! AttachmentPickerValue) return;
 
-    // Returns early if the result is already handled by the user.
-    final resultHandled = await widget.onAttachmentPickerResult?.call(result);
-    if (resultHandled ?? false) return;
+    // Add the attachments to the controller.
+    _effectiveController.attachments = value.attachments;
 
-    void _onAttachmentsPicked(List<Attachment> attachments) {
-      _effectiveController.attachments = attachments;
-    }
-
-    void _onAttachmentPickerError(AttachmentPickerError error) {
-      return widget.onError?.call(error.error, error.stackTrace);
-    }
-
-    return switch (result) {
-      // Add the attachments to the controller.
-      AttachmentsPicked() => _onAttachmentsPicked(result.attachments),
-      // Send the created poll in the channel.
-      PollCreated() => _onPollCreated(result.poll),
-      // Handle/Notify returned errors.
-      AttachmentPickerError() => _onAttachmentPickerError(result),
-      _ => Future.value(), // Ignore other results.
-    };
+    // Create or update the poll.
+    await _createOrUpdatePoll(initialPoll, value.poll);
   }
 
   Widget _buildTextInput(BuildContext context) {

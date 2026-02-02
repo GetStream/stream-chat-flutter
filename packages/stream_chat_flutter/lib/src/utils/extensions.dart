@@ -44,20 +44,8 @@ extension DurationExtension on Duration {
 /// String extension
 extension StringExtension on String {
   /// Returns the capitalized string
-  @Deprecated('Use sentenceCase instead')
-  String capitalize() => sentenceCase;
-
-  /// Returns the string in sentence case.
-  ///
-  /// Example: 'hello WORLD' -> 'Hello world'
-  String get sentenceCase {
-    if (isEmpty) return this;
-
-    final firstChar = this[0].toUpperCase();
-    final restOfString = substring(1).toLowerCase();
-
-    return '$firstChar$restOfString';
-  }
+  String capitalize() =>
+      isNotEmpty ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
 
   /// Returns the biggest line of a text.
   String biggestLine() {
@@ -491,12 +479,18 @@ extension TypeX<T> on T? {
 extension FileTypeX on FileType {
   /// Converts the [FileType] to a [String].
   String toAttachmentType() {
-    return switch (this) {
-      FileType.image => AttachmentType.image,
-      FileType.video => AttachmentType.video,
-      FileType.audio => AttachmentType.audio,
-      FileType.any || FileType.media || FileType.custom => AttachmentType.file,
-    };
+    switch (this) {
+      case FileType.image:
+        return AttachmentType.image;
+      case FileType.video:
+        return AttachmentType.video;
+      case FileType.audio:
+        return AttachmentType.audio;
+      case FileType.any:
+      case FileType.media:
+      case FileType.custom:
+        return AttachmentType.file;
+    }
   }
 }
 
@@ -504,16 +498,18 @@ extension FileTypeX on FileType {
 extension AttachmentPickerTypeX on AttachmentPickerType {
   /// Converts the [AttachmentPickerType] to a [FileType].
   FileType get fileType {
-    return switch (this) {
-      ImagesPickerType() => FileType.image,
-      VideosPickerType() => FileType.video,
-      AudiosPickerType() => FileType.audio,
-      FilesPickerType() => FileType.any,
-      _ => throw Exception(
-          'Unsupported AttachmentPickerType: $this. '
-          'Only Images, Videos, Audios and Files are supported.',
-        ),
-    };
+    switch (this) {
+      case AttachmentPickerType.images:
+        return FileType.image;
+      case AttachmentPickerType.videos:
+        return FileType.video;
+      case AttachmentPickerType.files:
+        return FileType.any;
+      case AttachmentPickerType.audios:
+        return FileType.audio;
+      case AttachmentPickerType.poll:
+        throw Exception('Polls do not have a file type');
+    }
   }
 }
 
@@ -580,6 +576,24 @@ extension MessageListX on Iterable<Message> {
   ///
   /// The [userRead] is the last read message by the user.
   ///
+  /// The last unread message is the last message in the list that is not
+  /// sent by the current user and is sent after the last read message.
+  @Deprecated("Use 'StreamChannel.getFirstUnreadMessage' instead.")
+  Message? lastUnreadMessage(Read? userRead) {
+    if (isEmpty || userRead == null) return null;
+
+    if (first.createdAt.isAfter(userRead.lastRead) &&
+        last.createdAt.isBefore(userRead.lastRead)) {
+      return lastWhereOrNull(
+        (it) =>
+            it.user?.id != userRead.user.id &&
+            it.id != userRead.lastReadMessageId &&
+            it.createdAt.compareTo(userRead.lastRead) > 0,
+      );
+    }
+
+    return null;
+  }
 }
 
 /// Useful extensions on [ChannelModel].
@@ -685,29 +699,5 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
         );
       }).nonNulls,
     ];
-  }
-}
-
-/// Extension to convert [AlignmentGeometry] to the corresponding
-/// [CrossAxisAlignment].
-extension ColumnAlignmentExtension on AlignmentGeometry {
-  /// Converts an [AlignmentGeometry] to the most appropriate
-  /// [CrossAxisAlignment] value.
-  CrossAxisAlignment toColumnCrossAxisAlignment() {
-    final x = switch (this) {
-      Alignment(x: final x) => x,
-      AlignmentDirectional(start: final start) => start,
-      _ => null,
-    };
-
-    // If the alignment is unknown, fallback to the center alignment.
-    if (x == null) return CrossAxisAlignment.center;
-
-    return switch (x) {
-      0.0 => CrossAxisAlignment.center,
-      < 0 => CrossAxisAlignment.start,
-      > 0 => CrossAxisAlignment.end,
-      _ => CrossAxisAlignment.center, // fallback (in case of NaN etc)
-    };
   }
 }

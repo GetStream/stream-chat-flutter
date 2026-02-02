@@ -16,8 +16,14 @@ class FloatingDateDivider extends StatelessWidget {
     required this.reverse,
     required this.messages,
     required this.itemCount,
+    @Deprecated('No longer used, Will be removed in future versions.')
+    this.isThreadConversation = false,
     this.dateDividerBuilder,
   });
+
+  /// true if this is a thread conversation
+  @Deprecated('No longer used, Will be removed in future versions.')
+  final bool isThreadConversation;
 
   /// A [ValueListenable] that provides the positions of items in the list view.
   final ValueListenable<Iterable<ItemPosition>> itemPositionListener;

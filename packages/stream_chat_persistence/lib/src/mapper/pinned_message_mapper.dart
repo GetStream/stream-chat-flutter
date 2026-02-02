@@ -14,7 +14,6 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
     Message? quotedMessage,
     Poll? poll,
     Draft? draft,
-    Location? sharedLocation,
   }) =>
       Message(
         shadowed: shadowed,
@@ -31,7 +30,6 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
         localUpdatedAt: localUpdatedAt,
         deletedAt: remoteDeletedAt,
         localDeletedAt: localDeletedAt,
-        deletedForMe: deletedForMe,
         messageTextUpdatedAt: messageTextUpdatedAt,
         id: id,
         type: type,
@@ -57,7 +55,6 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
         i18n: i18n,
         restrictedVisibility: restrictedVisibility,
         draft: draft,
-        sharedLocation: sharedLocation,
       );
 }
 
@@ -81,7 +78,7 @@ extension PMessageX on Message {
         replyCount: replyCount,
         reactionGroups: reactionGroups,
         mentionedUsers: mentionedUsers.map(jsonEncode).toList(),
-        state: jsonEncode(state.toJson()),
+        state: jsonEncode(state),
         remoteUpdatedAt: remoteUpdatedAt,
         localUpdatedAt: localUpdatedAt,
         extraData: extraData,
@@ -89,7 +86,6 @@ extension PMessageX on Message {
         channelRole: channelRole,
         remoteDeletedAt: remoteDeletedAt,
         localDeletedAt: localDeletedAt,
-        deletedForMe: deletedForMe,
         messageTextUpdatedAt: messageTextUpdatedAt,
         messageText: text,
         pinned: pinned,

@@ -1,6 +1,7 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/src/attachment/voice_recording_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:drift/drift.dart';
@@ -40,7 +39,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<Message> _messageFromJoinRow(
     TypedResult rows, {
     bool fetchDraft = false,
-    bool fetchSharedLocation = false,
   }) async {
     final userEntity = rows.readTableOrNull(_users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
@@ -69,11 +67,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       _ => null,
     };
 
-    final sharedLocation = await switch (fetchSharedLocation) {
-      true => _db.locationDao.getLocationByMessageId(msgEntity.id),
-      _ => null,
-    };
-
     return msgEntity.toMessage(
       user: userEntity?.toUser(),
       pinnedBy: pinnedByEntity?.toUser(),
@@ -82,7 +75,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       quotedMessage: quotedMessage,
       poll: poll,
       draft: draft,
-      sharedLocation: sharedLocation,
     );
   }
 
@@ -93,7 +85,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<Message?> getMessageById(
     String id, {
     bool fetchDraft = true,
-    bool fetchSharedLocation = true,
   }) async {
     final query = select(messages).join([
       leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
@@ -110,7 +101,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     return _messageFromJoinRow(
       result,
       fetchDraft: fetchDraft,
-      fetchSharedLocation: fetchSharedLocation,
     );
   }
 
@@ -179,7 +169,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<List<Message>> getMessagesByCid(
     String cid, {
     bool fetchDraft = true,
-    bool fetchSharedLocation = true,
     PaginationParams? messagePagination,
   }) async {
     final query = select(messages).join([
@@ -201,7 +190,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
         (row) => _messageFromJoinRow(
           row,
           fetchDraft: fetchDraft,
-          fetchSharedLocation: fetchSharedLocation,
         ),
       ),
     );
@@ -230,54 +218,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       }
     }
     return msgList;
-  }
-
-  /// Deletes all messages sent by a user with the given [userId].
-  ///
-  /// If [hardDelete] is `true`, permanently removes messages from the database.
-  /// Otherwise, soft-deletes them by updating their type, deletion timestamp,
-  /// and state.
-  ///
-  /// If [cid] is provided, only deletes messages in that channel. Otherwise,
-  /// deletes messages across all channels.
-  ///
-  /// The [deletedAt] timestamp is used for soft deletes. Defaults to the
-  /// current time if not provided.
-  ///
-  /// Returns the number of rows affected.
-  Future<int> deleteMessagesByUser({
-    String? cid,
-    required String userId,
-    bool hardDelete = false,
-    DateTime? deletedAt,
-  }) async {
-    if (hardDelete) {
-      // Hard delete: remove from database
-      final deleteQuery = delete(messages)
-        ..where((tbl) => tbl.userId.equals(userId));
-
-      if (cid != null) {
-        deleteQuery.where((tbl) => tbl.channelCid.equals(cid));
-      }
-
-      return deleteQuery.go();
-    }
-
-    // Soft delete: update messages to mark as deleted
-    final updateQuery = update(messages)
-      ..where((tbl) => tbl.userId.equals(userId));
-
-    if (cid != null) {
-      updateQuery.where((tbl) => tbl.channelCid.equals(cid));
-    }
-
-    return updateQuery.write(
-      MessagesCompanion(
-        type: const Value('deleted'),
-        remoteDeletedAt: Value(deletedAt ?? DateTime.now()),
-        state: Value(jsonEncode(MessageState.softDeleted)),
-      ),
-    );
   }
 
   /// Updates the message data of a particular channel with

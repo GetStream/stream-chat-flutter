@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Norwegian (`no`).
@@ -167,7 +165,8 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Vennligst gi tillatelse til dine bilder og videoer så du kan dele de med dine venner.';
+      'Vennligst gi tillatelse til dine bilder'
+      '\nog videoer så du kan dele de med dine venner.';
 
   @override
   String get allowGalleryAccessMessage => 'Tillat tilgang til galleri';
@@ -177,7 +176,8 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Ønsker du å sende en kopi av denne meldingen til en moderator for videre undersøkelser';
+      'Ønsker du å sende en kopi av denne meldingen til en'
+      '\nmoderator for videre undersøkelser';
 
   @override
   String get flagLabel => 'RAPPORTER';
@@ -423,6 +423,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   @override
   String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
     if (isMuted) {
+      // ignore: lines_longer_than_80_chars
       return 'Er du sikker på at du vil oppheve ignoreringen av denne brukeren?';
     }
     return 'Er du sikker på at du vil ignorere denne brukeren?';
@@ -436,7 +437,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get enableFileAccessMessage =>
-      'Aktiver tilgang til filer slik at du kan dele dem med venner.';
+      'Aktiver tilgang til filer slik' '\nat du kan dele dem med venner.';
 
   @override
   String get allowFileAccessMessage => 'Gi tilgang til filer';
@@ -666,10 +667,4 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Utkast';
-
-  @override
-  String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Direkte posisjon';
-    return '📍 Posisjon';
-  }
 }

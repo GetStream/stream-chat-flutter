@@ -30,7 +30,6 @@ class Event {
     this.channelLastMessageAt,
     this.parentId,
     this.hardDelete,
-    this.deletedForMe,
     this.aiState,
     this.aiMessage,
     this.messageId,
@@ -126,9 +125,6 @@ class Event {
   /// This is true if the message has been hard deleted
   final bool? hardDelete;
 
-  /// Whether the message was deleted only for the current user.
-  final bool? deletedForMe;
-
   /// The current state of the AI assistant.
   @JsonKey(unknownEnumValue: AITypingState.idle)
   final AITypingState? aiState;
@@ -205,7 +201,6 @@ class Event {
     'channel_last_message_at',
     'parent_id',
     'hard_delete',
-    'deleted_for_me',
     'is_local',
     'ai_state',
     'ai_message',
@@ -253,7 +248,6 @@ class Event {
     bool? online,
     String? parentId,
     bool? hardDelete,
-    bool? deletedForMe,
     AITypingState? aiState,
     String? aiMessage,
     String? messageId,
@@ -294,7 +288,6 @@ class Event {
         channelLastMessageAt: channelLastMessageAt ?? this.channelLastMessageAt,
         parentId: parentId ?? this.parentId,
         hardDelete: hardDelete ?? this.hardDelete,
-        deletedForMe: deletedForMe ?? this.deletedForMe,
         aiState: aiState ?? this.aiState,
         aiMessage: aiMessage ?? this.aiMessage,
         messageId: messageId ?? this.messageId,

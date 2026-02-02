@@ -33,7 +33,10 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
       const ['image', 'video'],
     ),
     sort: [
-      const SortOption.asc('created_at'),
+      const SortOption(
+        'created_at',
+        direction: SortOption.ASC,
+      ),
     ],
     limit: 20,
   );

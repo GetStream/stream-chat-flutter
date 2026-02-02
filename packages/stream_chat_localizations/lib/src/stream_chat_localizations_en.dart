@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 part of 'stream_chat_localizations.dart';
 
 /// The translations for English (`en`).
@@ -171,7 +169,8 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Please enable access to your photos and videos so you can share them with friends.';
+      'Please enable access to your photos'
+      '\nand videos so you can share them with friends.';
 
   @override
   String get allowGalleryAccessMessage => 'Allow access to your gallery';
@@ -181,7 +180,8 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Do you want to send a copy of this message to a moderator for further investigation?';
+      'Do you want to send a copy of this message to a'
+      '\nmoderator for further investigation?';
 
   @override
   String get flagLabel => 'FLAG';
@@ -204,7 +204,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this message?';
+      'Are you sure you want to permanently delete this\nmessage?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -446,8 +446,8 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
-  String get enableFileAccessMessage =>
-      'Please enable access to files so you can share them with friends.';
+  String get enableFileAccessMessage => 'Please enable access to files'
+      '\nso you can share them with friends.';
 
   @override
   String get allowFileAccessMessage => 'Allow access to files';
@@ -676,10 +676,4 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Draft';
-
-  @override
-  String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live Location';
-    return '📍 Location';
-  }
 }

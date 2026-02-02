@@ -473,14 +473,13 @@ class Updating implements OutgoingState {
 /// @nodoc
 @JsonSerializable()
 class Deleting implements OutgoingState {
-  const Deleting(
-      {this.scope = MessageDeleteScope.softDeleteForAll, final String? $type})
+  const Deleting({this.hard = false, final String? $type})
       : $type = $type ?? 'deleting';
   factory Deleting.fromJson(Map<String, dynamic> json) =>
       _$DeletingFromJson(json);
 
   @JsonKey()
-  final MessageDeleteScope scope;
+  final bool hard;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -504,16 +503,16 @@ class Deleting implements OutgoingState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Deleting &&
-            (identical(other.scope, scope) || other.scope == scope));
+            (identical(other.hard, hard) || other.hard == hard));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, scope);
+  int get hashCode => Object.hash(runtimeType, hard);
 
   @override
   String toString() {
-    return 'OutgoingState.deleting(scope: $scope)';
+    return 'OutgoingState.deleting(hard: $hard)';
   }
 }
 
@@ -523,9 +522,7 @@ abstract mixin class $DeletingCopyWith<$Res>
   factory $DeletingCopyWith(Deleting value, $Res Function(Deleting) _then) =
       _$DeletingCopyWithImpl;
   @useResult
-  $Res call({MessageDeleteScope scope});
-
-  $MessageDeleteScopeCopyWith<$Res> get scope;
+  $Res call({bool hard});
 }
 
 /// @nodoc
@@ -539,24 +536,14 @@ class _$DeletingCopyWithImpl<$Res> implements $DeletingCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? scope = null,
+    Object? hard = null,
   }) {
     return _then(Deleting(
-      scope: null == scope
-          ? _self.scope
-          : scope // ignore: cast_nullable_to_non_nullable
-              as MessageDeleteScope,
+      hard: null == hard
+          ? _self.hard
+          : hard // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
-  }
-
-  /// Create a copy of OutgoingState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MessageDeleteScopeCopyWith<$Res> get scope {
-    return $MessageDeleteScopeCopyWith<$Res>(_self.scope, (value) {
-      return _then(_self.copyWith(scope: value));
-    });
   }
 }
 
@@ -669,14 +656,13 @@ class Updated implements CompletedState {
 /// @nodoc
 @JsonSerializable()
 class Deleted implements CompletedState {
-  const Deleted(
-      {this.scope = MessageDeleteScope.softDeleteForAll, final String? $type})
+  const Deleted({this.hard = false, final String? $type})
       : $type = $type ?? 'deleted';
   factory Deleted.fromJson(Map<String, dynamic> json) =>
       _$DeletedFromJson(json);
 
   @JsonKey()
-  final MessageDeleteScope scope;
+  final bool hard;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -700,16 +686,16 @@ class Deleted implements CompletedState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Deleted &&
-            (identical(other.scope, scope) || other.scope == scope));
+            (identical(other.hard, hard) || other.hard == hard));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, scope);
+  int get hashCode => Object.hash(runtimeType, hard);
 
   @override
   String toString() {
-    return 'CompletedState.deleted(scope: $scope)';
+    return 'CompletedState.deleted(hard: $hard)';
   }
 }
 
@@ -719,9 +705,7 @@ abstract mixin class $DeletedCopyWith<$Res>
   factory $DeletedCopyWith(Deleted value, $Res Function(Deleted) _then) =
       _$DeletedCopyWithImpl;
   @useResult
-  $Res call({MessageDeleteScope scope});
-
-  $MessageDeleteScopeCopyWith<$Res> get scope;
+  $Res call({bool hard});
 }
 
 /// @nodoc
@@ -735,24 +719,14 @@ class _$DeletedCopyWithImpl<$Res> implements $DeletedCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? scope = null,
+    Object? hard = null,
   }) {
     return _then(Deleted(
-      scope: null == scope
-          ? _self.scope
-          : scope // ignore: cast_nullable_to_non_nullable
-              as MessageDeleteScope,
+      hard: null == hard
+          ? _self.hard
+          : hard // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
-  }
-
-  /// Create a copy of CompletedState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MessageDeleteScopeCopyWith<$Res> get scope {
-    return $MessageDeleteScopeCopyWith<$Res>(_self.scope, (value) {
-      return _then(_self.copyWith(scope: value));
-    });
   }
 }
 
@@ -762,8 +736,6 @@ FailedState _$FailedStateFromJson(Map<String, dynamic> json) {
       return SendingFailed.fromJson(json);
     case 'updatingFailed':
       return UpdatingFailed.fromJson(json);
-    case 'partialUpdatingFailed':
-      return PartialUpdatingFailed.fromJson(json);
     case 'deletingFailed':
       return DeletingFailed.fromJson(json);
 
@@ -802,26 +774,12 @@ class $FailedStateCopyWith<$Res> {
 /// @nodoc
 @JsonSerializable()
 class SendingFailed implements FailedState {
-  const SendingFailed(
-      {this.skipPush = false, this.skipEnrichUrl = false, final String? $type})
-      : $type = $type ?? 'sendingFailed';
+  const SendingFailed({final String? $type}) : $type = $type ?? 'sendingFailed';
   factory SendingFailed.fromJson(Map<String, dynamic> json) =>
       _$SendingFailedFromJson(json);
 
-  @JsonKey()
-  final bool skipPush;
-  @JsonKey()
-  final bool skipEnrichUrl;
-
   @JsonKey(name: 'runtimeType')
   final String $type;
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $SendingFailedCopyWith<SendingFailed> get copyWith =>
-      _$SendingFailedCopyWithImpl<SendingFailed>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
@@ -833,85 +791,29 @@ class SendingFailed implements FailedState {
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is SendingFailed &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush) &&
-            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
-                other.skipEnrichUrl == skipEnrichUrl));
+        (other.runtimeType == runtimeType && other is SendingFailed);
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, skipPush, skipEnrichUrl);
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() {
-    return 'FailedState.sendingFailed(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
-  }
-}
-
-/// @nodoc
-abstract mixin class $SendingFailedCopyWith<$Res>
-    implements $FailedStateCopyWith<$Res> {
-  factory $SendingFailedCopyWith(
-          SendingFailed value, $Res Function(SendingFailed) _then) =
-      _$SendingFailedCopyWithImpl;
-  @useResult
-  $Res call({bool skipPush, bool skipEnrichUrl});
-}
-
-/// @nodoc
-class _$SendingFailedCopyWithImpl<$Res>
-    implements $SendingFailedCopyWith<$Res> {
-  _$SendingFailedCopyWithImpl(this._self, this._then);
-
-  final SendingFailed _self;
-  final $Res Function(SendingFailed) _then;
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  $Res call({
-    Object? skipPush = null,
-    Object? skipEnrichUrl = null,
-  }) {
-    return _then(SendingFailed(
-      skipPush: null == skipPush
-          ? _self.skipPush
-          : skipPush // ignore: cast_nullable_to_non_nullable
-              as bool,
-      skipEnrichUrl: null == skipEnrichUrl
-          ? _self.skipEnrichUrl
-          : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return 'FailedState.sendingFailed()';
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class UpdatingFailed implements FailedState {
-  const UpdatingFailed(
-      {this.skipPush = false, this.skipEnrichUrl = false, final String? $type})
+  const UpdatingFailed({final String? $type})
       : $type = $type ?? 'updatingFailed';
   factory UpdatingFailed.fromJson(Map<String, dynamic> json) =>
       _$UpdatingFailedFromJson(json);
 
-  @JsonKey()
-  final bool skipPush;
-  @JsonKey()
-  final bool skipEnrichUrl;
-
   @JsonKey(name: 'runtimeType')
   final String $type;
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $UpdatingFailedCopyWith<UpdatingFailed> get copyWith =>
-      _$UpdatingFailedCopyWithImpl<UpdatingFailed>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
@@ -923,195 +825,29 @@ class UpdatingFailed implements FailedState {
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is UpdatingFailed &&
-            (identical(other.skipPush, skipPush) ||
-                other.skipPush == skipPush) &&
-            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
-                other.skipEnrichUrl == skipEnrichUrl));
+        (other.runtimeType == runtimeType && other is UpdatingFailed);
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, skipPush, skipEnrichUrl);
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() {
-    return 'FailedState.updatingFailed(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
-  }
-}
-
-/// @nodoc
-abstract mixin class $UpdatingFailedCopyWith<$Res>
-    implements $FailedStateCopyWith<$Res> {
-  factory $UpdatingFailedCopyWith(
-          UpdatingFailed value, $Res Function(UpdatingFailed) _then) =
-      _$UpdatingFailedCopyWithImpl;
-  @useResult
-  $Res call({bool skipPush, bool skipEnrichUrl});
-}
-
-/// @nodoc
-class _$UpdatingFailedCopyWithImpl<$Res>
-    implements $UpdatingFailedCopyWith<$Res> {
-  _$UpdatingFailedCopyWithImpl(this._self, this._then);
-
-  final UpdatingFailed _self;
-  final $Res Function(UpdatingFailed) _then;
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  $Res call({
-    Object? skipPush = null,
-    Object? skipEnrichUrl = null,
-  }) {
-    return _then(UpdatingFailed(
-      skipPush: null == skipPush
-          ? _self.skipPush
-          : skipPush // ignore: cast_nullable_to_non_nullable
-              as bool,
-      skipEnrichUrl: null == skipEnrichUrl
-          ? _self.skipEnrichUrl
-          : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class PartialUpdatingFailed implements FailedState {
-  const PartialUpdatingFailed(
-      {final Map<String, Object?>? set,
-      final List<String>? unset,
-      this.skipEnrichUrl = false,
-      final String? $type})
-      : _set = set,
-        _unset = unset,
-        $type = $type ?? 'partialUpdatingFailed';
-  factory PartialUpdatingFailed.fromJson(Map<String, dynamic> json) =>
-      _$PartialUpdatingFailedFromJson(json);
-
-  final Map<String, Object?>? _set;
-  Map<String, Object?>? get set {
-    final value = _set;
-    if (value == null) return null;
-    if (_set is EqualUnmodifiableMapView) return _set;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
-  }
-
-  final List<String>? _unset;
-  List<String>? get unset {
-    final value = _unset;
-    if (value == null) return null;
-    if (_unset is EqualUnmodifiableListView) return _unset;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
-  }
-
-  @JsonKey()
-  final bool skipEnrichUrl;
-
-  @JsonKey(name: 'runtimeType')
-  final String $type;
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $PartialUpdatingFailedCopyWith<PartialUpdatingFailed> get copyWith =>
-      _$PartialUpdatingFailedCopyWithImpl<PartialUpdatingFailed>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$PartialUpdatingFailedToJson(
-      this,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is PartialUpdatingFailed &&
-            const DeepCollectionEquality().equals(other._set, _set) &&
-            const DeepCollectionEquality().equals(other._unset, _unset) &&
-            (identical(other.skipEnrichUrl, skipEnrichUrl) ||
-                other.skipEnrichUrl == skipEnrichUrl));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_set),
-      const DeepCollectionEquality().hash(_unset),
-      skipEnrichUrl);
-
-  @override
-  String toString() {
-    return 'FailedState.partialUpdatingFailed(set: $set, unset: $unset, skipEnrichUrl: $skipEnrichUrl)';
-  }
-}
-
-/// @nodoc
-abstract mixin class $PartialUpdatingFailedCopyWith<$Res>
-    implements $FailedStateCopyWith<$Res> {
-  factory $PartialUpdatingFailedCopyWith(PartialUpdatingFailed value,
-          $Res Function(PartialUpdatingFailed) _then) =
-      _$PartialUpdatingFailedCopyWithImpl;
-  @useResult
-  $Res call(
-      {Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl});
-}
-
-/// @nodoc
-class _$PartialUpdatingFailedCopyWithImpl<$Res>
-    implements $PartialUpdatingFailedCopyWith<$Res> {
-  _$PartialUpdatingFailedCopyWithImpl(this._self, this._then);
-
-  final PartialUpdatingFailed _self;
-  final $Res Function(PartialUpdatingFailed) _then;
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  $Res call({
-    Object? set = freezed,
-    Object? unset = freezed,
-    Object? skipEnrichUrl = null,
-  }) {
-    return _then(PartialUpdatingFailed(
-      set: freezed == set
-          ? _self._set
-          : set // ignore: cast_nullable_to_non_nullable
-              as Map<String, Object?>?,
-      unset: freezed == unset
-          ? _self._unset
-          : unset // ignore: cast_nullable_to_non_nullable
-              as List<String>?,
-      skipEnrichUrl: null == skipEnrichUrl
-          ? _self.skipEnrichUrl
-          : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return 'FailedState.updatingFailed()';
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class DeletingFailed implements FailedState {
-  const DeletingFailed(
-      {this.scope = MessageDeleteScope.softDeleteForAll, final String? $type})
+  const DeletingFailed({this.hard = false, final String? $type})
       : $type = $type ?? 'deletingFailed';
   factory DeletingFailed.fromJson(Map<String, dynamic> json) =>
       _$DeletingFailedFromJson(json);
 
   @JsonKey()
-  final MessageDeleteScope scope;
+  final bool hard;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
@@ -1135,16 +871,16 @@ class DeletingFailed implements FailedState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is DeletingFailed &&
-            (identical(other.scope, scope) || other.scope == scope));
+            (identical(other.hard, hard) || other.hard == hard));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, scope);
+  int get hashCode => Object.hash(runtimeType, hard);
 
   @override
   String toString() {
-    return 'FailedState.deletingFailed(scope: $scope)';
+    return 'FailedState.deletingFailed(hard: $hard)';
   }
 }
 
@@ -1155,9 +891,7 @@ abstract mixin class $DeletingFailedCopyWith<$Res>
           DeletingFailed value, $Res Function(DeletingFailed) _then) =
       _$DeletingFailedCopyWithImpl;
   @useResult
-  $Res call({MessageDeleteScope scope});
-
-  $MessageDeleteScopeCopyWith<$Res> get scope;
+  $Res call({bool hard});
 }
 
 /// @nodoc
@@ -1172,24 +906,14 @@ class _$DeletingFailedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? scope = null,
+    Object? hard = null,
   }) {
     return _then(DeletingFailed(
-      scope: null == scope
-          ? _self.scope
-          : scope // ignore: cast_nullable_to_non_nullable
-              as MessageDeleteScope,
+      hard: null == hard
+          ? _self.hard
+          : hard // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
-  }
-
-  /// Create a copy of FailedState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MessageDeleteScopeCopyWith<$Res> get scope {
-    return $MessageDeleteScopeCopyWith<$Res>(_self.scope, (value) {
-      return _then(_self.copyWith(scope: value));
-    });
   }
 }
 

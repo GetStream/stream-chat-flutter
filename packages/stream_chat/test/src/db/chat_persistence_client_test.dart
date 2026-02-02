@@ -6,7 +6,6 @@ import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
-import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
@@ -50,14 +49,6 @@ class TestPersistenceClient extends ChatPersistenceClient {
       Future.value();
 
   @override
-  Future<void> deleteMessagesFromUser(
-          {String? cid,
-          required String userId,
-          bool hardDelete = false,
-          DateTime? deletedAt}) =>
-      throw UnimplementedError();
-
-  @override
   Future<void> deleteReactionsByMessageId(List<String> messageIds) =>
       Future.value();
 
@@ -90,7 +81,6 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<List<ChannelState>> getChannelStates(
           {Filter? filter,
           SortOrder<ChannelState>? channelStateSort,
-          int? messageLimit,
           PaginationParams? paginationParams}) =>
       throw UnimplementedError();
 
@@ -189,22 +179,6 @@ class TestPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<void> updateDraftMessages(List<Draft> draftMessages) => Future.value();
-
-  @override
-  Future<List<Location>> getLocationsByCid(String cid) async => [];
-
-  @override
-  Future<Location?> getLocationByMessageId(String messageId) async => null;
-
-  @override
-  Future<void> updateLocations(List<Location> locations) => Future.value();
-
-  @override
-  Future<void> deleteLocationsByCid(String cid) => Future.value();
-
-  @override
-  Future<void> deleteLocationsByMessageIds(List<String> messageIds) =>
-      Future.value();
 }
 
 void main() {

@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 part of 'stream_chat_localizations.dart';
 
 /// The translations for German (`de`).
@@ -164,7 +162,8 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Bitte aktivieren Sie den Zugriff auf Ihre Fotos und Videos, damit Sie sie mit Freunden teilen können.';
+      'Bitte aktivieren Sie den Zugriff auf Ihre Fotos'
+      '\nund Videos, damit Sie sie mit Freunden teilen können.';
 
   @override
   String get allowGalleryAccessMessage => 'Zugang zu Ihrer Galerie gewähren';
@@ -174,7 +173,8 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Möchten Sie eine Kopie dieser Nachricht an einen Moderator für weitere Untersuchungen senden?';
+      'Möchten Sie eine Kopie dieser Nachricht an einen'
+      '\nModerator für weitere Untersuchungen senden?';
 
   @override
   String get flagLabel => 'MELDEN';
@@ -443,7 +443,8 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get enableFileAccessMessage =>
-      'Bitte aktivieren Sie den Zugriff auf Dateien, damit Sie sie mit Freunden teilen können.';
+      'Bitte aktivieren Sie den Zugriff auf Dateien,'
+      '\ndamit Sie sie mit Freunden teilen können.';
 
   @override
   String get allowFileAccessMessage => 'Zugriff auf Dateien zulassen';
@@ -673,10 +674,4 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Entwurf';
-
-  @override
-  String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live-Standort';
-    return '📍 Standort';
-  }
 }

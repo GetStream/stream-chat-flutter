@@ -5,15 +5,13 @@ import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 extension ReactionEntityX on ReactionEntity {
   /// Maps a [ReactionEntity] into [Reaction]
   Reaction toReaction({User? user}) => Reaction(
+        extraData: extraData ?? {},
         type: type,
+        createdAt: createdAt,
         userId: userId,
         user: user,
         messageId: messageId,
         score: score,
-        emojiCode: emojiCode,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        extraData: extraData ?? <String, Object>{},
       );
 }
 
@@ -21,13 +19,11 @@ extension ReactionEntityX on ReactionEntity {
 extension ReactionX on Reaction {
   /// Maps a [Reaction] into [ReactionEntity]
   ReactionEntity toEntity() => ReactionEntity(
-        type: type,
-        userId: userId ?? user?.id,
-        messageId: messageId,
-        score: score,
-        emojiCode: emojiCode,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
         extraData: extraData,
+        type: type,
+        createdAt: createdAt,
+        userId: userId!,
+        messageId: messageId!,
+        score: score,
       );
 }

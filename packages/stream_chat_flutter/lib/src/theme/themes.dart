@@ -19,4 +19,5 @@ export 'poll_options_dialog_theme.dart';
 export 'poll_results_dialog_theme.dart';
 export 'text_theme.dart';
 export 'thread_list_tile_theme.dart';
+export 'voice_attachment_theme.dart';
 export 'voice_recording_attachment_theme.dart';

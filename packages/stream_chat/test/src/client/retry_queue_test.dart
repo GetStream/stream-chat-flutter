@@ -46,10 +46,7 @@ void main() {
       final message = Message(
         id: 'test-message-id',
         text: 'Sample message test',
-        state: MessageState.sendingFailed(
-          skipPush: false,
-          skipEnrichUrl: false,
-        ),
+        state: MessageState.sendingFailed,
       );
       retryQueue.add([message]);
       expect(() => retryQueue.add([message]), returnsNormally);
@@ -61,10 +58,7 @@ void main() {
       final message = Message(
         id: 'test-message-id',
         text: 'Sample message test',
-        state: MessageState.sendingFailed(
-          skipPush: false,
-          skipEnrichUrl: false,
-        ),
+        state: MessageState.sendingFailed,
       );
       retryQueue.add([message]);
       expect(retryQueue.hasMessages, isTrue);

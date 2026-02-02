@@ -53,9 +53,14 @@ class StreamChatThemeData {
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
+    @Deprecated('Use StreamChatConfigurationData.reactionIcons instead')
+    List<StreamReactionIcon>? reactionIcons,
     StreamGalleryHeaderThemeData? imageHeaderTheme,
     StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
+    @Deprecated(
+        "Use 'StreamChatThemeData.voiceRecordingAttachmentTheme' instead")
+    StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
     StreamPollOptionsDialogThemeData? pollOptionsDialogTheme,
@@ -69,8 +74,9 @@ class StreamChatThemeData {
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
-    textTheme ??= StreamTextTheme(brightness: brightness);
-    colorTheme ??= StreamColorTheme(brightness: brightness);
+    final isDark = brightness == Brightness.dark;
+    textTheme ??= isDark ? StreamTextTheme.dark() : StreamTextTheme.light();
+    colorTheme ??= isDark ? StreamColorTheme.dark() : StreamColorTheme.light();
 
     final defaultData = StreamChatThemeData.fromColorAndTextTheme(
       colorTheme,
@@ -87,9 +93,11 @@ class StreamChatThemeData {
       defaultUserImage: defaultUserImage,
       placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
+      reactionIcons: reactionIcons,
       galleryHeaderTheme: imageHeaderTheme,
       galleryFooterTheme: imageFooterTheme,
       messageListViewTheme: messageListViewTheme,
+      voiceRecordingTheme: voiceRecordingTheme,
       pollCreatorTheme: pollCreatorTheme,
       pollInteractorTheme: pollInteractorTheme,
       pollOptionsDialogTheme: pollOptionsDialogTheme,
@@ -128,6 +136,7 @@ class StreamChatThemeData {
     required this.galleryHeaderTheme,
     required this.galleryFooterTheme,
     required this.messageListViewTheme,
+    required this.voiceRecordingTheme,
     required this.pollCreatorTheme,
     required this.pollInteractorTheme,
     required this.pollResultsDialogTheme,
@@ -171,7 +180,7 @@ class StreamChatThemeData {
       color: colorTheme.barsBg,
       titleStyle: textTheme.headlineBold,
       subtitleStyle: textTheme.footnote.copyWith(
-        color: colorTheme.textLowEmphasis,
+        color: const Color(0xff7A7A7A),
       ),
     );
     final channelPreviewTheme = StreamChannelPreviewThemeData(
@@ -236,7 +245,7 @@ class StreamChatThemeData {
         createdAtStyle:
             textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
-        messageBackgroundColor: colorTheme.inputBg,
+        messageBackgroundColor: colorTheme.borders,
         messageBorderColor: colorTheme.borders,
         reactionsBackgroundColor: colorTheme.barsBg,
         reactionsBorderColor: colorTheme.borders,
@@ -300,14 +309,14 @@ class StreamChatThemeData {
         linkHighlightColor: colorTheme.accentPrimary,
         idleBorderGradient: LinearGradient(
           colors: [
-            colorTheme.borders,
-            colorTheme.borders,
+            colorTheme.disabled,
+            colorTheme.disabled,
           ],
         ),
         activeBorderGradient: LinearGradient(
           colors: [
-            colorTheme.borders,
-            colorTheme.borders,
+            colorTheme.disabled,
+            colorTheme.disabled,
           ],
         ),
         useSystemAttachmentPicker: false,
@@ -331,7 +340,7 @@ class StreamChatThemeData {
         bottomSheetCloseIconColor: colorTheme.textHighEmphasis,
       ),
       messageListViewTheme: StreamMessageListViewThemeData(
-        backgroundColor: colorTheme.appBg,
+        backgroundColor: colorTheme.barsBg,
       ),
       pollCreatorTheme: StreamPollCreatorThemeData(
         backgroundColor: colorTheme.appBg,
@@ -594,6 +603,9 @@ class StreamChatThemeData {
         ),
         audioWaveformSliderTheme: audioWaveformSliderTheme,
       ),
+      voiceRecordingTheme: colorTheme.brightness == Brightness.dark
+          ? StreamVoiceRecordingThemeData.dark()
+          : StreamVoiceRecordingThemeData.light(),
     );
   }
 
@@ -635,6 +647,10 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamMessageListView] widget.
   final StreamMessageListViewThemeData messageListViewTheme;
 
+  /// Theme configuration for the [StreamVoiceRecordingListPLayer] widget.
+  @Deprecated("Use 'StreamChatThemeData.voiceRecordingAttachmentTheme' instead")
+  final StreamVoiceRecordingThemeData voiceRecordingTheme;
+
   /// Theme configuration for the [StreamPollCreatorWidget] widget.
   final StreamPollCreatorThemeData pollCreatorTheme;
 
@@ -668,15 +684,6 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamDraftListTile] widget.
   final StreamDraftListTileThemeData draftListTileTheme;
 
-  /// Returns the theme for the message based on the [reverse] parameter.
-  ///
-  /// If [reverse] is true, it returns the [otherMessageTheme], otherwise it
-  /// returns the [ownMessageTheme].
-  StreamMessageThemeData getMessageTheme({bool reverse = false}) {
-    if (reverse) return ownMessageTheme;
-    return otherMessageTheme;
-  }
-
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -691,9 +698,13 @@ class StreamChatThemeData {
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     StreamChannelListHeaderThemeData? channelListHeaderTheme,
+    @Deprecated('Use StreamChatConfigurationData.reactionIcons instead')
+    List<StreamReactionIcon>? reactionIcons,
     StreamGalleryHeaderThemeData? galleryHeaderTheme,
     StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
+    @Deprecated("Use 'voiceRecordingAttachmentTheme' instead")
+    StreamVoiceRecordingThemeData? voiceRecordingTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
     StreamPollResultsDialogThemeData? pollResultsDialogTheme,
@@ -721,6 +732,7 @@ class StreamChatThemeData {
         galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
         galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
         messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
+        voiceRecordingTheme: voiceRecordingTheme ?? this.voiceRecordingTheme,
         pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
         pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
         pollResultsDialogTheme:
@@ -758,6 +770,7 @@ class StreamChatThemeData {
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
       messageListViewTheme:
           messageListViewTheme.merge(other.messageListViewTheme),
+      voiceRecordingTheme: voiceRecordingTheme.merge(other.voiceRecordingTheme),
       pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
       pollInteractorTheme: pollInteractorTheme.merge(other.pollInteractorTheme),
       pollResultsDialogTheme:

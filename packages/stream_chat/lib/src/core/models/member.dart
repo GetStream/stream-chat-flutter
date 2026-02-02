@@ -26,7 +26,6 @@ class Member extends Equatable implements ComparableFieldProvider {
     this.shadowBanned = false,
     this.pinnedAt,
     this.archivedAt,
-    this.deletedMessages = const [],
     this.extraData = const {},
   })  : userId = userId ?? user?.id,
         createdAt = createdAt ?? DateTime.now(),
@@ -54,8 +53,7 @@ class Member extends Equatable implements ComparableFieldProvider {
     'created_at',
     'updated_at',
     'pinned_at',
-    'archived_at',
-    'deleted_messages',
+    'archived_at'
   ];
 
   /// The interested user
@@ -100,12 +98,6 @@ class Member extends Equatable implements ComparableFieldProvider {
   /// The last date of update
   final DateTime updatedAt;
 
-  /// List of message ids deleted by this member only for himself.
-  ///
-  /// These messages are not visible to this member anymore, but are still
-  /// visible to other channel members.
-  final List<String> deletedMessages;
-
   /// Map of custom member extraData.
   final Map<String, Object?> extraData;
 
@@ -126,7 +118,6 @@ class Member extends Equatable implements ComparableFieldProvider {
     bool? banned,
     DateTime? banExpires,
     bool? shadowBanned,
-    List<String>? deletedMessages,
     Map<String, Object?>? extraData,
   }) =>
       Member(
@@ -144,7 +135,6 @@ class Member extends Equatable implements ComparableFieldProvider {
         archivedAt: archivedAt ?? this.archivedAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
-        deletedMessages: deletedMessages ?? this.deletedMessages,
         extraData: extraData ?? this.extraData,
       );
 
@@ -169,7 +159,6 @@ class Member extends Equatable implements ComparableFieldProvider {
         archivedAt,
         createdAt,
         updatedAt,
-        deletedMessages,
         extraData,
       ];
 

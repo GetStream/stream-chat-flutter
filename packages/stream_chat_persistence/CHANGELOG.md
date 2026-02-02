@@ -1,27 +1,6 @@
-## 10.0.0
-
-✅ Added
-
-- Added a new `StreamChatPersistenceClient.deleteMessagesFromUser()` method to delete
-  all messages from a specific user across all channels.
-- Added a new `messageLimit` parameter to the `getChannelStates` method
-  to limit the number of messages fetched per channel.
-- Added support for `Messages.deletedForMe`, `PinnedMessages.deletedForMe`, and
-  `Members.deletedMessages` fields.
-- Added support for `Location` entity in the database.
-- Added support for `emojiCode` and `updatedAt` fields in `Reaction` entity.
-
-## 10.0.0-beta.12
-
-- Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
-
 ## 9.23.0
 
 - Updated `stream_chat` dependency to [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
-
-## 10.0.0-beta.11
-
-- Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.22.0
 
@@ -29,17 +8,9 @@
 
 - Added support for `ChannelModel.filterTags` field.
 
-## 10.0.0-beta.10
-
-- Included the changes from version [`9.21.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
-
 ## 9.21.0
 
 - Updated `stream_chat` dependency to [`9.21.0`](https://pub.dev/packages/stream_chat/changelog).
-
-## 10.0.0-beta.9
-
-- Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.20.0
 
@@ -48,27 +19,9 @@
 - Added support for `Read.lastDeliveredAt` and `Read.lastDeliveredMessageId` fields to track message
   delivery receipts.
 
-## 10.0.0-beta.8
-
-✅ Added
-
-- Added a new `StreamChatPersistenceClient.deleteMessagesFromUser()` method to delete
-  all messages from a specific user across all channels.
-- Added a new `messageLimit` parameter to the `getChannelStates` method
-  to limit the number of messages fetched per channel.
-
-- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
-
 ## 9.19.0
 
 - Updated `stream_chat` dependency to [`9.19.0`](https://pub.dev/packages/stream_chat/changelog).
-
-## 10.0.0-beta.7
-
-- Added support for `Messages.deletedForMe`, `PinnedMessages.deletedForMe`, and
-  `Members.deletedMessages` fields.
-
-- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.18.0
 
@@ -78,28 +31,13 @@
 - Added support for `client.flush()` method to clear database.
 - Added support for `Channel.messageCount` field.
 
-## 10.0.0-beta.6
-
-- Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
-
 ## 9.17.0
 
 - Updated `stream_chat` dependency to [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).
 
-## 10.0.0-beta.5
-
-- Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
-
 ## 9.16.0
 
 - Updated `stream_chat` dependency to [`9.16.0`](https://pub.dev/packages/stream_chat/changelog).
-
-## 10.0.0-beta.4
-
-- Added support for `Location` entity in the database.
-- Added support for `emojiCode` and `updatedAt` fields in `Reaction` entity.
-
-- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.15.0
 
@@ -112,25 +50,13 @@
 
 - Added support for `User.avgResponseTime` field.
 
-## 10.0.0-beta.3
-
-- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
-
 ## 9.14.0
 
 - Updated `stream_chat` dependency to [`9.14.0`](https://pub.dev/packages/stream_chat/changelog).
 
-## 10.0.0-beta.2
-
-- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
-
 ## 9.13.0
 
 - Updated `stream_chat` dependency to [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
-
-## 10.0.0-beta.1
-
-- Updated `stream_chat` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.12.0
 

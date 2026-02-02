@@ -221,7 +221,6 @@ void main() {
 
     tearDown(() {
       channel.dispose();
-      clearInteractions(client);
     });
 
     test('should throw if trying to set `extraData`', () {
@@ -294,270 +293,6 @@ void main() {
               channelId,
               channelType,
             )).called(1);
-      });
-
-      test(
-          'should handle StreamChatNetworkError by adding message to retry queue with skipPush: true, skipEnrichUrl: false',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipPush: true,
-            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sendingFailed(
-                    skipPush: true,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.sendMessage(
-            message,
-            skipPush: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
-      });
-
-      test(
-          'should handle StreamChatNetworkError by adding message to retry queue with skipPush: true, skipEnrichUrl: true',
-          () async {
-        final message = Message(
-          id: 'test-message-id-2',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipPush: true,
-              skipEnrichUrl: true,
-            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sendingFailed(
-                    skipPush: true,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.sendMessage(
-            message,
-            skipPush: true,
-            skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
-      });
-
-      test(
-          'should handle StreamChatNetworkError by adding message to retry queue with skipPush: false, skipEnrichUrl: true',
-          () async {
-        final message = Message(
-          id: 'test-message-id-3',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipEnrichUrl: true,
-            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sendingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.sendMessage(
-            message,
-            skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
-      });
-
-      test(
-          'should handle StreamChatNetworkError by adding message to retry queue with skipPush: false, skipEnrichUrl: false',
-          () async {
-        final message = Message(
-          id: 'test-message-id-4',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sendingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.sendMessage(
-            message,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
-      });
-
-      test('should update message state even when non-retriable error occurs',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello world!',
-          user: client.state.currentUser,
-        );
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            )).thenThrow(StreamChatNetworkError.raw(
-          code: ChatErrorCode.inputError.code,
-          message: 'Input error',
-          data: ErrorResponse()
-            ..code = ChatErrorCode.inputError.code
-            ..message = 'Input error'
-            ..statusCode = 400,
-        ));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.sendingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ]
-          ]),
-        );
-
-        try {
-          await channel.sendMessage(message);
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-        }
       });
 
       test('with attachments should work just fine', () async {
@@ -1020,109 +755,6 @@ void main() {
       );
     });
 
-    group('`.sendStaticLocation`', () {
-      const deviceId = 'test-device-id';
-      const locationId = 'test-location-id';
-      const coordinates = LocationCoordinates(
-        latitude: 40.7128,
-        longitude: -74.0060,
-      );
-
-      test('should create a static location and call sendMessage', () async {
-        when(
-          () => client.sendMessage(any(), channelId, channelType),
-        ).thenAnswer(
-          (_) async => SendMessageResponse()
-            ..message = Message(
-              id: locationId,
-              text: 'Location shared',
-              extraData: const {'custom': 'data'},
-              sharedLocation: Location(
-                channelCid: channel.cid,
-                messageId: locationId,
-                userId: client.state.currentUser?.id,
-                latitude: coordinates.latitude,
-                longitude: coordinates.longitude,
-                createdByDeviceId: deviceId,
-              ),
-            ),
-        );
-
-        final response = await channel.sendStaticLocation(
-          id: locationId,
-          messageText: 'Location shared',
-          createdByDeviceId: deviceId,
-          location: coordinates,
-          extraData: {'custom': 'data'},
-        );
-
-        expect(response, isNotNull);
-        expect(response.message.id, locationId);
-        expect(response.message.text, 'Location shared');
-        expect(response.message.extraData['custom'], 'data');
-        expect(response.message.sharedLocation, isNotNull);
-
-        verify(
-          () => client.sendMessage(any(), channelId, channelType),
-        ).called(1);
-      });
-    });
-
-    group('`.startLiveLocationSharing`', () {
-      const deviceId = 'test-device-id';
-      const locationId = 'test-location-id';
-      final endSharingAt = DateTime.timestamp().add(const Duration(hours: 1));
-      const coordinates = LocationCoordinates(
-        latitude: 40.7128,
-        longitude: -74.0060,
-      );
-
-      test(
-        'should create message with live location and call sendMessage',
-        () async {
-          when(
-            () => client.sendMessage(any(), channelId, channelType),
-          ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = Message(
-                id: locationId,
-                text: 'Location shared',
-                extraData: const {'custom': 'data'},
-                sharedLocation: Location(
-                  channelCid: channel.cid,
-                  messageId: locationId,
-                  userId: client.state.currentUser?.id,
-                  latitude: coordinates.latitude,
-                  longitude: coordinates.longitude,
-                  createdByDeviceId: deviceId,
-                  endAt: endSharingAt,
-                ),
-              ),
-          );
-
-          final response = await channel.startLiveLocationSharing(
-            id: locationId,
-            messageText: 'Location shared',
-            createdByDeviceId: deviceId,
-            location: coordinates,
-            endSharingAt: endSharingAt,
-            extraData: {'custom': 'data'},
-          );
-
-          expect(response, isNotNull);
-          expect(response.message.id, locationId);
-          expect(response.message.text, 'Location shared');
-          expect(response.message.extraData['custom'], 'data');
-          expect(response.message.sharedLocation, isNotNull);
-          expect(response.message.sharedLocation?.endAt, endSharingAt);
-
-          verify(
-            () => client.sendMessage(any(), channelId, channelType),
-          ).called(1);
-        },
-      );
-    });
-
     group('`.createDraft`', () {
       final draftMessage = DraftMessage(text: 'Draft message text');
 
@@ -1549,253 +1181,6 @@ void main() {
               any(that: isSameMessageAs(message)),
             )).called(1);
       });
-
-      test(
-          'should update message state even when error is not StreamChatNetworkError',
-          () async {
-        final message = Message(
-          id: 'test-message-id-error-1',
-          state: MessageState.sent,
-        );
-
-        when(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-              skipEnrichUrl: true,
-            )).thenThrow(ArgumentError('Invalid argument'));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updatingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ]
-          ]),
-        );
-
-        try {
-          await channel.updateMessage(message, skipEnrichUrl: true);
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
-      });
-
-      test(
-          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipPush: false, skipEnrichUrl: true',
-          () async {
-        final message = Message(
-          id: 'test-message-id-retry-1',
-          state: MessageState.sent,
-        );
-
-        // Create a retriable error (data == null)
-        when(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-              skipEnrichUrl: true,
-            )).thenThrow(StreamChatNetworkError.raw(
-          code: ChatErrorCode.requestTimeout.code,
-          message: 'Request timed out',
-        ));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updatingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.updateMessage(message, skipEnrichUrl: true);
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.requestTimeout.code));
-          expect(networkError.isRetriable, isTrue);
-        }
-      });
-
-      test(
-          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipPush: true, skipEnrichUrl: false',
-          () async {
-        final message = Message(
-          id: 'test-message-id-retry-2',
-          state: MessageState.sent,
-        );
-
-        // Create a retriable error (data == null)
-        when(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-              skipPush: true,
-            )).thenThrow(StreamChatNetworkError.raw(
-          code: ChatErrorCode.internalSystemError.code,
-          message: 'Internal system error',
-        ));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updatingFailed(
-                    skipPush: true,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.updateMessage(message, skipPush: true);
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code,
-              equals(ChatErrorCode.internalSystemError.code));
-          expect(networkError.isRetriable, isTrue);
-        }
-      });
-
-      test(
-          'should handle non-retriable StreamChatNetworkError with skipPush: true, skipEnrichUrl: true',
-          () async {
-        final message = Message(
-          id: 'test-message-id-error-2',
-          state: MessageState.sent,
-        );
-
-        when(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-              skipPush: true,
-              skipEnrichUrl: true,
-            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updatingFailed(
-                    skipPush: true,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.updateMessage(
-            message,
-            skipPush: true,
-            skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
-      });
-
-      test(
-          'should handle non-retriable StreamChatNetworkError with skipPush: false, skipEnrichUrl: false',
-          () async {
-        final message = Message(
-          id: 'test-message-id-error-3',
-          state: MessageState.sent,
-        );
-
-        when(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-            )).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updatingFailed(
-                    skipPush: false,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.updateMessage(message);
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
-      });
     });
 
     test('`.partialUpdateMessage`', () async {
@@ -1856,345 +1241,6 @@ void main() {
       ).called(1);
     });
 
-    group('`.partialUpdateMessage` error handling', () {
-      test(
-          'should update message state even when error is not StreamChatNetworkError',
-          () async {
-        final message = Message(
-          id: 'test-message-id-error-partial-1',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-          ),
-        ).thenThrow(ArgumentError('Invalid argument'));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updating,
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ]
-          ]),
-        );
-
-        try {
-          await channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<ArgumentError>());
-        }
-      });
-
-      test(
-          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: true',
-          () async {
-        final message = Message(
-          id: 'test-message-id-retry-partial-1',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        // Create a retriable error (data == null)
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-            skipEnrichUrl: true,
-          ),
-        ).thenThrow(StreamChatNetworkError.raw(
-          code: ChatErrorCode.requestTimeout.code,
-          message: 'Request timed out',
-        ));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updating,
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-            skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.requestTimeout.code));
-          expect(networkError.isRetriable, isTrue);
-        }
-      });
-
-      test(
-          'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: false',
-          () async {
-        final message = Message(
-          id: 'test-message-id-retry-partial-2',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        // Create a retriable error (data == null)
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-          ),
-        ).thenThrow(StreamChatNetworkError.raw(
-          code: ChatErrorCode.internalSystemError.code,
-          message: 'Internal system error',
-        ));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updating,
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code,
-              equals(ChatErrorCode.internalSystemError.code));
-          expect(networkError.isRetriable, isTrue);
-        }
-      });
-
-      test(
-          'should handle non-retriable StreamChatNetworkError with skipEnrichUrl: true',
-          () async {
-        final message = Message(
-          id: 'test-message-id-error-partial-2',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-            skipEnrichUrl: true,
-          ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updating,
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: true,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-            skipEnrichUrl: true,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
-      });
-
-      test(
-          'should handle non-retriable StreamChatNetworkError with skipEnrichUrl: false',
-          () async {
-        final message = Message(
-          id: 'test-message-id-error-partial-3',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-          ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.updating,
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        try {
-          await channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-          );
-        } catch (e) {
-          expect(e, isA<StreamChatNetworkError>());
-
-          final networkError = e as StreamChatNetworkError;
-          expect(networkError.code, equals(ChatErrorCode.notAllowed.code));
-        }
-      });
-    });
-
     group('`.deleteMessage`', () {
       test('should work fine', () async {
         const messageId = 'test-message-id';
@@ -2245,47 +1291,41 @@ void main() {
             uploadState: const UploadState.success(),
           ),
         );
-
         const messageId = 'test-message-id';
         final message = Message(
-          id: messageId,
           attachments: attachments,
+          id: messageId,
           createdAt: DateTime.now(),
           state: MessageState.sent,
         );
 
-        when(
-          () => client.deleteMessage(messageId, hard: true),
-        ).thenAnswer((_) async => EmptyResponse());
+        when(() => client.deleteMessage(messageId, hard: true))
+            .thenAnswer((_) async => EmptyResponse());
 
-        when(
-          () => client.deleteImage(any(), channelId, channelType),
-        ).thenAnswer((_) async => EmptyResponse());
+        when(() => client.deleteImage(any(), channelId, channelType))
+            .thenAnswer((_) async => EmptyResponse());
 
-        when(
-          () => client.deleteFile(any(), channelId, channelType),
-        ).thenAnswer((_) async => EmptyResponse());
+        when(() => client.deleteFile(any(), channelId, channelType))
+            .thenAnswer((_) async => EmptyResponse());
 
         final res = await channel.deleteMessage(message, hard: true);
+
         expect(res, isNotNull);
 
         verify(() => client.deleteMessage(messageId, hard: true)).called(1);
-
-        verify(() => client.deleteImage(any(), channelId, channelType))
-            .called(2);
-
-        verify(() => client.deleteFile(any(), channelId, channelType))
-            .called(1);
+        verify(() => client.deleteImage(
+              any(),
+              channelId,
+              channelType,
+            )).called(2);
       });
 
       test(
-        'should hard delete the message if the state is sending or failed',
+        '''should directly update the state with message as deleted if the state is sending or failed''',
         () async {
           const messageId = 'test-message-id';
           final message = Message(
             id: messageId,
-            text: 'Hello World!',
-            state: MessageState.sending,
           );
 
           expectLater(
@@ -2294,94 +1334,17 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.softDeleted),
                   matchMessageState: true,
                 ),
               ],
-              const [], // message is hard deleted from state
             ]),
           );
-
-          // Add message to channel state first
-          channel.state?.addNewMessage(message);
 
           final res = await channel.deleteMessage(message);
 
           expect(res, isNotNull);
           verifyNever(() => client.deleteMessage(messageId));
-        },
-      );
-    });
-
-    group('`.deleteMessageForMe`', () {
-      test('should work fine', () async {
-        const messageId = 'test-message-id';
-        final message = Message(
-          id: messageId,
-          createdAt: DateTime.now(),
-          state: MessageState.sent,
-        );
-
-        when(() => client.deleteMessageForMe(messageId))
-            .thenAnswer((_) async => EmptyResponse());
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.deletingForMe),
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.deletedForMe),
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        final res = await channel.deleteMessageForMe(message);
-
-        expect(res, isNotNull);
-
-        verify(() => client.deleteMessageForMe(messageId)).called(1);
-      });
-
-      test(
-        'should hard delete the message if the state is sending or failed',
-        () async {
-          const messageId = 'test-message-id';
-          final message = Message(
-            id: messageId,
-            text: 'Hello World!',
-            state: MessageState.sending,
-          );
-
-          expectLater(
-            // skipping first seed message list -> [] messages
-            channel.state?.messagesStream.skip(1),
-            emitsInOrder([
-              [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
-                  matchMessageState: true,
-                ),
-              ],
-              const [], // message is hard deleted from state
-            ]),
-          );
-
-          // Add message to channel state first
-          channel.state?.addNewMessage(message);
-
-          final res = await channel.deleteMessageForMe(message);
-
-          expect(res, isNotNull);
-          verifyNever(() => client.deleteMessageForMe(messageId));
         },
       );
     });
@@ -2733,24 +1696,15 @@ void main() {
 
     group('`.sendReaction`', () {
       test('should work fine', () async {
+        const type = 'test-reaction-type';
         final message = Message(
           id: 'test-message-id',
           state: MessageState.sent,
         );
 
-        const type = 'like';
-        const emojiCode = '👍';
-        const score = 4;
+        final reaction = Reaction(type: type, messageId: message.id);
 
-        final reaction = Reaction(
-          type: type,
-          messageId: message.id,
-          emojiCode: emojiCode,
-          score: score,
-          user: client.state.currentUser,
-        );
-
-        when(() => client.sendReaction(message.id, reaction)).thenAnswer(
+        when(() => client.sendReaction(message.id, type)).thenAnswer(
           (_) async => SendReactionResponse()
             ..message = message
             ..reaction = reaction,
@@ -2775,15 +1729,156 @@ void main() {
           ]),
         );
 
-        final res = await channel.sendReaction(message, reaction);
+        final res = await channel.sendReaction(message, type);
 
         expect(res, isNotNull);
         expect(res.reaction.type, type);
         expect(res.reaction.messageId, message.id);
-        expect(res.reaction.emojiCode, emojiCode);
+
+        verify(() => client.sendReaction(message.id, type)).called(1);
+      });
+
+      test('should work fine with score passed explicitly', () async {
+        const type = 'test-reaction-type';
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sent,
+        );
+
+        const score = 5;
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          score: score,
+        );
+
+        when(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+            )).thenAnswer(
+          (_) async => SendReactionResponse()
+            ..message = message
+            ..reaction = reaction,
+        );
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.sent,
+                  reactionGroups: {
+                    type: ReactionGroup(
+                      count: 1,
+                      sumScores: score,
+                    )
+                  },
+                  latestReactions: [reaction],
+                  ownReactions: [reaction],
+                ),
+                matchReactions: true,
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.sendReaction(
+          message,
+          type,
+          score: score,
+        );
+
+        expect(res, isNotNull);
+        expect(res.reaction.type, type);
+        expect(res.reaction.messageId, message.id);
         expect(res.reaction.score, score);
 
-        verify(() => client.sendReaction(message.id, reaction)).called(1);
+        verify(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+            )).called(1);
+      });
+
+      test('should work fine with score passed explicitly and in extraData',
+          () async {
+        const type = 'test-reaction-type';
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sent,
+        );
+
+        const score = 5;
+        const extraDataScore = 3;
+        const extraData = {
+          'score': extraDataScore,
+        };
+        final reaction = Reaction(
+          type: type,
+          messageId: message.id,
+          score: extraDataScore,
+        );
+
+        when(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+              extraData: extraData,
+            )).thenAnswer(
+          (_) async => SendReactionResponse()
+            ..message = message
+            ..reaction = reaction,
+        );
+
+        expectLater(
+          // skipping first seed message list -> [] messages
+          channel.state?.messagesStream.skip(1),
+          emitsInOrder([
+            [
+              isSameMessageAs(
+                message.copyWith(
+                  state: MessageState.sent,
+                  reactionGroups: {
+                    type: ReactionGroup(
+                      count: 1,
+                      sumScores: extraDataScore,
+                    )
+                  },
+                  latestReactions: [reaction],
+                  ownReactions: [reaction],
+                ),
+                matchReactions: true,
+                matchMessageState: true,
+              ),
+            ],
+          ]),
+        );
+
+        final res = await channel.sendReaction(
+          message,
+          type,
+          score: score,
+          extraData: extraData,
+        );
+
+        expect(res, isNotNull);
+        expect(res.reaction.type, type);
+        expect(res.reaction.messageId, message.id);
+        expect(
+          res.reaction.score,
+          extraDataScore,
+        );
+
+        verify(() => client.sendReaction(
+              message.id,
+              type,
+              score: score,
+              extraData: extraData,
+            )).called(1);
       });
 
       test(
@@ -2795,13 +1890,9 @@ void main() {
             state: MessageState.sent,
           );
 
-          final reaction = Reaction(
-            type: type,
-            messageId: message.id,
-            user: client.state.currentUser,
-          );
+          final reaction = Reaction(type: type, messageId: message.id);
 
-          when(() => client.sendReaction(message.id, reaction))
+          when(() => client.sendReaction(message.id, type))
               .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
           expectLater(
@@ -2836,24 +1927,25 @@ void main() {
           );
 
           try {
-            await channel.sendReaction(message, reaction);
+            await channel.sendReaction(message, type);
           } catch (e) {
             expect(e, isA<StreamChatNetworkError>());
           }
 
-          verify(() => client.sendReaction(message.id, reaction)).called(1);
+          verify(() => client.sendReaction(message.id, type)).called(1);
         },
       );
 
       test(
         '''should override previous reaction if present and `enforceUnique` is true''',
         () async {
+          const userId = 'test-user-id';
           const messageId = 'test-message-id';
           const prevType = 'test-reaction-type';
           final prevReaction = Reaction(
             type: prevType,
             messageId: messageId,
-            user: client.state.currentUser,
+            userId: userId,
           );
           final message = Message(
             id: messageId,
@@ -2872,7 +1964,7 @@ void main() {
           final newReaction = Reaction(
             type: type,
             messageId: messageId,
-            user: client.state.currentUser,
+            userId: userId,
           );
           final newMessage = message.copyWith(
             ownReactions: [newReaction],
@@ -2883,7 +1975,7 @@ void main() {
 
           when(() => client.sendReaction(
                 messageId,
-                newReaction,
+                type,
                 enforceUnique: enforceUnique,
               )).thenAnswer(
             (_) async => SendReactionResponse()
@@ -2907,7 +1999,7 @@ void main() {
 
           final res = await channel.sendReaction(
             message,
-            newReaction,
+            type,
             enforceUnique: enforceUnique,
           );
 
@@ -2917,7 +2009,7 @@ void main() {
 
           verify(() => client.sendReaction(
                 messageId,
-                newReaction,
+                type,
                 enforceUnique: enforceUnique,
               )).called(1);
         },
@@ -2933,13 +2025,9 @@ void main() {
           state: MessageState.sent,
         );
 
-        final reaction = Reaction(
-          type: type,
-          messageId: message.id,
-          user: client.state.currentUser,
-        );
+        final reaction = Reaction(type: type, messageId: message.id);
 
-        when(() => client.sendReaction(message.id, reaction)).thenAnswer(
+        when(() => client.sendReaction(message.id, type)).thenAnswer(
           (_) async => SendReactionResponse()
             ..message = message
             ..reaction = reaction,
@@ -2972,13 +2060,13 @@ void main() {
           ]),
         );
 
-        final res = await channel.sendReaction(message, reaction);
+        final res = await channel.sendReaction(message, type);
 
         expect(res, isNotNull);
         expect(res.reaction.type, type);
         expect(res.reaction.messageId, message.id);
 
-        verify(() => client.sendReaction(message.id, reaction)).called(1);
+        verify(() => client.sendReaction(message.id, type)).called(1);
       });
 
       test(
@@ -2991,13 +2079,9 @@ void main() {
             state: MessageState.sent,
           );
 
-          final reaction = Reaction(
-            type: type,
-            messageId: message.id,
-            user: client.state.currentUser,
-          );
+          final reaction = Reaction(type: type, messageId: message.id);
 
-          when(() => client.sendReaction(message.id, reaction))
+          when(() => client.sendReaction(message.id, type))
               .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
           expectLater(
@@ -3036,25 +2120,26 @@ void main() {
           );
 
           try {
-            await channel.sendReaction(message, reaction);
+            await channel.sendReaction(message, type);
           } catch (e) {
             expect(e, isA<StreamChatNetworkError>());
           }
 
-          verify(() => client.sendReaction(message.id, reaction)).called(1);
+          verify(() => client.sendReaction(message.id, type)).called(1);
         },
       );
 
       test(
         '''should override previous thread reaction if present and `enforceUnique` is true''',
         () async {
+          const userId = 'test-user-id';
           const messageId = 'test-message-id';
           const parentId = 'test-parent-id';
           const prevType = 'test-reaction-type';
           final prevReaction = Reaction(
             type: prevType,
             messageId: messageId,
-            user: client.state.currentUser,
+            userId: userId,
           );
           final message = Message(
             id: messageId,
@@ -3074,7 +2159,7 @@ void main() {
           final newReaction = Reaction(
             type: type,
             messageId: messageId,
-            user: client.state.currentUser,
+            userId: userId,
           );
           final newMessage = message.copyWith(
             ownReactions: [newReaction],
@@ -3085,7 +2170,7 @@ void main() {
 
           when(() => client.sendReaction(
                 messageId,
-                newReaction,
+                type,
                 enforceUnique: enforceUnique,
               )).thenAnswer(
             (_) async => SendReactionResponse()
@@ -3112,7 +2197,7 @@ void main() {
 
           final res = await channel.sendReaction(
             message,
-            newReaction,
+            type,
             enforceUnique: enforceUnique,
           );
 
@@ -3122,7 +2207,7 @@ void main() {
 
           verify(() => client.sendReaction(
                 messageId,
-                newReaction,
+                type,
                 enforceUnique: enforceUnique,
               )).called(1);
         },
@@ -6286,486 +5371,6 @@ void main() {
       });
     });
 
-    group('Location events', () {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      late Channel channel;
-
-      setUp(() {
-        final channelState = _generateChannelState(channelId, channelType);
-        channel = Channel.fromState(client, channelState);
-      });
-
-      tearDown(() {
-        channel.dispose();
-      });
-
-      test('should handle location.shared event', () async {
-        // Verify initial state
-        expect(channel.state?.activeLiveLocations, isEmpty);
-
-        // Create live location
-        final liveLocation = Location(
-          channelCid: channel.cid,
-          userId: 'user1',
-          messageId: 'msg1',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        );
-
-        final locationMessage = Message(
-          id: 'msg1',
-          text: 'Live location shared',
-          sharedLocation: liveLocation,
-        );
-
-        // Create location.shared event
-        final locationSharedEvent = Event(
-          cid: channel.cid,
-          type: EventType.locationShared,
-          message: locationMessage,
-        );
-
-        // Dispatch event
-        client.addEvent(locationSharedEvent);
-
-        // Wait for the event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Check if message was added
-        final messages = channel.state?.messages;
-        final message = messages?.firstWhere((m) => m.id == 'msg1');
-        expect(message, isNotNull);
-
-        // Check if active live location was updated
-        final activeLiveLocations = channel.state?.activeLiveLocations;
-        expect(activeLiveLocations, hasLength(1));
-        expect(activeLiveLocations?.first.messageId, equals('msg1'));
-      });
-
-      test('should handle location.updated event', () async {
-        // Setup initial state with location message
-        final liveLocation = Location(
-          channelCid: channel.cid,
-          userId: 'user1',
-          messageId: 'msg1',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        );
-
-        final locationMessage = Message(
-          id: 'msg1',
-          text: 'Live location shared',
-          sharedLocation: liveLocation,
-        );
-
-        // Add initial message
-        channel.state?.addNewMessage(locationMessage);
-
-        // Create updated location
-        final updatedLocation = liveLocation.copyWith(
-          latitude: 40.7500, // Updated latitude
-          longitude: -74.1000, // Updated longitude
-        );
-
-        final updatedMessage = locationMessage.copyWith(
-          sharedLocation: updatedLocation,
-        );
-
-        // Create location.updated event
-        final locationUpdatedEvent = Event(
-          cid: channel.cid,
-          type: EventType.locationUpdated,
-          message: updatedMessage,
-        );
-
-        // Dispatch event
-        client.addEvent(locationUpdatedEvent);
-
-        // Wait for the event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Check if message was updated
-        final messages = channel.state?.messages;
-        final message = messages?.firstWhere((m) => m.id == 'msg1');
-        expect(message?.sharedLocation?.latitude, equals(40.7500));
-        expect(message?.sharedLocation?.longitude, equals(-74.1000));
-
-        // Check if active live location was updated
-        final activeLiveLocations = channel.state?.activeLiveLocations;
-        expect(activeLiveLocations, hasLength(1));
-        expect(activeLiveLocations?.first.latitude, equals(40.7500));
-        expect(activeLiveLocations?.first.longitude, equals(-74.1000));
-      });
-
-      test('should handle location.expired event', () async {
-        // Setup initial state with location message
-        final liveLocation = Location(
-          channelCid: channel.cid,
-          userId: 'user1',
-          messageId: 'msg1',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        );
-
-        final locationMessage = Message(
-          id: 'msg1',
-          text: 'Live location shared',
-          sharedLocation: liveLocation,
-        );
-
-        // Add initial message
-        channel.state?.addNewMessage(locationMessage);
-        expect(channel.state?.activeLiveLocations, hasLength(1));
-
-        // Create expired location
-        final expiredLocation = liveLocation.copyWith(
-          endAt: DateTime.now().subtract(const Duration(hours: 1)),
-        );
-
-        final expiredMessage = locationMessage.copyWith(
-          sharedLocation: expiredLocation,
-        );
-
-        // Create location.expired event
-        final locationExpiredEvent = Event(
-          cid: channel.cid,
-          type: EventType.locationExpired,
-          message: expiredMessage,
-        );
-
-        // Dispatch event
-        client.addEvent(locationExpiredEvent);
-
-        // Wait for the event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Check if message was updated
-        final messages = channel.state?.messages;
-        final message = messages?.firstWhere((m) => m.id == 'msg1');
-        expect(message?.sharedLocation?.isExpired, isTrue);
-
-        // Check if active live location was removed
-        expect(channel.state?.activeLiveLocations, isEmpty);
-      });
-
-      test('should not add static location to active locations', () async {
-        final staticLocation = Location(
-          channelCid: channel.cid,
-          userId: 'user1',
-          messageId: 'msg1',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device1',
-          // No endAt - static location
-        );
-
-        final staticMessage = Message(
-          id: 'msg1',
-          text: 'Static location shared',
-          sharedLocation: staticLocation,
-        );
-
-        // Create location.shared event
-        final locationSharedEvent = Event(
-          cid: channel.cid,
-          type: EventType.locationShared,
-          message: staticMessage,
-        );
-
-        // Dispatch event
-        client.addEvent(locationSharedEvent);
-
-        // Wait for the event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Check if message was added
-        final messages = channel.state?.messages;
-        final message = messages?.firstWhere((m) => m.id == 'msg1');
-        expect(message?.sharedLocation, isNotNull);
-
-        // Check if active live location was NOT updated (should remain empty)
-        expect(channel.state?.activeLiveLocations, isEmpty);
-      });
-
-      test(
-        'should update active locations when location message is deleted',
-        () async {
-          final liveLocation = Location(
-            channelCid: channel.cid,
-            userId: 'user1',
-            messageId: 'msg1',
-            latitude: 40.7128,
-            longitude: -74.0060,
-            createdByDeviceId: 'device1',
-            endAt: DateTime.now().add(const Duration(hours: 1)),
-          );
-
-          final locationMessage = Message(
-            id: 'msg1',
-            text: 'Live location shared',
-            sharedLocation: liveLocation,
-          );
-
-          // Verify initial state
-          channel.state?.addNewMessage(locationMessage);
-          expect(channel.state?.activeLiveLocations, hasLength(1));
-
-          final messageDeletedEvent = Event(
-            type: EventType.messageDeleted,
-            cid: channel.cid,
-            message: locationMessage.copyWith(
-              type: MessageType.deleted,
-              deletedAt: DateTime.timestamp(),
-            ),
-          );
-
-          // Dispatch event
-          client.addEvent(messageDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify active locations are updated
-          expect(channel.state?.activeLiveLocations, isEmpty);
-        },
-      );
-
-      test('should merge locations with same key', () async {
-        final liveLocation = Location(
-          channelCid: channel.cid,
-          userId: 'user1',
-          messageId: 'msg1',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        );
-
-        final locationMessage = Message(
-          id: 'msg1',
-          text: 'Live location shared',
-          sharedLocation: liveLocation,
-        );
-
-        // Add initial location for setup
-        channel.state?.addNewMessage(locationMessage);
-        expect(channel.state?.activeLiveLocations, hasLength(1));
-
-        // Create new location with same user, channel, and device
-        final newLocation = Location(
-          channelCid: channel.cid,
-          userId: 'user1', // Same user
-          messageId: 'msg2', // Different message
-          latitude: 40.7500,
-          longitude: -74.1000,
-          createdByDeviceId: 'device1', // Same device
-          endAt: DateTime.now().add(const Duration(hours: 2)),
-        );
-
-        final newMessage = Message(
-          id: 'msg2',
-          text: 'Updated location',
-          sharedLocation: newLocation,
-        );
-
-        // Create location.shared event for the new message
-        final locationSharedEvent = Event(
-          cid: channel.cid,
-          type: EventType.locationShared,
-          message: newMessage,
-        );
-
-        // Dispatch event
-        client.addEvent(locationSharedEvent);
-
-        // Wait for the event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Should still have only one active location (merged)
-        final activeLiveLocations = channel.state?.activeLiveLocations;
-        expect(activeLiveLocations, hasLength(1));
-        expect(activeLiveLocations?.first.messageId, equals('msg2'));
-        expect(activeLiveLocations?.first.latitude, equals(40.7500));
-      });
-
-      test(
-        'should handle multiple active locations from different devices',
-        () async {
-          final liveLocation = Location(
-            channelCid: channel.cid,
-            userId: 'user1',
-            messageId: 'msg1',
-            latitude: 40.7128,
-            longitude: -74.0060,
-            createdByDeviceId: 'device1',
-            endAt: DateTime.now().add(const Duration(hours: 1)),
-          );
-
-          final locationMessage = Message(
-            id: 'msg1',
-            text: 'Live location shared',
-            sharedLocation: liveLocation,
-          );
-
-          // Add first location for setup
-          channel.state?.addNewMessage(locationMessage);
-          expect(channel.state?.activeLiveLocations, hasLength(1));
-
-          // Create location from different device
-          final location2 = Location(
-            channelCid: channel.cid,
-            userId: 'user1', // Same user
-            messageId: 'msg2',
-            latitude: 34.0522,
-            longitude: -118.2437,
-            createdByDeviceId: 'device2', // Different device
-            endAt: DateTime.now().add(const Duration(hours: 1)),
-          );
-
-          final message2 = Message(
-            id: 'msg2',
-            text: 'Location from device 2',
-            sharedLocation: location2,
-          );
-
-          // Create location.shared event for the second message
-          final locationSharedEvent = Event(
-            cid: channel.cid,
-            type: EventType.locationShared,
-            message: message2,
-          );
-
-          // Dispatch event
-          client.addEvent(locationSharedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Should have two active locations
-          expect(channel.state?.activeLiveLocations, hasLength(2));
-        },
-      );
-
-      test('should handle location messages in threads', () async {
-        final parentMessage = Message(
-          id: 'parent1',
-          text: 'Thread parent',
-        );
-
-        // Add parent message first for setup
-        channel.state?.addNewMessage(parentMessage);
-
-        final liveLocation = Location(
-          channelCid: channel.cid,
-          userId: 'user1',
-          messageId: 'thread-msg1',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        );
-
-        final threadLocationMessage = Message(
-          id: 'thread-msg1',
-          text: 'Live location in thread',
-          parentId: 'parent1',
-          sharedLocation: liveLocation,
-        );
-
-        // Create location.shared event for the thread message
-        final locationSharedEvent = Event(
-          cid: channel.cid,
-          type: EventType.locationShared,
-          message: threadLocationMessage,
-        );
-
-        // Dispatch event
-        client.addEvent(locationSharedEvent);
-
-        // Wait for the event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Check if thread message was added
-        final thread = channel.state?.threads['parent1'];
-        expect(thread, contains(threadLocationMessage));
-
-        // Check if location was added to active locations
-        final activeLiveLocations = channel.state?.activeLiveLocations;
-        expect(activeLiveLocations, hasLength(1));
-        expect(activeLiveLocations?.first.messageId, equals('thread-msg1'));
-      });
-
-      test('should update thread location messages', () async {
-        final parentMessage = Message(
-          id: 'parent1',
-          text: 'Thread parent',
-        );
-
-        final liveLocation = Location(
-          channelCid: channel.cid,
-          userId: 'user1',
-          messageId: 'thread-msg1',
-          latitude: 40.7128,
-          longitude: -74.0060,
-          createdByDeviceId: 'device1',
-          endAt: DateTime.now().add(const Duration(hours: 1)),
-        );
-
-        final threadLocationMessage = Message(
-          id: 'thread-msg1',
-          text: 'Live location in thread',
-          parentId: 'parent1',
-          sharedLocation: liveLocation,
-        );
-
-        // Add messages
-        channel.state?.addNewMessage(parentMessage);
-        channel.state?.addNewMessage(threadLocationMessage);
-
-        // Update the location
-        final updatedLocation = liveLocation.copyWith(
-          latitude: 40.7500,
-          longitude: -74.1000,
-        );
-
-        final updatedThreadMessage = threadLocationMessage.copyWith(
-          sharedLocation: updatedLocation,
-        );
-
-        // Create location.updated event for the thread message
-        final locationUpdatedEvent = Event(
-          cid: channel.cid,
-          type: EventType.locationUpdated,
-          message: updatedThreadMessage,
-        );
-
-        // Dispatch event
-        client.addEvent(locationUpdatedEvent);
-
-        // Wait for the event to be processed
-        await Future.delayed(Duration.zero);
-
-        // Check if thread message was updated
-        final thread = channel.state?.threads['parent1'];
-        final threadMessage = thread?.firstWhere((m) => m.id == 'thread-msg1');
-        expect(threadMessage?.sharedLocation?.latitude, equals(40.7500));
-        expect(threadMessage?.sharedLocation?.longitude, equals(-74.1000));
-
-        // Check if active location was updated
-        final activeLiveLocations = channel.state?.activeLiveLocations;
-        expect(activeLiveLocations, hasLength(1));
-        expect(activeLiveLocations?.first.latitude, equals(40.7500));
-        expect(activeLiveLocations?.first.longitude, equals(-74.1000));
-      });
-    });
-
     group('Channel push preference events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
@@ -6857,491 +5462,6 @@ void main() {
           updatedPushPreference.disabledUntil,
         );
       });
-    });
-
-    group('User messages deleted event', () {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      late Channel channel;
-      late MockPersistenceClient persistenceClient;
-
-      setUp(() {
-        persistenceClient = MockPersistenceClient();
-        when(() => client.chatPersistenceClient).thenReturn(persistenceClient);
-        when(() => persistenceClient.deleteMessagesFromUser(
-              cid: any(named: 'cid'),
-              userId: any(named: 'userId'),
-              hardDelete: any(named: 'hardDelete'),
-              deletedAt: any(named: 'deletedAt'),
-            )).thenAnswer((_) async {});
-        when(() => persistenceClient.deleteMessageByIds(any()))
-            .thenAnswer((_) async {});
-        when(() => persistenceClient.deletePinnedMessageByIds(any()))
-            .thenAnswer((_) async {});
-        when(() => persistenceClient.getChannelThreads(any()))
-            .thenAnswer((_) async => <String, List<Message>>{});
-
-        final channelState = _generateChannelState(channelId, channelType);
-        channel = Channel.fromState(client, channelState);
-      });
-
-      tearDown(() {
-        channel.dispose();
-      });
-
-      test(
-        'should soft delete all messages from user when hardDelete is false',
-        () async {
-          // Setup: Add messages from different users
-          final user1 = User(id: 'user-1', name: 'User 1');
-          final user2 = User(id: 'user-2', name: 'User 2');
-
-          final message1 = Message(
-            id: 'msg-1',
-            text: 'Message from user 1',
-            user: user1,
-          );
-          final message2 = Message(
-            id: 'msg-2',
-            text: 'Another message from user 1',
-            user: user1,
-          );
-          final message3 = Message(
-            id: 'msg-3',
-            text: 'Message from user 2',
-            user: user2,
-          );
-
-          channel.state?.addNewMessage(message1);
-          channel.state?.addNewMessage(message2);
-          channel.state?.addNewMessage(message3);
-
-          // Verify initial state
-          expect(channel.state?.messages.length, equals(3));
-          expect(
-            channel.state?.messages.where((m) => m.user?.id == 'user-1').length,
-            equals(2),
-          );
-          expect(
-            channel.state?.messages.where((m) => m.user?.id == 'user-2').length,
-            equals(1),
-          );
-
-          // Create user.messages.deleted event (soft delete)
-          final deletedAt = DateTime.now();
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            user: user1,
-            hardDelete: false,
-            createdAt: deletedAt,
-          );
-
-          // Dispatch event
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify user1's messages are soft deleted
-          expect(channel.state?.messages.length, equals(3));
-          final deletedMessages = channel.state?.messages
-              .where((m) => m.user?.id == 'user-1')
-              .toList();
-          expect(deletedMessages?.length, equals(2));
-          for (final message in deletedMessages!) {
-            expect(message.type, equals(MessageType.deleted));
-            expect(message.deletedAt, isNotNull);
-            expect(message.state.isDeleted, isTrue);
-          }
-
-          // Verify user2's message is unaffected
-          final user2Message =
-              channel.state?.messages.firstWhere((m) => m.id == 'msg-3');
-          expect(user2Message?.type, isNot(MessageType.deleted));
-          expect(user2Message?.deletedAt, isNull);
-        },
-      );
-
-      test(
-        'should hard delete all messages from user when hardDelete is true',
-        () async {
-          // Setup: Add messages from different users
-          final user1 = User(id: 'user-1', name: 'User 1');
-          final user2 = User(id: 'user-2', name: 'User 2');
-
-          final message1 = Message(
-            id: 'msg-1',
-            text: 'Message from user 1',
-            user: user1,
-          );
-          final message2 = Message(
-            id: 'msg-2',
-            text: 'Another message from user 1',
-            user: user1,
-          );
-          final message3 = Message(
-            id: 'msg-3',
-            text: 'Message from user 2',
-            user: user2,
-          );
-
-          channel.state?.addNewMessage(message1);
-          channel.state?.addNewMessage(message2);
-          channel.state?.addNewMessage(message3);
-
-          // Verify initial state
-          expect(channel.state?.messages.length, equals(3));
-
-          // Create user.messages.deleted event (hard delete)
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            user: user1,
-            hardDelete: true,
-          );
-
-          // Dispatch event
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify user1's messages are removed
-          expect(channel.state?.messages.length, equals(1));
-          expect(
-            channel.state?.messages.any((m) => m.user?.id == 'user-1'),
-            isFalse,
-          );
-
-          // Verify user2's message still exists
-          final user2Message =
-              channel.state?.messages.firstWhere((m) => m.id == 'msg-3');
-          expect(user2Message, isNotNull);
-          expect(user2Message?.user?.id, equals('user-2'));
-        },
-      );
-
-      test(
-        'should handle thread messages from user',
-        () async {
-          // Setup: Add parent and thread messages
-          final user1 = User(id: 'user-1', name: 'User 1');
-          final user2 = User(id: 'user-2', name: 'User 2');
-
-          final parentMessage = Message(
-            id: 'parent-msg',
-            text: 'Parent message',
-            user: user2,
-          );
-          final threadMessage1 = Message(
-            id: 'thread-msg-1',
-            text: 'Thread message from user 1',
-            user: user1,
-            parentId: 'parent-msg',
-          );
-          final threadMessage2 = Message(
-            id: 'thread-msg-2',
-            text: 'Another thread message from user 1',
-            user: user1,
-            parentId: 'parent-msg',
-          );
-
-          channel.state?.addNewMessage(parentMessage);
-          channel.state?.addNewMessage(threadMessage1);
-          channel.state?.addNewMessage(threadMessage2);
-
-          // Verify initial state
-          expect(channel.state?.messages.length, equals(1));
-          expect(channel.state?.threads['parent-msg']?.length, equals(2));
-
-          // Create user.messages.deleted event (soft delete)
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            user: user1,
-            hardDelete: false,
-          );
-
-          // Dispatch event
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify thread messages are soft deleted
-          final threadMessages = channel.state?.threads['parent-msg'];
-          expect(threadMessages?.length, equals(2));
-          for (final message in threadMessages!) {
-            expect(message.type, equals(MessageType.deleted));
-            expect(message.state.isDeleted, isTrue);
-          }
-
-          // Verify parent message is unaffected
-          final parent = channel.state?.messages.first;
-          expect(parent?.type, isNot(MessageType.deleted));
-        },
-      );
-
-      test(
-        'should do nothing when user is null',
-        () async {
-          // Setup: Add messages
-          final user1 = User(id: 'user-1', name: 'User 1');
-          final message1 = Message(
-            id: 'msg-1',
-            text: 'Message from user 1',
-            user: user1,
-          );
-
-          channel.state?.addNewMessage(message1);
-
-          // Verify initial state
-          expect(channel.state?.messages.length, equals(1));
-
-          // Create user.messages.deleted event without user
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            hardDelete: false,
-          );
-
-          // Dispatch event
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify messages are unaffected
-          expect(channel.state?.messages.length, equals(1));
-          expect(
-            channel.state?.messages.first.type,
-            isNot(MessageType.deleted),
-          );
-        },
-      );
-
-      test(
-        'should handle empty message list',
-        () async {
-          // Setup: Empty channel
-          expect(channel.state?.messages.length, equals(0));
-
-          // Create user.messages.deleted event
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            user: User(id: 'user-1'),
-            hardDelete: false,
-          );
-
-          // Dispatch event - should not throw
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify state is still empty
-          expect(channel.state?.messages.length, equals(0));
-        },
-      );
-
-      test(
-        'should delete messages from persistence when hardDelete is true',
-        () async {
-          // Setup: Add messages from different users
-          final user1 = User(id: 'user-1', name: 'User 1');
-          final user2 = User(id: 'user-2', name: 'User 2');
-
-          final message1 = Message(
-            id: 'msg-1',
-            text: 'Message from user 1',
-            user: user1,
-          );
-          final message2 = Message(
-            id: 'msg-2',
-            text: 'Another message from user 1',
-            user: user1,
-          );
-          final message3 = Message(
-            id: 'msg-3',
-            text: 'Message from user 2',
-            user: user2,
-          );
-
-          channel.state?.addNewMessage(message1);
-          channel.state?.addNewMessage(message2);
-          channel.state?.addNewMessage(message3);
-
-          // Verify initial state
-          expect(channel.state?.messages.length, equals(3));
-
-          // Create user.messages.deleted event (hard delete)
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            user: user1,
-            hardDelete: true,
-          );
-
-          // Dispatch event
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify messages are removed from persistence
-          verify(
-            () => persistenceClient.deleteMessageByIds(['msg-1', 'msg-2']),
-          ).called(1);
-          verify(
-            () =>
-                persistenceClient.deletePinnedMessageByIds(['msg-1', 'msg-2']),
-          ).called(1);
-
-          // Verify user1's messages are removed from state
-          expect(channel.state?.messages.length, equals(1));
-          expect(
-            channel.state?.messages.any((m) => m.user?.id == 'user-1'),
-            isFalse,
-          );
-        },
-      );
-
-      test(
-        'should not delete from persistence when hardDelete is false',
-        () async {
-          // Setup: Add messages
-          final user1 = User(id: 'user-1', name: 'User 1');
-          final message1 = Message(
-            id: 'msg-1',
-            text: 'Message from user 1',
-            user: user1,
-          );
-
-          channel.state?.addNewMessage(message1);
-
-          // Create user.messages.deleted event (soft delete)
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            user: user1,
-            hardDelete: false,
-          );
-
-          // Dispatch event
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify persistence deletion methods were NOT called
-          verifyNever(() => persistenceClient.deleteMessageByIds(any()));
-          verifyNever(() => persistenceClient.deletePinnedMessageByIds(any()));
-
-          // Verify message is soft deleted (still in state)
-          expect(channel.state?.messages.length, equals(1));
-          expect(
-              channel.state?.messages.first.type, equals(MessageType.deleted));
-        },
-      );
-
-      test(
-        'should delete all user messages including those only in storage',
-        () async {
-          final user1 = User(id: 'user-1', name: 'User 1');
-          final user2 = User(id: 'user-2', name: 'User 2');
-
-          final stateMessage1 = Message(
-            id: 'msg-1',
-            text: 'Message from user 1 in state',
-            user: user1,
-            pinned: true,
-          );
-          final stateMessage2 = Message(
-            id: 'msg-2',
-            text: 'Message from user 2 in state',
-            user: user2,
-          );
-          final stateThreadMessage1 = Message(
-            id: 'thread-msg-1',
-            text: 'Thread message from user 1 in state',
-            user: user1,
-            parentId: 'msg-1',
-          );
-          final stateThreadMessage2 = Message(
-            id: 'thread-msg-2',
-            text: 'Another thread message from user 2 in state',
-            user: user2,
-            parentId: 'msg-1',
-          );
-
-          // Load the state with only 2 messages and 1 thread with 2 replies.
-          // Note: In reality, storage may contain many more user1 messages
-          // (e.g., older messages not loaded into state yet), but the delete
-          // operation should remove ALL of them from storage.
-          channel.state?.addNewMessage(stateMessage1);
-          channel.state?.addNewMessage(stateMessage2);
-          channel.state?.addNewMessage(stateThreadMessage1);
-          channel.state?.addNewMessage(stateThreadMessage2);
-
-          // Verify initial state has only 2 messages and 1 thread with 2 replies
-          expect(channel.state?.messages.length, equals(2));
-          expect(channel.state?.threads['msg-1']?.length, equals(2));
-
-          // Create user.messages.deleted event (hard delete)
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            user: user1,
-            hardDelete: true,
-          );
-
-          // Dispatch event
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify user1's messages are removed from state
-          expect(channel.state?.messages.length, equals(1));
-          expect(channel.state?.threads['msg-1']?.length, equals(1));
-
-          expect(
-            channel.state?.messages.any((m) => m.user?.id == 'user-1'),
-            isFalse,
-          );
-
-          expect(
-            channel.state?.threads['msg-1']?.any((m) => m.user?.id == 'user-1'),
-            isFalse,
-          );
-
-          // Verify persistence delete was called - this handles ALL messages
-          // in storage (both those in state AND those only in storage)
-          verify(
-            () => persistenceClient.deleteMessagesFromUser(
-              cid: channel.cid,
-              userId: user1.id,
-              hardDelete: true,
-              deletedAt: any(named: 'deletedAt'),
-            ),
-          ).called(1);
-
-          // Verify in-state messages were also removed from state's persistence
-          final capturedIds = verify(
-            () => persistenceClient.deleteMessageByIds(captureAny()),
-          ).captured.first as List<String>;
-
-          expect(
-            capturedIds,
-            containsAll([
-              'msg-1', // state message
-              'thread-msg-1', // state thread message
-            ]),
-          );
-        },
-      );
     });
   });
 
@@ -7888,12 +6008,6 @@ void main() {
       'QueryPollVotes',
       ChannelCapability.queryPollVotes,
       (channel) => channel.canQueryPollVotes,
-    );
-
-    testCapability(
-      'ShareLocation',
-      ChannelCapability.shareLocation,
-      (channel) => channel.canShareLocation,
     );
 
     test('returns correct values with multiple capabilities', () {
@@ -8935,320 +7049,5 @@ void main() {
         ).called(1);
       },
     );
-  });
-
-  group('Retry functionality with parameter preservation', () {
-    late final client = MockStreamChatClient();
-    const channelId = 'test-channel-id';
-    const channelType = 'test-channel-type';
-    late Channel channel;
-
-    setUpAll(() {
-      registerFallbackValue(FakeMessage());
-      registerFallbackValue(<Message>[]);
-      registerFallbackValue(FakeAttachmentFile());
-
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-
-      final clientState = FakeClientState();
-      when(() => client.state).thenReturn(clientState);
-
-      final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, error) {
-          return error is StreamChatNetworkError && error.isRetriable;
-        },
-      );
-      when(() => client.retryPolicy).thenReturn(retryPolicy);
-    });
-
-    setUp(() {
-      final channelState = _generateChannelState(channelId, channelType);
-      channel = Channel.fromState(client, channelState);
-    });
-
-    tearDown(() {
-      channel.dispose();
-    });
-
-    group('retryMessage method', () {
-      test(
-          'should call sendMessage with preserved skipPush and skipEnrichUrl parameters',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.sendingFailed(
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-        );
-
-        final sendMessageResponse = SendMessageResponse()
-          ..message = message.copyWith(state: MessageState.sent);
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipPush: true,
-              skipEnrichUrl: true,
-            )).thenAnswer((_) async => sendMessageResponse);
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
-
-        verify(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipPush: true,
-              skipEnrichUrl: true,
-            )).called(1);
-      });
-
-      test('should call sendMessage with preserved skipPush parameter',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.sendingFailed(
-            skipPush: true,
-            skipEnrichUrl: false,
-          ),
-        );
-
-        final sendMessageResponse = SendMessageResponse()
-          ..message = message.copyWith(state: MessageState.sent);
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipPush: true,
-            )).thenAnswer((_) async => sendMessageResponse);
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
-
-        verify(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipPush: true,
-            )).called(1);
-      });
-
-      test('should call sendMessage with preserved skipEnrichUrl parameter',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.sendingFailed(
-            skipPush: false,
-            skipEnrichUrl: true,
-          ),
-        );
-
-        final sendMessageResponse = SendMessageResponse()
-          ..message = message.copyWith(state: MessageState.sent);
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipEnrichUrl: true,
-            )).thenAnswer((_) async => sendMessageResponse);
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
-
-        verify(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-              skipEnrichUrl: true,
-            )).called(1);
-      });
-
-      test(
-          'should call sendMessage with preserved false skipPush and skipEnrichUrl parameters',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.sendingFailed(
-            skipPush: false,
-            skipEnrichUrl: false,
-          ),
-        );
-
-        final sendMessageResponse = SendMessageResponse()
-          ..message = message.copyWith(state: MessageState.sent);
-
-        when(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            )).thenAnswer((_) async => sendMessageResponse);
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
-
-        verify(() => client.sendMessage(
-              any(that: isSameMessageAs(message)),
-              channelId,
-              channelType,
-            )).called(1);
-      });
-
-      test(
-          'should call updateMessage with preserved skipPush, skipEnrichUrl parameter',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          text: 'Hello, World!',
-          state: MessageState.updatingFailed(
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-        );
-
-        final updateMessageResponse = UpdateMessageResponse()
-          ..message = message.copyWith(state: MessageState.updated);
-
-        when(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-              skipPush: true,
-              skipEnrichUrl: true,
-            )).thenAnswer((_) async => updateMessageResponse);
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<UpdateMessageResponse>());
-
-        verify(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-              skipPush: true,
-              skipEnrichUrl: true,
-            )).called(1);
-      });
-
-      test(
-          'should call updateMessage with preserved false skipPush, skipEnrichUrl parameter',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.updatingFailed(
-            skipPush: false,
-            skipEnrichUrl: false,
-          ),
-        );
-
-        final updateMessageResponse = UpdateMessageResponse()
-          ..message = message.copyWith(state: MessageState.updated);
-
-        when(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-            )).thenAnswer((_) async => updateMessageResponse);
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<UpdateMessageResponse>());
-
-        verify(() => client.updateMessage(
-              any(that: isSameMessageAs(message)),
-            )).called(1);
-      });
-
-      test('should call deleteMessage with preserved hard parameter', () async {
-        final message = Message(
-          id: 'test-message-id',
-          createdAt: DateTime.now(),
-          state: MessageState.hardDeletingFailed,
-        );
-
-        when(() => client.deleteMessage(
-              message.id,
-              hard: true,
-            )).thenAnswer((_) async => EmptyResponse());
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
-
-        verify(() => client.deleteMessage(
-              message.id,
-              hard: true,
-            )).called(1);
-      });
-
-      test('should call deleteMessage with preserved false hard parameter',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          createdAt: DateTime.now(),
-          state: MessageState.softDeletingFailed,
-        );
-
-        when(() => client.deleteMessage(
-              message.id,
-            )).thenAnswer((_) async => EmptyResponse());
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
-
-        verify(() => client.deleteMessage(
-              message.id,
-            )).called(1);
-      });
-
-      test('should call deleteMessageForMe for deletingForMeFailed state',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          createdAt: DateTime.now(),
-          state: MessageState.deletingForMeFailed,
-        );
-
-        when(() => client.deleteMessageForMe(message.id))
-            .thenAnswer((_) async => EmptyResponse());
-
-        final result = await channel.retryMessage(message);
-
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
-
-        verify(() => client.deleteMessageForMe(message.id)).called(1);
-      });
-
-      test('should throw AssertionError when message state is not failed',
-          () async {
-        final message = Message(
-          id: 'test-message-id',
-          state: MessageState.sent,
-        );
-
-        expect(() => channel.retryMessage(message),
-            throwsA(isA<AssertionError>()));
-      });
-    });
   });
 }

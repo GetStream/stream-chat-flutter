@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
@@ -7,21 +6,18 @@ part 'reaction.g.dart';
 
 /// The class that defines a reaction
 @JsonSerializable()
-class Reaction extends Equatable {
+class Reaction {
   /// Constructor used for json serialization
   Reaction({
     this.messageId,
+    DateTime? createdAt,
     required this.type,
     this.user,
     String? userId,
-    this.score = 1,
-    this.emojiCode,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    this.score = 0,
     this.extraData = const {},
   })  : userId = userId ?? user?.id,
-        createdAt = createdAt ?? DateTime.timestamp(),
-        updatedAt = updatedAt ?? DateTime.timestamp();
+        createdAt = createdAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Reaction.fromJson(Map<String, dynamic> json) =>
@@ -31,34 +27,25 @@ class Reaction extends Equatable {
       ));
 
   /// The messageId to which the reaction belongs
-  @JsonKey(includeToJson: false)
   final String? messageId;
 
   /// The type of the reaction
   final String type;
 
-  /// The score of the reaction (ie. number of reactions sent)
-  final int score;
-
-  /// The emoji code of the reaction (used for notifications)
-  @JsonKey(includeIfNull: false)
-  final String? emojiCode;
+  /// The date of the reaction
+  @JsonKey(includeToJson: false)
+  final DateTime createdAt;
 
   /// The user that sent the reaction
   @JsonKey(includeToJson: false)
   final User? user;
 
+  /// The score of the reaction (ie. number of reactions sent)
+  final int score;
+
   /// The userId that sent the reaction
   @JsonKey(includeToJson: false)
   final String? userId;
-
-  /// The date of the reaction
-  @JsonKey(includeToJson: false)
-  final DateTime createdAt;
-
-  /// The date of the reaction update
-  @JsonKey(includeToJson: false)
-  final DateTime updatedAt;
 
   /// Reaction custom extraData
   final Map<String, Object?> extraData;
@@ -66,13 +53,11 @@ class Reaction extends Equatable {
   /// Map of custom user extraData
   static const topLevelFields = [
     'message_id',
+    'created_at',
     'type',
     'user',
     'user_id',
     'score',
-    'emoji_code',
-    'created_at',
-    'updated_at',
   ];
 
   /// Serialize to json
@@ -83,24 +68,20 @@ class Reaction extends Equatable {
   /// Creates a copy of [Reaction] with specified attributes overridden.
   Reaction copyWith({
     String? messageId,
+    DateTime? createdAt,
     String? type,
     User? user,
     String? userId,
     int? score,
-    String? emojiCode,
-    DateTime? createdAt,
-    DateTime? updatedAt,
     Map<String, Object?>? extraData,
   }) =>
       Reaction(
         messageId: messageId ?? this.messageId,
+        createdAt: createdAt ?? this.createdAt,
         type: type ?? this.type,
         user: user ?? this.user,
         userId: userId ?? this.userId,
         score: score ?? this.score,
-        emojiCode: emojiCode ?? this.emojiCode,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
         extraData: extraData ?? this.extraData,
       );
 
@@ -108,26 +89,11 @@ class Reaction extends Equatable {
   /// given [other] reaction.
   Reaction merge(Reaction other) => copyWith(
         messageId: other.messageId,
+        createdAt: other.createdAt,
         type: other.type,
         user: other.user,
         userId: other.userId,
         score: other.score,
-        emojiCode: other.emojiCode,
-        createdAt: other.createdAt,
-        updatedAt: other.updatedAt,
         extraData: other.extraData,
       );
-
-  @override
-  List<Object?> get props => [
-        messageId,
-        type,
-        user,
-        userId,
-        score,
-        emojiCode,
-        createdAt,
-        updatedAt,
-        extraData,
-      ];
 }

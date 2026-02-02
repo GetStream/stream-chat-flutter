@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
@@ -33,7 +32,6 @@ class ChannelState implements ComparableFieldProvider {
     this.draft,
     this.pendingMessages,
     this.pushPreferences,
-    this.activeLiveLocations,
   });
 
   /// The channel to which this state belongs
@@ -88,9 +86,6 @@ class ChannelState implements ComparableFieldProvider {
   /// The push preferences for this channel if it exists.
   final ChannelPushPreference? pushPreferences;
 
-  /// The list of active live locations in the channel.
-  final List<Location>? activeLiveLocations;
-
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) =>
       _$ChannelStateFromJson(json);
@@ -111,7 +106,6 @@ class ChannelState implements ComparableFieldProvider {
     Object? draft = _nullConst,
     List<Message>? pendingMessages,
     ChannelPushPreference? pushPreferences,
-    List<Location>? activeLiveLocations,
   }) =>
       ChannelState(
         channel: channel ?? this.channel,
@@ -125,7 +119,6 @@ class ChannelState implements ComparableFieldProvider {
         draft: draft == _nullConst ? this.draft : draft as Draft?,
         pendingMessages: pendingMessages ?? this.pendingMessages,
         pushPreferences: pushPreferences ?? this.pushPreferences,
-        activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
       );
 
   @override

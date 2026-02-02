@@ -66,8 +66,8 @@ final _channelListHeaderThemeControl = StreamChannelListHeaderThemeData(
       width: 40,
     ),
   ),
-  color: const StreamColorTheme.light().barsBg,
-  titleStyle: const StreamTextTheme.light().headlineBold,
+  color: StreamColorTheme.light().barsBg,
+  titleStyle: StreamTextTheme.light().headlineBold,
 );
 
 final _channelListHeaderThemeControlMidLerp = StreamChannelListHeaderThemeData(
@@ -94,6 +94,6 @@ final _channelListHeaderThemeControlDark = StreamChannelListHeaderThemeData(
       width: 40,
     ),
   ),
-  color: const StreamColorTheme.dark().barsBg,
-  titleStyle: const StreamTextTheme.dark().headlineBold,
+  color: StreamColorTheme.dark().barsBg,
+  titleStyle: StreamTextTheme.dark().headlineBold,
 );

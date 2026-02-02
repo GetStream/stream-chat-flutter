@@ -163,8 +163,8 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get addMoreFilesLabel => '파일을 추가함';
 
   @override
-  String get enablePhotoAndVideoAccessMessage =>
-      '친구와 공유할 수 있도록 사진과 동영상에 액세스할 수 있도록 설정하십시오.';
+  String get enablePhotoAndVideoAccessMessage => '친구와 공유할 수 있도록 사진과'
+      '\n동영상에 액세스할 수 있도록 설정하십시오.';
 
   @override
   String get allowGalleryAccessMessage => '갤러리에 대한 액세스를 허용합니다';
@@ -655,10 +655,4 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => '임시글';
-
-  @override
-  String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 실시간 위치';
-    return '📍 위치';
-  }
 }

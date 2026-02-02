@@ -1,6 +1,6 @@
 // coverage:ignore-file
 import 'package:drift/drift.dart';
-import 'package:stream_chat_persistence/src/converter/converter.dart';
+import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Members] table in [MoorChatDatabase].
@@ -50,12 +50,6 @@ class Members extends Table {
 
   /// The last date of update
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
-
-  /// List of message ids deleted by the member only for himself.
-  ///
-  /// These messages are now marked deleted for this member, but are still
-  /// kept as regular to other channel members.
-  TextColumn get deletedMessages => text().map(ListConverter<String>())();
 
   @override
   Set<Column> get primaryKey => {userId, channelCid};

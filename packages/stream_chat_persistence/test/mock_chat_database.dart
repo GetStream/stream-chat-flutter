@@ -64,10 +64,6 @@ class MockChatDatabase extends Mock implements DriftChatDatabase {
   DraftMessageDao? _draftMessageDao;
 
   @override
-  LocationDao get locationDao => _locationDao ??= MockLocationDao();
-  LocationDao? _locationDao;
-
-  @override
   Future<void> flush() => Future.value();
 
   @override
@@ -100,5 +96,3 @@ class MockPollDao extends Mock implements PollDao {}
 class MockPollVoteDao extends Mock implements PollVoteDao {}
 
 class MockDraftMessageDao extends Mock implements DraftMessageDao {}
-
-class MockLocationDao extends Mock implements LocationDao {}
