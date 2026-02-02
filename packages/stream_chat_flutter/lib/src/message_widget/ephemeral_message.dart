@@ -39,9 +39,10 @@ class StreamEphemeralMessage extends StatelessWidget {
           child: GiphyEphemeralMessage(
             message: message,
             onActionPressed: (name, value) {
-              return streamChannel.channel.sendAction(message, {
-                name: value,
-              }).ignore();
+              streamChannel.channel.sendAction(
+                message,
+                {name: value},
+              );
             },
           ),
         ),

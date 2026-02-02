@@ -145,14 +145,14 @@ void main() {
 
 // Light theme control
 final _galleryFooterThemeDataControl = StreamGalleryFooterThemeData(
-  backgroundColor: const StreamColorTheme.light().barsBg,
-  shareIconColor: const StreamColorTheme.light().textHighEmphasis,
-  titleTextStyle: const StreamTextTheme.light().headlineBold,
-  gridIconButtonColor: const StreamColorTheme.light().textHighEmphasis,
-  bottomSheetBackgroundColor: const StreamColorTheme.light().barsBg,
-  bottomSheetBarrierColor: const StreamColorTheme.light().overlay,
-  bottomSheetCloseIconColor: const StreamColorTheme.light().textHighEmphasis,
-  bottomSheetPhotosTextStyle: const StreamTextTheme.light().headlineBold,
+  backgroundColor: StreamColorTheme.light().barsBg,
+  shareIconColor: StreamColorTheme.light().textHighEmphasis,
+  titleTextStyle: StreamTextTheme.light().headlineBold,
+  gridIconButtonColor: StreamColorTheme.light().textHighEmphasis,
+  bottomSheetBackgroundColor: StreamColorTheme.light().barsBg,
+  bottomSheetBarrierColor: StreamColorTheme.light().overlay,
+  bottomSheetCloseIconColor: StreamColorTheme.light().textHighEmphasis,
+  bottomSheetPhotosTextStyle: StreamTextTheme.light().headlineBold,
 );
 
 // Mid-lerp theme control
@@ -177,12 +177,12 @@ const _galleryFooterThemeDataControlMidLerp = StreamGalleryFooterThemeData(
 
 // Dark theme control
 final _galleryFooterThemeDataControlDark = StreamGalleryFooterThemeData(
-  backgroundColor: const StreamColorTheme.dark().barsBg,
-  shareIconColor: const StreamColorTheme.dark().textHighEmphasis,
-  titleTextStyle: const StreamTextTheme.dark().headlineBold,
-  gridIconButtonColor: const StreamColorTheme.dark().textHighEmphasis,
-  bottomSheetBackgroundColor: const StreamColorTheme.dark().barsBg,
-  bottomSheetBarrierColor: const StreamColorTheme.dark().overlay,
-  bottomSheetCloseIconColor: const StreamColorTheme.dark().textHighEmphasis,
-  bottomSheetPhotosTextStyle: const StreamTextTheme.dark().headlineBold,
+  backgroundColor: StreamColorTheme.dark().barsBg,
+  shareIconColor: StreamColorTheme.dark().textHighEmphasis,
+  titleTextStyle: StreamTextTheme.dark().headlineBold,
+  gridIconButtonColor: StreamColorTheme.dark().textHighEmphasis,
+  bottomSheetBackgroundColor: StreamColorTheme.dark().barsBg,
+  bottomSheetBarrierColor: StreamColorTheme.dark().overlay,
+  bottomSheetCloseIconColor: StreamColorTheme.dark().textHighEmphasis,
+  bottomSheetPhotosTextStyle: StreamTextTheme.dark().headlineBold,
 );

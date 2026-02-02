@@ -25,7 +25,6 @@ class PlatformWidgetBuilder extends StatelessWidget {
     this.mobile,
     this.desktop,
     this.web,
-    this.desktopOrWeb,
   });
 
   /// The child widget.
@@ -40,21 +39,12 @@ class PlatformWidgetBuilder extends StatelessWidget {
   /// The widget to build for web platforms.
   final PlatformTargetBuilder? web;
 
-  /// The widget to build for desktop or web platforms.
-  ///
-  /// Note: The widget will prefer the [desktop] or [web] widget if a
-  /// combination of desktop/web and desktopOrWeb is provided.
-  final PlatformTargetBuilder? desktopOrWeb;
-
   @override
   Widget build(BuildContext context) {
-    final webWidget = web ?? desktopOrWeb;
-    final desktopWidget = desktop ?? desktopOrWeb;
-
     return PlatformWidget(
-      desktop: (context) => desktopWidget?.call(context, child),
+      desktop: (context) => desktop?.call(context, child),
       mobile: (context) => mobile?.call(context, child),
-      web: (context) => webWidget?.call(context, child),
+      web: (context) => web?.call(context, child),
     );
   }
 }

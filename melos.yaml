@@ -25,7 +25,6 @@ command:
     # List of all the dependencies used in the project.
     dependencies:
       async: ^2.11.0
-      avatar_glow: ^3.0.0
       cached_network_image: ^3.3.1
       chewie: ^1.8.1
       collection: ^1.17.2
@@ -35,7 +34,7 @@ command:
       device_info_plus: '>=11.0.0 <13.0.0'
       diacritic: ^0.1.5
       dio: ^5.4.3+1
-      drift: ^2.28.0
+      drift: ^2.22.1
       equatable: ^2.0.5
       ezanimation: ^0.6.0
       firebase_core: ^3.0.0
@@ -44,8 +43,6 @@ command:
       file_selector: ^1.0.3
       flutter_app_badger: ^1.5.0
       flutter_local_notifications: ^18.0.1
-      flutter_map: ^8.1.1
-      flutter_map_animations: ^0.9.0
       flutter_markdown: ^0.7.2+1
       flutter_portal: ^1.1.4
       flutter_secure_storage: ^9.2.2
@@ -53,7 +50,6 @@ command:
       flutter_svg: ^2.0.10+1
       freezed_annotation: ">=2.4.1 <4.0.0"
       gal: ^2.3.1
-      geolocator: ^13.0.0
       get_thumbnail_video: ^0.7.3
       go_router: ^14.6.2
       http_parser: ^4.0.2
@@ -63,7 +59,6 @@ command:
       jose: ^0.3.4
       json_annotation: ^4.9.0
       just_audio: ">=0.9.38 <0.11.0"
-      latlong2: ^0.9.1
       logging: ^1.2.0
       lottie: ^3.1.2
       media_kit: ^1.2.2
@@ -84,11 +79,11 @@ command:
       share_plus: ">=11.0.0 <13.0.0"
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
-      stream_chat: ^10.0.0-beta.12
-      stream_chat_flutter: ^10.0.0-beta.12
-      stream_chat_flutter_core: ^10.0.0-beta.12
-      stream_chat_localizations: ^10.0.0-beta.12
-      stream_chat_persistence: ^10.0.0-beta.12
+      stream_chat: ^9.23.0
+      stream_chat_flutter: ^9.23.0
+      stream_chat_flutter_core: ^9.23.0
+      stream_chat_localizations: ^9.23.0
+      stream_chat_persistence: ^9.23.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       synchronized: ^3.1.0+1
@@ -103,7 +98,7 @@ command:
       alchemist: ">=0.11.0 <0.14.0"
       build_runner: ^2.4.9
       connectivity_plus_platform_interface: ^2.0.0
-      drift_dev: ^2.28.0
+      drift_dev: ^2.22.1
       fake_async: ^1.3.1
       faker_dart: ^0.2.1
       flutter_launcher_icons: ^0.14.2

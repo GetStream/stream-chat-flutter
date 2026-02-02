@@ -34,7 +34,9 @@
       "poll_id": null,
       "restricted_visibility": [
         "user-id-3"
-      ]
+      ],
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "dry-meadow-0-e8e74482-b4cd-48db-9d1e-30e6c191786f",
@@ -49,7 +51,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "dry-meadow-0-53e6299f-9b97-4a9c-a27e-7e2dde49b7e0",
@@ -64,7 +68,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "dry-meadow-0-80925be0-786e-40a5-b225-486518dafd35",
@@ -79,7 +85,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "dry-meadow-0-64d7970f-ede8-4b31-9738-1bc1756d2bfe",
@@ -94,7 +102,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "withered-cell-0-84cbd760-cf55-4f7e-9207-c5f66cccc6dc",
@@ -109,7 +119,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "dry-meadow-0-e9203588-43c3-40b1-91f7-f217fc42aa53",
@@ -124,7 +136,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "withered-cell-0-7e3552d7-7a0d-45f2-a856-e91b23a7e240",
@@ -139,7 +153,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "dry-meadow-0-1ffeafd4-e4fc-4c84-9394-9d7cb10fff42",
@@ -154,7 +170,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "dry-meadow-0-3f147324-12c8-4b41-9fb5-2db88d065efa",
@@ -169,7 +187,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "dry-meadow-0-51a348ae-0c0a-44de-a556-eac7891c0cf0",
@@ -184,7 +204,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "icy-recipe-7-a29e237b-8d81-4a97-9bc8-d42bca3f1356",
@@ -199,7 +221,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "icy-recipe-7-935c396e-ddf8-4a9a-951c-0a12fa5bf055",
@@ -214,7 +238,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "throbbing-boat-5-1e4d5730-5ff0-4d25-9948-9f34ffda43e4",
@@ -229,7 +255,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "snowy-credit-3-3e0c1a0d-d22f-42ee-b2a1-f9f49477bf21",
@@ -244,7 +272,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "snowy-credit-3-3319537e-2d0e-4876-8170-a54f046e4b7d",
@@ -259,7 +289,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "snowy-credit-3-cfaf0b46-1daa-49c5-947c-b16d6697487d",
@@ -274,7 +306,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "snowy-credit-3-cebe25a7-a3a3-49fc-9919-91c6725e81f3",
@@ -289,7 +323,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "divine-glade-9-0cea9262-5766-48e9-8b22-311870aed3bf",
@@ -304,7 +340,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "red-firefly-9-c4e9007b-bb7d-4238-ae08-5f8e3cd03d73",
@@ -319,7 +357,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "bitter-glade-2-02aee4eb-4093-4736-808b-2de75820e854",
@@ -334,7 +374,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "morning-sea-1-0c700bcb-46dd-4224-b590-e77bdbccc480",
@@ -349,7 +391,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "ancient-salad-0-53e8b4e6-5b7b-43ad-aeee-8bfb6a9ed0be",
@@ -364,7 +408,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "ancient-salad-0-8c225075-bd4c-42e2-8024-530aae13cd40",
@@ -379,7 +425,9 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     },
     {
       "id": "proud-sea-7-17802096-cbf8-4e3c-addd-4ee31f4c8b5c",
@@ -394,11 +442,12 @@
       "silent": false,
       "pinned": false,
       "pin_expires": null,
-      "poll_id": null
+      "poll_id": null,
+      "draft": null,
+      "reminder": null
     }
   ],
   "pinned_messages": [],
   "members": [],
-  "active_live_locations": [],
   "watcher_count": 5
 }

@@ -4,21 +4,8 @@ import 'package:flutter/material.dart';
 /// Class for holding text theme
 /// {@endtemplate}
 class StreamTextTheme {
-  /// Creates a [StreamTextTheme] instance based on the provided [brightness].
-  ///
-  /// Returns a light theme when [brightness] is [Brightness.light] and
-  /// a dark theme when [brightness] is [Brightness.dark].
-  factory StreamTextTheme({
-    Brightness brightness = Brightness.light,
-  }) {
-    return switch (brightness) {
-      Brightness.light => const StreamTextTheme.light(),
-      Brightness.dark => const StreamTextTheme.dark(),
-    };
-  }
-
   /// Initialise light text theme
-  const StreamTextTheme.light({
+  StreamTextTheme.light({
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.w500,
@@ -62,7 +49,7 @@ class StreamTextTheme {
   });
 
   /// Initialise with dark theme
-  const StreamTextTheme.dark({
+  StreamTextTheme.dark({
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.w500,

@@ -10,7 +10,6 @@ void main() {
       final reaction = Reaction.fromJson(jsonFixture('reaction.json'));
       expect(reaction.messageId, '76cd8c82-b557-4e48-9d12-87995d3a0e04');
       expect(reaction.createdAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
-      expect(reaction.updatedAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
       expect(reaction.type, 'wow');
       expect(
         reaction.user?.toJson(),
@@ -28,14 +27,13 @@ void main() {
       );
       expect(reaction.score, 1);
       expect(reaction.userId, '2de0297c-f3f2-489d-b930-ef77342edccf');
-      expect(reaction.emojiCode, '😮');
+      expect(reaction.extraData, {'updated_at': '2020-01-28T22:17:31.108742Z'});
     });
 
     test('should serialize to json correctly', () {
       final reaction = Reaction(
         messageId: '76cd8c82-b557-4e48-9d12-87995d3a0e04',
         createdAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
-        updatedAt: DateTime.parse('2020-01-28T22:17:31.108742Z'),
         type: 'wow',
         user: User(
           id: '2de0297c-f3f2-489d-b930-ef77342edccf',
@@ -43,16 +41,16 @@ void main() {
           name: 'Daisy Morgan',
         ),
         userId: '2de0297c-f3f2-489d-b930-ef77342edccf',
-        extraData: const {'bananas': 'yes'},
-        emojiCode: '😮',
+        extraData: {'bananas': 'yes'},
+        score: 1,
       );
 
       expect(
         reaction.toJson(),
         {
+          'message_id': '76cd8c82-b557-4e48-9d12-87995d3a0e04',
           'type': 'wow',
           'score': 1,
-          'emoji_code': '😮',
           'bananas': 'yes',
         },
       );
@@ -64,8 +62,6 @@ void main() {
       expect(newReaction.messageId, '76cd8c82-b557-4e48-9d12-87995d3a0e04');
       expect(
           newReaction.createdAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
-      expect(
-          newReaction.updatedAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
       expect(newReaction.type, 'wow');
       expect(
         newReaction.user?.toJson(),
@@ -83,15 +79,14 @@ void main() {
       );
       expect(newReaction.score, 1);
       expect(newReaction.userId, '2de0297c-f3f2-489d-b930-ef77342edccf');
-      expect(newReaction.emojiCode, '😮');
+      expect(
+          newReaction.extraData, {'updated_at': '2020-01-28T22:17:31.108742Z'});
 
       final newUserCreateTime = DateTime.now();
 
       newReaction = reaction.copyWith(
         type: 'lol',
-        emojiCode: '😂',
         createdAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
-        updatedAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
         extraData: {},
         messageId: 'test',
         score: 2,
@@ -104,13 +99,8 @@ void main() {
       );
 
       expect(newReaction.type, 'lol');
-      expect(newReaction.emojiCode, '😂');
       expect(
         newReaction.createdAt,
-        DateTime.parse('2021-01-28T22:17:31.108742Z'),
-      );
-      expect(
-        newReaction.updatedAt,
         DateTime.parse('2021-01-28T22:17:31.108742Z'),
       );
       expect(newReaction.extraData, {});
@@ -134,9 +124,8 @@ void main() {
       final newReaction = reaction.merge(
         Reaction(
           type: 'lol',
-          emojiCode: '😂',
           createdAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
-          updatedAt: DateTime.parse('2021-01-28T22:17:31.108742Z'),
+          extraData: {},
           messageId: 'test',
           score: 2,
           user: User(
@@ -149,13 +138,8 @@ void main() {
       );
 
       expect(newReaction.type, 'lol');
-      expect(newReaction.emojiCode, '😂');
       expect(
         newReaction.createdAt,
-        DateTime.parse('2021-01-28T22:17:31.108742Z'),
-      );
-      expect(
-        newReaction.updatedAt,
         DateTime.parse('2021-01-28T22:17:31.108742Z'),
       );
       expect(newReaction.extraData, {});

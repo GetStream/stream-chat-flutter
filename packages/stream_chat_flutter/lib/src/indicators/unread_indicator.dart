@@ -7,9 +7,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@endtemplate}
 class StreamUnreadIndicator extends StatelessWidget {
   /// Displays the total unread count.
-  const StreamUnreadIndicator({
+  StreamUnreadIndicator({
     super.key,
-  }) : _unreadType = const _TotalUnreadCount();
+    @Deprecated('Use StreamUnreadIndicator.channels instead') String? cid,
+  }) : _unreadType = switch (cid) {
+          final cid? => _UnreadChannels(cid: cid),
+          _ => const _TotalUnreadCount(),
+        };
 
   /// Displays the unreadChannel count.
   ///

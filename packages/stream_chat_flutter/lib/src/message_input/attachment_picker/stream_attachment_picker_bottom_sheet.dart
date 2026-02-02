@@ -1,83 +1,76 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/stream_gallery_picker.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template streamAttachmentPickerOptionsBuilder}
-/// Signature for a function that creates a list of [AttachmentPickerOption]s
-/// to be used in the attachment picker.
+/// Shows a modal material design bottom sheet.
 ///
-/// The function receives the [BuildContext] and a list of [defaultOptions]
-/// that can be modified or extended.
-/// {@endtemplate}
-typedef AttachmentPickerOptionsBuilder<T extends AttachmentPickerOption>
-    = List<T> Function(BuildContext context, List<T> defaultOptions);
-
-/// Shows a modal bottom sheet with the Stream attachment picker.
+/// A modal bottom sheet is an alternative to a menu or a dialog and prevents
+/// the user from interacting with the rest of the app.
 ///
-/// The picker supports two modes:
+/// A closely related widget is a persistent bottom sheet, which shows
+/// information that supplements the primary content of the app without
+/// preventing the use from interacting with the app. Persistent bottom sheets
+/// can be created and displayed with the [showBottomSheet] function or the
+/// [ScaffoldState.showBottomSheet] method.
 ///
-/// - **Tabbed interface**: Typically used on mobile platforms. Provide
-///   [TabbedAttachmentPickerOption] values in [customOptions]. This mode is
-///   active when [useSystemAttachmentPicker] is false (default).
+/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// the bottom sheet. It is only used when the method is called. Its
+/// corresponding widget can be safely removed from the tree before the bottom
+/// sheet is closed.
 ///
-/// - **System integration**: Used on web, desktop, or when
-///   [useSystemAttachmentPicker] is true. Provide
-///   [SystemAttachmentPickerOption] values in [customOptions].
+/// The `isScrollControlled` parameter specifies whether this is a route for
+/// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
+/// to have a bottom sheet that has a scrollable child such as a [ListView] or
+/// a [GridView] and have the bottom sheet be draggable, you should set this
+/// parameter to true.
 ///
-/// When using the system picker, all [customOptions] must be
-/// [SystemAttachmentPickerOption] instances. If any other type is included,
-/// an [ArgumentError] is thrown.
+/// The `useRootNavigator` parameter ensures that the root navigator is used to
+/// display the [BottomSheet] when set to `true`. This is useful in the case
+/// that a modal [BottomSheet] needs to be displayed above all other content
+/// but the caller is inside another [Navigator].
 ///
-/// Example using the tabbed interface:
-/// ```dart
-/// showStreamAttachmentPickerModalBottomSheet(
-///   context: context,
-///   customOptions: [
-///     TabbedAttachmentPickerOption(
-///       key: 'gallery',
-///       icon: Icon(Icons.photo),
-///       supportedTypes: [AttachmentPickerType.images],
-///       optionViewBuilder: (context, controller) {
-///         return CustomGalleryWidget();
-///       },
-///     ),
-///   ],
-/// );
-/// ```
+/// The [isDismissible] parameter specifies whether the bottom sheet will be
+/// dismissed when user taps on the scrim.
 ///
-/// Example using the system picker:
-/// ```dart
-/// showStreamAttachmentPickerModalBottomSheet(
-///   context: context,
-///   useSystemAttachmentPicker: true,
-///   customOptions: [
-///     SystemAttachmentPickerOption(
-///       key: 'upload',
-///       type: AttachmentPickerType.files,
-///       icon: Icon(Icons.upload_file),
-///       title: 'Upload File',
-///       onTap: (context, controller) async {
-///         // Handle file picker
-///       },
-///     ),
-///   ],
-/// );
-/// ```
+/// The [enableDrag] parameter specifies whether the bottom sheet can be
+/// dragged up and down and dismissed by swiping downwards.
 ///
-/// Returns a [Future] that completes with the value passed to [Navigator.pop],
-/// or `null` if the sheet was dismissed.
+/// The optional [backgroundColor], [elevation], [shape], [clipBehavior],
+/// [constraints] and [transitionAnimationController]
+/// parameters can be passed in to customize the appearance and behavior of
+/// modal bottom sheets (see the documentation for these on [BottomSheet]
+/// for more details).
+///
+/// The [transitionAnimationController] controls the bottom sheet's entrance and
+/// exit animations if provided.
+///
+/// The optional `routeSettings` parameter sets the [RouteSettings]
+/// of the modal bottom sheet sheet.
+/// This is particularly useful in the case that a user wants to observe
+/// [PopupRoute]s within a [NavigatorObserver].
+///
+/// Returns a `Future` that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the modal bottom sheet was closed.
+///
+/// See also:
+///
+///  * [BottomSheet], which becomes the parent of the widget returned by the
+///    function passed as the `builder` argument to [showModalBottomSheet].
+///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
+///    non-modal bottom sheets.
+///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
+///    that grows and then becomes scrollable once it reaches its maximum size.
+///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   required BuildContext context,
-  AttachmentPickerOptionsBuilder? optionsBuilder,
+  Iterable<AttachmentPickerOption>? customOptions,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   Poll? initialPoll,
   PollConfig? pollConfig,
-  GalleryPickerConfig? galleryPickerConfig,
   List<Attachment>? initialAttachments,
-  Map<String, Object?>? initialExtraData,
   StreamAttachmentPickerController? controller,
+  ErrorListener? onError,
   Color? backgroundColor,
   double? elevation,
   BoxConstraints? constraints,
@@ -87,15 +80,21 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
   bool isDismissible = true,
   bool enableDrag = true,
   bool useSystemAttachmentPicker = false,
+  @Deprecated("Use 'useSystemAttachmentPicker' instead.")
+  bool useNativeAttachmentPickerOnMobile = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Clip? clipBehavior = Clip.hardEdge,
   ShapeBorder? shape,
+  ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
+  ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
+  int attachmentThumbnailQuality = 100,
+  double attachmentThumbnailScale = 1,
 }) {
   final colorTheme = StreamChatTheme.of(context).colorTheme;
   final color = backgroundColor ?? colorTheme.inputBg;
 
-  return showModalBottomSheet(
+  return showModalBottomSheet<T>(
     context: context,
     backgroundColor: color,
     elevation: elevation,
@@ -110,31 +109,53 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
     routeSettings: routeSettings,
     transitionAnimationController: transitionAnimationController,
     builder: (BuildContext context) {
-      return StreamAttachmentPickerBottomSheetBuilder(
+      return StreamPlatformAttachmentPickerBottomSheetBuilder(
         controller: controller,
         initialPoll: initialPoll,
         initialAttachments: initialAttachments,
-        initialExtraData: initialExtraData,
         builder: (context, controller, child) {
           final isWebOrDesktop = switch (CurrentPlatform.type) {
-            PlatformType.android || PlatformType.ios => false,
-            _ => true,
+            PlatformType.web ||
+            PlatformType.macOS ||
+            PlatformType.linux ||
+            PlatformType.windows =>
+              true,
+            _ => false,
           };
 
-          final useSystemPicker = useSystemAttachmentPicker || isWebOrDesktop;
+          final useSystemPicker = useSystemAttachmentPicker || //
+              useNativeAttachmentPickerOnMobile;
 
-          final builder = switch (useSystemPicker) {
-            true => systemAttachmentPickerBuilder,
-            false => tabbedAttachmentPickerBuilder,
-          };
+          if (useSystemPicker || isWebOrDesktop) {
+            return webOrDesktopAttachmentPickerBuilder.call(
+              context: context,
+              onError: onError,
+              controller: controller,
+              allowedTypes: allowedTypes,
+              customOptions: customOptions?.map(
+                WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption,
+              ),
+              initialPoll: initialPoll,
+              pollConfig: pollConfig,
+              attachmentThumbnailSize: attachmentThumbnailSize,
+              attachmentThumbnailFormat: attachmentThumbnailFormat,
+              attachmentThumbnailQuality: attachmentThumbnailQuality,
+              attachmentThumbnailScale: attachmentThumbnailScale,
+            );
+          }
 
-          return builder.call(
+          return mobileAttachmentPickerBuilder.call(
             context: context,
+            onError: onError,
             controller: controller,
             allowedTypes: allowedTypes,
+            customOptions: customOptions,
+            initialPoll: initialPoll,
             pollConfig: pollConfig,
-            galleryPickerConfig: galleryPickerConfig,
-            optionsBuilder: optionsBuilder,
+            attachmentThumbnailSize: attachmentThumbnailSize,
+            attachmentThumbnailFormat: attachmentThumbnailFormat,
+            attachmentThumbnailQuality: attachmentThumbnailQuality,
+            attachmentThumbnailScale: attachmentThumbnailScale,
           );
         },
       );
@@ -143,13 +164,13 @@ Future<T?> showStreamAttachmentPickerModalBottomSheet<T>({
 }
 
 /// Builds the attachment picker bottom sheet.
-class StreamAttachmentPickerBottomSheetBuilder extends StatefulWidget {
+class StreamPlatformAttachmentPickerBottomSheetBuilder extends StatefulWidget {
   /// Creates a new instance of the widget.
-  const StreamAttachmentPickerBottomSheetBuilder({
+  const StreamPlatformAttachmentPickerBottomSheetBuilder({
     super.key,
+    this.customOptions,
     this.initialPoll,
     this.initialAttachments,
-    this.initialExtraData,
     this.child,
     this.controller,
     required this.builder,
@@ -165,25 +186,25 @@ class StreamAttachmentPickerBottomSheetBuilder extends StatefulWidget {
     Widget? child,
   ) builder;
 
+  /// The custom options to be displayed in the attachment picker.
+  final List<AttachmentPickerOption>? customOptions;
+
   /// The initial poll.
   final Poll? initialPoll;
 
   /// The initial attachments.
   final List<Attachment>? initialAttachments;
 
-  /// The initial extra data for the attachment picker.
-  final Map<String, Object?>? initialExtraData;
-
   /// The controller.
   final StreamAttachmentPickerController? controller;
 
   @override
-  State<StreamAttachmentPickerBottomSheetBuilder> createState() =>
-      _StreamAttachmentPickerBottomSheetBuilderState();
+  State<StreamPlatformAttachmentPickerBottomSheetBuilder> createState() =>
+      _StreamPlatformAttachmentPickerBottomSheetBuilderState();
 }
 
-class _StreamAttachmentPickerBottomSheetBuilderState
-    extends State<StreamAttachmentPickerBottomSheetBuilder> {
+class _StreamPlatformAttachmentPickerBottomSheetBuilderState
+    extends State<StreamPlatformAttachmentPickerBottomSheetBuilder> {
   late StreamAttachmentPickerController _controller;
 
   @override
@@ -193,7 +214,6 @@ class _StreamAttachmentPickerBottomSheetBuilderState
         StreamAttachmentPickerController(
           initialPoll: widget.initialPoll,
           initialAttachments: widget.initialAttachments,
-          initialExtraData: widget.initialExtraData,
         );
   }
 
@@ -211,7 +231,6 @@ class _StreamAttachmentPickerBottomSheetBuilderState
       _controller = StreamAttachmentPickerController(
         initialPoll: widget.initialPoll,
         initialAttachments: widget.initialAttachments,
-        initialExtraData: widget.initialExtraData,
       );
     } else {
       _controller = current;
@@ -220,7 +239,7 @@ class _StreamAttachmentPickerBottomSheetBuilderState
 
   @override
   void didUpdateWidget(
-    StreamAttachmentPickerBottomSheetBuilder oldWidget,
+    StreamPlatformAttachmentPickerBottomSheetBuilder oldWidget,
   ) {
     super.didUpdateWidget(oldWidget);
     _updateAttachmentPickerController(

@@ -4,7 +4,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
@@ -36,7 +35,11 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.mentionedUsers = const [],
     this.silent = false,
     this.shadowed = false,
-    this.reactionGroups,
+    @Deprecated("Use 'reactionGroups' instead")
+    Map<String, int>? reactionCounts,
+    @Deprecated("Use 'reactionGroups' instead")
+    Map<String, int>? reactionScores,
+    Map<String, ReactionGroup>? reactionGroups,
     this.latestReactions,
     this.ownReactions,
     this.parentId,
@@ -52,7 +55,6 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.localUpdatedAt,
     DateTime? deletedAt,
     this.localDeletedAt,
-    this.deletedForMe,
     this.messageTextUpdatedAt,
     this.user,
     this.pinned = false,
@@ -69,13 +71,17 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.draft,
     this.reminder,
     this.channelRole,
-    this.sharedLocation,
   })  : id = id ?? const Uuid().v4(),
         type = MessageType(type),
         pinExpires = pinExpires?.toUtc(),
         remoteCreatedAt = createdAt,
         remoteUpdatedAt = updatedAt,
         remoteDeletedAt = deletedAt,
+        reactionGroups = _maybeGetReactionGroups(
+          reactionGroups: reactionGroups,
+          reactionCounts: reactionCounts,
+          reactionScores: reactionScores,
+        ),
         _quotedMessageId = quotedMessageId,
         _pollId = pollId;
 
@@ -85,22 +91,14 @@ class Message extends Equatable implements ComparableFieldProvider {
       Serializer.moveToExtraDataFromRoot(json, topLevelFields),
     );
 
-    // TODO: Remove this once type are properly enriched on the backend.
-    var type = message.type;
-    if (message.deletedForMe ?? false) {
-      type = MessageType.deleted;
-    }
-
     var state = MessageState.sent;
-    if (message.deletedForMe ?? false) {
-      state = MessageState.deletedForMe;
-    } else if (message.deletedAt != null) {
+    if (message.deletedAt != null) {
       state = MessageState.softDeleted;
     } else if (message.updatedAt.isAfter(message.createdAt)) {
       state = MessageState.updated;
     }
 
-    return message.copyWith(type: type, state: state);
+    return message.copyWith(state: state);
   }
 
   /// The message ID. This is either created by Stream or set client side when
@@ -131,40 +129,45 @@ class Message extends Equatable implements ComparableFieldProvider {
   @JsonKey(toJson: User.toIds)
   final List<User> mentionedUsers;
 
-  static Object? _reactionGroupsReadValue(
-    Map<Object?, Object?> json,
-    String key,
-  ) {
-    final reactionGroups = json[key] as Map<String, dynamic>?;
-    if (reactionGroups != null) return reactionGroups;
+  /// A map describing the count of number of every reaction.
+  @JsonKey(includeToJson: false)
+  @Deprecated("Use 'reactionGroups' instead")
+  Map<String, int>? get reactionCounts {
+    return reactionGroups?.map((type, it) => MapEntry(type, it.count));
+  }
 
-    final reactionCounts = json['reaction_counts'] as Map<String, dynamic>?;
-    final reactionScores = json['reaction_scores'] as Map<String, dynamic>?;
+  /// A map describing the count of score of every reaction.
+  @JsonKey(includeToJson: false)
+  @Deprecated("Use 'reactionGroups' instead")
+  Map<String, int>? get reactionScores {
+    return reactionGroups?.map((type, it) => MapEntry(type, it.sumScores));
+  }
+
+  static Map<String, ReactionGroup>? _maybeGetReactionGroups({
+    Map<String, ReactionGroup>? reactionGroups,
+    Map<String, int>? reactionCounts,
+    Map<String, int>? reactionScores,
+  }) {
+    if (reactionGroups != null) return reactionGroups;
     if (reactionCounts == null && reactionScores == null) return null;
 
     final reactionTypes = {...?reactionCounts?.keys, ...?reactionScores?.keys};
     if (reactionTypes.isEmpty) return null;
 
-    final groups = <String, dynamic>{};
+    final groups = <String, ReactionGroup>{};
     for (final type in reactionTypes) {
       final count = reactionCounts?[type] ?? 0;
       final sumScores = reactionScores?[type] ?? 0;
 
       if (count == 0 || sumScores == 0) continue;
-      final now = DateTime.timestamp();
-      groups[type] = {
-        'count': count,
-        'sum_scores': sumScores,
-        'first_reaction_at': now.toIso8601String(),
-        'last_reaction_at': now.toIso8601String(),
-      };
+      groups[type] = ReactionGroup(count: count, sumScores: sumScores);
     }
 
     return groups;
   }
 
   /// A map of reaction types and their corresponding reaction groups.
-  @JsonKey(includeToJson: false, readValue: _reactionGroupsReadValue)
+  @JsonKey(includeToJson: false)
   final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.
@@ -306,13 +309,11 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// Optional draft message linked to this message.
   ///
   /// This is present when the message is a thread i.e. contains replies.
-  @JsonKey(includeToJson: false)
   final Draft? draft;
 
   /// Optional reminder for this message.
   ///
   /// This is present when a user has set a reminder for this message.
-  @JsonKey(includeToJson: false)
   final MessageReminder? reminder;
 
   static Object? _channelRoleReadValue(Map<Object?, Object?> json, String key) {
@@ -327,17 +328,6 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// The role of the user in the channel the message belongs to.
   @JsonKey(includeToJson: false, readValue: _channelRoleReadValue)
   final String? channelRole;
-
-  /// Optional shared location associated with this message.
-  ///
-  /// This is used to share a location in a message, allowing users to view the
-  /// location on a map.
-  @JsonKey(includeIfNull: false)
-  final Location? sharedLocation;
-
-  /// Whether the message was deleted only for the current user.
-  @JsonKey(includeToJson: false)
-  final bool? deletedForMe;
 
   /// Message custom extraData.
   final Map<String, Object?> extraData;
@@ -388,8 +378,6 @@ class Message extends Equatable implements ComparableFieldProvider {
     'draft',
     'reminder',
     'member',
-    'shared_location',
-    'deleted_for_me',
   ];
 
   /// Serialize to json.
@@ -417,6 +405,10 @@ class Message extends Equatable implements ComparableFieldProvider {
     List<User>? mentionedUsers,
     bool? silent,
     bool? shadowed,
+    @Deprecated("Use 'reactionGroups' instead")
+    Map<String, int>? reactionCounts,
+    @Deprecated("Use 'reactionGroups' instead")
+    Map<String, int>? reactionScores,
     Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
@@ -449,8 +441,6 @@ class Message extends Equatable implements ComparableFieldProvider {
     Object? draft = _nullConst,
     Object? reminder = _nullConst,
     String? channelRole,
-    Location? sharedLocation,
-    bool? deletedForMe,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -491,7 +481,12 @@ class Message extends Equatable implements ComparableFieldProvider {
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       silent: silent ?? this.silent,
       shadowed: shadowed ?? this.shadowed,
-      reactionGroups: reactionGroups ?? this.reactionGroups,
+      reactionGroups: _maybeGetReactionGroups(
+            reactionGroups: reactionGroups,
+            reactionCounts: reactionCounts,
+            reactionScores: reactionScores,
+          ) ??
+          this.reactionGroups,
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
@@ -529,8 +524,6 @@ class Message extends Equatable implements ComparableFieldProvider {
       reminder:
           reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
       channelRole: channelRole ?? this.channelRole,
-      sharedLocation: sharedLocation ?? this.sharedLocation,
-      deletedForMe: deletedForMe ?? this.deletedForMe,
     );
   }
 
@@ -577,8 +570,6 @@ class Message extends Equatable implements ComparableFieldProvider {
       draft: other.draft,
       reminder: other.reminder,
       channelRole: other.channelRole,
-      sharedLocation: other.sharedLocation,
-      deletedForMe: other.deletedForMe,
     );
   }
 
@@ -645,8 +636,6 @@ class Message extends Equatable implements ComparableFieldProvider {
         draft,
         reminder,
         channelRole,
-        sharedLocation,
-        deletedForMe,
       ];
 
   @override

@@ -65,7 +65,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
           title: Row(
             children: [
               Text(
-                command.name.sentenceCase,
+                command.name.capitalize(),
                 style: textTheme.bodyBold.copyWith(
                   color: colorTheme.textHighEmphasis,
                 ),

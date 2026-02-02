@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
@@ -18,7 +19,6 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/event.dart';
-import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
@@ -106,7 +106,7 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
 
   @override
   Stream<Event> get eventStream => _eventController.stream;
-  final _eventController = EventController<Event>();
+  final _eventController = PublishSubject<Event>();
   void addEvent(Event event) => _eventController.add(event);
 
   @override

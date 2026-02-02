@@ -31,7 +31,10 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
       const ['file'],
     ),
     sort: [
-      const SortOption.asc('created_at'),
+      const SortOption(
+        'created_at',
+        direction: SortOption.ASC,
+      ),
     ],
     limit: 20,
   );

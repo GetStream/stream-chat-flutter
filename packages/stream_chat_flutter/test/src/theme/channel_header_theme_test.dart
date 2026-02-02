@@ -61,10 +61,10 @@ final _channelThemeControl = StreamChannelHeaderThemeData(
     ),
   ),
   color: const Color(0xff101418),
-  titleStyle: const StreamTextTheme.light().headlineBold.copyWith(
+  titleStyle: StreamTextTheme.light().headlineBold.copyWith(
         color: const Color(0xffffffff),
       ),
-  subtitleStyle: const StreamTextTheme.light().footnote.copyWith(
+  subtitleStyle: StreamTextTheme.light().footnote.copyWith(
         color: const Color(0xff7a7a7a),
       ),
 );
@@ -83,7 +83,7 @@ final _channelThemeControlMidLerp = StreamChannelHeaderThemeData(
     fontWeight: FontWeight.w500,
     fontSize: 16,
   ),
-  subtitleStyle: const StreamTextTheme.light().footnote.copyWith(
+  subtitleStyle: StreamTextTheme.light().footnote.copyWith(
         color: const Color(0xff7a7a7a),
       ),
 );
@@ -96,9 +96,9 @@ final _channelThemeControlDark = StreamChannelHeaderThemeData(
       width: 40,
     ),
   ),
-  color: const StreamColorTheme.dark().barsBg,
-  titleStyle: const StreamTextTheme.dark().headlineBold,
-  subtitleStyle: const StreamTextTheme.dark().footnote.copyWith(
+  color: StreamColorTheme.dark().barsBg,
+  titleStyle: StreamTextTheme.dark().headlineBold,
+  subtitleStyle: StreamTextTheme.dark().footnote.copyWith(
         color: const Color(0xff7A7A7A),
       ),
 );

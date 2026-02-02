@@ -64,6 +64,13 @@ void main() {
       expect(option.field, 'age');
       expect(option.direction, SortOption.DESC);
     });
+
+    test('should correctly deserialize from JSON', () {
+      final json = {'field': 'age', 'direction': 1};
+      final option = SortOption<TestModel>.fromJson(json);
+      expect(option.field, 'age');
+      expect(option.direction, SortOption.ASC);
+    });
   });
 
   group('SortOption single field', () {

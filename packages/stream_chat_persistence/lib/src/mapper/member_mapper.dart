@@ -18,7 +18,6 @@ extension MemberEntityX on MemberEntity {
         pinnedAt: pinnedAt,
         archivedAt: archivedAt,
         isModerator: isModerator,
-        deletedMessages: deletedMessages,
         extraData: extraData ?? {},
       );
 }
@@ -40,7 +39,6 @@ extension MemberX on Member {
         archivedAt: archivedAt,
         channelRole: channelRole,
         updatedAt: updatedAt,
-        deletedMessages: deletedMessages,
         extraData: extraData,
       );
 }

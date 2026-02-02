@@ -223,10 +223,6 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       return formatPollMessage(context, poll, currentUser);
     }
 
-    if (message.sharedLocation case final location?) {
-      return formatLocationMessage(context, location);
-    }
-
     final messagePreviewText = formatRegularMessage(context, message);
     if (messagePreviewText == null) return formatEmptyMessage(context, message);
 
@@ -480,28 +476,6 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
 
     // If nothing else, we will show the default poll emoji.
     return '📊';
-  }
-
-  /// The formatted preview for a shared [location] message.
-  ///
-  /// Override to customize shared location formatting:
-  ///
-  /// ```dart
-  /// @override
-  /// String formatLocationMessage(
-  ///   BuildContext context,
-  ///   Location location,
-  /// ) {
-  ///   return '📍 (${location.latitude}, ${location.longitude})';
-  /// }
-  /// ```
-  @protected
-  String formatLocationMessage(
-    BuildContext context,
-    Location location,
-  ) {
-    final translations = context.translations;
-    return translations.locationLabel(isLive: location.isLive);
   }
 
   @override

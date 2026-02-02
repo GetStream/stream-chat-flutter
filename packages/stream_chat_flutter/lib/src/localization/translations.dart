@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
@@ -551,11 +549,6 @@ abstract class Translations {
 
   /// The label for draft message
   String get draftLabel;
-
-  /// The label for location attachment.
-  ///
-  /// [isLive] indicates if the location is live or not.
-  String locationLabel({bool isLive = false});
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -740,7 +733,8 @@ class DefaultTranslations implements Translations {
 
   @override
   String get flagMessageQuestion =>
-      'Do you want to send a copy of this message to a moderator for further investigation?';
+      'Do you want to send a copy of this message to a'
+      '\nmoderator for further investigation?';
 
   @override
   String get flagLabel => 'FLAG';
@@ -763,7 +757,7 @@ class DefaultTranslations implements Translations {
 
   @override
   String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this message?';
+      'Are you sure you want to permanently delete this\nmessage?';
 
   @override
   String get operationCouldNotBeCompletedText =>
@@ -1235,10 +1229,4 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get draftLabel => 'Draft';
-
-  @override
-  String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live Location';
-    return '📍 Location';
-  }
 }
