@@ -1,61 +1,16 @@
-## 10.0.0
-
-🛑️ Breaking
-
-- Replaced `ArgumentError` with typed errors in `StreamAttachmentPickerController`:
-  `AttachmentTooLargeError` (file size exceeds limit) and `AttachmentLimitReachedError`
-  (attachment count exceeds limit). [[#2476]](https://github.com/GetStream/stream-chat-flutter/issues/2476)
-- `onAttachmentTap` callback signature changed to include `BuildContext` as first parameter and
-  returns `FutureOr<bool>` to indicate if handled.
-- `ReactionPickerIconList` constructor changed: removed `message` parameter, changed `reactionIcons`
-  type to `List<ReactionPickerIcon>`, renamed `onReactionPicked` to `onIconPicked`.
-- `onCustomAttachmentPickerResult` has been removed. Use `onAttachmentPickerResult` which returns `FutureOr<bool>` to indicate if the result was handled.
-- `customAttachmentPickerOptions` has been removed. Use `attachmentPickerOptionsBuilder` to modify, reorder, or extend default options.
-- `StreamReactionPicker` now requires reactions to be explicitly handled via `onReactionPicked`. *(Automatic handling is no longer supported.)*
-- `StreamMessageAction` is now generic `(StreamMessageAction<T>)`, enhancing type safety. Individual onTap callbacks have been removed; actions are now handled centrally by widgets like `StreamMessageWidget.onCustomActionTap` or modals using action types.
-- `StreamMessageReactionsModal` no longer requires the `messageTheme` parameter. The theme now automatically derives from the `reverse` property.
-- `StreamMessageWidget` no longer requires the `showReactionTail` parameter. The reaction picker tail is now always shown when the reaction picker is visible.
-- `AttachmentPickerType` enum has been replaced with a sealed class to support extensible custom types like contact and location pickers. Use built-in types like `AttachmentPickerType.images` or define your own via `CustomAttachmentPickerType`.
-- `StreamAttachmentPickerOption` has been replaced with two sealed classes to support layout-specific picker options: `SystemAttachmentPickerOption` for system pickers (e.g. camera, files) and `TabbedAttachmentPickerOption` for tabbed pickers (e.g. gallery, polls, location).
-- `showStreamAttachmentPickerModalBottomSheet` now returns a `StreamAttachmentPickerResult` instead of `AttachmentPickerValue` for improved type safety and clearer intent handling.
-- `StreamMobileAttachmentPickerBottomSheet` has been renamed to `StreamTabbedAttachmentPickerBottomSheet`, and `StreamWebOrDesktopAttachmentPickerBottomSheet` has been renamed to `StreamSystemAttachmentPickerBottomSheet` to better reflect their respective layouts.
-- `PollMessage` widget has been removed and replaced with `PollAttachment` for better integration with the attachment system. Polls can now be customized through `PollAttachmentBuilder` or by creating custom poll attachment widgets via the attachment builder system.
-- **Deprecated API Cleanup**: Removed all deprecated classes, methods, and properties for the v10 major release:
-  - **Removed Classes**: `DmCheckbox` (use `DmCheckboxListTile`), `StreamIconThemeSvgIcon` (use `StreamSvgIcon`), `StreamVoiceRecordingThemeData` (use `StreamVoiceRecordingAttachmentThemeData`), `StreamVoiceRecordingLoading`, `StreamVoiceRecordingSlider` (use `StreamAudioWaveformSlider`), `StreamVoiceRecordingPlayer` (use `StreamVoiceRecordingAttachment`), `StreamVoiceRecordingListPlayer` (use `StreamVoiceRecordingAttachmentPlaylist`)
-  - **Removed Properties**: `reactionIcons` and `voiceRecordingTheme` from `StreamChatTheme`, `isThreadConversation` from `FloatingDateDivider`, `idleSendButton` and `activeSendButton` from `StreamMessageInput`, `isCommandEnabled` and `isEditEnabled` from `StreamMessageSendButton`, `assetName`, `width`, and `height` from `StreamSvgIcon`
-  - **Removed Constructor Parameters**: `useNativeAttachmentPickerOnMobile` from various components, `allowCompression` from `StreamAttachmentHandler.pickFile()` and `StreamFilePicker` (use `compressionQuality` instead), `cid` from `StreamUnreadIndicator` constructor
-  - **Removed Methods**: `lastUnreadMessage()` from message list extensions (use `StreamChannel.getFirstUnreadMessage`), `loadBuffer()` and `_loadAsync()` from `StreamVideoThumbnailImage`
-  - **StreamSvgIcon Refactoring**: Removed 80+ deprecated factory constructors. Use `StreamSvgIcon(icon: StreamSvgIcons.iconName)` instead of factory constructors like `StreamSvgIcon.add()`
-
-For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
-
-✅ Added
-
-- Added `reactionIndicatorBuilder` parameter to `StreamMessageWidget` for customizing reaction
-  indicators. Users can now display reaction counts alongside emojis on mobile, matching desktop/web
-  behavior. Fixes [#2434](https://github.com/GetStream/stream-chat-flutter/issues/2434).
-- Added `reactionIconBuilder` and `backgroundColor` parameters to `StreamReactionPicker`.
-- Exported `StreamReactionIndicator` and related components (`ReactionIndicatorBuilder`,
-  `ReactionIndicatorIconBuilder`, `ReactionIndicatorIcon`, `ReactionIndicatorIconList`).
-- Added new `StreamMessageActionsBuilder` which provides a list of actions to be displayed in the message actions modal.
-- Added new `StreamMessageActionConfirmationModal` for confirming destructive actions like delete or flag.
-- Added new `StreamMessageModal` and `showStreamMessageModal` for consistent message-related modals with improved transitions and backdrop effects.
-- Added `desktopOrWeb` parameter to `PlatformWidgetBuilder` to allow specifying a single builder for both desktop and web platforms.
-- Added `reactionPickerBuilder` to `StreamMessageActionsModal`, `StreamMessageReactionsModal`, and `StreamMessageWidget` to enable custom reaction picker widgets.
-- Added `StreamReactionIcon.defaultReactions` providing a predefined list of common reaction icons.
-- Exported `StreamMessageActionsModal` and `StreamModeratedMessageActionsModal` which are now based on `StreamMessageModal` for consistent styling and behavior.
-- Added `extraData` field to `AttachmentPickerValue` to support storing and retrieving custom picker state (e.g. tab-specific config).
-- Added support for `StreamMessageWidget.deletedMessageBuilder` to customize the deleted message UI.
-- Added `emojiCode` property to `StreamReactionIcon` to support custom emojis in reactions.
-- Updated default reaction builders with standard emoji codes. (`❤️`, `👍`, `👎`, `😂`, `😮`)
-
 ## 10.0.0-beta.12
 
+🐞 Fixed
+
+- Fixed regression in `emoji_code` support for reactions.
+
 🛑️ Breaking
 
 - Replaced `ArgumentError` with typed errors in `StreamAttachmentPickerController`:
   `AttachmentTooLargeError` (file size exceeds limit) and `AttachmentLimitReachedError`
   (attachment count exceeds limit). [[#2476]](https://github.com/GetStream/stream-chat-flutter/issues/2476)
+
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 - Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
@@ -165,7 +120,7 @@ For more details, please refer to the [migration guide](https://github.com/GetSt
 - `ReactionPickerIconList` constructor changed: removed `message` parameter, changed `reactionIcons`
   type to `List<ReactionPickerIcon>`, renamed `onReactionPicked` to `onIconPicked`.
 
-For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 - Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
@@ -245,7 +200,7 @@ For more details, please refer to the [migration guide](https://github.com/GetSt
   )
   ```
   
-For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 - Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
@@ -353,7 +308,7 @@ For more details, please refer to the [migration guide](https://github.com/GetSt
 - `showStreamAttachmentPickerModalBottomSheet` now returns a `StreamAttachmentPickerResult` instead of `AttachmentPickerValue` for improved type safety and clearer intent handling.
 - `StreamMobileAttachmentPickerBottomSheet` has been renamed to `StreamTabbedAttachmentPickerBottomSheet`, and `StreamWebOrDesktopAttachmentPickerBottomSheet` has been renamed to `StreamSystemAttachmentPickerBottomSheet` to better reflect their respective layouts.
 
-For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 ✅ Added
 
@@ -392,7 +347,7 @@ For more details, please refer to the [migration guide](https://github.com/GetSt
 - `StreamMessageReactionsModal` no longer requires the `messageTheme` parameter. The theme now automatically derives from the `reverse` property.
 - `StreamMessageWidget` no longer requires the `showReactionTail` parameter. The reaction picker tail is now always shown when the reaction picker is visible.
 
-For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/master/migrations/v10-migration.md).
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 
 ✅ Added
 
