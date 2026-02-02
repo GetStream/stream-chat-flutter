@@ -111,7 +111,7 @@ class FakeRecordPlatform extends Fake
   Future<void> create(String recorderId) async {}
 
   @override
-  Future<bool> hasPermission(String recorderId) async {
+  Future<bool> hasPermission(String recorderId, {bool request = true}) async {
     return true;
   }
 
