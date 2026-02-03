@@ -57,7 +57,10 @@ dependencies:
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^10.0.0-beta.12
   stream_core_flutter:
-    path: /Users/xsahil03x/StudioProjects/stream-core-flutter/packages/stream_core_flutter
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: feat/avatar-group-and-badge-count
+      path: packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
   thumblr: ^0.0.4
