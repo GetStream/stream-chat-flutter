@@ -6,6 +6,10 @@ on:
     - cron: '0 2 * * 1'
   workflow_dispatch:
 
+env:
+  # TODO: Remove after stream_core_flutter is published to pub.dev
+  GIT_LFS_SKIP_SMUDGE: 1
+
 jobs:
   # Does a sanity check on packages for the next beta version so we are not surprised by any breaking changes.
   analyze_beta_versions:
