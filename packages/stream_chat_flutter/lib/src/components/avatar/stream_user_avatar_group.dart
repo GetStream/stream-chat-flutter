@@ -50,7 +50,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 class StreamUserAvatarGroup extends StatelessWidget {
   /// Creates a Stream user avatar group.
   ///
-  /// The [users] list must not be empty.
+  /// If [users] is empty, returns an empty [SizedBox].
   const StreamUserAvatarGroup({
     super.key,
     required this.users,

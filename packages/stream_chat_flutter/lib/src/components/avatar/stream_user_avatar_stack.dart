@@ -63,7 +63,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 class StreamUserAvatarStack extends StatelessWidget {
   /// Creates a Stream user avatar stack.
   ///
-  /// The [users] list must not be empty.
+  /// If [users] is empty, returns an empty [SizedBox].
   /// The [max] must be at least 2.
   const StreamUserAvatarStack({
     super.key,
