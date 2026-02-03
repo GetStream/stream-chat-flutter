@@ -206,11 +206,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                               return ListTile(
                                 key: ObjectKey(user),
                                 leading: StreamUserAvatar(
+                                  size: .lg,
                                   user: user,
-                                  constraints: const BoxConstraints.tightFor(
-                                    width: 40,
-                                    height: 40,
-                                  ),
                                 ),
                                 title: Text(
                                   user.name,

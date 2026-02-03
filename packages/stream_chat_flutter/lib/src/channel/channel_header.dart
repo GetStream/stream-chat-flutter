@@ -189,11 +189,12 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: Center(
-                      child: StreamChannelAvatar(
-                        channel: channel,
-                        borderRadius: channelHeaderTheme.avatarTheme?.borderRadius,
-                        constraints: channelHeaderTheme.avatarTheme?.constraints,
+                      child: GestureDetector(
                         onTap: onImageTap,
+                        child: StreamChannelAvatar(
+                          size: .lg,
+                          channel: channel,
+                        ),
                       ),
                     ),
                   ),

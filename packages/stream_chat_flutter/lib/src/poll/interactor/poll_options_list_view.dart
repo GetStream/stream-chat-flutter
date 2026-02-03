@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/avatars/user_avatar.dart';
+import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar_stack.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template pollOptionsListView}
@@ -247,42 +246,7 @@ class OptionVoters extends StatelessWidget {
   Widget build(BuildContext context) {
     if (voters.isEmpty) return const Empty();
 
-    final theme = StreamChatTheme.of(context);
-
-    final diameter = radius * 2;
-    final width = diameter + (voters.length * diameter * overlap);
-
-    var overlapPadding = 0.0;
-
-    return SizedBox.fromSize(
-      size: Size(width, diameter),
-      child: Stack(
-        children: [
-          ...voters.map(
-            (user) {
-              overlapPadding += diameter * overlap;
-              return Positioned(
-                right: overlapPadding - (diameter * overlap),
-                bottom: 0,
-                top: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.colorTheme.barsBg,
-                  ),
-                  padding: const EdgeInsets.all(1),
-                  child: StreamUserAvatar(
-                    user: user,
-                    constraints: BoxConstraints.tight(Size.fromRadius(radius)),
-                    showOnlineStatus: false,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+    return StreamUserAvatarStack(size: .xs, users: voters, overlap: overlap);
   }
 }
 

@@ -122,10 +122,8 @@ class ChooseUserPage extends StatelessWidget {
                             router.replaceNamed(Routes.CHANNEL_LIST_PAGE.name);
                           },
                           leading: StreamUserAvatar(
+                            size: .lg,
                             user: user,
-                            constraints: BoxConstraints.tight(
-                              const Size.fromRadius(20),
-                            ),
                           ),
                           title: Text(
                             user.name,

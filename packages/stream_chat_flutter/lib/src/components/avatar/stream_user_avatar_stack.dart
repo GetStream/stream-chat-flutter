@@ -102,7 +102,12 @@ class StreamUserAvatarStack extends StatelessWidget {
       max: max,
       size: size,
       overlap: overlap,
-      children: users.map((user) => StreamUserAvatar(user: user)),
+      children: users.map(
+        (user) => StreamUserAvatar(
+          user: user,
+          showOnlineIndicator: false,
+        ),
+      ),
     );
   }
 }

@@ -93,9 +93,9 @@ class StreamPollVoteListTile extends StatelessWidget {
               children: [
                 if (pollVote.user case final user?) ...[
                   StreamUserAvatar(
+                    size: .xs,
                     user: user,
-                    constraints: BoxConstraints.tight(const Size.fromRadius(10)),
-                    showOnlineStatus: false,
+                    showOnlineIndicator: false,
                   ),
                   Expanded(
                     child: Padding(

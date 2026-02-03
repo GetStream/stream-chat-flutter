@@ -103,12 +103,12 @@ class LocationAttachment extends StatelessWidget {
                   onTap: onLocationTap,
                   child: IgnorePointer(
                     child: SimpleMapView(
-                      markerSize: 40,
+                      markerSize: MarkerSize.lg,
                       showLocateMeButton: false,
                       coordinates: sharedLocation.coordinates,
                       markerBuilder: (_, __, size) => LocationUserMarker(
                         user: user,
-                        markerSize: size,
+                        size: size,
                         sharedLocation: sharedLocation,
                       ),
                     ),

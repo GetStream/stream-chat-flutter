@@ -69,7 +69,12 @@ class StreamUserAvatarGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamAvatarGroup(
       size: size,
-      children: users.map((user) => StreamUserAvatar(user: user)),
+      children: users.map(
+        (user) => StreamUserAvatar(
+          user: user,
+          showOnlineIndicator: false,
+        ),
+      ),
     );
   }
 }

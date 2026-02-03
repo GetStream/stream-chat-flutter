@@ -194,9 +194,9 @@ class LeftDrawer extends StatelessWidget {
                   child: Row(
                     children: [
                       StreamUserAvatar(
+                        size: .lg,
                         user: user,
-                        showOnlineStatus: false,
-                        constraints: BoxConstraints.tight(const Size.fromRadius(20)),
+                        showOnlineIndicator: false,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 16),

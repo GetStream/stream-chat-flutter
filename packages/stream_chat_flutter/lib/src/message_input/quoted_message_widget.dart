@@ -68,12 +68,9 @@ class StreamQuotedMessageWidget extends StatelessWidget {
       const SizedBox(width: 8),
       if (message.user != null)
         StreamUserAvatar(
+          size: .sm,
           user: message.user!,
-          constraints: const BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          showOnlineStatus: false,
+          showOnlineIndicator: false,
         ),
     ];
     return Padding(

@@ -137,24 +137,26 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
             elevation: elevation,
             backgroundColor: backgroundColor ?? channelListHeaderThemeData.color,
             centerTitle: centerTitle,
-            leading:
-                leading ??
-                Center(
-                  child: user != null
-                      ? StreamUserAvatar(
-                          user: user,
-                          showOnlineStatus: false,
-                          onTap:
-                              onUserAvatarTap ??
-                              (_) {
-                                preNavigationCallback?.call();
-                                Scaffold.of(context).openDrawer();
-                              },
-                          borderRadius: channelListHeaderThemeData.avatarTheme?.borderRadius,
-                          constraints: channelListHeaderThemeData.avatarTheme?.constraints,
-                        )
-                      : const Empty(),
+            leading: switch ((leading, user)) {
+              (final leading?, _) => leading,
+              (_, final user?) => Center(
+                child: GestureDetector(
+                  onTap: switch (onUserAvatarTap) {
+                    final onTap? => () => onTap(user),
+                    _ => () {
+                      preNavigationCallback?.call();
+                      Scaffold.of(context).openDrawer();
+                    },
+                  },
+                  child: StreamUserAvatar(
+                    size: .lg,
+                    user: user,
+                    showOnlineIndicator: false,
+                  ),
                 ),
+              ),
+              _ => const Empty(),
+            },
             actions:
                 actions ??
                 [

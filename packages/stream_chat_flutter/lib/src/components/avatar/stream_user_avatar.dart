@@ -67,7 +67,7 @@ class StreamUserAvatar extends StatelessWidget {
     this.size,
     required this.user,
     this.showBorder = true,
-    this.showOnlineIndicator = false,
+    this.showOnlineIndicator = true,
   });
 
   /// The user whose avatar is displayed.
@@ -81,7 +81,7 @@ class StreamUserAvatar extends StatelessWidget {
 
   /// Whether to show the online status indicator.
   ///
-  /// Defaults to false.
+  /// Defaults to true.
   final bool showOnlineIndicator;
 
   /// The size of the avatar.
