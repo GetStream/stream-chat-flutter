@@ -3,8 +3,6 @@ name: stream_flutter_workflow
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
   flutter_version: "3.x"
-  # TODO: Remove after stream_core_flutter is published to pub.dev
-  GIT_LFS_SKIP_SMUDGE: 1
 
 on:
   pull_request:

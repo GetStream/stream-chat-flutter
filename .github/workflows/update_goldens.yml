@@ -2,10 +2,6 @@ name: update_goldens
 
 on: workflow_dispatch
 
-env:
-  # TODO: Remove after stream_core_flutter is published to pub.dev
-  GIT_LFS_SKIP_SMUDGE: 1
-
 jobs:
   update_goldens:
     runs-on: ubuntu-latest

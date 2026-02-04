@@ -18,8 +18,6 @@ on:
 
 env:
   FLUTTER_VERSION: '3.x'
-  # TODO: Remove after stream_core_flutter is published to pub.dev
-  GIT_LFS_SKIP_SMUDGE: 1
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
