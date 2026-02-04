@@ -151,11 +151,7 @@ class StreamChannelListTile extends StatelessWidget {
     final streamChatTheme = StreamChatTheme.of(context);
     final streamChat = StreamChat.of(context);
 
-    final leading =
-        this.leading ??
-        StreamChannelAvatar(
-          channel: channel,
-        );
+    final leading = this.leading ?? StreamChannelAvatar(channel: channel);
 
     final title =
         this.title ??

@@ -44,7 +44,9 @@ linter:
     - avoid_null_checks_in_equality_operators
     - avoid_positional_boolean_parameters
     - avoid_private_typedef_functions
-    - avoid_redundant_argument_values
+    # Does not always make sense to remove them; it also makes it hard
+    # to notice future breaking changes.
+    # - avoid_redundant_argument_values
     - avoid_return_types_on_setters
     - avoid_returning_null_for_void
     - avoid_shadowing_type_parameters

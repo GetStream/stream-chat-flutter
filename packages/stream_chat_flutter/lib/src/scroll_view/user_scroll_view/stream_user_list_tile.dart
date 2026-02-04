@@ -124,15 +124,7 @@ class StreamUserListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
 
-    final leading =
-        this.leading ??
-        StreamUserAvatar(
-          user: user,
-          constraints: const BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
-        );
+    final leading = this.leading ?? StreamUserAvatar(size: .lg, user: user);
 
     final title =
         this.title ??

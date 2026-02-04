@@ -254,11 +254,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               vertical: 12,
                             ),
                             child: StreamUserAvatar(
+                              size: .lg,
                               user: member.user!,
-                              constraints: const BoxConstraints.tightFor(
-                                height: 40,
-                                width: 40,
-                              ),
                             ),
                           ),
                           Expanded(
@@ -730,12 +727,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: StreamUserAvatar(
+                        size: .xl,
                         user: user,
-                        constraints: const BoxConstraints.tightFor(
-                          height: 64,
-                          width: 64,
-                        ),
-                        borderRadius: BorderRadius.circular(32),
                       ),
                     ),
                   ),

@@ -91,6 +91,12 @@ command:
       stream_chat_persistence: ^10.0.0-beta.12
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
+      # TODO: Replace with hosted version before merging PR
+      stream_core_flutter:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: c066cb481bd8a8523e5ea52f3433ffeaeab11332
+          path: packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
       url_launcher: ^6.3.0

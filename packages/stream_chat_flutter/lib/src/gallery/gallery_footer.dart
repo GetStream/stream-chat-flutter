@@ -261,9 +261,9 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                                 ],
                               ),
                               child: StreamUserAvatar(
+                                size: .sm,
                                 user: message.user!,
-                                constraints: BoxConstraints.tight(const Size(24, 24)),
-                                showOnlineStatus: false,
+                                showOnlineIndicator: false,
                               ),
                             ),
                           ),

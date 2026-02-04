@@ -143,13 +143,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                     Stack(
                                       children: [
                                         StreamUserAvatar(
-                                          onlineIndicatorAlignment: const Alignment(0.9, 0.9),
+                                          size: .xl,
                                           user: user,
-                                          borderRadius: BorderRadius.circular(32),
-                                          constraints: const BoxConstraints.tightFor(
-                                            height: 64,
-                                            width: 64,
-                                          ),
                                         ),
                                         Positioned(
                                           top: -4,

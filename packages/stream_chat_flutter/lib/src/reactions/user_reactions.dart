@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/avatars/user_avatar.dart';
+import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/reaction_icon.dart';
 import 'package:stream_chat_flutter/src/reactions/indicator/reaction_indicator_icon_list.dart';
@@ -115,12 +115,16 @@ class _UserReactionItem extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            StreamUserAvatar(
-              onTap: onTap,
-              user: reactionUser,
-              showOnlineStatus: false,
-              borderRadius: BorderRadius.circular(32),
-              constraints: const BoxConstraints.tightFor(height: 64, width: 64),
+            GestureDetector(
+              onTap: switch (onTap) {
+                final onTap? => () => onTap(reactionUser),
+                _ => null,
+              },
+              child: StreamUserAvatar(
+                size: .xl,
+                user: reactionUser,
+                showOnlineIndicator: false,
+              ),
             ),
             PositionedDirectional(
               bottom: 8,

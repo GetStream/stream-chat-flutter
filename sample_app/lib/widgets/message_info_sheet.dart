@@ -251,11 +251,8 @@ class _UserReadTile extends StatelessWidget {
         children: [
           // User avatar
           StreamUserAvatar(
+            size: .lg,
             user: read.user,
-            constraints: const BoxConstraints.tightFor(
-              height: 40,
-              width: 40,
-            ),
           ),
 
           const SizedBox(width: 12),

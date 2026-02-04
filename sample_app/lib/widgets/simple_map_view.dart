@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:sample_app/widgets/location/location_user_marker.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 typedef MarkerBuilder =
     Widget Function(
       BuildContext context,
       Animation<double> animation,
-      double markerSize,
+      MarkerSize markerSize,
     );
 
 class SimpleMapView extends StatefulWidget {
   const SimpleMapView({
     super.key,
     this.cameraZoom = 15,
-    this.markerSize = 30,
+    this.markerSize = MarkerSize.lg,
     required this.coordinates,
     this.showLocateMeButton = true,
     this.markerBuilder = _defaultMarkerBuilder,
@@ -23,17 +24,17 @@ class SimpleMapView extends StatefulWidget {
 
   final double cameraZoom;
 
-  final double markerSize;
+  final MarkerSize markerSize;
 
   final LocationCoordinates coordinates;
 
   final bool showLocateMeButton;
 
   final MarkerBuilder markerBuilder;
-  static Widget _defaultMarkerBuilder(BuildContext context, _, double size) {
+  static Widget _defaultMarkerBuilder(BuildContext context, _, MarkerSize size) {
     final theme = StreamChatTheme.of(context);
     final iconColor = theme.colorTheme.accentPrimary;
-    return Icon(size: size, Icons.person_pin, color: iconColor);
+    return Icon(size: size.value, Icons.person_pin, color: iconColor);
   }
 
   @override
@@ -87,8 +88,8 @@ class _SimpleMapViewState extends State<SimpleMapView> with TickerProviderStateM
         AnimatedMarkerLayer(
           markers: [
             AnimatedMarker(
-              height: widget.markerSize,
-              width: widget.markerSize,
+              height: widget.markerSize.value,
+              width: widget.markerSize.value,
               point: widget.coordinates.toLatLng(),
               builder: (context, animation) => widget.markerBuilder(
                 context,

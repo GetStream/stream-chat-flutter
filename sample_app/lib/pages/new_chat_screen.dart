@@ -218,12 +218,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 shape: BoxShape.circle,
                               ),
                               child: StreamUserAvatar(
-                                showOnlineStatus: false,
+                                size: .sm,
                                 user: user,
-                                constraints: const BoxConstraints.tightFor(
-                                  height: 24,
-                                  width: 24,
-                                ),
+                                showOnlineIndicator: false,
                               ),
                             ),
                             const StreamSvgIcon(icon: StreamSvgIcons.close),

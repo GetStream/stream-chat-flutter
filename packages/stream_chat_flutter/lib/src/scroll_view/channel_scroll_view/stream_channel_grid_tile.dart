@@ -59,16 +59,7 @@ class StreamChannelGridTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
-    final child =
-        this.child ??
-        StreamChannelAvatar(
-          channel: channel,
-          borderRadius: BorderRadius.circular(32),
-          constraints: const BoxConstraints.tightFor(
-            height: 64,
-            width: 64,
-          ),
-        );
+    final child = this.child ?? StreamChannelAvatar(size: .xl, channel: channel);
 
     final footer =
         this.footer ??

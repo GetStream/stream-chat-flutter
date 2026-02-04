@@ -223,7 +223,7 @@ class ThreadLatestReply extends StatelessWidget {
     return Row(
       spacing: 8,
       children: <Widget>[
-        if (latestReply.user case final user?) StreamUserAvatar(user: user),
+        if (latestReply.user case final user?) StreamUserAvatar(size: .md, user: user),
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,

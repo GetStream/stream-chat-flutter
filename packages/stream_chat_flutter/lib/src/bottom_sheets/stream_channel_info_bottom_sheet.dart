@@ -94,17 +94,15 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  StreamUserAvatar(
-                    user: user,
-                    constraints: const BoxConstraints.tightFor(
-                      height: 64,
-                      width: 64,
+                  GestureDetector(
+                    onTap: switch (onMemberTap) {
+                      final onTap? => () => onTap(member),
+                      _ => null,
+                    },
+                    child: StreamUserAvatar(
+                      size: .xl,
+                      user: user,
                     ),
-                    borderRadius: BorderRadius.circular(32),
-                    onlineIndicatorConstraints: BoxConstraints.tight(
-                      const Size(12, 12),
-                    ),
-                    onTap: onMemberTap != null ? (_) => onMemberTap!(member) : null,
                   ),
                   const SizedBox(height: 6),
                   Text(

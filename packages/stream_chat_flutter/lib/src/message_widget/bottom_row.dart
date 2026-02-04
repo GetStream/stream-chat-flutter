@@ -246,12 +246,8 @@ class BottomRow extends StatelessWidget {
         ),
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
-          SizedBox.fromSize(
-            size: Size((threadParticipants!.length * 8.0) + 8, 16),
-            child: ThreadParticipants(
-              threadParticipants: threadParticipants,
-              streamChatTheme: streamChatTheme,
-            ),
+          ThreadParticipants(
+            threadParticipants: threadParticipants!,
           ),
         MouseRegion(
           cursor: SystemMouseCursors.click,

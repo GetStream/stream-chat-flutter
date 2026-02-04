@@ -72,11 +72,11 @@ class LocationDetailDialog extends StatelessWidget {
             children: [
               SimpleMapView(
                 cameraZoom: 16,
-                markerSize: 48,
+                markerSize: MarkerSize.xl,
                 coordinates: sharedLocation.coordinates,
                 markerBuilder: (_, __, size) => LocationUserMarker(
                   user: message.user,
-                  markerSize: size,
+                  size: size,
                   sharedLocation: sharedLocation,
                 ),
               ),

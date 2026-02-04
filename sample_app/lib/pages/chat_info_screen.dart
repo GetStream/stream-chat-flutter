@@ -68,13 +68,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: StreamUserAvatar(
+                    size: .xl,
                     user: widget.user!,
-                    constraints: const BoxConstraints.tightFor(
-                      width: 72,
-                      height: 72,
-                    ),
-                    borderRadius: BorderRadius.circular(36),
-                    showOnlineStatus: false,
+                    showOnlineIndicator: false,
                   ),
                 ),
                 Text(
@@ -509,8 +505,8 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: StreamChannelAvatar(
+                        size: .lg,
                         channel: channel,
-                        constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
                       ),
                     ),
                     Expanded(
