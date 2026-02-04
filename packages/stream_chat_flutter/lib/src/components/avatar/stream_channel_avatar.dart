@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
 import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar_group.dart';
@@ -80,10 +81,16 @@ class StreamChannelAvatar extends StatelessWidget {
       noDataBuilder: (context) => BetterStreamBuilder(
         stream: channel.state!.membersStream,
         initialData: channel.state!.members,
-        builder: (context, members) => StreamUserAvatarGroup(
-          size: effectiveSize,
-          users: members.map((it) => it.user!),
-        ),
+        builder: (context, members) {
+          final users = members.map((it) => it.user!);
+          final currentUserId = channel.client.state.currentUser?.id;
+
+          return StreamUserAvatarGroup(
+            size: effectiveSize,
+            // Sort users by current user first.
+            users: users.sortedBy((it) => it.id == currentUserId ? 0 : 1),
+          );
+        },
       ),
     );
   }
