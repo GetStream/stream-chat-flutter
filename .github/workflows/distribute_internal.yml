@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+      # TODO: Remove feat/design-refresh once merged to master
+      - feat/design-refresh
   workflow_dispatch:
     inputs:
       platform:
