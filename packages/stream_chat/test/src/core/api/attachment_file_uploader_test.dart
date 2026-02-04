@@ -133,4 +133,94 @@ void main() {
     verify(() => client.delete(path, queryParameters: {'url': url})).called(1);
     verifyNoMoreInteractions(client);
   });
+
+  test('uploadImage', () async {
+    const path = '/uploads/image';
+    final file = assetFile('test_image.jpeg');
+    final attachmentFile = AttachmentFile(
+      size: 333,
+      path: file.path,
+      bytes: file.readAsBytesSync(),
+    );
+    final multipartFile = await attachmentFile.toMultipartFile();
+
+    when(() => client.postFile(
+          path,
+          any(that: isSameMultipartFileAs(multipartFile)),
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'file': 'test-image-url',
+        }));
+
+    final res = await fileUploader.uploadImage(attachmentFile);
+
+    expect(res, isNotNull);
+    expect(res.file, isNotNull);
+    expect(res.file, isNotEmpty);
+
+    verify(() => client.postFile(
+          path,
+          any(that: isSameMultipartFileAs(multipartFile)),
+        )).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('uploadFile', () async {
+    const path = '/uploads/file';
+    final file = assetFile('example.pdf');
+    final attachmentFile = AttachmentFile(
+      size: 333,
+      path: file.path,
+      bytes: file.readAsBytesSync(),
+    );
+    final multipartFile = await attachmentFile.toMultipartFile();
+
+    when(() => client.postFile(
+          path,
+          any(that: isSameMultipartFileAs(multipartFile)),
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'file': 'test-file-url',
+        }));
+
+    final res = await fileUploader.uploadFile(attachmentFile);
+
+    expect(res, isNotNull);
+    expect(res.file, isNotNull);
+    expect(res.file, isNotEmpty);
+
+    verify(() => client.postFile(
+          path,
+          any(that: isSameMultipartFileAs(multipartFile)),
+        )).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('removeImage', () async {
+    const path = '/uploads/image';
+    const url = 'test-image-url';
+
+    when(() => client.delete(path, queryParameters: {'url': url})).thenAnswer(
+        (_) async => successResponse(path, data: <String, dynamic>{}));
+
+    final res = await fileUploader.removeImage(url);
+
+    expect(res, isNotNull);
+
+    verify(() => client.delete(path, queryParameters: {'url': url})).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('removeFile', () async {
+    const path = '/uploads/file';
+    const url = 'test-file-url';
+
+    when(() => client.delete(path, queryParameters: {'url': url})).thenAnswer(
+        (_) async => successResponse(path, data: <String, dynamic>{}));
+
+    final res = await fileUploader.removeFile(url);
+
+    expect(res, isNotNull);
+
+    verify(() => client.delete(path, queryParameters: {'url': url})).called(1);
+    verifyNoMoreInteractions(client);
+  });
 }

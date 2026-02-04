@@ -19,11 +19,21 @@ class MessageRules {
   /// * A poll
   static bool canUpload(Message message) {
     final hasText = message.text?.trim().isNotEmpty == true;
-    final hasAttachments = message.attachments.isNotEmpty;
-    final hasQuotedMessage = message.quotedMessageId != null;
-    final hasPoll = message.pollId != null;
+    if (hasText) return true;
 
-    return hasText || hasAttachments || hasQuotedMessage || hasPoll;
+    final hasAttachments = message.attachments.isNotEmpty;
+    if (hasAttachments) return true;
+
+    final hasQuotedMessage = message.quotedMessageId != null;
+    if (hasQuotedMessage) return true;
+
+    final hasSharedLocation = message.sharedLocation != null;
+    if (hasSharedLocation) return true;
+
+    final hasPoll = message.pollId != null;
+    if (hasPoll) return true;
+
+    return false;
   }
 
   /// Whether the [message] can update the channel's last message timestamp.

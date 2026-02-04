@@ -5,13 +5,15 @@ import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 extension PinnedMessageReactionEntityX on PinnedMessageReactionEntity {
   /// Maps a [PinnedMessageReactionEntity] into [Reaction]
   Reaction toReaction({User? user}) => Reaction(
-        extraData: extraData ?? {},
         type: type,
-        createdAt: createdAt,
         userId: userId,
         user: user,
         messageId: messageId,
         score: score,
+        emojiCode: emojiCode,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        extraData: extraData ?? <String, Object>{},
       );
 }
 
@@ -19,11 +21,13 @@ extension PinnedMessageReactionEntityX on PinnedMessageReactionEntity {
 extension PReactionX on Reaction {
   /// Maps a [Reaction] into [ReactionEntity]
   PinnedMessageReactionEntity toPinnedEntity() => PinnedMessageReactionEntity(
-        extraData: extraData,
         type: type,
-        createdAt: createdAt,
-        userId: userId!,
-        messageId: messageId!,
+        userId: userId ?? user?.id,
+        messageId: messageId,
         score: score,
+        emojiCode: emojiCode,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        extraData: extraData,
       );
 }

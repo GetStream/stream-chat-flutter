@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sample_app/widgets/location/location_attachment.dart';
+import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ThreadPage extends StatefulWidget {
@@ -43,6 +45,13 @@ class _ThreadPageState extends State<ThreadPage> {
 
   @override
   Widget build(BuildContext context) {
+    final locationAttachmentBuilder = LocationAttachmentBuilder(
+      onAttachmentTap: (location) => showLocationDetailDialog(
+        context: context,
+        location: location,
+      ),
+    );
+
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamThreadHeader(
@@ -59,9 +68,18 @@ class _ThreadPageState extends State<ThreadPage> {
               messageFilter: defaultFilter,
               showScrollToBottom: false,
               highlightInitialMessage: true,
+              parentMessageBuilder: (context, message, defaultMessage) {
+                return defaultMessage.copyWith(
+                  attachmentBuilders: [locationAttachmentBuilder],
+                );
+              },
               messageBuilder: (context, details, messages, defaultMessage) {
+                final message = details.message;
+
                 return defaultMessage.copyWith(
                   onReplyTap: _reply,
+                  showEditMessage: message.sharedLocation == null,
+                  attachmentBuilders: [locationAttachmentBuilder],
                   bottomRowBuilderWithDefaultWidget: (
                     context,
                     message,

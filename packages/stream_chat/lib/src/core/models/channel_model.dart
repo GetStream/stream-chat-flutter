@@ -393,4 +393,7 @@ extension type const ChannelCapability(String capability) implements String {
 
   /// Ability to query poll votes.
   static const queryPollVotes = ChannelCapability('query-poll-votes');
+
+  /// Ability to share location.
+  static const shareLocation = ChannelCapability('share-location');
 }

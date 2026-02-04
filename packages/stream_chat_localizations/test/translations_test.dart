@@ -311,6 +311,8 @@ void main() {
       expect(localizations.pollYouCreatedText, isNotNull);
       expect(localizations.pollSomeoneCreatedText('TestUser'), isNotNull);
       expect(localizations.systemMessageLabel, isNotNull);
+      expect(localizations.draftLabel, isNotNull);
+      expect(localizations.locationLabel(), isNotNull);
     });
   }
 

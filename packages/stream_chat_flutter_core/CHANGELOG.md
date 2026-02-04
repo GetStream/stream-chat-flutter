@@ -1,14 +1,30 @@
+## 10.0.0-beta.12
+
+- Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.23.0
 
 - Updated `stream_chat` dependency to [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.11
+
+- Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.22.0
 
 - Updated `stream_chat` dependency to [`9.22.0`](https://pub.dev/packages/stream_chat/changelog).
 
+## 10.0.0-beta.10
+
+- Included the changes from version [`9.21.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.21.0
 
 - Updated `stream_chat` dependency to [`9.21.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.9
+
+- Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.20.0
 
@@ -17,17 +33,33 @@
 - Fixed race condition where `connectUser` could be blocked when connectivity monitoring triggers
   during initial connection. [[#2409]](https://github.com/GetStream/stream-chat-flutter/issues/2409)
 
+## 10.0.0-beta.8
+
+- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.19.0
 
 - Updated `stream_chat` dependency to [`9.19.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.7
+
+- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.18.0
 
 - Updated `stream_chat` dependency to [`9.18.0`](https://pub.dev/packages/stream_chat/changelog).
 
+## 10.0.0-beta.6
+
+- Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.17.0
 
 - Updated `stream_chat` dependency to [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.5
+
+- Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.16.0
 
@@ -38,6 +70,10 @@
 ✅ Added
 
 - Added methods for paginating thread replies in `StreamChannel`.
+
+## 10.0.0-beta.4
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.15.0
 
@@ -53,6 +89,10 @@
 - Ensure `StreamChannel` future builder completes after channel
   initialization. [[#2323]](https://github.com/GetStream/stream-chat-flutter/issues/2323)
 
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.14.0
 
 🐞 Fixed
@@ -60,12 +100,20 @@
 - Fixed cached messages are cleared from channels with unread messages when accessed
   offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.13.0
 
 🐞 Fixed
 
 - Fixed pagination end detection logic to properly determine when the top or bottom of the message
   list has been reached.
+
+## 10.0.0-beta.1
+
+- Updated `stream_chat` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.12.0
 

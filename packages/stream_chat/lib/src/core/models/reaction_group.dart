@@ -57,3 +57,26 @@ class ReactionGroup extends Equatable {
         lastReactionAt,
       ];
 }
+
+/// A group of comparators for sorting [ReactionGroup]s.
+final class ReactionSorting {
+  /// Sorts [ReactionGroup]s by the sum of their scores.
+  static int byScore(ReactionGroup a, ReactionGroup b) {
+    return a.sumScores.compareTo(b.sumScores);
+  }
+
+  /// Sorts [ReactionGroup]s by the count of reactions.
+  static int byCount(ReactionGroup a, ReactionGroup b) {
+    return a.count.compareTo(b.count);
+  }
+
+  /// Sorts [ReactionGroup]s by the date of their first reaction.
+  static int byFirstReactionAt(ReactionGroup a, ReactionGroup b) {
+    return a.firstReactionAt.compareTo(b.firstReactionAt);
+  }
+
+  /// Sorts [ReactionGroup]s by the date of their last reaction.
+  static int byLastReactionAt(ReactionGroup a, ReactionGroup b) {
+    return a.lastReactionAt.compareTo(b.lastReactionAt);
+  }
+}

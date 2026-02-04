@@ -212,6 +212,30 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> deleteMessagesFromUser({
+    String? cid,
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  }) async {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteMessagesFromUser');
+
+    // Delete from both messages and pinned_messages tables
+    await Future.wait([
+      db!.messageDao.deleteMessagesByUser,
+      db!.pinnedMessageDao.deleteMessagesByUser,
+    ].map(
+      (f) => f.call(
+        cid: cid,
+        userId: userId,
+        hardDelete: hardDelete,
+        deletedAt: deletedAt,
+      ),
+    ));
+  }
+
+  @override
   Future<Draft?> getDraftMessageByCid(
     String cid, {
     String? parentId,
@@ -222,6 +246,20 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       cid,
       parentId: parentId,
     );
+  }
+
+  @override
+  Future<List<Location>> getLocationsByCid(String cid) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getLocationsByCid');
+    return db!.locationDao.getLocationsByCid(cid);
+  }
+
+  @override
+  Future<Location?> getLocationByMessageId(String messageId) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getLocationByMessageId');
+    return db!.locationDao.getLocationByMessageId(messageId);
   }
 
   @override
@@ -265,6 +303,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
+    int? messageLimit,
     PaginationParams? paginationParams,
   }) async {
     assert(_debugIsConnected, '');
@@ -272,8 +311,18 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
     final channels = await db!.channelQueryDao.getChannels(filter: filter);
 
+    final messagePagination = PaginationParams(
+      // Default limit is set to 25 in backend.
+      limit: messageLimit ?? 25,
+    );
+
     final channelStates = await Future.wait(
-      channels.map((e) => getChannelStateByCid(e.cid)),
+      channels.map(
+        (e) => getChannelStateByCid(
+          e.cid,
+          messagePagination: messagePagination,
+        ),
+      ),
     );
 
     // Sort the channel states
@@ -395,6 +444,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> updateLocations(List<Location> locations) async {
+    assert(_debugIsConnected, '');
+    _logger.info('updateLocations');
+    return db!.locationDao.updateLocations(locations);
+  }
+
+  @override
   Future<void> deletePinnedMessageReactionsByMessageId(
     List<String> messageIds,
   ) {
@@ -442,6 +498,20 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       cid,
       parentId: parentId,
     );
+  }
+
+  @override
+  Future<void> deleteLocationsByCid(String cid) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteLocationsByCid');
+    return db!.locationDao.deleteLocationsByCid(cid);
+  }
+
+  @override
+  Future<void> deleteLocationsByMessageIds(List<String> messageIds) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteLocationsByMessageIds');
+    return db!.locationDao.deleteLocationsByMessageIds(messageIds);
   }
 
   @override

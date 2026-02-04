@@ -699,6 +699,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Draft';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return '📍 Live Location';
+    return '📍 Location';
+  }
 }
 
 void main() async {
