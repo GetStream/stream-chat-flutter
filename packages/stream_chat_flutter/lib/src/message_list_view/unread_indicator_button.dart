@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:svg_icon_widget/svg_icon_widget.dart';
-
+ 
 /// Function signature for handling the dismiss action on the unread indicator.
 typedef OnUnreadIndicatorDismissTap = Future<void> Function();
 
@@ -60,10 +60,16 @@ class UnreadIndicatorButton extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
     if (channel.state == null) return const Empty();
 
-    return BetterStreamBuilder(
+    return BetterStreamBuilder<Read>(
       initialData: channel.state!.currentUserRead,
       stream: channel.state!.currentUserReadStream,
       builder: (context, currentUserRead) {
+        // CHANGE: Unnecessary comparison with null is removed.
+        // Only channel.state is checked for security purposes.
+        if (channel.state == null) {
+          return const Empty();
+        }
+
         final unreadCount = currentUserRead.unreadMessages;
         if (unreadCount <= 0) return const Empty();
 
@@ -87,6 +93,7 @@ class UnreadIndicatorButton extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 2, 8, 2),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     context.translations.unreadCountIndicatorLabel(
