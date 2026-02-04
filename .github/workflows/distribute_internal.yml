@@ -49,8 +49,8 @@ jobs:
           echo "Selected platform: $platform"
           
           # Set outputs only if they should be true
-          [[ "$platform" == "ios" || "$platform" == "both" ]] && echo "run_ios=true" >> $GITHUB_OUTPUT
-          [[ "$platform" == "android" || "$platform" == "both" ]] && echo "run_android=true" >> $GITHUB_OUTPUT
+          [[ "$platform" == "ios" || "$platform" == "both" ]] && echo "run_ios=true" >> $GITHUB_OUTPUT || true
+          [[ "$platform" == "android" || "$platform" == "both" ]] && echo "run_android=true" >> $GITHUB_OUTPUT || true
 
   android:
     needs: determine_platforms
