@@ -120,6 +120,30 @@ platform :ios do
     )
   end
 
+  desc "Build and distribute app to TestFlight Internal Testers with auto-incrementing build number"
+  # Usage: bundle exec fastlane ios distribute_to_testflight_internal
+  lane :distribute_to_testflight_internal do
+    match_me
+
+    current_build_number = latest_testflight_build_number(
+      api_key: appstore_api_key,
+      app_identifier: app_identifier
+    )
+
+    build_number = (current_build_number || 0).to_i + 1
+    build_ipa(export_method: "app-store", build_number: build_number)
+
+    upload_to_testflight(
+      api_key: appstore_api_key,
+      distribute_external: false,
+      notify_external_testers: false,
+      ipa: "#{root_path}/build/ios/ipa/ChatSample.ipa",
+      groups: ['Internal Testers'],
+      changelog: 'Lots of amazing new features to test out!',
+      skip_waiting_for_build_processing: true,
+    )
+  end
+
   desc "Upload iOS dSYMs from the most recent `flutter build ipa` to Firebase Crashlytics"
   private_lane :upload_dsyms_to_crashlytics do
     dsym_zip = zip(
