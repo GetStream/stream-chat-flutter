@@ -14,11 +14,13 @@ class StreamChatMessageComposer extends StatefulWidget {
     this.controller,
     required VoidCallback onSendPressed,
     VoidCallback? onMicrophonePressed,
+    FocusNode? focusNode,
   }) : props = MessageComposerProps(
          isFloating: false,
          message: null,
          onSendPressed: onSendPressed,
          onMicrophonePressed: onMicrophonePressed,
+         focusNode: focusNode,
        );
 
   final StreamMessageInputController? controller;
@@ -76,6 +78,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
         core.StreamBaseMessageComposer(
           controller: _controller,
           isFloating: widget.props.isFloating,
+          focusNode: widget.props.focusNode,
           composerLeading: StreamMessageComposerLeading(props: componentProps),
           composerTrailing: StreamMessageComposerTrailing(props: componentProps),
           inputHeader: StreamMessageComposerInputHeader(props: componentProps),
@@ -92,12 +95,14 @@ class MessageComposerProps {
     this.message,
     required this.onSendPressed,
     this.onMicrophonePressed,
+    this.focusNode,
   });
 
   final bool isFloating;
   final Message? message;
   final VoidCallback onSendPressed;
   final VoidCallback? onMicrophonePressed;
+  final FocusNode? focusNode;
 }
 
 /// Properties to build any of the sub-components.
