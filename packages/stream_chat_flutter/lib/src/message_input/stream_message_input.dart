@@ -760,18 +760,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   ) {
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
-      builder: (context, value, _) => Padding(
-        padding: widget.padding,
-        child: Column(
-          spacing: 8,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget?>[
-            _buildTopMessageArea(context),
-            _buildTextField(context),
-            _buildDmCheckbox(context),
-          ].nonNulls.toList(),
-        ),
+      builder: (context, value, _) => StreamChatMessageComposer(
+        controller: controller,
+        onSendPressed: sendMessage,
       ),
     );
   }

@@ -483,22 +483,12 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                     theme: ThemeData(
                       brightness: .light,
                       extensions: [
-                        StreamTheme.light().copyWith(
-                          componentFactory: StreamComponentFactory(
-                            messageComposer: StreamChatMessageComposer.defaultFactory,
-                          ),
-                        ),
+                        StreamTheme.light(),
                       ],
                     ),
                     darkTheme: ThemeData(
                       brightness: .dark,
-                      extensions: [
-                        StreamTheme.dark().copyWith(
-                          componentFactory: StreamComponentFactory(
-                            messageComposer: StreamChatMessageComposer.defaultFactory,
-                          ),
-                        ),
-                      ],
+                      extensions: [StreamTheme.dark()],
                     ),
                     themeMode: const {
                       -1: ThemeMode.dark,

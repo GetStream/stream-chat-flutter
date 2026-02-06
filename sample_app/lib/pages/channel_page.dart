@@ -126,48 +126,47 @@ class _ChannelPageState extends State<ChannelPage> {
               ],
             ),
           ),
-          StreamChatMessageComposer(),
-          // StreamMessageInput(
-          //   focusNode: _focusNode,
-          //   messageInputController: _messageInputController,
-          //   onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
-          //   enableVoiceRecording: true,
-          //   allowedAttachmentPickerTypes: [
-          //     ...AttachmentPickerType.values,
-          //     if (config?.sharedLocations == true && channel.canShareLocation) const LocationPickerType(),
-          //   ],
-          //   onAttachmentPickerResult: (result) {
-          //     return _onCustomAttachmentPickerResult(channel, result);
-          //   },
-          //   attachmentPickerOptionsBuilder: (context, defaultOptions) => [
-          //     ...defaultOptions,
-          //     TabbedAttachmentPickerOption(
-          //       key: 'location-picker',
-          //       icon: const Icon(Icons.near_me_rounded),
-          //       supportedTypes: [const LocationPickerType()],
-          //       isEnabled: (value) {
-          //         // Enable if nothing has been selected yet.
-          //         if (value.isEmpty) return true;
+          StreamMessageInput(
+            focusNode: _focusNode,
+            messageInputController: _messageInputController,
+            onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
+            enableVoiceRecording: true,
+            allowedAttachmentPickerTypes: [
+              ...AttachmentPickerType.values,
+              if (config?.sharedLocations == true && channel.canShareLocation) const LocationPickerType(),
+            ],
+            onAttachmentPickerResult: (result) {
+              return _onCustomAttachmentPickerResult(channel, result);
+            },
+            attachmentPickerOptionsBuilder: (context, defaultOptions) => [
+              ...defaultOptions,
+              TabbedAttachmentPickerOption(
+                key: 'location-picker',
+                icon: const Icon(Icons.near_me_rounded),
+                supportedTypes: [const LocationPickerType()],
+                isEnabled: (value) {
+                  // Enable if nothing has been selected yet.
+                  if (value.isEmpty) return true;
 
-          //         // Otherwise, enable only if there is a location.
-          //         return value.extraData['location'] != null;
-          //       },
-          //       optionViewBuilder: (context, controller) => LocationPicker(
-          //         onLocationPicked: (locationResult) {
-          //           if (locationResult == null) return Navigator.pop(context);
+                  // Otherwise, enable only if there is a location.
+                  return value.extraData['location'] != null;
+                },
+                optionViewBuilder: (context, controller) => LocationPicker(
+                  onLocationPicked: (locationResult) {
+                    if (locationResult == null) return Navigator.pop(context);
 
-          //           controller.extraData = {
-          //             ...controller.value.extraData,
-          //             'location': locationResult,
-          //           };
+                    controller.extraData = {
+                      ...controller.value.extraData,
+                      'location': locationResult,
+                    };
 
-          //           final result = LocationPicked(location: locationResult);
-          //           return Navigator.pop(context, result);
-          //         },
-          //       ),
-          //     ),
-          //   ],
-          // ),
+                    final result = LocationPicked(location: locationResult);
+                    return Navigator.pop(context, result);
+                  },
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
