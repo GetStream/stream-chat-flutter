@@ -92,8 +92,11 @@ command:
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       # TODO: Replace with hosted version before merging PR
-      stream_core_flutter:
-        path: /Users/renefloor/Documents/github/stream-core-flutter/packages/stream_core_flutter
+      stream_core_flutter:   
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: f0af49b3cb1426efed625d0a24e58874363e9538
+          path: packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
       url_launcher: ^6.3.0
