@@ -762,6 +762,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       valueListenable: controller,
       builder: (context, value, _) => StreamChatMessageComposer(
         controller: controller,
+        placeholder: _getHint(context) ?? '',
         focusNode: focusNode,
         onSendPressed: sendMessage,
       ),
