@@ -21,8 +21,8 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
   StreamAudioPlaylistController.raw({
     AudioPlayer? player,
     AudioPlaylistState state = const AudioPlaylistState(tracks: []),
-  })  : _player = player ?? AudioPlayer(),
-        super(state);
+  }) : _player = player ?? AudioPlayer(),
+       super(state);
 
   final AudioPlayer _player;
 
@@ -45,21 +45,22 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
       final tracks = [
         ...value.tracks.mapIndexed((index, track) {
           final trackState = switch (index == currentIndex) {
-            true => state.playing
-                ? TrackState.playing
-                : switch (state.processingState) {
-                    ProcessingState.idle => TrackState.idle,
-                    ProcessingState.loading => TrackState.loading,
-                    _ => TrackState.paused,
-                  },
+            true =>
+              state.playing
+                  ? TrackState.playing
+                  : switch (state.processingState) {
+                      ProcessingState.idle => TrackState.idle,
+                      ProcessingState.loading => TrackState.loading,
+                      _ => TrackState.paused,
+                    },
             false => switch (track.state) {
-                TrackState.idle => TrackState.idle,
-                _ => TrackState.paused,
-              },
+              TrackState.idle => TrackState.idle,
+              _ => TrackState.paused,
+            },
           };
 
           return track.copyWith(state: trackState);
-        })
+        }),
       ];
 
       value = value.copyWith(tracks: tracks);
@@ -74,7 +75,7 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
         ...value.tracks.mapIndexed((index, track) {
           if (index != currentIndex) return track;
           return track.copyWith(position: position);
-        })
+        }),
       ];
 
       value = value.copyWith(tracks: tracks);

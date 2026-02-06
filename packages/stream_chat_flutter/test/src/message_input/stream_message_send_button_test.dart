@@ -176,20 +176,22 @@ Widget _wrapWithStreamChatApp(
     debugShowCheckedModeBanner: false,
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          bottomNavigationBar: Material(
-            elevation: 10,
-            color: theme.colorTheme.barsBg,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: widget,
+      child: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            bottomNavigationBar: Material(
+              elevation: 10,
+              color: theme.colorTheme.barsBg,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: widget,
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     ),
   );
 }

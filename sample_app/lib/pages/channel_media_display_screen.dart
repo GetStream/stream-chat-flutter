@@ -15,8 +15,7 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
   final StreamMessageThemeData messageTheme;
 
   @override
-  State<ChannelMediaDisplayScreen> createState() =>
-      _ChannelMediaDisplayScreenState();
+  State<ChannelMediaDisplayScreen> createState() => _ChannelMediaDisplayScreenState();
 }
 
 class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
@@ -57,8 +56,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
       ),
       body: ValueListenableBuilder(
         valueListenable: controller,
-        builder: (BuildContext context,
-            PagedValue<String, GetMessageResponse> value, Widget? child) {
+        builder: (BuildContext context, PagedValue<String, GetMessageResponse> value, Widget? child) {
           return value.when(
             (items, nextPageKey, error) {
               if (items.isEmpty) {
@@ -76,22 +74,16 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                         AppLocalizations.of(context).noMedia,
                         style: TextStyle(
                           fontSize: 14,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis,
+                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        AppLocalizations.of(context)
-                            .photosOrVideosWillAppearHere,
+                        AppLocalizations.of(context).photosOrVideosWillAppearHere,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis
-                              .withOpacity(0.5),
+                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                         ),
                       ),
                     ],
@@ -102,25 +94,23 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
 
               for (final item in value.asSuccess.items) {
                 item.message.attachments
-                    .where((e) =>
-                        (e.type == 'image' || e.type == 'video') &&
-                        e.ogScrapeUrl == null)
+                    .where((e) => (e.type == 'image' || e.type == 'video') && e.ogScrapeUrl == null)
                     .forEach((e) {
-                  VideoPlayerController? controller;
-                  if (e.type == 'video') {
-                    final cachedController = controllerCache[e.assetUrl];
+                      VideoPlayerController? controller;
+                      if (e.type == 'video') {
+                        final cachedController = controllerCache[e.assetUrl];
 
-                    if (cachedController == null) {
-                      final url = Uri.parse(e.assetUrl!);
-                      controller = VideoPlayerController.networkUrl(url);
-                      controller.initialize();
-                      controllerCache[e.assetUrl] = controller;
-                    } else {
-                      controller = cachedController;
-                    }
-                  }
-                  media.add(_AssetPackage(e, item.message, controller));
-                });
+                        if (cachedController == null) {
+                          final url = Uri.parse(e.assetUrl!);
+                          controller = VideoPlayerController.networkUrl(url);
+                          controller.initialize();
+                          controllerCache[e.assetUrl] = controller;
+                        } else {
+                          controller = cachedController;
+                        }
+                      }
+                      media.add(_AssetPackage(e, item.message, controller));
+                    });
               }
 
               return LazyLoadScrollView(
@@ -130,8 +120,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                   }
                 },
                 child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
                   itemBuilder: (context, position) {
                     final channel = StreamChannel.of(context).channel;
                     return Padding(
@@ -161,10 +150,8 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                                     }
                                     router.pushNamed(
                                       Routes.CHANNEL_PAGE.name,
-                                      pathParameters:
-                                          Routes.CHANNEL_PAGE.params(channel),
-                                      queryParameters:
-                                          Routes.CHANNEL_PAGE.queryParams(m),
+                                      pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                                      queryParameters: Routes.CHANNEL_PAGE.queryParams(m),
                                     );
                                   },
                                 ),

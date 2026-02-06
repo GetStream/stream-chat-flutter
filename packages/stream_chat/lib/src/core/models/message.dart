@@ -70,14 +70,14 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.reminder,
     this.channelRole,
     this.sharedLocation,
-  })  : id = id ?? const Uuid().v4(),
-        type = MessageType(type),
-        pinExpires = pinExpires?.toUtc(),
-        remoteCreatedAt = createdAt,
-        remoteUpdatedAt = updatedAt,
-        remoteDeletedAt = deletedAt,
-        _quotedMessageId = quotedMessageId,
-        _pollId = pollId;
+  }) : id = id ?? const Uuid().v4(),
+       type = MessageType(type),
+       pinExpires = pinExpires?.toUtc(),
+       remoteCreatedAt = createdAt,
+       remoteUpdatedAt = updatedAt,
+       remoteDeletedAt = deletedAt,
+       _quotedMessageId = quotedMessageId,
+       _pollId = pollId;
 
   /// Create a new instance from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -453,18 +453,14 @@ class Message extends Equatable implements ComparableFieldProvider {
     bool? deletedForMe,
   }) {
     assert(() {
-      if (pinExpires is! DateTime &&
-          pinExpires != null &&
-          pinExpires is! _NullConst) {
+      if (pinExpires is! DateTime && pinExpires != null && pinExpires is! _NullConst) {
         throw ArgumentError('`pinExpires` can only be set as DateTime or null');
       }
       return true;
     }(), 'Validate type for pinExpires');
 
     assert(() {
-      if (quotedMessage is! Message &&
-          quotedMessage != null &&
-          quotedMessage is! _NullConst) {
+      if (quotedMessage is! Message && quotedMessage != null && quotedMessage is! _NullConst) {
         throw ArgumentError(
           '`quotedMessage` can only be set as Message or null',
         );
@@ -473,9 +469,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     }(), 'Validate type for quotedMessage');
 
     assert(() {
-      if (quotedMessageId is! String &&
-          quotedMessageId != null &&
-          quotedMessageId is! _NullConst) {
+      if (quotedMessageId is! String && quotedMessageId != null && quotedMessageId is! _NullConst) {
         throw ArgumentError(
           '`quotedMessage` can only be set as String or null',
         );
@@ -495,12 +489,8 @@ class Message extends Equatable implements ComparableFieldProvider {
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
-      quotedMessage: quotedMessage == _nullConst
-          ? this.quotedMessage
-          : quotedMessage as Message?,
-      quotedMessageId: quotedMessageId == _nullConst
-          ? _quotedMessageId
-          : quotedMessageId as String?,
+      quotedMessage: quotedMessage == _nullConst ? this.quotedMessage : quotedMessage as Message?,
+      quotedMessageId: quotedMessageId == _nullConst ? _quotedMessageId : quotedMessageId as String?,
       replyCount: replyCount ?? this.replyCount,
       threadParticipants: threadParticipants ?? this.threadParticipants,
       showInChannel: showInChannel ?? this.showInChannel,
@@ -515,8 +505,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       user: user ?? this.user,
       pinned: pinned ?? this.pinned,
       pinnedAt: pinnedAt ?? this.pinnedAt,
-      pinExpires:
-          pinExpires == _nullConst ? this.pinExpires : pinExpires as DateTime?,
+      pinExpires: pinExpires == _nullConst ? this.pinExpires : pinExpires as DateTime?,
       pinnedBy: pinnedBy ?? this.pinnedBy,
       poll: poll ?? this.poll,
       pollId: pollId ?? _pollId,
@@ -526,8 +515,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
       moderation: moderation ?? this.moderation,
       draft: draft == _nullConst ? this.draft : draft as Draft?,
-      reminder:
-          reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
+      reminder: reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
       channelRole: channelRole ?? this.channelRole,
       sharedLocation: sharedLocation ?? this.sharedLocation,
       deletedForMe: deletedForMe ?? this.deletedForMe,
@@ -606,48 +594,48 @@ class Message extends Equatable implements ComparableFieldProvider {
 
   @override
   List<Object?> get props => [
-        id,
-        text,
-        type,
-        attachments,
-        mentionedUsers,
-        reactionGroups,
-        latestReactions,
-        ownReactions,
-        parentId,
-        quotedMessage,
-        quotedMessageId,
-        replyCount,
-        threadParticipants,
-        showInChannel,
-        shadowed,
-        silent,
-        command,
-        localCreatedAt,
-        remoteCreatedAt,
-        localUpdatedAt,
-        remoteUpdatedAt,
-        localDeletedAt,
-        remoteDeletedAt,
-        messageTextUpdatedAt,
-        user,
-        pinned,
-        pinnedAt,
-        pinExpires,
-        pinnedBy,
-        poll,
-        pollId,
-        extraData,
-        state,
-        i18n,
-        restrictedVisibility,
-        moderation,
-        draft,
-        reminder,
-        channelRole,
-        sharedLocation,
-        deletedForMe,
-      ];
+    id,
+    text,
+    type,
+    attachments,
+    mentionedUsers,
+    reactionGroups,
+    latestReactions,
+    ownReactions,
+    parentId,
+    quotedMessage,
+    quotedMessageId,
+    replyCount,
+    threadParticipants,
+    showInChannel,
+    shadowed,
+    silent,
+    command,
+    localCreatedAt,
+    remoteCreatedAt,
+    localUpdatedAt,
+    remoteUpdatedAt,
+    localDeletedAt,
+    remoteDeletedAt,
+    messageTextUpdatedAt,
+    user,
+    pinned,
+    pinnedAt,
+    pinExpires,
+    pinnedBy,
+    poll,
+    pollId,
+    extraData,
+    state,
+    i18n,
+    restrictedVisibility,
+    moderation,
+    draft,
+    reminder,
+    channelRole,
+    sharedLocation,
+    deletedForMe,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

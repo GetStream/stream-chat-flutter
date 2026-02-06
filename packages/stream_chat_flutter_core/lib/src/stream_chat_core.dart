@@ -137,8 +137,7 @@ class StreamChatCore extends StatefulWidget {
 }
 
 /// State class associated with [StreamChatCore].
-class StreamChatCoreState extends State<StreamChatCore>
-    with WidgetsBindingObserver {
+class StreamChatCoreState extends State<StreamChatCore> with WidgetsBindingObserver {
   /// The current user
   User? get currentUser => client.state.currentUser;
 
@@ -168,15 +167,13 @@ class StreamChatCoreState extends State<StreamChatCore>
 
         case PlatformType.macOS:
           final info = await DeviceInfoPlugin().macOsInfo;
-          osVersion = [info.majorVersion, info.minorVersion, info.patchVersion]
-              .join('.');
+          osVersion = [info.majorVersion, info.minorVersion, info.patchVersion].join('.');
           deviceModel = info.model;
           break;
 
         case PlatformType.windows:
           final info = await DeviceInfoPlugin().windowsInfo;
-          osVersion = [info.majorVersion, info.minorVersion, info.buildNumber]
-              .join('.');
+          osVersion = [info.majorVersion, info.minorVersion, info.buildNumber].join('.');
           deviceModel = null;
           break;
 

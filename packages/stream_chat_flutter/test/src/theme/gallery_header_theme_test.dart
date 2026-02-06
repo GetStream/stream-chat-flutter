@@ -7,26 +7,18 @@ class MockStreamChatClient extends Mock implements StreamChatClient {}
 
 void main() {
   test('GalleryHeaderThemeData copyWith, ==, hashCode basics', () {
-    expect(const StreamGalleryHeaderThemeData(),
-        const StreamGalleryHeaderThemeData().copyWith());
-    expect(const StreamGalleryHeaderThemeData().hashCode,
-        const StreamGalleryHeaderThemeData().copyWith().hashCode);
+    expect(const StreamGalleryHeaderThemeData(), const StreamGalleryHeaderThemeData().copyWith());
+    expect(const StreamGalleryHeaderThemeData().hashCode, const StreamGalleryHeaderThemeData().copyWith().hashCode);
   });
 
-  test(
-      '''Light GalleryHeaderThemeData lerps completely to dark GalleryHeaderThemeData''',
-      () {
+  test('''Light GalleryHeaderThemeData lerps completely to dark GalleryHeaderThemeData''', () {
     expect(
-        const StreamGalleryHeaderThemeData().lerp(
-            _galleryHeaderThemeDataControl,
-            _galleryHeaderThemeDataDarkControl,
-            1),
-        _galleryHeaderThemeDataDarkControl);
+      const StreamGalleryHeaderThemeData().lerp(_galleryHeaderThemeDataControl, _galleryHeaderThemeDataDarkControl, 1),
+      _galleryHeaderThemeDataDarkControl,
+    );
   });
 
-  test(
-      '''Light GalleryHeaderThemeData lerps halfway to dark GalleryHeaderThemeData''',
-      () {
+  test('''Light GalleryHeaderThemeData lerps halfway to dark GalleryHeaderThemeData''', () {
     expect(
       const StreamGalleryHeaderThemeData().lerp(
         _galleryHeaderThemeDataControl,
@@ -40,27 +32,21 @@ void main() {
     );
   });
 
-  test(
-      '''Dark GalleryHeaderThemeData lerps completely to light GalleryHeaderThemeData''',
-      () {
+  test('''Dark GalleryHeaderThemeData lerps completely to light GalleryHeaderThemeData''', () {
     expect(
-        const StreamGalleryHeaderThemeData().lerp(
-            _galleryHeaderThemeDataDarkControl,
-            _galleryHeaderThemeDataControl,
-            1),
-        _galleryHeaderThemeDataControl);
+      const StreamGalleryHeaderThemeData().lerp(_galleryHeaderThemeDataDarkControl, _galleryHeaderThemeDataControl, 1),
+      _galleryHeaderThemeDataControl,
+    );
   });
 
   test('Merging dark and light themes results in a dark theme', () {
     expect(
-        _galleryHeaderThemeDataControl
-            .merge(_galleryHeaderThemeDataDarkControl),
-        _galleryHeaderThemeDataDarkControl);
+      _galleryHeaderThemeDataControl.merge(_galleryHeaderThemeDataDarkControl),
+      _galleryHeaderThemeDataDarkControl,
+    );
   });
 
-  testWidgets(
-      'Passing no GalleryHeaderThemeData returns default light theme values',
-      (WidgetTester tester) async {
+  testWidgets('Passing no GalleryHeaderThemeData returns default light theme values', (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
       MaterialApp(
@@ -78,23 +64,15 @@ void main() {
     );
 
     final imageHeaderTheme = StreamGalleryHeaderTheme.of(_context);
-    expect(imageHeaderTheme.closeButtonColor,
-        _galleryHeaderThemeDataControl.closeButtonColor);
-    expect(imageHeaderTheme.backgroundColor,
-        _galleryHeaderThemeDataControl.backgroundColor);
-    expect(imageHeaderTheme.iconMenuPointColor,
-        _galleryHeaderThemeDataControl.iconMenuPointColor);
-    expect(imageHeaderTheme.titleTextStyle,
-        _galleryHeaderThemeDataControl.titleTextStyle);
-    expect(imageHeaderTheme.subtitleTextStyle,
-        _galleryHeaderThemeDataControl.subtitleTextStyle);
-    expect(imageHeaderTheme.bottomSheetBarrierColor,
-        _galleryHeaderThemeDataControl.bottomSheetBarrierColor);
+    expect(imageHeaderTheme.closeButtonColor, _galleryHeaderThemeDataControl.closeButtonColor);
+    expect(imageHeaderTheme.backgroundColor, _galleryHeaderThemeDataControl.backgroundColor);
+    expect(imageHeaderTheme.iconMenuPointColor, _galleryHeaderThemeDataControl.iconMenuPointColor);
+    expect(imageHeaderTheme.titleTextStyle, _galleryHeaderThemeDataControl.titleTextStyle);
+    expect(imageHeaderTheme.subtitleTextStyle, _galleryHeaderThemeDataControl.subtitleTextStyle);
+    expect(imageHeaderTheme.bottomSheetBarrierColor, _galleryHeaderThemeDataControl.bottomSheetBarrierColor);
   });
 
-  testWidgets(
-      'Passing no GalleryHeaderThemeData returns default dark theme values',
-      (WidgetTester tester) async {
+  testWidgets('Passing no GalleryHeaderThemeData returns default dark theme values', (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
       MaterialApp(
@@ -113,18 +91,12 @@ void main() {
     );
 
     final imageHeaderTheme = StreamGalleryHeaderTheme.of(_context);
-    expect(imageHeaderTheme.closeButtonColor,
-        _galleryHeaderThemeDataDarkControl.closeButtonColor);
-    expect(imageHeaderTheme.backgroundColor,
-        _galleryHeaderThemeDataDarkControl.backgroundColor);
-    expect(imageHeaderTheme.iconMenuPointColor,
-        _galleryHeaderThemeDataDarkControl.iconMenuPointColor);
-    expect(imageHeaderTheme.titleTextStyle,
-        _galleryHeaderThemeDataDarkControl.titleTextStyle);
-    expect(imageHeaderTheme.subtitleTextStyle,
-        _galleryHeaderThemeDataDarkControl.subtitleTextStyle);
-    expect(imageHeaderTheme.bottomSheetBarrierColor,
-        _galleryHeaderThemeDataDarkControl.bottomSheetBarrierColor);
+    expect(imageHeaderTheme.closeButtonColor, _galleryHeaderThemeDataDarkControl.closeButtonColor);
+    expect(imageHeaderTheme.backgroundColor, _galleryHeaderThemeDataDarkControl.backgroundColor);
+    expect(imageHeaderTheme.iconMenuPointColor, _galleryHeaderThemeDataDarkControl.iconMenuPointColor);
+    expect(imageHeaderTheme.titleTextStyle, _galleryHeaderThemeDataDarkControl.titleTextStyle);
+    expect(imageHeaderTheme.subtitleTextStyle, _galleryHeaderThemeDataDarkControl.subtitleTextStyle);
+    expect(imageHeaderTheme.bottomSheetBarrierColor, _galleryHeaderThemeDataDarkControl.bottomSheetBarrierColor);
   });
 }
 
@@ -138,13 +110,14 @@ final _galleryHeaderThemeDataControl = StreamGalleryHeaderThemeData(
     fontWeight: FontWeight.w500,
     color: Colors.black,
   ),
-  subtitleTextStyle: const TextStyle(
-    fontSize: 12,
-    color: Colors.black,
-    fontWeight: FontWeight.w400,
-  ).copyWith(
-    color: const Color(0xff7A7A7A),
-  ),
+  subtitleTextStyle:
+      const TextStyle(
+        fontSize: 12,
+        color: Colors.black,
+        fontWeight: FontWeight.w400,
+      ).copyWith(
+        color: const Color(0xff7A7A7A),
+      ),
   bottomSheetBarrierColor: const Color.fromRGBO(0, 0, 0, 0.2),
 );
 
@@ -158,13 +131,14 @@ final _galleryHeaderThemeDataHalfLerpControl = StreamGalleryHeaderThemeData(
     fontWeight: FontWeight.w500,
     color: Color(0xff7f7f7f),
   ),
-  subtitleTextStyle: const TextStyle(
-    fontSize: 12,
-    color: Color(0xff7a7a7a),
-    fontWeight: FontWeight.w400,
-  ).copyWith(
-    color: const Color(0xff7A7A7A),
-  ),
+  subtitleTextStyle:
+      const TextStyle(
+        fontSize: 12,
+        color: Color(0xff7a7a7a),
+        fontWeight: FontWeight.w400,
+      ).copyWith(
+        color: const Color(0xff7A7A7A),
+      ),
   bottomSheetBarrierColor: const Color(0x4c000000),
 );
 
@@ -178,12 +152,13 @@ final _galleryHeaderThemeDataDarkControl = StreamGalleryHeaderThemeData(
     fontWeight: FontWeight.w500,
     color: Colors.white,
   ),
-  subtitleTextStyle: const TextStyle(
-    fontSize: 12,
-    color: Colors.white,
-    fontWeight: FontWeight.w400,
-  ).copyWith(
-    color: const Color(0xff7A7A7A),
-  ),
+  subtitleTextStyle:
+      const TextStyle(
+        fontSize: 12,
+        color: Colors.white,
+        fontWeight: FontWeight.w400,
+      ).copyWith(
+        color: const Color(0xff7A7A7A),
+      ),
   bottomSheetBarrierColor: const Color.fromRGBO(0, 0, 0, 0.4),
 );

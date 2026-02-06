@@ -141,8 +141,7 @@ class StreamChatState extends State<StreamChat> {
   StreamChatClient get client => widget.client;
 
   /// Gets configuration options from widget
-  StreamChatConfigurationData get streamChatConfigData =>
-      widget.streamChatConfigData ?? StreamChatConfigurationData();
+  StreamChatConfigurationData get streamChatConfigData => widget.streamChatConfigData ?? StreamChatConfigurationData();
 
   @override
   void initState() {
@@ -208,8 +207,7 @@ class StreamChatState extends State<StreamChat> {
 
   @override
   void didChangeDependencies() {
-    final currentLocale =
-        Localizations.localeOf(context).toString().toLowerCase();
+    final currentLocale = Localizations.localeOf(context).toString().toLowerCase();
     final availableLocales = Jiffy.getSupportedLocales();
     if (availableLocales.contains(currentLocale)) {
       Jiffy.setLocale(currentLocale);

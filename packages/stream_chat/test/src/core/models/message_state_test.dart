@@ -113,8 +113,7 @@ void main() {
       test(
         'isSent should return true if the message state is MessageCompleted with Sent state',
         () {
-          const messageState =
-              MessageState.completed(state: CompletedState.sent());
+          const messageState = MessageState.completed(state: CompletedState.sent());
           expect(messageState.isSent, true);
         },
       );

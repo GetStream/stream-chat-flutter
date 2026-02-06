@@ -11,13 +11,11 @@ Widget defaultDraftListViewSeparatorBuilder(
   BuildContext context,
   List<Draft> drafts,
   int index,
-) =>
-    const StreamDraftListSeparator();
+) => const StreamDraftListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamDraftListView].
-typedef StreamDraftListViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<Draft, StreamDraftListTile>;
+typedef StreamDraftListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidgetBuilder<Draft, StreamDraftListTile>;
 
 /// {@template streamDraftListView}
 /// A [ListView] that shows a list of [Draft]'s. It uses a
@@ -331,8 +329,7 @@ class StreamDraftListView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.list(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
       ),

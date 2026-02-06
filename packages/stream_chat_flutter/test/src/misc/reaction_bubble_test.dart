@@ -38,8 +38,7 @@ void main() {
                   ),
                 ],
                 borderColor: theme.ownMessageTheme.reactionsBorderColor!,
-                backgroundColor:
-                    theme.ownMessageTheme.reactionsBackgroundColor!,
+                backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
                 maskColor: theme.ownMessageTheme.reactionsMaskColor!,
               ),
             ),
@@ -78,8 +77,7 @@ void main() {
                   ),
                 ],
                 borderColor: theme.ownMessageTheme.reactionsBorderColor!,
-                backgroundColor:
-                    theme.ownMessageTheme.reactionsBackgroundColor!,
+                backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
                 maskColor: theme.ownMessageTheme.reactionsMaskColor!,
               ),
             ),
@@ -126,8 +124,7 @@ void main() {
                   ),
                 ],
                 borderColor: theme.ownMessageTheme.reactionsBorderColor!,
-                backgroundColor:
-                    theme.ownMessageTheme.reactionsBackgroundColor!,
+                backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
                 maskColor: theme.ownMessageTheme.reactionsMaskColor!,
               ),
             ),
@@ -174,8 +171,7 @@ void main() {
                   ),
                 ],
                 borderColor: theme.ownMessageTheme.reactionsBorderColor!,
-                backgroundColor:
-                    theme.ownMessageTheme.reactionsBackgroundColor!,
+                backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
                 maskColor: theme.ownMessageTheme.reactionsMaskColor!,
               ),
             ),

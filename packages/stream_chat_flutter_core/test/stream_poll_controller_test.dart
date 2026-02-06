@@ -11,10 +11,13 @@ void main() {
     });
 
     test('Initialization with Custom Poll and Config', () {
-      final poll = Poll(name: 'Initial Poll', options: const [
-        PollOption(text: 'Option 1'),
-        PollOption(text: 'Option 2'),
-      ]);
+      final poll = Poll(
+        name: 'Initial Poll',
+        options: const [
+          PollOption(text: 'Option 1'),
+          PollOption(text: 'Option 2'),
+        ],
+      );
       const config = PollConfig(nameRange: (min: 2, max: 50));
       final pollController = StreamPollController(poll: poll, config: config);
 
@@ -101,10 +104,7 @@ void main() {
       final errors = pollController.validateGranularly();
       expect(errors.isEmpty, isFalse);
 
-      final containsNameRangeError = errors
-          .map((e) => e.mapOrNull(nameRange: (e) => e))
-          .nonNulls
-          .isNotEmpty;
+      final containsNameRangeError = errors.map((e) => e.mapOrNull(nameRange: (e) => e)).nonNulls.isNotEmpty;
 
       expect(containsNameRangeError, isTrue);
     });
@@ -117,10 +117,7 @@ void main() {
       final errors = pollController.validateGranularly();
       expect(errors.isEmpty, isFalse);
 
-      final containsDuplicateOptions = errors
-          .map((e) => e.mapOrNull(duplicateOptions: (e) => e))
-          .nonNulls
-          .isNotEmpty;
+      final containsDuplicateOptions = errors.map((e) => e.mapOrNull(duplicateOptions: (e) => e)).nonNulls.isNotEmpty;
 
       expect(containsDuplicateOptions, isTrue);
     });
@@ -130,10 +127,7 @@ void main() {
       final errors = pollController.validateGranularly();
       expect(errors.isEmpty, isFalse);
 
-      final containsOptionsRangeError = errors
-          .map((e) => e.mapOrNull(optionsRange: (e) => e))
-          .nonNulls
-          .isNotEmpty;
+      final containsOptionsRangeError = errors.map((e) => e.mapOrNull(optionsRange: (e) => e)).nonNulls.isNotEmpty;
 
       expect(containsOptionsRangeError, isTrue);
     });
@@ -238,10 +232,7 @@ void main() {
       )..question = 'A' * 200;
 
       final errors = pollController.validateGranularly();
-      final containsNameRangeError = errors
-          .map((e) => e.mapOrNull(nameRange: (e) => e))
-          .nonNulls
-          .isNotEmpty;
+      final containsNameRangeError = errors.map((e) => e.mapOrNull(nameRange: (e) => e)).nonNulls.isNotEmpty;
 
       expect(containsNameRangeError, isFalse);
     });
@@ -256,10 +247,7 @@ void main() {
       }
 
       final errors = pollController.validateGranularly();
-      final containsOptionsRangeError = errors
-          .map((e) => e.mapOrNull(optionsRange: (e) => e))
-          .nonNulls
-          .isNotEmpty;
+      final containsOptionsRangeError = errors.map((e) => e.mapOrNull(optionsRange: (e) => e)).nonNulls.isNotEmpty;
 
       expect(containsOptionsRangeError, isFalse);
     });

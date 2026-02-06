@@ -41,8 +41,7 @@ class DesktopReactionsBuilder extends StatefulWidget {
   final bool reverse;
 
   @override
-  State<DesktopReactionsBuilder> createState() =>
-      _DesktopReactionsBuilderState();
+  State<DesktopReactionsBuilder> createState() => _DesktopReactionsBuilderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -75,14 +74,12 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
 
     final reactionsMap = <String, Reaction>{};
     widget.message.latestReactions?.forEach((element) {
-      if (!reactionsMap.containsKey(element.type) ||
-          element.user!.id == currentUser.id) {
+      if (!reactionsMap.containsKey(element.type) || element.user!.id == currentUser.id) {
         reactionsMap[element.type] = element;
       }
     });
 
-    final reactionsList = reactionsMap.values.toList()
-      ..sort((a, b) => a.user!.id == currentUser.id ? 1 : -1);
+    final reactionsList = reactionsMap.values.toList()..sort((a, b) => a.user!.id == currentUser.id ? 1 : -1);
 
     return PortalTarget(
       visible: _showReactionsPopup,
@@ -177,16 +174,15 @@ class _BottomReaction extends StatelessWidget {
       onTap: () {
         if (reaction.userId == userId) {
           StreamChannel.of(context).channel.deleteReaction(
-                message,
-                reaction,
-              );
+            message,
+            reaction,
+          );
         } else if (reactionIcon != null) {
           StreamChannel.of(context).channel.sendReaction(
-                message,
-                reactionIcon!.toReaction(),
-                enforceUnique:
-                    StreamChatConfiguration.of(context).enforceUniqueReactions,
-              );
+            message,
+            reactionIcon!.toReaction(),
+            enforceUnique: StreamChatConfiguration.of(context).enforceUniqueReactions,
+          );
         }
       },
       child: Card(
@@ -195,7 +191,8 @@ class _BottomReaction extends StatelessWidget {
         // This is done to avoid shadow when background color is transparent.
         elevation: backgroundColor == Colors.transparent ? 0 : null,
         shape: RoundedRectangleBorder(
-          side: borderSide ??
+          side:
+              borderSide ??
               BorderSide(
                 color: messageTheme?.reactionsBorderColor ?? Colors.transparent,
               ),
@@ -211,7 +208,8 @@ class _BottomReaction extends StatelessWidget {
                 constraints: BoxConstraints.tight(
                   const Size.square(14),
                 ),
-                child: reactionIcon?.builder(
+                child:
+                    reactionIcon?.builder(
                       context,
                       reaction.user?.id == userId,
                       14,

@@ -34,10 +34,12 @@ class StreamDeletedMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: messageTheme.messageBackgroundColor,
-      shape: shape ??
+      shape:
+          shape ??
           RoundedRectangleBorder(
             borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
-            side: borderSide ??
+            side:
+                borderSide ??
                 BorderSide(
                   color: messageTheme.messageBorderColor ?? Colors.transparent,
                 ),

@@ -32,13 +32,12 @@ class Location extends Equatable {
     DateTime? endAt,
     DateTime? createdAt,
     DateTime? updatedAt,
-  })  : endAt = endAt?.toUtc(),
-        createdAt = createdAt ?? DateTime.timestamp(),
-        updatedAt = updatedAt ?? DateTime.timestamp();
+  }) : endAt = endAt?.toUtc(),
+       createdAt = createdAt ?? DateTime.timestamp(),
+       updatedAt = updatedAt ?? DateTime.timestamp();
 
   /// Create a new instance from a json
-  factory Location.fromJson(Map<String, dynamic> json) =>
-      _$LocationFromJson(json);
+  factory Location.fromJson(Map<String, dynamic> json) => _$LocationFromJson(json);
 
   /// The channel CID where the message exists.
   ///
@@ -143,16 +142,16 @@ class Location extends Equatable {
 
   @override
   List<Object?> get props => [
-        channelCid,
-        channel,
-        messageId,
-        message,
-        userId,
-        latitude,
-        longitude,
-        createdByDeviceId,
-        endAt,
-        createdAt,
-        updatedAt,
-      ];
+    channelCid,
+    channel,
+    messageId,
+    message,
+    userId,
+    latitude,
+    longitude,
+    createdByDeviceId,
+    endAt,
+    createdAt,
+    updatedAt,
+  ];
 }

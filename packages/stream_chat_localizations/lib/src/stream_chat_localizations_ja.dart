@@ -49,8 +49,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      '$remaining/${total}mbのアップロード中…';
+  }) => '$remaining/${total}mbのアップロード中…';
 
   @override
   String pinnedByUserText({
@@ -129,8 +128,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       '圧縮を試しましたがサイズをオーバーしました';
 
   @override
-  String fileTooLargeError(double limitInMB) =>
-      'ファイルが大きすぎてアップロードできません。ファイルサイズの制限は${limitInMB}MBです。';
+  String fileTooLargeError(double limitInMB) => 'ファイルが大きすぎてアップロードできません。ファイルサイズの制限は${limitInMB}MBです。';
 
   @override
   String get couldNotReadBytesFromFileError => 'ファイルからバイトを読み取れませんでした';
@@ -163,8 +161,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get addMoreFilesLabel => 'ファイルの追加';
 
   @override
-  String get enablePhotoAndVideoAccessMessage =>
-      'お友達と共有できるように、写真やビデオへのアクセスを有効にしてください。';
+  String get enablePhotoAndVideoAccessMessage => 'お友達と共有できるように、写真やビデオへのアクセスを有効にしてください。';
   @override
   String get allowGalleryAccessMessage => 'ギャラリーへのアクセスを許可する';
 
@@ -349,8 +346,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} / $totalPages';
+  }) => '${currentPage + 1} / $totalPages';
 
   @override
   String get fileText => 'ファイル';
@@ -365,7 +361,8 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'ライブラリを表示';
 
   @override
-  String attachmentLimitExceedError(int limit) => '''
+  String attachmentLimitExceedError(int limit) =>
+      '''
 添付ファイルの制限を超えました：$limit個のファイル以上を添付することはできません
   ''';
 
@@ -441,8 +438,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get markUnreadError =>
-      'メッセージを未読にする際にエラーが発生しました。最新の100件のチャンネルメッセージより古い未読メッセージはマークできません。';
+  String get markUnreadError => 'メッセージを未読にする際にエラーが発生しました。最新の100件のチャンネルメッセージより古い未読メッセージはマークできません。';
 
   @override
   String createPollLabel({bool isNew = false}) {
@@ -584,10 +580,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 票',
-        1 => '1 票',
-        _ => '$count 票',
-      };
+    null || < 1 => '0 票',
+    1 => '1 票',
+    _ => '$count 票',
+  };
 
   @override
   String get noPollVotesLabel => '現在投票はありません';
@@ -619,8 +615,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get moderationReviewModalTitle => 'よろしいですか？';
 
   @override
-  String get moderationReviewModalDescription =>
-      '''あなたのコメントが他の人にどのような影響を与えるかを考え、コミュニティガイドラインに従ってください。''';
+  String get moderationReviewModalDescription => '''あなたのコメントが他の人にどのような影響を与えるかを考え、コミュニティガイドラインに従ってください。''';
 
   @override
   String get emptyMessagePreviewText => '';

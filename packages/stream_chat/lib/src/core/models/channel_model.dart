@@ -33,33 +33,31 @@ class ChannelModel {
     DateTime? truncatedAt,
     this.messageCount,
     this.filterTags,
-  })  : assert(
-          (cid != null && cid.contains(':')) || (id != null && type != null),
-          'provide either a cid or an id and type',
-        ),
-        id = id ?? cid!.split(':')[1],
-        type = type ?? cid!.split(':')[0],
-        cid = cid ?? '$type:$id',
-        config = config ?? ChannelConfig(),
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now(),
-        ownCapabilities = ownCapabilities?.map(ChannelCapability.new).toList(),
+  }) : assert(
+         (cid != null && cid.contains(':')) || (id != null && type != null),
+         'provide either a cid or an id and type',
+       ),
+       id = id ?? cid!.split(':')[1],
+       type = type ?? cid!.split(':')[0],
+       cid = cid ?? '$type:$id',
+       config = config ?? ChannelConfig(),
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now(),
+       ownCapabilities = ownCapabilities?.map(ChannelCapability.new).toList(),
 
-        // For backwards compatibility, set 'disabled', 'hidden'
-        // and 'truncated_at' in [extraData].
-        extraData = {
-          ...extraData,
-          if (disabled != null) 'disabled': disabled,
-          if (hidden != null) 'hidden': hidden,
-          if (truncatedAt != null)
-            'truncated_at': truncatedAt.toIso8601String(),
-        };
+       // For backwards compatibility, set 'disabled', 'hidden'
+       // and 'truncated_at' in [extraData].
+       extraData = {
+         ...extraData,
+         if (disabled != null) 'disabled': disabled,
+         if (hidden != null) 'hidden': hidden,
+         if (truncatedAt != null) 'truncated_at': truncatedAt.toIso8601String(),
+       };
 
   /// Create a new instance from a json
-  factory ChannelModel.fromJson(Map<String, dynamic> json) =>
-      _$ChannelModelFromJson(
-        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-      );
+  factory ChannelModel.fromJson(Map<String, dynamic> json) => _$ChannelModelFromJson(
+    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+  );
 
   /// The id of this channel
   final String id;
@@ -190,8 +188,8 @@ class ChannelModel {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$ChannelModelToJson(this),
-      );
+    _$ChannelModelToJson(this),
+  );
 
   /// Creates a copy of [ChannelModel] with specified attributes overridden.
   ChannelModel copyWith({
@@ -216,35 +214,35 @@ class ChannelModel {
     DateTime? truncatedAt,
     int? messageCount,
     List<String>? filterTags,
-  }) =>
-      ChannelModel(
-        id: id ?? this.id,
-        type: type ?? this.type,
-        cid: cid ?? this.cid,
-        ownCapabilities: ownCapabilities ?? this.ownCapabilities,
-        config: config ?? this.config,
-        createdBy: createdBy ?? this.createdBy,
-        frozen: frozen ?? this.frozen,
-        lastMessageAt: lastMessageAt ?? this.lastMessageAt,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        deletedAt: deletedAt ?? this.deletedAt,
-        memberCount: memberCount ?? this.memberCount,
-        members: members ?? this.members,
-        extraData: extraData ?? this.extraData,
-        team: team ?? this.team,
-        cooldown: cooldown ?? this.cooldown,
-        disabled: disabled ?? extraData?['disabled'] as bool? ?? this.disabled,
-        hidden: hidden ?? extraData?['hidden'] as bool? ?? this.hidden,
-        truncatedAt: truncatedAt ??
-            (extraData?['truncated_at'] == null
-                ? null
-                // ignore: cast_nullable_to_non_nullable
-                : DateTime.parse(extraData?['truncated_at'] as String)) ??
-            this.truncatedAt,
-        messageCount: messageCount ?? this.messageCount,
-        filterTags: filterTags ?? this.filterTags,
-      );
+  }) => ChannelModel(
+    id: id ?? this.id,
+    type: type ?? this.type,
+    cid: cid ?? this.cid,
+    ownCapabilities: ownCapabilities ?? this.ownCapabilities,
+    config: config ?? this.config,
+    createdBy: createdBy ?? this.createdBy,
+    frozen: frozen ?? this.frozen,
+    lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt ?? this.deletedAt,
+    memberCount: memberCount ?? this.memberCount,
+    members: members ?? this.members,
+    extraData: extraData ?? this.extraData,
+    team: team ?? this.team,
+    cooldown: cooldown ?? this.cooldown,
+    disabled: disabled ?? extraData?['disabled'] as bool? ?? this.disabled,
+    hidden: hidden ?? extraData?['hidden'] as bool? ?? this.hidden,
+    truncatedAt:
+        truncatedAt ??
+        (extraData?['truncated_at'] == null
+            ? null
+            // ignore: cast_nullable_to_non_nullable
+            : DateTime.parse(extraData?['truncated_at'] as String)) ??
+        this.truncatedAt,
+    messageCount: messageCount ?? this.messageCount,
+    filterTags: filterTags ?? this.filterTags,
+  );
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
   /// and the given [other] channelModel.

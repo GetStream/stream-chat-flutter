@@ -145,8 +145,7 @@ void main() {
       when(
         mockClient.openConnection,
       ).thenAnswer((_) async => OwnUser(id: 'test-user'));
-      when(() => mockClient.wsConnectionStatus)
-          .thenReturn(ConnectionStatus.connected);
+      when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.connected);
     });
 
     tearDown(() {
@@ -202,8 +201,7 @@ void main() {
         ).thenReturn(ConnectionStatus.disconnected);
 
         // Act - bring app to foreground
-        tester.binding
-            .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         await tester.pumpAndSettle();
 
         // Assert
@@ -251,8 +249,7 @@ void main() {
           );
 
           // Act
-          tester.binding
-              .handleAppLifecycleStateChanged(AppLifecycleState.paused);
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
           await tester.pumpAndSettle();
 
           // Wait for timer to expire

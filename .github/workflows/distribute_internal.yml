@@ -144,3 +144,47 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
         run: bundle exec fastlane distribute_to_firebase
+
+  # TODO: Remove once feat/design-refresh is merged to master
+  ios_testflight:
+    needs: determine_platforms
+    if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
+    runs-on: macos-15 # Requires xcode 15 or later
+    timeout-minutes: 30
+    steps:
+      - name: Connect Bot
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
+      - name: "Git Checkout"
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+        
+      - name: "Install Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+          
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+      
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
+        
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: sample_app/ios
+
+      - name: Distribute to TestFlight Internal
+        working-directory: sample_app/ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+        run: bundle exec fastlane distribute_to_testflight_internal

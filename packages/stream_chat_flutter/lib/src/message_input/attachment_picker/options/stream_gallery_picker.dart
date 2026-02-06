@@ -248,8 +248,7 @@ extension StreamImagePickerX on StreamAttachmentPickerController {
       final image = await asset.originFile;
       if (image != null) {
         final tempDir = await getTemporaryDirectory();
-        final cachedFile =
-            File('${tempDir.path}/${image.path.split('/').last}');
+        final cachedFile = File('${tempDir.path}/${image.path.split('/').last}');
         if (cachedFile.existsSync()) {
           cachedFile.deleteSync();
         }

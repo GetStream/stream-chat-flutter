@@ -37,25 +37,25 @@ class StreamUnreadIndicator extends StatelessWidget {
     final stream = switch (_unreadType) {
       _TotalUnreadCount() => client.state.totalUnreadCountStream,
       _UnreadChannels(cid: final cid) => switch (cid) {
-          final cid? => client.state.channels[cid]?.state?.unreadCountStream,
-          _ => client.state.unreadChannelsStream,
-        },
+        final cid? => client.state.channels[cid]?.state?.unreadCountStream,
+        _ => client.state.unreadChannelsStream,
+      },
       _UnreadThreads(id: final id) => switch (id) {
-          // TODO: Handle id once it's supported
-          _ => client.state.unreadThreadsStream,
-        }
+        // TODO: Handle id once it's supported
+        _ => client.state.unreadThreadsStream,
+      },
     };
 
     final initialData = switch (_unreadType) {
       _TotalUnreadCount() => client.state.totalUnreadCount,
       _UnreadChannels(cid: final cid) => switch (cid) {
-          final cid? => client.state.channels[cid]?.state?.unreadCount,
-          _ => client.state.unreadChannels,
-        },
+        final cid? => client.state.channels[cid]?.state?.unreadCount,
+        _ => client.state.unreadChannels,
+      },
       _UnreadThreads(id: final id) => switch (id) {
-          // TODO: Handle id once it's supported
-          _ => client.state.unreadThreads,
-        }
+        // TODO: Handle id once it's supported
+        _ => client.state.unreadThreads,
+      },
     };
 
     return IgnorePointer(

@@ -13,8 +13,7 @@ class ChannelFileDisplayScreen extends StatefulWidget {
   final StreamMessageThemeData messageTheme;
 
   @override
-  State<ChannelFileDisplayScreen> createState() =>
-      _ChannelFileDisplayScreenState();
+  State<ChannelFileDisplayScreen> createState() => _ChannelFileDisplayScreenState();
 }
 
 class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
@@ -55,88 +54,82 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
       ),
       body: ValueListenableBuilder(
         valueListenable: controller,
-        builder: (
-          BuildContext context,
-          PagedValue<String, GetMessageResponse> value,
-          Widget? child,
-        ) {
-          return value.when(
-            (items, nextPageKey, error) {
-              if (items.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      StreamSvgIcon(
-                        icon: StreamSvgIcons.files,
-                        size: 136,
-                        color: StreamChatTheme.of(context).colorTheme.disabled,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        AppLocalizations.of(context).noFiles,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppLocalizations.of(context).filesAppearHere,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis
-                              .withOpacity(0.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              final media = <Attachment, Message>{};
-
-              for (final item in items) {
-                item.message.attachments
-                    .where((e) => e.type == 'file')
-                    .forEach((e) {
-                  media[e] = item.message;
-                });
-              }
-
-              return LazyLoadScrollView(
-                onEndOfPage: () async {
-                  if (nextPageKey != null) {
-                    controller.loadMore(nextPageKey);
-                  }
-                },
-                child: ListView.builder(
-                  itemBuilder: (context, position) {
-                    return Padding(
-                      padding: const EdgeInsets.all(1),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: StreamFileAttachment(
-                          message: media.values.toList()[position],
-                          file: media.keys.toList()[position],
-                        ),
+        builder:
+            (
+              BuildContext context,
+              PagedValue<String, GetMessageResponse> value,
+              Widget? child,
+            ) {
+              return value.when(
+                (items, nextPageKey, error) {
+                  if (items.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          StreamSvgIcon(
+                            icon: StreamSvgIcons.files,
+                            size: 136,
+                            color: StreamChatTheme.of(context).colorTheme.disabled,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            AppLocalizations.of(context).noFiles,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            AppLocalizations.of(context).filesAppearHere,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
                       ),
                     );
-                  },
-                  itemCount: media.length,
+                  }
+                  final media = <Attachment, Message>{};
+
+                  for (final item in items) {
+                    item.message.attachments.where((e) => e.type == 'file').forEach((e) {
+                      media[e] = item.message;
+                    });
+                  }
+
+                  return LazyLoadScrollView(
+                    onEndOfPage: () async {
+                      if (nextPageKey != null) {
+                        controller.loadMore(nextPageKey);
+                      }
+                    },
+                    child: ListView.builder(
+                      itemBuilder: (context, position) {
+                        return Padding(
+                          padding: const EdgeInsets.all(1),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: StreamFileAttachment(
+                              message: media.values.toList()[position],
+                              file: media.keys.toList()[position],
+                            ),
+                          ),
+                        );
+                      },
+                      itemCount: media.length,
+                    ),
+                  );
+                },
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
                 ),
+                error: (_) => const Offstage(),
               );
             },
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (_) => const Offstage(),
-          );
-        },
       ),
     );
   }

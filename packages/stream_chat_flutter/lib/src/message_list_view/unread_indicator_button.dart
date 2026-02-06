@@ -18,11 +18,12 @@ typedef OnUnreadIndicatorTap = Future<void> Function(String? lastReadMessageId);
 /// [unreadCount] is the number of unread messages.
 /// [onTap] is called when the indicator is tapped.
 /// [onDismissTap] is called when the dismiss action is triggered.
-typedef UnreadIndicatorBuilder = Widget Function(
-  int unreadCount,
-  OnUnreadIndicatorTap onTap,
-  OnUnreadIndicatorDismissTap onDismissTap,
-);
+typedef UnreadIndicatorBuilder =
+    Widget Function(
+      int unreadCount,
+      OnUnreadIndicatorTap onTap,
+      OnUnreadIndicatorDismissTap onDismissTap,
+    );
 
 /// {@template unreadIndicatorButton}
 /// A button that displays the number of unread messages in a channel.

@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
 
 /// Function signature for building the attachment picker option view.
-typedef AttachmentPickerOptionViewBuilder = Widget Function(
-  BuildContext context,
-  StreamAttachmentPickerController controller,
-);
+typedef AttachmentPickerOptionViewBuilder =
+    Widget Function(
+      BuildContext context,
+      StreamAttachmentPickerController controller,
+    );
 
 /// Function signature for system attachment picker option callback.
-typedef OnSystemAttachmentPickerOptionTap = Future<void> Function(
-  BuildContext context,
-  StreamAttachmentPickerController controller,
-);
+typedef OnSystemAttachmentPickerOptionTap =
+    Future<void> Function(
+      BuildContext context,
+      StreamAttachmentPickerController controller,
+    );
 
 /// Base class for attachment picker options.
 abstract class AttachmentPickerOption {

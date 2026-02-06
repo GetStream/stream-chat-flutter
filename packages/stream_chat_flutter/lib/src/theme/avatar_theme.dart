@@ -10,8 +10,8 @@ class StreamAvatarThemeData with Diagnosticable {
   const StreamAvatarThemeData({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
-  })  : _constraints = constraints,
-        _borderRadius = borderRadius;
+  }) : _constraints = constraints,
+       _borderRadius = borderRadius;
 
   final BoxConstraints? _constraints;
   final BorderRadius? _borderRadius;

@@ -28,15 +28,17 @@ void main() {
           home: StreamChat(
             client: client,
             streamChatThemeData: StreamChatThemeData.light(),
-            child: Builder(builder: (context) {
-              return Scaffold(
-                body: Center(
-                  child: StreamUserAvatar(
-                    user: user,
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Center(
+                    child: StreamUserAvatar(
+                      user: user,
+                    ),
                   ),
-                ),
-              );
-            }),
+                );
+              },
+            ),
           ),
         ),
       );

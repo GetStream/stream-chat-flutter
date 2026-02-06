@@ -11,12 +11,13 @@ const _kDefaultWaveformHeight = 28.0;
 ///
 /// Provides a flexible way to customize the trailing section of the
 /// voice recording player based on the current track and playback state.
-typedef StreamVoiceRecordingAttachmentTrailingWidgetBuilder = Widget Function(
-  BuildContext context,
-  PlaylistTrack track,
-  PlaybackSpeed speed,
-  ValueChanged<PlaybackSpeed>? onChangeSpeed,
-);
+typedef StreamVoiceRecordingAttachmentTrailingWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      PlaylistTrack track,
+      PlaybackSpeed speed,
+      ValueChanged<PlaybackSpeed>? onChangeSpeed,
+    );
 
 /// {@template streamVoiceRecordingAttachment}
 /// An embedded audio player for voice recordings with comprehensive playback
@@ -102,9 +103,9 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       child: switch (track.state.isPlaying) {
         true => SpeedControlButton(
-            speed: speed,
-            onChangeSpeed: onChangeSpeed,
-          ),
+          speed: speed,
+          onChangeSpeed: onChangeSpeed,
+        ),
         false => getFileTypeImage(track.title?.mediaType?.mimeType),
       },
     );
@@ -116,7 +117,8 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
     final waveformSliderTheme = theme.audioWaveformSliderTheme;
     final waveformTheme = waveformSliderTheme?.audioWaveformTheme;
 
-    final shape = this.shape ??
+    final shape =
+        this.shape ??
         RoundedRectangleBorder(
           side: BorderSide(
             color: StreamChatTheme.of(context).colorTheme.borders,
@@ -181,8 +183,7 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
                           spacingRatio: waveformTheme?.spacingRatio,
                           heightScale: waveformTheme?.heightScale,
                           thumbColor: waveformSliderTheme?.thumbColor,
-                          thumbBorderColor:
-                              waveformSliderTheme?.thumbBorderColor,
+                          thumbBorderColor: waveformSliderTheme?.thumbBorderColor,
                         ),
                       ),
                     ),

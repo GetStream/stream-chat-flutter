@@ -7,10 +7,11 @@ const double _kContextMenuWidth = 222;
 ///
 /// This builder can be used to customize the appearance of the menu
 /// container by wrapping [child] in additional UI elements.
-typedef ContextMenuBuilder = Widget Function(
-  BuildContext context,
-  Widget child,
-);
+typedef ContextMenuBuilder =
+    Widget Function(
+      BuildContext context,
+      Widget child,
+    );
 
 /// A widget that displays a context menu anchored to a specific [Offset].
 ///

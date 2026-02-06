@@ -34,10 +34,10 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     this.filter,
     this.sort = defaultDraftListSort,
     this.limit = defaultDraftPagedLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort,
-        _eventHandler = eventHandler ?? StreamDraftListEventHandler(),
-        super(const PagedValue.loading());
+  }) : _activeFilter = filter,
+       _activeSort = sort,
+       _eventHandler = eventHandler ?? StreamDraftListEventHandler(),
+       super(const PagedValue.loading());
 
   /// Creates a [StreamThreadListController] from the passed [value].
   StreamDraftListController.fromValue(
@@ -47,9 +47,9 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     this.filter,
     this.sort = defaultDraftListSort,
     this.limit = defaultDraftPagedLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort,
-        _eventHandler = eventHandler ?? StreamDraftListEventHandler();
+  }) : _activeFilter = filter,
+       _activeSort = sort,
+       _eventHandler = eventHandler ?? StreamDraftListEventHandler();
 
   /// The Stream client used to perform the queries.
   final StreamChatClient client;
@@ -94,11 +94,11 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     super.value = switch (_activeSort) {
       null => newValue,
       final draftSort => newValue.maybeMap(
-          orElse: () => newValue,
-          (success) => success.copyWith(
-            items: success.items.sorted(draftSort.compare),
-          ),
+        orElse: () => newValue,
+        (success) => success.copyWith(
+          items: success.items.sorted(draftSort.compare),
         ),
+      ),
     };
   }
 

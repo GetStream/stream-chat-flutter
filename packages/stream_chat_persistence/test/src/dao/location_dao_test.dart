@@ -42,9 +42,7 @@ void main() {
         latitude: 37.7749 + index * 0.001, // San Francisco area
         longitude: -122.4194 + index * 0.001,
         createdByDeviceId: 'testDevice$index',
-        endAt: index.isEven
-            ? DateTime.now().add(const Duration(hours: 1))
-            : null, // Some live, some static
+        endAt: index.isEven ? DateTime.now().add(const Duration(hours: 1)) : null, // Some live, some static
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
@@ -112,10 +110,12 @@ void main() {
     final fetchedLocations = await locationDao.getLocationsByCid(cid);
     expect(fetchedLocations.length, insertedLocations.length + 1);
     expect(
-      fetchedLocations.any((it) =>
-          it.messageId == newLocation.messageId &&
-          it.latitude == newLocation.latitude &&
-          it.longitude == newLocation.longitude),
+      fetchedLocations.any(
+        (it) =>
+            it.messageId == newLocation.messageId &&
+            it.latitude == newLocation.latitude &&
+            it.longitude == newLocation.longitude,
+      ),
       isTrue,
     );
   });
@@ -128,8 +128,7 @@ void main() {
 
     // Fetched location should not be null
     final locationToFetch = insertedLocations.first;
-    final fetchedLocation =
-        await locationDao.getLocationByMessageId(locationToFetch.messageId!);
+    final fetchedLocation = await locationDao.getLocationByMessageId(locationToFetch.messageId!);
     expect(fetchedLocation, isNotNull);
     expect(fetchedLocation!.messageId, locationToFetch.messageId);
     expect(fetchedLocation.latitude, locationToFetch.latitude);
@@ -140,8 +139,7 @@ void main() {
     'getLocationByMessageId should return null for non-existent messageId',
     () async {
       // Should return null for non-existent messageId
-      final fetchedLocation =
-          await locationDao.getLocationByMessageId('nonExistentMessageId');
+      final fetchedLocation = await locationDao.getLocationByMessageId('nonExistentMessageId');
       expect(fetchedLocation, isNull);
     },
   );
@@ -171,14 +169,12 @@ void main() {
     final insertedLocations = await _prepareLocationData(cid: cid);
 
     // Deleting the first two locations by their message IDs
-    final messageIdsToDelete =
-        insertedLocations.take(2).map((it) => it.messageId!).toList();
+    final messageIdsToDelete = insertedLocations.take(2).map((it) => it.messageId!).toList();
     await locationDao.deleteLocationsByMessageIds(messageIdsToDelete);
 
     // Fetched location list should be one less than inserted locations
     final fetchedLocations = await locationDao.getLocationsByCid(cid);
-    expect(fetchedLocations.length,
-        insertedLocations.length - messageIdsToDelete.length);
+    expect(fetchedLocations.length, insertedLocations.length - messageIdsToDelete.length);
 
     // Deleted locations should not exist in fetched locations
     expect(
@@ -193,10 +189,8 @@ void main() {
       const cid2 = 'test:Cid2';
 
       // Preparing test data for two channels
-      final insertedLocations1 =
-          await _prepareLocationData(cid: cid1, count: 2);
-      final insertedLocations2 =
-          await _prepareLocationData(cid: cid2, count: 2);
+      final insertedLocations1 = await _prepareLocationData(cid: cid1, count: 2);
+      final insertedLocations2 = await _prepareLocationData(cid: cid2, count: 2);
 
       // Verify all locations exist
       final locations1 = await locationDao.getLocationsByCid(cid1);
@@ -205,8 +199,7 @@ void main() {
       expect(locations2.length, insertedLocations2.length);
 
       // Delete only locations from the first channel
-      final messageIdsToDelete =
-          insertedLocations1.map((it) => it.messageId!).toList();
+      final messageIdsToDelete = insertedLocations1.map((it) => it.messageId!).toList();
       await locationDao.deleteLocationsByMessageIds(messageIdsToDelete);
 
       // Only locations from cid1 should be deleted
@@ -246,32 +239,27 @@ void main() {
         const cid = 'test:messageRefCascade';
 
         // Prepare test data
-        final insertedLocations =
-            await _prepareLocationData(cid: cid, count: 3);
+        final insertedLocations = await _prepareLocationData(cid: cid, count: 3);
         final messageToDelete = insertedLocations.first.messageId!;
 
         // Verify location exists before message deletion
-        final locationBeforeDelete =
-            await locationDao.getLocationByMessageId(messageToDelete);
+        final locationBeforeDelete = await locationDao.getLocationByMessageId(messageToDelete);
         expect(locationBeforeDelete, isNotNull);
         expect(locationBeforeDelete!.messageId, messageToDelete);
 
         // Verify all locations exist
-        final allLocationsBeforeDelete =
-            await locationDao.getLocationsByCid(cid);
+        final allLocationsBeforeDelete = await locationDao.getLocationsByCid(cid);
         expect(allLocationsBeforeDelete.length, 3);
 
         // Delete the message
         await database.messageDao.deleteMessageByIds([messageToDelete]);
 
         // Verify the specific location has been deleted (cascade)
-        final locationAfterDelete =
-            await locationDao.getLocationByMessageId(messageToDelete);
+        final locationAfterDelete = await locationDao.getLocationByMessageId(messageToDelete);
         expect(locationAfterDelete, isNull);
 
         // Verify other locations still exist
-        final allLocationsAfterDelete =
-            await locationDao.getLocationsByCid(cid);
+        final allLocationsAfterDelete = await locationDao.getLocationsByCid(cid);
         expect(allLocationsAfterDelete.length, 2);
         expect(
           allLocationsAfterDelete.any((it) => it.messageId == messageToDelete),
@@ -286,26 +274,21 @@ void main() {
         const cid = 'test:multipleMessageRefCascade';
 
         // Prepare test data
-        final insertedLocations =
-            await _prepareLocationData(cid: cid, count: 3);
-        final messageIdsToDelete =
-            insertedLocations.take(2).map((it) => it.messageId!).toList();
+        final insertedLocations = await _prepareLocationData(cid: cid, count: 3);
+        final messageIdsToDelete = insertedLocations.take(2).map((it) => it.messageId!).toList();
 
         // Verify locations exist before message deletion
-        final allLocationsBeforeDelete =
-            await locationDao.getLocationsByCid(cid);
+        final allLocationsBeforeDelete = await locationDao.getLocationsByCid(cid);
         expect(allLocationsBeforeDelete.length, 3);
 
         // Delete multiple messages
         await database.messageDao.deleteMessageByIds(messageIdsToDelete);
 
         // Verify corresponding locations have been deleted (cascade)
-        final allLocationsAfterDelete =
-            await locationDao.getLocationsByCid(cid);
+        final allLocationsAfterDelete = await locationDao.getLocationsByCid(cid);
         expect(allLocationsAfterDelete.length, 1);
         expect(
-          allLocationsAfterDelete
-              .any((it) => messageIdsToDelete.contains(it.messageId)),
+          allLocationsAfterDelete.any((it) => messageIdsToDelete.contains(it.messageId)),
           isFalse,
         );
       },

@@ -17,8 +17,7 @@ class ChannelMute {
   });
 
   /// Create a new instance from a json
-  factory ChannelMute.fromJson(Map<String, dynamic> json) =>
-      _$ChannelMuteFromJson(json);
+  factory ChannelMute.fromJson(Map<String, dynamic> json) => _$ChannelMuteFromJson(json);
 
   /// The user that performed the muting action
   final User user;

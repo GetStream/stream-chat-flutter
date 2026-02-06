@@ -180,18 +180,20 @@ Widget _wrapWithMaterialApp(
     debugShowCheckedModeBanner: false,
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.overlay,
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: child,
+      child: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.overlay,
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: child,
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     ),
   );
 }

@@ -87,22 +87,23 @@ class StreamMarkdownMessage extends StatelessWidget {
       syntaxHighlighter: syntaxHighlighter,
       builders: builders,
       paddingBuilders: paddingBuilders,
-      styleSheet: MarkdownStyleSheet.fromTheme(
-        themeData.copyWith(
-          textTheme: themeData.textTheme.apply(
-            bodyColor: messageTheme?.messageTextStyle?.color,
-            decoration: messageTheme?.messageTextStyle?.decoration,
-            decorationColor: messageTheme?.messageTextStyle?.decorationColor,
-            decorationStyle: messageTheme?.messageTextStyle?.decorationStyle,
-            fontFamily: messageTheme?.messageTextStyle?.fontFamily,
-          ),
-        ),
-      )
-          .copyWith(
-            a: messageTheme?.messageLinksStyle,
-            p: messageTheme?.messageTextStyle,
-          )
-          .merge(styleSheet),
+      styleSheet:
+          MarkdownStyleSheet.fromTheme(
+                themeData.copyWith(
+                  textTheme: themeData.textTheme.apply(
+                    bodyColor: messageTheme?.messageTextStyle?.color,
+                    decoration: messageTheme?.messageTextStyle?.decoration,
+                    decorationColor: messageTheme?.messageTextStyle?.decorationColor,
+                    decorationStyle: messageTheme?.messageTextStyle?.decorationStyle,
+                    fontFamily: messageTheme?.messageTextStyle?.fontFamily,
+                  ),
+                ),
+              )
+              .copyWith(
+                a: messageTheme?.messageLinksStyle,
+                p: messageTheme?.messageTextStyle,
+              )
+              .merge(styleSheet),
     );
   }
 }

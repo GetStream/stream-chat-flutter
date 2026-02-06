@@ -64,8 +64,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
   /// Returns the singleton instance of [StreamAttachmentHandler].
   // ignore: prefer_constructors_over_static_methods
-  static StreamAttachmentHandler get instance =>
-      _instance ??= StreamAttachmentHandler._();
+  static StreamAttachmentHandler get instance => _instance ??= StreamAttachmentHandler._();
 
   late final _imagePicker = ImagePicker();
   late final _filePicker = FilePicker.platform;
@@ -140,9 +139,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
     final tempDir = await getTemporaryDirectory();
     final tempPath = Uri.file(tempDir.path, windows: CurrentPlatform.isWindows);
-    final tempFilePath = tempPath
-        .resolve(fileName!)
-        .toFilePath(windows: CurrentPlatform.isWindows);
+    final tempFilePath = tempPath.resolve(fileName!).toFilePath(windows: CurrentPlatform.isWindows);
 
     final attachmentFileBytes = attachmentFile.bytes;
     if (attachmentFileBytes == null) {

@@ -35,38 +35,34 @@ class StreamMessageText extends StatelessWidget {
       stream: streamChat.currentUserStream.map((it) => it!.language ?? 'en'),
       initialData: streamChat.currentUser!.language ?? 'en',
       builder: (context, language) {
-        final messageText = message
-            .translate(language)
-            .replaceMentions()
-            .text
-            ?.replaceAll('\n', '\n\n')
-            .trim();
+        final messageText = message.translate(language).replaceMentions().text?.replaceAll('\n', '\n\n').trim();
 
         return StreamMarkdownMessage(
           data: messageText ?? '',
           messageTheme: messageTheme,
           selectable: isDesktopDeviceOrWeb,
-          onTapLink: (
-            String text,
-            String? href,
-            String title,
-          ) {
-            if (text.startsWith('@')) {
-              final mentionedUser = message.mentionedUsers.firstWhereOrNull(
-                (u) => '@${u.name}' == text,
-              );
+          onTapLink:
+              (
+                String text,
+                String? href,
+                String title,
+              ) {
+                if (text.startsWith('@')) {
+                  final mentionedUser = message.mentionedUsers.firstWhereOrNull(
+                    (u) => '@${u.name}' == text,
+                  );
 
-              if (mentionedUser == null) return;
+                  if (mentionedUser == null) return;
 
-              onMentionTap?.call(mentionedUser);
-            } else if (href != null) {
-              if (onLinkTap != null) {
-                onLinkTap!(href);
-              } else {
-                launchURL(context, href);
-              }
-            }
-          },
+                  onMentionTap?.call(mentionedUser);
+                } else if (href != null) {
+                  if (onLinkTap != null) {
+                    onLinkTap!(href);
+                  } else {
+                    launchURL(context, href);
+                  }
+                }
+              },
         );
       },
     );

@@ -38,9 +38,7 @@ class StreamThreadListTile extends StatelessWidget {
     final theme = StreamThreadListTileTheme.of(context);
 
     final language = currentUser?.language;
-    final unreadMessageCount = thread.read
-        ?.firstWhereOrNull((read) => read.user.id == currentUser?.id)
-        ?.unreadMessages;
+    final unreadMessageCount = thread.read?.firstWhereOrNull((read) => read.user.id == currentUser?.id)?.unreadMessages;
 
     return Material(
       color: theme.backgroundColor,
@@ -68,8 +66,7 @@ class StreamThreadListTile extends StatelessWidget {
                         parentMessage: parentMessage,
                       ),
                     ),
-                  if (unreadMessageCount case final count? when count > 0)
-                    ThreadUnreadCount(unreadCount: count),
+                  if (unreadMessageCount case final count? when count > 0) ThreadUnreadCount(unreadCount: count),
                 ],
               ),
               if (thread.latestReplies.lastOrNull case final latestReply?)
@@ -226,7 +223,7 @@ class ThreadLatestReply extends StatelessWidget {
     return Row(
       spacing: 8,
       children: <Widget>[
-        if (latestReply.user case final user?) StreamUserAvatar(user: user),
+        if (latestReply.user case final user?) StreamUserAvatar(size: .md, user: user),
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,

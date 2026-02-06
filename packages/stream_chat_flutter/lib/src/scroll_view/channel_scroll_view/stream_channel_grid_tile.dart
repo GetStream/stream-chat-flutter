@@ -46,31 +46,23 @@ class StreamChannelGridTile extends StatelessWidget {
     Widget? footer,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
-  }) =>
-      StreamChannelGridTile(
-        key: key ?? this.key,
-        channel: channel ?? this.channel,
-        footer: footer ?? this.footer,
-        onTap: onTap ?? this.onTap,
-        onLongPress: onLongPress ?? this.onLongPress,
-        child: child ?? this.child,
-      );
+  }) => StreamChannelGridTile(
+    key: key ?? this.key,
+    channel: channel ?? this.channel,
+    footer: footer ?? this.footer,
+    onTap: onTap ?? this.onTap,
+    onLongPress: onLongPress ?? this.onLongPress,
+    child: child ?? this.child,
+  );
 
   @override
   Widget build(BuildContext context) {
     final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
-    final child = this.child ??
-        StreamChannelAvatar(
-          channel: channel,
-          borderRadius: BorderRadius.circular(32),
-          constraints: const BoxConstraints.tightFor(
-            height: 64,
-            width: 64,
-          ),
-        );
+    final child = this.child ?? StreamChannelAvatar(size: .xl, channel: channel);
 
-    final footer = this.footer ??
+    final footer =
+        this.footer ??
         StreamChannelName(
           channel: channel,
           textStyle: channelPreviewTheme.titleStyle,

@@ -30,15 +30,14 @@ void main() {
     });
 
     test('should have empty extraData', () {
-      final result = Serializer.moveToExtraDataFromRoot({
-        'prop1': 'test',
-        'prop2': 123,
-        'prop3': true,
-      }, [
-        'prop1',
-        'prop2',
-        'prop3'
-      ]);
+      final result = Serializer.moveToExtraDataFromRoot(
+        {
+          'prop1': 'test',
+          'prop2': 123,
+          'prop3': true,
+        },
+        ['prop1', 'prop2', 'prop3'],
+      );
 
       expect(result, {
         'prop1': 'test',

@@ -4,6 +4,10 @@ analyzer:
     - packages/*/lib/scrollable_positioned_list/**
     - packages/*/lib/**/*.freezed.dart
 
+formatter:
+  page_width: 120
+  trailing_commas: preserve
+
 linter:
   rules:
     # these rules are documented on and in the same order as
@@ -40,7 +44,9 @@ linter:
     - avoid_null_checks_in_equality_operators
     - avoid_positional_boolean_parameters
     - avoid_private_typedef_functions
-    - avoid_redundant_argument_values
+    # Does not always make sense to remove them; it also makes it hard
+    # to notice future breaking changes.
+    # - avoid_redundant_argument_values
     - avoid_return_types_on_setters
     - avoid_returning_null_for_void
     - avoid_shadowing_type_parameters
@@ -64,7 +70,6 @@ linter:
     - leading_newlines_in_multiline_strings
     - library_names
     - library_prefixes
-    - lines_longer_than_80_chars
     - missing_whitespace_between_adjacent_strings
     - non_constant_identifier_names
     - null_closures

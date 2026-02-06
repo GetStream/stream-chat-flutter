@@ -49,13 +49,12 @@ class User extends Equatable implements ComparableFieldProvider {
     this.teamsRole,
     this.avgResponseTime,
     Map<String, Object?> extraData = const {},
-  }) :
-        // For backwards compatibility, set 'name', 'image' in [extraData].
-        extraData = {
-          ...extraData,
-          if (name != null) 'name': name,
-          if (image != null) 'image': image,
-        };
+  }) : // For backwards compatibility, set 'name', 'image' in [extraData].
+       extraData = {
+         ...extraData,
+         if (name != null) 'name': name,
+         if (image != null) 'image': image,
+       };
 
   /// Create a new instance from json.
   factory User.fromJson(Map<String, dynamic> json) =>
@@ -138,7 +137,7 @@ class User extends Equatable implements ComparableFieldProvider {
   /// The roles for the user in the teams.
   ///
   /// eg: `{'teamId': 'role', 'teamId2': 'role2'}`
-  final Map< /*Team*/ String, /*Role*/ String>? teamsRole;
+  final Map</*Team*/ String, /*Role*/ String>? teamsRole;
 
   /// The average response time of the user in seconds.
   final int? avgResponseTime;
@@ -147,13 +146,12 @@ class User extends Equatable implements ComparableFieldProvider {
   final Map<String, Object?> extraData;
 
   /// List of users to list of userIds.
-  static List<String>? toIds(List<User>? users) =>
-      users?.map((u) => u.id).toList();
+  static List<String>? toIds(List<User>? users) => users?.map((u) => u.id).toList();
 
   /// Serialize to json.
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$UserToJson(this),
-      );
+    _$UserToJson(this),
+  );
 
   /// Creates a copy of [User] with specified attributes overridden.
   User copyWith({
@@ -173,44 +171,44 @@ class User extends Equatable implements ComparableFieldProvider {
     bool? invisible,
     Map<String, String>? teamsRole,
     int? avgResponseTime,
-  }) =>
-      User(
-        id: id ?? this.id,
-        role: role ?? this.role,
-        name: name ??
-            extraData?['name'] as String? ??
-            // Using extraData value in order to not use id as name.
-            this.extraData['name'] as String?,
-        image: image ?? extraData?['image'] as String? ?? this.image,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        lastActive: lastActive ?? this.lastActive,
-        online: online ?? this.online,
-        extraData: extraData ?? this.extraData,
-        banned: banned ?? this.banned,
-        banExpires: banExpires ?? this.banExpires,
-        teams: teams ?? this.teams,
-        language: language ?? this.language,
-        invisible: invisible ?? this.invisible,
-        teamsRole: teamsRole ?? this.teamsRole,
-        avgResponseTime: avgResponseTime ?? this.avgResponseTime,
-      );
+  }) => User(
+    id: id ?? this.id,
+    role: role ?? this.role,
+    name:
+        name ??
+        extraData?['name'] as String? ??
+        // Using extraData value in order to not use id as name.
+        this.extraData['name'] as String?,
+    image: image ?? extraData?['image'] as String? ?? this.image,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    lastActive: lastActive ?? this.lastActive,
+    online: online ?? this.online,
+    extraData: extraData ?? this.extraData,
+    banned: banned ?? this.banned,
+    banExpires: banExpires ?? this.banExpires,
+    teams: teams ?? this.teams,
+    language: language ?? this.language,
+    invisible: invisible ?? this.invisible,
+    teamsRole: teamsRole ?? this.teamsRole,
+    avgResponseTime: avgResponseTime ?? this.avgResponseTime,
+  );
 
   @override
   List<Object?> get props => [
-        id,
-        role,
-        lastActive,
-        online,
-        extraData,
-        banned,
-        banExpires,
-        teams,
-        language,
-        invisible,
-        teamsRole,
-        avgResponseTime,
-      ];
+    id,
+    role,
+    lastActive,
+    online,
+    extraData,
+    banned,
+    banExpires,
+    teams,
+    language,
+    invisible,
+    teamsRole,
+    avgResponseTime,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

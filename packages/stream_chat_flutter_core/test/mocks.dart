@@ -22,11 +22,11 @@ class MockClientState extends Mock implements ClientState {
 
   @override
   OwnUser get currentUser => _currentUser ??= OwnUser(
-        id: 'testUserId',
-        role: 'admin',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+    id: 'testUserId',
+    role: 'admin',
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
 }
 
 class NonInitializedMockChannel extends Mock implements Channel {

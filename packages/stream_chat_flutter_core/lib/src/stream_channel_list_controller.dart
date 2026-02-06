@@ -55,8 +55,8 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  })  : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
-        super(const PagedValue.loading());
+  }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
+       super(const PagedValue.loading());
 
   /// Creates a [StreamChannelListController] from the passed [value].
   StreamChannelListController.fromValue(
@@ -113,14 +113,14 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     super.value = switch (channelStateSort) {
       null => newValue,
       final channelSort => newValue.maybeMap(
-          orElse: () => newValue,
-          (success) => success.copyWith(
-            items: success.items.sortedByCompare(
-              (it) => it.state!.channelState,
-              channelSort.compare,
-            ),
+        orElse: () => newValue,
+        (success) => success.copyWith(
+          items: success.items.sortedByCompare(
+            (it) => it.state!.channelState,
+            channelSort.compare,
           ),
         ),
+      ),
     };
   }
 
@@ -269,8 +269,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         _eventHandler.onNotificationMessageNew(event, this);
       } else if (eventType == EventType.notificationRemovedFromChannel) {
         _eventHandler.onNotificationRemovedFromChannel(event, this);
-      } else if (eventType == 'user.presence.changed' ||
-          eventType == EventType.userUpdated) {
+      } else if (eventType == 'user.presence.changed' || eventType == EventType.userUpdated) {
         _eventHandler.onUserPresenceChanged(event, this);
       } else if (eventType == EventType.memberUpdated) {
         _eventHandler.onMemberUpdated(event, this);

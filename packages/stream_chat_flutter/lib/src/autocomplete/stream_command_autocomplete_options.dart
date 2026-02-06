@@ -79,9 +79,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
               ),
             ],
           ),
-          onTap: onCommandSelected == null
-              ? null
-              : () => onCommandSelected!(command),
+          onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
         );
       },
     );

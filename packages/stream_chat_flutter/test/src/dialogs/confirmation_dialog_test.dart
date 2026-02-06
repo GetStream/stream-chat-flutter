@@ -18,12 +18,9 @@ void main() {
                   child: StreamChatTheme(
                     data: StreamChatThemeData.light(),
                     child: ConfirmationDialog(
-                      titleText: context.translations
-                          .toggleMuteUnmuteUserText(isMuted: false),
-                      promptText: context.translations
-                          .toggleMuteUnmuteUserQuestion(isMuted: false),
-                      affirmativeText: context.translations
-                          .toggleMuteUnmuteAction(isMuted: false),
+                      titleText: context.translations.toggleMuteUnmuteUserText(isMuted: false),
+                      promptText: context.translations.toggleMuteUnmuteUserQuestion(isMuted: false),
+                      affirmativeText: context.translations.toggleMuteUnmuteAction(isMuted: false),
                       onConfirmation: () {},
                     ),
                   ),
@@ -36,8 +33,7 @@ void main() {
 
       expect(find.byType(AlertDialog), findsOneWidget);
       expect(find.text('Mute User'), findsOneWidget);
-      expect(find.text('Are you sure you want to mute this user?'),
-          findsOneWidget);
+      expect(find.text('Are you sure you want to mute this user?'), findsOneWidget);
       expect(find.text('MUTE'), findsOneWidget);
     });
 
@@ -53,12 +49,9 @@ void main() {
                 child: StreamChatTheme(
                   data: StreamChatThemeData.light(),
                   child: ConfirmationDialog(
-                    titleText: context.translations
-                        .toggleMuteUnmuteUserText(isMuted: false),
-                    promptText: context.translations
-                        .toggleMuteUnmuteUserQuestion(isMuted: false),
-                    affirmativeText: context.translations
-                        .toggleMuteUnmuteAction(isMuted: false),
+                    titleText: context.translations.toggleMuteUnmuteUserText(isMuted: false),
+                    promptText: context.translations.toggleMuteUnmuteUserQuestion(isMuted: false),
+                    affirmativeText: context.translations.toggleMuteUnmuteAction(isMuted: false),
                     onConfirmation: () {},
                   ),
                 ),

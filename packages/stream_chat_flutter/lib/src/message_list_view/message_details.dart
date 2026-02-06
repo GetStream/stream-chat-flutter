@@ -13,10 +13,8 @@ class MessageDetails {
     this.index,
   ) {
     isMyMessage = message.user?.id == currentUserId;
-    isLastUser = index + 1 < messages.length &&
-        message.user?.id == messages[index + 1].user?.id;
-    isNextUser =
-        index - 1 >= 0 && message.user!.id == messages[index - 1].user?.id;
+    isLastUser = index + 1 < messages.length && message.user?.id == messages[index + 1].user?.id;
+    isNextUser = index - 1 >= 0 && message.user!.id == messages[index - 1].user?.id;
   }
 
   /// True if the message belongs to the current user

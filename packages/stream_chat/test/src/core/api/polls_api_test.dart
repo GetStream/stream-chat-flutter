@@ -15,10 +15,10 @@ import '../../mocks.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late PollsApi pollsApi;
@@ -41,12 +41,19 @@ void main() {
 
     const path = '/polls';
 
-    when(() => client.post(
-          path,
-          data: jsonEncode(poll),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: jsonEncode(poll),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'poll': poll.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await pollsApi.createPoll(poll);
 
@@ -73,10 +80,14 @@ void main() {
       ],
     );
 
-    when(() => client.get(path))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'poll': poll.toJson(),
-            }));
+    when(() => client.get(path)).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'poll': poll.toJson(),
+        },
+      ),
+    );
 
     final res = await pollsApi.getPoll(pollId);
 
@@ -101,12 +112,19 @@ void main() {
 
     const path = '/polls';
 
-    when(() => client.put(
-          path,
-          data: jsonEncode(poll),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.put(
+        path,
+        data: jsonEncode(poll),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'poll': poll.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await pollsApi.updatePoll(poll);
 
@@ -134,12 +152,19 @@ void main() {
       ],
     );
 
-    when(() => client.patch(
-          path,
-          data: jsonEncode({'set': set, 'unset': unset}),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.patch(
+        path,
+        data: jsonEncode({'set': set, 'unset': unset}),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'poll': poll.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await pollsApi.partialUpdatePoll(
       pollId,
@@ -151,11 +176,15 @@ void main() {
     expect(res.poll.id, pollId);
     expect(res.poll.name, set['name']);
 
-    verify(() => client.patch(path,
+    verify(
+      () => client.patch(
+        path,
         data: jsonEncode({
           'set': set,
           'unset': unset,
-        }))).called(1);
+        }),
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -164,8 +193,7 @@ void main() {
 
     const path = '/polls/$pollId';
 
-    when(() => client.delete(path)).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await pollsApi.deletePoll(pollId);
 
@@ -184,15 +212,22 @@ void main() {
 
     const path = '/polls/$pollId/options';
 
-    when(() => client.post(
-          path,
-          data: jsonEncode(option),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: jsonEncode(option),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'poll_option': option.toJson()
             ..addAll({
               'id': option.id,
             }),
-        }));
+        },
+      ),
+    );
 
     final res = await pollsApi.createPollOption(pollId, option);
 
@@ -214,13 +249,17 @@ void main() {
       text: 'test-option-value',
     );
 
-    when(() => client.get(path))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'poll_option': option.toJson()
-                ..addAll({
-                  'id': option.id,
-                }),
-            }));
+    when(() => client.get(path)).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'poll_option': option.toJson()
+            ..addAll({
+              'id': option.id,
+            }),
+        },
+      ),
+    );
 
     final res = await pollsApi.getPollOption(pollId, optionId);
 
@@ -240,15 +279,22 @@ void main() {
 
     const path = '/polls/$pollId/options';
 
-    when(() => client.put(
-          path,
-          data: jsonEncode(option),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.put(
+        path,
+        data: jsonEncode(option),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'poll_option': option.toJson()
             ..addAll({
               'id': option.id,
             }),
-        }));
+        },
+      ),
+    );
 
     final res = await pollsApi.updatePollOption(pollId, option);
 
@@ -265,8 +311,7 @@ void main() {
 
     const path = '/polls/$pollId/options/$optionId';
 
-    when(() => client.delete(path)).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await pollsApi.deletePollOption(pollId, optionId);
 
@@ -286,14 +331,21 @@ void main() {
 
     const path = '/messages/$messageId/polls/$pollId/vote';
 
-    when(() => client.post(
-          path,
-          data: jsonEncode({
-            'vote': vote,
-          }),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: jsonEncode({
+          'vote': vote,
+        }),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'vote': vote.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await pollsApi.castPollVote(messageId, pollId, vote);
 
@@ -315,10 +367,14 @@ void main() {
       optionId: 'test-option-id',
     );
 
-    when(() => client.delete(path))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'vote': vote.toJson(),
-            }));
+    when(() => client.delete(path)).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'vote': vote.toJson(),
+        },
+      ),
+    );
 
     final res = await pollsApi.removePollVote(messageId, pollId, voteId);
 
@@ -359,9 +415,14 @@ void main() {
         path,
         data: payload,
       ),
-    ).thenAnswer((_) async => successResponse(path, data: {
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'polls': [...polls.map((it) => it.toJson())],
-        }));
+        },
+      ),
+    );
 
     final res = await pollsApi.queryPolls(
       filter: filter,
@@ -405,9 +466,14 @@ void main() {
         path,
         data: payload,
       ),
-    ).thenAnswer((_) async => successResponse(path, data: {
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'votes': [...votes.map((it) => it.toJson())],
-        }));
+        },
+      ),
+    );
 
     final res = await pollsApi.queryPollVotes(
       pollId,

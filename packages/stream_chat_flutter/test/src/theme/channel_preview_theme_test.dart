@@ -6,25 +6,19 @@ String _dummyFormatter(BuildContext context, DateTime date) => 'formatted';
 
 void main() {
   test('ChannelPreviewThemeData copyWith, ==, hashCode basics', () {
-    expect(const StreamChannelPreviewThemeData(),
-        const StreamChannelPreviewThemeData().copyWith());
-    expect(const StreamChannelPreviewThemeData().hashCode,
-        const StreamChannelPreviewThemeData().copyWith().hashCode);
+    expect(const StreamChannelPreviewThemeData(), const StreamChannelPreviewThemeData().copyWith());
+    expect(const StreamChannelPreviewThemeData().hashCode, const StreamChannelPreviewThemeData().copyWith().hashCode);
   });
 
   group('ChannelPreviewThemeData lerps', () {
-    test(
-        '''Light ChannelPreviewThemeData lerps completely to dark ChannelPreviewThemeData''',
-        () {
+    test('''Light ChannelPreviewThemeData lerps completely to dark ChannelPreviewThemeData''', () {
       expect(
-          const StreamChannelPreviewThemeData().lerp(
-              _channelPreviewThemeControl, _channelPreviewThemeControlDark, 1),
-          _channelPreviewThemeControlDark);
+        const StreamChannelPreviewThemeData().lerp(_channelPreviewThemeControl, _channelPreviewThemeControlDark, 1),
+        _channelPreviewThemeControlDark,
+      );
     });
 
-    test(
-        '''Light ChannelPreviewThemeData lerps halfway to dark ChannelPreviewThemeData''',
-        () {
+    test('''Light ChannelPreviewThemeData lerps halfway to dark ChannelPreviewThemeData''', () {
       expect(
         const StreamChannelPreviewThemeData().lerp(
           _channelPreviewThemeControl,
@@ -38,19 +32,16 @@ void main() {
       );
     });
 
-    test(
-        '''Dark ChannelPreviewThemeData lerps completely to light ChannelPreviewThemeData''',
-        () {
+    test('''Dark ChannelPreviewThemeData lerps completely to light ChannelPreviewThemeData''', () {
       expect(
-          const StreamChannelPreviewThemeData().lerp(
-              _channelPreviewThemeControlDark, _channelPreviewThemeControl, 1),
-          _channelPreviewThemeControl);
+        const StreamChannelPreviewThemeData().lerp(_channelPreviewThemeControlDark, _channelPreviewThemeControl, 1),
+        _channelPreviewThemeControl,
+      );
     });
   });
 
   test('Merging dark and light themes results in a dark theme', () {
-    expect(_channelPreviewThemeControl.merge(_channelPreviewThemeControlDark),
-        _channelPreviewThemeControlDark);
+    expect(_channelPreviewThemeControl.merge(_channelPreviewThemeControlDark), _channelPreviewThemeControlDark);
   });
 }
 
@@ -65,12 +56,12 @@ final _channelPreviewThemeControl = StreamChannelPreviewThemeData(
   ),
   titleStyle: const StreamTextTheme.light().bodyBold,
   subtitleStyle: const StreamTextTheme.light().footnote.copyWith(
-        color: const Color(0xff7A7A7A),
-      ),
+    color: const Color(0xff7A7A7A),
+  ),
   lastMessageAtStyle: const StreamTextTheme.light().footnote.copyWith(
-        // ignore: deprecated_member_use
-        color: const StreamColorTheme.light().textHighEmphasis.withOpacity(0.5),
-      ),
+    // ignore: deprecated_member_use
+    color: const StreamColorTheme.light().textHighEmphasis.withOpacity(0.5),
+  ),
   lastMessageAtFormatter: _dummyFormatter,
   indicatorIconSize: 16,
 );
@@ -95,9 +86,9 @@ final _channelPreviewThemeControlMidLerp = StreamChannelPreviewThemeData(
     fontWeight: FontWeight.w400,
   ),
   lastMessageAtStyle: const StreamTextTheme.light().footnote.copyWith(
-        // ignore: deprecated_member_use
-        color: const Color(0x807f7f7f).withOpacity(0.5),
-      ),
+    // ignore: deprecated_member_use
+    color: const Color(0x807f7f7f).withOpacity(0.5),
+  ),
   lastMessageAtFormatter: _dummyFormatter,
   indicatorIconSize: 16,
 );
@@ -113,12 +104,12 @@ final _channelPreviewThemeControlDark = StreamChannelPreviewThemeData(
   ),
   titleStyle: const StreamTextTheme.dark().bodyBold,
   subtitleStyle: const StreamTextTheme.dark().footnote.copyWith(
-        color: const Color(0xff7A7A7A),
-      ),
+    color: const Color(0xff7A7A7A),
+  ),
   lastMessageAtStyle: const StreamTextTheme.dark().footnote.copyWith(
-        // ignore: deprecated_member_use
-        color: const StreamColorTheme.dark().textHighEmphasis.withOpacity(0.5),
-      ),
+    // ignore: deprecated_member_use
+    color: const StreamColorTheme.dark().textHighEmphasis.withOpacity(0.5),
+  ),
   lastMessageAtFormatter: _dummyFormatter,
   indicatorIconSize: 16,
 );

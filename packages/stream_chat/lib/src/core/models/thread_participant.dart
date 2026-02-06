@@ -22,8 +22,7 @@ class ThreadParticipant extends Equatable {
   });
 
   /// Create a new instance from a json
-  factory ThreadParticipant.fromJson(Map<String, dynamic> json) =>
-      _$ThreadParticipantFromJson(json);
+  factory ThreadParticipant.fromJson(Map<String, dynamic> json) => _$ThreadParticipantFromJson(json);
 
   /// The channel cid this thread participant belongs to.
   final String channelCid;
@@ -63,27 +62,26 @@ class ThreadParticipant extends Equatable {
     String? threadId,
     String? userId,
     User? user,
-  }) =>
-      ThreadParticipant(
-        channelCid: channelCid ?? this.channelCid,
-        createdAt: createdAt ?? this.createdAt,
-        lastReadAt: lastReadAt ?? this.lastReadAt,
-        lastThreadMessageAt: lastThreadMessageAt ?? this.lastThreadMessageAt,
-        leftThreadAt: leftThreadAt ?? this.leftThreadAt,
-        threadId: threadId ?? this.threadId,
-        userId: userId ?? this.userId,
-        user: user ?? this.user,
-      );
+  }) => ThreadParticipant(
+    channelCid: channelCid ?? this.channelCid,
+    createdAt: createdAt ?? this.createdAt,
+    lastReadAt: lastReadAt ?? this.lastReadAt,
+    lastThreadMessageAt: lastThreadMessageAt ?? this.lastThreadMessageAt,
+    leftThreadAt: leftThreadAt ?? this.leftThreadAt,
+    threadId: threadId ?? this.threadId,
+    userId: userId ?? this.userId,
+    user: user ?? this.user,
+  );
 
   @override
   List<Object?> get props => [
-        channelCid,
-        createdAt,
-        lastReadAt,
-        lastThreadMessageAt,
-        leftThreadAt,
-        threadId,
-        userId,
-        user,
-      ];
+    channelCid,
+    createdAt,
+    lastReadAt,
+    lastThreadMessageAt,
+    leftThreadAt,
+    threadId,
+    userId,
+    user,
+  ];
 }

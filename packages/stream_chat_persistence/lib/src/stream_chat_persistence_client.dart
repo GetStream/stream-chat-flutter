@@ -33,9 +33,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     /// Otherwise, falls back to the local storage based implementation.
     bool webUseExperimentalIndexedDb = false,
     LogHandlerFunction? logHandlerFunction,
-  })  : _connectionMode = connectionMode,
-        _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
-        _logger = Logger.detached('💽')..level = logLevel {
+  }) : _connectionMode = connectionMode,
+       _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
+       _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
 
@@ -72,12 +72,11 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<DriftChatDatabase> _defaultDatabaseProvider(
     String userId,
     ConnectionMode mode,
-  ) =>
-      SharedDB.constructDatabase(
-        userId,
-        connectionMode: mode,
-        webUseIndexedDbIfSupported: _webUseIndexedDbIfSupported,
-      );
+  ) => SharedDB.constructDatabase(
+    userId,
+    connectionMode: mode,
+    webUseIndexedDbIfSupported: _webUseIndexedDbIfSupported,
+  );
 
   @override
   bool get isConnected => db != null;
@@ -97,8 +96,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       );
     }
     _logger.info('connect');
-    db = databaseProvider?.call(userId, _connectionMode) ??
-        await _defaultDatabaseProvider(userId, _connectionMode);
+    db = databaseProvider?.call(userId, _connectionMode) ?? await _defaultDatabaseProvider(userId, _connectionMode);
   }
 
   @override
@@ -222,17 +220,19 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     _logger.info('deleteMessagesFromUser');
 
     // Delete from both messages and pinned_messages tables
-    await Future.wait([
-      db!.messageDao.deleteMessagesByUser,
-      db!.pinnedMessageDao.deleteMessagesByUser,
-    ].map(
-      (f) => f.call(
-        cid: cid,
-        userId: userId,
-        hardDelete: hardDelete,
-        deletedAt: deletedAt,
+    await Future.wait(
+      [
+        db!.messageDao.deleteMessagesByUser,
+        db!.pinnedMessageDao.deleteMessagesByUser,
+      ].map(
+        (f) => f.call(
+          cid: cid,
+          userId: userId,
+          hardDelete: hardDelete,
+          deletedAt: deletedAt,
+        ),
       ),
-    ));
+    );
   }
 
   @override

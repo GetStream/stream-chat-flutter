@@ -86,7 +86,8 @@ enum TrackState {
   playing,
 
   /// The track is currently paused.
-  paused;
+  paused
+  ;
 
   /// Returns `true` if the track is currently idle.
   bool get isIdle => this == TrackState.idle;
@@ -112,7 +113,8 @@ enum PlaybackSpeed {
   faster._(1.5),
 
   /// The fastest speed of the playback (2x).
-  fastest._(2);
+  fastest._(2)
+  ;
 
   const PlaybackSpeed._(this.speed);
 

@@ -7,11 +7,12 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/size_change_listener.dart';
 
 /// Signature for building a custom ReactionBubble widget.
-typedef ReactionBubbleBuilder = Widget Function(
-  BuildContext context,
-  ReactionBubbleConfig config,
-  Widget child,
-);
+typedef ReactionBubbleBuilder =
+    Widget Function(
+      BuildContext context,
+      ReactionBubbleConfig config,
+      Widget child,
+    );
 
 /// Defines the anchor settings for positioning a ReactionBubble relative to a
 /// target widget.
@@ -29,16 +30,16 @@ class ReactionBubbleAnchor {
   const ReactionBubbleAnchor.topEnd({
     this.offset = Offset.zero,
     this.shiftToWithinBound = const AxisFlag(x: true),
-  })  : target = AlignmentDirectional.topEnd,
-        follower = AlignmentDirectional.bottomCenter;
+  }) : target = AlignmentDirectional.topEnd,
+       follower = AlignmentDirectional.bottomCenter;
 
   /// Creates an anchor that positions the bubble at the top-start of the
   /// target widget.
   const ReactionBubbleAnchor.topStart({
     this.offset = Offset.zero,
     this.shiftToWithinBound = const AxisFlag(x: true),
-  })  : target = AlignmentDirectional.topStart,
-        follower = AlignmentDirectional.bottomCenter;
+  }) : target = AlignmentDirectional.topStart,
+       follower = AlignmentDirectional.bottomCenter;
 
   /// Additional offset applied to the bubble position.
   final Offset offset;
@@ -118,7 +119,7 @@ class _ReactionBubbleOverlayState extends State<ReactionBubbleOverlay> {
   }) {
     final childEdgeX = switch (reverse) {
       true => availableSpace.width - childSize.width,
-      false => childSize.width
+      false => childSize.width,
     };
 
     final idealBubbleLeft = childEdgeX - (bubbleRect.width / 2);
@@ -243,8 +244,7 @@ class ReactionBubbleConfig {
       maskWidth: maskWidth ?? this.maskWidth,
       borderWidth: borderWidth ?? this.borderWidth,
       bigTailCircleRadius: bigTailCircleRadius ?? this.bigTailCircleRadius,
-      smallTailCircleRadius:
-          smallTailCircleRadius ?? this.smallTailCircleRadius,
+      smallTailCircleRadius: smallTailCircleRadius ?? this.smallTailCircleRadius,
       tailAlignment: tailAlignment ?? this.tailAlignment,
     );
   }
@@ -283,16 +283,16 @@ class ReactionBubblePainter extends CustomPainter {
   /// Creates a [ReactionBubblePainter] with the specified configuration.
   ReactionBubblePainter({
     this.config = const ReactionBubbleConfig(),
-  })  : _fillPaint = Paint()
-          ..color = config.fillColor ?? Colors.white
-          ..style = PaintingStyle.fill,
-        _maskPaint = Paint()
-          ..color = config.maskColor ?? Colors.white
-          ..style = PaintingStyle.fill,
-        _borderPaint = Paint()
-          ..color = config.borderColor ?? Colors.black
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = config.borderWidth;
+  }) : _fillPaint = Paint()
+         ..color = config.fillColor ?? Colors.white
+         ..style = PaintingStyle.fill,
+       _maskPaint = Paint()
+         ..color = config.maskColor ?? Colors.white
+         ..style = PaintingStyle.fill,
+       _borderPaint = Paint()
+         ..color = config.borderColor ?? Colors.black
+         ..style = PaintingStyle.stroke
+         ..strokeWidth = config.borderWidth;
 
   /// Configuration used to style the bubble.
   final ReactionBubbleConfig config;

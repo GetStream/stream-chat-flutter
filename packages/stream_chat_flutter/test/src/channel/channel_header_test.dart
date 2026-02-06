@@ -28,8 +28,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -37,23 +36,19 @@ void main() {
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream)
-          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connected));
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer(
         (i) => Stream.value([
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -99,8 +94,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -108,18 +102,16 @@ void main() {
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream)
-          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer(
         (i) => Stream.value([
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -128,13 +120,10 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
-      when(() => client.wsConnectionStatus)
-          .thenReturn(ConnectionStatus.disconnected);
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
+      when(() => client.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -155,13 +144,8 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      expect(
-          tester
-              .widget<StreamInfoTile>(find.byType(StreamInfoTile))
-              .showMessage,
-          true);
-      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).message,
-          'Disconnected');
+      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).showMessage, true);
+      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).message, 'Disconnected');
     },
   );
 
@@ -177,8 +161,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -186,18 +169,16 @@ void main() {
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream)
-          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer(
         (i) => Stream.value([
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -206,11 +187,9 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -231,13 +210,8 @@ void main() {
 
       await tester.pump();
 
-      expect(
-          tester
-              .widget<StreamInfoTile>(find.byType(StreamInfoTile))
-              .showMessage,
-          true);
-      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).message,
-          'Reconnecting...');
+      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).showMessage, true);
+      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).message, 'Reconnecting...');
     },
   );
 
@@ -253,28 +227,28 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer(
         (i) => Stream.value([
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -283,10 +257,8 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
 
       await tester.pumpWidget(
         MaterialAppWrapper(
@@ -337,8 +309,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -346,18 +317,16 @@ void main() {
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream)
-          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer(
         (i) => Stream.value([
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -366,8 +335,7 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -391,16 +359,10 @@ void main() {
 
       expect(find.byType(StreamBackButton), findsNothing);
       expect(
-        tester
-            .widget<StreamChannelInfo>(find.byType(StreamChannelInfo))
-            .showTypingIndicator,
+        tester.widget<StreamChannelInfo>(find.byType(StreamChannelInfo)).showTypingIndicator,
         false,
       );
-      expect(
-          tester
-              .widget<StreamInfoTile>(find.byType(StreamInfoTile))
-              .showMessage,
-          false);
+      expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).showMessage, false);
     },
   );
 
@@ -416,8 +378,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -425,18 +386,16 @@ void main() {
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream)
-          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer(
         (i) => Stream.value([
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -445,11 +404,9 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
 
       var backPressed = false;
       var imageTapped = false;
@@ -500,8 +457,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -509,23 +465,19 @@ void main() {
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream)
-          .thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
+      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
       when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connected));
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer(
         (i) => Stream.value([
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([

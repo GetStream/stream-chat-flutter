@@ -10,11 +10,12 @@ typedef BottomRowBuilder = Widget Function(BuildContext, Message);
 
 /// Signature for the builder function that will be called when the message
 /// bottom row is built. Includes the [Message] and the default [BottomRow].
-typedef BottomRowBuilderWithDefaultWidget = Widget Function(
-  BuildContext,
-  Message,
-  BottomRow,
-);
+typedef BottomRowBuilderWithDefaultWidget =
+    Widget Function(
+      BuildContext,
+      Message,
+      BottomRow,
+    );
 
 /// {@template messageWidgetContent}
 /// The main content of a [StreamMessageWidget].
@@ -231,15 +232,12 @@ class MessageWidgetContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment:
-          reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Stack(
           clipBehavior: Clip.none,
-          alignment: reverse
-              ? AlignmentDirectional.bottomEnd
-              : AlignmentDirectional.bottomStart,
+          alignment: reverse ? AlignmentDirectional.bottomEnd : AlignmentDirectional.bottomStart,
           children: [
             if (showBottomRow)
               Padding(
@@ -255,8 +253,7 @@ class MessageWidgetContent extends StatelessWidget {
                 bottom: isPinned && showPinHighlight ? 8.0 : 0.0,
               ),
               child: Column(
-                crossAxisAlignment:
-                    reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment: reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isPinned && message.pinnedBy != null && showPinHighlight)
@@ -299,12 +296,12 @@ class MessageWidgetContent extends StatelessWidget {
                           DisplayWidget.gone => null,
                           DisplayWidget.hide => SizedBox(width: avatarWidth),
                           DisplayWidget.show => UserAvatarTransform(
-                              onUserAvatarTap: onUserAvatarTap,
-                              userAvatarBuilder: userAvatarBuilder,
-                              translateUserAvatar: translateUserAvatar,
-                              messageTheme: messageTheme,
-                              message: message,
-                            ),
+                            onUserAvatarTap: onUserAvatarTap,
+                            userAvatarBuilder: userAvatarBuilder,
+                            translateUserAvatar: translateUserAvatar,
+                            messageTheme: messageTheme,
+                            message: message,
+                          ),
                         },
                       ),
                     ],
@@ -314,9 +311,9 @@ class MessageWidgetContent extends StatelessWidget {
                       padding: switch (showUserAvatar) {
                         DisplayWidget.gone => EdgeInsets.zero,
                         _ => EdgeInsets.only(
-                            left: avatarWidth + 4,
-                            right: avatarWidth + 4,
-                          )
+                          left: avatarWidth + 4,
+                          right: avatarWidth + 4,
+                        ),
                       },
                       child: DesktopReactionsBuilder(
                         message: message,

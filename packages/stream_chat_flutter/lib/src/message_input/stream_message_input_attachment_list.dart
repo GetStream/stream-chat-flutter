@@ -14,21 +14,23 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// see more:
 ///   - [StreamMessageInputAttachmentList]
-typedef AttachmentListBuilder = Widget Function(
-  BuildContext context,
-  List<Attachment> attachments,
-  ValueSetter<Attachment>? onRemovePressed,
-);
+typedef AttachmentListBuilder =
+    Widget Function(
+      BuildContext context,
+      List<Attachment> attachments,
+      ValueSetter<Attachment>? onRemovePressed,
+    );
 
 /// WidgetBuilder used to build the message input attachment item.
 ///
 /// see more:
 ///  - [StreamMessageInputAttachmentList]
-typedef AttachmentItemBuilder = Widget Function(
-  BuildContext context,
-  Attachment attachment,
-  ValueSetter<Attachment>? onRemovePressed,
-);
+typedef AttachmentItemBuilder =
+    Widget Function(
+      BuildContext context,
+      Attachment attachment,
+      ValueSetter<Attachment>? onRemovePressed,
+    );
 
 /// {@template stream_message_input_attachment_list}
 /// Widget used to display the list of attachments added to the message input.
@@ -108,49 +110,50 @@ class StreamMessageInputAttachmentList extends StatelessWidget {
       padding: const EdgeInsets.only(top: 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (media.isNotEmpty)
-            Flexible(
-              child: switch (mediaAttachmentListBuilder) {
-                final builder? => builder(context, media, onRemovePressed),
-                _ => MessageInputMediaAttachments(
-                    attachments: media,
-                    attachmentBuilder: mediaAttachmentBuilder,
-                    onRemovePressed: onRemovePressed,
-                  ),
-              },
+        children:
+            <Widget>[
+              if (media.isNotEmpty)
+                Flexible(
+                  child: switch (mediaAttachmentListBuilder) {
+                    final builder? => builder(context, media, onRemovePressed),
+                    _ => MessageInputMediaAttachments(
+                      attachments: media,
+                      attachmentBuilder: mediaAttachmentBuilder,
+                      onRemovePressed: onRemovePressed,
+                    ),
+                  },
+                ),
+              if (voices.isNotEmpty)
+                Flexible(
+                  child: switch (voiceRecordingAttachmentListBuilder) {
+                    final builder? => builder(context, voices, onRemovePressed),
+                    _ => MessageInputVoiceRecordingAttachments(
+                      attachments: voices,
+                      attachmentBuilder: voiceRecordingAttachmentBuilder,
+                      onRemovePressed: onRemovePressed,
+                    ),
+                  },
+                ),
+              if (files.isNotEmpty)
+                Flexible(
+                  child: switch (fileAttachmentListBuilder) {
+                    final builder? => builder(context, files, onRemovePressed),
+                    _ => MessageInputFileAttachments(
+                      attachments: files,
+                      attachmentBuilder: fileAttachmentBuilder,
+                      onRemovePressed: onRemovePressed,
+                    ),
+                  },
+                ),
+            ].insertBetween(
+              Divider(
+                height: 16,
+                indent: 16,
+                endIndent: 16,
+                thickness: 1,
+                color: StreamChatTheme.of(context).colorTheme.disabled,
+              ),
             ),
-          if (voices.isNotEmpty)
-            Flexible(
-              child: switch (voiceRecordingAttachmentListBuilder) {
-                final builder? => builder(context, voices, onRemovePressed),
-                _ => MessageInputVoiceRecordingAttachments(
-                    attachments: voices,
-                    attachmentBuilder: voiceRecordingAttachmentBuilder,
-                    onRemovePressed: onRemovePressed,
-                  ),
-              },
-            ),
-          if (files.isNotEmpty)
-            Flexible(
-              child: switch (fileAttachmentListBuilder) {
-                final builder? => builder(context, files, onRemovePressed),
-                _ => MessageInputFileAttachments(
-                    attachments: files,
-                    attachmentBuilder: fileAttachmentBuilder,
-                    onRemovePressed: onRemovePressed,
-                  ),
-              },
-            ),
-        ].insertBetween(
-          Divider(
-            height: 16,
-            indent: 16,
-            endIndent: 16,
-            thickness: 1,
-            color: StreamChatTheme.of(context).colorTheme.disabled,
-          ),
-        ),
       ),
     );
   }
@@ -183,33 +186,35 @@ class MessageInputFileAttachments extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      children: attachments.reversed.map<Widget>(
-        (attachment) {
-          // If a custom builder is provided, use it.
-          final builder = attachmentBuilder;
-          if (builder != null) {
-            return builder(context, attachment, onRemovePressed);
-          }
+      children: attachments.reversed
+          .map<Widget>(
+            (attachment) {
+              // If a custom builder is provided, use it.
+              final builder = attachmentBuilder;
+              if (builder != null) {
+                return builder(context, attachment, onRemovePressed);
+              }
 
-          // Otherwise, use the default builder.
-          return StreamFileAttachment(
-            message: Message(), // Dummy message
-            file: attachment,
-            constraints: BoxConstraints.loose(Size(
-              MediaQuery.of(context).size.width * 0.65,
-              56,
-            )),
-            trailing: Padding(
-              padding: const EdgeInsets.all(8),
-              child: RemoveAttachmentButton(
-                onPressed: onRemovePressed != null
-                    ? () => onRemovePressed!(attachment)
-                    : null,
-              ),
-            ),
-          );
-        },
-      ).insertBetween(const SizedBox(height: 8)),
+              // Otherwise, use the default builder.
+              return StreamFileAttachment(
+                message: Message(), // Dummy message
+                file: attachment,
+                constraints: BoxConstraints.loose(
+                  Size(
+                    MediaQuery.of(context).size.width * 0.65,
+                    56,
+                  ),
+                ),
+                trailing: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: RemoveAttachmentButton(
+                    onPressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
+                  ),
+                ),
+              );
+            },
+          )
+          .insertBetween(const SizedBox(height: 8)),
     );
   }
 }
@@ -237,12 +242,10 @@ class MessageInputVoiceRecordingAttachments extends StatefulWidget {
   final ValueSetter<Attachment>? onRemovePressed;
 
   @override
-  State<MessageInputVoiceRecordingAttachments> createState() =>
-      _MessageInputVoiceRecordingAttachmentsState();
+  State<MessageInputVoiceRecordingAttachments> createState() => _MessageInputVoiceRecordingAttachmentsState();
 }
 
-class _MessageInputVoiceRecordingAttachmentsState
-    extends State<MessageInputVoiceRecordingAttachments> {
+class _MessageInputVoiceRecordingAttachmentsState extends State<MessageInputVoiceRecordingAttachments> {
   late final _controller = StreamAudioPlaylistController(
     widget.attachments.toPlaylist(),
   );
@@ -370,20 +373,22 @@ class MessageInputMediaAttachments extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
         cacheExtent: 104 * 10, // Cache 10 items ahead.
-        children: attachments.map<Widget>(
-          (attachment) {
-            // If a custom builder is provided, use it.
-            final builder = attachmentBuilder;
-            if (builder != null) {
-              return builder(context, attachment, onRemovePressed);
-            }
+        children: attachments
+            .map<Widget>(
+              (attachment) {
+                // If a custom builder is provided, use it.
+                final builder = attachmentBuilder;
+                if (builder != null) {
+                  return builder(context, attachment, onRemovePressed);
+                }
 
-            return StreamMediaAttachmentBuilder(
-              attachment: attachment,
-              onRemovePressed: onRemovePressed,
-            );
-          },
-        ).insertBetween(const SizedBox(width: 8)),
+                return StreamMediaAttachmentBuilder(
+                  attachment: attachment,
+                  onRemovePressed: onRemovePressed,
+                );
+              },
+            )
+            .insertBetween(const SizedBox(width: 8)),
       ),
     );
   }
@@ -392,8 +397,7 @@ class MessageInputMediaAttachments extends StatelessWidget {
 /// Widget used to display a media type attachment item.
 class StreamMediaAttachmentBuilder extends StatelessWidget {
   /// Creates a new media attachment item.
-  const StreamMediaAttachmentBuilder(
-      {super.key, required this.attachment, this.onRemovePressed});
+  const StreamMediaAttachmentBuilder({super.key, required this.attachment, this.onRemovePressed});
 
   /// The media attachment to display.
   final Attachment attachment;
@@ -437,9 +441,7 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
               top: 8,
               right: 8,
               child: RemoveAttachmentButton(
-                onPressed: onRemovePressed != null
-                    ? () => onRemovePressed!(attachment)
-                    : null,
+                onPressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
               ),
             ),
           ],

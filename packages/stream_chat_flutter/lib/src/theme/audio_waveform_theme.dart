@@ -36,19 +36,15 @@ class StreamAudioWaveformTheme extends InheritedTheme {
   /// StreamAudioWaveformTheme theme = StreamAudioWaveformTheme.of(context);
   /// ```
   static StreamAudioWaveformThemeData of(BuildContext context) {
-    final audioWaveformTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamAudioWaveformTheme>();
-    return audioWaveformTheme?.data ??
-        StreamChatTheme.of(context).audioWaveformTheme;
+    final audioWaveformTheme = context.dependOnInheritedWidgetOfExactType<StreamAudioWaveformTheme>();
+    return audioWaveformTheme?.data ?? StreamChatTheme.of(context).audioWaveformTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamAudioWaveformTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamAudioWaveformTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamAudioWaveformTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamAudioWaveformTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamVoiceRecordingAttachmentThemeData}
@@ -119,14 +115,13 @@ class StreamAudioWaveformThemeData with Diagnosticable {
     StreamAudioWaveformThemeData a,
     StreamAudioWaveformThemeData b,
     double t,
-  ) =>
-      StreamAudioWaveformThemeData(
-        color: Color.lerp(a.color, b.color, t),
-        progressColor: Color.lerp(a.progressColor, b.progressColor, t),
-        minBarHeight: lerpDouble(a.minBarHeight, b.minBarHeight, t),
-        spacingRatio: lerpDouble(a.spacingRatio, b.spacingRatio, t),
-        heightScale: lerpDouble(a.heightScale, b.heightScale, t),
-      );
+  ) => StreamAudioWaveformThemeData(
+    color: Color.lerp(a.color, b.color, t),
+    progressColor: Color.lerp(a.progressColor, b.progressColor, t),
+    minBarHeight: lerpDouble(a.minBarHeight, b.minBarHeight, t),
+    spacingRatio: lerpDouble(a.spacingRatio, b.spacingRatio, t),
+    heightScale: lerpDouble(a.heightScale, b.heightScale, t),
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -140,11 +135,7 @@ class StreamAudioWaveformThemeData with Diagnosticable {
 
   @override
   int get hashCode =>
-      color.hashCode ^
-      progressColor.hashCode ^
-      minBarHeight.hashCode ^
-      spacingRatio.hashCode ^
-      heightScale.hashCode;
+      color.hashCode ^ progressColor.hashCode ^ minBarHeight.hashCode ^ spacingRatio.hashCode ^ heightScale.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

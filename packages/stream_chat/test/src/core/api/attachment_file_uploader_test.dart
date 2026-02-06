@@ -19,10 +19,10 @@ void main() {
   });
 
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   test('sendImage', () async {
     const channelId = 'test-channel-id';
@@ -37,12 +37,19 @@ void main() {
     );
     final multipartFile = await attachmentFile.toMultipartFile();
 
-    when(() => client.postFile(
-          path,
-          any(that: isSameMultipartFileAs(multipartFile)),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.postFile(
+        path,
+        any(that: isSameMultipartFileAs(multipartFile)),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'file': 'test-file-url',
-        }));
+        },
+      ),
+    );
 
     final res = await fileUploader.sendImage(
       attachmentFile,
@@ -54,10 +61,12 @@ void main() {
     expect(res.file, isNotNull);
     expect(res.file, isNotEmpty);
 
-    verify(() => client.postFile(
-          path,
-          any(that: isSameMultipartFileAs(multipartFile)),
-        )).called(1);
+    verify(
+      () => client.postFile(
+        path,
+        any(that: isSameMultipartFileAs(multipartFile)),
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -74,12 +83,19 @@ void main() {
     );
     final multipartFile = await attachmentFile.toMultipartFile();
 
-    when(() => client.postFile(
-          path,
-          any(that: isSameMultipartFileAs(multipartFile)),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.postFile(
+        path,
+        any(that: isSameMultipartFileAs(multipartFile)),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'file': 'test-file-url',
-        }));
+        },
+      ),
+    );
 
     final res = await fileUploader.sendFile(
       attachmentFile,
@@ -91,10 +107,12 @@ void main() {
     expect(res.file, isNotNull);
     expect(res.file, isNotEmpty);
 
-    verify(() => client.postFile(
-          path,
-          any(that: isSameMultipartFileAs(multipartFile)),
-        )).called(1);
+    verify(
+      () => client.postFile(
+        path,
+        any(that: isSameMultipartFileAs(multipartFile)),
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -105,8 +123,9 @@ void main() {
 
     const url = 'test-image-url';
 
-    when(() => client.delete(path, queryParameters: {'url': url})).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.delete(path, queryParameters: {'url': url}),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await fileUploader.deleteImage(url, channelId, channelType);
 
@@ -123,8 +142,9 @@ void main() {
 
     const url = 'test-file-url';
 
-    when(() => client.delete(path, queryParameters: {'url': url})).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.delete(path, queryParameters: {'url': url}),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await fileUploader.deleteFile(url, channelId, channelType);
 
@@ -144,12 +164,19 @@ void main() {
     );
     final multipartFile = await attachmentFile.toMultipartFile();
 
-    when(() => client.postFile(
-          path,
-          any(that: isSameMultipartFileAs(multipartFile)),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.postFile(
+        path,
+        any(that: isSameMultipartFileAs(multipartFile)),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'file': 'test-image-url',
-        }));
+        },
+      ),
+    );
 
     final res = await fileUploader.uploadImage(attachmentFile);
 
@@ -157,10 +184,12 @@ void main() {
     expect(res.file, isNotNull);
     expect(res.file, isNotEmpty);
 
-    verify(() => client.postFile(
-          path,
-          any(that: isSameMultipartFileAs(multipartFile)),
-        )).called(1);
+    verify(
+      () => client.postFile(
+        path,
+        any(that: isSameMultipartFileAs(multipartFile)),
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -174,12 +203,19 @@ void main() {
     );
     final multipartFile = await attachmentFile.toMultipartFile();
 
-    when(() => client.postFile(
-          path,
-          any(that: isSameMultipartFileAs(multipartFile)),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.postFile(
+        path,
+        any(that: isSameMultipartFileAs(multipartFile)),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'file': 'test-file-url',
-        }));
+        },
+      ),
+    );
 
     final res = await fileUploader.uploadFile(attachmentFile);
 
@@ -187,10 +223,12 @@ void main() {
     expect(res.file, isNotNull);
     expect(res.file, isNotEmpty);
 
-    verify(() => client.postFile(
-          path,
-          any(that: isSameMultipartFileAs(multipartFile)),
-        )).called(1);
+    verify(
+      () => client.postFile(
+        path,
+        any(that: isSameMultipartFileAs(multipartFile)),
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -198,8 +236,9 @@ void main() {
     const path = '/uploads/image';
     const url = 'test-image-url';
 
-    when(() => client.delete(path, queryParameters: {'url': url})).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.delete(path, queryParameters: {'url': url}),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await fileUploader.removeImage(url);
 
@@ -213,8 +252,9 @@ void main() {
     const path = '/uploads/file';
     const url = 'test-file-url';
 
-    when(() => client.delete(path, queryParameters: {'url': url})).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.delete(path, queryParameters: {'url': url}),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await fileUploader.removeFile(url);
 

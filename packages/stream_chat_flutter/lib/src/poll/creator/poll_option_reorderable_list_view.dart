@@ -116,9 +116,9 @@ class PollOptionListItem extends StatelessWidget {
               contentPadding: const EdgeInsets.symmetric(vertical: 18),
               onChanged: switch (onChanged) {
                 final onChanged? => (text) {
-                    final updated = option.copyWith(text: text);
-                    return onChanged.call(updated);
-                  },
+                  final updated = option.copyWith(text: text);
+                  return onChanged.call(updated);
+                },
                 _ => null,
               },
             ),
@@ -181,12 +181,10 @@ class PollOptionReorderableListView extends StatefulWidget {
   final ValueSetter<List<PollOptionItem>>? onOptionsChanged;
 
   @override
-  State<PollOptionReorderableListView> createState() =>
-      _PollOptionReorderableListViewState();
+  State<PollOptionReorderableListView> createState() => _PollOptionReorderableListViewState();
 }
 
-class _PollOptionReorderableListViewState
-    extends State<PollOptionReorderableListView> {
+class _PollOptionReorderableListViewState extends State<PollOptionReorderableListView> {
   late Map<String, FocusNode> _focusNodes;
   late Map<String, PollOptionItem> _options;
 

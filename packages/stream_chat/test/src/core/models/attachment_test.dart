@@ -29,8 +29,7 @@ void main() {
       final channel = Attachment(
         type: 'giphy',
         title: 'soo',
-        titleLink:
-            'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
+        titleLink: 'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
       );
 
       expect(
@@ -38,8 +37,7 @@ void main() {
         {
           'type': 'giphy',
           'title': 'soo',
-          'title_link':
-              'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
+          'title_link': 'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
           'actions': [],
         },
       );
@@ -51,17 +49,12 @@ void main() {
 
       expect(attachment.fileSize, 3);
       expect(attachment.mimeType, 'text/plain');
-      expect(attachment.toJson(), {
-        'title': 'myfile.txt',
-        'actions': [],
-        'file_size': 3,
-        'mime_type': 'text/plain'
-      });
+      expect(attachment.toJson(), {'title': 'myfile.txt', 'actions': [], 'file_size': 3, 'mime_type': 'text/plain'});
       expect(Attachment.fromJson(attachment.toJson()).toJson(), {
         'title': 'myfile.txt',
         'actions': [],
         'file_size': 3,
-        'mime_type': 'text/plain'
+        'mime_type': 'text/plain',
       });
 
       // Setting the size and mimeType using extraData should work fine
@@ -88,10 +81,13 @@ void main() {
 
       // if file is available, should override size and mimeType.
       final fileThree = AttachmentFile(size: 9, path: 'myfolder/fileThree.png');
-      newAttachment = attachment.copyWith(file: fileThree, extraData: {
-        'file_size': 88,
-        'mime_type': 'application/pdf',
-      });
+      newAttachment = attachment.copyWith(
+        file: fileThree,
+        extraData: {
+          'file_size': 88,
+          'mime_type': 'application/pdf',
+        },
+      );
 
       expect(newAttachment.extraData['file_size'], 9);
       expect(newAttachment.extraData['mime_type'], 'image/png');

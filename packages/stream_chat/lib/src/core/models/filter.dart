@@ -53,7 +53,8 @@ enum FilterOperator {
   nor,
 
   /// Matches any list that contains the specified value
-  contains;
+  contains
+  ;
 
   @override
   String toString() {
@@ -117,29 +118,22 @@ class Filter extends Equatable {
   }) : operator = '$operator';
 
   /// An empty filter
-  const Filter.empty()
-      : value = const <String, Object?>{},
-        operator = null,
-        key = null;
+  const Filter.empty() : value = const <String, Object?>{}, operator = null, key = null;
 
   /// Combines the provided filters and matches the values
   /// matched by all filters.
-  factory Filter.and(List<Filter> filters) =>
-      Filter._(operator: FilterOperator.and, value: filters);
+  factory Filter.and(List<Filter> filters) => Filter._(operator: FilterOperator.and, value: filters);
 
   /// Combines the provided filters and matches the values
   /// matched by at least one of the filters.
-  factory Filter.or(List<Filter> filters) =>
-      Filter._(operator: FilterOperator.or, value: filters);
+  factory Filter.or(List<Filter> filters) => Filter._(operator: FilterOperator.or, value: filters);
 
   /// Combines the provided filters and matches the values
   /// not matched by all the filters.
-  factory Filter.nor(List<Filter> filters) =>
-      Filter._(operator: FilterOperator.nor, value: filters);
+  factory Filter.nor(List<Filter> filters) => Filter._(operator: FilterOperator.nor, value: filters);
 
   /// Matches values that are equal to a specified value.
-  factory Filter.equal(String key, Object value) =>
-      Filter._(operator: FilterOperator.equal, key: key, value: value);
+  factory Filter.equal(String key, Object value) => Filter._(operator: FilterOperator.equal, key: key, value: value);
 
   /// Matches all values that are not equal to a specified value.
   factory Filter.notEqual(String key, Object value) =>
@@ -154,8 +148,7 @@ class Filter extends Equatable {
       Filter._(operator: FilterOperator.greaterOrEqual, key: key, value: value);
 
   /// Matches values that are less than a specified value.
-  factory Filter.less(String key, Object value) =>
-      Filter._(operator: FilterOperator.less, key: key, value: value);
+  factory Filter.less(String key, Object value) => Filter._(operator: FilterOperator.less, key: key, value: value);
 
   /// Matches values that are less than or equal to a specified value.
   factory Filter.lessOrEqual(String key, Object value) =>
@@ -170,8 +163,7 @@ class Filter extends Equatable {
       Filter._(operator: FilterOperator.notIn, key: key, value: values);
 
   /// Matches values by performing text search with the specified value.
-  factory Filter.query(String key, String text) =>
-      Filter._(operator: FilterOperator.query, key: key, value: text);
+  factory Filter.query(String key, String text) => Filter._(operator: FilterOperator.query, key: key, value: text);
 
   /// Matches values with the specified prefix.
   factory Filter.autoComplete(String key, String text) =>

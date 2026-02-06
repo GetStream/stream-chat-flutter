@@ -13,9 +13,9 @@ class StreamChannelName extends StatelessWidget {
     this.textStyle,
     this.textOverflow = TextOverflow.ellipsis,
   }) : assert(
-          channel.state != null,
-          'Channel ${channel.id} is not initialized',
-        );
+         channel.state != null,
+         'Channel ${channel.id} is not initialized',
+       );
 
   /// The [Channel] to show the name for.
   final Channel channel;
@@ -28,63 +28,60 @@ class StreamChannelName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BetterStreamBuilder<String>(
-        stream: channel.nameStream,
-        initialData: channel.name,
-        builder: (context, channelName) => Text(
-          channelName,
-          style: textStyle,
-          overflow: textOverflow,
-        ),
-        noDataBuilder: (context) => _generateName(
-          channel.client.state.currentUser!,
-          channel.state!.members,
-        ),
-      );
+    stream: channel.nameStream,
+    initialData: channel.name,
+    builder: (context, channelName) => Text(
+      channelName,
+      style: textStyle,
+      overflow: textOverflow,
+    ),
+    noDataBuilder: (context) => _generateName(
+      channel.client.state.currentUser!,
+      channel.state!.members,
+    ),
+  );
 
   Widget _generateName(
     User currentUser,
     List<Member> members,
-  ) =>
-      LayoutBuilder(
-        builder: (context, constraints) {
-          var channelName = context.translations.noTitleText;
-          final otherMembers = members.where(
-            (member) => member.userId != currentUser.id,
-          );
-
-          if (otherMembers.isNotEmpty) {
-            if (otherMembers.length == 1) {
-              final user = otherMembers.first.user;
-              if (user != null) {
-                channelName = user.name;
-              }
-            } else {
-              final maxWidth = constraints.maxWidth;
-              final maxChars = maxWidth / (textStyle?.fontSize ?? 1);
-              var currentChars = 0;
-              final currentMembers = <Member>[];
-              otherMembers.forEach((element) {
-                final newLength =
-                    currentChars + (element.user?.name.length ?? 0);
-                if (newLength < maxChars) {
-                  currentChars = newLength;
-                  currentMembers.add(element);
-                }
-              });
-
-              final exceedingMembers =
-                  otherMembers.length - currentMembers.length;
-              channelName =
-                  '${currentMembers.map((e) => e.user?.name).join(', ')} '
-                  '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
-            }
-          }
-
-          return Text(
-            channelName,
-            style: textStyle,
-            overflow: textOverflow,
-          );
-        },
+  ) => LayoutBuilder(
+    builder: (context, constraints) {
+      var channelName = context.translations.noTitleText;
+      final otherMembers = members.where(
+        (member) => member.userId != currentUser.id,
       );
+
+      if (otherMembers.isNotEmpty) {
+        if (otherMembers.length == 1) {
+          final user = otherMembers.first.user;
+          if (user != null) {
+            channelName = user.name;
+          }
+        } else {
+          final maxWidth = constraints.maxWidth;
+          final maxChars = maxWidth / (textStyle?.fontSize ?? 1);
+          var currentChars = 0;
+          final currentMembers = <Member>[];
+          otherMembers.forEach((element) {
+            final newLength = currentChars + (element.user?.name.length ?? 0);
+            if (newLength < maxChars) {
+              currentChars = newLength;
+              currentMembers.add(element);
+            }
+          });
+
+          final exceedingMembers = otherMembers.length - currentMembers.length;
+          channelName =
+              '${currentMembers.map((e) => e.user?.name).join(', ')} '
+              '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+        }
+      }
+
+      return Text(
+        channelName,
+        style: textStyle,
+        overflow: textOverflow,
+      );
+    },
+  );
 }

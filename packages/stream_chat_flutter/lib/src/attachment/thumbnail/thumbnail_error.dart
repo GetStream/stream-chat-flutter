@@ -6,11 +6,12 @@ import 'package:flutter/material.dart';
 /// The parameters represent the [BuildContext], [error] and [stackTrace] of the
 /// error that triggered this callback.
 /// {@endtemplate}
-typedef ThumbnailErrorBuilder = Widget Function(
-  BuildContext context,
-  Object error,
-  StackTrace? stackTrace,
-);
+typedef ThumbnailErrorBuilder =
+    Widget Function(
+      BuildContext context,
+      Object error,
+      StackTrace? stackTrace,
+    );
 
 /// {@template thumbnailError}
 /// A widget that shows an error state when a thumbnail fails to load.

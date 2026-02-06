@@ -82,8 +82,8 @@ class _StreamingMessageViewState extends State<StreamingMessageView> {
       onTapLink: switch (widget.onTapLink) {
         final onTapLink? => onTapLink,
         _ => (String link, String? href, String title) {
-            if (href != null) launchURL(context, href);
-          },
+          if (href != null) launchURL(context, href);
+        },
       },
     );
   }

@@ -17,8 +17,7 @@ class UserBlock extends Equatable {
   });
 
   /// Create a new instance from a json
-  factory UserBlock.fromJson(Map<String, dynamic> json) =>
-      _$UserBlockFromJson(json);
+  factory UserBlock.fromJson(Map<String, dynamic> json) => _$UserBlockFromJson(json);
 
   /// User that blocked the [blockedUser].
   final User user;
@@ -45,21 +44,20 @@ class UserBlock extends Equatable {
     String? userId,
     String? blockedUserId,
     DateTime? createdAt,
-  }) =>
-      UserBlock(
-        user: user ?? this.user,
-        blockedUser: blockedUser ?? this.blockedUser,
-        userId: userId ?? this.userId,
-        blockedUserId: blockedUserId ?? this.blockedUserId,
-        createdAt: createdAt ?? this.createdAt,
-      );
+  }) => UserBlock(
+    user: user ?? this.user,
+    blockedUser: blockedUser ?? this.blockedUser,
+    userId: userId ?? this.userId,
+    blockedUserId: blockedUserId ?? this.blockedUserId,
+    createdAt: createdAt ?? this.createdAt,
+  );
 
   @override
   List<Object?> get props => [
-        user,
-        blockedUser,
-        userId,
-        blockedUserId,
-        createdAt,
-      ];
+    user,
+    blockedUser,
+    userId,
+    blockedUserId,
+    createdAt,
+  ];
 }

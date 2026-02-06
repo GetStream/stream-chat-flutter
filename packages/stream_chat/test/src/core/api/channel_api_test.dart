@@ -9,8 +9,7 @@ import 'package:test/test.dart';
 import '../../mocks.dart';
 
 void main() {
-  String _getChannelUrl(String channelId, String channelType) =>
-      '/channels/$channelType/$channelId';
+  String _getChannelUrl(String channelId, String channelType) => '/channels/$channelType/$channelId';
 
   ChannelState _generateChannelState(
     String channelId,
@@ -53,10 +52,10 @@ void main() {
   }
 
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late ChannelApi channelApi;
@@ -88,13 +87,17 @@ void main() {
       'watchers': watchersPagination,
     };
 
-    when(() => client.post(
-          path,
-          data: data,
-        )).thenAnswer((_) async => successResponse(
-          path,
-          data: channelState.toJson(),
-        ));
+    when(
+      () => client.post(
+        path,
+        data: data,
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: channelState.toJson(),
+      ),
+    );
 
     final res = await channelApi.queryChannel(
       channelType,
@@ -143,20 +146,24 @@ void main() {
       'message_limit': messageLimit,
 
       // pagination
-      ...const PaginationParams().toJson()
+      ...const PaginationParams().toJson(),
     });
 
-    when(() => client.get(
-          path,
-          queryParameters: {
-            'payload': payload,
-          },
-        )).thenAnswer((_) async => successResponse(
-          path,
-          data: {
-            'channels': [channelState.toJson()]
-          },
-        ));
+    when(
+      () => client.get(
+        path,
+        queryParameters: {
+          'payload': payload,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'channels': [channelState.toJson()],
+        },
+      ),
+    );
 
     final res = await channelApi.queryChannels(
       filter: filter,
@@ -176,8 +183,7 @@ void main() {
 
   test('markAllRead', () async {
     const path = '/channels/read';
-    when(() => client.post(path, data: {})).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.post(path, data: {})).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.markAllRead();
 
@@ -201,18 +207,23 @@ void main() {
       extraData: data,
     );
 
-    when(() => client.post(
-          path,
-          data: any(
-            named: 'data',
-            that: wrapMatcher((Map v) =>
-                containsPair('data', data).matches(v, {}) &&
-                contains('message').matches(v, {})),
-          ),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: any(
+          named: 'data',
+          that: wrapMatcher((Map v) => containsPair('data', data).matches(v, {}) && contains('message').matches(v, {})),
+        ),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.updateChannel(
       channelId,
@@ -249,9 +260,14 @@ void main() {
 
     when(
       () => client.patch(path, data: {'set': set, 'unset': unset}),
-    ).thenAnswer((_) async => successResponse(path, data: {
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.updateChannelPartial(
       channelId,
@@ -277,16 +293,23 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(
-          path,
-          data: {
-            'accept_invite': true,
-            'message': message,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'accept_invite': true,
+          'message': message,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.acceptChannelInvite(
       channelId,
@@ -311,16 +334,23 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(
-          path,
-          data: {
-            'reject_invite': true,
-            'message': message,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'reject_invite': true,
+          'message': message,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.rejectChannelInvite(
       channelId,
@@ -345,16 +375,23 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(
-          path,
-          data: {
-            'invites': memberIds,
-            'message': message,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'invites': memberIds,
+          'message': message,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.inviteChannelMembers(
       channelId,
@@ -381,17 +418,24 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(
-          path,
-          data: {
-            'add_members': memberIds,
-            'message': message,
-            'hide_history': hideHistory,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'add_members': memberIds,
+          'message': message,
+          'hide_history': hideHistory,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.addMembers(
       channelId,
@@ -419,17 +463,24 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(
-          path,
-          data: {
-            'add_members': memberIds,
-            'message': message,
-            'hide_history_before': hideHistoryBefore.toUtc().toIso8601String(),
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'add_members': memberIds,
+          'message': message,
+          'hide_history_before': hideHistoryBefore.toUtc().toIso8601String(),
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.addMembers(
       channelId,
@@ -447,8 +498,7 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('addMembers with hideHistoryBefore takes precedence over hideHistory',
-      () async {
+  test('addMembers with hideHistoryBefore takes precedence over hideHistory', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     const memberIds = ['test-member-id-1', 'test-member-id-2'];
@@ -459,17 +509,24 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(
-          path,
-          data: {
-            'add_members': memberIds,
-            'message': message,
-            'hide_history_before': hideHistoryBefore.toUtc().toIso8601String(),
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'add_members': memberIds,
+          'message': message,
+          'hide_history_before': hideHistoryBefore.toUtc().toIso8601String(),
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.addMembers(
       channelId,
@@ -497,16 +554,23 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(
-          path,
-          data: {
-            'remove_members': memberIds,
-            'message': message,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'remove_members': memberIds,
+          'message': message,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.removeMembers(
       channelId,
@@ -530,8 +594,9 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/event';
 
-    when(() => client.post(path, data: {'event': event})).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(path, data: {'event': event}),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.sendEvent(channelId, channelType, event);
 
@@ -547,8 +612,7 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.delete(path)).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.deleteChannel(channelId, channelType);
 
@@ -564,21 +628,23 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/truncate';
 
-    when(() => client.post(
-              path,
-              data: {},
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {},
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.truncateChannel(channelId, channelType);
 
     expect(res, isNotNull);
 
-    verify(() => client.post(
-          path,
-          data: {},
-        )).called(1);
+    verify(
+      () => client.post(
+        path,
+        data: {},
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -638,21 +704,23 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/show';
 
-    when(() => client.post(
-              path,
-              data: {},
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {},
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.showChannel(channelId, channelType);
 
     expect(res, isNotNull);
 
-    verify(() => client.post(
-          path,
-          data: {},
-        )).called(1);
+    verify(
+      () => client.post(
+        path,
+        data: {},
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -663,14 +731,14 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/read';
 
-    when(() => client.post(
-              path,
-              data: {
-                'message_id': messageId,
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'message_id': messageId,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.markRead(
       channelId,
@@ -691,12 +759,12 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/unread';
 
-    when(() => client.post(
-              path,
-              data: {'message_id': messageId},
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {'message_id': messageId},
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.markUnread(
       channelId,
@@ -717,14 +785,14 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/unread';
 
-    when(() => client.post(
-              path,
-              data: {
-                'message_timestamp': timestamp.toUtc().toIso8601String(),
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'message_timestamp': timestamp.toUtc().toIso8601String(),
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.markUnreadByTimestamp(
       channelId,
@@ -745,17 +813,22 @@ void main() {
     final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
     const archivedAt = '2025-04-10 10:27:03.150349';
 
-    when(() => client.patch(
-          path,
-          data: {
-            'set': {'archived': true},
+    when(
+      () => client.patch(
+        path,
+        data: {
+          'set': {'archived': true},
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: <String, dynamic>{
+          'channel_member': <String, dynamic>{
+            'archived_at': archivedAt,
           },
-        )).thenAnswer(
-      (_) async => successResponse(path, data: <String, dynamic>{
-        'channel_member': <String, dynamic>{
-          'archived_at': archivedAt,
-        }
-      }),
+        },
+      ),
     );
 
     final res = await channelApi.updateMemberPartial(
@@ -777,14 +850,15 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
 
-    when(() => client.patch(
-          path,
-          data: {
-            'unset': ['archived'],
-          },
-        )).thenAnswer(
-      (_) async => successResponse(path,
-          data: <String, dynamic>{'channel_member': <String, dynamic>{}}),
+    when(
+      () => client.patch(
+        path,
+        data: {
+          'unset': ['archived'],
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(path, data: <String, dynamic>{'channel_member': <String, dynamic>{}}),
     );
 
     final res = await channelApi.updateMemberPartial(
@@ -807,17 +881,22 @@ void main() {
     final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
     const pinnedAt = '2025-04-10 10:27:03.150349';
 
-    when(() => client.patch(
-          path,
-          data: {
-            'set': {'pinned': true},
+    when(
+      () => client.patch(
+        path,
+        data: {
+          'set': {'pinned': true},
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: <String, dynamic>{
+          'channel_member': <String, dynamic>{
+            'pinned_at': pinnedAt,
           },
-        )).thenAnswer(
-      (_) async => successResponse(path, data: <String, dynamic>{
-        'channel_member': <String, dynamic>{
-          'pinned_at': pinnedAt,
-        }
-      }),
+        },
+      ),
     );
 
     final res = await channelApi.updateMemberPartial(
@@ -839,14 +918,15 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/member/{user_id}';
 
-    when(() => client.patch(
-          path,
-          data: {
-            'unset': ['pinned'],
-          },
-        )).thenAnswer(
-      (_) async => successResponse(path,
-          data: <String, dynamic>{'channel_member': <String, dynamic>{}}),
+    when(
+      () => client.patch(
+        path,
+        data: {
+          'unset': ['pinned'],
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(path, data: <String, dynamic>{'channel_member': <String, dynamic>{}}),
     );
 
     final res = await channelApi.updateMemberPartial(
@@ -868,8 +948,7 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/stop-watching';
 
-    when(() => client.post(path, data: {})).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.post(path, data: {})).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.stopWatching(channelId, channelType);
 
@@ -895,20 +974,34 @@ void main() {
       extraData: set,
     );
 
-    when(() => client.patch(path, data: {
+    when(
+      () => client.patch(
+        path,
+        data: {
           'set': set,
-        })).thenAnswer((_) async => successResponse(path, data: {
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
-        }));
+        },
+      ),
+    );
 
-    final res =
-        await channelApi.enableSlowdown(channelId, channelType, cooldown);
+    final res = await channelApi.enableSlowdown(channelId, channelType, cooldown);
 
     expect(res, isNotNull);
 
-    verify(() => client.patch(path, data: {
+    verify(
+      () => client.patch(
+        path,
+        data: {
           'set': set,
-        })).called(1);
+        },
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -924,19 +1017,34 @@ void main() {
       type: channelType,
     );
 
-    when(() => client.patch(path, data: {
+    when(
+      () => client.patch(
+        path,
+        data: {
           'unset': unset,
-        })).thenAnswer((_) async => successResponse(path, data: {
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'channel': channelModel.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await channelApi.disableSlowdown(channelId, channelType);
 
     expect(res, isNotNull);
 
-    verify(() => client.patch(path, data: {
+    verify(
+      () => client.patch(
+        path,
+        data: {
           'unset': unset,
-        })).called(1);
+        },
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -954,24 +1062,30 @@ void main() {
       ),
     ];
 
-    when(() => client.post(
-          path,
-          data: any(named: 'data'),
-        )).thenAnswer((_) async => successResponse(
-          path,
-          data: <String, dynamic>{},
-        ));
+    when(
+      () => client.post(
+        path,
+        data: any(named: 'data'),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: <String, dynamic>{},
+      ),
+    );
 
     final res = await channelApi.markChannelsDelivered(deliveries);
 
     expect(res, isNotNull);
 
-    verify(() => client.post(
-          path,
-          data: jsonEncode({
-            'latest_delivered_messages': deliveries,
-          }),
-        )).called(1);
+    verify(
+      () => client.post(
+        path,
+        data: jsonEncode({
+          'latest_delivered_messages': deliveries,
+        }),
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 }

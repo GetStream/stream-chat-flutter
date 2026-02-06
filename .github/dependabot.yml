@@ -25,7 +25,6 @@ updates:
   # All packages grouped into a single configuration using multi-directory support
   - package-ecosystem: "pub"
     directories:
-      - "/sample_app"
       - "/packages/stream_chat"
       - "/packages/stream_chat_flutter_core"
       - "/packages/stream_chat_flutter"

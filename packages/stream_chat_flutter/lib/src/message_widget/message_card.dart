@@ -166,11 +166,11 @@ class _MessageCardState extends State<MessageCard> {
         children: [
           if (widget.hasQuotedMessage)
             InkWell(
-              onTap: !widget.message.quotedMessage!.isDeleted &&
-                      onQuotedMessageTap != null
+              onTap: !widget.message.quotedMessage!.isDeleted && onQuotedMessageTap != null
                   ? () => onQuotedMessageTap(widget.message.quotedMessageId)
                   : null,
-              child: quotedMessageBuilder?.call(
+              child:
+                  quotedMessageBuilder?.call(
                     context,
                     widget.message.quotedMessage!,
                   ) ??
@@ -221,12 +221,12 @@ class _MessageCardState extends State<MessageCard> {
       shape: switch (widget.shape) {
         final shape? => shape,
         _ => RoundedRectangleBorder(
-            borderRadius: borderRadius,
-            side: switch (widget.borderSide) {
-              final side? => side,
-              _ => BorderSide(color: borderColor),
-            },
-          ),
+          borderRadius: borderRadius,
+          side: switch (widget.borderSide) {
+            final side? => side,
+            _ => BorderSide(color: borderColor),
+          },
+        ),
       },
     );
   }
@@ -236,8 +236,7 @@ class _MessageCardState extends State<MessageCard> {
       return theme.messageBackgroundColor;
     }
 
-    final containsOnlyUrlAttachment =
-        widget.hasUrlAttachments && !widget.hasNonUrlAttachments;
+    final containsOnlyUrlAttachment = widget.hasUrlAttachments && !widget.hasNonUrlAttachments;
 
     if (containsOnlyUrlAttachment) {
       return theme.urlAttachmentBackgroundColor;

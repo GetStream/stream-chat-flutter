@@ -94,7 +94,7 @@ void main() {
             'total_unread_count': 0,
             'unread_channels': 0,
             'unread_threads': 0,
-            'blocked_user_ids': []
+            'blocked_user_ids': [],
           },
           'user': {'id': 'id', 'teams': [], 'online': false, 'banned': false},
           'total_unread_count': 1,
@@ -121,7 +121,7 @@ void main() {
               'mentioned_users': [],
               'silent': false,
             },
-          }
+          },
         },
       );
 

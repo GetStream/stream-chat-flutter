@@ -80,17 +80,18 @@ class _ThreadPageState extends State<ThreadPage> {
                   onReplyTap: _reply,
                   showEditMessage: message.sharedLocation == null,
                   attachmentBuilders: [locationAttachmentBuilder],
-                  bottomRowBuilderWithDefaultWidget: (
-                    context,
-                    message,
-                    defaultWidget,
-                  ) {
-                    return defaultWidget.copyWith(
-                      deletedBottomRowBuilder: (context, message) {
-                        return const StreamVisibleFootnote();
+                  bottomRowBuilderWithDefaultWidget:
+                      (
+                        context,
+                        message,
+                        defaultWidget,
+                      ) {
+                        return defaultWidget.copyWith(
+                          deletedBottomRowBuilder: (context, message) {
+                            return const StreamVisibleFootnote();
+                          },
+                        );
                       },
-                    );
-                  },
                 );
               },
             ),

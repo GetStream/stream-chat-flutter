@@ -44,7 +44,8 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
     final messageId = message.id;
     final attachmentId = attachment.id;
 
-    final inProgress = inProgressBuilder ??
+    final inProgress =
+        inProgressBuilder ??
         (context, int sent, int total) {
           return _InProgressState(
             sent: sent,
@@ -53,7 +54,8 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
           );
         };
 
-    final failed = failedBuilder ??
+    final failed =
+        failedBuilder ??
         (context, error) {
           return _FailedState(
             error: error,
@@ -64,8 +66,7 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
 
     final success = successBuilder ?? (context) => _SuccessState();
 
-    final preparing = preparingBuilder ??
-        (context) => _PreparingState(attachmentId: attachmentId);
+    final preparing = preparingBuilder ?? (context) => _PreparingState(attachmentId: attachmentId);
 
     return attachment.uploadState.when(
       preparing: () => preparing(context),

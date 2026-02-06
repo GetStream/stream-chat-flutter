@@ -10,8 +10,7 @@ part 'draft_message_dao.g.dart';
 
 /// The Data Access Object for operations in [DraftMessages] table.
 @DriftAccessor(tables: [DraftMessages, Messages])
-class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase>
-    with _$DraftMessageDaoMixin {
+class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$DraftMessageDaoMixin {
   /// Creates a new draft message dao instance
   DraftMessageDao(this._db) : super(_db);
 
@@ -26,19 +25,19 @@ class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase>
 
     final parentMessage = await switch (entity.parentId) {
       final id? => _db.messageDao.getMessageById(
-          id,
-          fetchDraft: fetchDraft,
-          fetchSharedLocation: fetchSharedLocation,
-        ),
+        id,
+        fetchDraft: fetchDraft,
+        fetchSharedLocation: fetchSharedLocation,
+      ),
       _ => null,
     };
 
     final quotedMessage = await switch (entity.quotedMessageId) {
       final id? => _db.messageDao.getMessageById(
-          id,
-          fetchDraft: fetchDraft,
-          fetchSharedLocation: fetchSharedLocation,
-        ),
+        id,
+        fetchDraft: fetchDraft,
+        fetchSharedLocation: fetchSharedLocation,
+      ),
       _ => null,
     };
 

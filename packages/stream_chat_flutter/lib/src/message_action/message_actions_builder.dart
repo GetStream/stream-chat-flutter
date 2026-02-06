@@ -197,7 +197,7 @@ class StreamMessageActionsBuilder {
 
       final action = switch (isPinned) {
         true => UnpinMessage(message: message),
-        false => PinMessage(message: message)
+        false => PinMessage(message: message),
       };
 
       messageActions.add(
@@ -232,8 +232,7 @@ class StreamMessageActionsBuilder {
       );
     }
 
-    if (message.user case final messageUser?
-        when channel.config?.mutes == true && !isSentByCurrentUser) {
+    if (message.user case final messageUser? when channel.config?.mutes == true && !isSentByCurrentUser) {
       final mutedUsers = currentUser?.mutes.map((mute) => mute.target.id);
       final isMuted = mutedUsers?.contains(messageUser.id) ?? false;
       final label = context.translations.toggleMuteUnmuteUserText;

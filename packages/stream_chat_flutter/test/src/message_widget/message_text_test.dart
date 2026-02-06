@@ -46,35 +46,39 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(currentUser);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(currentUser));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test',
-          }));
+      when(() => channel.extraDataStream).thenAnswer(
+        (i) => Stream.value({
+          'name': 'test',
+        }),
+      );
       when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: StreamMessageText(
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamMessageText(
                   message: Message(
                     text: 'demo',
                   ),
-                  messageTheme: streamTheme.otherMessageTheme),
+                  messageTheme: streamTheme.otherMessageTheme,
+                ),
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
@@ -98,8 +102,7 @@ void main() {
     setUp(() {
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(currentUser);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(currentUser));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
 
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
@@ -202,8 +205,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(currentUser);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(currentUser));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
       when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);

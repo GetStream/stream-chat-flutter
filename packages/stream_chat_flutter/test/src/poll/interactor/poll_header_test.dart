@@ -99,17 +99,19 @@ Widget _wrapWithMaterialApp(
   return MaterialApp(
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: Container(
-            color: theme.colorTheme.disabled,
-            padding: const EdgeInsets.all(16),
-            child: Center(child: widget),
-          ),
-        );
-      }),
+      child: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            body: Container(
+              color: theme.colorTheme.disabled,
+              padding: const EdgeInsets.all(16),
+              child: Center(child: widget),
+            ),
+          );
+        },
+      ),
     ),
   );
 }

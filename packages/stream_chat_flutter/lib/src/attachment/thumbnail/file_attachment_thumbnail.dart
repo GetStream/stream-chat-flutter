@@ -54,17 +54,17 @@ class StreamFileAttachmentThumbnail extends StatelessWidget {
 
     return switch (mediaType?.type) {
       AttachmentType.image => StreamImageAttachmentThumbnail(
-          image: file,
-          width: width,
-          height: height,
-          fit: fit,
-        ),
+        image: file,
+        width: width,
+        height: height,
+        fit: fit,
+      ),
       AttachmentType.video => StreamVideoAttachmentThumbnail(
-          video: file,
-          width: width,
-          height: height,
-          fit: fit,
-        ),
+        video: file,
+        width: width,
+        height: height,
+        fit: fit,
+      ),
       // Return a generic file type icon.
       _ => getFileTypeImage(mediaType?.mimeType),
     };

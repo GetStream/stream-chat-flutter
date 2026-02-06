@@ -17,11 +17,12 @@ typedef OnReactionPicked = ValueSetter<Reaction>;
 /// - [message]: The message to show reactions for.
 /// - [onReactionPicked]: Callback when a reaction is picked.
 /// {@endtemplate}
-typedef ReactionPickerBuilder = Widget Function(
-  BuildContext context,
-  Message message,
-  OnReactionPicked? onReactionPicked,
-);
+typedef ReactionPickerBuilder =
+    Widget Function(
+      BuildContext context,
+      Message message,
+      OnReactionPicked? onReactionPicked,
+    );
 
 /// {@template streamReactionPicker}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/reaction_picker.png)
@@ -67,17 +68,17 @@ class StreamReactionPicker extends StatelessWidget {
     final platform = Theme.of(context).platform;
     return switch (platform) {
       TargetPlatform.iOS || TargetPlatform.android => StreamReactionPicker(
-          message: message,
-          reactionIcons: reactionIcons,
-          onReactionPicked: onReactionPicked,
-        ),
+        message: message,
+        reactionIcons: reactionIcons,
+        onReactionPicked: onReactionPicked,
+      ),
       _ => StreamReactionPicker(
-          message: message,
-          scrollable: false,
-          borderRadius: BorderRadius.zero,
-          reactionIcons: reactionIcons,
-          onReactionPicked: onReactionPicked,
-        ),
+        message: message,
+        scrollable: false,
+        borderRadius: BorderRadius.zero,
+        reactionIcons: reactionIcons,
+        onReactionPicked: onReactionPicked,
+      ),
     };
   }
 
@@ -162,9 +163,9 @@ class StreamReactionPicker extends StatelessWidget {
         child: switch (scrollable) {
           false => reactionPicker,
           true => SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: reactionPicker,
-            ),
+            scrollDirection: Axis.horizontal,
+            child: reactionPicker,
+          ),
         },
       ),
     );

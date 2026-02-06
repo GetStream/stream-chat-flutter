@@ -123,33 +123,29 @@ class BottomRow extends StatelessWidget {
     void Function(Message)? onThreadTap,
     Widget Function(BuildContext, Message)? usernameBuilder,
     Widget Function(BuildContext, Message)? sendingIndicatorBuilder,
-  }) =>
-      BottomRow(
-        key: key ?? this.key,
-        isDeleted: isDeleted ?? this.isDeleted,
-        message: message ?? this.message,
-        showThreadReplyIndicator:
-            showThreadReplyIndicator ?? this.showThreadReplyIndicator,
-        showInChannel: showInChannel ?? this.showInChannel,
-        showTimeStamp: showTimeStamp ?? this.showTimeStamp,
-        showUsername: showUsername ?? this.showUsername,
-        showEditedLabel: showEditedLabel ?? this.showEditedLabel,
-        reverse: reverse ?? this.reverse,
-        showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
-        hasUrlAttachments: hasUrlAttachments ?? this.hasUrlAttachments,
-        isGiphy: isGiphy ?? this.isGiphy,
-        isOnlyEmoji: isOnlyEmoji ?? this.isOnlyEmoji,
-        messageTheme: messageTheme ?? this.messageTheme,
-        streamChatTheme: streamChatTheme ?? this.streamChatTheme,
-        hasNonUrlAttachments: hasNonUrlAttachments ?? this.hasNonUrlAttachments,
-        streamChat: streamChat ?? this.streamChat,
-        deletedBottomRowBuilder:
-            deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
-        onThreadTap: onThreadTap ?? this.onThreadTap,
-        usernameBuilder: usernameBuilder ?? this.usernameBuilder,
-        sendingIndicatorBuilder:
-            sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
-      );
+  }) => BottomRow(
+    key: key ?? this.key,
+    isDeleted: isDeleted ?? this.isDeleted,
+    message: message ?? this.message,
+    showThreadReplyIndicator: showThreadReplyIndicator ?? this.showThreadReplyIndicator,
+    showInChannel: showInChannel ?? this.showInChannel,
+    showTimeStamp: showTimeStamp ?? this.showTimeStamp,
+    showUsername: showUsername ?? this.showUsername,
+    showEditedLabel: showEditedLabel ?? this.showEditedLabel,
+    reverse: reverse ?? this.reverse,
+    showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
+    hasUrlAttachments: hasUrlAttachments ?? this.hasUrlAttachments,
+    isGiphy: isGiphy ?? this.isGiphy,
+    isOnlyEmoji: isOnlyEmoji ?? this.isOnlyEmoji,
+    messageTheme: messageTheme ?? this.messageTheme,
+    streamChatTheme: streamChatTheme ?? this.streamChatTheme,
+    hasNonUrlAttachments: hasNonUrlAttachments ?? this.hasNonUrlAttachments,
+    streamChat: streamChat ?? this.streamChat,
+    deletedBottomRowBuilder: deletedBottomRowBuilder ?? this.deletedBottomRowBuilder,
+    onThreadTap: onThreadTap ?? this.onThreadTap,
+    usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+    sendingIndicatorBuilder: sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -190,21 +186,21 @@ class BottomRow extends StatelessWidget {
         switch (sendingIndicatorBuilder) {
           final builder? => builder(context, message),
           _ => SendingIndicatorBuilder(
-              messageTheme: messageTheme,
-              message: message,
-              hasNonUrlAttachments: hasNonUrlAttachments,
-              streamChat: streamChat,
-              streamChatTheme: streamChatTheme,
-            ),
+            messageTheme: messageTheme,
+            message: message,
+            hasNonUrlAttachments: hasNonUrlAttachments,
+            streamChat: streamChat,
+            streamChatTheme: streamChatTheme,
+          ),
         },
       if (showUsername)
         switch (usernameBuilder) {
           final builder? => builder(context, message),
           _ => Username(
-              key: usernameKey,
-              message: message,
-              messageTheme: messageTheme,
-            ),
+            key: usernameKey,
+            message: message,
+            messageTheme: messageTheme,
+          ),
         },
       if (showEditedLabel && isEdited)
         Text(
@@ -225,8 +221,7 @@ class BottomRow extends StatelessWidget {
         ),
     ];
 
-    final showThreadTail =
-        (showThreadReplyIndicator || showInChannel) && !isOnlyEmoji;
+    final showThreadTail = (showThreadReplyIndicator || showInChannel) && !isOnlyEmoji;
 
     final threadIndicatorWidgets = [
       if (showThreadTail)
@@ -236,8 +231,7 @@ class BottomRow extends StatelessWidget {
           builder: (context) {
             return Padding(
               padding: EdgeInsets.only(
-                bottom: context.textScaleFactor *
-                    ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
+                bottom: context.textScaleFactor * ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
               ),
               child: CustomPaint(
                 size: const Size(16, 32) * context.textScaleFactor,
@@ -252,12 +246,8 @@ class BottomRow extends StatelessWidget {
         ),
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
-          SizedBox.fromSize(
-            size: Size((threadParticipants!.length * 8.0) + 8, 16),
-            child: ThreadParticipants(
-              threadParticipants: threadParticipants,
-              streamChatTheme: streamChatTheme,
-            ),
+          ThreadParticipants(
+            threadParticipants: threadParticipants!,
           ),
         MouseRegion(
           cursor: SystemMouseCursors.click,

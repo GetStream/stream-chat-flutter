@@ -35,8 +35,7 @@ void main() {
           // Verify key components are present
           expect(find.byType(AudioControlButton), findsOneWidget);
           expect(find.byType(StreamAudioWaveformSlider), findsOneWidget);
-          expect(
-              find.bySvgIcon(StreamSvgIcons.filetypeAudioM4a), findsOneWidget);
+          expect(find.bySvgIcon(StreamSvgIcons.filetypeAudioM4a), findsOneWidget);
         },
       );
 
@@ -284,13 +283,15 @@ Widget _wrapWithStreamChatApp(
   return MaterialApp(
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: Center(child: widget),
-        );
-      }),
+      child: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            body: Center(child: widget),
+          );
+        },
+      ),
     ),
   );
 }

@@ -13,8 +13,8 @@ class FlexibleFractionallySizedBox extends StatelessWidget {
     this.widthFactor,
     this.heightFactor,
     this.child,
-  })  : assert(widthFactor == null || widthFactor >= 0.0, ''),
-        assert(heightFactor == null || heightFactor >= 0.0, '');
+  }) : assert(widthFactor == null || widthFactor >= 0.0, ''),
+       assert(heightFactor == null || heightFactor >= 0.0, '');
 
   /// The widget below this widget in the tree.
   ///

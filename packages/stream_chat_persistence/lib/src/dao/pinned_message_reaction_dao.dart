@@ -9,8 +9,7 @@ part 'pinned_message_reaction_dao.g.dart';
 
 /// The Data Access Object for operations in [PinnedMessageReactions] table.
 @DriftAccessor(tables: [PinnedMessageReactions, Users])
-class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase>
-    with _$PinnedMessageReactionDaoMixin {
+class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase> with _$PinnedMessageReactionDaoMixin {
   /// Creates a new reaction dao instance
   PinnedMessageReactionDao(super.db);
 
@@ -18,15 +17,16 @@ class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase>
   /// [Reactions.messageId] with [messageId]
   Future<List<Reaction>> getReactions(String messageId) =>
       (select(pinnedMessageReactions).join([
-        leftOuterJoin(users, pinnedMessageReactions.userId.equalsExp(users.id)),
-      ])
+              leftOuterJoin(users, pinnedMessageReactions.userId.equalsExp(users.id)),
+            ])
             ..where(pinnedMessageReactions.messageId.equals(messageId))
             ..orderBy([OrderingTerm.asc(pinnedMessageReactions.createdAt)]))
           .map((rows) {
-        final userEntity = rows.readTableOrNull(users);
-        final reactionEntity = rows.readTable(pinnedMessageReactions);
-        return reactionEntity.toReaction(user: userEntity?.toUser());
-      }).get();
+            final userEntity = rows.readTableOrNull(users);
+            final reactionEntity = rows.readTable(pinnedMessageReactions);
+            return reactionEntity.toReaction(user: userEntity?.toUser());
+          })
+          .get();
 
   /// Returns all the reactions of a particular message
   /// added by a particular user by matching
@@ -42,19 +42,18 @@ class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase>
 
   /// Updates the reactions data with the new [reactionList] data
   Future<void> updateReactions(List<Reaction> reactionList) => batch((it) {
-        it.insertAllOnConflictUpdate(
-          pinnedMessageReactions,
-          reactionList.map((r) => r.toPinnedEntity()).toList(),
-        );
-      });
+    it.insertAllOnConflictUpdate(
+      pinnedMessageReactions,
+      reactionList.map((r) => r.toPinnedEntity()).toList(),
+    );
+  });
 
   /// Deletes all the reactions whose [Reactions.messageId] is
   /// present in [messageIds]
-  Future<void> deleteReactionsByMessageIds(List<String> messageIds) =>
-      batch((it) {
-        it.deleteWhere<PinnedMessageReactions, PinnedMessageReactionEntity>(
-          pinnedMessageReactions,
-          (r) => r.messageId.isIn(messageIds),
-        );
-      });
+  Future<void> deleteReactionsByMessageIds(List<String> messageIds) => batch((it) {
+    it.deleteWhere<PinnedMessageReactions, PinnedMessageReactionEntity>(
+      pinnedMessageReactions,
+      (r) => r.messageId.isIn(messageIds),
+    );
+  });
 }

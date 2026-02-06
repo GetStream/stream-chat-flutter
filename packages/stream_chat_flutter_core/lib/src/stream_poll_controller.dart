@@ -53,11 +53,14 @@ class StreamPollController extends ValueNotifier<Poll> {
   factory StreamPollController({
     Poll? poll,
     PollConfig? config,
-  }) =>
-      StreamPollController._(
-        config ?? const PollConfig(),
-        poll ?? Poll(name: '', options: const [PollOption(text: '')]),
-      );
+  }) => StreamPollController._(
+    config ?? const PollConfig(),
+    poll ??
+        Poll(
+          name: '',
+          options: const [PollOption(text: '')],
+        ),
+  );
 
   StreamPollController._(this.config, super.poll) : _initialValue = poll;
 
@@ -84,7 +87,7 @@ class StreamPollController extends ValueNotifier<Poll> {
 
           // Remove the id from the new added options.
           return option.copyWith(id: null);
-        })
+        }),
       ],
     );
   }
@@ -122,8 +125,7 @@ class StreamPollController extends ValueNotifier<Poll> {
       final name = value.name;
       final (:min, :max) = nameRange;
 
-      if (min != null && name.length < min ||
-          max != null && name.length > max) {
+      if (min != null && name.length < min || max != null && name.length > max) {
         invalidErrors.add(
           PollValidationError.nameRange(name, range: nameRange),
         );
@@ -147,8 +149,7 @@ class StreamPollController extends ValueNotifier<Poll> {
       final nonEmptyOptions = [...options.where((it) => it.text.isNotEmpty)];
       final (:min, :max) = optionsRange;
 
-      if (min != null && nonEmptyOptions.length < min ||
-          max != null && nonEmptyOptions.length > max) {
+      if (min != null && nonEmptyOptions.length < min || max != null && nonEmptyOptions.length > max) {
         invalidErrors.add(
           PollValidationError.optionsRange(options, range: optionsRange),
         );
@@ -161,8 +162,7 @@ class StreamPollController extends ValueNotifier<Poll> {
         if (config.allowedVotesRange case final allowedVotesRange?) {
           final (:min, :max) = allowedVotesRange;
 
-          if (min != null && maxVotesAllowed < min ||
-              max != null && maxVotesAllowed > max) {
+          if (min != null && maxVotesAllowed < min || max != null && maxVotesAllowed > max) {
             invalidErrors.add(
               PollValidationError.maxVotesAllowed(
                 maxVotesAllowed,
@@ -292,19 +292,15 @@ extension PollValidationErrorPatternMatching on PollValidationError {
   TResult when<TResult extends Object?>({
     required TResult Function(List<PollOption> options) duplicateOptions,
     required TResult Function(String name, Range<int> range) nameRange,
-    required TResult Function(List<PollOption> options, Range<int> range)
-        optionsRange,
-    required TResult Function(int maxVotesAllowed, Range<int> range)
-        maxVotesAllowed,
+    required TResult Function(List<PollOption> options, Range<int> range) optionsRange,
+    required TResult Function(int maxVotesAllowed, Range<int> range) maxVotesAllowed,
   }) {
     final error = this;
     return switch (error) {
       _PollValidationErrorDuplicateOptions() => duplicateOptions(error.options),
       _PollValidationErrorNameRange() => nameRange(error.name, error.range),
-      _PollValidationErrorOptionsRange() =>
-        optionsRange(error.options, error.range),
-      _PollValidationErrorMaxVotesAllowed() =>
-        maxVotesAllowed(error.maxVotesAllowed, error.range),
+      _PollValidationErrorOptionsRange() => optionsRange(error.options, error.range),
+      _PollValidationErrorMaxVotesAllowed() => maxVotesAllowed(error.maxVotesAllowed, error.range),
     };
   }
 
@@ -318,14 +314,10 @@ extension PollValidationErrorPatternMatching on PollValidationError {
   }) {
     final error = this;
     return switch (error) {
-      _PollValidationErrorDuplicateOptions() =>
-        duplicateOptions?.call(error.options),
-      _PollValidationErrorNameRange() =>
-        nameRange?.call(error.name, error.range),
-      _PollValidationErrorOptionsRange() =>
-        optionsRange?.call(error.options, error.range),
-      _PollValidationErrorMaxVotesAllowed() =>
-        maxVotesAllowed?.call(error.maxVotesAllowed, error.range),
+      _PollValidationErrorDuplicateOptions() => duplicateOptions?.call(error.options),
+      _PollValidationErrorNameRange() => nameRange?.call(error.name, error.range),
+      _PollValidationErrorOptionsRange() => optionsRange?.call(error.options, error.range),
+      _PollValidationErrorMaxVotesAllowed() => maxVotesAllowed?.call(error.maxVotesAllowed, error.range),
     };
   }
 
@@ -340,14 +332,10 @@ extension PollValidationErrorPatternMatching on PollValidationError {
   }) {
     final error = this;
     final result = switch (error) {
-      _PollValidationErrorDuplicateOptions() =>
-        duplicateOptions?.call(error.options),
-      _PollValidationErrorNameRange() =>
-        nameRange?.call(error.name, error.range),
-      _PollValidationErrorOptionsRange() =>
-        optionsRange?.call(error.options, error.range),
-      _PollValidationErrorMaxVotesAllowed() =>
-        maxVotesAllowed?.call(error.maxVotesAllowed, error.range),
+      _PollValidationErrorDuplicateOptions() => duplicateOptions?.call(error.options),
+      _PollValidationErrorNameRange() => nameRange?.call(error.name, error.range),
+      _PollValidationErrorOptionsRange() => optionsRange?.call(error.options, error.range),
+      _PollValidationErrorMaxVotesAllowed() => maxVotesAllowed?.call(error.maxVotesAllowed, error.range),
     };
 
     return result ?? orElse();
@@ -356,13 +344,10 @@ extension PollValidationErrorPatternMatching on PollValidationError {
   /// @nodoc
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_PollValidationErrorDuplicateOptions value)
-        duplicateOptions,
+    required TResult Function(_PollValidationErrorDuplicateOptions value) duplicateOptions,
     required TResult Function(_PollValidationErrorNameRange value) nameRange,
-    required TResult Function(_PollValidationErrorOptionsRange value)
-        optionsRange,
-    required TResult Function(_PollValidationErrorMaxVotesAllowed value)
-        maxVotesAllowed,
+    required TResult Function(_PollValidationErrorOptionsRange value) optionsRange,
+    required TResult Function(_PollValidationErrorMaxVotesAllowed value) maxVotesAllowed,
   }) {
     final error = this;
     return switch (error) {
@@ -376,12 +361,10 @@ extension PollValidationErrorPatternMatching on PollValidationError {
   /// @nodoc
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_PollValidationErrorDuplicateOptions value)?
-        duplicateOptions,
+    TResult? Function(_PollValidationErrorDuplicateOptions value)? duplicateOptions,
     TResult? Function(_PollValidationErrorNameRange value)? nameRange,
     TResult? Function(_PollValidationErrorOptionsRange value)? optionsRange,
-    TResult? Function(_PollValidationErrorMaxVotesAllowed value)?
-        maxVotesAllowed,
+    TResult? Function(_PollValidationErrorMaxVotesAllowed value)? maxVotesAllowed,
   }) {
     final error = this;
     return switch (error) {
@@ -395,12 +378,10 @@ extension PollValidationErrorPatternMatching on PollValidationError {
   /// @nodoc
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_PollValidationErrorDuplicateOptions value)?
-        duplicateOptions,
+    TResult Function(_PollValidationErrorDuplicateOptions value)? duplicateOptions,
     TResult Function(_PollValidationErrorNameRange value)? nameRange,
     TResult Function(_PollValidationErrorOptionsRange value)? optionsRange,
-    TResult Function(_PollValidationErrorMaxVotesAllowed value)?
-        maxVotesAllowed,
+    TResult Function(_PollValidationErrorMaxVotesAllowed value)? maxVotesAllowed,
     required TResult orElse(),
   }) {
     final error = this;

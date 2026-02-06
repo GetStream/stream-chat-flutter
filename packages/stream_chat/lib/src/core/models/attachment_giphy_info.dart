@@ -17,7 +17,8 @@ enum GiphyInfoType {
   /// Lower quality with a fixed height with width adjusted according to the
   /// aspect ratio and played at a lower frame rate. Significantly lower size,
   /// but visually less appealing.
-  fixedHeightDownsampled('fixed_height_downsampled');
+  fixedHeightDownsampled('fixed_height_downsampled')
+  ;
 
   /// {@macro giphy_info_type}
   const GiphyInfoType(this.value);

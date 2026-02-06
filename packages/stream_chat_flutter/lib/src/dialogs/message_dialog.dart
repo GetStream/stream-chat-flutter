@@ -33,8 +33,7 @@ class MessageDialog extends StatelessWidget {
       title: Text(titleText ?? context.translations.somethingWentWrongError),
       content: messageText != null
           ? Text(
-              messageText ??
-                  context.translations.operationCouldNotBeCompletedText,
+              messageText ?? context.translations.operationCouldNotBeCompletedText,
             )
           : null,
       actions: [

@@ -181,13 +181,15 @@ Widget _wrapWithMaterialApp(
       data: ThemeData(brightness: brightness),
       child: StreamChatTheme(
         data: StreamChatThemeData(brightness: brightness),
-        child: Builder(builder: (context) {
-          final theme = StreamChatTheme.of(context);
-          return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
-            body: Center(child: widget),
-          );
-        }),
+        child: Builder(
+          builder: (context) {
+            final theme = StreamChatTheme.of(context);
+            return Scaffold(
+              backgroundColor: theme.colorTheme.appBg,
+              body: Center(child: widget),
+            );
+          },
+        ),
       ),
     ),
   );

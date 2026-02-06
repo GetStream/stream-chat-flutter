@@ -11,14 +11,13 @@ void main() {
 
   setUp(() {
     channel = MockChannel();
-    when(() => channel.on(any(), any(), any(), any()))
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channel.on(any(), any(), any(), any())).thenAnswer((_) => const Stream.empty());
     channelClientState = MockChannelState();
     when(() => channel.state).thenReturn(channelClientState);
     when(() => channelClientState.messages).thenReturn([
       Message(
         id: 'parentId',
-      )
+      ),
     ]);
   });
 

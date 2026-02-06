@@ -51,8 +51,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      'Hochladen $remaining/$total ...';
+  }) => 'Hochladen $remaining/$total ...';
 
   @override
   String pinnedByUserText({
@@ -186,8 +185,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulLabel => 'Nachricht gemeldet';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'Die Nachricht wurde an einen Moderator weitergeleitet.';
+  String get flagMessageSuccessfulText => 'Die Nachricht wurde an einen Moderator weitergeleitet.';
 
   @override
   String get deleteLabel => 'LÖSCHEN';
@@ -196,12 +194,10 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get deleteMessageLabel => 'Nachricht löschen';
 
   @override
-  String get deleteMessageQuestion =>
-      'Sind Sie sicher, dass Sie diese Nachricht endgültig löschen wollen?';
+  String get deleteMessageQuestion => 'Sind Sie sicher, dass Sie diese Nachricht endgültig löschen wollen?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      'Die Operation konnte nicht abgeschlossen werden.';
+  String get operationCouldNotBeCompletedText => 'Die Operation konnte nicht abgeschlossen werden.';
 
   @override
   String get replyLabel => 'Antwort';
@@ -271,7 +267,8 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'Lass uns anfangen zu chatten!';
 
   @override
-  String get sendingFirstMessageLabel => 'Wie wäre es, wenn Sie Ihre erste '
+  String get sendingFirstMessageLabel =>
+      'Wie wäre es, wenn Sie Ihre erste '
       'Nachricht an einen Freund senden würden?';
 
   @override
@@ -284,8 +281,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => 'Unterhaltung löschen';
 
   @override
-  String get deleteConversationQuestion =>
-      'Sind Sie sicher, dass Sie diese Unterhaltung löschen wollen?';
+  String get deleteConversationQuestion => 'Sind Sie sicher, dass Sie diese Unterhaltung löschen wollen?';
 
   @override
   String get streamChatLabel => 'Stream Chat';
@@ -323,8 +319,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => 'Unterhaltung verlassen';
 
   @override
-  String get leaveConversationQuestion =>
-      'Sind Sie sicher, dass Sie diese Unterhaltung verlassen wollen?';
+  String get leaveConversationQuestion => 'Sind Sie sicher, dass Sie diese Unterhaltung verlassen wollen?';
 
   @override
   String get showInChatLabel => 'Im Chat anzeigen';
@@ -360,8 +355,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} von $totalPages';
+  }) => '${currentPage + 1} von $totalPages';
 
   @override
   String get fileText => 'Datei';
@@ -370,26 +364,22 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'Auf Nachricht antworten';
 
   @override
-  String attachmentLimitExceedError(int limit) =>
-      'Dateigröße überschritten, Grenze: $limit';
+  String attachmentLimitExceedError(int limit) => 'Dateigröße überschritten, Grenze: $limit';
 
   @override
   String get slowModeOnLabel => 'Langsamer Modus: EIN';
 
   @override
-  String get linkDisabledDetails =>
-      'Das Senden von Links ist in dieser Konversation nicht erlaubt.';
+  String get linkDisabledDetails => 'Das Senden von Links ist in dieser Konversation nicht erlaubt.';
 
   @override
   String get linkDisabledError => 'Verknüpfungen sind deaktiviert';
 
   @override
-  String get sendMessagePermissionError =>
-      'Sie sind nicht berechtigt Nachrichten zu senden';
+  String get sendMessagePermissionError => 'Sie sind nicht berechtigt Nachrichten zu senden';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      'Kan bytes niet uit bestand lezen.';
+  String get couldNotReadBytesFromFileError => 'Kan bytes niet uit bestand lezen.';
 
   @override
   String get downloadLabel => 'Downloaden';
@@ -552,15 +542,13 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Geben Sie Ihren Kommentar ein';
 
   @override
-  String get endVoteConfirmationText =>
-      'Sind Sie sicher, dass Sie die Abstimmung beenden möchten?';
+  String get endVoteConfirmationText => 'Sind Sie sicher, dass Sie die Abstimmung beenden möchten?';
 
   @override
   String get deletePollOptionLabel => 'Option löschen';
 
   @override
-  String get deletePollOptionQuestion =>
-      'Sind Sie sicher, dass Sie diese Option löschen möchten?';
+  String get deletePollOptionQuestion => 'Sind Sie sicher, dass Sie diese Option löschen möchten?';
 
   @override
   String get createLabel => 'Erstellen';
@@ -604,10 +592,10 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 Stimmen',
-        1 => '1 Stimme',
-        _ => '$count Stimmen',
-      };
+    null || < 1 => '0 Stimmen',
+    1 => '1 Stimme',
+    _ => '$count Stimmen',
+  };
 
   @override
   String get noPollVotesLabel => 'Derzeit keine Umfrage-Stimmen';
@@ -634,8 +622,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get sendAnywayLabel => 'Trotzdem senden';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Nachricht wurde durch Moderationsrichtlinien blockiert';
+  String get moderatedMessageBlockedText => 'Nachricht wurde durch Moderationsrichtlinien blockiert';
 
   @override
   String get moderationReviewModalTitle => 'Bist du sicher?';

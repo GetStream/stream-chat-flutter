@@ -38,8 +38,7 @@ class UnboundedViewport extends Viewport {
   RenderViewport createRenderObject(BuildContext context) {
     return UnboundedRenderViewport(
       axisDirection: axisDirection,
-      crossAxisDirection: crossAxisDirection ??
-          Viewport.getDefaultCrossAxisDirection(context, axisDirection),
+      crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       anchor: anchor,
       offset: offset,
       cacheExtent: cacheExtent,
@@ -233,10 +232,8 @@ class UnboundedRenderViewport extends RenderViewport {
     // to the zero scroll offset (the line between the forward slivers and the
     // reverse slivers).
     final centerOffset = mainAxisExtent * anchor - correctedOffset;
-    final reverseDirectionRemainingPaintExtent =
-        centerOffset.clamp(0.0, mainAxisExtent);
-    final forwardDirectionRemainingPaintExtent =
-        (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
+    final reverseDirectionRemainingPaintExtent = centerOffset.clamp(0.0, mainAxisExtent);
+    final forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
 
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
@@ -249,10 +246,8 @@ class UnboundedRenderViewport extends RenderViewport {
 
     final fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
     final centerCacheOffset = centerOffset + _calculatedCacheExtent!;
-    final reverseDirectionRemainingCacheExtent =
-        centerCacheOffset.clamp(0.0, fullCacheExtent);
-    final forwardDirectionRemainingCacheExtent =
-        (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
+    final reverseDirectionRemainingCacheExtent = centerCacheOffset.clamp(0.0, fullCacheExtent);
+    final forwardDirectionRemainingCacheExtent = (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
 
     final leadingNegativeChild = childBefore(center!);
 
@@ -269,8 +264,7 @@ class UnboundedRenderViewport extends RenderViewport {
         growthDirection: GrowthDirection.reverse,
         advance: childBefore,
         remainingCacheExtent: reverseDirectionRemainingCacheExtent,
-        cacheOrigin: (mainAxisExtent - centerOffset)
-            .clamp(-_calculatedCacheExtent!, 0.0),
+        cacheOrigin: (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent!, 0.0),
       );
       if (result != 0.0) return -result;
     }
@@ -280,9 +274,7 @@ class UnboundedRenderViewport extends RenderViewport {
       child: center,
       scrollOffset: math.max(0, -centerOffset),
       overlap: leadingNegativeChild == null ? math.min(0, -centerOffset) : 0.0,
-      layoutOffset: centerOffset >= mainAxisExtent
-          ? centerOffset
-          : reverseDirectionRemainingPaintExtent,
+      layoutOffset: centerOffset >= mainAxisExtent ? centerOffset : reverseDirectionRemainingPaintExtent,
       remainingPaintExtent: forwardDirectionRemainingPaintExtent,
       mainAxisExtent: mainAxisExtent,
       crossAxisExtent: crossAxisExtent,

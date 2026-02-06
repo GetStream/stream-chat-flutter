@@ -61,18 +61,18 @@ class DriftChatDatabase extends _$DriftChatDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-        onUpgrade: (migrator, from, to) async {
-          if (from != to) {
-            for (final table in allTables) {
-              await migrator.deleteTable(table.actualTableName);
-            }
-            await migrator.createAll();
-          }
-        },
-      );
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+    onUpgrade: (migrator, from, to) async {
+      if (from != to) {
+        for (final table in allTables) {
+          await migrator.deleteTable(table.actualTableName);
+        }
+        await migrator.createAll();
+      }
+    },
+  );
 
   /// Deletes all the tables
   Future<void> flush() async {

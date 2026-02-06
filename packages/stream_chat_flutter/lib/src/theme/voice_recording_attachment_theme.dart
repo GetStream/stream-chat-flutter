@@ -36,19 +36,15 @@ class StreamVoiceRecordingAttachmentTheme extends InheritedTheme {
   /// StreamVoiceRecordingAttachmentTheme.of(context);
   /// ```
   static StreamVoiceRecordingAttachmentThemeData of(BuildContext context) {
-    final voiceRecordingTheme = context.dependOnInheritedWidgetOfExactType<
-        StreamVoiceRecordingAttachmentTheme>();
-    return voiceRecordingTheme?.data ??
-        StreamChatTheme.of(context).voiceRecordingAttachmentTheme;
+    final voiceRecordingTheme = context.dependOnInheritedWidgetOfExactType<StreamVoiceRecordingAttachmentTheme>();
+    return voiceRecordingTheme?.data ?? StreamChatTheme.of(context).voiceRecordingAttachmentTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamVoiceRecordingAttachmentTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamVoiceRecordingAttachmentTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamVoiceRecordingAttachmentTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamVoiceRecordingAttachmentTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamVoiceRecordingAttachmentThemeData}
@@ -110,21 +106,17 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
     TextStyle? durationTextStyle,
     ButtonStyle? speedControlButtonStyle,
     StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
-  }) =>
-      StreamVoiceRecordingAttachmentThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        playIcon: playIcon ?? this.playIcon,
-        pauseIcon: pauseIcon ?? this.pauseIcon,
-        loadingIndicator: loadingIndicator ?? this.loadingIndicator,
-        audioControlButtonStyle:
-            audioControlButtonStyle ?? this.audioControlButtonStyle,
-        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
-        durationTextStyle: durationTextStyle ?? this.durationTextStyle,
-        speedControlButtonStyle:
-            speedControlButtonStyle ?? this.speedControlButtonStyle,
-        audioWaveformSliderTheme:
-            audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
-      );
+  }) => StreamVoiceRecordingAttachmentThemeData(
+    backgroundColor: backgroundColor ?? this.backgroundColor,
+    playIcon: playIcon ?? this.playIcon,
+    pauseIcon: pauseIcon ?? this.pauseIcon,
+    loadingIndicator: loadingIndicator ?? this.loadingIndicator,
+    audioControlButtonStyle: audioControlButtonStyle ?? this.audioControlButtonStyle,
+    titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+    durationTextStyle: durationTextStyle ?? this.durationTextStyle,
+    speedControlButtonStyle: speedControlButtonStyle ?? this.speedControlButtonStyle,
+    audioWaveformSliderTheme: audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
+  );
 
   /// Merges this [StreamVoiceRecordingAttachmentThemeData] with the [other].
   StreamVoiceRecordingAttachmentThemeData merge(
@@ -158,15 +150,15 @@ class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
       playIcon: t < 0.5 ? a.playIcon : b.playIcon,
       pauseIcon: t < 0.5 ? a.pauseIcon : b.pauseIcon,
       loadingIndicator: t < 0.5 ? a.loadingIndicator : b.loadingIndicator,
-      audioControlButtonStyle: ButtonStyle.lerp(
-          a.audioControlButtonStyle, b.audioControlButtonStyle, t),
+      audioControlButtonStyle: ButtonStyle.lerp(a.audioControlButtonStyle, b.audioControlButtonStyle, t),
       titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-      durationTextStyle:
-          TextStyle.lerp(a.durationTextStyle, b.durationTextStyle, t),
-      speedControlButtonStyle: ButtonStyle.lerp(
-          a.speedControlButtonStyle, b.speedControlButtonStyle, t),
+      durationTextStyle: TextStyle.lerp(a.durationTextStyle, b.durationTextStyle, t),
+      speedControlButtonStyle: ButtonStyle.lerp(a.speedControlButtonStyle, b.speedControlButtonStyle, t),
       audioWaveformSliderTheme: StreamAudioWaveformSliderThemeData.lerp(
-          a.audioWaveformSliderTheme!, b.audioWaveformSliderTheme!, t),
+        a.audioWaveformSliderTheme!,
+        b.audioWaveformSliderTheme!,
+        t,
+      ),
     );
   }
 

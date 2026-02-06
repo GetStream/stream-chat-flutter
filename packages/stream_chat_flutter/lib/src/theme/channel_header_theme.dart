@@ -35,19 +35,15 @@ class StreamChannelHeaderTheme extends InheritedTheme {
   /// final theme = ChannelHeaderTheme.of(context);
   /// ```
   static StreamChannelHeaderThemeData of(BuildContext context) {
-    final channelHeaderTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamChannelHeaderTheme>();
-    return channelHeaderTheme?.data ??
-        StreamChatTheme.of(context).channelHeaderTheme;
+    final channelHeaderTheme = context.dependOnInheritedWidgetOfExactType<StreamChannelHeaderTheme>();
+    return channelHeaderTheme?.data ?? StreamChatTheme.of(context).channelHeaderTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamChannelHeaderTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamChannelHeaderTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamChannelHeaderTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamChannelHeaderTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template channel_header_theme_data}
@@ -108,8 +104,7 @@ class StreamChannelHeaderThemeData with Diagnosticable {
     return StreamChannelHeaderThemeData(
       titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
       subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
-      avatarTheme:
-          const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      avatarTheme: const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
       color: Color.lerp(a.color, b.color, t),
     );
   }
@@ -119,8 +114,7 @@ class StreamChannelHeaderThemeData with Diagnosticable {
     if (other == null) return this;
     return copyWith(
       titleStyle: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
-      subtitleStyle:
-          subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
+      subtitleStyle: subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       color: other.color,
     );
@@ -137,11 +131,7 @@ class StreamChannelHeaderThemeData with Diagnosticable {
           color == other.color;
 
   @override
-  int get hashCode =>
-      titleStyle.hashCode ^
-      subtitleStyle.hashCode ^
-      avatarTheme.hashCode ^
-      color.hashCode;
+  int get hashCode => titleStyle.hashCode ^ subtitleStyle.hashCode ^ avatarTheme.hashCode ^ color.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

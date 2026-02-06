@@ -9,8 +9,7 @@ part of 'attachment_widget_builder.dart';
 /// The widget is built when the message has at least one voice recording
 /// attachment.
 /// {@endtemplate}
-class VoiceRecordingAttachmentPlaylistBuilder
-    extends StreamAttachmentWidgetBuilder {
+class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro voiceRecordingAttachmentPlaylistBuilder}
   const VoiceRecordingAttachmentPlaylistBuilder({
     this.shape,

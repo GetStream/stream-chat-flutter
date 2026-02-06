@@ -72,8 +72,7 @@ void main() {
           await tester.tap(find.text('Show Picker'));
           await tester.pumpAndSettle();
 
-          final bottomSheet =
-              tester.widget<StreamSystemAttachmentPickerBottomSheet>(
+          final bottomSheet = tester.widget<StreamSystemAttachmentPickerBottomSheet>(
             find.byType(StreamSystemAttachmentPickerBottomSheet),
           );
 
@@ -121,8 +120,7 @@ void main() {
           await tester.tap(find.text('Show Picker'));
           await tester.pumpAndSettle();
 
-          final bottomSheet =
-              tester.widget<StreamSystemAttachmentPickerBottomSheet>(
+          final bottomSheet = tester.widget<StreamSystemAttachmentPickerBottomSheet>(
             find.byType(StreamSystemAttachmentPickerBottomSheet),
           );
 
@@ -245,16 +243,14 @@ void main() {
           await tester.tap(find.text('Show Picker'));
           await tester.pumpAndSettle();
 
-          final bottomSheet =
-              tester.widget<StreamSystemAttachmentPickerBottomSheet>(
+          final bottomSheet = tester.widget<StreamSystemAttachmentPickerBottomSheet>(
             find.byType(StreamSystemAttachmentPickerBottomSheet),
           );
 
           // All options should support images
           expect(
             bottomSheet.options.every(
-              (option) =>
-                  option.supportedTypes.contains(AttachmentPickerType.images),
+              (option) => option.supportedTypes.contains(AttachmentPickerType.images),
             ),
             isTrue,
           );

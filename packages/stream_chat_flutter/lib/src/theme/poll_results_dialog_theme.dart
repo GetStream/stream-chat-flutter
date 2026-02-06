@@ -36,19 +36,15 @@ class StreamPollResultsDialogTheme extends InheritedTheme {
   /// StreamPollCreatorTheme theme = StreamPollCreatorTheme.of(context);
   /// ```
   static StreamPollResultsDialogThemeData of(BuildContext context) {
-    final pollResultsDialogTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamPollResultsDialogTheme>();
-    return pollResultsDialogTheme?.data ??
-        StreamChatTheme.of(context).pollResultsDialogTheme;
+    final pollResultsDialogTheme = context.dependOnInheritedWidgetOfExactType<StreamPollResultsDialogTheme>();
+    return pollResultsDialogTheme?.data ?? StreamChatTheme.of(context).pollResultsDialogTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamPollResultsDialogTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamPollResultsDialogTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamPollResultsDialogTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamPollResultsDialogTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamPollCreatorThemeData}
@@ -138,27 +134,19 @@ class StreamPollResultsDialogThemeData with Diagnosticable {
     return StreamPollResultsDialogThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       appBarElevation: appBarElevation ?? this.appBarElevation,
-      appBarBackgroundColor:
-          appBarBackgroundColor ?? this.appBarBackgroundColor,
-      appBarForegroundColor:
-          appBarForegroundColor ?? this.appBarForegroundColor,
+      appBarBackgroundColor: appBarBackgroundColor ?? this.appBarBackgroundColor,
+      appBarForegroundColor: appBarForegroundColor ?? this.appBarForegroundColor,
       appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
       pollTitleTextStyle: pollTitleTextStyle ?? this.pollTitleTextStyle,
       pollTitleDecoration: pollTitleDecoration ?? this.pollTitleDecoration,
-      pollOptionsDecoration:
-          pollOptionsDecoration ?? this.pollOptionsDecoration,
-      pollOptionsWinnerDecoration:
-          pollOptionsWinnerDecoration ?? this.pollOptionsWinnerDecoration,
+      pollOptionsDecoration: pollOptionsDecoration ?? this.pollOptionsDecoration,
+      pollOptionsWinnerDecoration: pollOptionsWinnerDecoration ?? this.pollOptionsWinnerDecoration,
       pollOptionsTextStyle: pollOptionsTextStyle ?? this.pollOptionsTextStyle,
-      pollOptionsWinnerTextStyle:
-          pollOptionsWinnerTextStyle ?? this.pollOptionsWinnerTextStyle,
-      pollOptionsVoteCountTextStyle:
-          pollOptionsVoteCountTextStyle ?? this.pollOptionsVoteCountTextStyle,
+      pollOptionsWinnerTextStyle: pollOptionsWinnerTextStyle ?? this.pollOptionsWinnerTextStyle,
+      pollOptionsVoteCountTextStyle: pollOptionsVoteCountTextStyle ?? this.pollOptionsVoteCountTextStyle,
       pollOptionsWinnerVoteCountTextStyle:
-          pollOptionsWinnerVoteCountTextStyle ??
-              this.pollOptionsWinnerVoteCountTextStyle,
-      pollOptionsShowAllVotesButtonStyle: pollOptionsShowAllVotesButtonStyle ??
-          this.pollOptionsShowAllVotesButtonStyle,
+          pollOptionsWinnerVoteCountTextStyle ?? this.pollOptionsWinnerVoteCountTextStyle,
+      pollOptionsShowAllVotesButtonStyle: pollOptionsShowAllVotesButtonStyle ?? this.pollOptionsShowAllVotesButtonStyle,
     );
   }
 
@@ -180,10 +168,8 @@ class StreamPollResultsDialogThemeData with Diagnosticable {
       pollOptionsTextStyle: other.pollOptionsTextStyle,
       pollOptionsWinnerTextStyle: other.pollOptionsWinnerTextStyle,
       pollOptionsVoteCountTextStyle: other.pollOptionsVoteCountTextStyle,
-      pollOptionsWinnerVoteCountTextStyle:
-          other.pollOptionsWinnerVoteCountTextStyle,
-      pollOptionsShowAllVotesButtonStyle:
-          other.pollOptionsShowAllVotesButtonStyle,
+      pollOptionsWinnerVoteCountTextStyle: other.pollOptionsWinnerVoteCountTextStyle,
+      pollOptionsShowAllVotesButtonStyle: other.pollOptionsShowAllVotesButtonStyle,
     );
   }
 
@@ -196,25 +182,18 @@ class StreamPollResultsDialogThemeData with Diagnosticable {
     return StreamPollResultsDialogThemeData(
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       appBarElevation: lerpDouble(a.appBarElevation, b.appBarElevation, t),
-      appBarBackgroundColor:
-          Color.lerp(a.appBarBackgroundColor, b.appBarBackgroundColor, t),
-      appBarForegroundColor:
-          Color.lerp(a.appBarForegroundColor, b.appBarForegroundColor, t),
-      appBarTitleTextStyle:
-          TextStyle.lerp(a.appBarTitleTextStyle, b.appBarTitleTextStyle, t),
-      pollTitleTextStyle:
-          TextStyle.lerp(a.pollTitleTextStyle, b.pollTitleTextStyle, t),
-      pollTitleDecoration:
-          Decoration.lerp(a.pollTitleDecoration, b.pollTitleDecoration, t),
-      pollOptionsDecoration:
-          Decoration.lerp(a.pollOptionsDecoration, b.pollOptionsDecoration, t),
+      appBarBackgroundColor: Color.lerp(a.appBarBackgroundColor, b.appBarBackgroundColor, t),
+      appBarForegroundColor: Color.lerp(a.appBarForegroundColor, b.appBarForegroundColor, t),
+      appBarTitleTextStyle: TextStyle.lerp(a.appBarTitleTextStyle, b.appBarTitleTextStyle, t),
+      pollTitleTextStyle: TextStyle.lerp(a.pollTitleTextStyle, b.pollTitleTextStyle, t),
+      pollTitleDecoration: Decoration.lerp(a.pollTitleDecoration, b.pollTitleDecoration, t),
+      pollOptionsDecoration: Decoration.lerp(a.pollOptionsDecoration, b.pollOptionsDecoration, t),
       pollOptionsWinnerDecoration: Decoration.lerp(
         a.pollOptionsWinnerDecoration,
         b.pollOptionsWinnerDecoration,
         t,
       ),
-      pollOptionsTextStyle:
-          TextStyle.lerp(a.pollOptionsTextStyle, b.pollOptionsTextStyle, t),
+      pollOptionsTextStyle: TextStyle.lerp(a.pollOptionsTextStyle, b.pollOptionsTextStyle, t),
       pollOptionsWinnerTextStyle: TextStyle.lerp(
         a.pollOptionsWinnerTextStyle,
         b.pollOptionsWinnerTextStyle,
@@ -253,12 +232,9 @@ class StreamPollResultsDialogThemeData with Diagnosticable {
           other.pollOptionsWinnerDecoration == pollOptionsWinnerDecoration &&
           other.pollOptionsTextStyle == pollOptionsTextStyle &&
           other.pollOptionsWinnerTextStyle == pollOptionsWinnerTextStyle &&
-          other.pollOptionsVoteCountTextStyle ==
-              pollOptionsVoteCountTextStyle &&
-          other.pollOptionsWinnerVoteCountTextStyle ==
-              pollOptionsWinnerVoteCountTextStyle &&
-          other.pollOptionsShowAllVotesButtonStyle ==
-              pollOptionsShowAllVotesButtonStyle;
+          other.pollOptionsVoteCountTextStyle == pollOptionsVoteCountTextStyle &&
+          other.pollOptionsWinnerVoteCountTextStyle == pollOptionsWinnerVoteCountTextStyle &&
+          other.pollOptionsShowAllVotesButtonStyle == pollOptionsShowAllVotesButtonStyle;
 
   @override
   int get hashCode =>

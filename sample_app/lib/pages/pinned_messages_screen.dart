@@ -64,37 +64,32 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                   AppLocalizations.of(context).noPinnedItems,
                   style: TextStyle(
                     fontSize: 17,
-                    color:
-                        StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
                 RichText(
                   textAlign: TextAlign.center,
-                  text: TextSpan(children: [
-                    TextSpan(
-                      text: '${AppLocalizations.of(context).longPressMessage} ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textHighEmphasis
-                            .withOpacity(0.5),
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${AppLocalizations.of(context).longPressMessage} ',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: AppLocalizations.of(context).pinToConversation,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textHighEmphasis
-                            .withOpacity(0.5),
+                      TextSpan(
+                        text: AppLocalizations.of(context).pinToConversation,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
+                        ),
                       ),
-                    ),
-                  ]),
+                    ],
+                  ),
                 ),
               ],
             ),

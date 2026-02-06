@@ -44,18 +44,14 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
                         child: StreamSvgIcon(
                           icon: StreamSvgIcons.mentions,
                           size: 96,
-                          color:
-                              StreamChatTheme.of(context).colorTheme.disabled,
+                          color: StreamChatTheme.of(context).colorTheme.disabled,
                         ),
                       ),
                       Text(
                         AppLocalizations.of(context).noMentionsExistYet,
-                        style:
-                            StreamChatTheme.of(context).textTheme.body.copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .textLowEmphasis,
-                                ),
+                        style: StreamChatTheme.of(context).textTheme.body.copyWith(
+                          color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                        ),
                       ),
                     ],
                   ),

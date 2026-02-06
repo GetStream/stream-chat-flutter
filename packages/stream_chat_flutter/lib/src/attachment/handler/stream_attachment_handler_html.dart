@@ -11,8 +11,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
   /// Returns the singleton instance of [StreamAttachmentHandler].
   // ignore: prefer_constructors_over_static_methods
-  static StreamAttachmentHandler get instance =>
-      _instance ??= StreamAttachmentHandler._();
+  static StreamAttachmentHandler get instance => _instance ??= StreamAttachmentHandler._();
 
   late final _filePicker = FilePicker.platform;
 

@@ -11,13 +11,11 @@ Widget defaultThreadListViewSeparatorBuilder(
   BuildContext context,
   List<Thread> threads,
   int index,
-) =>
-    const StreamThreadListSeparator();
+) => const StreamThreadListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamThreadListView].
-typedef StreamThreadListViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<Thread, StreamThreadListTile>;
+typedef StreamThreadListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidgetBuilder<Thread, StreamThreadListTile>;
 
 /// {@template streamThreadListView}
 /// A [ListView] that shows a list of [Thread]'s. It uses a
@@ -331,8 +329,7 @@ class StreamThreadListView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.list(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
       ),

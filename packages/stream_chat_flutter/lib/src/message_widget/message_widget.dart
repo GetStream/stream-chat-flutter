@@ -401,8 +401,7 @@ class StreamMessageWidget extends StatefulWidget {
   /// Crop type of the image attachment thumbnail.
   ///
   /// Defaults to [center]
-  final String /*center|top|bottom|left|right*/
-      imageAttachmentThumbnailCropType;
+  final String /*center|top|bottom|left|right*/ imageAttachmentThumbnailCropType;
 
   /// {@template copyWith}
   /// Creates a copy of [StreamMessageWidget] with specified attributes
@@ -481,17 +480,13 @@ class StreamMessageWidget extends StatefulWidget {
       onThreadTap: onThreadTap ?? this.onThreadTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
       onConfirmDeleteTap: onConfirmDeleteTap ?? this.onConfirmDeleteTap,
-      editMessageInputBuilder:
-          editMessageInputBuilder ?? this.editMessageInputBuilder,
+      editMessageInputBuilder: editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
       quotedMessageBuilder: quotedMessageBuilder ?? this.quotedMessageBuilder,
-      deletedMessageBuilder:
-          deletedMessageBuilder ?? this.deletedMessageBuilder,
-      bottomRowBuilderWithDefaultWidget: bottomRowBuilderWithDefaultWidget ??
-          this.bottomRowBuilderWithDefaultWidget,
+      deletedMessageBuilder: deletedMessageBuilder ?? this.deletedMessageBuilder,
+      bottomRowBuilderWithDefaultWidget: bottomRowBuilderWithDefaultWidget ?? this.bottomRowBuilderWithDefaultWidget,
       onMessageActions: onMessageActions ?? this.onMessageActions,
-      onBouncedErrorMessageActions:
-          onBouncedErrorMessageActions ?? this.onBouncedErrorMessageActions,
+      onBouncedErrorMessageActions: onBouncedErrorMessageActions ?? this.onBouncedErrorMessageActions,
       message: message ?? this.message,
       messageTheme: messageTheme ?? this.messageTheme,
       reverse: reverse ?? this.reverse,
@@ -507,10 +502,8 @@ class StreamMessageWidget extends StatefulWidget {
       showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
       showEditedLabel: showEditedLabel ?? this.showEditedLabel,
       showReactions: showReactions ?? this.showReactions,
-      showThreadReplyIndicator:
-          showThreadReplyIndicator ?? this.showThreadReplyIndicator,
-      showInChannelIndicator:
-          showInChannelIndicator ?? this.showInChannelIndicator,
+      showThreadReplyIndicator: showThreadReplyIndicator ?? this.showThreadReplyIndicator,
+      showInChannelIndicator: showInChannelIndicator ?? this.showInChannelIndicator,
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onLinkTap: onLinkTap ?? this.onLinkTap,
       showReactionPicker: showReactionPicker ?? this.showReactionPicker,
@@ -518,8 +511,7 @@ class StreamMessageWidget extends StatefulWidget {
       showUsername: showUsername ?? this.showUsername,
       showTimestamp: showTimestamp ?? this.showTimestamp,
       showReplyMessage: showReplyMessage ?? this.showReplyMessage,
-      showThreadReplyMessage:
-          showThreadReplyMessage ?? this.showThreadReplyMessage,
+      showThreadReplyMessage: showThreadReplyMessage ?? this.showThreadReplyMessage,
       showEditMessage: showEditMessage ?? this.showEditMessage,
       showCopyMessage: showCopyMessage ?? this.showCopyMessage,
       showDeleteMessage: showDeleteMessage ?? this.showDeleteMessage,
@@ -527,8 +519,7 @@ class StreamMessageWidget extends StatefulWidget {
       showFlagButton: showFlagButton ?? this.showFlagButton,
       showPinButton: showPinButton ?? this.showPinButton,
       showPinHighlight: showPinHighlight ?? this.showPinHighlight,
-      showMarkUnreadMessage:
-          showMarkUnreadMessage ?? this.showMarkUnreadMessage,
+      showMarkUnreadMessage: showMarkUnreadMessage ?? this.showMarkUnreadMessage,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
@@ -540,18 +531,12 @@ class StreamMessageWidget extends StatefulWidget {
       onCustomActionTap: onCustomActionTap ?? this.onCustomActionTap,
       onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
       userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
-      imageAttachmentThumbnailSize:
-          imageAttachmentThumbnailSize ?? this.imageAttachmentThumbnailSize,
-      imageAttachmentThumbnailResizeType: imageAttachmentThumbnailResizeType ??
-          this.imageAttachmentThumbnailResizeType,
-      imageAttachmentThumbnailCropType: imageAttachmentThumbnailCropType ??
-          this.imageAttachmentThumbnailCropType,
-      attachmentActionsModalBuilder:
-          attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
-      reactionPickerBuilder:
-          reactionPickerBuilder ?? this.reactionPickerBuilder,
-      reactionIndicatorBuilder:
-          reactionIndicatorBuilder ?? this.reactionIndicatorBuilder,
+      imageAttachmentThumbnailSize: imageAttachmentThumbnailSize ?? this.imageAttachmentThumbnailSize,
+      imageAttachmentThumbnailResizeType: imageAttachmentThumbnailResizeType ?? this.imageAttachmentThumbnailResizeType,
+      imageAttachmentThumbnailCropType: imageAttachmentThumbnailCropType ?? this.imageAttachmentThumbnailCropType,
+      attachmentActionsModalBuilder: attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
+      reactionPickerBuilder: reactionPickerBuilder ?? this.reactionPickerBuilder,
+      reactionIndicatorBuilder: reactionIndicatorBuilder ?? this.reactionIndicatorBuilder,
     );
   }
 
@@ -594,14 +579,12 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// Whether the message has failed to be sent, updated, deleted or is bounced
   /// back with the message type as error.
   /// {@endtemplate}
-  bool get isFailedState =>
-      isSendFailed || isUpdateFailed || isDeleteFailed || isBouncedWithError;
+  bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed || isBouncedWithError;
 
   /// {@template isGiphy}
   /// `true` if any of the [message]'s attachments are a giphy.
   /// {@endtemplate}
-  bool get isGiphy => widget.message.attachments
-      .any((element) => element.type == AttachmentType.giphy);
+  bool get isGiphy => widget.message.attachments.any((element) => element.type == AttachmentType.giphy);
 
   /// {@template isOnlyEmoji}
   /// `true` if [message.text] contains only emoji.
@@ -612,15 +595,13 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// `true` if any of the [message]'s attachments are a giphy and do not
   /// have a [Attachment.titleLink].
   /// {@endtemplate}
-  bool get hasNonUrlAttachments => widget.message.attachments
-      .any((it) => it.type != AttachmentType.urlPreview);
+  bool get hasNonUrlAttachments => widget.message.attachments.any((it) => it.type != AttachmentType.urlPreview);
 
   /// {@template hasUrlAttachments}
   /// `true` if any of the [message]'s attachments are a giphy with a
   /// [Attachment.titleLink].
   /// {@endtemplate}
-  bool get hasUrlAttachments => widget.message.attachments
-      .any((it) => it.type == AttachmentType.urlPreview);
+  bool get hasUrlAttachments => widget.message.attachments.any((it) => it.type == AttachmentType.urlPreview);
 
   /// {@template showBottomRow}
   /// Show the [BottomRow] widget if any of the following are `true`:
@@ -649,9 +630,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// `true`, if there are reactions to show, and if the message is not deleted.
   /// {@endtemplate}
   bool get shouldShowReactions =>
-      widget.showReactions &&
-      (widget.message.latestReactions?.isNotEmpty == true) &&
-      !widget.message.isDeleted;
+      widget.showReactions && (widget.message.latestReactions?.isNotEmpty == true) && !widget.message.isDeleted;
 
   @override
   bool get wantKeepAlive => widget.message.attachments.isNotEmpty;
@@ -662,10 +641,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     final theme = StreamChatTheme.of(context);
     final streamChat = StreamChat.of(context);
 
-    final avatarWidth =
-        widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
-    final bottomRowPadding =
-        widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
+    final avatarWidth = widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
+    final bottomRowPadding = widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     return Portal(
       child: Material(
@@ -743,8 +720,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                 onReplyTap: widget.onReplyTap,
                 onThreadTap: widget.onThreadTap,
                 onShowMessage: widget.onShowMessage,
-                attachmentActionsModalBuilder:
-                    widget.attachmentActionsModalBuilder,
+                attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
                 avatarWidth: avatarWidth,
                 bottomRowPadding: bottomRowPadding,
                 isFailedState: isFailedState,
@@ -773,8 +749,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
                 onLinkTap: widget.onLinkTap,
                 onMentionTap: widget.onMentionTap,
                 onQuotedMessageTap: widget.onQuotedMessageTap,
-                bottomRowBuilderWithDefaultWidget:
-                    widget.bottomRowBuilderWithDefaultWidget,
+                bottomRowBuilderWithDefaultWidget: widget.bottomRowBuilderWithDefaultWidget,
                 onUserAvatarTap: widget.onUserAvatarTap,
                 userAvatarBuilder: widget.userAvatarBuilder,
                 reactionIndicatorBuilder: widget.reactionIndicatorBuilder,
@@ -805,26 +780,27 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     OwnUser? currentUser,
     List<StreamMessageAction>? customActions,
   }) {
-    final actions = StreamMessageActionsBuilder.buildActions(
-      context: context,
-      message: message,
-      channel: channel,
-      currentUser: currentUser,
-      customActions: customActions,
-    )..retainWhere(
-        (it) => switch (it.action) {
-          QuotedReply() => widget.showReplyMessage,
-          ThreadReply() => widget.showThreadReplyMessage,
-          MarkUnread() => widget.showMarkUnreadMessage,
-          ResendMessage() => widget.showResendMessage,
-          EditMessage() => widget.showEditMessage,
-          CopyMessage() => widget.showCopyMessage,
-          FlagMessage() => widget.showFlagButton,
-          PinMessage() => widget.showPinButton,
-          DeleteMessage() => widget.showDeleteMessage,
-          _ => true, // Retain all the remaining actions.
-        },
-      );
+    final actions =
+        StreamMessageActionsBuilder.buildActions(
+          context: context,
+          message: message,
+          channel: channel,
+          currentUser: currentUser,
+          customActions: customActions,
+        )..retainWhere(
+          (it) => switch (it.action) {
+            QuotedReply() => widget.showReplyMessage,
+            ThreadReply() => widget.showThreadReplyMessage,
+            MarkUnread() => widget.showMarkUnreadMessage,
+            ResendMessage() => widget.showResendMessage,
+            EditMessage() => widget.showEditMessage,
+            CopyMessage() => widget.showCopyMessage,
+            FlagMessage() => widget.showFlagButton,
+            PinMessage() => widget.showPinButton,
+            DeleteMessage() => widget.showDeleteMessage,
+            _ => true, // Retain all the remaining actions.
+          },
+        );
 
     return actions;
   }
@@ -1076,8 +1052,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     MessageAction action,
   ) async {
     return switch (action) {
-      SelectReaction() =>
-        _selectReaction(context, action.message, channel, action.reaction),
+      SelectReaction() => _selectReaction(context, action.message, channel, action.reaction),
       CopyMessage() => _copyMessage(action.message, channel),
       DeleteMessage() => _maybeDeleteMessage(context, action.message, channel),
       HardDeleteMessage() => channel.deleteMessage(action.message, hard: true),

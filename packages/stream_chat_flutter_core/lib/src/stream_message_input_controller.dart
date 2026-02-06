@@ -23,42 +23,39 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   factory StreamMessageInputController({
     Message? message,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-  }) =>
-      StreamMessageInputController._(
-        initialMessage: message ?? Message(),
-        textPatternStyle: textPatternStyle,
-      );
+  }) => StreamMessageInputController._(
+    initialMessage: message ?? Message(),
+    textPatternStyle: textPatternStyle,
+  );
 
   /// Creates a controller for an editable text field from an initial [text].
   factory StreamMessageInputController.fromText(
     String? text, {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-  }) =>
-      StreamMessageInputController._(
-        initialMessage: Message(text: text),
-        textPatternStyle: textPatternStyle,
-      );
+  }) => StreamMessageInputController._(
+    initialMessage: Message(text: text),
+    textPatternStyle: textPatternStyle,
+  );
 
   /// Creates a controller for an editable text field from initial
   /// [attachments].
   factory StreamMessageInputController.fromAttachments(
     List<Attachment> attachments, {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-  }) =>
-      StreamMessageInputController._(
-        initialMessage: Message(attachments: attachments),
-        textPatternStyle: textPatternStyle,
-      );
+  }) => StreamMessageInputController._(
+    initialMessage: Message(attachments: attachments),
+    textPatternStyle: textPatternStyle,
+  );
 
   StreamMessageInputController._({
     required Message initialMessage,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-  })  : _initialMessage = initialMessage,
-        _textFieldController = MessageTextFieldController.fromValue(
-          _textEditingValueFromMessage(initialMessage),
-          textPatternStyle: textPatternStyle,
-        ),
-        super(initialMessage) {
+  }) : _initialMessage = initialMessage,
+       _textFieldController = MessageTextFieldController.fromValue(
+         _textEditingValueFromMessage(initialMessage),
+         textPatternStyle: textPatternStyle,
+       ),
+       super(initialMessage) {
     _textFieldController.addListener(_textFieldListener);
   }
 
@@ -347,14 +344,12 @@ class StreamMessageInputController extends ValueNotifier<Message> {
 /// the property will restore [StreamMessageInputController.message]
 /// to the value it had when the restoration data it is getting restored from
 /// was collected.
-class StreamRestorableMessageInputController
-    extends RestorableChangeNotifier<StreamMessageInputController> {
+class StreamRestorableMessageInputController extends RestorableChangeNotifier<StreamMessageInputController> {
   /// Creates a [StreamRestorableMessageInputController].
   ///
   /// This constructor creates a default [Message] when no `message` argument
   /// is supplied.
-  StreamRestorableMessageInputController({Message? message})
-      : _initialValue = message ?? Message();
+  StreamRestorableMessageInputController({Message? message}) : _initialValue = message ?? Message();
 
   /// Creates a [StreamRestorableMessageInputController] from an initial
   /// [text] value.
@@ -364,8 +359,7 @@ class StreamRestorableMessageInputController
   final Message _initialValue;
 
   @override
-  StreamMessageInputController createDefaultValue() =>
-      StreamMessageInputController(message: _initialValue);
+  StreamMessageInputController createDefaultValue() => StreamMessageInputController(message: _initialValue);
 
   @override
   StreamMessageInputController fromPrimitives(Object? data) {

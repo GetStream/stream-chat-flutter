@@ -80,19 +80,19 @@ class FlexGrid extends StatelessWidget {
     this.reverse = false,
     this.spacing = 2.0,
     this.runSpacing = 2.0,
-  })  : assert(
-          pattern.count == children.length,
-          'The number of children must match the number of cells in the matrix',
-        ),
-        assert(
-          maxChildren == null || maxChildren <= pattern.count,
-          'The number of maxChildren must be less than or equal to the number '
-          'of cells in the matrix',
-        ),
-        assert(
-          maxChildren == null || overlayBuilder != null,
-          'overlayBuilder must be provided when maxChildren is not null',
-        );
+  }) : assert(
+         pattern.count == children.length,
+         'The number of children must match the number of cells in the matrix',
+       ),
+       assert(
+         maxChildren == null || maxChildren <= pattern.count,
+         'The number of maxChildren must be less than or equal to the number '
+         'of cells in the matrix',
+       ),
+       assert(
+         maxChildren == null || overlayBuilder != null,
+         'overlayBuilder must be provided when maxChildren is not null',
+       );
 
   /// The pattern of the grid.
   ///

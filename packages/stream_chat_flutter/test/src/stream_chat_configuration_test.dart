@@ -9,15 +9,17 @@ void main() {
       (t) async {
         final configuration = StreamChatConfigurationData();
         late final StreamChatConfigurationData configurationFromProvider;
-        await t.pumpWidget(StreamChatConfiguration(
-          data: configuration,
-          child: Builder(
-            builder: (context) {
-              configurationFromProvider = StreamChatConfiguration.of(context);
-              return const SizedBox();
-            },
+        await t.pumpWidget(
+          StreamChatConfiguration(
+            data: configuration,
+            child: Builder(
+              builder: (context) {
+                configurationFromProvider = StreamChatConfiguration.of(context);
+                return const SizedBox();
+              },
+            ),
           ),
-        ));
+        );
 
         expect(configuration, configurationFromProvider);
       },
@@ -30,15 +32,17 @@ void main() {
           enforceUniqueReactions: false,
         );
         late final StreamChatConfigurationData configurationFromProvider;
-        await t.pumpWidget(StreamChatConfiguration(
-          data: configuration,
-          child: Builder(
-            builder: (context) {
-              configurationFromProvider = StreamChatConfiguration.of(context);
-              return const SizedBox();
-            },
+        await t.pumpWidget(
+          StreamChatConfiguration(
+            data: configuration,
+            child: Builder(
+              builder: (context) {
+                configurationFromProvider = StreamChatConfiguration.of(context);
+                return const SizedBox();
+              },
+            ),
           ),
-        ));
+        );
 
         expect(configuration, configurationFromProvider);
       },

@@ -637,8 +637,7 @@ void main() {
 
       goldenTest(
         '[${brightness.name}] -> should look fine in recording hold state',
-        fileName:
-            'stream_audio_recorder_button_recording_hold_${brightness.name}',
+        fileName: 'stream_audio_recorder_button_recording_hold_${brightness.name}',
         constraints: const BoxConstraints.tightFor(width: 400, height: 160),
         builder: () => _wrapWithStreamChatApp(
           brightness: brightness,
@@ -653,8 +652,7 @@ void main() {
 
       goldenTest(
         '[${brightness.name}] -> should look fine in recording locked state',
-        fileName:
-            'stream_audio_recorder_button_recording_locked_${brightness.name}',
+        fileName: 'stream_audio_recorder_button_recording_locked_${brightness.name}',
         constraints: const BoxConstraints.tightFor(width: 400, height: 160),
         builder: () => _wrapWithStreamChatApp(
           brightness: brightness,
@@ -672,8 +670,7 @@ void main() {
 
       goldenTest(
         '[${brightness.name}] -> should look fine in recording stopped state',
-        fileName:
-            'stream_audio_recorder_button_recording_stopped_${brightness.name}',
+        fileName: 'stream_audio_recorder_button_recording_stopped_${brightness.name}',
         constraints: const BoxConstraints.tightFor(width: 400, height: 160),
         builder: () => _wrapWithStreamChatApp(
           brightness: brightness,
@@ -699,20 +696,22 @@ Widget _wrapWithStreamChatApp(
     home: Portal(
       child: StreamChatTheme(
         data: StreamChatThemeData(brightness: brightness),
-        child: Builder(builder: (context) {
-          final theme = StreamChatTheme.of(context);
-          return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
-            bottomNavigationBar: Material(
-              elevation: 10,
-              color: theme.colorTheme.barsBg,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: widget,
+        child: Builder(
+          builder: (context) {
+            final theme = StreamChatTheme.of(context);
+            return Scaffold(
+              backgroundColor: theme.colorTheme.appBg,
+              bottomNavigationBar: Material(
+                elevation: 10,
+                color: theme.colorTheme.barsBg,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: widget,
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          },
+        ),
       ),
     ),
   );

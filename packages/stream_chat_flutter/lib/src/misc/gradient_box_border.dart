@@ -4,15 +4,19 @@ import 'dart:ui' as ui show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-const _kDefaultGradient = LinearGradient(colors: [
-  Color(0xFF000000),
-  Color(0xFF000000),
-]);
+const _kDefaultGradient = LinearGradient(
+  colors: [
+    Color(0xFF000000),
+    Color(0xFF000000),
+  ],
+);
 
-const _kTransparentGradient = LinearGradient(colors: [
-  Color(0x00000000),
-  Color(0x00000000),
-]);
+const _kTransparentGradient = LinearGradient(
+  colors: [
+    Color(0x00000000),
+    Color(0x00000000),
+  ],
+);
 
 /// {@template gradientBoxBorder}
 /// A border that draws a gradient instead of a solid color.
@@ -109,8 +113,7 @@ class GradientBoxBorder extends BoxBorder {
   /// Two sides can be merged if one or both are zero-width with
   /// [GradientBoxBorder.none], or if they both have the same gradient and style
   bool canMerge(GradientBoxBorder b) {
-    if ((style == BorderStyle.none && width == 0.0) ||
-        (b.style == BorderStyle.none && b.width == 0.0)) {
+    if ((style == BorderStyle.none && width == 0.0) || (b.style == BorderStyle.none && b.width == 0.0)) {
       return true;
     }
     return style == b.style && gradient == b.gradient;
@@ -209,8 +212,7 @@ class GradientBoxBorder extends BoxBorder {
   /// Linearly interpolate between two gradient borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static GradientBoxBorder? lerp(
-      GradientBoxBorder? a, GradientBoxBorder? b, double t) {
+  static GradientBoxBorder? lerp(GradientBoxBorder? a, GradientBoxBorder? b, double t) {
     if (identical(a, b)) return a;
     if (a == null) return b!.scale(t);
     if (b == null) return a.scale(1.0 - t);
@@ -270,10 +272,9 @@ class GradientBoxBorder extends BoxBorder {
     return switch (shape) {
       BoxShape.circle => _paintUniformBorderWithCircle(canvas, rect),
       BoxShape.rectangle => switch (borderRadius) {
-          final radius? when radius != BorderRadius.zero =>
-            _paintUniformBorderWithRadius(canvas, rect, radius),
-          _ => _paintUniformBorderWithRectangle(canvas, rect),
-        },
+        final radius? when radius != BorderRadius.zero => _paintUniformBorderWithRadius(canvas, rect, radius),
+        _ => _paintUniformBorderWithRectangle(canvas, rect),
+      },
     };
   }
 
@@ -307,14 +308,16 @@ class GradientBoxBorder extends BoxBorder {
 
   Paint _getPaint(Rect rect) {
     return switch (style) {
-      BorderStyle.solid => Paint()
-        ..strokeWidth = width
-        ..style = PaintingStyle.stroke
-        ..shader = gradient.createShader(rect),
-      BorderStyle.none => Paint()
-        ..strokeWidth = 0.0
-        ..style = PaintingStyle.stroke
-        ..shader = _kTransparentGradient.createShader(rect),
+      BorderStyle.solid =>
+        Paint()
+          ..strokeWidth = width
+          ..style = PaintingStyle.stroke
+          ..shader = gradient.createShader(rect),
+      BorderStyle.none =>
+        Paint()
+          ..strokeWidth = 0.0
+          ..style = PaintingStyle.stroke
+          ..shader = _kTransparentGradient.createShader(rect),
     };
   }
 

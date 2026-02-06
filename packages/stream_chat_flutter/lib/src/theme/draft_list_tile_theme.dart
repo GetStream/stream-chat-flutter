@@ -29,19 +29,15 @@ class StreamDraftListTileTheme extends InheritedTheme {
   /// If there is no enclosing [StreamDraftListTileTheme] widget, then
   /// [StreamChatThemeData.draftListTileTheme] is used.
   static StreamDraftListTileThemeData of(BuildContext context) {
-    final draftListTileTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamDraftListTileTheme>();
-    return draftListTileTheme?.data ??
-        StreamChatTheme.of(context).draftListTileTheme;
+    final draftListTileTheme = context.dependOnInheritedWidgetOfExactType<StreamDraftListTileTheme>();
+    return draftListTileTheme?.data ?? StreamChatTheme.of(context).draftListTileTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamDraftListTileTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamDraftListTileTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamDraftListTileTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamDraftListTileTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamDraftListTileThemeData}
@@ -101,17 +97,14 @@ class StreamDraftListTileThemeData with Diagnosticable {
     TextStyle? draftTimestampStyle,
     DateFormatter? draftTimestampFormatter,
     Color? draftIconColor,
-  }) =>
-      StreamDraftListTileThemeData(
-        padding: padding ?? this.padding,
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        draftChannelNameStyle:
-            draftChannelNameStyle ?? this.draftChannelNameStyle,
-        draftMessageStyle: draftMessageStyle ?? this.draftMessageStyle,
-        draftTimestampStyle: draftTimestampStyle ?? this.draftTimestampStyle,
-        draftTimestampFormatter:
-            draftTimestampFormatter ?? this.draftTimestampFormatter,
-      );
+  }) => StreamDraftListTileThemeData(
+    padding: padding ?? this.padding,
+    backgroundColor: backgroundColor ?? this.backgroundColor,
+    draftChannelNameStyle: draftChannelNameStyle ?? this.draftChannelNameStyle,
+    draftMessageStyle: draftMessageStyle ?? this.draftMessageStyle,
+    draftTimestampStyle: draftTimestampStyle ?? this.draftTimestampStyle,
+    draftTimestampFormatter: draftTimestampFormatter ?? this.draftTimestampFormatter,
+  );
 
   /// Merges this [StreamDraftListTileThemeData] with the [other].
   StreamDraftListTileThemeData merge(
@@ -133,28 +126,26 @@ class StreamDraftListTileThemeData with Diagnosticable {
     StreamDraftListTileThemeData? a,
     StreamDraftListTileThemeData? b,
     double t,
-  ) =>
-      StreamDraftListTileThemeData(
-        padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
-        backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
-        draftChannelNameStyle: TextStyle.lerp(
-          a?.draftChannelNameStyle,
-          b?.draftChannelNameStyle,
-          t,
-        ),
-        draftMessageStyle: TextStyle.lerp(
-          a?.draftMessageStyle,
-          b?.draftMessageStyle,
-          t,
-        ),
-        draftTimestampStyle: TextStyle.lerp(
-          a?.draftTimestampStyle,
-          b?.draftTimestampStyle,
-          t,
-        ),
-        draftTimestampFormatter:
-            t < 0.5 ? a?.draftTimestampFormatter : b?.draftTimestampFormatter,
-      );
+  ) => StreamDraftListTileThemeData(
+    padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
+    backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+    draftChannelNameStyle: TextStyle.lerp(
+      a?.draftChannelNameStyle,
+      b?.draftChannelNameStyle,
+      t,
+    ),
+    draftMessageStyle: TextStyle.lerp(
+      a?.draftMessageStyle,
+      b?.draftMessageStyle,
+      t,
+    ),
+    draftTimestampStyle: TextStyle.lerp(
+      a?.draftTimestampStyle,
+      b?.draftTimestampStyle,
+      t,
+    ),
+    draftTimestampFormatter: t < 0.5 ? a?.draftTimestampFormatter : b?.draftTimestampFormatter,
+  );
 
   @override
   bool operator ==(Object other) =>

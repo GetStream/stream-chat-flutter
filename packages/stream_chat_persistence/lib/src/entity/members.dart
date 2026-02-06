@@ -10,8 +10,7 @@ class Members extends Table {
   TextColumn get userId => text()();
 
   /// The channel cid of which this user is part of
-  TextColumn get channelCid =>
-      text().references(Channels, #cid, onDelete: KeyAction.cascade)();
+  TextColumn get channelCid => text().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
   /// The role of the user in the channel
   TextColumn get channelRole => text().nullable()();
@@ -32,12 +31,10 @@ class Members extends Table {
   BoolColumn get shadowBanned => boolean().withDefault(const Constant(false))();
 
   /// The date at which the channel was pinned by the member
-  DateTimeColumn get pinnedAt =>
-      dateTime().nullable().withDefault(const Constant(null))();
+  DateTimeColumn get pinnedAt => dateTime().nullable().withDefault(const Constant(null))();
 
   /// The date at which the channel was archived by the member
-  DateTimeColumn get archivedAt =>
-      dateTime().nullable().withDefault(const Constant(null))();
+  DateTimeColumn get archivedAt => dateTime().nullable().withDefault(const Constant(null))();
 
   /// True if the user is a moderator of the channel
   BoolColumn get isModerator => boolean().withDefault(const Constant(false))();

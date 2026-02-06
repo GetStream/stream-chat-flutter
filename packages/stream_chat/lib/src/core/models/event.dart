@@ -52,11 +52,12 @@ class Event {
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
 
   /// Create a new instance from a json
-  factory Event.fromJson(Map<String, dynamic> json) =>
-      _$EventFromJson(Serializer.moveToExtraDataFromRoot(
-        json,
-        topLevelFields,
-      ));
+  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(
+    Serializer.moveToExtraDataFromRoot(
+      json,
+      topLevelFields,
+    ),
+  );
 
   /// The type of the event
   /// [EventType] contains some predefined constant types
@@ -227,8 +228,8 @@ class Event {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$EventToJson(this),
-      );
+    _$EventToJson(this),
+  );
 
   /// Creates a copy of [Event] with specified attributes overridden.
   Event copyWith({
@@ -271,51 +272,48 @@ class Event {
     DateTime? lastDeliveredAt,
     String? lastDeliveredMessageId,
     Map<String, Object?>? extraData,
-  }) =>
-      Event(
-        type: type ?? this.type,
-        userId: userId ?? this.userId,
-        cid: cid ?? this.cid,
-        connectionId: connectionId ?? this.connectionId,
-        createdAt: createdAt ?? this.createdAt,
-        me: me ?? this.me,
-        user: user ?? this.user,
-        message: message ?? this.message,
-        poll: poll ?? this.poll,
-        pollVote: pollVote ?? this.pollVote,
-        totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
-        unreadChannels: unreadChannels ?? this.unreadChannels,
-        reaction: reaction ?? this.reaction,
-        online: online ?? this.online,
-        channel: channel ?? this.channel,
-        member: member ?? this.member,
-        channelId: channelId ?? this.channelId,
-        channelType: channelType ?? this.channelType,
-        channelLastMessageAt: channelLastMessageAt ?? this.channelLastMessageAt,
-        parentId: parentId ?? this.parentId,
-        hardDelete: hardDelete ?? this.hardDelete,
-        deletedForMe: deletedForMe ?? this.deletedForMe,
-        aiState: aiState ?? this.aiState,
-        aiMessage: aiMessage ?? this.aiMessage,
-        messageId: messageId ?? this.messageId,
-        thread: thread ?? this.thread,
-        unreadThreadMessages: unreadThreadMessages ?? this.unreadThreadMessages,
-        unreadThreads: unreadThreads ?? this.unreadThreads,
-        lastReadAt: lastReadAt ?? this.lastReadAt,
-        unreadMessages: unreadMessages ?? this.unreadMessages,
-        lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
-        draft: draft ?? this.draft,
-        reminder: reminder ?? this.reminder,
-        pushPreference: pushPreference ?? this.pushPreference,
-        channelPushPreference:
-            channelPushPreference ?? this.channelPushPreference,
-        channelMessageCount: channelMessageCount ?? this.channelMessageCount,
-        lastDeliveredAt: lastDeliveredAt ?? this.lastDeliveredAt,
-        lastDeliveredMessageId:
-            lastDeliveredMessageId ?? this.lastDeliveredMessageId,
-        isLocal: isLocal,
-        extraData: extraData ?? this.extraData,
-      );
+  }) => Event(
+    type: type ?? this.type,
+    userId: userId ?? this.userId,
+    cid: cid ?? this.cid,
+    connectionId: connectionId ?? this.connectionId,
+    createdAt: createdAt ?? this.createdAt,
+    me: me ?? this.me,
+    user: user ?? this.user,
+    message: message ?? this.message,
+    poll: poll ?? this.poll,
+    pollVote: pollVote ?? this.pollVote,
+    totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
+    unreadChannels: unreadChannels ?? this.unreadChannels,
+    reaction: reaction ?? this.reaction,
+    online: online ?? this.online,
+    channel: channel ?? this.channel,
+    member: member ?? this.member,
+    channelId: channelId ?? this.channelId,
+    channelType: channelType ?? this.channelType,
+    channelLastMessageAt: channelLastMessageAt ?? this.channelLastMessageAt,
+    parentId: parentId ?? this.parentId,
+    hardDelete: hardDelete ?? this.hardDelete,
+    deletedForMe: deletedForMe ?? this.deletedForMe,
+    aiState: aiState ?? this.aiState,
+    aiMessage: aiMessage ?? this.aiMessage,
+    messageId: messageId ?? this.messageId,
+    thread: thread ?? this.thread,
+    unreadThreadMessages: unreadThreadMessages ?? this.unreadThreadMessages,
+    unreadThreads: unreadThreads ?? this.unreadThreads,
+    lastReadAt: lastReadAt ?? this.lastReadAt,
+    unreadMessages: unreadMessages ?? this.unreadMessages,
+    lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
+    draft: draft ?? this.draft,
+    reminder: reminder ?? this.reminder,
+    pushPreference: pushPreference ?? this.pushPreference,
+    channelPushPreference: channelPushPreference ?? this.channelPushPreference,
+    channelMessageCount: channelMessageCount ?? this.channelMessageCount,
+    lastDeliveredAt: lastDeliveredAt ?? this.lastDeliveredAt,
+    lastDeliveredMessageId: lastDeliveredMessageId ?? this.lastDeliveredMessageId,
+    isLocal: isLocal,
+    extraData: extraData ?? this.extraData,
+  );
 }
 
 /// {@template aiState}

@@ -241,12 +241,10 @@ void main() {
     });
 
     test('setOGAttachment replaces existing OG attachment', () {
-      final oldOGAttachment =
-          Attachment(ogScrapeUrl: 'https://old.example.com');
+      final oldOGAttachment = Attachment(ogScrapeUrl: 'https://old.example.com');
       controller.addAttachment(oldOGAttachment);
 
-      final newOGAttachment =
-          Attachment(ogScrapeUrl: 'https://new.example.com');
+      final newOGAttachment = Attachment(ogScrapeUrl: 'https://new.example.com');
       controller.setOGAttachment(newOGAttachment);
 
       expect(controller.attachments.length, 1);
@@ -501,8 +499,7 @@ class _RestorableWidget extends StatefulWidget {
   State<_RestorableWidget> createState() => _RestorableWidgetState();
 }
 
-class _RestorableWidgetState extends State<_RestorableWidget>
-    with RestorationMixin {
+class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMixin {
   final controller = StreamRestorableMessageInputController();
 
   @override

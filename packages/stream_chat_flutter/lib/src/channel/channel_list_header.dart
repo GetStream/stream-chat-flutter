@@ -37,8 +37,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// the [StreamChannelListHeaderThemeData] property. Modify it to change the
 /// widget's appearance.
 /// {@endtemplate}
-class StreamChannelListHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamChannelListHeader}
   const StreamChannelListHeader({
     super.key,
@@ -124,8 +123,7 @@ class StreamChannelListHeader extends StatelessWidget
         }
 
         final chatThemeData = StreamChatTheme.of(context);
-        final channelListHeaderThemeData =
-            StreamChannelListHeaderTheme.of(context);
+        final channelListHeaderThemeData = StreamChannelListHeaderTheme.of(context);
         final theme = Theme.of(context);
         return StreamInfoTile(
           showMessage: showConnectionStateTile && showStatus,
@@ -137,36 +135,37 @@ class StreamChannelListHeader extends StatelessWidget
                 ? SystemUiOverlayStyle.light
                 : SystemUiOverlayStyle.dark,
             elevation: elevation,
-            backgroundColor:
-                backgroundColor ?? channelListHeaderThemeData.color,
+            backgroundColor: backgroundColor ?? channelListHeaderThemeData.color,
             centerTitle: centerTitle,
-            leading: leading ??
-                Center(
-                  child: user != null
-                      ? StreamUserAvatar(
-                          user: user,
-                          showOnlineStatus: false,
-                          onTap: onUserAvatarTap ??
-                              (_) {
-                                preNavigationCallback?.call();
-                                Scaffold.of(context).openDrawer();
-                              },
-                          borderRadius: channelListHeaderThemeData
-                              .avatarTheme?.borderRadius,
-                          constraints: channelListHeaderThemeData
-                              .avatarTheme?.constraints,
-                        )
-                      : const Empty(),
+            leading: switch ((leading, user)) {
+              (final leading?, _) => leading,
+              (_, final user?) => Center(
+                child: GestureDetector(
+                  onTap: switch (onUserAvatarTap) {
+                    final onTap? => () => onTap(user),
+                    _ => () {
+                      preNavigationCallback?.call();
+                      Scaffold.of(context).openDrawer();
+                    },
+                  },
+                  child: StreamUserAvatar(
+                    size: .lg,
+                    user: user,
+                    showOnlineIndicator: false,
+                  ),
                 ),
-            actions: actions ??
+              ),
+              _ => const Empty(),
+            },
+            actions:
+                actions ??
                 [
                   StreamNeumorphicButton(
                     child: IconButton(
                       icon: StreamConnectionStatusBuilder(
                         statusBuilder: (context, status) {
                           final color = switch (status) {
-                            ConnectionStatus.connected =>
-                              chatThemeData.colorTheme.accentPrimary,
+                            ConnectionStatus.connected => chatThemeData.colorTheme.accentPrimary,
                             ConnectionStatus.connecting => Colors.grey,
                             ConnectionStatus.disconnected => Colors.grey,
                           };
@@ -239,9 +238,9 @@ class _ConnectingTitleState extends StatelessWidget {
         Text(
           context.translations.searchingForNetworkText,
           style: StreamChannelListHeaderTheme.of(context).titleStyle?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

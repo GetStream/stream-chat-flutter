@@ -23,7 +23,7 @@ void main() {
           'online': false,
           'banned': false,
           'image': 'https://randomuser.me/api/portraits/women/45.jpg',
-          'name': 'Daisy Morgan'
+          'name': 'Daisy Morgan',
         },
       );
       expect(reaction.score, 1);
@@ -62,10 +62,8 @@ void main() {
       final reaction = Reaction.fromJson(jsonFixture('reaction.json'));
       var newReaction = reaction.copyWith();
       expect(newReaction.messageId, '76cd8c82-b557-4e48-9d12-87995d3a0e04');
-      expect(
-          newReaction.createdAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
-      expect(
-          newReaction.updatedAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
+      expect(newReaction.createdAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
+      expect(newReaction.updatedAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
       expect(newReaction.type, 'wow');
       expect(
         newReaction.user?.toJson(),
@@ -78,7 +76,7 @@ void main() {
           'online': false,
           'banned': false,
           'image': 'https://randomuser.me/api/portraits/women/45.jpg',
-          'name': 'Daisy Morgan'
+          'name': 'Daisy Morgan',
         },
       );
       expect(newReaction.score, 1);

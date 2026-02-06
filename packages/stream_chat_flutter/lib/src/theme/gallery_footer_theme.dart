@@ -33,19 +33,15 @@ class StreamGalleryFooterTheme extends InheritedTheme {
   /// ImageFooterTheme theme = ImageFooterTheme.of(context);
   /// ```
   static StreamGalleryFooterThemeData of(BuildContext context) {
-    final imageFooterTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamGalleryFooterTheme>();
-    return imageFooterTheme?.data ??
-        StreamChatTheme.of(context).galleryFooterTheme;
+    final imageFooterTheme = context.dependOnInheritedWidgetOfExactType<StreamGalleryFooterTheme>();
+    return imageFooterTheme?.data ?? StreamChatTheme.of(context).galleryFooterTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamGalleryFooterTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamGalleryFooterTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamGalleryFooterTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamGalleryFooterTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template galleryFooterThemeData}
@@ -128,14 +124,10 @@ class StreamGalleryFooterThemeData with Diagnosticable {
       shareIconColor: shareIconColor ?? this.shareIconColor,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
       gridIconButtonColor: gridIconButtonColor ?? this.gridIconButtonColor,
-      bottomSheetBarrierColor:
-          bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
-      bottomSheetBackgroundColor:
-          bottomSheetBackgroundColor ?? this.bottomSheetBackgroundColor,
-      bottomSheetPhotosTextStyle:
-          bottomSheetPhotosTextStyle ?? this.bottomSheetPhotosTextStyle,
-      bottomSheetCloseIconColor:
-          bottomSheetCloseIconColor ?? this.bottomSheetCloseIconColor,
+      bottomSheetBarrierColor: bottomSheetBarrierColor ?? this.bottomSheetBarrierColor,
+      bottomSheetBackgroundColor: bottomSheetBackgroundColor ?? this.bottomSheetBackgroundColor,
+      bottomSheetPhotosTextStyle: bottomSheetPhotosTextStyle ?? this.bottomSheetPhotosTextStyle,
+      bottomSheetCloseIconColor: bottomSheetCloseIconColor ?? this.bottomSheetCloseIconColor,
     );
   }
 
@@ -151,10 +143,8 @@ class StreamGalleryFooterThemeData with Diagnosticable {
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       shareIconColor: Color.lerp(a.shareIconColor, b.shareIconColor, t),
       titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-      gridIconButtonColor:
-          Color.lerp(a.gridIconButtonColor, b.gridIconButtonColor, t),
-      bottomSheetBarrierColor:
-          Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
+      gridIconButtonColor: Color.lerp(a.gridIconButtonColor, b.gridIconButtonColor, t),
+      bottomSheetBarrierColor: Color.lerp(a.bottomSheetBarrierColor, b.bottomSheetBarrierColor, t),
       bottomSheetBackgroundColor: Color.lerp(
         a.bottomSheetBackgroundColor,
         b.bottomSheetBackgroundColor,
@@ -222,17 +212,23 @@ class StreamGalleryFooterThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('titleTextStyle', titleTextStyle))
       ..add(ColorProperty('gridIconButtonColor', gridIconButtonColor))
       ..add(ColorProperty('bottomSheetBarrierColor', bottomSheetBarrierColor))
-      ..add(ColorProperty(
-        'bottomSheetBackgroundColor',
-        bottomSheetBackgroundColor,
-      ))
-      ..add(DiagnosticsProperty(
-        'bottomSheetPhotosTextStyle',
-        bottomSheetPhotosTextStyle,
-      ))
-      ..add(ColorProperty(
-        'bottomSheetCloseIconColor',
-        bottomSheetCloseIconColor,
-      ));
+      ..add(
+        ColorProperty(
+          'bottomSheetBackgroundColor',
+          bottomSheetBackgroundColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'bottomSheetPhotosTextStyle',
+          bottomSheetPhotosTextStyle,
+        ),
+      )
+      ..add(
+        ColorProperty(
+          'bottomSheetCloseIconColor',
+          bottomSheetCloseIconColor,
+        ),
+      );
   }
 }

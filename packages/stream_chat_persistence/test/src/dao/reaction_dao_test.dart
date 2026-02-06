@@ -102,15 +102,13 @@ void main() {
     expect(reactions, isEmpty);
 
     // Adding sample reactions
-    final insertedReactions =
-        await _prepareReactionData(messageId, userId: userId);
+    final insertedReactions = await _prepareReactionData(messageId, userId: userId);
     expect(insertedReactions, isNotEmpty);
 
     // Fetched reaction length should match inserted reactions length.
     // Every reaction messageId should match the provided messageId.
     // Every reaction userId should match the provided userId.
-    final fetchedReactions =
-        await reactionDao.getReactionsByUserId(messageId, userId);
+    final fetchedReactions = await reactionDao.getReactionsByUserId(messageId, userId);
     expect(fetchedReactions.length, insertedReactions.length);
     expect(fetchedReactions.every((it) => it.messageId == messageId), true);
     expect(fetchedReactions.every((it) => it.userId == userId), true);

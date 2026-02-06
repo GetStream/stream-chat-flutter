@@ -38,9 +38,9 @@ class _RegistryWidgetState extends State<RegistryWidget> {
 
   @override
   Widget build(BuildContext context) => _InheritedRegistryWidget(
-        state: this,
-        child: widget.child,
-      );
+    state: this,
+    child: widget.child,
+  );
 }
 
 class _InheritedRegistryWidget extends InheritedWidget {
@@ -66,30 +66,25 @@ class _RegisteredElement extends ProxyElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    final _inheritedRegistryWidget =
-        dependOnInheritedWidgetOfExactType<_InheritedRegistryWidget>()!;
+    final _inheritedRegistryWidget = dependOnInheritedWidgetOfExactType<_InheritedRegistryWidget>()!;
     _registryWidgetState = _inheritedRegistryWidget.state;
     _registryWidgetState.registeredElements.add(this);
-    _registryWidgetState.widget.elementNotifier?.value =
-        _registryWidgetState.registeredElements;
+    _registryWidgetState.widget.elementNotifier?.value = _registryWidgetState.registeredElements;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final _inheritedRegistryWidget =
-        dependOnInheritedWidgetOfExactType<_InheritedRegistryWidget>()!;
+    final _inheritedRegistryWidget = dependOnInheritedWidgetOfExactType<_InheritedRegistryWidget>()!;
     _registryWidgetState = _inheritedRegistryWidget.state;
     _registryWidgetState.registeredElements.add(this);
-    _registryWidgetState.widget.elementNotifier?.value =
-        _registryWidgetState.registeredElements;
+    _registryWidgetState.widget.elementNotifier?.value = _registryWidgetState.registeredElements;
   }
 
   @override
   void unmount() {
     _registryWidgetState.registeredElements.remove(this);
-    _registryWidgetState.widget.elementNotifier?.value =
-        _registryWidgetState.registeredElements;
+    _registryWidgetState.widget.elementNotifier?.value = _registryWidgetState.registeredElements;
     super.unmount();
   }
 }

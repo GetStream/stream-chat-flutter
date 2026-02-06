@@ -100,8 +100,7 @@ class StreamAudioWaveformSlider extends StatefulWidget {
   final Color? thumbBorderColor;
 
   @override
-  State<StreamAudioWaveformSlider> createState() =>
-      _StreamAudioWaveformSliderState();
+  State<StreamAudioWaveformSlider> createState() => _StreamAudioWaveformSliderState();
 }
 
 class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
@@ -310,13 +309,13 @@ class _WaveformPainter extends CustomPainter {
     double spacingRatio = 0.3,
     this.heightScale = 1,
     this.inverse = true,
-  })  : waveform = [
-          ...waveform.take(limit),
-          if (waveform.length < limit)
-            // Fill the remaining bars with 0 value
-            ...List.filled(limit - waveform.length, 0)
-        ],
-        spacingRatio = spacingRatio.clamp(0, 1);
+  }) : waveform = [
+         ...waveform.take(limit),
+         if (waveform.length < limit)
+           // Fill the remaining bars with 0 value
+           ...List.filled(limit - waveform.length, 0),
+       ],
+       spacingRatio = spacingRatio.clamp(0, 1);
 
   final List<double> waveform;
   final Color color;

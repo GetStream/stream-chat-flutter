@@ -58,7 +58,8 @@ class StreamGiphyAttachment extends StatelessWidget {
 
     final chatTheme = StreamChatTheme.of(context);
     final colorTheme = chatTheme.colorTheme;
-    final shape = this.shape ??
+    final shape =
+        this.shape ??
         RoundedRectangleBorder(
           side: BorderSide(
             color: colorTheme.borders,

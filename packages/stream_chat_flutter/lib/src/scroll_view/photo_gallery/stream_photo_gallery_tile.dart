@@ -60,18 +60,17 @@ class StreamPhotoGalleryTile extends StatelessWidget {
     ThumbnailFormat? thumbnailFormat,
     int? thumbnailQuality,
     double? thumbnailScale,
-  }) =>
-      StreamPhotoGalleryTile(
-        key: key ?? this.key,
-        media: media ?? this.media,
-        selected: selected ?? this.selected,
-        onTap: onTap ?? this.onTap,
-        onLongPress: onLongPress ?? this.onLongPress,
-        thumbnailSize: thumbnailSize ?? this.thumbnailSize,
-        thumbnailFormat: thumbnailFormat ?? this.thumbnailFormat,
-        thumbnailQuality: thumbnailQuality ?? this.thumbnailQuality,
-        thumbnailScale: thumbnailScale ?? this.thumbnailScale,
-      );
+  }) => StreamPhotoGalleryTile(
+    key: key ?? this.key,
+    media: media ?? this.media,
+    selected: selected ?? this.selected,
+    onTap: onTap ?? this.onTap,
+    onLongPress: onLongPress ?? this.onLongPress,
+    thumbnailSize: thumbnailSize ?? this.thumbnailSize,
+    thumbnailFormat: thumbnailFormat ?? this.thumbnailFormat,
+    thumbnailQuality: thumbnailQuality ?? this.thumbnailQuality,
+    thumbnailScale: thumbnailScale ?? this.thumbnailScale,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +250,8 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   int get hashCode => Object.hash(media, size, format, quality, scale);
 
   @override
-  String toString() => '$runtimeType('
+  String toString() =>
+      '$runtimeType('
       'media: $media, '
       'size: $size, '
       'format: $format, '

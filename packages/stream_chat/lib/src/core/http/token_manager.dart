@@ -12,9 +12,9 @@ class TokenManager {
     String? userId,
     Token? token,
     TokenProvider? tokenProvider,
-  })  : _userId = userId,
-        _token = token,
-        _provider = tokenProvider;
+  }) : _userId = userId,
+       _token = token,
+       _provider = tokenProvider;
 
   String? _type;
   Token? _token;

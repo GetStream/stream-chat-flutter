@@ -32,8 +32,12 @@ class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   bool canHandle(Message message, _) => message.sharedLocation != null;
 
   @override
-  Widget build(BuildContext context, Message message, _) {
-    assert(debugAssertCanHandle(message, _), '');
+  Widget build(
+    BuildContext context,
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    assert(debugAssertCanHandle(message, attachments), '');
 
     final user = message.user;
     final location = message.sharedLocation!;
@@ -99,12 +103,12 @@ class LocationAttachment extends StatelessWidget {
                   onTap: onLocationTap,
                   child: IgnorePointer(
                     child: SimpleMapView(
-                      markerSize: 40,
+                      markerSize: MarkerSize.lg,
                       showLocateMeButton: false,
                       coordinates: sharedLocation.coordinates,
                       markerBuilder: (_, __, size) => LocationUserMarker(
                         user: user,
-                        markerSize: size,
+                        size: size,
                         sharedLocation: sharedLocation,
                       ),
                     ),

@@ -24,8 +24,7 @@ void main() {
     WebSocketChannel channelProvider(
       Uri uri, {
       Iterable<String>? protocols,
-    }) =>
-        webSocketChannel;
+    }) => webSocketChannel;
 
     webSocket = WebSocket(
       apiKey: 'api-key',

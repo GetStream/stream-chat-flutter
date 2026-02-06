@@ -21,7 +21,7 @@ enum NullOrdering {
 
   /// Null values appear at the end of the sorted list,
   /// regardless of sort direction (ASC or DESC).
-  nullsLast;
+  nullsLast,
 }
 
 /// A sort specification for objects that implement [ComparableFieldProvider].
@@ -47,8 +47,8 @@ class SortOption<T extends ComparableFieldProvider> {
     this.field, {
     this.nullOrdering = NullOrdering.nullsFirst,
     Comparator<T>? comparator,
-  })  : direction = SortOption.DESC,
-        _comparator = comparator;
+  }) : direction = SortOption.DESC,
+       _comparator = comparator;
 
   /// Creates a SortOption for ascending order sorting by the specified field.
   ///
@@ -61,8 +61,8 @@ class SortOption<T extends ComparableFieldProvider> {
     this.field, {
     this.nullOrdering = NullOrdering.nullsLast,
     Comparator<T>? comparator,
-  })  : direction = SortOption.ASC,
-        _comparator = comparator;
+  }) : direction = SortOption.ASC,
+       _comparator = comparator;
 
   /// Ascending order (1)
   static const ASC = 1;
@@ -132,8 +132,7 @@ class SortOption<T extends ComparableFieldProvider> {
 }
 
 /// Extension that allows a [SortOrder] to be used as a comparator function.
-extension CompositeComparator<T extends ComparableFieldProvider>
-    on SortOrder<T> {
+extension CompositeComparator<T extends ComparableFieldProvider> on SortOrder<T> {
   /// Compares two objects using all sort options in sequence.
   ///
   /// Returns the first non-zero comparison result, or 0 if all comparisons

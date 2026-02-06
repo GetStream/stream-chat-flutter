@@ -56,12 +56,10 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
   }
 
   @override
-  State<StreamVoiceRecordingAttachmentPlaylist> createState() =>
-      _StreamVoiceRecordingAttachmentPlaylistState();
+  State<StreamVoiceRecordingAttachmentPlaylist> createState() => _StreamVoiceRecordingAttachmentPlaylistState();
 }
 
-class _StreamVoiceRecordingAttachmentPlaylistState
-    extends State<StreamVoiceRecordingAttachmentPlaylist> {
+class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist> {
   late final _controller = StreamAudioPlaylistController(
     widget.voiceRecordings.toPlaylist(),
   );

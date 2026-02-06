@@ -113,11 +113,11 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: StreamChannelListView(
-          onChannelTap: widget.onTap,
-          controller: _listController,
-        ),
-      );
+    body: StreamChannelListView(
+      onChannelTap: widget.onTap,
+      controller: _listController,
+    ),
+  );
 }
 
 class ChannelPage extends StatelessWidget {
@@ -127,20 +127,20 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Navigator(
-        onGenerateRoute: (settings) => MaterialPageRoute(
-          builder: (context) => const Scaffold(
-            appBar: StreamChannelHeader(
-              showBackButton: false,
-            ),
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                  child: StreamMessageListView(),
-                ),
-                StreamMessageInput(),
-              ],
-            ),
-          ),
+    onGenerateRoute: (settings) => MaterialPageRoute(
+      builder: (context) => const Scaffold(
+        appBar: StreamChannelHeader(
+          showBackButton: false,
         ),
-      );
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: StreamMessageListView(),
+            ),
+            StreamMessageInput(),
+          ],
+        ),
+      ),
+    ),
+  );
 }

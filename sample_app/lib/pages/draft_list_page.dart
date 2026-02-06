@@ -71,8 +71,8 @@ class _DraftListPageState extends State<DraftListPage> {
                   initialMessageId: draft.parentId,
                   child: switch (draft.parentMessage) {
                     final parent? => ThreadPage(
-                        parent: parent.copyWith(draft: draft),
-                      ),
+                      parent: parent.copyWith(draft: draft),
+                    ),
                     _ => const ChannelPage(),
                   },
                 );

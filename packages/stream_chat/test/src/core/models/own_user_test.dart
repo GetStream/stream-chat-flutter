@@ -28,8 +28,7 @@ void main() {
 
       expect(ownUser.createdAt, DateTime.parse('2020-03-03T16:48:28.853674Z'));
       expect(ownUser.updatedAt, DateTime.parse('2021-05-26T03:22:20.296181Z'));
-      expect(
-          ownUser.lastActive, DateTime.parse('2021-06-16T11:59:59.003453014Z'));
+      expect(ownUser.lastActive, DateTime.parse('2021-06-16T11:59:59.003453014Z'));
       expect(ownUser.banned, false);
       expect(ownUser.online, true);
       expect(ownUser.devices.length, 1);

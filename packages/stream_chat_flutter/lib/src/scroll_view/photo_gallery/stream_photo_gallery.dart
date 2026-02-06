@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart'
-    show AssetEntity, ThumbnailFormat, ThumbnailSize;
+import 'package:photo_manager/photo_manager.dart' show AssetEntity, ThumbnailFormat, ThumbnailSize;
 
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
@@ -10,8 +9,7 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_w
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default grid delegate  for [StreamPhotoGallery].
-const defaultStreamPhotoGalleryDelegate =
-    SliverGridDelegateWithFixedCrossAxisCount(
+const defaultStreamPhotoGalleryDelegate = SliverGridDelegateWithFixedCrossAxisCount(
   crossAxisCount: 3,
   mainAxisSpacing: 2,
   crossAxisSpacing: 2,
@@ -19,8 +17,8 @@ const defaultStreamPhotoGalleryDelegate =
 
 /// Signature for the item builder that creates the children of the
 /// [StreamPhotoGallery].
-typedef StreamPhotoGalleryIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<AssetEntity, StreamPhotoGalleryTile>;
+typedef StreamPhotoGalleryIndexedWidgetBuilder =
+    StreamScrollViewIndexedWidgetBuilder<AssetEntity, StreamPhotoGalleryTile>;
 
 /// Widget used to display a gallery of photos in the form of grid.
 class StreamPhotoGallery extends StatelessWidget {

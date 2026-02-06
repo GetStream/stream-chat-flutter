@@ -29,8 +29,8 @@ class StreamHttpClient {
     Logger? logger,
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
-  })  : _options = options ?? const StreamHttpClientOptions(),
-        httpClient = dio ?? Dio() {
+  }) : _options = options ?? const StreamHttpClientOptions(),
+       httpClient = dio ?? Dio() {
     httpClient
       ..options.baseUrl = _options.baseUrl
       ..options.receiveTimeout = _options.receiveTimeout
@@ -47,8 +47,7 @@ class StreamHttpClient {
       ..interceptors.addAll([
         AdditionalHeadersInterceptor(systemEnvironmentManager),
         if (tokenManager != null) AuthInterceptor(this, tokenManager),
-        if (connectionIdManager != null)
-          ConnectionIdInterceptor(connectionIdManager),
+        if (connectionIdManager != null) ConnectionIdInterceptor(connectionIdManager),
         ...interceptors ??
             [
               // Add a default logging interceptor if no interceptors are

@@ -90,8 +90,7 @@ class StreamChatClient {
     Duration receiveTimeout = const Duration(seconds: 6),
     StreamChatApi? chatApi,
     WebSocket? ws,
-    AttachmentFileUploaderProvider attachmentFileUploaderProvider =
-        StreamAttachmentFileUploader.new,
+    AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
     HttpClientAdapter? httpClientAdapter,
   }) {
@@ -103,7 +102,8 @@ class StreamChatClient {
       receiveTimeout: receiveTimeout,
     );
 
-    _chatApi = chatApi ??
+    _chatApi =
+        chatApi ??
         StreamChatApi(
           apiKey,
           options: options,
@@ -116,7 +116,8 @@ class StreamChatClient {
           httpClientAdapter: httpClientAdapter,
         );
 
-    _ws = ws ??
+    _ws =
+        ws ??
         WebSocket(
           apiKey: apiKey,
           baseUrl: baseWsUrl ?? options.baseUrl,
@@ -126,7 +127,8 @@ class StreamChatClient {
           logger: detachedLogger('🔌'),
         );
 
-    _retryPolicy = retryPolicy ??
+    _retryPolicy =
+        retryPolicy ??
         RetryPolicy(
           shouldRetry: (_, __, error) {
             return error is StreamChatNetworkError && error.isRetriable;
@@ -292,12 +294,11 @@ class StreamChatClient {
     User user,
     String token, {
     bool connectWebSocket = true,
-  }) =>
-      _connectUser(
-        user,
-        token: Token.fromRawValue(token),
-        connectWebSocket: connectWebSocket,
-      );
+  }) => _connectUser(
+    user,
+    token: Token.fromRawValue(token),
+    connectWebSocket: connectWebSocket,
+  );
 
   /// Connects the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
@@ -305,12 +306,11 @@ class StreamChatClient {
     User user,
     TokenProvider tokenProvider, {
     bool connectWebSocket = true,
-  }) =>
-      _connectUser(
-        user,
-        provider: tokenProvider,
-        connectWebSocket: connectWebSocket,
-      );
+  }) => _connectUser(
+    user,
+    provider: tokenProvider,
+    connectWebSocket: connectWebSocket,
+  );
 
   /// Connects the current user with an anonymous id, this triggers a connection
   /// to the API. It returns a [Future] that resolves when the connection is
@@ -523,10 +523,12 @@ class StreamChatClient {
     final isConnected = currStatus == ConnectionStatus.connected;
 
     // Notify the connection status change event
-    handleEvent(Event(
-      type: EventType.connectionChanged,
-      online: isConnected,
-    ));
+    handleEvent(
+      Event(
+        type: EventType.connectionChanged,
+        online: isConnected,
+      ),
+    );
 
     final connectionRecovered = !wasConnected && isConnected;
 
@@ -543,10 +545,12 @@ class StreamChatClient {
         if (persistenceEnabled) await sync(cids: cids);
       }
 
-      handleEvent(Event(
-        type: EventType.connectionRecovered,
-        online: true,
-      ));
+      handleEvent(
+        Event(
+          type: EventType.connectionRecovered,
+          online: true,
+        ),
+      );
     }
   }
 
@@ -559,11 +563,10 @@ class StreamChatClient {
     String? eventType4,
   ]) {
     if (eventType == null || eventType == EventType.any) return eventStream;
-    return eventStream.where((event) =>
-        event.type == eventType ||
-        event.type == eventType2 ||
-        event.type == eventType3 ||
-        event.type == eventType4);
+    return eventStream.where(
+      (event) =>
+          event.type == eventType || event.type == eventType2 || event.type == eventType3 || event.type == eventType4,
+    );
   }
 
   // Lock to make sure only one sync process is running at a time.
@@ -676,26 +679,29 @@ class StreamChatClient {
     }
 
     try {
-      final newQueryChannelsFuture = queryChannelsOnline(
-        filter: filter,
-        sort: channelStateSort,
-        state: state,
-        watch: watch,
-        presence: presence,
-        memberLimit: memberLimit,
-        messageLimit: messageLimit,
-        paginationParams: paginationParams,
-        waitForConnect: waitForConnect,
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          logger.warning('Online channel query timed out');
-          throw TimeoutException('Channel query timed out');
-        },
-      ).whenComplete(() {
-        // Always clean up cache reference when done
-        _queryChannelsStreams.remove(hash);
-      });
+      final newQueryChannelsFuture =
+          queryChannelsOnline(
+                filter: filter,
+                sort: channelStateSort,
+                state: state,
+                watch: watch,
+                presence: presence,
+                memberLimit: memberLimit,
+                messageLimit: messageLimit,
+                paginationParams: paginationParams,
+                waitForConnect: waitForConnect,
+              )
+              .timeout(
+                const Duration(seconds: 30),
+                onTimeout: () {
+                  logger.warning('Online channel query timed out');
+                  throw TimeoutException('Channel query timed out');
+                },
+              )
+              .whenComplete(() {
+                // Always clean up cache reference when done
+                _queryChannelsStreams.remove(hash);
+              });
 
       // Store the future in cache
       _queryChannelsStreams[hash] = newQueryChannelsFuture;
@@ -762,10 +768,7 @@ class StreamChatClient {
 
     final channels = res.channels;
 
-    final users = channels
-        .expand((it) => it.members ?? <Member>[])
-        .map((it) => it.user)
-        .toList(growable: false);
+    final users = channels.expand((it) => it.members ?? <Member>[]).map((it) => it.user).toList(growable: false);
 
     this.state.updateUsers(users);
 
@@ -854,12 +857,11 @@ class StreamChatClient {
     required Filter filter,
     SortOrder<BannedUser>? sort,
     PaginationParams? pagination,
-  }) =>
-      _chatApi.moderation.queryBannedUsers(
-        filter: filter,
-        sort: sort,
-        pagination: pagination,
-      );
+  }) => _chatApi.moderation.queryBannedUsers(
+    filter: filter,
+    sort: sort,
+    pagination: pagination,
+  );
 
   /// A message search.
   Future<SearchMessagesResponse> search(
@@ -868,14 +870,13 @@ class StreamChatClient {
     SortOrder? sort,
     PaginationParams? paginationParams,
     Filter? messageFilters,
-  }) =>
-      _chatApi.general.searchMessages(
-        filter,
-        query: query,
-        sort: sort,
-        pagination: paginationParams,
-        messageFilters: messageFilters,
-      );
+  }) => _chatApi.general.searchMessages(
+    filter,
+    query: query,
+    sort: sort,
+    pagination: paginationParams,
+    messageFilters: messageFilters,
+  );
 
   /// Send a [file] to the [channelId] of type [channelType]
   Future<SendFileResponse> sendFile(
@@ -885,15 +886,14 @@ class StreamChatClient {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
-  }) =>
-      _chatApi.fileUploader.sendFile(
-        file,
-        channelId,
-        channelType,
-        onSendProgress: onSendProgress,
-        cancelToken: cancelToken,
-        extraData: extraData,
-      );
+  }) => _chatApi.fileUploader.sendFile(
+    file,
+    channelId,
+    channelType,
+    onSendProgress: onSendProgress,
+    cancelToken: cancelToken,
+    extraData: extraData,
+  );
 
   /// Send a [image] to the [channelId] of type [channelType]
   Future<SendImageResponse> sendImage(
@@ -903,15 +903,14 @@ class StreamChatClient {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
-  }) =>
-      _chatApi.fileUploader.sendImage(
-        image,
-        channelId,
-        channelType,
-        onSendProgress: onSendProgress,
-        cancelToken: cancelToken,
-        extraData: extraData,
-      );
+  }) => _chatApi.fileUploader.sendImage(
+    image,
+    channelId,
+    channelType,
+    onSendProgress: onSendProgress,
+    cancelToken: cancelToken,
+    extraData: extraData,
+  );
 
   /// Delete a file from this channel
   Future<EmptyResponse> deleteFile(
@@ -920,14 +919,13 @@ class StreamChatClient {
     String channelType, {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
-  }) =>
-      _chatApi.fileUploader.deleteFile(
-        url,
-        channelId,
-        channelType,
-        cancelToken: cancelToken,
-        extraData: extraData,
-      );
+  }) => _chatApi.fileUploader.deleteFile(
+    url,
+    channelId,
+    channelType,
+    cancelToken: cancelToken,
+    extraData: extraData,
+  );
 
   /// Delete an image from this channel
   Future<EmptyResponse> deleteImage(
@@ -936,14 +934,13 @@ class StreamChatClient {
     String channelType, {
     CancelToken? cancelToken,
     Map<String, Object?>? extraData,
-  }) =>
-      _chatApi.fileUploader.deleteImage(
-        url,
-        channelId,
-        channelType,
-        cancelToken: cancelToken,
-        extraData: extraData,
-      );
+  }) => _chatApi.fileUploader.deleteImage(
+    url,
+    channelId,
+    channelType,
+    cancelToken: cancelToken,
+    extraData: extraData,
+  );
 
   /// Upload an image to the Stream CDN
   ///
@@ -955,12 +952,11 @@ class StreamChatClient {
     AttachmentFile image, {
     ProgressCallback? onUploadProgress,
     CancelToken? cancelToken,
-  }) =>
-      _chatApi.fileUploader.uploadImage(
-        image,
-        onSendProgress: onUploadProgress,
-        cancelToken: cancelToken,
-      );
+  }) => _chatApi.fileUploader.uploadImage(
+    image,
+    onSendProgress: onUploadProgress,
+    cancelToken: cancelToken,
+  );
 
   /// Upload a file to the Stream CDN
   ///
@@ -972,12 +968,11 @@ class StreamChatClient {
     AttachmentFile file, {
     ProgressCallback? onUploadProgress,
     CancelToken? cancelToken,
-  }) =>
-      _chatApi.fileUploader.uploadFile(
-        file,
-        onSendProgress: onUploadProgress,
-        cancelToken: cancelToken,
-      );
+  }) => _chatApi.fileUploader.uploadFile(
+    file,
+    onSendProgress: onUploadProgress,
+    cancelToken: cancelToken,
+  );
 
   /// Remove an image from the Stream CDN using its [url].
   ///
@@ -987,11 +982,10 @@ class StreamChatClient {
   Future<EmptyResponse> removeImage(
     String url, {
     CancelToken? cancelToken,
-  }) =>
-      _chatApi.fileUploader.removeImage(
-        url,
-        cancelToken: cancelToken,
-      );
+  }) => _chatApi.fileUploader.removeImage(
+    url,
+    cancelToken: cancelToken,
+  );
 
   /// Remove a file from the Stream CDN using its [url].
   ///
@@ -1001,11 +995,10 @@ class StreamChatClient {
   Future<EmptyResponse> removeFile(
     String url, {
     CancelToken? cancelToken,
-  }) =>
-      _chatApi.fileUploader.removeFile(
-        url,
-        cancelToken: cancelToken,
-      );
+  }) => _chatApi.fileUploader.removeFile(
+    url,
+    cancelToken: cancelToken,
+  );
 
   /// Replaces the [channelId] of type [ChannelType] data with [data].
   ///
@@ -1015,13 +1008,12 @@ class StreamChatClient {
     String channelType,
     Map<String, Object?> data, {
     Message? message,
-  }) =>
-      _chatApi.channel.updateChannel(
-        channelId,
-        channelType,
-        data,
-        message: message,
-      );
+  }) => _chatApi.channel.updateChannel(
+    channelId,
+    channelType,
+    data,
+    message: message,
+  );
 
   /// Partial update for the [channelId] of type [ChannelType]. Sets the
   /// data provided in [set], and removes the attributes given in [unset].
@@ -1032,32 +1024,29 @@ class StreamChatClient {
     String channelType, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) =>
-      _chatApi.channel.updateChannelPartial(
-        channelId,
-        channelType,
-        set: set,
-        unset: unset,
-      );
+  }) => _chatApi.channel.updateChannelPartial(
+    channelId,
+    channelType,
+    set: set,
+    unset: unset,
+  );
 
   /// Add a device for Push Notifications.
   Future<EmptyResponse> addDevice(
     String id,
     PushProvider pushProvider, {
     String? pushProviderName,
-  }) =>
-      _chatApi.device.addDevice(
-        id,
-        pushProvider,
-        pushProviderName: pushProviderName,
-      );
+  }) => _chatApi.device.addDevice(
+    id,
+    pushProvider,
+    pushProviderName: pushProviderName,
+  );
 
   /// Gets a list of user devices.
   Future<ListDevicesResponse> getDevices() => _chatApi.device.getDevices();
 
   /// Remove a user's device.
-  Future<EmptyResponse> removeDevice(String id) =>
-      _chatApi.device.removeDevice(id);
+  Future<EmptyResponse> removeDevice(String id) => _chatApi.device.removeDevice(id);
 
   /// Set push preferences for the current user.
   ///
@@ -1158,13 +1147,12 @@ class StreamChatClient {
     String channelType, {
     String? channelId,
     Map<String, Object?>? channelData,
-  }) =>
-      queryChannel(
-        channelType,
-        channelId: channelId,
-        state: false,
-        channelData: channelData,
-      );
+  }) => queryChannel(
+    channelType,
+    channelId: channelId,
+    state: false,
+    channelData: channelData,
+  );
 
   /// watches the provided channel
   /// Creates first if not yet created
@@ -1172,13 +1160,12 @@ class StreamChatClient {
     String channelType, {
     String? channelId,
     Map<String, Object?>? channelData,
-  }) =>
-      queryChannel(
-        channelType,
-        channelId: channelId,
-        watch: true,
-        channelData: channelData,
-      );
+  }) => queryChannel(
+    channelType,
+    channelId: channelId,
+    watch: true,
+    channelData: channelData,
+  );
 
   /// Query the API, get messages, members or other channel fields
   /// Creates the channel first if not yet created
@@ -1192,18 +1179,17 @@ class StreamChatClient {
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
-  }) =>
-      _chatApi.channel.queryChannel(
-        channelType,
-        channelId: channelId,
-        channelData: channelData,
-        state: state,
-        watch: watch,
-        presence: presence,
-        messagesPagination: messagesPagination,
-        membersPagination: membersPagination,
-        watchersPagination: watchersPagination,
-      );
+  }) => _chatApi.channel.queryChannel(
+    channelType,
+    channelId: channelId,
+    channelData: channelData,
+    state: state,
+    watch: watch,
+    presence: presence,
+    messagesPagination: messagesPagination,
+    membersPagination: membersPagination,
+    watchersPagination: watchersPagination,
+  );
 
   /// Query channel members
   Future<QueryMembersResponse> queryMembers(
@@ -1213,15 +1199,14 @@ class StreamChatClient {
     List<Member>? members,
     SortOrder<Member>? sort,
     PaginationParams? pagination,
-  }) =>
-      _chatApi.general.queryMembers(
-        channelType,
-        channelId: channelId,
-        filter: filter,
-        members: members,
-        sort: sort,
-        pagination: pagination,
-      );
+  }) => _chatApi.general.queryMembers(
+    channelType,
+    channelId: channelId,
+    filter: filter,
+    members: members,
+    sort: sort,
+    pagination: pagination,
+  );
 
   /// Hides the channel from [queryChannels] for the user
   /// until a message is added If [clearHistory] is set to true - all messages
@@ -1230,32 +1215,29 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     bool clearHistory = false,
-  }) =>
-      _chatApi.channel.hideChannel(
-        channelId,
-        channelType,
-        clearHistory: clearHistory,
-      );
+  }) => _chatApi.channel.hideChannel(
+    channelId,
+    channelType,
+    clearHistory: clearHistory,
+  );
 
   /// Removes the hidden status for the channel
   Future<EmptyResponse> showChannel(
     String channelId,
     String channelType,
-  ) =>
-      _chatApi.channel.showChannel(
-        channelId,
-        channelType,
-      );
+  ) => _chatApi.channel.showChannel(
+    channelId,
+    channelType,
+  );
 
   /// Delete this channel. Messages are permanently removed.
   Future<EmptyResponse> deleteChannel(
     String channelId,
     String channelType,
-  ) =>
-      _chatApi.channel.deleteChannel(
-        channelId,
-        channelType,
-      );
+  ) => _chatApi.channel.deleteChannel(
+    channelId,
+    channelType,
+  );
 
   /// Removes all messages from the channel up to [truncatedAt] or now if
   /// [truncatedAt] is not provided.
@@ -1267,52 +1249,47 @@ class StreamChatClient {
     Message? message,
     bool? skipPush,
     DateTime? truncatedAt,
-  }) =>
-      _chatApi.channel.truncateChannel(
-        channelId,
-        channelType,
-        message: message,
-        skipPush: skipPush,
-        truncatedAt: truncatedAt,
-      );
+  }) => _chatApi.channel.truncateChannel(
+    channelId,
+    channelType,
+    message: message,
+    skipPush: skipPush,
+    truncatedAt: truncatedAt,
+  );
 
   /// Mutes the channel
   Future<EmptyResponse> muteChannel(
     String channelCid, {
     Duration? expiration,
-  }) =>
-      _chatApi.moderation.muteChannel(
-        channelCid,
-        expiration: expiration,
-      );
+  }) => _chatApi.moderation.muteChannel(
+    channelCid,
+    expiration: expiration,
+  );
 
   /// Unmutes the channel
-  Future<EmptyResponse> unmuteChannel(String channelCid) =>
-      _chatApi.moderation.unmuteChannel(channelCid);
+  Future<EmptyResponse> unmuteChannel(String channelCid) => _chatApi.moderation.unmuteChannel(channelCid);
 
   /// Accept invitation to the channel
   Future<AcceptInviteResponse> acceptChannelInvite(
     String channelId,
     String channelType, {
     Message? message,
-  }) =>
-      _chatApi.channel.acceptChannelInvite(
-        channelId,
-        channelType,
-        message: message,
-      );
+  }) => _chatApi.channel.acceptChannelInvite(
+    channelId,
+    channelType,
+    message: message,
+  );
 
   /// Reject invitation to the channel
   Future<RejectInviteResponse> rejectChannelInvite(
     String channelId,
     String channelType, {
     Message? message,
-  }) =>
-      _chatApi.channel.rejectChannelInvite(
-        channelId,
-        channelType,
-        message: message,
-      );
+  }) => _chatApi.channel.rejectChannelInvite(
+    channelId,
+    channelType,
+    message: message,
+  );
 
   /// Add members to the channel
   Future<AddMembersResponse> addChannelMembers(
@@ -1322,15 +1299,14 @@ class StreamChatClient {
     Message? message,
     bool hideHistory = false,
     DateTime? hideHistoryBefore,
-  }) =>
-      _chatApi.channel.addMembers(
-        channelId,
-        channelType,
-        memberIds,
-        message: message,
-        hideHistory: hideHistory,
-        hideHistoryBefore: hideHistoryBefore,
-      );
+  }) => _chatApi.channel.addMembers(
+    channelId,
+    channelType,
+    memberIds,
+    message: message,
+    hideHistory: hideHistory,
+    hideHistoryBefore: hideHistoryBefore,
+  );
 
   /// Remove members from the channel
   Future<RemoveMembersResponse> removeChannelMembers(
@@ -1338,13 +1314,12 @@ class StreamChatClient {
     String channelType,
     List<String> memberIds, {
     Message? message,
-  }) =>
-      _chatApi.channel.removeMembers(
-        channelId,
-        channelType,
-        memberIds,
-        message: message,
-      );
+  }) => _chatApi.channel.removeMembers(
+    channelId,
+    channelType,
+    memberIds,
+    message: message,
+  );
 
   /// Invite members to the channel
   Future<InviteMembersResponse> inviteChannelMembers(
@@ -1352,23 +1327,21 @@ class StreamChatClient {
     String channelType,
     List<String> memberIds, {
     Message? message,
-  }) =>
-      _chatApi.channel.inviteChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-        message: message,
-      );
+  }) => _chatApi.channel.inviteChannelMembers(
+    channelId,
+    channelType,
+    memberIds,
+    message: message,
+  );
 
   /// Stop watching the channel
   Future<EmptyResponse> stopChannelWatching(
     String channelId,
     String channelType,
-  ) =>
-      _chatApi.channel.stopWatching(
-        channelId,
-        channelType,
-      );
+  ) => _chatApi.channel.stopWatching(
+    channelId,
+    channelType,
+  );
 
   /// Send action for a specific message of this channel
   Future<SendActionResponse> sendAction(
@@ -1376,13 +1349,12 @@ class StreamChatClient {
     String channelType,
     String messageId,
     Map<String, Object?> formData,
-  ) =>
-      _chatApi.message.sendAction(
-        channelId,
-        channelType,
-        messageId,
-        formData,
-      );
+  ) => _chatApi.message.sendAction(
+    channelId,
+    channelType,
+    messageId,
+    formData,
+  );
 
   /// Mark [channelId] of type [channelType] all messages as read
   /// Optionally provide a [messageId] if you want to mark a
@@ -1391,12 +1363,11 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     String? messageId,
-  }) =>
-      _chatApi.channel.markRead(
-        channelId,
-        channelType,
-        messageId: messageId,
-      );
+  }) => _chatApi.channel.markRead(
+    channelId,
+    channelType,
+    messageId: messageId,
+  );
 
   /// Marks the [channelId] of type [channelType] as unread
   /// by a given [messageId].
@@ -1406,12 +1377,11 @@ class StreamChatClient {
     String channelId,
     String channelType,
     String messageId,
-  ) =>
-      _chatApi.channel.markUnread(
-        channelId,
-        channelType,
-        messageId,
-      );
+  ) => _chatApi.channel.markUnread(
+    channelId,
+    channelType,
+    messageId,
+  );
 
   /// Marks the [channelId] of type [channelType] as unread
   /// by a given [timestamp].
@@ -1421,12 +1391,11 @@ class StreamChatClient {
     String channelId,
     String channelType,
     DateTime timestamp,
-  ) =>
-      _chatApi.channel.markUnreadByTimestamp(
-        channelId,
-        channelType,
-        timestamp,
-      );
+  ) => _chatApi.channel.markUnreadByTimestamp(
+    channelId,
+    channelType,
+    timestamp,
+  );
 
   /// Mark the thread with [threadId] in the channel with [channelId] of type
   /// [channelType] as read.
@@ -1434,12 +1403,11 @@ class StreamChatClient {
     String channelId,
     String channelType,
     String threadId,
-  ) =>
-      _chatApi.channel.markThreadRead(
-        channelId,
-        channelType,
-        threadId,
-      );
+  ) => _chatApi.channel.markThreadRead(
+    channelId,
+    channelType,
+    threadId,
+  );
 
   /// Mark the thread with [threadId] in the channel with [channelId] of type
   /// [channelType] as unread.
@@ -1447,24 +1415,20 @@ class StreamChatClient {
     String channelId,
     String channelType,
     String threadId,
-  ) =>
-      _chatApi.channel.markThreadUnread(
-        channelId,
-        channelType,
-        threadId,
-      );
+  ) => _chatApi.channel.markThreadUnread(
+    channelId,
+    channelType,
+    threadId,
+  );
 
   /// Creates a new Poll
-  Future<CreatePollResponse> createPoll(Poll poll) =>
-      _chatApi.polls.createPoll(poll);
+  Future<CreatePollResponse> createPoll(Poll poll) => _chatApi.polls.createPoll(poll);
 
   /// Retrieves a Poll by [pollId]
-  Future<GetPollResponse> getPoll(String pollId) =>
-      _chatApi.polls.getPoll(pollId);
+  Future<GetPollResponse> getPoll(String pollId) => _chatApi.polls.getPoll(pollId);
 
   /// Updates a Poll
-  Future<UpdatePollResponse> updatePoll(Poll poll) =>
-      _chatApi.polls.updatePoll(poll);
+  Future<UpdatePollResponse> updatePoll(Poll poll) => _chatApi.polls.updatePoll(poll);
 
   /// Partially updates a Poll by [pollId].
   ///
@@ -1474,50 +1438,46 @@ class StreamChatClient {
     String pollId, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) =>
-      _chatApi.polls.partialUpdatePoll(
-        pollId,
-        set: set,
-        unset: unset,
-      );
+  }) => _chatApi.polls.partialUpdatePoll(
+    pollId,
+    set: set,
+    unset: unset,
+  );
 
   /// Deletes the Poll by [pollId].
-  Future<EmptyResponse> deletePoll(String pollId) =>
-      _chatApi.polls.deletePoll(pollId);
+  Future<EmptyResponse> deletePoll(String pollId) => _chatApi.polls.deletePoll(pollId);
 
   /// Marks the Poll [pollId] as closed.
-  Future<UpdatePollResponse> closePoll(String pollId) =>
-      partialUpdatePoll(pollId, set: {
-        'is_closed': true,
-      });
+  Future<UpdatePollResponse> closePoll(String pollId) => partialUpdatePoll(
+    pollId,
+    set: {
+      'is_closed': true,
+    },
+  );
 
   /// Creates a new Poll Option for the Poll [pollId].
   Future<CreatePollOptionResponse> createPollOption(
     String pollId,
     PollOption option,
-  ) =>
-      _chatApi.polls.createPollOption(pollId, option);
+  ) => _chatApi.polls.createPollOption(pollId, option);
 
   /// Retrieves a Poll Option by [optionId] for the Poll [pollId].
   Future<GetPollOptionResponse> getPollOption(
     String pollId,
     String optionId,
-  ) =>
-      _chatApi.polls.getPollOption(pollId, optionId);
+  ) => _chatApi.polls.getPollOption(pollId, optionId);
 
   /// Updates a Poll Option for the Poll [pollId].
   Future<UpdatePollOptionResponse> updatePollOption(
     String pollId,
     PollOption option,
-  ) =>
-      _chatApi.polls.updatePollOption(pollId, option);
+  ) => _chatApi.polls.updatePollOption(pollId, option);
 
   /// Deletes a Poll Option by [optionId] for the Poll [pollId].
   Future<EmptyResponse> deletePollOption(
     String pollId,
     String optionId,
-  ) =>
-      _chatApi.polls.deletePollOption(pollId, optionId);
+  ) => _chatApi.polls.deletePollOption(pollId, optionId);
 
   /// Cast a [vote] for the Poll [pollId].
   Future<CastPollVoteResponse> castPollVote(
@@ -1544,20 +1504,18 @@ class StreamChatClient {
     String messageId,
     String pollId,
     String voteId,
-  ) =>
-      _chatApi.polls.removePollVote(messageId, pollId, voteId);
+  ) => _chatApi.polls.removePollVote(messageId, pollId, voteId);
 
   /// Queries Polls with the given [filter] and [sort] options.
   Future<QueryPollsResponse> queryPolls({
     Filter? filter,
     SortOrder<Poll>? sort,
     PaginationParams pagination = const PaginationParams(),
-  }) =>
-      _chatApi.polls.queryPolls(
-        filter: filter,
-        sort: sort,
-        pagination: pagination,
-      );
+  }) => _chatApi.polls.queryPolls(
+    filter: filter,
+    sort: sort,
+    pagination: pagination,
+  );
 
   /// Queries Poll Votes for the Poll [pollId] with the given [filter]
   /// and [sort] options.
@@ -1566,20 +1524,18 @@ class StreamChatClient {
     Filter? filter,
     SortOrder<PollVote>? sort,
     PaginationParams pagination = const PaginationParams(),
-  }) =>
-      _chatApi.polls.queryPollVotes(
-        pollId,
-        filter: filter,
-        sort: sort,
-        pagination: pagination,
-      );
+  }) => _chatApi.polls.queryPollVotes(
+    pollId,
+    filter: filter,
+    sort: sort,
+    pagination: pagination,
+  );
 
   /// Update or Create the given user object.
   Future<UpdateUsersResponse> updateUser(User user) => updateUsers([user]);
 
   /// Batch update a list of users
-  Future<UpdateUsersResponse> updateUsers(List<User> users) =>
-      _chatApi.user.updateUsers(users);
+  Future<UpdateUsersResponse> updateUsers(List<User> users) => _chatApi.user.updateUsers(users);
 
   /// Partially update the given user with [id].
   /// Use [set] to define values to be set.
@@ -1600,48 +1556,43 @@ class StreamChatClient {
   /// Batch partial updates the [users].
   Future<UpdateUsersResponse> partialUpdateUsers(
     List<PartialUpdateUserRequest> users,
-  ) =>
-      _chatApi.user.partialUpdateUsers(users);
+  ) => _chatApi.user.partialUpdateUsers(users);
 
   /// Bans a user from all channels
   Future<EmptyResponse> banUser(
     String targetUserId, [
     Map<String, dynamic> options = const {},
-  ]) =>
-      _chatApi.moderation.banUser(
-        targetUserId,
-        options: options,
-      );
+  ]) => _chatApi.moderation.banUser(
+    targetUserId,
+    options: options,
+  );
 
   /// Remove global ban for a user
   Future<EmptyResponse> unbanUser(
     String targetUserId, [
     Map<String, dynamic> options = const {},
-  ]) =>
-      _chatApi.moderation.unbanUser(
-        targetUserId,
-        options: options,
-      );
+  ]) => _chatApi.moderation.unbanUser(
+    targetUserId,
+    options: options,
+  );
 
   /// Shadow bans a user
   Future<EmptyResponse> shadowBan(
     String targetID, [
     Map<String, dynamic> options = const {},
-  ]) =>
-      banUser(targetID, {
-        'shadow': true,
-        ...options,
-      });
+  ]) => banUser(targetID, {
+    'shadow': true,
+    ...options,
+  });
 
   /// Removes shadow ban from a user
   Future<EmptyResponse> removeShadowBan(
     String targetID, [
     Map<String, dynamic> options = const {},
-  ]) =>
-      unbanUser(targetID, {
-        'shadow': true,
-        ...options,
-      });
+  ]) => unbanUser(targetID, {
+    'shadow': true,
+    ...options,
+  });
 
   final _userBlockLock = Lock();
 
@@ -1711,38 +1662,34 @@ class StreamChatClient {
 
     // Emit an local event with the unread count information as a side effect
     // in order to update the current user state.
-    handleEvent(Event(
-      totalUnreadCount: response.totalUnreadCount,
-      unreadChannels: response.channels.length,
-      unreadThreads: response.threads.length,
-    ));
+    handleEvent(
+      Event(
+        totalUnreadCount: response.totalUnreadCount,
+        unreadChannels: response.channels.length,
+        unreadThreads: response.threads.length,
+      ),
+    );
 
     return response;
   }
 
   /// Mutes a user
-  Future<EmptyResponse> muteUser(String userId) =>
-      _chatApi.moderation.muteUser(userId);
+  Future<EmptyResponse> muteUser(String userId) => _chatApi.moderation.muteUser(userId);
 
   /// Unmutes a user
-  Future<EmptyResponse> unmuteUser(String userId) =>
-      _chatApi.moderation.unmuteUser(userId);
+  Future<EmptyResponse> unmuteUser(String userId) => _chatApi.moderation.unmuteUser(userId);
 
   /// Flag a message
-  Future<EmptyResponse> flagMessage(String messageId) =>
-      _chatApi.moderation.flagMessage(messageId);
+  Future<EmptyResponse> flagMessage(String messageId) => _chatApi.moderation.flagMessage(messageId);
 
   /// Unflag a message
-  Future<EmptyResponse> unflagMessage(String messageId) =>
-      _chatApi.moderation.unflagMessage(messageId);
+  Future<EmptyResponse> unflagMessage(String messageId) => _chatApi.moderation.unflagMessage(messageId);
 
   /// Flag a user
-  Future<EmptyResponse> flagUser(String userId) =>
-      _chatApi.moderation.flagUser(userId);
+  Future<EmptyResponse> flagUser(String userId) => _chatApi.moderation.flagUser(userId);
 
   /// Unflag a message
-  Future<EmptyResponse> unflagUser(String userId) =>
-      _chatApi.moderation.unflagUser(userId);
+  Future<EmptyResponse> unflagUser(String userId) => _chatApi.moderation.unflagUser(userId);
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() => _chatApi.channel.markAllRead();
@@ -1775,12 +1722,11 @@ class StreamChatClient {
     String channelId,
     String channelType,
     Event event,
-  ) =>
-      _chatApi.channel.sendEvent(
-        channelId,
-        channelType,
-        event,
-      );
+  ) => _chatApi.channel.sendEvent(
+    channelId,
+    channelType,
+    event,
+  );
 
   /// Send a [reactionType] for this [messageId]
   /// Set [enforceUnique] to true to remove the existing user reaction
@@ -1789,23 +1735,21 @@ class StreamChatClient {
     Reaction reaction, {
     bool skipPush = false,
     bool enforceUnique = false,
-  }) =>
-      _chatApi.message.sendReaction(
-        messageId,
-        reaction,
-        skipPush: skipPush,
-        enforceUnique: enforceUnique,
-      );
+  }) => _chatApi.message.sendReaction(
+    messageId,
+    reaction,
+    skipPush: skipPush,
+    enforceUnique: enforceUnique,
+  );
 
   /// Delete a [reactionType] from this [messageId]
   Future<EmptyResponse> deleteReaction(
     String messageId,
     String reactionType,
-  ) =>
-      _chatApi.message.deleteReaction(
-        messageId,
-        reactionType,
-      );
+  ) => _chatApi.message.deleteReaction(
+    messageId,
+    reactionType,
+  );
 
   /// Sends the message to the given channel
   Future<SendMessageResponse> sendMessage(
@@ -1814,46 +1758,42 @@ class StreamChatClient {
     String channelType, {
     bool skipPush = false,
     bool skipEnrichUrl = false,
-  }) =>
-      _chatApi.message.sendMessage(
-        channelId,
-        channelType,
-        message,
-        skipPush: skipPush,
-        skipEnrichUrl: skipEnrichUrl,
-      );
+  }) => _chatApi.message.sendMessage(
+    channelId,
+    channelType,
+    message,
+    skipPush: skipPush,
+    skipEnrichUrl: skipEnrichUrl,
+  );
 
   /// Lists all the message replies for the [parentId]
   Future<QueryRepliesResponse> getReplies(
     String parentId, {
     PaginationParams? options,
-  }) =>
-      _chatApi.message.getReplies(
-        parentId,
-        options: options,
-      );
+  }) => _chatApi.message.getReplies(
+    parentId,
+    options: options,
+  );
 
   /// Get all the reactions for a [messageId]
   Future<QueryReactionsResponse> getReactions(
     String messageId, {
     PaginationParams? pagination,
-  }) =>
-      _chatApi.message.getReactions(
-        messageId,
-        pagination: pagination,
-      );
+  }) => _chatApi.message.getReactions(
+    messageId,
+    pagination: pagination,
+  );
 
   /// Update the given message
   Future<UpdateMessageResponse> updateMessage(
     Message message, {
     bool skipPush = false,
     bool skipEnrichUrl = false,
-  }) =>
-      _chatApi.message.updateMessage(
-        message,
-        skipPush: skipPush,
-        skipEnrichUrl: skipEnrichUrl,
-      );
+  }) => _chatApi.message.updateMessage(
+    message,
+    skipPush: skipPush,
+    skipEnrichUrl: skipEnrichUrl,
+  );
 
   /// Partially update the given [messageId]
   /// Use [set] to define values to be set
@@ -1863,13 +1803,12 @@ class StreamChatClient {
     Map<String, Object?>? set,
     List<String>? unset,
     bool skipEnrichUrl = false,
-  }) =>
-      _chatApi.message.partialUpdateMessage(
-        messageId,
-        set: set,
-        unset: unset,
-        skipEnrichUrl: skipEnrichUrl,
-      );
+  }) => _chatApi.message.partialUpdateMessage(
+    messageId,
+    set: set,
+    unset: unset,
+    skipEnrichUrl: skipEnrichUrl,
+  );
 
   /// Deletes the given message.
   ///
@@ -1897,8 +1836,7 @@ class StreamChatClient {
   }
 
   /// Get a message by [messageId]
-  Future<GetMessageResponse> getMessage(String messageId) =>
-      _chatApi.message.getMessage(messageId);
+  Future<GetMessageResponse> getMessage(String messageId) => _chatApi.message.getMessage(messageId);
 
   /// Retrieves a list of messages by [messageIDs]
   /// from the given [channelId] of type [channelType]
@@ -1906,34 +1844,31 @@ class StreamChatClient {
     String channelId,
     String channelType,
     List<String> messageIDs,
-  ) =>
-      _chatApi.message.getMessagesById(
-        channelId,
-        channelType,
-        messageIDs,
-      );
+  ) => _chatApi.message.getMessagesById(
+    channelId,
+    channelType,
+    messageIDs,
+  );
 
   /// Translates the [messageId] in provided [language]
   Future<TranslateMessageResponse> translateMessage(
     String messageId,
     String language,
-  ) =>
-      _chatApi.message.translateMessage(
-        messageId,
-        language,
-      );
+  ) => _chatApi.message.translateMessage(
+    messageId,
+    language,
+  );
 
   /// Creates a draft for the given [channelId] of type [channelType].
   Future<CreateDraftResponse> createDraft(
     DraftMessage draft,
     String channelId,
     String channelType,
-  ) =>
-      _chatApi.message.createDraft(
-        channelId,
-        channelType,
-        draft,
-      );
+  ) => _chatApi.message.createDraft(
+    channelId,
+    channelType,
+    draft,
+  );
 
   /// Retrieves a draft for the given [channelId] of type [channelType].
   ///
@@ -1942,12 +1877,11 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     String? parentId,
-  }) =>
-      _chatApi.message.getDraft(
-        channelId,
-        channelType,
-        parentId: parentId,
-      );
+  }) => _chatApi.message.getDraft(
+    channelId,
+    channelType,
+    parentId: parentId,
+  );
 
   /// Deletes a draft for the given [channelId] of type [channelType].
   ///
@@ -1956,23 +1890,21 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     String? parentId,
-  }) =>
-      _chatApi.message.deleteDraft(
-        channelId,
-        channelType,
-        parentId: parentId,
-      );
+  }) => _chatApi.message.deleteDraft(
+    channelId,
+    channelType,
+    parentId: parentId,
+  );
 
   /// Queries drafts for the current user.
   Future<QueryDraftsResponse> queryDrafts({
     Filter? filter,
     SortOrder<Draft>? sort,
     PaginationParams? pagination,
-  }) =>
-      _chatApi.message.queryDrafts(
-        sort: sort,
-        pagination: pagination,
-      );
+  }) => _chatApi.message.queryDrafts(
+    sort: sort,
+    pagination: pagination,
+  );
 
   /// Retrieves all the active live locations of the current user.
   Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
@@ -2024,22 +1956,20 @@ class StreamChatClient {
     String channelId,
     String channelType,
     int cooldown,
-  ) async =>
-      _chatApi.channel.enableSlowdown(
-        channelId,
-        channelType,
-        cooldown,
-      );
+  ) async => _chatApi.channel.enableSlowdown(
+    channelId,
+    channelType,
+    cooldown,
+  );
 
   /// Disables slow mode
   Future<PartialUpdateChannelResponse> disableSlowdown(
     String channelId,
     String channelType,
-  ) async =>
-      _chatApi.channel.disableSlowdown(
-        channelId,
-        channelType,
-      );
+  ) async => _chatApi.channel.disableSlowdown(
+    channelId,
+    channelType,
+  );
 
   /// Pins provided message
   /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
@@ -2049,9 +1979,7 @@ class StreamChatClient {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,
   }) {
     assert(() {
-      if (timeoutOrExpirationDate is! DateTime &&
-          timeoutOrExpirationDate != null &&
-          timeoutOrExpirationDate is! num) {
+      if (timeoutOrExpirationDate is! DateTime && timeoutOrExpirationDate != null && timeoutOrExpirationDate is! num) {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;
@@ -2075,17 +2003,15 @@ class StreamChatClient {
   }
 
   /// Unpins provided message
-  Future<UpdateMessageResponse> unpinMessage(String messageId) =>
-      partialUpdateMessage(
-        messageId,
-        set: {
-          'pinned': false,
-        },
-      );
+  Future<UpdateMessageResponse> unpinMessage(String messageId) => partialUpdateMessage(
+    messageId,
+    set: {
+      'pinned': false,
+    },
+  );
 
   /// Get OpenGraph data of the given [url].
-  Future<OGAttachmentResponse> enrichUrl(String url) =>
-      _chatApi.general.enrichUrl(url);
+  Future<OGAttachmentResponse> enrichUrl(String url) => _chatApi.general.enrichUrl(url);
 
   /// Queries threads with the given [options] and [pagination] params.
   ///
@@ -2095,13 +2021,12 @@ class StreamChatClient {
     SortOrder<Thread>? sort,
     ThreadOptions options = const ThreadOptions(),
     PaginationParams pagination = const PaginationParams(),
-  }) =>
-      _chatApi.threads.queryThreads(
-        filter: filter,
-        sort: sort,
-        options: options,
-        pagination: pagination,
-      );
+  }) => _chatApi.threads.queryThreads(
+    filter: filter,
+    sort: sort,
+    options: options,
+    pagination: pagination,
+  );
 
   /// Retrieves a thread with the given [messageId].
   ///
@@ -2109,11 +2034,10 @@ class StreamChatClient {
   Future<GetThreadResponse> getThread(
     String messageId, {
     ThreadOptions options = const ThreadOptions(),
-  }) =>
-      _chatApi.threads.getThread(
-        messageId,
-        options: options,
-      );
+  }) => _chatApi.threads.getThread(
+    messageId,
+    options: options,
+  );
 
   /// Partially updates the thread with the given [messageId].
   ///
@@ -2123,12 +2047,11 @@ class StreamChatClient {
     String messageId, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) =>
-      _chatApi.threads.partialUpdateThread(
-        messageId,
-        set: set,
-        unset: unset,
-      );
+  }) => _chatApi.threads.partialUpdateThread(
+    messageId,
+    set: set,
+    unset: unset,
+  );
 
   /// Pins the channel for the current user.
   Future<PartialUpdateMemberResponse> pinChannel({
@@ -2421,18 +2344,17 @@ class ClientState {
     _eventsSubscription?.add(
       _client
           .on(
-        EventType.memberRemoved,
-        EventType.notificationRemovedFromChannel,
-      )
+            EventType.memberRemoved,
+            EventType.notificationRemovedFromChannel,
+          )
           .listen((event) async {
-        final isCurrentUser = event.user!.id == currentUser!.id;
-        if (isCurrentUser && event.channel != null) {
-          final eventChannel = event.channel!;
-          await _client.chatPersistenceClient
-              ?.deleteChannels([eventChannel.cid]);
-          channels.remove(eventChannel.cid)?.dispose();
-        }
-      }),
+            final isCurrentUser = event.user!.id == currentUser!.id;
+            if (isCurrentUser && event.channel != null) {
+              final eventChannel = event.channel!;
+              await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
+              channels.remove(eventChannel.cid)?.dispose();
+            }
+          }),
     );
   }
 
@@ -2440,14 +2362,14 @@ class ClientState {
     _eventsSubscription?.add(
       _client
           .on(
-        EventType.channelDeleted,
-        EventType.notificationChannelDeleted,
-      )
+            EventType.channelDeleted,
+            EventType.notificationChannelDeleted,
+          )
           .listen((Event event) async {
-        final eventChannel = event.channel!;
-        await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-        channels.remove(eventChannel.cid)?.dispose();
-      }),
+            final eventChannel = event.channel!;
+            await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
+            channels.remove(eventChannel.cid)?.dispose();
+          }),
     );
   }
 
@@ -2528,7 +2450,7 @@ class ClientState {
         final newActiveLiveLocations = <Location>[
           ...activeLiveLocations.where(
             (it) => it.messageId != location.messageId,
-          )
+          ),
         ];
 
         activeLiveLocations = newActiveLiveLocations;

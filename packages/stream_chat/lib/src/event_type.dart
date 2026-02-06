@@ -52,23 +52,19 @@ class EventType {
   static const String channelDeleted = 'channel.deleted';
 
   /// Event sent when a channel is deleted
-  static const String notificationChannelDeleted =
-      'notification.channel_deleted';
+  static const String notificationChannelDeleted = 'notification.channel_deleted';
 
   /// Event sent when a channel is truncated
   static const String channelTruncated = 'channel.truncated';
 
   /// Event sent when a channel is truncated
-  static const String notificationChannelTruncated =
-      'notification.channel_truncated';
+  static const String notificationChannelTruncated = 'notification.channel_truncated';
 
   /// Event sent when the user is added to a channel
-  static const String notificationAddedToChannel =
-      'notification.added_to_channel';
+  static const String notificationAddedToChannel = 'notification.added_to_channel';
 
   /// Event sent when the user is removed from a channel
-  static const String notificationRemovedFromChannel =
-      'notification.removed_from_channel';
+  static const String notificationRemovedFromChannel = 'notification.removed_from_channel';
 
   /// Event sent when a channel is updated
   static const String channelUpdated = 'channel.updated';
@@ -104,8 +100,7 @@ class EventType {
   static const String connectionRecovered = 'connection.recovered';
 
   /// Event sent when the user is accepts an invite
-  static const String notificationInviteAccepted =
-      'notification.invite_accepted';
+  static const String notificationInviteAccepted = 'notification.invite_accepted';
 
   /// Event sent when the user is invited
   static const String notificationInvited = 'notification.invited';
@@ -153,8 +148,7 @@ class EventType {
   static const String threadUpdated = 'thread.updated';
 
   /// Event sent when a new message is added to a thread.
-  static const String notificationThreadMessageNew =
-      'notification.thread_message_new';
+  static const String notificationThreadMessageNew = 'notification.thread_message_new';
 
   /// Event sent when a draft message is either created or updated.
   static const String draftUpdated = 'draft.updated';
@@ -187,8 +181,7 @@ class EventType {
   static const String pushPreferenceUpdated = 'push_preference.updated';
 
   /// Local event sent when channel push notification preference is updated.
-  static const String channelPushPreferenceUpdated =
-      'channel.push_preference.updated';
+  static const String channelPushPreferenceUpdated = 'channel.push_preference.updated';
 
   /// Event sent when a message is marked as delivered.
   static const String messageDelivered = 'message.delivered';

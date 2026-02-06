@@ -17,13 +17,12 @@ Widget defaultPollVoteListViewSeparatorBuilder(
   BuildContext context,
   List<PollVote> pollVotes,
   int index,
-) =>
-    const SizedBox(height: 8);
+) => const SizedBox(height: 8);
 
 /// Signature for the item builder that creates the children of the
 /// [StreamPollVoteListView].
-typedef StreamPollVoteListViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<PollVote, StreamPollVoteListTile>;
+typedef StreamPollVoteListViewIndexedWidgetBuilder =
+    StreamScrollViewIndexedWidgetBuilder<PollVote, StreamPollVoteListTile>;
 
 /// {@template streamPollVoteListView}
 /// A [ListView] that shows a list of [PollVote] for a poll. It uses a
@@ -283,87 +282,85 @@ class StreamPollVoteListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PagedValueListView<String, PollVote>(
-        scrollDirection: scrollDirection,
-        padding: padding,
-        physics: physics,
-        reverse: reverse,
-        controller: controller,
-        scrollController: scrollController,
-        primary: primary,
-        shrinkWrap: shrinkWrap,
-        addAutomaticKeepAlives: addAutomaticKeepAlives,
-        addRepaintBoundaries: addRepaintBoundaries,
-        addSemanticIndexes: addSemanticIndexes,
-        keyboardDismissBehavior: keyboardDismissBehavior,
-        restorationId: restorationId,
-        dragStartBehavior: dragStartBehavior,
-        cacheExtent: cacheExtent,
-        clipBehavior: clipBehavior,
-        loadMoreTriggerIndex: loadMoreTriggerIndex,
-        separatorBuilder: separatorBuilder,
-        itemBuilder: (context, pollVotes, index) {
-          final pollVote = pollVotes[index];
-          final onTap = onPollVoteTap;
-          final onLongPress = onPollVoteLongPress;
+    scrollDirection: scrollDirection,
+    padding: padding,
+    physics: physics,
+    reverse: reverse,
+    controller: controller,
+    scrollController: scrollController,
+    primary: primary,
+    shrinkWrap: shrinkWrap,
+    addAutomaticKeepAlives: addAutomaticKeepAlives,
+    addRepaintBoundaries: addRepaintBoundaries,
+    addSemanticIndexes: addSemanticIndexes,
+    keyboardDismissBehavior: keyboardDismissBehavior,
+    restorationId: restorationId,
+    dragStartBehavior: dragStartBehavior,
+    cacheExtent: cacheExtent,
+    clipBehavior: clipBehavior,
+    loadMoreTriggerIndex: loadMoreTriggerIndex,
+    separatorBuilder: separatorBuilder,
+    itemBuilder: (context, pollVotes, index) {
+      final pollVote = pollVotes[index];
+      final onTap = onPollVoteTap;
+      final onLongPress = onPollVoteLongPress;
 
-          final streamPollVoteListTile = StreamPollVoteListTile(
-            pollVote: pollVote,
-            onTap: onTap == null ? null : () => onTap(pollVote),
-            onLongPress:
-                onLongPress == null ? null : () => onLongPress(pollVote),
-          );
+      final streamPollVoteListTile = StreamPollVoteListTile(
+        pollVote: pollVote,
+        onTap: onTap == null ? null : () => onTap(pollVote),
+        onLongPress: onLongPress == null ? null : () => onLongPress(pollVote),
+      );
 
-          return itemBuilder?.call(
-                context,
-                pollVotes,
-                index,
-                streamPollVoteListTile,
-              ) ??
-              streamPollVoteListTile;
-        },
-        emptyBuilder: (context) {
-          final chatThemeData = StreamChatTheme.of(context);
-          return emptyBuilder?.call(context) ??
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: StreamScrollViewEmptyWidget(
-                    emptyIcon: StreamSvgIcon(
-                      size: 148,
-                      icon: StreamSvgIcons.polls,
-                      color: chatThemeData.colorTheme.disabled,
-                    ),
-                    emptyTitle: Text(
-                      context.translations.noPollVotesLabel,
-                      style: chatThemeData.textTheme.headline,
-                    ),
-                  ),
+      return itemBuilder?.call(
+            context,
+            pollVotes,
+            index,
+            streamPollVoteListTile,
+          ) ??
+          streamPollVoteListTile;
+    },
+    emptyBuilder: (context) {
+      final chatThemeData = StreamChatTheme.of(context);
+      return emptyBuilder?.call(context) ??
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: StreamScrollViewEmptyWidget(
+                emptyIcon: StreamSvgIcon(
+                  size: 148,
+                  icon: StreamSvgIcons.polls,
+                  color: chatThemeData.colorTheme.disabled,
                 ),
-              );
-        },
-        loadMoreErrorBuilder: (context, error) =>
-            StreamScrollViewLoadMoreError.list(
-          onTap: controller.retry,
-          error: Text(context.translations.loadingPollVotesError),
-        ),
-        loadMoreIndicatorBuilder: (context) => const Center(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: StreamScrollViewLoadMoreIndicator(),
-          ),
-        ),
-        loadingBuilder: (context) =>
-            loadingBuilder?.call(context) ??
-            const Center(
-              child: StreamScrollViewLoadingWidget(),
-            ),
-        errorBuilder: (context, error) =>
-            errorBuilder?.call(context, error) ??
-            Center(
-              child: StreamScrollViewErrorWidget(
-                errorTitle: Text(context.translations.loadingPollVotesError),
-                onRetryPressed: controller.refresh,
+                emptyTitle: Text(
+                  context.translations.noPollVotesLabel,
+                  style: chatThemeData.textTheme.headline,
+                ),
               ),
             ),
-      );
+          );
+    },
+    loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
+      onTap: controller.retry,
+      error: Text(context.translations.loadingPollVotesError),
+    ),
+    loadMoreIndicatorBuilder: (context) => const Center(
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: StreamScrollViewLoadMoreIndicator(),
+      ),
+    ),
+    loadingBuilder: (context) =>
+        loadingBuilder?.call(context) ??
+        const Center(
+          child: StreamScrollViewLoadingWidget(),
+        ),
+    errorBuilder: (context, error) =>
+        errorBuilder?.call(context, error) ??
+        Center(
+          child: StreamScrollViewErrorWidget(
+            errorTitle: Text(context.translations.loadingPollVotesError),
+            onRetryPressed: controller.refresh,
+          ),
+        ),
+  );
 }

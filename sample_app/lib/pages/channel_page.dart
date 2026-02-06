@@ -133,8 +133,7 @@ class _ChannelPageState extends State<ChannelPage> {
             enableVoiceRecording: true,
             allowedAttachmentPickerTypes: [
               ...AttachmentPickerType.values,
-              if (config?.sharedLocations == true && channel.canShareLocation)
-                const LocationPickerType(),
+              if (config?.sharedLocations == true && channel.canShareLocation) const LocationPickerType(),
             ],
             onAttachmentPickerResult: (result) {
               return _onCustomAttachmentPickerResult(channel, result);

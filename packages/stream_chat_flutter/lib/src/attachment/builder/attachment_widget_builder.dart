@@ -16,10 +16,11 @@ part 'poll_attachment_builder.dart';
 /// {@template streamAttachmentWidgetTapCallback}
 /// Signature for a function that's called when the user taps on an attachment.
 /// {@endtemplate}
-typedef StreamAttachmentWidgetTapCallback = void Function(
-  Message message,
-  Attachment attachment,
-);
+typedef StreamAttachmentWidgetTapCallback =
+    void Function(
+      Message message,
+      Attachment attachment,
+    );
 
 /// {@template attachmentWidgetBuilder}
 /// A builder which is used to build a widget for a given [Message] and

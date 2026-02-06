@@ -47,25 +47,25 @@ class AdaptiveDialogAction extends StatelessWidget {
 
     return switch (Theme.of(context).platform) {
       TargetPlatform.iOS || TargetPlatform.macOS => CupertinoTheme(
-          data: CupertinoTheme.of(context).copyWith(
-            primaryColor: theme.colorTheme.accentPrimary,
-          ),
-          child: CupertinoDialogAction(
-            onPressed: onPressed,
-            isDefaultAction: isDefaultAction,
-            isDestructiveAction: isDestructiveAction,
-            child: child,
-          ),
+        data: CupertinoTheme.of(context).copyWith(
+          primaryColor: theme.colorTheme.accentPrimary,
         ),
-      _ => TextButton(
+        child: CupertinoDialogAction(
           onPressed: onPressed,
-          style: TextButton.styleFrom(
-            textStyle: theme.textTheme.body,
-            foregroundColor: theme.colorTheme.accentPrimary,
-            disabledForegroundColor: theme.colorTheme.disabled,
-          ),
+          isDefaultAction: isDefaultAction,
+          isDestructiveAction: isDestructiveAction,
           child: child,
         ),
+      ),
+      _ => TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          textStyle: theme.textTheme.body,
+          foregroundColor: theme.colorTheme.accentPrimary,
+          disabledForegroundColor: theme.colorTheme.disabled,
+        ),
+        child: child,
+      ),
     };
   }
 }

@@ -50,9 +50,9 @@ class DmCheckboxListTile extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
           onChanged: switch (onChanged) {
             final onChanged? => (value) {
-                if (value == null) return;
-                return onChanged.call(value);
-              },
+              if (value == null) return;
+              return onChanged.call(value);
+            },
             _ => null,
           },
         ),

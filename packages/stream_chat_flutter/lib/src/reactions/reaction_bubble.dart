@@ -48,8 +48,7 @@ class StreamReactionBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final reactionIcons = StreamChatConfiguration.of(context).reactionIcons;
     final totalReactions = reactions.length;
-    final offset =
-        totalReactions > 1 ? 16.0.mirrorConditionally(flipTail) : 2.0;
+    final offset = totalReactions > 1 ? 16.0.mirrorConditionally(flipTail) : 2.0;
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -84,7 +83,7 @@ class StreamReactionBubble extends StatelessWidget {
                       reaction,
                       reactionIcons,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -185,9 +184,9 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path()
       ..addOval(
         Rect.fromCircle(
-          center: const Offset(4, 3).mirrorConditionally(flipTail) +
-              Offset(tailCirclesSpace, tailCirclesSpace)
-                  .mirrorConditionally(flipTail),
+          center:
+              const Offset(4, 3).mirrorConditionally(flipTail) +
+              Offset(tailCirclesSpace, tailCirclesSpace).mirrorConditionally(flipTail),
           radius: 4,
         ),
       );
@@ -203,9 +202,9 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path()
       ..addOval(
         Rect.fromCircle(
-          center: const Offset(4, 3).mirrorConditionally(flipTail) +
-              Offset(tailCirclesSpace, tailCirclesSpace)
-                  .mirrorConditionally(flipTail),
+          center:
+              const Offset(4, 3).mirrorConditionally(flipTail) +
+              Offset(tailCirclesSpace, tailCirclesSpace).mirrorConditionally(flipTail),
           radius: 2,
         ),
       );
@@ -218,12 +217,14 @@ class ReactionBubblePainter extends CustomPainter {
       ..strokeWidth = 1;
 
     final path = Path()
-      ..addOval(Rect.fromCircle(
-        center: const Offset(4, 3).mirrorConditionally(flipTail) +
-            Offset(tailCirclesSpace, tailCirclesSpace)
-                .mirrorConditionally(flipTail),
-        radius: 2,
-      ));
+      ..addOval(
+        Rect.fromCircle(
+          center:
+              const Offset(4, 3).mirrorConditionally(flipTail) +
+              Offset(tailCirclesSpace, tailCirclesSpace).mirrorConditionally(flipTail),
+          radius: 2,
+        ),
+      );
     canvas.drawPath(path, paint);
   }
 

@@ -11,13 +11,12 @@ Widget defaultChannelListViewSeparatorBuilder(
   BuildContext context,
   List<Channel> items,
   int index,
-) =>
-    const StreamChannelListSeparator();
+) => const StreamChannelListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamChannelListView].
-typedef StreamChannelListViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelListTile>;
+typedef StreamChannelListViewIndexedWidgetBuilder =
+    StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelListTile>;
 
 /// A [ListView] that shows a list of [Channel]s,
 /// it uses [StreamChannelListTile] as a default item.
@@ -338,8 +337,7 @@ class StreamChannelListView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.list(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingChannelsError),
       ),

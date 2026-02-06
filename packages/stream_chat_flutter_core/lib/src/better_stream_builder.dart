@@ -40,8 +40,7 @@ class BetterStreamBuilder<T extends Object> extends StatefulWidget {
   _BetterStreamBuilderState createState() => _BetterStreamBuilderState<T>();
 }
 
-class _BetterStreamBuilderState<T extends Object>
-    extends State<BetterStreamBuilder<T>> {
+class _BetterStreamBuilderState<T extends Object> extends State<BetterStreamBuilder<T>> {
   T? _lastEvent;
   StreamSubscription<T?>? _subscription;
   Object? _lastError;
@@ -102,8 +101,7 @@ class _BetterStreamBuilderState<T extends Object>
 
   void _onEvent(T? event) {
     _lastError = null;
-    final isEqual =
-        widget.comparator?.call(_lastEvent, event) ?? event == _lastEvent;
+    final isEqual = widget.comparator?.call(_lastEvent, event) ?? event == _lastEvent;
     if (!isEqual) {
       _lastEvent = event;
       if (mounted) {

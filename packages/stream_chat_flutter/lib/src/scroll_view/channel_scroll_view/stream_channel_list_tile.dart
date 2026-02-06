@@ -37,9 +37,9 @@ class StreamChannelListTile extends StatelessWidget {
     this.selected = false,
     this.selectedTileColor,
   }) : assert(
-          channel.state != null,
-          'Channel ${channel.id} is not initialized',
-        );
+         channel.state != null,
+         'Channel ${channel.id} is not initialized',
+       );
 
   /// The channel to display.
   final Channel channel;
@@ -133,12 +133,10 @@ class StreamChannelListTile extends StatelessWidget {
       onLongPress: onLongPress ?? this.onLongPress,
       visualDensity: visualDensity ?? this.visualDensity,
       contentPadding: contentPadding ?? this.contentPadding,
-      sendingIndicatorBuilder:
-          sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
+      sendingIndicatorBuilder: sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
       tileColor: tileColor ?? this.tileColor,
       trailing: trailing ?? this.trailing,
-      unreadIndicatorBuilder:
-          unreadIndicatorBuilder ?? this.unreadIndicatorBuilder,
+      unreadIndicatorBuilder: unreadIndicatorBuilder ?? this.unreadIndicatorBuilder,
       selected: selected ?? this.selected,
       selectedTileColor: selectedTileColor ?? this.selectedTileColor,
     );
@@ -153,24 +151,24 @@ class StreamChannelListTile extends StatelessWidget {
     final streamChatTheme = StreamChatTheme.of(context);
     final streamChat = StreamChat.of(context);
 
-    final leading = this.leading ??
-        StreamChannelAvatar(
-          channel: channel,
-        );
+    final leading = this.leading ?? StreamChannelAvatar(channel: channel);
 
-    final title = this.title ??
+    final title =
+        this.title ??
         StreamChannelName(
           channel: channel,
           textStyle: channelPreviewTheme.titleStyle,
         );
 
-    final subtitle = this.subtitle ??
+    final subtitle =
+        this.subtitle ??
         ChannelListTileSubtitle(
           channel: channel,
           textStyle: channelPreviewTheme.subtitleStyle,
         );
 
-    final trailing = this.trailing ??
+    final trailing =
+        this.trailing ??
         ChannelLastMessageDate(
           channel: channel,
           textStyle: channelPreviewTheme.lastMessageAtStyle,
@@ -191,8 +189,7 @@ class StreamChannelListTile extends StatelessWidget {
           leading: leading,
           tileColor: tileColor,
           selected: selected,
-          selectedTileColor: selectedTileColor ??
-              StreamChatTheme.of(context).colorTheme.borders,
+          selectedTileColor: selectedTileColor ?? StreamChatTheme.of(context).colorTheme.borders,
           title: Row(
             children: [
               Expanded(child: title),
@@ -204,8 +201,7 @@ class StreamChannelListTile extends StatelessWidget {
                   if (members.isEmpty) {
                     return const Empty();
                   }
-                  return unreadIndicatorBuilder?.call(context) ??
-                      StreamUnreadIndicator.channels(cid: channel.cid);
+                  return unreadIndicatorBuilder?.call(context) ?? StreamUnreadIndicator.channels(cid: channel.cid);
                 },
               ),
             ],
@@ -227,26 +223,26 @@ class StreamChannelListTile extends StatelessWidget {
                     (m) => !m.shadowed && !m.isDeleted,
                   );
 
-                  if (lastMessage == null ||
-                      (lastMessage.user?.id != currentUser.id)) {
+                  if (lastMessage == null || (lastMessage.user?.id != currentUser.id)) {
                     return const Empty();
                   }
 
-                  final hasNonUrlAttachments = lastMessage.attachments
-                      .any((it) => it.type != AttachmentType.urlPreview);
+                  final hasNonUrlAttachments = lastMessage.attachments.any(
+                    (it) => it.type != AttachmentType.urlPreview,
+                  );
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child:
                         sendingIndicatorBuilder?.call(context, lastMessage) ??
-                            SendingIndicatorBuilder(
-                              messageTheme: streamChatTheme.ownMessageTheme,
-                              message: lastMessage,
-                              hasNonUrlAttachments: hasNonUrlAttachments,
-                              streamChat: streamChat,
-                              streamChatTheme: streamChatTheme,
-                              channel: channel,
-                            ),
+                        SendingIndicatorBuilder(
+                          messageTheme: streamChatTheme.ownMessageTheme,
+                          message: lastMessage,
+                          hasNonUrlAttachments: hasNonUrlAttachments,
+                          streamChat: streamChat,
+                          streamChatTheme: streamChatTheme,
+                          channel: channel,
+                        ),
                   );
                 },
               ),
@@ -268,9 +264,9 @@ class ChannelLastMessageDate extends StatelessWidget {
     this.textStyle,
     this.formatter,
   }) : assert(
-          channel.state != null,
-          'Channel ${channel.id} is not initialized',
-        );
+         channel.state != null,
+         'Channel ${channel.id} is not initialized',
+       );
 
   /// The channel to display the last message date for.
   final Channel channel;
@@ -303,9 +299,9 @@ class ChannelListTileSubtitle extends StatelessWidget {
     required this.channel,
     this.textStyle,
   }) : assert(
-          channel.state != null,
-          'Channel ${channel.id} is not initialized',
-        );
+         channel.state != null,
+         'Channel ${channel.id} is not initialized',
+       );
 
   /// The channel to create the subtitle from.
   final Channel channel;
@@ -351,9 +347,9 @@ class ChannelLastMessageText extends StatefulWidget {
     this.textStyle,
     this.lastMessagePredicate = _defaultLastMessagePredicate,
   }) : assert(
-          channel.state != null,
-          'Channel ${channel.id} is not initialized',
-        );
+         channel.state != null,
+         'Channel ${channel.id} is not initialized',
+       );
 
   /// The channel to display the last message of.
   final Channel channel;

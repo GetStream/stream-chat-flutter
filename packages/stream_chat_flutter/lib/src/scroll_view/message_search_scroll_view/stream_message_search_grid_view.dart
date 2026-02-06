@@ -7,13 +7,11 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_w
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default grid delegate  for [StreamMessageSearchGridView].
-const defaultMessageSearchGridViewDelegate =
-    SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
+const defaultMessageSearchGridViewDelegate = SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
 
 /// Signature for the item builder that creates the children of the
 /// [StreamMessageSearchGridView].
-typedef StreamMessageSearchGridViewIndexedWidgetBuilder
-    = PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse>;
+typedef StreamMessageSearchGridViewIndexedWidgetBuilder = PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse>;
 
 /// A [GridView] that shows a grid of [GetMessageResponse]s,
 /// it uses [StreamMessageSearchGridTile] as a default item.
@@ -336,8 +334,7 @@ class StreamMessageSearchGridView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.grid(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.grid(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
       ),

@@ -11,8 +11,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The function receives the [BuildContext] and a list of [defaultOptions]
 /// that can be modified or extended.
 /// {@endtemplate}
-typedef AttachmentPickerOptionsBuilder<T extends AttachmentPickerOption>
-    = List<T> Function(BuildContext context, List<T> defaultOptions);
+typedef AttachmentPickerOptionsBuilder<T extends AttachmentPickerOption> =
+    List<T> Function(BuildContext context, List<T> defaultOptions);
 
 /// Shows a modal bottom sheet with the Stream attachment picker.
 ///
@@ -163,7 +163,8 @@ class StreamAttachmentPickerBottomSheetBuilder extends StatefulWidget {
     BuildContext context,
     StreamAttachmentPickerController controller,
     Widget? child,
-  ) builder;
+  )
+  builder;
 
   /// The initial poll.
   final Poll? initialPoll;
@@ -178,18 +179,17 @@ class StreamAttachmentPickerBottomSheetBuilder extends StatefulWidget {
   final StreamAttachmentPickerController? controller;
 
   @override
-  State<StreamAttachmentPickerBottomSheetBuilder> createState() =>
-      _StreamAttachmentPickerBottomSheetBuilderState();
+  State<StreamAttachmentPickerBottomSheetBuilder> createState() => _StreamAttachmentPickerBottomSheetBuilderState();
 }
 
-class _StreamAttachmentPickerBottomSheetBuilderState
-    extends State<StreamAttachmentPickerBottomSheetBuilder> {
+class _StreamAttachmentPickerBottomSheetBuilderState extends State<StreamAttachmentPickerBottomSheetBuilder> {
   late StreamAttachmentPickerController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ??
+    _controller =
+        widget.controller ??
         StreamAttachmentPickerController(
           initialPoll: widget.initialPoll,
           initialAttachments: widget.initialAttachments,

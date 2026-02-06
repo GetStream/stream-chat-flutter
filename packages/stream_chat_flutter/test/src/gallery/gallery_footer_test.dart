@@ -13,8 +13,7 @@ void main() {
   late MockClientState clientState;
   late MockChannel channel;
   late MockChannelState channelState;
-  const methodChannel =
-      MethodChannel('dev.fluttercommunity.plus/connectivity_status');
+  const methodChannel = MethodChannel('dev.fluttercommunity.plus/connectivity_status');
 
   setUpAll(() {
     client = MockClient();
@@ -41,13 +40,12 @@ void main() {
   });
 
   setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(methodChannel, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(methodChannel, (
+      MethodCall methodCall,
+    ) async {
       if (methodCall.method == 'listen') {
         try {
-          await TestDefaultBinaryMessengerBinding
-              .instance.defaultBinaryMessenger
-              .handlePlatformMessage(
+          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
             methodChannel.name,
             methodChannel.codec.encodeSuccessEnvelope(['wifi']),
             (_) {},
@@ -112,7 +110,6 @@ void main() {
   );
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(methodChannel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(methodChannel, null);
   });
 }

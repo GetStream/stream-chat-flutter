@@ -14,35 +14,34 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   MixedAttachmentBuilder({
     this.padding = const EdgeInsets.all(4),
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
-  })  : _imageAttachmentBuilder = ImageAttachmentBuilder(
-          padding: EdgeInsets.zero,
-          onAttachmentTap: onAttachmentTap,
-        ),
-        _videoAttachmentBuilder = VideoAttachmentBuilder(
-          padding: EdgeInsets.zero,
-          onAttachmentTap: onAttachmentTap,
-        ),
-        _giphyAttachmentBuilder = GiphyAttachmentBuilder(
-          padding: EdgeInsets.zero,
-          onAttachmentTap: onAttachmentTap,
-        ),
-        _galleryAttachmentBuilder = GalleryAttachmentBuilder(
-          padding: EdgeInsets.zero,
-          onAttachmentTap: onAttachmentTap,
-        ),
-        _fileAttachmentBuilder = FileAttachmentBuilder(
-          padding: EdgeInsets.zero,
-          onAttachmentTap: onAttachmentTap,
-        ),
-        _urlAttachmentBuilder = UrlAttachmentBuilder(
-          padding: EdgeInsets.zero,
-          onAttachmentTap: onAttachmentTap,
-        ),
-        _voiceRecordingAttachmentPlaylistBuilder =
-            VoiceRecordingAttachmentPlaylistBuilder(
-          padding: EdgeInsets.zero,
-          onAttachmentTap: onAttachmentTap,
-        );
+  }) : _imageAttachmentBuilder = ImageAttachmentBuilder(
+         padding: EdgeInsets.zero,
+         onAttachmentTap: onAttachmentTap,
+       ),
+       _videoAttachmentBuilder = VideoAttachmentBuilder(
+         padding: EdgeInsets.zero,
+         onAttachmentTap: onAttachmentTap,
+       ),
+       _giphyAttachmentBuilder = GiphyAttachmentBuilder(
+         padding: EdgeInsets.zero,
+         onAttachmentTap: onAttachmentTap,
+       ),
+       _galleryAttachmentBuilder = GalleryAttachmentBuilder(
+         padding: EdgeInsets.zero,
+         onAttachmentTap: onAttachmentTap,
+       ),
+       _fileAttachmentBuilder = FileAttachmentBuilder(
+         padding: EdgeInsets.zero,
+         onAttachmentTap: onAttachmentTap,
+       ),
+       _urlAttachmentBuilder = UrlAttachmentBuilder(
+         padding: EdgeInsets.zero,
+         onAttachmentTap: onAttachmentTap,
+       ),
+       _voiceRecordingAttachmentPlaylistBuilder = VoiceRecordingAttachmentPlaylistBuilder(
+         padding: EdgeInsets.zero,
+         onAttachmentTap: onAttachmentTap,
+       );
 
   /// The padding to apply to the mixed attachment widget.
   final EdgeInsetsGeometry padding;
@@ -53,8 +52,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   late final StreamAttachmentWidgetBuilder _galleryAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _fileAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _urlAttachmentBuilder;
-  late final StreamAttachmentWidgetBuilder
-      _voiceRecordingAttachmentPlaylistBuilder;
+  late final StreamAttachmentWidgetBuilder _voiceRecordingAttachmentPlaylistBuilder;
 
   @override
   bool canHandle(

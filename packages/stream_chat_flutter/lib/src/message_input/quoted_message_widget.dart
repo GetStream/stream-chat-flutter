@@ -68,12 +68,9 @@ class StreamQuotedMessageWidget extends StatelessWidget {
       const SizedBox(width: 8),
       if (message.user != null)
         StreamUserAvatar(
+          size: .sm,
           user: message.user!,
-          constraints: const BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          showOnlineStatus: false,
+          showOnlineIndicator: false,
         ),
     ];
     return Padding(
@@ -113,11 +110,9 @@ class _QuotedMessage extends StatelessWidget {
 
   bool get _containsText => message.text?.isNotEmpty == true;
 
-  bool get _containsLinkAttachment =>
-      message.attachments.any((it) => it.type == AttachmentType.urlPreview);
+  bool get _containsLinkAttachment => message.attachments.any((it) => it.type == AttachmentType.urlPreview);
 
-  bool get _isGiphy => message.attachments
-      .any((element) => element.type == AttachmentType.giphy);
+  bool get _isGiphy => message.attachments.any((element) => element.type == AttachmentType.giphy);
 
   bool get _isDeleted => message.isDeleted || message.deletedAt != null;
 
@@ -176,19 +171,18 @@ class _QuotedMessage extends StatelessWidget {
           ),
         if (msg.text!.isNotEmpty && !_isGiphy)
           Flexible(
-            child: textBuilder?.call(context, msg) ??
+            child:
+                textBuilder?.call(context, msg) ??
                 StreamMessageText(
                   message: msg,
                   messageTheme: isOnlyEmoji && _containsText
                       ? messageTheme.copyWith(
-                          messageTextStyle:
-                              messageTheme.messageTextStyle?.copyWith(
+                          messageTextStyle: messageTheme.messageTextStyle?.copyWith(
                             fontSize: 32,
                           ),
                         )
                       : messageTheme.copyWith(
-                          messageTextStyle:
-                              messageTheme.messageTextStyle?.copyWith(
+                          messageTextStyle: messageTheme.messageTextStyle?.copyWith(
                             fontSize: 12,
                           ),
                         ),
@@ -224,8 +218,7 @@ class _QuotedMessage extends StatelessWidget {
       child: Row(
         spacing: 8,
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment:
-            reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: reverse ? children.reversed.toList() : children,
       ),
     );
@@ -270,8 +263,7 @@ class _ParseAttachments extends StatelessWidget {
 
     var clipBehavior = Clip.none;
     ShapeDecoration? decoration;
-    if (attachment.type != AttachmentType.file &&
-        attachment.type != AttachmentType.voiceRecording) {
+    if (attachment.type != AttachmentType.file && attachment.type != AttachmentType.voiceRecording) {
       clipBehavior = Clip.hardEdge;
       decoration = ShapeDecoration(
         shape: RoundedRectangleBorder(

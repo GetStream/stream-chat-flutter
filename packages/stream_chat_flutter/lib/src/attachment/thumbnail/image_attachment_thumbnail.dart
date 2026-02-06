@@ -79,10 +79,10 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
         final effectiveThumbnailSize = switch (thumbnailSize) {
           final thumbnailSize? => thumbnailSize,
           _ => ThumbnailSizeCalculator.calculate(
-              targetSize: constraints.biggest,
-              originalSize: image.originalSize,
-              pixelRatio: MediaQuery.devicePixelRatioOf(context),
-            ),
+            targetSize: constraints.biggest,
+            originalSize: image.originalSize,
+            pixelRatio: MediaQuery.devicePixelRatioOf(context),
+          ),
         };
 
         final cacheWidth = effectiveThumbnailSize?.width.round();

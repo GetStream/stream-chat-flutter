@@ -83,8 +83,7 @@ class _ConnectedTitleState extends StatelessWidget {
     final memberCount = channel.memberCount;
     if (memberCount != null && memberCount > 2) {
       var text = context.translations.membersCountText(memberCount);
-      final onlineCount =
-          members?.where((m) => m.user?.online == true).length ?? 0;
+      final onlineCount = members?.where((m) => m.user?.online == true).length ?? 0;
       if (onlineCount > 0) {
         text += ', ${context.translations.watchersCountText(onlineCount)}';
       }
