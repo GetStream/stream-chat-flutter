@@ -116,6 +116,29 @@ platform :ios do
     )
   end
 
+  # Usage: bundle exec fastlane ios distribute_to_testflight_internal
+  lane :distribute_to_testflight_internal do
+    match_me
+
+    current_build_number = latest_testflight_build_number(
+      api_key: appstore_api_key,
+      app_identifier: app_identifier
+    )
+
+    build_number = (current_build_number || 0).to_i + 1
+    build_ipa(export_method: "app-store", build_number: build_number)
+
+    upload_to_testflight(
+      api_key: appstore_api_key,
+      distribute_external: false,
+      notify_external_testers: false,
+      ipa: "#{root_path}/build/ios/ipa/ChatSample.ipa",
+      groups: ['Internal Testers'],
+      changelog: 'Lots of amazing new features to test out!',
+      skip_waiting_for_build_processing: true,
+    )
+  end
+
   private_lane :appstore_api_key do
     @appstore_api_key ||= app_store_connect_api_key(
       key_id: 'MT3PRT8TB7',
