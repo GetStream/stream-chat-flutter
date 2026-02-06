@@ -482,9 +482,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                   builder: (context, snapshot) => MaterialApp.router(
                     theme: ThemeData(
                       brightness: .light,
-                      extensions: [
-                        StreamTheme.light(),
-                      ],
+                      extensions: [StreamTheme.light()],
                     ),
                     darkTheme: ThemeData(
                       brightness: .dark,
