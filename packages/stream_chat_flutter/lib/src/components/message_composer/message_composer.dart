@@ -1,0 +1,1 @@
+export 'stream_chat_message_composer.dart';
