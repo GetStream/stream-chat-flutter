@@ -20,6 +20,7 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
   const DefaultStreamMessageComposerInputHeader({super.key, required this.props});
 
   final MessageComposerComponentProps props;
+  StreamMessageInputController get controller => props.controller;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +28,7 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
 
     final currentUserId = StreamChat.of(context).currentUser?.id;
     final quotedMessage = props.controller.message.quotedMessage;
+    final ogAttachment = props.controller.ogAttachment;
 
     final hasAttachments = props.controller.message.attachments.isNotEmpty;
     final hasContent = quotedMessage != null || hasAttachments;
@@ -42,16 +44,24 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
           if (quotedMessage != null)
             _QuotedMessageInHeader(
               quotedMessage: quotedMessage,
-              onRemovePressed: props.controller.clearQuotedMessage,
+              onRemovePressed: controller.clearQuotedMessage,
               currentUserId: currentUserId,
             ),
           if (hasAttachments)
             SizedBox(
               height: 80,
               child: _AttachmentsInHeader(
-                attachments: props.controller.message.attachments,
-                onRemovePressed: props.controller.clearAttachments,
+                attachments: controller.message.attachments,
+                onRemovePressed: controller.clearAttachments,
               ),
+            ),
+          if (ogAttachment != null)
+            OGAttachmentPreview(
+              attachment: ogAttachment,
+              onDismissPreviewPressed: () {
+                controller.clearOGAttachment();
+                props.focusNode?.unfocus();
+              },
             ),
         ],
       ),

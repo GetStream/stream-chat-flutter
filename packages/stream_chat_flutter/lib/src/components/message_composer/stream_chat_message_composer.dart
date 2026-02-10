@@ -77,6 +77,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
       onSendPressed: widget.props.onSendPressed,
       onMicrophonePressed: widget.props.onMicrophonePressed,
       onAttachmentButtonPressed: widget.props.onAttachmentButtonPressed,
+      focusNode: widget.props.focusNode,
     );
 
     return StreamMessageComposerFactory.maybeOf(context)?.messageComposer?.call(context, widget.props) ??
@@ -126,6 +127,7 @@ class MessageComposerComponentProps {
     required this.onSendPressed,
     this.onMicrophonePressed,
     this.onAttachmentButtonPressed,
+    this.focusNode,
   });
 
   final StreamMessageInputController controller;
@@ -134,4 +136,5 @@ class MessageComposerComponentProps {
   final VoidCallback onSendPressed;
   final VoidCallback? onMicrophonePressed;
   final VoidCallback? onAttachmentButtonPressed;
+  final FocusNode? focusNode;
 }
