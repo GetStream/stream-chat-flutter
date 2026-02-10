@@ -29,9 +29,14 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
     final currentUserId = StreamChat.of(context).currentUser?.id;
     final quotedMessage = props.controller.message.quotedMessage;
     final ogAttachment = props.controller.ogAttachment;
+    final nonOGAttachments = controller.attachments
+        .where((it) {
+          return it.titleLink == null;
+        })
+        .toList(growable: false);
 
-    final hasAttachments = props.controller.message.attachments.isNotEmpty;
-    final hasContent = quotedMessage != null || hasAttachments;
+    final hasAttachments = nonOGAttachments.isNotEmpty;
+    final hasContent = quotedMessage != null || hasAttachments || ogAttachment != null;
 
     if (!hasContent) return const SizedBox.shrink();
     final spacing = context.streamSpacing;
@@ -48,12 +53,9 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
               currentUserId: currentUserId,
             ),
           if (hasAttachments)
-            SizedBox(
-              height: 80,
-              child: _AttachmentsInHeader(
-                attachments: controller.message.attachments,
-                onRemovePressed: controller.clearAttachments,
-              ),
+            StreamMessageInputAttachmentList(
+              attachments: nonOGAttachments,
+              onRemovePressed: _onAttachmentRemovePressed,
             ),
           if (ogAttachment != null)
             OGAttachmentPreview(
@@ -66,6 +68,20 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Default callback for removing an attachment.
+  Future<void> _onAttachmentRemovePressed(Attachment attachment) async {
+    final file = attachment.file;
+    final uploadState = attachment.uploadState;
+
+    if (file != null && !uploadState.isSuccess && !isWeb) {
+      await StreamAttachmentHandler.instance.deleteAttachmentFile(
+        attachmentFile: file,
+      );
+    }
+
+    controller.removeAttachmentById(attachment.id);
   }
 }
 
@@ -92,36 +108,6 @@ class _QuotedMessageInHeader extends StatelessWidget {
       subtitle: quotedMessage.text ?? '',
       onRemovePressed: onRemovePressed,
       style: isIncoming ? .incoming : .outgoing,
-    );
-  }
-}
-
-class _AttachmentsInHeader extends StatelessWidget {
-  const _AttachmentsInHeader({
-    required this.attachments,
-    required this.onRemovePressed,
-  });
-
-  final List<Attachment> attachments;
-  final VoidCallback onRemovePressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          for (final attachment in attachments)
-            SizedBox(
-              width: 80,
-              height: 80,
-              child: StreamFileAttachmentThumbnail(
-                file: attachment,
-              ),
-            ),
-        ],
-      ),
     );
   }
 }
