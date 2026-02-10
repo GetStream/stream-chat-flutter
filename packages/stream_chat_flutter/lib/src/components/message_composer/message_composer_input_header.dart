@@ -23,7 +23,9 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement header for attachments and quoted message
+    // TODO: improve getter for currentUserId
+
+    final currentUserId = StreamChat.of(context).currentUser?.id;
     final quotedMessage = props.controller.message.quotedMessage;
 
     final hasAttachments = props.controller.message.attachments.isNotEmpty;
@@ -41,6 +43,7 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
             _QuotedMessageInHeader(
               quotedMessage: quotedMessage,
               onRemovePressed: props.controller.clearQuotedMessage,
+              currentUserId: currentUserId,
             ),
           if (hasAttachments)
             SizedBox(
@@ -58,29 +61,33 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
 
 class _QuotedMessageInHeader extends StatelessWidget {
   const _QuotedMessageInHeader({
-    super.key,
     required this.quotedMessage,
     required this.onRemovePressed,
+    required this.currentUserId,
   });
 
   final Message quotedMessage;
   final VoidCallback onRemovePressed;
+  final String? currentUserId;
 
   @override
   Widget build(BuildContext context) {
+    final isIncoming = currentUserId != quotedMessage.user?.id;
+
     return
     // TODO: show image if available
+    // TODO: localize strings
     MessageComposerAttachmentReply(
-      title: quotedMessage.text ?? '',
-      subtitle: quotedMessage.user?.name ?? '',
+      title: isIncoming ? 'Reply to ${quotedMessage.user?.name}' : 'You',
+      subtitle: quotedMessage.text ?? '',
       onRemovePressed: onRemovePressed,
+      style: isIncoming ? .incoming : .outgoing,
     );
   }
 }
 
 class _AttachmentsInHeader extends StatelessWidget {
   const _AttachmentsInHeader({
-    super.key,
     required this.attachments,
     required this.onRemovePressed,
   });
