@@ -12,14 +12,13 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 Future<String?> showPollSuggestOptionDialog({
   required BuildContext context,
   String initialOption = '',
-}) =>
-    showDialog<String?>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => PollSuggestOptionDialog(
-        initialOption: initialOption,
-      ),
-    );
+}) => showDialog<String?>(
+  context: context,
+  barrierDismissible: false,
+  builder: (_) => PollSuggestOptionDialog(
+    initialOption: initialOption,
+  ),
+);
 
 /// {@template pollSuggestOptionDialog}
 /// A dialog that allows the user to suggest an option for a poll.
@@ -39,8 +38,7 @@ class PollSuggestOptionDialog extends StatefulWidget {
   final String initialOption;
 
   @override
-  State<PollSuggestOptionDialog> createState() =>
-      _PollSuggestOptionDialogState();
+  State<PollSuggestOptionDialog> createState() => _PollSuggestOptionDialogState();
 }
 
 class _PollSuggestOptionDialogState extends State<PollSuggestOptionDialog> {

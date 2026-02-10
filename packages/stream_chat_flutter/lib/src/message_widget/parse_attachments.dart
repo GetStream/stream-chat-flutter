@@ -29,11 +29,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// )
 /// ```
 /// {@endtemplate}
-typedef OnAttachmentWidgetTap = FutureOr<bool> Function(
-  BuildContext context,
-  Message message,
-  Attachment attachment,
-);
+typedef OnAttachmentWidgetTap =
+    FutureOr<bool> Function(
+      BuildContext context,
+      Message message,
+      Attachment attachment,
+    );
 
 /// {@template parseAttachments}
 /// Parses the attachments of a [StreamMessageWidget].
@@ -185,7 +186,7 @@ extension on Message {
           attachment: it,
           message: this,
         );
-      })
+      }),
     ];
   }
 }

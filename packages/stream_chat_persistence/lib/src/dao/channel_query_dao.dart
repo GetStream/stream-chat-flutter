@@ -12,8 +12,7 @@ part 'channel_query_dao.g.dart';
 
 /// The Data Access Object for operations in [ChannelQueries] table.
 @DriftAccessor(tables: [ChannelQueries, Channels, Users])
-class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
-    with _$ChannelQueryDaoMixin {
+class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase> with _$ChannelQueryDaoMixin {
   /// Creates a new channel query dao instance
   ChannelQueryDao(super.db);
 
@@ -32,35 +31,29 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     Filter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
-  }) async =>
-      transaction(() async {
-        final hash = _computeHash(filter);
-        if (clearQueryCache) {
-          await batch((it) {
-            it.deleteWhere<ChannelQueries, ChannelQueryEntity>(
-              channelQueries,
-              (c) => c.queryHash.equals(hash),
-            );
-          });
-        }
-
-        await batch((it) {
-          it.insertAllOnConflictUpdate(
-            channelQueries,
-            cids
-                .map((cid) =>
-                    ChannelQueryEntity(queryHash: hash, channelCid: cid))
-                .toList(),
-          );
-        });
+  }) async => transaction(() async {
+    final hash = _computeHash(filter);
+    if (clearQueryCache) {
+      await batch((it) {
+        it.deleteWhere<ChannelQueries, ChannelQueryEntity>(
+          channelQueries,
+          (c) => c.queryHash.equals(hash),
+        );
       });
+    }
+
+    await batch((it) {
+      it.insertAllOnConflictUpdate(
+        channelQueries,
+        cids.map((cid) => ChannelQueryEntity(queryHash: hash, channelCid: cid)).toList(),
+      );
+    });
+  });
 
   ///
   Future<List<String>> getCachedChannelCids(Filter? filter) {
     final hash = _computeHash(filter);
-    return (select(channelQueries)..where((c) => c.queryHash.equals(hash)))
-        .map((c) => c.channelCid)
-        .get();
+    return (select(channelQueries)..where((c) => c.queryHash.equals(hash))).map((c) => c.channelCid).get();
   }
 
   /// Get list of channels by filter, sort and paginationParams
@@ -68,13 +61,16 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     final cachedChannelCids = await getCachedChannelCids(filter);
     final query = select(channels)..where((c) => c.cid.isIn(cachedChannelCids));
 
-    final cachedChannels = await query.join([
-      leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
-    ]).map((row) {
-      final createdByEntity = row.readTableOrNull(users);
-      final channelEntity = row.readTable(channels);
-      return channelEntity.toChannelModel(createdBy: createdByEntity?.toUser());
-    }).get();
+    final cachedChannels = await query
+        .join([
+          leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
+        ])
+        .map((row) {
+          final createdByEntity = row.readTableOrNull(users);
+          final channelEntity = row.readTable(channels);
+          return channelEntity.toChannelModel(createdBy: createdByEntity?.toUser());
+        })
+        .get();
 
     return cachedChannels;
   }

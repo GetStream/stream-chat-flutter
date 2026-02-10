@@ -33,8 +33,7 @@ void main() {
     when(() => mockRecorder.dispose()).thenAnswer((_) async {});
 
     amplitudeController = PublishSubject<Amplitude>();
-    when(() => mockRecorder.onAmplitudeChanged(any()))
-        .thenAnswer((_) => amplitudeController.stream);
+    when(() => mockRecorder.onAmplitudeChanged(any())).thenAnswer((_) => amplitudeController.stream);
 
     controller = StreamAudioRecorderController.raw(
       config: config,
@@ -53,8 +52,7 @@ void main() {
 
   group('startRecord', () {
     setUp(() {
-      when(() => mockRecorder.start(config, path: any(named: 'path')))
-          .thenAnswer((_) async {});
+      when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
     });
 
     test(
@@ -86,8 +84,7 @@ void main() {
     setUp(() async {
       when(() => mockRecorder.hasPermission()).thenAnswer((_) async => true);
       when(() => mockRecorder.stop()).thenAnswer((_) async => testPath);
-      when(() => mockRecorder.start(config, path: any(named: 'path')))
-          .thenAnswer((_) async {});
+      when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
     });
 
     test('stops recording and updates state to stopped', () async {
@@ -122,8 +119,7 @@ void main() {
     setUp(() {
       when(() => mockRecorder.hasPermission()).thenAnswer((_) async => true);
       when(() => mockRecorder.cancel()).thenAnswer((_) async {});
-      when(() => mockRecorder.start(config, path: any(named: 'path')))
-          .thenAnswer((_) async {});
+      when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
     });
 
     test('cancels recording and returns to idle state', () async {
@@ -208,8 +204,7 @@ void main() {
   group('amplitude changes', () {
     setUp(() {
       when(() => mockRecorder.hasPermission()).thenAnswer((_) async => true);
-      when(() => mockRecorder.start(config, path: any(named: 'path')))
-          .thenAnswer((_) async {});
+      when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
     });
 
     test('updates waveform data when amplitude changes', () async {

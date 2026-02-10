@@ -9,8 +9,8 @@ class SharedLocationService {
   SharedLocationService({
     required StreamChatClient client,
     LocationProvider? locationProvider,
-  })  : _client = client,
-        _locationProvider = locationProvider ?? LocationProvider();
+  }) : _client = client,
+       _locationProvider = locationProvider ?? LocationProvider();
 
   final StreamChatClient _client;
   final LocationProvider _locationProvider;
@@ -23,12 +23,12 @@ class SharedLocationService {
     _activeLiveLocationsSubscription = _client.state.activeLiveLocationsStream
         .distinct((prev, curr) => prev.length == curr.length)
         .listen((locations) async {
-      // If there are no more active locations to update, stop tracking.
-      if (locations.isEmpty) return _stopTrackingLocation();
+          // If there are no more active locations to update, stop tracking.
+          if (locations.isEmpty) return _stopTrackingLocation();
 
-      // Otherwise, start tracking the user's location.
-      return _startTrackingLocation();
-    });
+          // Otherwise, start tracking the user's location.
+          return _startTrackingLocation();
+        });
 
     return _client.getActiveLiveLocations().ignore();
   }

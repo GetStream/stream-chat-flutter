@@ -94,8 +94,7 @@ void main() {
       final mockChannel = MockChannel();
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value([]));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value([]));
       when(() => mockChannel.state.messages).thenReturn([]);
 
       await tester.pumpWidget(
@@ -131,8 +130,7 @@ void main() {
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value([]));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value([]));
       when(() => mockChannel.state.messages).thenReturn([]);
 
       await tester.pumpWidget(
@@ -173,8 +171,7 @@ void main() {
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       final messages = _generateMessages();
       when(() => mockChannel.state.messages).thenReturn(messages);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
 
       await tester.pumpWidget(
@@ -193,13 +190,15 @@ void main() {
 
       await coreState.paginateData();
 
-      verify(() => mockChannel.query(
-            messagesPagination: any(
-              named: 'messagesPagination',
-              that: wrapMatcher((it) => it.limit == paginationLimit),
-            ),
-            preferOffline: any(named: 'preferOffline'),
-          )).called(1);
+      verify(
+        () => mockChannel.query(
+          messagesPagination: any(
+            named: 'messagesPagination',
+            that: wrapMatcher((it) => it.limit == paginationLimit),
+          ),
+          preferOffline: any(named: 'preferOffline'),
+        ),
+      ).called(1);
     },
   );
 
@@ -223,8 +222,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
       const error = 'Error! Error! Error!';
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.error(error));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.error(error));
       when(() => mockChannel.state.messages).thenReturn([]);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
@@ -254,8 +252,7 @@ void main() {
         key: messageListCoreKey,
         messageListBuilder: (_, __) => const Offstage(),
         loadingBuilder: (BuildContext context) => const Offstage(),
-        emptyBuilder: (BuildContext context) =>
-            const Offstage(key: emptyWidgetKey),
+        emptyBuilder: (BuildContext context) => const Offstage(key: emptyWidgetKey),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
@@ -264,8 +261,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
       const messages = <Message>[];
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
@@ -302,19 +298,20 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(false);
-      when(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            membersPagination: any(named: 'membersPagination'),
-            messagesPagination: any(named: 'messagesPagination'),
-            preferOffline: any(named: 'preferOffline'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => const ChannelState());
+      when(
+        () => mockChannel.query(
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          membersPagination: any(named: 'membersPagination'),
+          messagesPagination: any(named: 'messagesPagination'),
+          preferOffline: any(named: 'preferOffline'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer((_) async => const ChannelState());
 
       const messages = <Message>[];
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
@@ -358,8 +355,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
       final messages = _generateMessages();
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
@@ -408,8 +404,7 @@ void main() {
       final threads = {parentMessage.id: messages};
 
       when(() => mockChannel.state.threads).thenReturn(threads);
-      when(() => mockChannel.state.threadsStream)
-          .thenAnswer((_) => Stream.value(threads));
+      when(() => mockChannel.state.threadsStream).thenAnswer((_) => Stream.value(threads));
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       when(

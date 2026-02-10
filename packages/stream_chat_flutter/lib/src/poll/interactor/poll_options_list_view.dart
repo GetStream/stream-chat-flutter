@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/avatars/user_avatar.dart';
+import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar_stack.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template pollOptionsListView}
@@ -198,9 +197,7 @@ class PollOptionItem extends StatelessWidget {
                   if (showProgressBar)
                     OptionVotesProgressBar(
                       value: poll.voteRatioFor(option),
-                      borderRadius:
-                          theme.pollOptionVotesProgressBarBorderRadius ??
-                              BorderRadius.circular(4),
+                      borderRadius: theme.pollOptionVotesProgressBarBorderRadius ?? BorderRadius.circular(4),
                       trackColor: theme.pollOptionVotesProgressBarTrackColor,
                       valueColor: switch (poll.isOptionWinner(option)) {
                         true => theme.pollOptionVotesProgressBarWinnerColor,
@@ -209,7 +206,7 @@ class PollOptionItem extends StatelessWidget {
                     ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -230,9 +227,9 @@ class OptionVoters extends StatelessWidget {
     this.overlap = 0.5,
     required this.voters,
   }) : assert(
-          overlap >= 0 && overlap <= 1,
-          'Overlap must be between 0 and 1',
-        );
+         overlap >= 0 && overlap <= 1,
+         'Overlap must be between 0 and 1',
+       );
 
   /// The radius of the avatars.
   final double radius;
@@ -249,42 +246,7 @@ class OptionVoters extends StatelessWidget {
   Widget build(BuildContext context) {
     if (voters.isEmpty) return const Empty();
 
-    final theme = StreamChatTheme.of(context);
-
-    final diameter = radius * 2;
-    final width = diameter + (voters.length * diameter * overlap);
-
-    var overlapPadding = 0.0;
-
-    return SizedBox.fromSize(
-      size: Size(width, diameter),
-      child: Stack(
-        children: [
-          ...voters.map(
-            (user) {
-              overlapPadding += diameter * overlap;
-              return Positioned(
-                right: overlapPadding - (diameter * overlap),
-                bottom: 0,
-                top: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.colorTheme.barsBg,
-                  ),
-                  padding: const EdgeInsets.all(1),
-                  child: StreamUserAvatar(
-                    user: user,
-                    constraints: BoxConstraints.tight(Size.fromRadius(radius)),
-                    showOnlineStatus: false,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+    return StreamUserAvatarStack(size: .xs, users: voters, overlap: overlap);
   }
 }
 

@@ -325,8 +325,7 @@ void main() {
         );
       });
 
-      test('should handle both userId and userName with special characters',
-          () {
+      test('should handle both userId and userName with special characters', () {
         final user = User(id: 'user[123]', name: 'Test (X)');
 
         final message = Message(

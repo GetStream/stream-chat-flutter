@@ -13,10 +13,11 @@ typedef SwipeDirectionCallback = void Function(SwipeDirection direction);
 /// dismissing action.
 ///
 /// Used by [Swipeable.backgroundBuilder].
-typedef BackgroundWidgetBuilder = Widget Function(
-  BuildContext context,
-  SwipeUpdateDetails details,
-);
+typedef BackgroundWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      SwipeUpdateDetails details,
+    );
 
 /// The direction in which a [Swipeable] can be swiped.
 enum SwipeDirection {
@@ -32,7 +33,7 @@ enum SwipeDirection {
   startToEnd,
 
   /// The [Swipeable] cannot be swiped by dragging.
-  none
+  none,
 }
 
 /// A widget that can be swiped in a specified direction.
@@ -95,9 +96,9 @@ class Swipeable extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.behavior = HitTestBehavior.opaque,
   }) : assert(
-          swipeThreshold >= 0.0 && swipeThreshold <= 1.0,
-          'swipeThreshold must be between 0.0 and 1.0',
-        );
+         swipeThreshold >= 0.0 && swipeThreshold <= 1.0,
+         'swipeThreshold must be between 0.0 and 1.0',
+       );
 
   /// The widget below this widget in the tree.
   ///
@@ -225,8 +226,7 @@ class _SwipeableClipper extends CustomClipper<Rect> {
   }
 }
 
-class _SwipeableState extends State<Swipeable>
-    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+class _SwipeableState extends State<Swipeable> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
@@ -261,13 +261,9 @@ class _SwipeableState extends State<Swipeable>
     }
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
-        return extent < 0
-            ? SwipeDirection.startToEnd
-            : SwipeDirection.endToStart;
+        return extent < 0 ? SwipeDirection.startToEnd : SwipeDirection.endToStart;
       case TextDirection.ltr:
-        return extent > 0
-            ? SwipeDirection.startToEnd
-            : SwipeDirection.endToStart;
+        return extent > 0 ? SwipeDirection.startToEnd : SwipeDirection.endToStart;
     }
   }
 
@@ -280,8 +276,7 @@ class _SwipeableState extends State<Swipeable>
   void _handleDragStart(DragStartDetails details) {
     _dragUnderway = true;
     if (_moveController!.isAnimating) {
-      _dragExtent =
-          _moveController!.value * _overallDragAxisExtent * _dragExtent.sign;
+      _dragExtent = _moveController!.value * _overallDragAxisExtent * _dragExtent.sign;
       _moveController!.stop();
     } else {
       _dragExtent = 0.0;

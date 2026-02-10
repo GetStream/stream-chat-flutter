@@ -30,19 +30,15 @@ class StreamPollOptionVotesDialogTheme extends InheritedTheme {
   /// If there is no enclosing [StreamPollOptionVotesDialogTheme] widget, then
   /// [StreamChatThemeData.pollOptionVotesDialogTheme] is used.
   static StreamPollOptionVotesDialogThemeData of(BuildContext context) {
-    final pollCommentsDialogTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamPollOptionVotesDialogTheme>();
-    return pollCommentsDialogTheme?.data ??
-        StreamChatTheme.of(context).pollOptionVotesDialogTheme;
+    final pollCommentsDialogTheme = context.dependOnInheritedWidgetOfExactType<StreamPollOptionVotesDialogTheme>();
+    return pollCommentsDialogTheme?.data ?? StreamChatTheme.of(context).pollOptionVotesDialogTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamPollOptionVotesDialogTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamPollOptionVotesDialogTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamPollOptionVotesDialogTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamPollOptionVotesDialogTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamPollOptionVotesDialogThemeData}
@@ -103,25 +99,17 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
     TextStyle? pollOptionWinnerVoteCountTextStyle,
     Color? pollOptionVoteItemBackgroundColor,
     BorderRadius? pollOptionVoteItemBorderRadius,
-  }) =>
-      StreamPollOptionVotesDialogThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        appBarElevation: appBarElevation ?? this.appBarElevation,
-        appBarBackgroundColor:
-            appBarBackgroundColor ?? this.appBarBackgroundColor,
-        appBarForegroundColor:
-            appBarForegroundColor ?? this.appBarForegroundColor,
-        appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
-        pollOptionVoteCountTextStyle:
-            pollOptionVoteCountTextStyle ?? this.pollOptionVoteCountTextStyle,
-        pollOptionWinnerVoteCountTextStyle:
-            pollOptionWinnerVoteCountTextStyle ??
-                this.pollOptionWinnerVoteCountTextStyle,
-        pollOptionVoteItemBackgroundColor: pollOptionVoteItemBackgroundColor ??
-            this.pollOptionVoteItemBackgroundColor,
-        pollOptionVoteItemBorderRadius: pollOptionVoteItemBorderRadius ??
-            this.pollOptionVoteItemBorderRadius,
-      );
+  }) => StreamPollOptionVotesDialogThemeData(
+    backgroundColor: backgroundColor ?? this.backgroundColor,
+    appBarElevation: appBarElevation ?? this.appBarElevation,
+    appBarBackgroundColor: appBarBackgroundColor ?? this.appBarBackgroundColor,
+    appBarForegroundColor: appBarForegroundColor ?? this.appBarForegroundColor,
+    appBarTitleTextStyle: appBarTitleTextStyle ?? this.appBarTitleTextStyle,
+    pollOptionVoteCountTextStyle: pollOptionVoteCountTextStyle ?? this.pollOptionVoteCountTextStyle,
+    pollOptionWinnerVoteCountTextStyle: pollOptionWinnerVoteCountTextStyle ?? this.pollOptionWinnerVoteCountTextStyle,
+    pollOptionVoteItemBackgroundColor: pollOptionVoteItemBackgroundColor ?? this.pollOptionVoteItemBackgroundColor,
+    pollOptionVoteItemBorderRadius: pollOptionVoteItemBorderRadius ?? this.pollOptionVoteItemBorderRadius,
+  );
 
   /// Merges this [StreamPollOptionVotesDialogThemeData] with the [other].
   StreamPollOptionVotesDialogThemeData merge(
@@ -135,10 +123,8 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
       appBarForegroundColor: other.appBarForegroundColor,
       appBarTitleTextStyle: other.appBarTitleTextStyle,
       pollOptionVoteCountTextStyle: other.pollOptionVoteCountTextStyle,
-      pollOptionWinnerVoteCountTextStyle:
-          other.pollOptionWinnerVoteCountTextStyle,
-      pollOptionVoteItemBackgroundColor:
-          other.pollOptionVoteItemBackgroundColor,
+      pollOptionWinnerVoteCountTextStyle: other.pollOptionWinnerVoteCountTextStyle,
+      pollOptionVoteItemBackgroundColor: other.pollOptionVoteItemBackgroundColor,
       pollOptionVoteItemBorderRadius: other.pollOptionVoteItemBorderRadius,
     );
   }
@@ -152,12 +138,9 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
     return StreamPollOptionVotesDialogThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       appBarElevation: lerpDouble(a?.appBarElevation, b?.appBarElevation, t),
-      appBarBackgroundColor:
-          Color.lerp(a?.appBarBackgroundColor, b?.appBarBackgroundColor, t),
-      appBarForegroundColor:
-          Color.lerp(a?.appBarForegroundColor, b?.appBarForegroundColor, t),
-      appBarTitleTextStyle:
-          TextStyle.lerp(a?.appBarTitleTextStyle, b?.appBarTitleTextStyle, t),
+      appBarBackgroundColor: Color.lerp(a?.appBarBackgroundColor, b?.appBarBackgroundColor, t),
+      appBarForegroundColor: Color.lerp(a?.appBarForegroundColor, b?.appBarForegroundColor, t),
+      appBarTitleTextStyle: TextStyle.lerp(a?.appBarTitleTextStyle, b?.appBarTitleTextStyle, t),
       pollOptionVoteCountTextStyle: TextStyle.lerp(
         a?.pollOptionVoteCountTextStyle,
         b?.pollOptionVoteCountTextStyle,
@@ -173,11 +156,13 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
         b?.pollOptionVoteItemBackgroundColor,
         t,
       ),
-      pollOptionVoteItemBorderRadius: BorderRadiusGeometry.lerp(
-        a?.pollOptionVoteItemBorderRadius,
-        b?.pollOptionVoteItemBorderRadius,
-        t,
-      ) as BorderRadius?,
+      pollOptionVoteItemBorderRadius:
+          BorderRadiusGeometry.lerp(
+                a?.pollOptionVoteItemBorderRadius,
+                b?.pollOptionVoteItemBorderRadius,
+                t,
+              )
+              as BorderRadius?,
     );
   }
 
@@ -191,12 +176,9 @@ class StreamPollOptionVotesDialogThemeData with Diagnosticable {
           other.appBarForegroundColor == appBarForegroundColor &&
           other.appBarTitleTextStyle == appBarTitleTextStyle &&
           other.pollOptionVoteCountTextStyle == pollOptionVoteCountTextStyle &&
-          other.pollOptionWinnerVoteCountTextStyle ==
-              pollOptionWinnerVoteCountTextStyle &&
-          other.pollOptionVoteItemBackgroundColor ==
-              pollOptionVoteItemBackgroundColor &&
-          other.pollOptionVoteItemBorderRadius ==
-              pollOptionVoteItemBorderRadius;
+          other.pollOptionWinnerVoteCountTextStyle == pollOptionWinnerVoteCountTextStyle &&
+          other.pollOptionVoteItemBackgroundColor == pollOptionVoteItemBackgroundColor &&
+          other.pollOptionVoteItemBorderRadius == pollOptionVoteItemBorderRadius;
 
   @override
   int get hashCode =>

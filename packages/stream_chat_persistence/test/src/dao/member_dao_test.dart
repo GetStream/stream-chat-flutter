@@ -129,15 +129,11 @@ void main() {
     final newFetchedMembers = await memberDao.getMembersByCid(cid);
     expect(newFetchedMembers.length, fetchedMembers.length + 1);
     expect(
-      newFetchedMembers
-          .firstWhere((it) => it.user!.id == copyMember.user!.id)
-          .banned,
+      newFetchedMembers.firstWhere((it) => it.user!.id == copyMember.user!.id).banned,
       true,
     );
     expect(
-      newFetchedMembers
-          .where((it) => it.user!.id == newMember.user!.id)
-          .isNotEmpty,
+      newFetchedMembers.where((it) => it.user!.id == newMember.user!.id).isNotEmpty,
       true,
     );
   });

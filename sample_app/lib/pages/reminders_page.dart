@@ -15,20 +15,21 @@ class RemindersPage extends StatefulWidget {
 }
 
 class _RemindersPageState extends State<RemindersPage> {
-  late final controller = StreamMessageReminderListController(
-    client: StreamChat.of(context).client,
-  )..eventListener = (event) {
-      if (event.type == EventType.connectionRecovered ||
-          event.type == EventType.notificationReminderDue) {
-        // This will create the query filter with the updated current date
-        // and time, so that the reminders list is updated with the new
-        // reminders that are due.
-        onFilterChanged(_currentFilter);
-      }
+  late final controller =
+      StreamMessageReminderListController(
+          client: StreamChat.of(context).client,
+        )
+        ..eventListener = (event) {
+          if (event.type == EventType.connectionRecovered || event.type == EventType.notificationReminderDue) {
+            // This will create the query filter with the updated current date
+            // and time, so that the reminders list is updated with the new
+            // reminders that are due.
+            onFilterChanged(_currentFilter);
+          }
 
-      // Returning false as we also want the controller to handle the event.
-      return false;
-    };
+          // Returning false as we also want the controller to handle the event.
+          return false;
+        };
 
   @override
   void dispose() {
@@ -209,7 +210,8 @@ enum MessageRemindersFilter {
   overdue('Overdue'),
   upcoming('Upcoming'),
   scheduled('Scheduled'),
-  savedForLater('Saved for later');
+  savedForLater('Saved for later')
+  ;
 
   const MessageRemindersFilter(this.label);
   final String label;
@@ -238,12 +240,10 @@ class MessageRemindersFilterSelection extends StatefulWidget {
   final ValueSetter<MessageRemindersFilter> onSelected;
 
   @override
-  State<MessageRemindersFilterSelection> createState() =>
-      _MessageRemindersFilterSelectionState();
+  State<MessageRemindersFilterSelection> createState() => _MessageRemindersFilterSelectionState();
 }
 
-class _MessageRemindersFilterSelectionState
-    extends State<MessageRemindersFilterSelection> {
+class _MessageRemindersFilterSelectionState extends State<MessageRemindersFilterSelection> {
   final _filterKeys = <MessageRemindersFilter, GlobalKey>{};
 
   @override

@@ -76,16 +76,12 @@ class ChooseUserPage extends StatelessWidget {
                             showDialog(
                               barrierDismissible: false,
                               context: context,
-                              barrierColor: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .overlay,
+                              barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
                               builder: (context) => Center(
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .barsBg,
+                                    color: StreamChatTheme.of(context).colorTheme.barsBg,
                                   ),
                                   height: 100,
                                   width: 100,
@@ -96,8 +92,7 @@ class ChooseUserPage extends StatelessWidget {
                               ),
                             );
 
-                            final client =
-                                context.read<InitNotifier>().initData!.client;
+                            final client = context.read<InitNotifier>().initData!.client;
 
                             final router = GoRouter.of(context);
 
@@ -127,46 +122,32 @@ class ChooseUserPage extends StatelessWidget {
                             router.replaceNamed(Routes.CHANNEL_LIST_PAGE.name);
                           },
                           leading: StreamUserAvatar(
+                            size: .lg,
                             user: user,
-                            constraints: BoxConstraints.tight(
-                              const Size.fromRadius(20),
-                            ),
                           ),
                           title: Text(
                             user.name,
-                            style:
-                                StreamChatTheme.of(context).textTheme.bodyBold,
+                            style: StreamChatTheme.of(context).textTheme.bodyBold,
                           ),
                           subtitle: Text(
                             AppLocalizations.of(context).streamTestAccount,
-                            style: StreamChatTheme.of(context)
-                                .textTheme
-                                .footnote
-                                .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .textLowEmphasis,
-                                ),
+                            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                              color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                            ),
                           ),
                           trailing: StreamSvgIcon(
                             icon: StreamSvgIcons.arrowRight,
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentPrimary,
+                            color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                           ),
                         );
                       }),
                       ListTile(
-                        onTap: () => GoRouter.of(context)
-                            .pushNamed(Routes.ADVANCED_OPTIONS.name),
+                        onTap: () => GoRouter.of(context).pushNamed(Routes.ADVANCED_OPTIONS.name),
                         leading: CircleAvatar(
-                          backgroundColor:
-                              StreamChatTheme.of(context).colorTheme.borders,
+                          backgroundColor: StreamChatTheme.of(context).colorTheme.borders,
                           child: StreamSvgIcon(
                             icon: StreamSvgIcons.settings,
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .textHighEmphasis,
+                            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                           ),
                         ),
                         title: Text(
@@ -175,14 +156,9 @@ class ChooseUserPage extends StatelessWidget {
                         ),
                         subtitle: Text(
                           AppLocalizations.of(context).customSettings,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .footnote
-                              .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .textLowEmphasis,
-                              ),
+                          style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                          ),
                         ),
                         trailing: SvgPicture.asset(
                           'assets/icon_arrow_right.svg',

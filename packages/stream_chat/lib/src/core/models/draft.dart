@@ -73,14 +73,14 @@ class Draft extends Equatable implements ComparableFieldProvider {
 
   @override
   List<Object?> get props => [
-        channelCid,
-        createdAt,
-        message,
-        channel,
-        parentId,
-        parentMessage,
-        quotedMessage,
-      ];
+    channelCid,
+    createdAt,
+    message,
+    channel,
+    parentId,
+    parentMessage,
+    quotedMessage,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

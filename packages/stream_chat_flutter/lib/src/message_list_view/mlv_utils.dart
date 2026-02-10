@@ -16,8 +16,7 @@ int getInitialIndex(
   if (currentUser == null) return 0;
 
   final messages = [
-    ...channelState.channel.state!.messages
-        .where(messageFilter ?? defaultMessageFilter(currentUser.id))
+    ...channelState.channel.state!.messages.where(messageFilter ?? defaultMessageFilter(currentUser.id)),
   ].reversed.toList(growable: false);
 
   // Return the initial message index if available.

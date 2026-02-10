@@ -50,17 +50,14 @@ class SearchTextField extends StatelessWidget {
                   ),
                   child: StreamSvgIcon(
                     icon: StreamSvgIcons.search,
-                    color:
-                        StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                     size: 24,
                   ),
                 ),
                 hintText: hintText,
                 hintStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(.5)),
+                  color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
+                ),
                 contentPadding: EdgeInsets.zero,
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,

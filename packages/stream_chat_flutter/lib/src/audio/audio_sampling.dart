@@ -36,23 +36,21 @@ List<double> downSample(List<double> data, int targetOutputSize) {
     final previousBucketRefPoint = data[lastSelectedPointIndex];
     final nextBucketMean = _getNextBucketMean(data, bucketIndex, bucketSize);
 
-    final currentBucketStartIndex =
-        ((bucketIndex - 1) * bucketSize).floor() + 1;
+    final currentBucketStartIndex = ((bucketIndex - 1) * bucketSize).floor() + 1;
     final nextBucketStartIndex = (bucketIndex * bucketSize).floor() + 1;
-    final countUnitsBetweenAtoC =
-        1 + nextBucketStartIndex - currentBucketStartIndex;
+    final countUnitsBetweenAtoC = 1 + nextBucketStartIndex - currentBucketStartIndex;
 
     var maxArea = -1.0;
     var triangleArea = -1.0;
     double? maxAreaPoint;
 
-    for (var currentPointIndex = currentBucketStartIndex;
-        currentPointIndex < nextBucketStartIndex;
-        currentPointIndex++) {
-      final countUnitsBetweenAtoB =
-          (currentPointIndex - currentBucketStartIndex).abs() + 1;
-      final countUnitsBetweenBtoC =
-          countUnitsBetweenAtoC - countUnitsBetweenAtoB;
+    for (
+      var currentPointIndex = currentBucketStartIndex;
+      currentPointIndex < nextBucketStartIndex;
+      currentPointIndex++
+    ) {
+      final countUnitsBetweenAtoB = (currentPointIndex - currentBucketStartIndex).abs() + 1;
+      final countUnitsBetweenBtoC = countUnitsBetweenAtoC - countUnitsBetweenAtoB;
       final currentPointValue = data[currentPointIndex];
 
       triangleArea = _triangleAreaHeron(
@@ -107,11 +105,8 @@ double _getNextBucketMean(
   double bucketSize,
 ) {
   final nextBucketStartIndex = (currentBucketIndex * bucketSize).floor() + 1;
-  var nextNextBucketStartIndex =
-      ((currentBucketIndex + 1) * bucketSize).floor() + 1;
-  nextNextBucketStartIndex = nextNextBucketStartIndex < data.length
-      ? nextNextBucketStartIndex
-      : data.length;
+  var nextNextBucketStartIndex = ((currentBucketIndex + 1) * bucketSize).floor() + 1;
+  nextNextBucketStartIndex = nextNextBucketStartIndex < data.length ? nextNextBucketStartIndex : data.length;
 
   return _mean(data.sublist(nextBucketStartIndex, nextNextBucketStartIndex));
 }

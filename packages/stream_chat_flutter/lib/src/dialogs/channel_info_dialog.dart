@@ -39,9 +39,7 @@ class ChannelInfoDialog extends StatelessWidget {
             children: [
               StreamChannelInfo(
                 channel: channel,
-                textStyle: StreamChatTheme.of(context)
-                    .channelPreviewTheme
-                    .subtitleStyle,
+                textStyle: StreamChatTheme.of(context).channelPreviewTheme.subtitleStyle,
               ),
             ],
           ),
@@ -50,18 +48,12 @@ class ChannelInfoDialog extends StatelessWidget {
             Column(
               children: [
                 StreamUserAvatar(
+                  size: .xl,
                   user: members
                       .firstWhere(
                         (e) => e.user?.id != userAsMember.user?.id,
                       )
                       .user!,
-                  constraints: const BoxConstraints.tightFor(
-                    height: 64,
-                    width: 64,
-                  ),
-                  borderRadius: BorderRadius.circular(32),
-                  onlineIndicatorConstraints:
-                      BoxConstraints.tight(const Size(12, 12)),
                 ),
                 const SizedBox(height: 6),
                 Text(

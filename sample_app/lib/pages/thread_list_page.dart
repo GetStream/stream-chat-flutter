@@ -29,9 +29,7 @@ class _ThreadListPageState extends State<ThreadListPage> {
           valueListenable: controller.unseenThreadIds,
           builder: (_, unreadThreads, __) => StreamUnreadThreadsBanner(
             unreadThreads: unreadThreads,
-            onTap: () => controller
-                .refresh(resetValue: false)
-                .then((_) => controller.clearUnseenThreadIds()),
+            onTap: () => controller.refresh(resetValue: false).then((_) => controller.clearUnseenThreadIds()),
           ),
         ),
         Expanded(
@@ -41,9 +39,9 @@ class _ThreadListPageState extends State<ThreadListPage> {
               final channelCid = thread.channelCid;
 
               final channel = StreamChat.of(context).client.channel(
-                    channelCid.split(':')[0],
-                    id: channelCid.split(':')[1],
-                  );
+                channelCid.split(':')[0],
+                id: channelCid.split(':')[1],
+              );
 
               Navigator.of(context).push(
                 MaterialPageRoute(

@@ -6,8 +6,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../material_app_wrapper.dart';
 
 void main() {
-  testWidgets('StreamUploadProgressIndicator at 0% with no background',
-      (tester) async {
+  testWidgets('StreamUploadProgressIndicator at 0% with no background', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: StreamChatTheme(
@@ -28,8 +27,7 @@ void main() {
     expect(find.text('0%'), findsOneWidget);
   });
 
-  testWidgets('StreamUploadProgressIndicator at 50% with no background',
-      (tester) async {
+  testWidgets('StreamUploadProgressIndicator at 50% with no background', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: StreamChatTheme(
@@ -50,8 +48,7 @@ void main() {
     expect(find.text('50%'), findsOneWidget);
   });
 
-  testWidgets('StreamUploadProgressIndicator at 100% with no background',
-      (tester) async {
+  testWidgets('StreamUploadProgressIndicator at 100% with no background', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: StreamChatTheme(
@@ -72,8 +69,7 @@ void main() {
     expect(find.text('100%'), findsOneWidget);
   });
 
-  testWidgets('StreamUploadProgressIndicator at 50% with background',
-      (tester) async {
+  testWidgets('StreamUploadProgressIndicator at 50% with background', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: StreamChatTheme(
@@ -91,9 +87,7 @@ void main() {
     );
 
     final backgroundColor =
-        ((find.byType(DecoratedBox).evaluate().first.widget as DecoratedBox)
-                .decoration as BoxDecoration)
-            .color;
+        ((find.byType(DecoratedBox).evaluate().first.widget as DecoratedBox).decoration as BoxDecoration).color;
 
     expect(const Color(0x99000000), backgroundColor);
   });

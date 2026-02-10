@@ -1,4 +1,4 @@
-name: stream_chat_flutter
+name: stream_chat_flutter_workspace
 repository: https://github.com/GetStream/stream-chat-flutter
 
 packages:
@@ -18,9 +18,9 @@ command:
   bootstrap:
     # Dart and Flutter environment used in the project.
     environment:
-      sdk: ^3.6.2
+      sdk: ^3.10.0
       # We are not using carat '^' syntax here because flutter don't follow semantic versioning.
-      flutter: ">=3.27.4"
+      flutter: ">=3.38.1"
 
     # List of all the dependencies used in the project.
     dependencies:
@@ -91,6 +91,12 @@ command:
       stream_chat_persistence: ^10.0.0-beta.12
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
+      # TODO: Replace with hosted version before merging PR
+      stream_core_flutter:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: f0af49b3cb1426efed625d0a24e58874363e9538
+          path: packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
       url_launcher: ^6.3.0

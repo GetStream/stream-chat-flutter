@@ -13,9 +13,9 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
     this.onDeleteConversationTap,
     this.onCancelTap,
   }) : assert(
-          channel.state != null,
-          'Channel ${channel.id} is not initialized',
-        );
+         channel.state != null,
+         'Channel ${channel.id} is not initialized',
+       );
 
   /// The [Channel] to show information about.
   final Channel channel;
@@ -94,19 +94,15 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  StreamUserAvatar(
-                    user: user,
-                    constraints: const BoxConstraints.tightFor(
-                      height: 64,
-                      width: 64,
+                  GestureDetector(
+                    onTap: switch (onMemberTap) {
+                      final onTap? => () => onTap(member),
+                      _ => null,
+                    },
+                    child: StreamUserAvatar(
+                      size: .xl,
+                      user: user,
                     ),
-                    borderRadius: BorderRadius.circular(32),
-                    onlineIndicatorConstraints: BoxConstraints.tight(
-                      const Size(12, 12),
-                    ),
-                    onTap: onMemberTap != null
-                        ? (_) => onMemberTap!(member)
-                        : null,
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -259,30 +255,29 @@ Future<T?> showChannelInfoModalBottomSheet<T>({
   VoidCallback? onLeaveChannelTap,
   VoidCallback? onDeleteConversationTap,
   VoidCallback? onCancelTap,
-}) =>
-    showModalBottomSheet<T>(
-      context: context,
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      shape: shape,
-      clipBehavior: clipBehavior,
-      constraints: constraints,
-      barrierColor: barrierColor,
-      isScrollControlled: isScrollControlled,
-      useRootNavigator: useRootNavigator,
-      isDismissible: isDismissible,
-      enableDrag: enableDrag,
-      routeSettings: routeSettings,
-      transitionAnimationController: transitionAnimationController,
-      builder: (BuildContext context) => StreamChannelInfoBottomSheet(
-        channel: channel,
-        onMemberTap: onMemberTap,
-        onViewInfoTap: onViewInfoTap,
-        onLeaveChannelTap: onLeaveChannelTap,
-        onDeleteConversationTap: onDeleteConversationTap,
-        onCancelTap: onCancelTap,
-      ),
-    );
+}) => showModalBottomSheet<T>(
+  context: context,
+  backgroundColor: backgroundColor,
+  elevation: elevation,
+  shape: shape,
+  clipBehavior: clipBehavior,
+  constraints: constraints,
+  barrierColor: barrierColor,
+  isScrollControlled: isScrollControlled,
+  useRootNavigator: useRootNavigator,
+  isDismissible: isDismissible,
+  enableDrag: enableDrag,
+  routeSettings: routeSettings,
+  transitionAnimationController: transitionAnimationController,
+  builder: (BuildContext context) => StreamChannelInfoBottomSheet(
+    channel: channel,
+    onMemberTap: onMemberTap,
+    onViewInfoTap: onViewInfoTap,
+    onLeaveChannelTap: onLeaveChannelTap,
+    onDeleteConversationTap: onDeleteConversationTap,
+    onCancelTap: onCancelTap,
+  ),
+);
 
 /// Shows a material design bottom sheet in the nearest [Scaffold] ancestor. If
 /// you wish to show a persistent bottom sheet, use [Scaffold.bottomSheet].
@@ -339,21 +334,20 @@ PersistentBottomSheetController showChannelInfoBottomSheet<T>({
   VoidCallback? onLeaveChannelTap,
   VoidCallback? onDeleteConversationTap,
   VoidCallback? onCancelTap,
-}) =>
-    showBottomSheet(
-      context: context,
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      shape: shape,
-      clipBehavior: clipBehavior,
-      constraints: constraints,
-      transitionAnimationController: transitionAnimationController,
-      builder: (BuildContext context) => StreamChannelInfoBottomSheet(
-        channel: channel,
-        onMemberTap: onMemberTap,
-        onViewInfoTap: onViewInfoTap,
-        onLeaveChannelTap: onLeaveChannelTap,
-        onDeleteConversationTap: onDeleteConversationTap,
-        onCancelTap: onCancelTap,
-      ),
-    );
+}) => showBottomSheet(
+  context: context,
+  backgroundColor: backgroundColor,
+  elevation: elevation,
+  shape: shape,
+  clipBehavior: clipBehavior,
+  constraints: constraints,
+  transitionAnimationController: transitionAnimationController,
+  builder: (BuildContext context) => StreamChannelInfoBottomSheet(
+    channel: channel,
+    onMemberTap: onMemberTap,
+    onViewInfoTap: onViewInfoTap,
+    onLeaveChannelTap: onLeaveChannelTap,
+    onDeleteConversationTap: onDeleteConversationTap,
+    onCancelTap: onCancelTap,
+  ),
+);

@@ -21,10 +21,11 @@ const _kMentionTrigger = '@';
 
 /// Signature for the function that determines if a [matchedUri] should be
 /// previewed as an OG Attachment.
-typedef OgPreviewFilter = bool Function(
-  Uri matchedUri,
-  String messageText,
-);
+typedef OgPreviewFilter =
+    bool Function(
+      Uri matchedUri,
+      String messageText,
+    );
 
 /// Different types of hints that can be shown in [StreamMessageInput].
 enum HintType {
@@ -47,10 +48,11 @@ enum HintType {
 typedef HintGetter = String? Function(BuildContext context, HintType type);
 
 /// The signature for the function that builds the list of actions.
-typedef ActionsBuilder = List<Widget> Function(
-  BuildContext context,
-  List<Widget> defaultActions,
-);
+typedef ActionsBuilder =
+    List<Widget> Function(
+      BuildContext context,
+      List<Widget> defaultActions,
+    );
 
 /// Inactive state:
 ///
@@ -152,8 +154,7 @@ class StreamMessageInput extends StatefulWidget {
     this.onQuotedMessageCleared,
     this.enableActionAnimation = true,
     this.sendMessageKeyPredicate = _defaultSendMessageKeyPredicate,
-    this.clearQuotedMessageKeyPredicate =
-        _defaultClearQuotedMessageKeyPredicate,
+    this.clearQuotedMessageKeyPredicate = _defaultClearQuotedMessageKeyPredicate,
     this.ogPreviewFilter = _defaultOgPreviewFilter,
     this.hintGetter = _defaultHintGetter,
     this.contentInsertionConfiguration,
@@ -307,8 +308,7 @@ class StreamMessageInput extends StatefulWidget {
   ///
   /// This is used to build the thumbnail for the attachment in the quoted
   /// message.
-  final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
-      quotedMessageAttachmentThumbnailBuilders;
+  final Map<String, QuotedMessageAttachmentThumbnailBuilder>? quotedMessageAttachmentThumbnailBuilders;
 
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
@@ -516,8 +516,7 @@ class StreamMessageInput extends StatefulWidget {
 }
 
 /// State of [StreamMessageInput]
-class StreamMessageInputState extends State<StreamMessageInput>
-    with RestorationMixin<StreamMessageInput> {
+class StreamMessageInputState extends State<StreamMessageInput> with RestorationMixin<StreamMessageInput> {
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool _actionsShrunk = false;
@@ -525,19 +524,16 @@ class StreamMessageInputState extends State<StreamMessageInput>
   late StreamChatThemeData _streamChatTheme;
   late StreamMessageInputThemeData _messageInputTheme;
 
-  bool get _hasQuotedMessage =>
-      _effectiveController.message.quotedMessage != null;
+  bool get _hasQuotedMessage => _effectiveController.message.quotedMessage != null;
 
   bool get _isEditing => !_effectiveController.message.state.isInitial;
 
   late final _audioRecorderController = StreamAudioRecorderController();
 
-  FocusNode get _effectiveFocusNode =>
-      widget.focusNode ?? (_focusNode ??= FocusNode());
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
   FocusNode? _focusNode;
 
-  StreamMessageInputController get _effectiveController =>
-      widget.messageInputController ?? _controller!.value;
+  StreamMessageInputController get _effectiveController => widget.messageInputController ?? _controller!.value;
   StreamRestorableMessageInputController? _controller;
 
   void _createLocalController([Message? message]) {
@@ -619,11 +615,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   void didUpdateWidget(covariant StreamMessageInput oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.messageInputController == null &&
-        oldWidget.messageInputController != null) {
+    if (widget.messageInputController == null && oldWidget.messageInputController != null) {
       _createLocalController(oldWidget.messageInputController!.message);
-    } else if (widget.messageInputController != null &&
-        oldWidget.messageInputController == null) {
+    } else if (widget.messageInputController != null && oldWidget.messageInputController == null) {
       unregisterFromRestoration(_controller!);
       _controller!.dispose();
       _controller = null;
@@ -671,17 +665,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final channel = StreamChannel.of(context).channel;
     final messageInput = switch (_buildAutocompleteMessageInput(context)) {
       final messageInput when channel.state != null => BetterStreamBuilder(
-          stream: channel.ownCapabilitiesStream.map(canSendOrUpdateMessage),
-          initialData: canSendOrUpdateMessage(channel.ownCapabilities),
-          builder: (context, enabled) {
-            // Allow the user to send messages if the user has the permission to
-            // send messages or if the user is editing a message.
-            if (enabled) return messageInput;
+        stream: channel.ownCapabilitiesStream.map(canSendOrUpdateMessage),
+        initialData: canSendOrUpdateMessage(channel.ownCapabilities),
+        builder: (context, enabled) {
+          // Allow the user to send messages if the user has the permission to
+          // send messages or if the user is editing a message.
+          if (enabled) return messageInput;
 
-            // Otherwise, show the no permission message.
-            return _buildNoPermissionMessage(context);
-          },
-        ),
+          // Otherwise, show the no permission message.
+          return _buildNoPermissionMessage(context);
+        },
+      ),
       final messageInput => messageInput,
     };
 
@@ -712,47 +706,48 @@ class StreamMessageInputState extends State<StreamMessageInput>
         StreamAutocompleteTrigger(
           trigger: _kCommandTrigger,
           triggerOnlyAtStart: true,
-          optionsViewBuilder: (
-            context,
-            autocompleteQuery,
-            messageEditingController,
-          ) {
-            final query = autocompleteQuery.query;
-            return StreamCommandAutocompleteOptions(
-              query: query,
-              channel: StreamChannel.of(context).channel,
-              onCommandSelected: (command) {
-                _effectiveController.command = command.name;
-                // removing the overlay after the command is selected
-                StreamAutocomplete.of(context).closeSuggestions();
+          optionsViewBuilder:
+              (
+                context,
+                autocompleteQuery,
+                messageEditingController,
+              ) {
+                final query = autocompleteQuery.query;
+                return StreamCommandAutocompleteOptions(
+                  query: query,
+                  channel: StreamChannel.of(context).channel,
+                  onCommandSelected: (command) {
+                    _effectiveController.command = command.name;
+                    // removing the overlay after the command is selected
+                    StreamAutocomplete.of(context).closeSuggestions();
+                  },
+                );
               },
-            );
-          },
         ),
         if (widget.enableMentionsOverlay)
           StreamAutocompleteTrigger(
             trigger: _kMentionTrigger,
-            optionsViewBuilder: (
-              context,
-              autocompleteQuery,
-              messageEditingController,
-            ) {
-              final query = autocompleteQuery.query;
-              return StreamMentionAutocompleteOptions(
-                query: query,
-                channel: StreamChannel.of(context).channel,
-                mentionAllAppUsers: widget.mentionAllAppUsers,
-                mentionsTileBuilder: widget.userMentionsTileBuilder,
-                onMentionUserTap: (user) {
-                  // adding the mentioned user to the controller.
-                  _effectiveController.addMentionedUser(user);
+            optionsViewBuilder:
+                (
+                  context,
+                  autocompleteQuery,
+                  messageEditingController,
+                ) {
+                  final query = autocompleteQuery.query;
+                  return StreamMentionAutocompleteOptions(
+                    query: query,
+                    channel: StreamChannel.of(context).channel,
+                    mentionAllAppUsers: widget.mentionAllAppUsers,
+                    mentionsTileBuilder: widget.userMentionsTileBuilder,
+                    onMentionUserTap: (user) {
+                      // adding the mentioned user to the controller.
+                      _effectiveController.addMentionedUser(user);
 
-                  // accepting the autocomplete option.
-                  StreamAutocomplete.of(context)
-                      .acceptAutocompleteOption(user.name);
+                      // accepting the autocomplete option.
+                      StreamAutocomplete.of(context).acceptAutocompleteOption(user.name);
+                    },
+                  );
                 },
-              );
-            },
           ),
       ],
     );
@@ -765,18 +760,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
   ) {
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
-      builder: (context, value, _) => Padding(
-        padding: widget.padding,
-        child: Column(
-          spacing: 8,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget?>[
-            _buildTopMessageArea(context),
-            _buildTextField(context),
-            _buildDmCheckbox(context),
-          ].nonNulls.toList(),
-        ),
+      builder: (context, value, _) => StreamChatMessageComposer(
+        controller: controller,
+        placeholder: _getHint(context) ?? '',
+        focusNode: focusNode,
+        onSendPressed: sendMessage,
       ),
     );
   }
@@ -838,17 +826,14 @@ class StreamMessageInputState extends State<StreamMessageInput>
         return Row(
           children: [
             if (!isAudioRecordingFlowActive) ...[
-              if (!_commandEnabled &&
-                  widget.actionsLocation == ActionsLocation.left)
+              if (!_commandEnabled && widget.actionsLocation == ActionsLocation.left)
                 _buildExpandActionsButton(context),
               const SizedBox(width: 4),
               Expanded(child: _buildTextInput(context)),
               const SizedBox(width: 4),
-              if (!_commandEnabled &&
-                  widget.actionsLocation == ActionsLocation.right)
+              if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
                 _buildExpandActionsButton(context),
-              if (widget.sendButtonLocation == SendButtonLocation.outside)
-                _buildSendButton(context),
+              if (widget.sendButtonLocation == SendButtonLocation.outside) _buildSendButton(context),
             ],
             if (widget.enableVoiceRecording)
               Expanded(
@@ -926,8 +911,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       firstChild: StreamMessageInputIconButton(
         color: _messageInputTheme.expandButtonColor,
         icon: Transform.rotate(
-          angle: (widget.actionsLocation == ActionsLocation.right ||
-                  widget.actionsLocation == ActionsLocation.rightInside)
+          angle:
+              (widget.actionsLocation == ActionsLocation.right || widget.actionsLocation == ActionsLocation.rightInside)
               ? pi
               : 0,
           child: const StreamSvgIcon(icon: StreamSvgIcons.emptyCircleRight),
@@ -938,9 +923,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
           }
         },
       ),
-      secondChild: widget.disableAttachments &&
-              !widget.showCommandsButton &&
-              !(widget.actionsBuilder != null)
+      secondChild: widget.disableAttachments && !widget.showCommandsButton && !(widget.actionsBuilder != null)
           ? const Empty()
           : Row(
               spacing: widget.spaceBetweenActions,
@@ -953,8 +936,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   List<Widget> _actionsList() {
     final channel = StreamChannel.of(context).channel;
     final defaultActions = <Widget>[
-      if (!widget.disableAttachments && channel.canUploadFile)
-        _buildAttachmentButton(context),
+      if (!widget.disableAttachments && channel.canUploadFile) _buildAttachmentButton(context),
       if (widget.showCommandsButton &&
           !_isEditing &&
           channel.state != null &&
@@ -975,8 +957,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       onPressed: _onAttachmentButtonPressed,
     );
 
-    return widget.attachmentButtonBuilder?.call(context, defaultButton) ??
-        defaultButton;
+    return widget.attachmentButtonBuilder?.call(context, defaultButton) ?? defaultButton;
   }
 
   Future<void> _onPollCreated(Poll poll) async {
@@ -1016,8 +997,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final allowedTypes = _getAllowedAttachmentPickerTypes();
 
     final messageInputTheme = StreamMessageInputTheme.of(context);
-    final useSystemPicker = widget.useSystemAttachmentPicker ||
-        (messageInputTheme.useSystemAttachmentPicker ?? false);
+    final useSystemPicker = widget.useSystemAttachmentPicker || (messageInputTheme.useSystemAttachmentPicker ?? false);
 
     final result = await showStreamAttachmentPickerModalBottomSheet(
       context: context,
@@ -1055,9 +1035,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   Widget _buildTextInput(BuildContext context) {
-    final margin = (widget.sendButtonLocation == SendButtonLocation.inside
-            ? const EdgeInsets.only(right: 8)
-            : EdgeInsets.zero) +
+    final margin =
+        (widget.sendButtonLocation == SendButtonLocation.inside ? const EdgeInsets.only(right: 8) : EdgeInsets.zero) +
         (widget.actionsLocation != ActionsLocation.left || _commandEnabled
             ? const EdgeInsets.only(left: 8)
             : EdgeInsets.zero);
@@ -1115,8 +1094,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   decoration: _getInputDecoration(context),
                   textCapitalization: widget.textCapitalization,
                   autocorrect: widget.autoCorrect,
-                  contentInsertionConfiguration:
-                      widget.contentInsertionConfiguration,
+                  contentInsertionConfiguration: widget.contentInsertionConfiguration,
                 ),
               ),
             ),
@@ -1207,11 +1185,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
               ),
             )
           : (widget.actionsLocation == ActionsLocation.leftInside
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [_buildExpandActionsButton(context)],
-                )
-              : null),
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [_buildExpandActionsButton(context)],
+                  )
+                : null),
       suffixIconConstraints: const BoxConstraints.tightFor(height: 40),
       prefixIconConstraints: const BoxConstraints.tightFor(height: 40),
       suffixIcon: Row(
@@ -1227,11 +1205,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
                 onPressed: _effectiveController.clear,
               ),
             ),
-          if (!_commandEnabled &&
-              widget.actionsLocation == ActionsLocation.rightInside)
+          if (!_commandEnabled && widget.actionsLocation == ActionsLocation.rightInside)
             _buildExpandActionsButton(context),
-          if (widget.sendButtonLocation == SendButtonLocation.inside)
-            _buildSendButton(context),
+          if (widget.sendButtonLocation == SendButtonLocation.inside) _buildSendButton(context),
         ].nonNulls.toList(),
       ),
     ).merge(passedDecoration);
@@ -1306,8 +1282,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
       if (_parsedMatch == null) return false;
 
-      return _parsedMatch.host.split('.').last.isValidTLD() &&
-          widget.ogPreviewFilter.call(_parsedMatch, value);
+      return _parsedMatch.host.split('.').last.isValidTLD() && widget.ogPreviewFilter.call(_parsedMatch, value);
     }).toList();
 
     // Reset the og attachment if the text doesn't contain any url
@@ -1325,19 +1300,20 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final client = StreamChat.maybeOf(context)?.client;
     if (client == null) return;
 
-    _enrichUrlOperation = CancelableOperation.fromFuture(
-      _enrichUrl(firstMatchedUrl, client),
-    ).then(
-      (ogAttachment) {
-        final attachment = Attachment.fromOGAttachment(ogAttachment);
-        _effectiveController.setOGAttachment(attachment);
-      },
-      onError: (error, stackTrace) {
-        // Reset the ogAttachment if there was an error
-        _effectiveController.clearOGAttachment();
-        widget.onError?.call(error, stackTrace);
-      },
-    );
+    _enrichUrlOperation =
+        CancelableOperation.fromFuture(
+          _enrichUrl(firstMatchedUrl, client),
+        ).then(
+          (ogAttachment) {
+            final attachment = Attachment.fromOGAttachment(ogAttachment);
+            _effectiveController.setOGAttachment(attachment);
+          },
+          onError: (error, stackTrace) {
+            // Reset the ogAttachment if there was an error
+            _effectiveController.clearOGAttachment();
+            widget.onError?.call(error, stackTrace);
+          },
+        );
   }
 
   final _ogAttachmentCache = <String, OGAttachmentResponse>{};
@@ -1380,16 +1356,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
       message: quotedMessage,
       messageTheme: _streamChatTheme.otherMessageTheme,
       onQuotedMessageClear: widget.onQuotedMessageCleared,
-      attachmentThumbnailBuilders:
-          widget.quotedMessageAttachmentThumbnailBuilders,
+      attachmentThumbnailBuilders: widget.quotedMessageAttachmentThumbnailBuilders,
     );
   }
 
   Widget _buildAttachments() {
     final attachments = _effectiveController.attachments;
-    final nonOGAttachments = attachments.where((it) {
-      return it.titleLink == null;
-    }).toList(growable: false);
+    final nonOGAttachments = attachments
+        .where((it) {
+          return it.titleLink == null;
+        })
+        .toList(growable: false);
 
     // If there are no attachments, return an empty widget
     if (nonOGAttachments.isEmpty) return const Empty();
@@ -1415,8 +1392,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
         voiceRecordingAttachmentBuilder: widget.voiceRecordingAttachmentBuilder,
         fileAttachmentBuilder: widget.fileAttachmentBuilder,
         mediaAttachmentBuilder: widget.mediaAttachmentBuilder,
-        voiceRecordingAttachmentListBuilder:
-            widget.voiceRecordingAttachmentListBuilder,
+        voiceRecordingAttachmentListBuilder: widget.voiceRecordingAttachmentListBuilder,
       ),
     );
   }
@@ -1442,8 +1418,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
       color: s.isNotEmpty
           ? _streamChatTheme.colorTheme.disabled
           : (isCommandOptionsVisible
-              ? _messageInputTheme.actionButtonColor!
-              : _messageInputTheme.actionButtonIdleColor!),
+                ? _messageInputTheme.actionButtonColor!
+                : _messageInputTheme.actionButtonIdleColor!),
       onPressed: () async {
         // Clear the text if the commands options are already visible.
         if (isCommandOptionsVisible) {
@@ -1460,8 +1436,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       },
     );
 
-    return widget.commandButtonBuilder?.call(context, defaultButton) ??
-        defaultButton;
+    return widget.commandButtonBuilder?.call(context, defaultButton) ?? defaultButton;
   }
 
   /// Adds an attachment to the [messageInputController.attachments] map
@@ -1497,8 +1472,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     var message = _effectiveController.value;
 
     if (!channel.canSendLinks &&
-        _urlRegex.allMatches(message.text ?? '').any((element) =>
-            element.group(0)?.split('.').last.isValidTLD() == true)) {
+        _urlRegex
+            .allMatches(message.text ?? '')
+            .any((element) => element.group(0)?.split('.').last.isValidTLD() == true)) {
       showInfoBottomSheet(
         context,
         icon: StreamSvgIcon(

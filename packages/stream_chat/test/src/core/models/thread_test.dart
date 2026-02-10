@@ -91,8 +91,7 @@ void main() {
 
       final updatedThread = thread.copyWith(draft: updatedDraft);
       expect(updatedThread.draft?.message.text, equals('Updated draft'));
-      expect(
-          updatedThread.draft?.message.text, isNot(equals(draft.message.text)));
+      expect(updatedThread.draft?.message.text, isNot(equals(draft.message.text)));
 
       // Test copyWith with null draft (removing draft)
       final removedDraftThread = thread.copyWith(draft: null);
@@ -209,8 +208,7 @@ void main() {
 
       // Test text equality instead of object identity
       expect(thread1.draft?.message.text, equals(thread2.draft?.message.text));
-      expect(thread1.draft?.message.text,
-          isNot(equals(thread3.draft?.message.text)));
+      expect(thread1.draft?.message.text, isNot(equals(thread3.draft?.message.text)));
     });
   });
 }

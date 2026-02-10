@@ -14,11 +14,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// - [onTap]: An optional callback triggered when the reaction indicator
 ///   is tapped.
 /// {@endtemplate}
-typedef ReactionIndicatorBuilder = Widget Function(
-  BuildContext context,
-  Message message,
-  VoidCallback? onTap,
-);
+typedef ReactionIndicatorBuilder =
+    Widget Function(
+      BuildContext context,
+      Message message,
+      VoidCallback? onTap,
+    );
 
 /// {@template streamReactionIndicator}
 /// A widget that displays a horizontal list of reaction icons that users have
@@ -115,8 +116,7 @@ class StreamReactionIndicator extends StatelessWidget {
     final ownReactions = {...?message.ownReactions?.map((it) => it.type)};
     final reactionIcons = {for (final it in this.reactionIcons) it.type: it};
 
-    final sortedReactionGroups = message.reactionGroups?.entries
-        .sortedByCompare((it) => it.value, reactionSorting);
+    final sortedReactionGroups = message.reactionGroups?.entries.sortedByCompare((it) => it.value, reactionSorting);
 
     final indicatorIcons = sortedReactionGroups?.map(
       (group) {
@@ -156,9 +156,9 @@ class StreamReactionIndicator extends StatelessWidget {
           child: switch (scrollable) {
             false => reactionIndicator,
             true => SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: reactionIndicator,
-              ),
+              scrollDirection: Axis.horizontal,
+              child: reactionIndicator,
+            ),
           },
         ),
       ),

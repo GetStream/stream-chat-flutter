@@ -15,8 +15,7 @@ class UnreadCountsChannel {
   });
 
   /// Create a new instance from a json.
-  factory UnreadCountsChannel.fromJson(Map<String, dynamic> json) =>
-      _$UnreadCountsChannelFromJson(json);
+  factory UnreadCountsChannel.fromJson(Map<String, dynamic> json) => _$UnreadCountsChannelFromJson(json);
 
   /// The unique identifier of the channel (format: "type:id").
   final String channelId;
@@ -45,8 +44,7 @@ class UnreadCountsThread {
   });
 
   /// Create a new instance from a json.
-  factory UnreadCountsThread.fromJson(Map<String, dynamic> json) =>
-      _$UnreadCountsThreadFromJson(json);
+  factory UnreadCountsThread.fromJson(Map<String, dynamic> json) => _$UnreadCountsThreadFromJson(json);
 
   /// Number of unread messages in this thread.
   final int unreadCount;
@@ -78,8 +76,7 @@ class UnreadCountsChannelType {
   });
 
   /// Create a new instance from a json.
-  factory UnreadCountsChannelType.fromJson(Map<String, dynamic> json) =>
-      _$UnreadCountsChannelTypeFromJson(json);
+  factory UnreadCountsChannelType.fromJson(Map<String, dynamic> json) => _$UnreadCountsChannelTypeFromJson(json);
 
   /// The type of channel (e.g., "messaging", "livestream", "team").
   final String channelType;

@@ -12,14 +12,13 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 Future<String?> showPollAddCommentDialog({
   required BuildContext context,
   String initialValue = '',
-}) =>
-    showDialog<String?>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => PollAddCommentDialog(
-        initialValue: initialValue,
-      ),
-    );
+}) => showDialog<String?>(
+  context: context,
+  barrierDismissible: false,
+  builder: (_) => PollAddCommentDialog(
+    initialValue: initialValue,
+  ),
+);
 
 /// {@template pollAddCommentDialog}
 /// A dialog that allows the user to add or update a poll comment.

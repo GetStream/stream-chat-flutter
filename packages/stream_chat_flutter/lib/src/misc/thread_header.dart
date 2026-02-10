@@ -57,8 +57,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// and the [ChannelTheme.channelHeaderTheme] property. Modify it to change
 /// the widget's appearance.
 /// {@endtemplate}
-class StreamThreadHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamThreadHeader}
   const StreamThreadHeader({
     super.key,
@@ -128,7 +127,8 @@ class StreamThreadHeader extends StatelessWidget
 
     final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
-    final defaultSubtitle = subtitle ??
+    final defaultSubtitle =
+        subtitle ??
         Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -151,11 +151,10 @@ class StreamThreadHeader extends StatelessWidget
       automaticallyImplyLeading: false,
       toolbarTextStyle: theme.textTheme.bodyMedium,
       titleTextStyle: theme.textTheme.titleLarge,
-      systemOverlayStyle: theme.brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
+      systemOverlayStyle: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       elevation: elevation,
-      leading: leading ??
+      leading:
+          leading ??
           (showBackButton
               ? StreamBackButton(
                   channelId: StreamChannel.of(context).channel.cid,
@@ -173,9 +172,7 @@ class StreamThreadHeader extends StatelessWidget
           width: 250,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: effectiveCenterTitle
-                ? CrossAxisAlignment.center
-                : CrossAxisAlignment.stretch,
+            crossAxisAlignment: effectiveCenterTitle ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
             children: [
               title ??
                   Text(

@@ -17,8 +17,8 @@ class StreamScrollViewLoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: height,
-        width: width,
-        child: const CircularProgressIndicator.adaptive(),
-      );
+    height: height,
+    width: width,
+    child: const CircularProgressIndicator.adaptive(),
+  );
 }

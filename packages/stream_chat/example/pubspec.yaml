@@ -17,8 +17,8 @@ version: 1.0.0+1
 #   2. Add it to the melos.yaml file for future updates.
 
 environment:
-  sdk: ^3.6.2
-  flutter: ">=3.27.4"
+  sdk: ^3.10.0
+  flutter: ">=3.38.1"
 
 dependencies:
   cupertino_icons: ^1.0.3

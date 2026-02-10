@@ -12,9 +12,9 @@ class StreamChatDioError extends DioException {
     StackTrace? stackTrace,
     super.message,
   }) : super(
-          error: error,
-          stackTrace: stackTrace ?? StackTrace.current,
-        );
+         error: error,
+         stackTrace: stackTrace ?? StackTrace.current,
+       );
 
   @override
   final StreamChatNetworkError error;

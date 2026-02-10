@@ -20,9 +20,11 @@ void main() {
   testWidgets(
     'checks message input features',
     (WidgetTester tester) async {
-      await tester.pumpWidget(buildWidget(
-        const StreamMessageInput(),
-      ));
+      await tester.pumpWidget(
+        buildWidget(
+          const StreamMessageInput(),
+        ),
+      );
 
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
@@ -62,7 +64,7 @@ void main() {
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -75,14 +77,14 @@ void main() {
         Message(
           text: 'hello',
           user: User(id: 'other-user'),
-        )
+        ),
       ]);
       when(() => channelState.messagesStream).thenAnswer(
         (i) => Stream.value([
           Message(
             text: 'hello',
             user: User(id: 'other-user'),
-          )
+          ),
         ]),
       );
 
@@ -122,12 +124,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-          find.descendant(
-              of: find.byType(StreamMessageValueListenableBuilder),
-              matching: find.byWidgetPredicate((w) =>
-                  w is Padding &&
-                  w.padding == const EdgeInsets.only(left: 50))),
-          findsOneWidget);
+        find.descendant(
+          of: find.byType(StreamMessageValueListenableBuilder),
+          matching: find.byWidgetPredicate((w) => w is Padding && w.padding == const EdgeInsets.only(left: 50)),
+        ),
+        findsOneWidget,
+      );
     },
   );
 
@@ -145,12 +147,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-          find.descendant(
-              of: find.byType(DropTarget),
-              matching: find.byWidgetPredicate((w) =>
-                  w is Container &&
-                  w.margin == const EdgeInsets.only(left: 50))),
-          findsOneWidget);
+        find.descendant(
+          of: find.byType(DropTarget),
+          matching: find.byWidgetPredicate((w) => w is Container && w.margin == const EdgeInsets.only(left: 50)),
+        ),
+        findsOneWidget,
+      );
     },
   );
 
@@ -381,14 +383,14 @@ void main() {
         Message(
           text: 'hello',
           user: User(id: 'other-user'),
-        )
+        ),
       ]);
       when(() => channelState.messagesStream).thenAnswer(
         (i) => Stream.value([
           Message(
             text: 'hello',
             user: User(id: 'other-user'),
-          )
+          ),
         ]),
       );
     });
@@ -548,7 +550,7 @@ MaterialApp buildWidget(StreamMessageInput input) {
       Member(
         userId: 'user-id',
         user: User(id: 'user-id'),
-      )
+      ),
     ]),
   );
   when(() => channelState.members).thenReturn([
@@ -561,14 +563,14 @@ MaterialApp buildWidget(StreamMessageInput input) {
     Message(
       text: 'hello',
       user: User(id: 'other-user'),
-    )
+    ),
   ]);
   when(() => channelState.messagesStream).thenAnswer(
     (i) => Stream.value([
       Message(
         text: 'hello',
         user: User(id: 'other-user'),
-      )
+      ),
     ]),
   );
 

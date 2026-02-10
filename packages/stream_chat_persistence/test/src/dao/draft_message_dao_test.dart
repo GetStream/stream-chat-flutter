@@ -62,8 +62,7 @@ void main() {
       (index) {
         // When count is 1, use the exact cid provided
         // Otherwise, create unique cids for each draft to avoid conflicts
-        final draftChannelCid =
-            count == 1 ? cid : (withParentMessage ? cid : '$cid$index');
+        final draftChannelCid = count == 1 ? cid : (withParentMessage ? cid : '$cid$index');
 
         final draftMessage = DraftMessage(
           id: 'testDraftId$cid$index',
@@ -236,8 +235,7 @@ void main() {
         await draftMessageDao.updateDraftMessages([firstDraft]);
 
         // Verify first draft exists
-        final firstFetchedDraft =
-            await draftMessageDao.getDraftMessageByCid(cid);
+        final firstFetchedDraft = await draftMessageDao.getDraftMessageByCid(cid);
         expect(firstFetchedDraft, isNotNull);
         expect(firstFetchedDraft!.message.text, 'First channel draft');
 
@@ -254,16 +252,13 @@ void main() {
         await draftMessageDao.updateDraftMessages([secondDraft]);
 
         // Verify only the second draft exists
-        final secondFetchedDraft =
-            await draftMessageDao.getDraftMessageByCid(cid);
+        final secondFetchedDraft = await draftMessageDao.getDraftMessageByCid(cid);
         expect(secondFetchedDraft, isNotNull);
         expect(secondFetchedDraft!.message.text, 'Second channel draft');
 
         // Verify the first draft no longer exists
-        final firstDraftAfterUpdate =
-            await draftMessageDao.getDraftMessageByCid(firstDraft.channelCid);
-        expect(
-            firstDraftAfterUpdate!.message.text, isNot('First channel draft'));
+        final firstDraftAfterUpdate = await draftMessageDao.getDraftMessageByCid(firstDraft.channelCid);
+        expect(firstDraftAfterUpdate!.message.text, isNot('First channel draft'));
 
         // Verify there's only one draft message for this channel
         final channelDraft = await draftMessageDao.getDraftMessageByCid(cid);
@@ -303,8 +298,7 @@ void main() {
         await draftMessageDao.updateDraftMessages([firstDraft]);
 
         // Verify first thread draft exists
-        final firstFetchedDraft = await draftMessageDao
-            .getDraftMessageByCid(cid, parentId: firstDraft.parentId);
+        final firstFetchedDraft = await draftMessageDao.getDraftMessageByCid(cid, parentId: firstDraft.parentId);
         expect(firstFetchedDraft, isNotNull);
         expect(firstFetchedDraft!.message.text, 'First thread draft');
 
@@ -323,20 +317,16 @@ void main() {
         await draftMessageDao.updateDraftMessages([secondDraft]);
 
         // Verify only the second draft exists
-        final secondFetchedDraft = await draftMessageDao
-            .getDraftMessageByCid(cid, parentId: secondDraft.parentId);
+        final secondFetchedDraft = await draftMessageDao.getDraftMessageByCid(cid, parentId: secondDraft.parentId);
         expect(secondFetchedDraft, isNotNull);
         expect(secondFetchedDraft!.message.text, 'Second thread draft');
 
         // Verify the first draft no longer exists
-        final firstDraftAfterUpdate = await draftMessageDao
-            .getDraftMessageByCid(cid, parentId: firstDraft.parentId);
-        expect(
-            firstDraftAfterUpdate!.message.text, isNot('First thread draft'));
+        final firstDraftAfterUpdate = await draftMessageDao.getDraftMessageByCid(cid, parentId: firstDraft.parentId);
+        expect(firstDraftAfterUpdate!.message.text, isNot('First thread draft'));
 
         // Verify there's only one draft message for this thread
-        final threadDraft = await draftMessageDao.getDraftMessageByCid(cid,
-            parentId: parentMessage.id);
+        final threadDraft = await draftMessageDao.getDraftMessageByCid(cid, parentId: parentMessage.id);
         expect(threadDraft, isNotNull);
         expect(threadDraft!.message.text, 'Second thread draft');
       },
@@ -387,16 +377,14 @@ void main() {
         await _prepareTestData(cid, count: 1);
 
         // Verify draft exists
-        final draftBeforeChannelDelete =
-            await draftMessageDao.getDraftMessageByCid(cid);
+        final draftBeforeChannelDelete = await draftMessageDao.getDraftMessageByCid(cid);
         expect(draftBeforeChannelDelete, isNotNull);
 
         // Delete the channel
         await database.channelDao.deleteChannelByCids([cid]);
 
         // Verify draft has been deleted (cascade)
-        final draftAfterChannelDelete =
-            await draftMessageDao.getDraftMessageByCid(cid);
+        final draftAfterChannelDelete = await draftMessageDao.getDraftMessageByCid(cid);
         expect(draftAfterChannelDelete, isNull);
       },
     );
@@ -454,14 +442,12 @@ void main() {
         );
 
         // Verify drafts exist before channel deletion
-        final channelDraftBeforeDelete =
-            await draftMessageDao.getDraftMessageByCid(cid);
+        final channelDraftBeforeDelete = await draftMessageDao.getDraftMessageByCid(cid);
         expect(channelDraftBeforeDelete, isNotNull);
         expect(channelDraftBeforeDelete!.parentId, isNull);
 
         for (var i = 0; i < threadDrafts.length; i++) {
-          final threadDraft = await draftMessageDao.getDraftMessageByCid(cid,
-              parentId: threadDrafts[i].parentId);
+          final threadDraft = await draftMessageDao.getDraftMessageByCid(cid, parentId: threadDrafts[i].parentId);
           expect(threadDraft, isNotNull);
           expect(threadDraft!.parentId, messages[i].id);
         }
@@ -470,13 +456,11 @@ void main() {
         await database.channelDao.deleteChannelByCids([cid]);
 
         // Verify all drafts have been deleted (cascade)
-        final channelDraftAfterDelete =
-            await draftMessageDao.getDraftMessageByCid(cid);
+        final channelDraftAfterDelete = await draftMessageDao.getDraftMessageByCid(cid);
         expect(channelDraftAfterDelete, isNull);
 
         for (final threadDraft in threadDrafts) {
-          final draft = await draftMessageDao.getDraftMessageByCid(cid,
-              parentId: threadDraft.parentId);
+          final draft = await draftMessageDao.getDraftMessageByCid(cid, parentId: threadDraft.parentId);
           expect(draft, isNull);
         }
       },
@@ -486,21 +470,18 @@ void main() {
       'should delete draft messages when referenced parent message is deleted',
       () async {
         const cid = 'test:parentRefCascade';
-        final testDrafts =
-            await _prepareTestData(cid, withParentMessage: true, count: 1);
+        final testDrafts = await _prepareTestData(cid, withParentMessage: true, count: 1);
         final parentId = testDrafts.first.parentId!;
 
         // Verify draft with parent exists
-        final draftBeforeMessageDelete =
-            await draftMessageDao.getDraftMessageByCid(cid, parentId: parentId);
+        final draftBeforeMessageDelete = await draftMessageDao.getDraftMessageByCid(cid, parentId: parentId);
         expect(draftBeforeMessageDelete, isNotNull);
 
         // Delete the parent message
         await database.messageDao.deleteMessageByIds([parentId]);
 
         // Verify draft has been deleted (cascade)
-        final draftAfterMessageDelete =
-            await draftMessageDao.getDraftMessageByCid(cid, parentId: parentId);
+        final draftAfterMessageDelete = await draftMessageDao.getDraftMessageByCid(cid, parentId: parentId);
         expect(draftAfterMessageDelete, isNull);
       },
     );

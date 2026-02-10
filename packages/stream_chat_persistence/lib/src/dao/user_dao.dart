@@ -14,15 +14,13 @@ class UserDao extends DatabaseAccessor<DriftChatDatabase> with _$UserDaoMixin {
 
   /// Updates the users data with the new [userList] data
   Future<void> updateUsers(List<User> userList) => batch(
-        (it) => it.insertAllOnConflictUpdate(
-          users,
-          userList.map((u) => u.toEntity()).toList(),
-        ),
-      );
+    (it) => it.insertAllOnConflictUpdate(
+      users,
+      userList.map((u) => u.toEntity()).toList(),
+    ),
+  );
 
   /// Returns the list of all the users stored in db
   Future<List<User>> getUsers() =>
-      (select(users)..orderBy([(u) => OrderingTerm.desc(u.createdAt)]))
-          .map((it) => it.toUser())
-          .get();
+      (select(users)..orderBy([(u) => OrderingTerm.desc(u.createdAt)])).map((it) => it.toUser()).get();
 }

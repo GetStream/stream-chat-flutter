@@ -37,18 +37,22 @@ class UserAvatarTransform extends StatelessWidget {
     return Transform.translate(
       offset: Offset(
         0,
-        translateUserAvatar
-            ? (messageTheme.avatarTheme?.constraints.maxHeight ?? 40) / 2
-            : 0,
+        translateUserAvatar ? (messageTheme.avatarTheme?.constraints.maxHeight ?? 40) / 2 : 0,
       ),
-      child: userAvatarBuilder?.call(context, message.user!) ??
-          StreamUserAvatar(
+      child: switch (userAvatarBuilder) {
+        final builder? => builder(context, message.user!),
+        _ => GestureDetector(
+          onTap: switch (onUserAvatarTap) {
+            final onTap? => () => onTap(message.user!),
+            _ => null,
+          },
+          child: StreamUserAvatar(
+            size: .md,
             user: message.user!,
-            onTap: onUserAvatarTap,
-            constraints: messageTheme.avatarTheme!.constraints,
-            borderRadius: messageTheme.avatarTheme!.borderRadius,
-            showOnlineStatus: false,
+            showOnlineIndicator: false,
           ),
+        ),
+      },
     );
   }
 }

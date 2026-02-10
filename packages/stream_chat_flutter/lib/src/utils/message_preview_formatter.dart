@@ -199,7 +199,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
 
           return TextSpan(text: text, style: textStyle);
         },
-      )
+      ),
     ];
 
     return TextSpan(children: children);

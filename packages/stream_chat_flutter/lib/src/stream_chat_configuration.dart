@@ -18,8 +18,7 @@ class StreamChatConfiguration extends InheritedWidget {
   final StreamChatConfigurationData data;
 
   @override
-  bool updateShouldNotify(StreamChatConfiguration oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamChatConfiguration oldWidget) => data != oldWidget.data;
 
   /// Finds the [StreamChatConfigurationData] from the closest
   /// [StreamChatConfiguration] ancestor that encloses the given context.
@@ -81,8 +80,7 @@ class StreamChatConfiguration extends InheritedWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChatConfiguration] is found.
   static StreamChatConfigurationData? maybeOf(BuildContext context) {
-    final streamChatConfiguration =
-        context.dependOnInheritedWidgetOfExactType<StreamChatConfiguration>();
+    final streamChatConfiguration = context.dependOnInheritedWidgetOfExactType<StreamChatConfiguration>();
     return streamChatConfiguration?.data;
   }
 }
@@ -175,8 +173,7 @@ class StreamChatConfigurationData {
       reactionIcons: reactionIcons ?? StreamReactionIcon.defaultReactions,
       enforceUniqueReactions: enforceUniqueReactions ?? true,
       draftMessagesEnabled: draftMessagesEnabled,
-      messagePreviewFormatter:
-          messagePreviewFormatter ?? MessagePreviewFormatter(),
+      messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
     );
   }
 
@@ -206,11 +203,9 @@ class StreamChatConfigurationData {
       defaultUserImage: defaultUserImage ?? this.defaultUserImage,
       placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
       loadingIndicator: loadingIndicator ?? this.loadingIndicator,
-      enforceUniqueReactions:
-          enforceUniqueReactions ?? this.enforceUniqueReactions,
+      enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
-      messagePreviewFormatter:
-          messagePreviewFormatter ?? this.messagePreviewFormatter,
+      messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
     );
   }
 

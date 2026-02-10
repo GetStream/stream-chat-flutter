@@ -30,13 +30,10 @@ class QuotedMessage extends StatelessWidget {
     final chatThemeData = StreamChatTheme.of(context);
 
     final isMyMessage = message.user?.id == streamChat.currentUser?.id;
-    final isMyQuotedMessage =
-        message.quotedMessage?.user?.id == streamChat.currentUser?.id;
+    final isMyQuotedMessage = message.quotedMessage?.user?.id == streamChat.currentUser?.id;
     return StreamQuotedMessageWidget(
       message: message.quotedMessage!,
-      messageTheme: isMyMessage
-          ? chatThemeData.otherMessageTheme
-          : chatThemeData.ownMessageTheme,
+      messageTheme: isMyMessage ? chatThemeData.otherMessageTheme : chatThemeData.ownMessageTheme,
       reverse: !isMyQuotedMessage,
       textBuilder: textBuilder,
       padding: EdgeInsets.only(

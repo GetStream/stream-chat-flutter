@@ -28,5 +28,4 @@ extension IntX on num {
 }
 
 // Top level util function to delay the code execution
-Future delay(num milliseconds) =>
-    Future.delayed(Duration(milliseconds: milliseconds.toInt()));
+Future delay(num milliseconds) => Future.delayed(Duration(milliseconds: milliseconds.toInt()));

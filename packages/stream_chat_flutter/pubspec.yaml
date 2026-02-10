@@ -5,6 +5,9 @@ version: 10.0.0-beta.12
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
+# TODO: Remove this once stream_core_flutter is published to pub.dev
+publish_to: none
+
 # Note: The environment configuration and dependency versions are managed by Melos.
 #
 # Do not edit them manually.
@@ -18,8 +21,8 @@ issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 #   2. Add it to the melos.yaml file for future updates.
 
 environment:
-  sdk: ^3.6.2
-  flutter: ">=3.27.4"
+  sdk: ^3.10.0
+  flutter: ">=3.38.1"
 
 dependencies:
   cached_network_image: ^3.3.1
@@ -56,6 +59,11 @@ dependencies:
   share_plus: ">=11.0.0 <13.0.0"
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^10.0.0-beta.12
+  stream_core_flutter:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: f0af49b3cb1426efed625d0a24e58874363e9538
+      path: packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
   thumblr: ^0.0.4

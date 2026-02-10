@@ -1,7 +1,9 @@
 export 'package:jiffy/jiffy.dart';
-export 'package:photo_manager/photo_manager.dart'
-    show ThumbnailSize, ThumbnailFormat;
+export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+export 'package:stream_core_flutter/stream_core_flutter.dart'
+    show StreamAvatarSize, StreamTheme, StreamComponentFactory;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
 export 'src/ai_assistant/stream_typewriter_builder.dart';
@@ -24,8 +26,6 @@ export 'src/attachment/voice_recording_attachment_playlist.dart';
 export 'src/attachment_actions_modal/attachment_actions_modal.dart';
 export 'src/autocomplete/stream_autocomplete.dart';
 export 'src/avatars/gradient_avatar.dart';
-export 'src/avatars/group_avatar.dart';
-export 'src/avatars/user_avatar.dart';
 export 'src/bottom_sheets/attachment_modal_sheet.dart';
 export 'src/bottom_sheets/edit_message_sheet.dart';
 export 'src/bottom_sheets/error_alert_sheet.dart';
@@ -34,10 +34,16 @@ export 'src/channel/channel_header.dart';
 export 'src/channel/channel_info.dart';
 export 'src/channel/channel_list_header.dart';
 export 'src/channel/channel_name.dart';
-export 'src/channel/stream_channel_avatar.dart';
 export 'src/channel/stream_channel_name.dart';
 export 'src/channel/stream_draft_message_preview_text.dart';
 export 'src/channel/stream_message_preview_text.dart';
+// region SDK Design Refresh Components
+export 'src/components/avatar/stream_channel_avatar.dart';
+export 'src/components/avatar/stream_user_avatar.dart';
+export 'src/components/avatar/stream_user_avatar_group.dart';
+export 'src/components/avatar/stream_user_avatar_stack.dart';
+export 'src/components/message_composer/message_composer.dart';
+// endregion
 export 'src/fullscreen_media/full_screen_media.dart';
 export 'src/fullscreen_media/full_screen_media_builder.dart';
 export 'src/gallery/gallery_footer.dart';

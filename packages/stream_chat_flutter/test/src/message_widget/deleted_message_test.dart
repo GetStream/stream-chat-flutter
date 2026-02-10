@@ -62,8 +62,7 @@ void main() {
       });
 
       when(() => clientState.totalUnreadCount).thenReturn(10);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(10));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
 
       final materialTheme = ThemeData.light(
         useMaterial3: false,
@@ -117,8 +116,7 @@ void main() {
       });
 
       when(() => clientState.totalUnreadCount).thenReturn(10);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(10));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
 
       final materialTheme = ThemeData.dark(
         useMaterial3: false,
@@ -172,8 +170,7 @@ void main() {
       });
 
       when(() => clientState.totalUnreadCount).thenReturn(10);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(10));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
 
       final materialTheme = ThemeData.light(
         useMaterial3: false,

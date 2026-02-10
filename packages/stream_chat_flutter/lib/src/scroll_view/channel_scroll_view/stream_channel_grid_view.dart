@@ -7,13 +7,12 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_w
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default grid delegate  for [StreamChannelGridView].
-const defaultChannelGridViewDelegate =
-    SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
+const defaultChannelGridViewDelegate = SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
 
 /// Signature for the item builder that creates the children of the
 /// [StreamChannelGridView].
-typedef StreamChannelGridViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelGridTile>;
+typedef StreamChannelGridViewIndexedWidgetBuilder =
+    StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelGridTile>;
 
 /// A [GridView] that shows a grid of [User]s,
 /// it uses [StreamChannelGridTile] as a default item.
@@ -364,8 +363,7 @@ class StreamChannelGridView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.grid(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.grid(
         onTap: controller.retry,
         error: Text(
           context.translations.loadingChannelsError,

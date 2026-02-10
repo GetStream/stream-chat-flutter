@@ -35,8 +35,7 @@ void main() {
       expect(draftMessage.extraData, isEmpty);
     });
 
-    test('should create a valid instance with UUID when id is not provided',
-        () {
+    test('should create a valid instance with UUID when id is not provided', () {
       final messageWithoutId = DraftMessage(text: text);
       expect(messageWithoutId.id, isNotNull);
       expect(messageWithoutId.id, isNotEmpty);
@@ -156,8 +155,7 @@ void main() {
       expect(json['poll_id'], equals(pollId));
     });
 
-    test('should append command to text field in toJson when command exists',
-        () {
+    test('should append command to text field in toJson when command exists', () {
       final draftWithCommand = DraftMessage(
         id: id,
         text: 'Hello world',
@@ -244,8 +242,7 @@ void main() {
 
       expect(deserializedMessage.id, equals(id));
       expect(deserializedMessage.text, equals(text));
-      expect(deserializedMessage.extraData['custom_field'],
-          equals('custom_value'));
+      expect(deserializedMessage.extraData['custom_field'], equals('custom_value'));
       expect(deserializedMessage.extraData['priority'], equals(5));
     });
 

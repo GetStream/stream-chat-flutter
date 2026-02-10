@@ -2,16 +2,30 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+enum MarkerSize {
+  xs(20),
+  sm(24),
+  md(32),
+  lg(40),
+  xl(64)
+  ;
+
+  const MarkerSize(this.value);
+
+  final double value;
+}
+
 class LocationUserMarker extends StatelessWidget {
   const LocationUserMarker({
     super.key,
     this.user,
-    this.markerSize = 40,
+    this.size = MarkerSize.lg,
     required this.sharedLocation,
   });
 
   final User? user;
-  final double markerSize;
+  final MarkerSize size;
+
   final Location sharedLocation;
 
   @override
@@ -29,12 +43,9 @@ class LocationUserMarker extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(borderWidth),
           child: StreamUserAvatar(
+            size: _avatarSizeForMarkerSize(size),
             user: user,
-            constraints: BoxConstraints.tightFor(
-              width: markerSize,
-              height: markerSize,
-            ),
-            showOnlineStatus: false,
+            showOnlineIndicator: false,
           ),
         ),
       );
@@ -48,9 +59,19 @@ class LocationUserMarker extends StatelessWidget {
     }
 
     return Icon(
-      size: markerSize,
+      size: size.value,
       Icons.person_pin,
       color: colorTheme.accentPrimary,
     );
   }
+
+  StreamAvatarSize _avatarSizeForMarkerSize(
+    MarkerSize size,
+  ) => switch (size) {
+    .xs => StreamAvatarSize.xs,
+    .sm => StreamAvatarSize.sm,
+    .md => StreamAvatarSize.md,
+    .lg => StreamAvatarSize.lg,
+    .xl => StreamAvatarSize.xl,
+  };
 }

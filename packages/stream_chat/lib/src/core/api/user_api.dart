@@ -118,8 +118,7 @@ class UserApi {
       '/users/live_locations',
       data: json.encode({
         'message_id': messageId,
-        if (createdByDeviceId != null)
-          'created_by_device_id': createdByDeviceId,
+        if (createdByDeviceId != null) 'created_by_device_id': createdByDeviceId,
         if (location?.latitude case final latitude) 'latitude': latitude,
         if (location?.longitude case final longitude) 'longitude': longitude,
         if (endAt != null) 'end_at': endAt.toIso8601String(),

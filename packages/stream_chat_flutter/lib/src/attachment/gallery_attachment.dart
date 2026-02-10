@@ -72,7 +72,8 @@ class StreamGalleryAttachment extends StatelessWidget {
 
     final chatTheme = StreamChatTheme.of(context);
     final colorTheme = chatTheme.colorTheme;
-    final shape = this.shape ??
+    final shape =
+        this.shape ??
         RoundedRectangleBorder(
           side: BorderSide(
             color: colorTheme.borders,
@@ -218,8 +219,7 @@ class StreamGalleryAttachment extends StatelessWidget {
     );
   }
 
-  Widget _buildForFourOrMore(
-      BuildContext context, List<Attachment> attachments) {
+  Widget _buildForFourOrMore(BuildContext context, List<Attachment> attachments) {
     final pattern = <List<int>>[];
     final children = <Widget>[];
 
