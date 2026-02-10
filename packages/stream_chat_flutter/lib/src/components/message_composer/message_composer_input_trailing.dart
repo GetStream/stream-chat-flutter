@@ -13,7 +13,7 @@ class StreamMessageComposerInputTrailing extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamMessageComposerFactory.maybeOf(context)?.inputTrailing?.call(context, props) ??
         core.StreamMessageComposerInputTrailing(
-          controller: props.controller,
+          controller: props.controller.textFieldController,
           onSendPressed: props.onSendPressed,
           onMicrophonePressed: props.onMicrophonePressed,
         );

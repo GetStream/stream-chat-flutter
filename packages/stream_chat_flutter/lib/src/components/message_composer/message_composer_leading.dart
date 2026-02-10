@@ -29,7 +29,7 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
           type: StreamButtonType.outline,
           size: StreamButtonSize.large,
           onTap: () {
-            // TODO: Implement attachment picker
+            props.onAttachmentButtonPressed?.call();
           },
         ),
         SizedBox(width: context.streamSpacing.xs),

@@ -14,6 +14,7 @@ class StreamChatMessageComposer extends StatefulWidget {
     this.controller,
     required VoidCallback onSendPressed,
     VoidCallback? onMicrophonePressed,
+    VoidCallback? onAttachmentButtonPressed,
     FocusNode? focusNode,
     String placeholder = '',
   }) : props = MessageComposerProps(
@@ -21,6 +22,7 @@ class StreamChatMessageComposer extends StatefulWidget {
          message: null,
          onSendPressed: onSendPressed,
          onMicrophonePressed: onMicrophonePressed,
+         onAttachmentButtonPressed: onAttachmentButtonPressed,
          focusNode: focusNode,
          placeholder: placeholder,
        );
@@ -33,7 +35,7 @@ class StreamChatMessageComposer extends StatefulWidget {
 }
 
 class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
-  late MessageTextFieldController _controller;
+  late StreamMessageInputController _controller;
 
   @override
   void initState() {
@@ -57,7 +59,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
   }
 
   void _initController() {
-    _controller = widget.controller?.textFieldController ?? MessageTextFieldController();
+    _controller = widget.controller ?? StreamMessageInputController();
   }
 
   void _disposeController(StreamChatMessageComposer widget) {
@@ -74,12 +76,13 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
       message: widget.props.message,
       onSendPressed: widget.props.onSendPressed,
       onMicrophonePressed: widget.props.onMicrophonePressed,
+      onAttachmentButtonPressed: widget.props.onAttachmentButtonPressed,
     );
 
     return StreamMessageComposerFactory.maybeOf(context)?.messageComposer?.call(context, widget.props) ??
         core.StreamBaseMessageComposer(
           placeholder: widget.props.placeholder,
-          controller: _controller,
+          controller: _controller.textFieldController,
           isFloating: widget.props.isFloating,
           focusNode: widget.props.focusNode,
           composerLeading: StreamMessageComposerLeading(props: componentProps),
@@ -99,6 +102,7 @@ class MessageComposerProps {
     this.placeholder = '',
     required this.onSendPressed,
     this.onMicrophonePressed,
+    this.onAttachmentButtonPressed,
     this.focusNode,
   });
 
@@ -107,6 +111,7 @@ class MessageComposerProps {
   final String placeholder;
   final VoidCallback onSendPressed;
   final VoidCallback? onMicrophonePressed;
+  final VoidCallback? onAttachmentButtonPressed;
   final FocusNode? focusNode;
 }
 
@@ -120,11 +125,13 @@ class MessageComposerComponentProps {
     this.message,
     required this.onSendPressed,
     this.onMicrophonePressed,
+    this.onAttachmentButtonPressed,
   });
 
-  final MessageTextFieldController controller;
+  final StreamMessageInputController controller;
   final bool isFloating;
   final Message? message;
   final VoidCallback onSendPressed;
   final VoidCallback? onMicrophonePressed;
+  final VoidCallback? onAttachmentButtonPressed;
 }
