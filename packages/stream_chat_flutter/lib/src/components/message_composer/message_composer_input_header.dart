@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_factory.dart';
@@ -60,9 +61,12 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
               onRemovePressed: _onAttachmentRemovePressed,
             ),
           if (ogAttachment != null)
-            OGAttachmentPreview(
-              attachment: ogAttachment,
-              onDismissPreviewPressed: () {
+            MessageComposerAttachmentLinkPreview(
+              title: ogAttachment.title,
+              subtitle: ogAttachment.text,
+              image: ogAttachment.imageUrl != null ? CachedNetworkImageProvider(ogAttachment.imageUrl!) : null,
+              url: ogAttachment.titleLink,
+              onRemovePressed: () {
                 controller.clearOGAttachment();
                 props.focusNode?.unfocus();
               },
