@@ -368,7 +368,7 @@ class MessageInputMediaAttachments extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 104,
+      height: 72,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),

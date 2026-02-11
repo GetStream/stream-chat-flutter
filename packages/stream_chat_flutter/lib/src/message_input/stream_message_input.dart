@@ -1,3 +1,6 @@
+// ignore_for_file: unused_element
+// TODO: remove unused elements
+
 import 'dart:async';
 import 'dart:math';
 
@@ -758,10 +761,14 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     StreamMessageEditingController controller,
     FocusNode focusNode,
   ) {
+    final currentUserId = StreamChat.of(context).currentUser?.id;
+
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, _) => StreamChatMessageComposer(
         controller: controller,
+        currentUserId: currentUserId,
+        onAttachmentButtonPressed: _onAttachmentButtonPressed,
         placeholder: _getHint(context) ?? '',
         focusNode: focusNode,
         onSendPressed: sendMessage,
