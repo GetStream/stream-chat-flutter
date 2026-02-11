@@ -4,28 +4,31 @@ import 'package:stream_chat_flutter/src/components/message_composer/message_comp
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
+/// A widget that shows the input header of the message composer.
+/// Uses the factory to show custom components or used the default implementation.
 class StreamMessageComposerInputHeader extends StatelessWidget {
+  /// Creates a new instance of [StreamMessageComposerInputHeader].
+  /// [props] contains the properties for the message composer component.
   const StreamMessageComposerInputHeader({super.key, required this.props});
 
+  /// The properties for the message composer component.
   final MessageComposerComponentProps props;
 
   @override
   Widget build(BuildContext context) {
     return StreamMessageComposerFactory.maybeOf(context)?.inputHeader?.call(context, props) ??
-        DefaultStreamMessageComposerInputHeader(props: props);
+        _DefaultStreamMessageComposerInputHeader(props: props);
   }
 }
 
-class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
-  const DefaultStreamMessageComposerInputHeader({super.key, required this.props});
+class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
+  const _DefaultStreamMessageComposerInputHeader({required this.props});
 
   final MessageComposerComponentProps props;
   StreamMessageInputController get controller => props.controller;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: improve getter for currentUserId
-
     final quotedMessage = props.controller.message.quotedMessage;
     final ogAttachment = props.controller.ogAttachment;
     final nonOGAttachments = controller.attachments

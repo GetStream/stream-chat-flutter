@@ -8,7 +8,17 @@ import 'package:stream_chat_flutter/src/components/message_composer/message_comp
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
+/// A widget that shows the message composer.
+/// Uses the factory to show custom components or the default implementation.
 class StreamChatMessageComposer extends StatefulWidget {
+  /// Creates a new instance of [StreamChatMessageComposer].
+  /// [controller] is the controller for the message composer.
+  /// [onSendPressed] is the callback for when the send button is pressed.
+  /// [onMicrophonePressed] is the callback for when the microphone button is pressed.
+  /// [onAttachmentButtonPressed] is the callback for when the attachment button is pressed.
+  /// [focusNode] is the focus node for the message composer.
+  /// [currentUserId] is the current user id.
+  /// [placeholder] is the placeholder text of the message composer.
   StreamChatMessageComposer({
     super.key,
     this.controller,
@@ -29,7 +39,10 @@ class StreamChatMessageComposer extends StatefulWidget {
          placeholder: placeholder,
        );
 
+  /// The controller for the message composer.
   final StreamMessageInputController? controller;
+
+  /// The properties for the message composer.
   final MessageComposerProps props;
 
   @override
@@ -99,6 +112,15 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
 
 /// Properties to build the main message composer component
 class MessageComposerProps {
+  /// Creates a new instance of [MessageComposerProps].
+  /// [isFloating] is whether the message composer is floating.
+  /// [message] is the message for the message composer.
+  /// [placeholder] is the placeholder text of the message composer.
+  /// [onSendPressed] is the callback for when the send button is pressed.
+  /// [onMicrophonePressed] is the callback for when the microphone button is pressed.
+  /// [onAttachmentButtonPressed] is the callback for when the attachment button is pressed.
+  /// [focusNode] is the focus node for the message composer.
+  /// [currentUserId] is the current user id.
   const MessageComposerProps({
     this.isFloating = false,
     this.message,
@@ -110,13 +132,28 @@ class MessageComposerProps {
     this.currentUserId,
   });
 
+  /// Whether the message composer is floating.
   final bool isFloating;
+
+  /// The message for the message composer.
   final Message? message;
+
+  /// The placeholder text of the message composer.
   final String placeholder;
+
+  /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;
+
+  /// The callback for when the microphone button is pressed.
   final VoidCallback? onMicrophonePressed;
+
+  /// The callback for when the attachment button is pressed.
   final VoidCallback? onAttachmentButtonPressed;
+
+  /// The focus node for the message composer.
   final FocusNode? focusNode;
+
+  /// The current user id.
   final String? currentUserId;
 }
 
@@ -124,6 +161,15 @@ class MessageComposerProps {
 /// These properties are all the same, so features such as 'add attachment',
 /// can be added to any of the sub-components.
 class MessageComposerComponentProps {
+  /// Creates a new instance of [MessageComposerComponentProps].
+  /// [controller] is the controller for the message composer component.
+  /// [isFloating] is whether the message composer is floating.
+  /// [message] is the message for the message composer component.
+  /// [onSendPressed] is the callback for when the send button is pressed.
+  /// [onMicrophonePressed] is the callback for when the microphone button is pressed.
+  /// [onAttachmentButtonPressed] is the callback for when the attachment button is pressed.
+  /// [focusNode] is the focus node for the message composer component.
+  /// [currentUserId] is the current user id.
   const MessageComposerComponentProps({
     required this.controller,
     this.isFloating = false,
@@ -135,12 +181,27 @@ class MessageComposerComponentProps {
     this.currentUserId,
   });
 
+  /// The controller for the message composer component.
   final StreamMessageInputController controller;
+
+  /// Whether the message composer is floating.
   final bool isFloating;
+
+  /// The message for the message composer component.
   final Message? message;
+
+  /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;
+
+  /// The callback for when the microphone button is pressed.
   final VoidCallback? onMicrophonePressed;
+
+  /// The callback for when the attachment button is pressed.
   final VoidCallback? onAttachmentButtonPressed;
+
+  /// The focus node for the message composer component.
   final FocusNode? focusNode;
+
+  /// The current user id.
   final String? currentUserId;
 }
