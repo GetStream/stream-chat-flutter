@@ -95,7 +95,7 @@ command:
       stream_core_flutter:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
-          ref: 043b6342aed679dc6555c2529c86163a2f9262e9
+          ref: 6ac7fc1dbed5fac16cbcdab89e129252203f7d9c
           path: packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
@@ -106,7 +106,7 @@ command:
 
     # List of all the dev_dependencies used in the project.
     dev_dependencies:
-      alchemist: ">=0.11.0 <0.14.0"
+      alchemist: ^0.13.0
       build_runner: ^2.4.9
       connectivity_plus_platform_interface: ^2.0.0
       drift_dev: ^2.28.0

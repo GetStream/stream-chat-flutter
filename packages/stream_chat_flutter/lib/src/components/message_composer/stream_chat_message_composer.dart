@@ -16,6 +16,7 @@ class StreamChatMessageComposer extends StatefulWidget {
     VoidCallback? onMicrophonePressed,
     VoidCallback? onAttachmentButtonPressed,
     FocusNode? focusNode,
+    String? currentUserId,
     String placeholder = '',
   }) : props = MessageComposerProps(
          isFloating: false,
@@ -24,6 +25,7 @@ class StreamChatMessageComposer extends StatefulWidget {
          onMicrophonePressed: onMicrophonePressed,
          onAttachmentButtonPressed: onAttachmentButtonPressed,
          focusNode: focusNode,
+         currentUserId: currentUserId,
          placeholder: placeholder,
        );
 
@@ -105,6 +107,7 @@ class MessageComposerProps {
     this.onMicrophonePressed,
     this.onAttachmentButtonPressed,
     this.focusNode,
+    this.currentUserId,
   });
 
   final bool isFloating;
@@ -114,6 +117,7 @@ class MessageComposerProps {
   final VoidCallback? onMicrophonePressed;
   final VoidCallback? onAttachmentButtonPressed;
   final FocusNode? focusNode;
+  final String? currentUserId;
 }
 
 /// Properties to build any of the sub-components.
@@ -128,6 +132,7 @@ class MessageComposerComponentProps {
     this.onMicrophonePressed,
     this.onAttachmentButtonPressed,
     this.focusNode,
+    this.currentUserId,
   });
 
   final StreamMessageInputController controller;
@@ -137,4 +142,5 @@ class MessageComposerComponentProps {
   final VoidCallback? onMicrophonePressed;
   final VoidCallback? onAttachmentButtonPressed;
   final FocusNode? focusNode;
+  final String? currentUserId;
 }

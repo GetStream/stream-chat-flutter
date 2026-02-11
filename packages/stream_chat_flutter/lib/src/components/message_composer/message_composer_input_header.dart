@@ -26,7 +26,6 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: improve getter for currentUserId
 
-    final currentUserId = StreamChat.of(context).currentUser?.id;
     final quotedMessage = props.controller.message.quotedMessage;
     final ogAttachment = props.controller.ogAttachment;
     final nonOGAttachments = controller.attachments
@@ -50,7 +49,7 @@ class DefaultStreamMessageComposerInputHeader extends StatelessWidget {
             _QuotedMessageInHeader(
               quotedMessage: quotedMessage,
               onRemovePressed: controller.clearQuotedMessage,
-              currentUserId: currentUserId,
+              currentUserId: props.currentUserId,
             ),
           if (hasAttachments)
             StreamMessageInputAttachmentList(
