@@ -89,6 +89,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
       controller: _controller,
       isFloating: widget.props.isFloating,
       message: widget.props.message,
+      currentUserId: widget.props.currentUserId,
       onSendPressed: widget.props.onSendPressed,
       onMicrophonePressed: widget.props.onMicrophonePressed,
       onAttachmentButtonPressed: widget.props.onAttachmentButtonPressed,

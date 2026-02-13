@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_th
 import 'package:stream_chat_flutter/src/attachment/voice_recording_attachment.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
@@ -90,7 +91,8 @@ class StreamMessageInputAttachmentList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupedAttachments = attachments.groupListsBy((it) => it.type);
+    final attachmentsList = attachments.toList();
+    final groupedAttachments = attachmentsList.groupListsBy((it) => it.type);
     final (:files, :media, :voices) = (
       files: [...?groupedAttachments[AttachmentType.file]],
       voices: [...?groupedAttachments[AttachmentType.voiceRecording]],
@@ -106,6 +108,17 @@ class StreamMessageInputAttachmentList extends StatelessWidget {
     if (files.isEmpty && media.isEmpty && voices.isEmpty) {
       return const Empty();
     }
+
+    return switch (mediaAttachmentListBuilder) {
+      final builder? => builder(context, media, onRemovePressed),
+      _ => MessageInputMediaAttachments(
+        attachments: attachmentsList,
+        attachmentBuilder: mediaAttachmentBuilder,
+        voiceRecordingAttachmentBuilder: voiceRecordingAttachmentBuilder,
+        fileAttachmentBuilder: fileAttachmentBuilder,
+        onRemovePressed: onRemovePressed,
+      ),
+    };
 
     return SingleChildScrollView(
       child: Column(
@@ -195,26 +208,47 @@ class MessageInputFileAttachments extends StatelessWidget {
                 return builder(context, attachment, onRemovePressed);
               }
 
-              // Otherwise, use the default builder.
-              return StreamFileAttachment(
-                message: Message(), // Dummy message
-                file: attachment,
-                constraints: BoxConstraints.loose(
-                  Size(
-                    MediaQuery.of(context).size.width * 0.65,
-                    56,
-                  ),
-                ),
-                trailing: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: RemoveAttachmentButton(
-                    onPressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
-                  ),
-                ),
+              return MessageComposerAttachmentFile(
+                fileTypeIcon: StreamFileTypeIcon.fromMimeType(mimeType: attachment.file?.mediaType?.mimeType ?? ''),
+                title: attachment.title ?? context.translations.fileText,
+                subtitle: _FileAttachmentSubtitle(attachment: attachment),
+                onRemovePressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
               );
             },
           )
           .insertBetween(const SizedBox(height: 8)),
+    );
+  }
+}
+
+class _FileAttachmentSubtitle extends StatelessWidget {
+  const _FileAttachmentSubtitle({
+    required this.attachment,
+  });
+
+  final Attachment attachment;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = StreamChatTheme.of(context);
+    final size = attachment.file?.size ?? attachment.extraData['file_size'];
+    final textStyle = theme.textTheme.footnote.copyWith(
+      color: theme.colorTheme.textLowEmphasis,
+    );
+    return attachment.uploadState.when(
+      preparing: () => Text(fileSize(size), style: textStyle),
+      inProgress: (sent, total) => StreamUploadProgressIndicator(
+        uploaded: sent,
+        total: total,
+        showBackground: false,
+        textStyle: textStyle,
+        progressIndicatorColor: theme.colorTheme.accentPrimary,
+      ),
+      success: () => Text(fileSize(size), style: textStyle),
+      failed: (_) => Text(
+        context.translations.uploadErrorLabel,
+        style: textStyle,
+      ),
     );
   }
 }
@@ -350,6 +384,8 @@ class MessageInputMediaAttachments extends StatelessWidget {
     super.key,
     required this.attachments,
     this.attachmentBuilder,
+    this.voiceRecordingAttachmentBuilder,
+    this.fileAttachmentBuilder,
     this.onRemovePressed,
   });
 
@@ -361,6 +397,12 @@ class MessageInputMediaAttachments extends StatelessWidget {
 
   /// Builder used to build the media type attachment item.
   final AttachmentItemBuilder? attachmentBuilder;
+
+  /// Builder used to build the voice recording type attachment item.
+  final AttachmentItemBuilder? voiceRecordingAttachmentBuilder;
+
+  /// Builder used to build the file type attachment item.
+  final AttachmentItemBuilder? fileAttachmentBuilder;
 
   /// Callback called when the remove button is pressed.
   final ValueSetter<Attachment>? onRemovePressed;
@@ -379,6 +421,28 @@ class MessageInputMediaAttachments extends StatelessWidget {
             final builder = attachmentBuilder;
             if (builder != null) {
               return builder(context, attachment, onRemovePressed);
+            }
+
+            if (attachment.type == AttachmentType.file) {
+              return SizedBox(
+                width: 268,
+                child: MessageInputFileAttachments(
+                  attachments: [attachment],
+                  attachmentBuilder: fileAttachmentBuilder,
+                  onRemovePressed: onRemovePressed,
+                ),
+              );
+            }
+
+            if (attachment.type == AttachmentType.audio) {
+              return SizedBox(
+                width: 268,
+                child: MessageInputVoiceRecordingAttachments(
+                  attachments: [attachment],
+                  attachmentBuilder: voiceRecordingAttachmentBuilder,
+                  onRemovePressed: onRemovePressed,
+                ),
+              );
             }
 
             return StreamMediaAttachmentBuilder(

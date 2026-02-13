@@ -41,49 +41,51 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
     final hasAttachments = nonOGAttachments.isNotEmpty;
     final hasContent = quotedMessage != null || hasAttachments || ogAttachment != null;
 
-    if (!hasContent) return const SizedBox.shrink();
     final spacing = context.streamSpacing;
     final contentPadding = EdgeInsets.only(
       left: spacing.xs,
       right: spacing.xs,
     );
 
-    return Padding(
-      padding: EdgeInsets.only(
-        top: spacing.xs,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (quotedMessage != null)
-            Padding(
-              padding: contentPadding,
-              child: _QuotedMessageInHeader(
-                quotedMessage: quotedMessage,
-                onRemovePressed: controller.clearQuotedMessage,
-                currentUserId: props.currentUserId,
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      alignment: Alignment.topCenter,
+      child: hasContent ? Padding(
+        padding: EdgeInsets.only(
+          top: spacing.xs,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (quotedMessage != null) Padding(
+                padding: contentPadding,
+                child: _QuotedMessageInHeader(
+                  quotedMessage: quotedMessage,
+                  onRemovePressed: controller.clearQuotedMessage,
+                  currentUserId: props.currentUserId,
+                ),
               ),
-            ),
-          if (hasAttachments)
-            StreamMessageInputAttachmentList(
-              attachments: nonOGAttachments,
-              onRemovePressed: _onAttachmentRemovePressed,
-            ),
-          if (ogAttachment != null)
-            Padding(
-              padding: contentPadding,
-              child: MessageComposerAttachmentLinkPreview(
-                title: ogAttachment.title,
-                subtitle: ogAttachment.text,
-                image: ogAttachment.imageUrl != null ? CachedNetworkImageProvider(ogAttachment.imageUrl!) : null,
-                url: ogAttachment.titleLink,
-                onRemovePressed: () {
-                  controller.clearOGAttachment();
-                  props.focusNode?.unfocus();
-                },
+            if (hasAttachments)
+              StreamMessageInputAttachmentList(
+                attachments: nonOGAttachments,
+                onRemovePressed: _onAttachmentRemovePressed,
               ),
-            ),
-        ],
+            if (ogAttachment != null)
+              Padding(
+                padding: contentPadding,
+                child: MessageComposerAttachmentLinkPreview(
+                  title: ogAttachment.title,
+                  subtitle: ogAttachment.text,
+                  image: ogAttachment.imageUrl != null ? CachedNetworkImageProvider(ogAttachment.imageUrl!) : null,
+                  url: ogAttachment.titleLink,
+                  onRemovePressed: () {
+                    controller.clearOGAttachment();
+                    props.focusNode?.unfocus();
+                  },
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
