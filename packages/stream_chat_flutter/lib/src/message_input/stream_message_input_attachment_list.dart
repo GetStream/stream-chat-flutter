@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// WidgetBuilder used to build the message input attachment list.
 ///
@@ -107,7 +108,6 @@ class StreamMessageInputAttachmentList extends StatelessWidget {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children:
@@ -368,27 +368,25 @@ class MessageInputMediaAttachments extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 72,
+      height: 80,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+        padding: EdgeInsets.symmetric(horizontal: context.streamSpacing.xs),
         cacheExtent: 104 * 10, // Cache 10 items ahead.
-        children: attachments
-            .map<Widget>(
-              (attachment) {
-                // If a custom builder is provided, use it.
-                final builder = attachmentBuilder;
-                if (builder != null) {
-                  return builder(context, attachment, onRemovePressed);
-                }
+        children: attachments.map<Widget>(
+          (attachment) {
+            // If a custom builder is provided, use it.
+            final builder = attachmentBuilder;
+            if (builder != null) {
+              return builder(context, attachment, onRemovePressed);
+            }
 
-                return StreamMediaAttachmentBuilder(
-                  attachment: attachment,
-                  onRemovePressed: onRemovePressed,
-                );
-              },
-            )
-            .insertBetween(const SizedBox(width: 8)),
+            return StreamMediaAttachmentBuilder(
+              attachment: attachment,
+              onRemovePressed: onRemovePressed,
+            );
+          },
+        ).toList(),
       ),
     );
   }
@@ -407,44 +405,20 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-    final shape = RoundedRectangleBorder(
-      side: BorderSide(
-        color: colorTheme.borders,
-        strokeAlign: BorderSide.strokeAlignOutside,
-      ),
-      borderRadius: BorderRadius.circular(14),
-    );
+    final mediaBadge = attachment.type == AttachmentType.video
+        ? const StreamMediaBadge(type: MediaBadgeType.video)
+        : null;
 
     return Container(
       key: Key(attachment.id),
-      clipBehavior: Clip.hardEdge,
-      decoration: ShapeDecoration(shape: shape),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            StreamMediaAttachmentThumbnail(
-              media: attachment,
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.cover,
-            ),
-            if (attachment.type == AttachmentType.video)
-              const Positioned(
-                left: 8,
-                bottom: 8,
-                child: StreamSvgIcon(icon: StreamSvgIcons.videoCall),
-              ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: RemoveAttachmentButton(
-                onPressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
-              ),
-            ),
-          ],
+      child: MessageComposerAttachmentMediaFile(
+        mediaBadge: mediaBadge,
+        onRemovePressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
+        child: StreamMediaAttachmentThumbnail(
+          media: attachment,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
         ),
       ),
     );

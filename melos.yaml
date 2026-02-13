@@ -73,7 +73,7 @@ command:
       package_info_plus: ">=8.3.0 <10.0.0"
       path: ^1.8.3
       path_provider: ^2.1.3
-      photo_manager: ^3.2.0
+      photo_manager: ^3.8.3
       photo_view: ^0.15.0
       provider: ^6.0.5
       rate_limiter: ^1.0.0
@@ -93,10 +93,7 @@ command:
       svg_icon_widget: ^0.0.1
       # TODO: Replace with hosted version before merging PR
       stream_core_flutter:
-        git:
-          url: https://github.com/GetStream/stream-core-flutter.git
-          ref: 236ff7c7c8472f7a32d621b00be5e9588cdf75f7
-          path: packages/stream_core_flutter
+        path: /Users/renefloor/Documents/github/stream-core-flutter/packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
       url_launcher: ^6.3.0

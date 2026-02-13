@@ -43,17 +43,26 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
 
     if (!hasContent) return const SizedBox.shrink();
     final spacing = context.streamSpacing;
+    final contentPadding = EdgeInsets.only(
+      left: spacing.xs,
+      right: spacing.xs,
+    );
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(spacing.xs, spacing.xs, spacing.xs, 0),
+      padding: EdgeInsets.only(
+        top: spacing.xs,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (quotedMessage != null)
-            _QuotedMessageInHeader(
-              quotedMessage: quotedMessage,
-              onRemovePressed: controller.clearQuotedMessage,
-              currentUserId: props.currentUserId,
+            Padding(
+              padding: contentPadding,
+              child: _QuotedMessageInHeader(
+                quotedMessage: quotedMessage,
+                onRemovePressed: controller.clearQuotedMessage,
+                currentUserId: props.currentUserId,
+              ),
             ),
           if (hasAttachments)
             StreamMessageInputAttachmentList(
@@ -61,15 +70,18 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
               onRemovePressed: _onAttachmentRemovePressed,
             ),
           if (ogAttachment != null)
-            MessageComposerAttachmentLinkPreview(
-              title: ogAttachment.title,
-              subtitle: ogAttachment.text,
-              image: ogAttachment.imageUrl != null ? CachedNetworkImageProvider(ogAttachment.imageUrl!) : null,
-              url: ogAttachment.titleLink,
-              onRemovePressed: () {
-                controller.clearOGAttachment();
-                props.focusNode?.unfocus();
-              },
+            Padding(
+              padding: contentPadding,
+              child: MessageComposerAttachmentLinkPreview(
+                title: ogAttachment.title,
+                subtitle: ogAttachment.text,
+                image: ogAttachment.imageUrl != null ? CachedNetworkImageProvider(ogAttachment.imageUrl!) : null,
+                url: ogAttachment.titleLink,
+                onRemovePressed: () {
+                  controller.clearOGAttachment();
+                  props.focusNode?.unfocus();
+                },
+              ),
             ),
         ],
       ),
