@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_factory.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/stream_chat_message_composer.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// A widget that shows the input trailing of the message composer.
@@ -21,7 +22,8 @@ class StreamMessageComposerInputTrailing extends StatelessWidget {
         core.StreamMessageComposerInputTrailing(
           controller: props.controller.textFieldController,
           onSendPressed: props.onSendPressed,
-          onMicrophonePressed: props.onMicrophonePressed,
+          voiceRecordingCallback: props.voiceRecordingCallback,
+          isRecording: props.isAudioRecordingFlowActive,
         );
   }
 }

@@ -772,6 +772,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
         placeholder: _getHint(context) ?? '',
         focusNode: focusNode,
         onSendPressed: sendMessage,
+        audioRecorderController: _audioRecorderController,
       ),
     );
   }
@@ -1394,12 +1395,10 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       child: StreamMessageInputAttachmentList(
         attachments: nonOGAttachments,
         onRemovePressed: _onAttachmentRemovePressed,
-        fileAttachmentListBuilder: widget.fileAttachmentListBuilder,
-        mediaAttachmentListBuilder: widget.mediaAttachmentListBuilder,
+        attachmentListBuilder: widget.mediaAttachmentListBuilder,
         voiceRecordingAttachmentBuilder: widget.voiceRecordingAttachmentBuilder,
         fileAttachmentBuilder: widget.fileAttachmentBuilder,
         mediaAttachmentBuilder: widget.mediaAttachmentBuilder,
-        voiceRecordingAttachmentListBuilder: widget.voiceRecordingAttachmentListBuilder,
       ),
     );
   }

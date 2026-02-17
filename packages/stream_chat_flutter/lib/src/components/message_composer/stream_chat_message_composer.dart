@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/src/components/message_composer/message_comp
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_leading.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_trailing.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_leading.dart';
+import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_ongoing.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_trailing.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
@@ -23,20 +24,20 @@ class StreamChatMessageComposer extends StatefulWidget {
     super.key,
     this.controller,
     required VoidCallback onSendPressed,
-    VoidCallback? onMicrophonePressed,
     VoidCallback? onAttachmentButtonPressed,
     FocusNode? focusNode,
     String? currentUserId,
     String placeholder = '',
+    StreamAudioRecorderController? audioRecorderController,
   }) : props = MessageComposerProps(
          isFloating: false,
          message: null,
          onSendPressed: onSendPressed,
-         onMicrophonePressed: onMicrophonePressed,
          onAttachmentButtonPressed: onAttachmentButtonPressed,
          focusNode: focusNode,
          currentUserId: currentUserId,
          placeholder: placeholder,
+         audioRecorderController: audioRecorderController,
        );
 
   /// The controller for the message composer.
@@ -85,29 +86,108 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
 
   @override
   Widget build(BuildContext context) {
-    final componentProps = MessageComposerComponentProps(
-      controller: _controller,
-      isFloating: widget.props.isFloating,
-      message: widget.props.message,
-      currentUserId: widget.props.currentUserId,
-      onSendPressed: widget.props.onSendPressed,
-      onMicrophonePressed: widget.props.onMicrophonePressed,
-      onAttachmentButtonPressed: widget.props.onAttachmentButtonPressed,
-      focusNode: widget.props.focusNode,
-    );
+    core.VoiceRecordingCallback? voiceRecordingCallback = null;
+    if (widget.props.audioRecorderController case final controller?) {
+      voiceRecordingCallback = core.VoiceRecordingCallback(
+        onStart: controller.startRecord,
+        onStop: () async {
+          final audio = await controller.finishRecord();
+          if (audio != null) {
+            _controller.addAttachment(audio);
+          }
 
-    return StreamMessageComposerFactory.maybeOf(context)?.messageComposer?.call(context, widget.props) ??
+          // Once the recording is finished, cancel the recorder.
+          controller.cancelRecord(discardTrack: false);
+        },
+      );
+    }
+
+    MessageComposerComponentProps componentProps({required AudioRecorderState audioRecorderState}) =>
+        MessageComposerComponentProps(
+          controller: _controller,
+          isFloating: widget.props.isFloating,
+          message: widget.props.message,
+          currentUserId: widget.props.currentUserId,
+          onSendPressed: widget.props.onSendPressed,
+          voiceRecordingCallback: voiceRecordingCallback,
+          onAttachmentButtonPressed: widget.props.onAttachmentButtonPressed,
+          audioRecorderState: audioRecorderState,
+          focusNode: widget.props.focusNode,
+        );
+
+    Widget createComposer({
+      Widget? body = null,
+      AudioRecorderState audioRecorderState = const RecordStateIdle(),
+    }) =>
+        StreamMessageComposerFactory.maybeOf(context)?.messageComposer?.call(context, widget.props) ??
         core.StreamBaseMessageComposer(
           placeholder: widget.props.placeholder,
           controller: _controller.textFieldController,
           isFloating: widget.props.isFloating,
           focusNode: widget.props.focusNode,
-          composerLeading: StreamMessageComposerLeading(props: componentProps),
-          composerTrailing: StreamMessageComposerTrailing(props: componentProps),
-          inputHeader: StreamMessageComposerInputHeader(props: componentProps),
-          inputTrailing: StreamMessageComposerInputTrailing(props: componentProps),
-          inputLeading: StreamMessageComposerInputLeading(props: componentProps),
+          composerLeading: StreamMessageComposerLeading(props: componentProps(audioRecorderState: audioRecorderState)),
+          composerTrailing: StreamMessageComposerTrailing(
+            props: componentProps(audioRecorderState: audioRecorderState),
+          ),
+          inputHeader: StreamMessageComposerInputHeader(props: componentProps(audioRecorderState: audioRecorderState)),
+          inputTrailing: StreamMessageComposerInputTrailing(
+            props: componentProps(audioRecorderState: audioRecorderState),
+          ),
+          inputLeading: StreamMessageComposerInputLeading(
+            props: componentProps(audioRecorderState: audioRecorderState),
+          ),
+          inputBody: body,
         );
+
+    if (widget.props.audioRecorderController case final controller?) {
+      return ValueListenableBuilder(
+        valueListenable: controller,
+        builder: (context, state, _) {
+          final isAudioRecordingFlowActive = state is RecordStateRecording;
+
+          final body = isAudioRecordingFlowActive
+              ? StreamMessageComposerRecordingOngoing(audioRecorderController: controller)
+              : null;
+
+          return createComposer(body: body, audioRecorderState: state);
+
+          return StreamAudioRecorderButton(
+            recordState: state,
+            // feedback: widget.voiceRecordingFeedback,
+            onRecordStart: controller.startRecord,
+            onRecordCancel: controller.cancelRecord,
+            onRecordStop: controller.stopRecord,
+            onRecordLock: controller.lockRecord,
+            onRecordDragUpdate: controller.dragRecord,
+            onRecordStartCancel: () {
+              // Show a message to the user to hold to record.
+              controller.showInfo(
+                context.translations.holdToRecordLabel,
+              );
+            },
+            onRecordFinish: () async {
+              // Finish the recording session and add the audio to the
+              // message input controller.
+              final audio = await controller.finishRecord();
+              if (audio != null) {
+                _controller.addAttachment(audio);
+              }
+
+              // Once the recording is finished, cancel the recorder.
+              controller.cancelRecord(discardTrack: false);
+
+              // Send the message if the user has enabled the option to
+              // send the voice recording automatically.
+              // if (widget.sendVoiceRecordingAutomatically) {
+              //   return sendMessage();
+              // }
+            },
+          );
+        },
+      );
+    }
+
+    return createComposer();
   }
 }
 
@@ -127,10 +207,10 @@ class MessageComposerProps {
     this.message,
     this.placeholder = '',
     required this.onSendPressed,
-    this.onMicrophonePressed,
     this.onAttachmentButtonPressed,
     this.focusNode,
     this.currentUserId,
+    this.audioRecorderController,
   });
 
   /// Whether the message composer is floating.
@@ -145,9 +225,6 @@ class MessageComposerProps {
   /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;
 
-  /// The callback for when the microphone button is pressed.
-  final VoidCallback? onMicrophonePressed;
-
   /// The callback for when the attachment button is pressed.
   final VoidCallback? onAttachmentButtonPressed;
 
@@ -156,6 +233,9 @@ class MessageComposerProps {
 
   /// The current user id.
   final String? currentUserId;
+
+  /// The audio recorder controller.
+  final StreamAudioRecorderController? audioRecorderController;
 }
 
 /// Properties to build any of the sub-components.
@@ -176,10 +256,11 @@ class MessageComposerComponentProps {
     this.isFloating = false,
     this.message,
     required this.onSendPressed,
-    this.onMicrophonePressed,
+    this.voiceRecordingCallback,
     this.onAttachmentButtonPressed,
     this.focusNode,
     this.currentUserId,
+    this.audioRecorderState = const RecordStateIdle(),
   });
 
   /// The controller for the message composer component.
@@ -195,7 +276,7 @@ class MessageComposerComponentProps {
   final VoidCallback onSendPressed;
 
   /// The callback for when the microphone button is pressed.
-  final VoidCallback? onMicrophonePressed;
+  final core.VoiceRecordingCallback? voiceRecordingCallback;
 
   /// The callback for when the attachment button is pressed.
   final VoidCallback? onAttachmentButtonPressed;
@@ -205,4 +286,10 @@ class MessageComposerComponentProps {
 
   /// The current user id.
   final String? currentUserId;
+
+  /// Whether the audio recording flow is active.
+  final AudioRecorderState audioRecorderState;
+
+  /// Whether the audio recording flow is active.
+  bool get isAudioRecordingFlowActive => audioRecorderState is RecordStateRecording;
 }

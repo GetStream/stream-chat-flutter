@@ -50,14 +50,15 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
       alignment: Alignment.topCenter,
-      child: hasContent ? Padding(
+      child: Padding(
         padding: EdgeInsets.only(
-          top: spacing.xs,
+          top: hasContent ? spacing.xs : 0,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (quotedMessage != null) Padding(
+            if (quotedMessage != null)
+              Padding(
                 padding: contentPadding,
                 child: _QuotedMessageInHeader(
                   quotedMessage: quotedMessage,

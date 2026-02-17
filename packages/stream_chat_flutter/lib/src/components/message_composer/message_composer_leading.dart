@@ -28,19 +28,30 @@ class _DefaultStreamMessageComposerLeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        StreamButton.icon(
-          icon: context.streamIcons.plusLarge,
-          style: StreamButtonStyle.secondary,
-          type: StreamButtonType.outline,
-          size: StreamButtonSize.large,
-          onTap: () {
-            props.onAttachmentButtonPressed?.call();
-          },
+    return AnimatedOpacity(
+      opacity: props.isAudioRecordingFlowActive ? 0.0 : 1.0,
+      duration: props.isAudioRecordingFlowActive ? Duration.zero : const Duration(milliseconds: 200),
+      curve: Curves.easeInQuint,
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 200),
+        alignment: Alignment.bottomCenter,
+        child: Row(
+          children: [
+            if (!props.isAudioRecordingFlowActive) ...[
+              StreamButton.icon(
+                icon: context.streamIcons.plusLarge,
+                style: StreamButtonStyle.secondary,
+                type: StreamButtonType.outline,
+                size: StreamButtonSize.large,
+                onTap: () {
+                  props.onAttachmentButtonPressed?.call();
+                },
+              ),
+              SizedBox(width: context.streamSpacing.xs),
+            ],
+          ],
         ),
-        SizedBox(width: context.streamSpacing.xs),
-      ],
+      ),
     );
   }
 }

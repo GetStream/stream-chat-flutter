@@ -149,12 +149,16 @@ class PlaylistTrack {
   /// {@macro playlistTrack}
   const PlaylistTrack({
     required this.uri,
+    this.key,
     this.title,
     this.waveform = const [],
     this.duration = Duration.zero,
     this.position = Duration.zero,
     this.state = TrackState.idle,
   });
+
+  /// The key to identify the track.
+  final Object? key;
 
   /// The uri of the track.
   final Uri uri;
@@ -202,6 +206,7 @@ class PlaylistTrack {
     TrackState? state,
   }) {
     return PlaylistTrack(
+      key: key,
       uri: uri ?? this.uri,
       title: title ?? this.title,
       duration: duration ?? this.duration,
