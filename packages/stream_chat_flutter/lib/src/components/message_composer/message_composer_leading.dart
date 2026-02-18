@@ -43,6 +43,7 @@ class _DefaultStreamMessageComposerLeading extends StatelessWidget {
                 style: StreamButtonStyle.secondary,
                 type: StreamButtonType.outline,
                 size: StreamButtonSize.large,
+                isFloating: props.isFloating,
                 onTap: () {
                   props.onAttachmentButtonPressed?.call();
                 },

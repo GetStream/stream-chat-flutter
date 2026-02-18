@@ -93,6 +93,7 @@ class _StreamMessageInputAttachmentListState extends State<StreamMessageInputAtt
   late List<Attachment> _audioAttachments = widget._audioAttachments;
 
   late final _controller = StreamAudioPlaylistController(_audioAttachments.toPlaylist());
+  late final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -112,11 +113,24 @@ class _StreamMessageInputAttachmentListState extends State<StreamMessageInputAtt
       _audioAttachments = newAudioAttachments;
       _controller.updatePlaylist(newAudioAttachments.toPlaylist());
     }
+    if (oldWidget.attachments.length < widget.attachments.length) {
+      // If an attachment has been added, scroll to the end.
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        },
+      );
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -127,6 +141,7 @@ class _StreamMessageInputAttachmentListState extends State<StreamMessageInputAtt
     return switch (widget.attachmentListBuilder) {
       final builder? => builder(context, attachmentsList, widget.onRemovePressed),
       _ => MessageInputMediaAttachments(
+        scrollController: _scrollController,
         attachments: attachmentsList,
         attachmentBuilder: widget.mediaAttachmentBuilder,
         audioPlaylistController: _controller,
@@ -306,6 +321,7 @@ class MessageInputMediaAttachments extends StatelessWidget {
     this.voiceRecordingAttachmentBuilder,
     this.fileAttachmentBuilder,
     this.onRemovePressed,
+    this.scrollController,
   });
 
   /// List of media type attachments to display thumbnails for.
@@ -329,11 +345,15 @@ class MessageInputMediaAttachments extends StatelessWidget {
   /// Controller to use to control the audio playback.
   final StreamAudioPlaylistController? audioPlaylistController;
 
+  /// Scroll controller to use to control the scroll position.
+  final ScrollController? scrollController;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 80,
       child: ListView(
+        controller: scrollController,
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: context.streamSpacing.xs),
         cacheExtent: 104 * 10, // Cache 10 items ahead.
