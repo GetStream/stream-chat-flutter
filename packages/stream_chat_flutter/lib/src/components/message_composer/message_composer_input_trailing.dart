@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_factory.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/stream_chat_message_composer.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -19,11 +20,34 @@ class StreamMessageComposerInputTrailing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamMessageComposerFactory.maybeOf(context)?.inputTrailing?.call(context, props) ??
-        core.StreamMessageComposerInputTrailing(
-          controller: props.controller.textFieldController,
-          onSendPressed: props.onSendPressed,
-          voiceRecordingCallback: props.voiceRecordingCallback,
-          isRecording: props.isAudioRecordingFlowActive,
-        );
+        DefaultStreamMessageComposerInputTrailing(props: props);
+  }
+}
+
+class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
+  const DefaultStreamMessageComposerInputTrailing({super.key, required this.props});
+
+  /// The properties for the message composer component.
+  final MessageComposerComponentProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    return PortalTarget(
+      anchor: const Aligned(
+        offset: Offset(4, -16),
+        target: Alignment.bottomRight,
+        follower: Alignment.bottomRight,
+      ),
+      visible: false,
+      portalFollower: SwipeToLockButton(isLocked: props.audioRecorderState is RecordStateRecordingLocked),
+      child: props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped
+          ? const SizedBox.shrink()
+          : core.StreamMessageComposerInputTrailing(
+              controller: props.controller.textFieldController,
+              onSendPressed: props.onSendPressed,
+              voiceRecordingCallback: props.voiceRecordingCallback,
+              isRecording: props.isAudioRecordingFlowActive,
+            ),
+    );
   }
 }

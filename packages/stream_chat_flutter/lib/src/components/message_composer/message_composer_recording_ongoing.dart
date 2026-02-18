@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -35,7 +37,10 @@ class StreamMessageComposerRecordingOngoing extends StatelessWidget {
               final duration = state is RecordStateRecording ? state.duration : Duration.zero;
               return Text(
                 duration.toMinutesAndSeconds(),
-                style: textTheme.captionEmphasis.copyWith(color: colorScheme.textPrimary),
+                style: textTheme.captionEmphasis.copyWith(
+                  color: colorScheme.textPrimary,
+                  fontFeatures: [const FontFeature.tabularFigures()],
+                ),
               );
             },
           ),
