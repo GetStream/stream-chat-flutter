@@ -49,6 +49,10 @@ class StreamChatMessageComposer extends StatefulWidget {
   /// The properties for the message composer.
   final MessageComposerProps props;
 
+  /// Whether the voice recording should be sent automatically.
+  /// If enabled, the voice recording will be sent automatically when the recording is finished.
+  /// If disabled, the voice recording will be added as an attachment to the message
+  /// and the user will need to send the message manually.
   final bool sendVoiceRecordingAutomatically;
 
   @override
@@ -345,7 +349,7 @@ class MessageComposerComponentProps {
   bool get isAudioRecordingFlowStopped => audioRecorderState is RecordStateStopped;
 }
 
-extension AudioRecorderControllerExtension on StreamAudioRecorderController {
+extension on StreamAudioRecorderController {
   bool get isRecording => value is RecordStateRecording;
   bool get isLocked => isRecording && value is! RecordStateRecordingHold;
 }

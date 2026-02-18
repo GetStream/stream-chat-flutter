@@ -1,11 +1,16 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
+/// Widget to display the recording ongoing state.
+/// This widget can be used inside of the [StreamBaseMessageComposer] instead of the default `inputBody`.
+/// It shows a hint to slide to cancel the recording.
 class StreamMessageComposerRecordingOngoing extends StatelessWidget {
+  /// Creates a new instance of [StreamMessageComposerRecordingOngoing].
+  /// [audioRecorderController] is the controller for the audio recorder.
   const StreamMessageComposerRecordingOngoing({super.key, required this.audioRecorderController});
+
+  /// The controller for the audio recorder.
   final StreamAudioRecorderController audioRecorderController;
 
   @override
@@ -45,7 +50,7 @@ class StreamMessageComposerRecordingOngoing extends StatelessWidget {
             },
           ),
           const SizedBox(width: 23),
-          GradientText(
+          _GradientText(
             'Slide to cancel',
             style: context.streamTextTheme.bodyDefault,
             gradient: LinearGradient(
@@ -60,8 +65,8 @@ class StreamMessageComposerRecordingOngoing extends StatelessWidget {
   }
 }
 
-class GradientText extends StatelessWidget {
-  const GradientText(
+class _GradientText extends StatelessWidget {
+  const _GradientText(
     this.text, {
     required this.gradient,
     this.style,

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_factory.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/stream_chat_message_composer.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -24,7 +22,12 @@ class StreamMessageComposerInputTrailing extends StatelessWidget {
   }
 }
 
+/// Default implementation of the input trailing of the message composer.
+/// Shows the send button or the microphone button based on the state of the message composer.
+/// It shows no button when the audio recording flow is locked or stopped.
 class DefaultStreamMessageComposerInputTrailing extends StatefulWidget {
+  /// Creates a new instance of [DefaultStreamMessageComposerInputTrailing].
+  /// [props] contains the properties for the message composer component.
   const DefaultStreamMessageComposerInputTrailing({super.key, required this.props});
 
   /// The properties for the message composer component.
@@ -78,22 +81,13 @@ class _DefaultStreamMessageComposerInputTrailingState extends State<DefaultStrea
       buttonState = StreamMessageComposerInputTrailingState.send;
     }
 
-    return PortalTarget(
-      anchor: const Aligned(
-        offset: Offset(4, -16),
-        target: Alignment.bottomRight,
-        follower: Alignment.bottomRight,
-      ),
-      visible: false,
-      portalFollower: SwipeToLockButton(isLocked: widget.props.audioRecorderState is RecordStateRecordingLocked),
-      child: widget.props.isAudioRecordingFlowLocked || widget.props.isAudioRecordingFlowStopped
-          ? const SizedBox.shrink()
-          : StreamBaseMessageComposerInputTrailing(
-              controller: widget.props.controller.textFieldController,
-              onSendPressed: widget.props.onSendPressed,
-              voiceRecordingCallback: widget.props.voiceRecordingCallback,
-              buttonState: buttonState,
-            ),
-    );
+    return widget.props.isAudioRecordingFlowLocked || widget.props.isAudioRecordingFlowStopped
+        ? const SizedBox.shrink()
+        : StreamBaseMessageComposerInputTrailing(
+            controller: widget.props.controller.textFieldController,
+            onSendPressed: widget.props.onSendPressed,
+            voiceRecordingCallback: widget.props.voiceRecordingCallback,
+            buttonState: buttonState,
+          );
   }
 }

@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
+/// Widget to display the recording locked state.
+/// This widget can be used inside of the [StreamBaseMessageComposer] instead of the default `inputBody`.
 class MessageComposerRecordingLocked extends StatelessWidget {
+  /// Creates a new instance of [MessageComposerRecordingLocked].
+  /// [audioRecorderController] is the controller for the audio recorder.
+  /// [feedback] is the feedback for the audio recorder.
+  /// [messageInputController] is the controller for the message input.
+  /// [sendMessageCallback] is the callback for when the message is sent automatically.
   const MessageComposerRecordingLocked({
     super.key,
     required this.audioRecorderController,
@@ -10,9 +17,18 @@ class MessageComposerRecordingLocked extends StatelessWidget {
     required this.messageInputController,
     required this.sendMessageCallback,
   });
+
+  /// The controller for the audio recorder.
   final StreamAudioRecorderController audioRecorderController;
+
+  /// The feedback for the audio recorder.
   final AudioRecorderFeedback feedback;
+
+  /// The controller for the message input.
   final StreamMessageInputController messageInputController;
+
+  /// The callback for when the message is sent automatically.
+  /// This callback should be null when the message is not supposed to be sent automatically.
   final VoidCallback? sendMessageCallback;
 
   @override
@@ -68,7 +84,7 @@ class MessageComposerRecordingLocked extends StatelessWidget {
               icon: icons.trashBin,
               onTap: audioRecorderController.cancelRecord,
             ),
-            if (audioRecorderController.isRecording)
+            if (audioRecorderController.value is RecordStateRecording)
               StreamButton.icon(
                 key: const ValueKey('stop-record-button'),
                 style: StreamButtonStyle.destructive,
