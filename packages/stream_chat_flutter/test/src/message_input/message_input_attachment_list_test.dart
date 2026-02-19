@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 import '../mocks.dart';
 
@@ -36,8 +37,7 @@ void main() {
         );
 
         // Expect 2 file attachments and 1 media attachment
-        expect(find.byType(MessageInputFileAttachments), findsOneWidget);
-        expect(find.byType(StreamFileAttachment), findsNWidgets(2));
+        expect(find.byType(MessageComposerAttachmentFile), findsNWidgets(2));
         expect(find.byType(MessageInputMediaAttachments), findsOneWidget);
         expect(find.byType(StreamMediaAttachmentThumbnail), findsOneWidget);
       },
@@ -64,7 +64,7 @@ void main() {
           ),
         );
 
-        final removeButtons = find.byType(RemoveAttachmentButton);
+        final removeButtons = find.byType(StreamRemoveControl);
 
         // Tap the first remove button
         await tester.tap(removeButtons.first);
@@ -72,7 +72,7 @@ void main() {
 
         // Expect the onRemovePressed callback to be called with the second
         // attachment as they are reversed in the UI.
-        expect(removedAttachment, attachments[1]);
+        expect(removedAttachment, attachments[0]);
       },
     );
 
@@ -113,7 +113,7 @@ void main() {
         );
 
         // Expect 2 file attachments
-        expect(find.byType(StreamFileAttachment), findsNWidgets(2));
+        expect(find.byType(MessageComposerAttachmentFile), findsNWidgets(2));
       },
     );
 
@@ -137,7 +137,7 @@ void main() {
           ),
         );
 
-        final removeButton = find.byType(RemoveAttachmentButton);
+        final removeButton = find.byType(StreamRemoveControl);
 
         // Tap the remove button
         await tester.tap(removeButton);
@@ -228,7 +228,7 @@ void main() {
           ),
         );
 
-        final removeButton = find.byType(RemoveAttachmentButton);
+        final removeButton = find.byType(StreamRemoveControl);
 
         // Tap the remove button
         await tester.tap(removeButton);
