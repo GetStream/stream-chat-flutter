@@ -364,10 +364,11 @@ class MessageInputMediaAttachments extends StatelessWidget {
 
               return SizedBox(
                 width: 268,
-                child: MessageInputFileAttachments(
-                  attachments: [attachment],
-                  attachmentBuilder: fileAttachmentBuilder,
-                  onRemovePressed: onRemovePressed,
+                child: MessageComposerAttachmentFile(
+                  fileTypeIcon: StreamFileTypeIcon.fromMimeType(mimeType: attachment.file?.mediaType?.mimeType ?? ''),
+                  title: attachment.title ?? context.translations.fileText,
+                  subtitle: _FileAttachmentSubtitle(attachment: attachment),
+                  onRemovePressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
                 ),
               );
             }
