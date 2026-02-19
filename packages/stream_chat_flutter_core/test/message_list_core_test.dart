@@ -14,14 +14,14 @@ void main() {
     int offset = 0,
     bool threads = false,
   }) {
-    final users = List.generate(count, (index) {
-      index = count + offset;
+    final users = List.generate(count, (i) {
+      final index = i + offset;
       return User(id: 'testUserId$index');
     });
     final messages = List.generate(
       count,
-      (index) {
-        index = index + offset;
+      (i) {
+        final index = i + offset;
         return Message(
           id: 'testMessageId$index',
           type: 'testType',
@@ -39,8 +39,8 @@ void main() {
     );
     final threadMessages = List.generate(
       count,
-      (index) {
-        index = index + offset;
+      (i) {
+        final index = i + offset;
         return Message(
           id: 'testThreadMessageId$index',
           type: 'testType',
