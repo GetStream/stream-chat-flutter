@@ -25,7 +25,7 @@ class StreamMessageComposerInputTrailing extends StatelessWidget {
 /// Default implementation of the input trailing of the message composer.
 /// Shows the send button or the microphone button based on the state of the message composer.
 /// It shows no button when the audio recording flow is locked or stopped.
-class DefaultStreamMessageComposerInputTrailing extends StatefulWidget {
+class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
   /// Creates a new instance of [DefaultStreamMessageComposerInputTrailing].
   /// [props] contains the properties for the message composer component.
   const DefaultStreamMessageComposerInputTrailing({super.key, required this.props});
@@ -33,61 +33,32 @@ class DefaultStreamMessageComposerInputTrailing extends StatefulWidget {
   /// The properties for the message composer component.
   final MessageComposerComponentProps props;
 
-  @override
-  State<DefaultStreamMessageComposerInputTrailing> createState() => _DefaultStreamMessageComposerInputTrailingState();
-}
-
-class _DefaultStreamMessageComposerInputTrailingState extends State<DefaultStreamMessageComposerInputTrailing> {
-  var _hasText = false;
-  StreamMessageInputController get controller => widget.props.controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller.addListener(_onInputTextChanged);
-    _hasText = controller.text.isNotEmpty;
-  }
-
-  @override
-  void didUpdateWidget(DefaultStreamMessageComposerInputTrailing oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (controller != oldWidget.props.controller) {
-      oldWidget.props.controller.removeListener(_onInputTextChanged);
-      controller.addListener(_onInputTextChanged);
-    }
-  }
-
-  void _onInputTextChanged() {
-    final hasText = controller.text.isNotEmpty;
-    if (_hasText != hasText) {
-      setState(() => _hasText = hasText);
-    }
-  }
-
-  @override
-  void dispose() {
-    controller.removeListener(_onInputTextChanged);
-    super.dispose();
-  }
+  StreamMessageInputController get _controller => props.controller;
 
   @override
   Widget build(BuildContext context) {
-    var buttonState = StreamMessageComposerInputTrailingState.microphone;
-    if (widget.props.isAudioRecordingFlowActive) {
-      buttonState = StreamMessageComposerInputTrailingState.voiceRecordingActive;
-    }
+    return ValueListenableBuilder(
+      valueListenable: _controller,
+      builder: (context, value, child) {
+        final hasText = _controller.text.isNotEmpty;
+        var buttonState = StreamMessageComposerInputTrailingState.microphone;
+        if (props.isAudioRecordingFlowActive) {
+          buttonState = StreamMessageComposerInputTrailingState.voiceRecordingActive;
+        }
 
-    if (_hasText || widget.props.controller.attachments.isNotEmpty) {
-      buttonState = StreamMessageComposerInputTrailingState.send;
-    }
+        if (hasText || _controller.attachments.isNotEmpty) {
+          buttonState = StreamMessageComposerInputTrailingState.send;
+        }
 
-    return widget.props.isAudioRecordingFlowLocked || widget.props.isAudioRecordingFlowStopped
-        ? const SizedBox.shrink()
-        : StreamBaseMessageComposerInputTrailing(
-            controller: widget.props.controller.textFieldController,
-            onSendPressed: widget.props.onSendPressed,
-            voiceRecordingCallback: widget.props.voiceRecordingCallback,
-            buttonState: buttonState,
-          );
+        return props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped
+            ? const SizedBox.shrink()
+            : StreamCoreMessageComposerInputTrailing(
+                controller: _controller.textFieldController,
+                onSendPressed: props.onSendPressed,
+                voiceRecordingCallback: props.voiceRecordingCallback,
+                buttonState: buttonState,
+              );
+      },
+    );
   }
 }
