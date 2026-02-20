@@ -263,15 +263,13 @@ class MessageInputVoiceRecordingAttachment extends StatelessWidget {
         final track = state.tracks.where((it) => it.key == attachment).first;
 
         return StreamVoiceRecordingAttachment(
+          title: 'Voice Message',
+          showTitle: true,
           track: track,
           speed: state.speed,
-          trailingBuilder: (_, __, ___, ____) {
-            return RemoveAttachmentButton(
-              onPressed: switch (onRemovePressed) {
-                final callback? => () => callback(attachment),
-                _ => null,
-              },
-            );
+          onRemovePressed: switch (onRemovePressed) {
+            final callback? => () => callback(attachment),
+            _ => null,
           },
           onTrackPause: controller.pause,
           onChangeSpeed: controller.setSpeed,

@@ -191,19 +191,9 @@ class StreamChatThemeData {
       indicatorIconSize: 16,
     );
 
-    final audioWaveformTheme = StreamAudioWaveformThemeData(
-      color: colorTheme.textLowEmphasis,
-      progressColor: colorTheme.accentPrimary,
-      minBarHeight: 2,
-      spacingRatio: 0.3,
-      heightScale: 1,
-    );
+    final audioWaveformTheme = StreamAudioWaveformThemeData();
 
-    final audioWaveformSliderTheme = StreamAudioWaveformSliderThemeData(
-      audioWaveformTheme: audioWaveformTheme,
-      thumbColor: Colors.white,
-      thumbBorderColor: colorTheme.borders,
-    );
+    final audioWaveformSliderTheme = StreamAudioWaveformSliderThemeData();
 
     return StreamChatThemeData.raw(
       textTheme: textTheme,
@@ -568,19 +558,13 @@ class StreamChatThemeData {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           minimumSize: const Size(36, 36),
         ),
-        titleTextStyle: textTheme.bodyBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        durationTextStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
         speedControlButtonStyle: ElevatedButton.styleFrom(
           elevation: 2,
           textStyle: textTheme.footnote,
           foregroundColor: Colors.black,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           backgroundColor: Colors.white,
-          shape: const StadiumBorder(),
+          shape: StadiumBorder(side: BorderSide(color: colorTheme.borders)),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           minimumSize: const Size(40, 28),
         ),

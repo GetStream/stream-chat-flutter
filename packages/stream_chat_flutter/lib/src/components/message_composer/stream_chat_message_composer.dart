@@ -146,11 +146,19 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
         valueListenable: controller,
         builder: (context, state, _) {
           final body = switch (state) {
-            RecordStateRecordingLocked() || RecordStateStopped() => MessageComposerRecordingLocked(
+            RecordStateRecordingLocked() => MessageComposerRecordingLocked(
               audioRecorderController: controller,
               feedback: feedback,
               messageInputController: _controller,
               sendMessageCallback: widget.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
+              state: state,
+            ),
+            RecordStateStopped() => MessageComposerRecordingStopped(
+              audioRecorderController: controller,
+              feedback: feedback,
+              messageInputController: _controller,
+              sendMessageCallback: widget.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
+              recordingState: state,
             ),
             RecordStateRecording() => StreamMessageComposerRecordingOngoing(audioRecorderController: controller),
             _ => null,

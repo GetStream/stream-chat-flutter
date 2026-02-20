@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/theme/audio_waveform_slider_theme.dart';
 import 'package:stream_chat_flutter/src/theme/audio_waveform_theme.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
-const _kAudioWaveformSliderThumbWidth = 4.0;
-const _kAudioWaveformSliderThumbHeight = 28.0;
+const _kAudioWaveformSliderThumbWidth = 12.0;
 
 /// {@template streamAudioWaveformSlider}
 /// A widget that displays an audio waveform and allows the user to interact
@@ -107,15 +107,10 @@ class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamAudioWaveformSliderTheme.of(context);
-    final waveformTheme = theme.audioWaveformTheme;
+    final colorScheme = context.streamColorScheme;
 
-    final color = widget.color ?? waveformTheme!.color!;
-    final progressColor = widget.progressColor ?? waveformTheme!.progressColor!;
-    final minBarHeight = widget.minBarHeight ?? waveformTheme!.minBarHeight!;
-    final spacingRatio = widget.spacingRatio ?? waveformTheme!.spacingRatio!;
-    final heightScale = widget.heightScale ?? waveformTheme!.heightScale!;
-    final thumbColor = widget.thumbColor ?? theme.thumbColor!;
-    final thumbBorderColor = widget.thumbBorderColor ?? theme.thumbBorderColor!;
+    final thumbColor = widget.thumbColor ?? theme.thumbColor ?? colorScheme.accentPrimary;
+    final thumbBorderColor = widget.thumbBorderColor ?? theme.thumbBorderColor ?? colorScheme.borderOnAccent;
 
     return HorizontalSlider(
       onChangeStart: widget.onChangeStart,
@@ -130,12 +125,12 @@ class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
             StreamAudioWaveform(
               waveform: widget.waveform,
               limit: widget.limit,
-              color: color,
+              color: widget.color,
               progress: widget.progress,
-              progressColor: progressColor,
-              minBarHeight: minBarHeight,
-              spacingRatio: spacingRatio,
-              heightScale: heightScale,
+              progressColor: widget.progressColor,
+              minBarHeight: widget.minBarHeight,
+              spacingRatio: widget.spacingRatio,
+              heightScale: widget.heightScale,
               inverse: widget.inverse,
             ),
             Builder(
@@ -149,7 +144,6 @@ class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
                   child: StreamAudioWaveformSliderThumb(
                     color: thumbColor,
                     borderColor: thumbBorderColor,
-                    height: constraints.maxHeight,
                   ),
                 );
               },
@@ -168,17 +162,13 @@ class StreamAudioWaveformSliderThumb extends StatelessWidget {
   /// {@macro streamAudioWaveformSliderThumb}
   const StreamAudioWaveformSliderThumb({
     super.key,
-    this.width = _kAudioWaveformSliderThumbWidth,
-    this.height = _kAudioWaveformSliderThumbHeight,
+    this.size = _kAudioWaveformSliderThumbWidth,
     this.color = Colors.white,
     this.borderColor = const Color(0xffecebeb),
   });
 
   /// The width of the thumb.
-  final double width;
-
-  /// The height of the thumb.
-  final double height;
+  final double size;
 
   /// The color of the thumb.
   final Color color;
@@ -189,15 +179,16 @@ class StreamAudioWaveformSliderThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
+      width: size,
+      height: size,
+      foregroundDecoration: BoxDecoration(
         color: color,
         border: Border.all(
           color: borderColor,
-          strokeAlign: BorderSide.strokeAlignOutside,
+          strokeAlign: BorderSide.strokeAlignCenter,
+          width: 2,
         ),
-        borderRadius: BorderRadius.circular(2),
+        shape: BoxShape.circle,
       ),
     );
   }
@@ -274,12 +265,13 @@ class StreamAudioWaveform extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamAudioWaveformTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
-    final color = this.color ?? theme.color!;
-    final progressColor = this.progressColor ?? theme.progressColor!;
-    final minBarHeight = this.minBarHeight ?? theme.minBarHeight!;
-    final spacingRatio = this.spacingRatio ?? theme.spacingRatio!;
-    final heightScale = this.heightScale ?? theme.heightScale!;
+    final color = this.color ?? theme.color ?? colorScheme.borderOpacity25;
+    final progressColor = this.progressColor ?? theme.progressColor ?? colorScheme.accentPrimary;
+    final minBarHeight = this.minBarHeight ?? theme.minBarHeight ?? 2;
+    final spacingRatio = this.spacingRatio ?? theme.spacingRatio ?? 0.3;
+    final heightScale = this.heightScale ?? theme.heightScale ?? 1;
 
     return CustomPaint(
       willChange: true,

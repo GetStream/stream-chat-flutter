@@ -631,6 +631,15 @@ extension VoiceRecordingAttachmentExtension on Attachment {
   }
 }
 
+/// {@template singleAttachmentPlaylistExtension}
+/// Extension on [Attachment] to provide the playlist specific
+/// properties.
+/// {@endtemplate}
+extension SingleAttachmentPlaylistExtension on Attachment {
+  /// Converts the attachment to a list of [PlaylistTrack].
+  List<PlaylistTrack> toPlaylist() => [this].toPlaylist();
+}
+
 /// {@template attachmentPlaylistExtension}
 /// Extension on [Iterable<Attachment>] to provide the playlist specific
 /// properties.

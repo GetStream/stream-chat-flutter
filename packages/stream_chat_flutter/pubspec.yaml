@@ -62,7 +62,7 @@ dependencies:
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: da18aa04ad48d4d5bb429c9e90d9f0253c418fae
+      ref: 596297e8b2a656a96c8699d8e1027bf5d9788e58
       path: packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
