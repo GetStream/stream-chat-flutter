@@ -74,7 +74,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
             if (ogAttachment != null)
               Padding(
                 padding: contentPadding,
-                child: MessageComposerAttachmentLinkPreview(
+                child: MessageComposerLinkPreviewAttachment(
                   title: ogAttachment.title,
                   subtitle: ogAttachment.text,
                   image: ogAttachment.imageUrl != null ? CachedNetworkImageProvider(ogAttachment.imageUrl!) : null,
@@ -124,7 +124,7 @@ class _QuotedMessageInHeader extends StatelessWidget {
     return
     // TODO: show image if available
     // TODO: localize strings
-    MessageComposerAttachmentReply(
+    MessageComposerReplyAttachment(
       title: isIncoming ? 'Reply to ${quotedMessage.user?.name}' : 'You',
       subtitle: quotedMessage.text ?? '',
       onRemovePressed: onRemovePressed,

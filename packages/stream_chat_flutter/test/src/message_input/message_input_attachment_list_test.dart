@@ -37,7 +37,7 @@ void main() {
         );
 
         // Expect 2 file attachments and 1 media attachment
-        expect(find.byType(MessageComposerAttachmentFile), findsNWidgets(2));
+        expect(find.byType(MessageComposerFileAttachment), findsNWidgets(2));
         expect(find.byType(MessageInputMediaAttachments), findsOneWidget);
         expect(find.byType(StreamMediaAttachmentThumbnail), findsOneWidget);
       },
@@ -113,7 +113,7 @@ void main() {
         );
 
         // Expect 2 file attachments
-        expect(find.byType(MessageComposerAttachmentFile), findsNWidgets(2));
+        expect(find.byType(MessageComposerFileAttachment), findsNWidgets(2));
       },
     );
 

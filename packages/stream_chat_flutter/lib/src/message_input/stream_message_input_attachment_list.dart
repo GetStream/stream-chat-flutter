@@ -186,7 +186,7 @@ class MessageInputFileAttachments extends StatelessWidget {
                 return builder(context, attachment, onRemovePressed);
               }
 
-              return MessageComposerAttachmentFile(
+              return MessageComposerFileAttachment(
                 fileTypeIcon: StreamFileTypeIcon.fromMimeType(mimeType: attachment.file?.mediaType?.mimeType ?? ''),
                 title: attachment.title ?? context.translations.fileText,
                 subtitle: _FileAttachmentSubtitle(attachment: attachment),
@@ -364,7 +364,7 @@ class MessageInputMediaAttachments extends StatelessWidget {
 
               return SizedBox(
                 width: 268,
-                child: MessageComposerAttachmentFile(
+                child: MessageComposerFileAttachment(
                   fileTypeIcon: StreamFileTypeIcon.fromMimeType(mimeType: attachment.file?.mediaType?.mimeType ?? ''),
                   title: attachment.title ?? context.translations.fileText,
                   subtitle: _FileAttachmentSubtitle(attachment: attachment),
@@ -437,7 +437,7 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
 
     return Container(
       key: Key(attachment.id),
-      child: MessageComposerAttachmentMediaFile(
+      child: MessageComposerMediaFileAttachment(
         mediaBadge: mediaBadge,
         onRemovePressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
         child: StreamMediaAttachmentThumbnail(

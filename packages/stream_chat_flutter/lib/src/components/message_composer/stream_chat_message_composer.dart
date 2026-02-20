@@ -122,7 +122,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
       AudioRecorderState audioRecorderState = const RecordStateIdle(),
     }) =>
         StreamMessageComposerFactory.maybeOf(context)?.messageComposer?.call(context, widget.props) ??
-        core.StreamBaseMessageComposer(
+        core.StreamCoreMessageComposer(
           placeholder: widget.props.placeholder,
           controller: _controller.textFieldController,
           isFloating: widget.props.isFloating,
