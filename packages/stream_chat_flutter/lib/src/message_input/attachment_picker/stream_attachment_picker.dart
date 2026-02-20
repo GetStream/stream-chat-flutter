@@ -449,7 +449,6 @@ Widget tabbedAttachmentPickerBuilder({
         AttachmentPickerType.images,
         AttachmentPickerType.videos,
       ],
-      isEnabled: (value) => true,
       optionViewBuilder: (context, controller) {
         final attachment = controller.value.attachments;
         final selectedIds = attachment.map((it) => it.id);
