@@ -132,7 +132,6 @@ void main() {
     expect(actions.isEmpty, isTrue);
   });
 
-
   group('permission-based actions', () {
     testWidgets(
       'includes/excludes edit action based on authorship',
