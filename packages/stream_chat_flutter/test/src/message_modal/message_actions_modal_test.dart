@@ -14,27 +14,26 @@ void main() {
     user: User(id: 'test-user', name: 'Test User'),
   );
 
-  final messageActions = <StreamMessageAction>[
-    StreamMessageAction(
-      title: const Text('Reply'),
+  final messageActions = <StreamContextMenuAction<MessageAction>>[
+    StreamContextMenuAction<MessageAction>(
+      label: const Text('Reply'),
       leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
-      action: QuotedReply(message: message),
+      value: QuotedReply(message: message),
     ),
-    StreamMessageAction(
-      title: const Text('Thread Reply'),
+    StreamContextMenuAction<MessageAction>(
+      label: const Text('Thread Reply'),
       leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
-      action: ThreadReply(message: message),
+      value: ThreadReply(message: message),
     ),
-    StreamMessageAction(
-      title: const Text('Copy Message'),
+    StreamContextMenuAction<MessageAction>(
+      label: const Text('Copy Message'),
       leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
-      action: CopyMessage(message: message),
+      value: CopyMessage(message: message),
     ),
-    StreamMessageAction(
-      isDestructive: true,
-      title: const Text('Delete Message'),
+    StreamContextMenuAction<MessageAction>.destructive(
+      label: const Text('Delete Message'),
       leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-      action: DeleteMessage(message: message),
+      value: DeleteMessage(message: message),
     ),
   ];
 
@@ -77,7 +76,7 @@ void main() {
     });
 
     testWidgets(
-      'calls onActionTap with SelectReaction when reaction is selected',
+      'pops with SelectReaction when reaction is selected',
       (tester) async {
         MessageAction? messageAction;
 
@@ -95,16 +94,26 @@ void main() {
 
         await tester.pumpWidget(
           _wrapWithMaterialApp(
-            StreamMessageActionsModal(
-              message: message,
-              messageActions: messageActions,
-              messageWidget: const Text('Message Widget'),
-              showReactionPicker: true,
-              onActionTap: (action) => messageAction = action,
-            ),
             reactionIcons: testReactionIcons,
+            Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  messageAction = await showStreamDialog(
+                    context: context,
+                    builder: (_) => StreamMessageActionsModal(
+                      message: message,
+                      messageActions: messageActions,
+                      messageWidget: const Text('Message Widget'),
+                      showReactionPicker: true,
+                    ),
+                  );
+                },
+                child: const Text('Open Dialog'),
+              ),
+            ),
           ),
         );
+        await tester.tap(find.text('Open Dialog'));
 
         // Use a longer timeout to ensure everything is rendered
         await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -119,17 +128,20 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(messageAction, isA<SelectReaction>());
-        // Verify callback was called with correct reaction type
+        // Verify the popped value has correct reaction type
         expect((messageAction! as SelectReaction).reaction.type, 'like');
 
-        // Find and tap the second reaction (love)
+        // Open dialog again and tap the second reaction (love)
+        await tester.tap(find.text('Open Dialog'));
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
         final loveIconFinder = find.byIcon(Icons.favorite);
         expect(loveIconFinder, findsOneWidget);
         await tester.tap(loveIconFinder);
         await tester.pumpAndSettle();
 
         expect(messageAction, isA<SelectReaction>());
-        // Verify callback was called with correct reaction type
+        // Verify the popped value has correct reaction type
         expect((messageAction! as SelectReaction).reaction.type, 'love');
       },
     );
@@ -234,26 +246,28 @@ Widget _wrapWithMaterialApp(
   return Portal(
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: StreamChatConfiguration(
+      theme: ThemeData(brightness: brightness),
+      builder: (context, child) => StreamChatConfiguration(
         data: StreamChatConfigurationData(reactionIcons: reactionIcons),
         child: StreamChatTheme(
           data: StreamChatThemeData(brightness: brightness),
-          child: Builder(
-            builder: (context) {
-              final theme = StreamChatTheme.of(context);
-              return Scaffold(
-                backgroundColor: theme.colorTheme.appBg,
-                body: ColoredBox(
-                  color: theme.colorTheme.overlay,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: child,
-                  ),
-                ),
-              );
-            },
-          ),
+          child: child ?? const SizedBox.shrink(),
         ),
+      ),
+      home: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            body: ColoredBox(
+              color: theme.colorTheme.overlay,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: child,
+              ),
+            ),
+          );
+        },
       ),
     ),
   );

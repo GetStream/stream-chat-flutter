@@ -1,70 +1,140 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
-part 'message_action_type.dart';
 
-/// {@template streamMessageAction}
-/// A class that represents an action that can be performed on a message.
+/// {@template messageActionsBuilder}
+/// Signature for a builder that customizes the list of message actions shown
+/// in the long-press context menu.
 ///
-/// This class is used to define actions that appear in message action menus
-/// or option lists, providing a consistent structure for message-related
-/// actions including their visual representation and behavior.
+/// [defaultActions] are the pre-built actions already filtered by the widget's
+/// `show*` flags. Return a modified list to add, remove, or reorder actions.
+///
+/// The return type is [List<Widget>] so any widget — including
+/// [StreamContextMenuSeparator] or fully custom items — can be mixed in
+/// alongside the default [StreamContextMenuAction] items.
 /// {@endtemplate}
-class StreamMessageAction<T extends MessageAction> {
-  /// {@macro streamMessageAction}
-  const StreamMessageAction({
-    required this.action,
-    this.isDestructive = false,
-    this.leading,
-    this.iconColor,
-    this.title,
-    this.titleTextColor,
-    this.titleTextStyle,
-    this.backgroundColor,
+typedef MessageActionsBuilder<T extends MessageAction> =
+    List<Widget> Function(
+      BuildContext context,
+      List<StreamContextMenuAction<T>> defaultActions,
+    );
+
+/// {@template messageAction}
+/// A sealed class that represents different actions that can be performed on a
+/// message.
+/// {@endtemplate}
+sealed class MessageAction {
+  /// {@macro messageAction}
+  const MessageAction({required this.message});
+
+  /// The message this action applies to.
+  final Message message;
+}
+
+/// Action to show reaction selector for adding reactions to a message
+final class SelectReaction extends MessageAction {
+  /// Create a new select reaction action
+  const SelectReaction({
+    required super.message,
+    required this.reaction,
+    this.enforceUnique = false,
   });
 
-  /// The [MessageAction] that this item represents.
-  final T action;
+  /// The reaction to be added or removed from the message.
+  final Reaction reaction;
 
-  /// Whether the action is destructive.
-  ///
-  /// Destructive actions are typically displayed with a red color to indicate
-  /// that they will remove or delete content.
-  ///
-  /// Defaults to `false`.
-  final bool isDestructive;
-
-  /// A widget to display before the title.
-  ///
-  /// Typically an [Icon] or a [CircleAvatar] widget.
-  final Widget? leading;
-
-  /// The color for the [leading] icon.
-  ///
-  /// If this property is null, the icon will use the default color provided by
-  /// the theme or parent widget.
-  final Color? iconColor;
-
-  /// The primary content of the action item.
-  ///
-  /// Typically a [Text] widget.
-  ///
-  /// This should not wrap. To enforce the single line limit, use
-  /// [Text.maxLines].
-  final Widget? title;
-
-  /// The color for the text in the [title].
-  ///
-  /// If this property is null, the text will use the default color provided by
-  /// the theme or parent widget.
-  final Color? titleTextColor;
-
-  /// The text style for the [title].
-  ///
-  /// If this property is null, the title will use the default text style
-  /// provided by the theme or parent widget.
-  final TextStyle? titleTextStyle;
-
-  /// Defines the background color of the action item.
-  final Color? backgroundColor;
+  /// Whether to enforce unique reactions.
+  final bool enforceUnique;
 }
+
+/// Action to copy message content to clipboard
+final class CopyMessage extends MessageAction {
+  /// Create a new copy message action
+  const CopyMessage({required super.message});
+}
+
+/// Action to delete a message from the conversation
+final class DeleteMessage extends MessageAction {
+  /// Create a new delete message action
+  const DeleteMessage({required super.message});
+}
+
+/// Action to hard delete a message permanently from the conversation
+final class HardDeleteMessage extends MessageAction {
+  /// Create a new hard delete message action
+  const HardDeleteMessage({required super.message});
+}
+
+/// Action to modify content of an existing message
+final class EditMessage extends MessageAction {
+  /// Create a new edit message action
+  const EditMessage({required super.message});
+}
+
+/// Action to flag a message for moderator review
+final class FlagMessage extends MessageAction {
+  /// Create a new flag message action
+  const FlagMessage({required super.message});
+}
+
+/// Action to mark a message as unread for later viewing
+final class MarkUnread extends MessageAction {
+  /// Create a new mark unread action
+  const MarkUnread({required super.message});
+}
+
+/// Action to mute a user to prevent notifications from their messages
+final class MuteUser extends MessageAction {
+  /// Create a new mute user action
+  const MuteUser({
+    required super.message,
+    required this.user,
+  });
+
+  /// The user to be muted.
+  final User user;
+}
+
+/// Action to unmute a user to receive notifications from their messages
+final class UnmuteUser extends MessageAction {
+  /// Create a new unmute user action
+  const UnmuteUser({
+    required super.message,
+    required this.user,
+  });
+
+  /// The user to be unmuted.
+  final User user;
+}
+
+/// Action to pin a message to make it prominently visible in the channel
+final class PinMessage extends MessageAction {
+  /// Create a new pin message action
+  const PinMessage({required super.message});
+}
+
+/// Action to remove a previously pinned message
+final class UnpinMessage extends MessageAction {
+  /// Create a new unpin message action
+  const UnpinMessage({required super.message});
+}
+
+/// Action to attempt to resend a message that failed to send
+final class ResendMessage extends MessageAction {
+  /// Create a new resend message action
+  const ResendMessage({required super.message});
+}
+
+/// Action to create a reply with quoted original message content
+final class QuotedReply extends MessageAction {
+  /// Create a new quoted reply action
+  const QuotedReply({required super.message});
+}
+
+/// Action to start a threaded conversation from a message
+final class ThreadReply extends MessageAction {
+  /// Create a new thread reply action
+  const ThreadReply({required super.message});
+}
+

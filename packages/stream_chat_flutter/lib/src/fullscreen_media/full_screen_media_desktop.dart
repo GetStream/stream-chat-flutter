@@ -121,12 +121,16 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
     return Stack(
       children: [
         ContextMenuRegion(
-          contextMenuBuilder: (context, anchor) {
+          menuBuilder: (context, anchor) {
             final index = _currentPage.value;
             final mediaAttachment = widget.mediaAttachmentPackages[index];
             return ContextMenu(
               anchor: anchor,
-              menuItems: [_DownloadMenuItem(mediaAttachment: mediaAttachment)],
+              menuItems: [
+                _DownloadMenuItem(
+                  mediaAttachment: mediaAttachment.attachment,
+                ),
+              ],
             );
           },
           child: _PlaylistPlayer(
@@ -348,16 +352,14 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                       }
 
                       return ContextMenuRegion(
-                        contextMenuBuilder: (_, anchor) {
-                          return ContextMenu(
-                            anchor: anchor,
-                            menuItems: [
-                              _DownloadMenuItem(
-                                mediaAttachment: currentAttachmentPackage,
-                              ),
-                            ],
-                          );
-                        },
+                        menuBuilder: (_, anchor) => ContextMenu(
+                          anchor: anchor,
+                          menuItems: [
+                            _DownloadMenuItem(
+                              mediaAttachment: currentAttachmentPackage.attachment,
+                            ),
+                          ],
+                        ),
                         child: Video(
                           controller: package.controller,
                         ),
@@ -382,8 +384,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
 /// This widget displays a download option in a context menu, allowing users to
 /// download the attachment associated with a message.
 ///
-/// It uses [StreamMessageActionItem] and [StreamMessageAction] to create a
-/// consistent UI with other message actions.
+/// It uses [StreamContextMenuAction] to stay consistent with message actions.
 /// {@endtemplate}
 class _DownloadMenuItem extends StatelessWidget {
   /// {@macro streamDownloadMenuItem}
@@ -392,31 +393,17 @@ class _DownloadMenuItem extends StatelessWidget {
   });
 
   /// The attachment package containing the message and attachment to download.
-  final StreamAttachmentPackage mediaAttachment;
-  static const String _attachmentKey = 'attachment';
+  final Attachment mediaAttachment;
 
   @override
   Widget build(BuildContext context) {
-    return StreamMessageActionItem(
-      action: StreamMessageAction(
-        leading: const StreamSvgIcon(icon: StreamSvgIcons.download),
-        title: Text(context.translations.downloadLabel),
-        action: CustomMessageAction(
-          message: mediaAttachment.message,
-          extraData: {_attachmentKey: mediaAttachment.attachment},
-        ),
-      ),
-      // TODO: Use a callback to handle the action instead of onTap.
-      onTap: (action) async {
-        if (action is! CustomMessageAction) return;
-        final attachment = action.extraData[_attachmentKey] as Attachment?;
-        if (attachment == null) return;
-
-        final popped = await Navigator.of(context).maybePop();
-        if (popped) {
-          final handler = StreamAttachmentHandler.instance;
-          return handler.downloadAttachment(attachment).ignore();
-        }
+    final icons = context.streamIcons;
+    return StreamContextMenuAction(
+      leading: Icon(icons.arrowDown),
+      label: Text(context.translations.downloadLabel),
+      onTap: () {
+        final handler = StreamAttachmentHandler.instance;
+        return handler.downloadAttachment(mediaAttachment).ignore();
       },
     );
   }

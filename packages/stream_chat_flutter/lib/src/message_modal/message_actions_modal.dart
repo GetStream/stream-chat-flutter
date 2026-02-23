@@ -22,7 +22,6 @@ class StreamMessageActionsModal extends StatelessWidget {
     this.reverse = false,
     this.showReactionPicker = false,
     this.reactionPickerBuilder = StreamReactionPicker.builder,
-    this.onActionTap,
   });
 
   /// The message object that actions will be performed on.
@@ -30,11 +29,12 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// This is the message the user selected to see available actions.
   final Message message;
 
-  /// List of custom actions that will be displayed in the modal.
+  /// List of widgets that will be displayed as actions in the modal.
   ///
-  /// Each action is represented by a [StreamMessageAction] object which defines
-  /// the action's appearance and behavior.
-  final List<StreamMessageAction> messageActions;
+  /// Typically built by [StreamMessageActionsBuilder] and optionally modified
+  /// by [StreamMessageWidget.actionsBuilder]. Each item is rendered directly
+  /// as a child of [StreamContextMenu].
+  final List<Widget> messageActions;
 
   /// The widget representing the message being acted upon.
   ///
@@ -62,26 +62,17 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// {@macro reactionPickerBuilder}
   final ReactionPickerBuilder reactionPickerBuilder;
 
-  /// Callback triggered when a message action is tapped.
-  ///
-  /// Provides the tapped [MessageAction] object to the callback.
-  final OnMessageActionTap? onActionTap;
-
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     final alignment = switch (reverse) {
       true => AlignmentDirectional.centerEnd,
       false => AlignmentDirectional.centerStart,
     };
 
-    final onReactionPicked = switch (onActionTap) {
-      null => null,
-      final onActionTap => (reaction) => onActionTap(
-        SelectReaction(message: message, reaction: reaction),
-      ),
-    };
+    void onReactionPicked(Reaction reaction) {
+      final action = SelectReaction(message: message, reaction: reaction);
+      return Navigator.pop(context, action); // Pop the modal with the selected reaction action
+    }
 
     return StreamMessageDialog(
       spacing: 4,
@@ -102,32 +93,7 @@ class StreamMessageActionsModal extends StatelessWidget {
           ),
         );
       },
-      contentBuilder: (context) {
-        final actions = Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>{
-            ...messageActions.map(
-              (action) => StreamMessageActionItem(
-                action: action,
-                onTap: onActionTap,
-              ),
-            ),
-          }.insertBetween(Divider(height: 1, color: theme.colorTheme.borders)),
-        );
-
-        return FractionallySizedBox(
-          widthFactor: 0.78,
-          child: Material(
-            type: MaterialType.transparency,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: actions,
-          ),
-        );
-      },
+      contentBuilder: (context) => StreamContextMenu(children: messageActions),
     );
   }
 }
