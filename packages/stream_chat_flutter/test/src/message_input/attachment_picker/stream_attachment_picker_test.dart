@@ -3,37 +3,38 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
-  group('showStreamAttachmentPickerModalBottomSheet', () {
-    group('attachmentPickerOptionsBuilder', () {
+  group('tabbedAttachmentPickerBuilder', () {
+    group('optionsBuilder', () {
       testWidgets(
         'should call optionsBuilder with default options',
         (tester) async {
           var builderCalled = false;
           int? defaultOptionsCount;
 
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
           await tester.pumpWidget(
             _wrapWithStreamChatApp(
               Builder(
                 builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        optionsBuilder: (context, defaultOptions) {
-                          builderCalled = true;
-                          defaultOptionsCount = defaultOptions.length;
-                          return defaultOptions;
-                        },
-                      );
-                    },
-                    child: const Text('Show Picker'),
+                  return SizedBox(
+                    height: 400,
+                    child: tabbedAttachmentPickerBuilder(
+                      context: context,
+                      controller: controller,
+                      optionsBuilder: (context, defaultOptions) {
+                        builderCalled = true;
+                        defaultOptionsCount = defaultOptions.length;
+                        return defaultOptions;
+                      },
+                    ),
                   );
                 },
               ),
             ),
           );
 
-          await tester.tap(find.text('Show Picker'));
           await tester.pumpAndSettle();
 
           expect(builderCalled, isTrue);
@@ -47,171 +48,72 @@ void main() {
         (tester) async {
           int? defaultOptionsCount;
 
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
           await tester.pumpWidget(
             _wrapWithStreamChatApp(
               Builder(
                 builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        optionsBuilder: (context, defaultOptions) {
-                          defaultOptionsCount = defaultOptions.length;
-                          // Return only first option
-                          return [defaultOptions.first];
-                        },
-                      );
-                    },
-                    child: const Text('Show Picker'),
+                  return SizedBox(
+                    height: 400,
+                    child: tabbedAttachmentPickerBuilder(
+                      context: context,
+                      controller: controller,
+                      optionsBuilder: (context, defaultOptions) {
+                        defaultOptionsCount = defaultOptions.length;
+                        return [defaultOptions.first];
+                      },
+                    ),
                   );
                 },
               ),
             ),
           );
 
-          await tester.tap(find.text('Show Picker'));
           await tester.pumpAndSettle();
 
-          final bottomSheet = tester.widget<StreamSystemAttachmentPickerBottomSheet>(
-            find.byType(StreamSystemAttachmentPickerBottomSheet),
+          final picker = tester.widget<StreamTabbedAttachmentPicker>(
+            find.byType(StreamTabbedAttachmentPicker),
           );
 
-          expect(bottomSheet.options.length, equals(1));
-          expect(bottomSheet.options.length, lessThan(defaultOptionsCount!));
-        },
-      );
-
-      testWidgets(
-        'should allow adding custom options',
-        (tester) async {
-          int? defaultOptionsCount;
-          const customOptionKey = 'custom-location';
-
-          await tester.pumpWidget(
-            _wrapWithStreamChatApp(
-              Builder(
-                builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        optionsBuilder: (context, defaultOptions) {
-                          defaultOptionsCount = defaultOptions.length;
-                          return [
-                            ...defaultOptions,
-                            SystemAttachmentPickerOption(
-                              key: customOptionKey,
-                              icon: const Icon(Icons.location_on),
-                              supportedTypes: [AttachmentPickerType.images],
-                              title: 'Send Location',
-                              onTap: (context, controller) async {},
-                            ),
-                          ];
-                        },
-                      );
-                    },
-                    child: const Text('Show Picker'),
-                  );
-                },
-              ),
-            ),
-          );
-
-          await tester.tap(find.text('Show Picker'));
-          await tester.pumpAndSettle();
-
-          final bottomSheet = tester.widget<StreamSystemAttachmentPickerBottomSheet>(
-            find.byType(StreamSystemAttachmentPickerBottomSheet),
-          );
-
-          // Should have one more option than default
-          expect(bottomSheet.options.length, equals(defaultOptionsCount! + 1));
-
-          // Verify our custom option exists
-          expect(
-            bottomSheet.options.any((option) => option.key == customOptionKey),
-            isTrue,
-          );
-        },
-      );
-
-      testWidgets(
-        'should allow reordering options',
-        (tester) async {
-          String? firstDefaultKey;
-          String? firstReversedKey;
-
-          await tester.pumpWidget(
-            _wrapWithStreamChatApp(
-              Builder(
-                builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        optionsBuilder: (context, defaultOptions) {
-                          firstDefaultKey = defaultOptions.first.key;
-                          final reversed = defaultOptions.reversed.toList();
-                          firstReversedKey = reversed.first.key;
-                          return reversed;
-                        },
-                      );
-                    },
-                    child: const Text('Show Picker'),
-                  );
-                },
-              ),
-            ),
-          );
-
-          await tester.tap(find.text('Show Picker'));
-          await tester.pumpAndSettle();
-
-          // Verify first option changed after reversing
-          expect(firstDefaultKey, isNotNull);
-          expect(firstReversedKey, isNotNull);
-          expect(firstDefaultKey, isNot(equals(firstReversedKey)));
+          expect(picker.options.length, equals(1));
+          expect(picker.options.length, lessThan(defaultOptionsCount!));
         },
       );
 
       testWidgets(
         'should throw ArgumentError when wrong option types are provided',
         (tester) async {
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
           await tester.pumpWidget(
             _wrapWithStreamChatApp(
               Builder(
                 builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        optionsBuilder: (context, defaultOptions) {
-                          // Return tabbed option for system picker (wrong type)
-                          return [
-                            TabbedAttachmentPickerOption(
-                              key: 'wrong',
-                              icon: const Icon(Icons.error),
-                              title: 'Wrong',
-                              supportedTypes: [AttachmentPickerType.images],
-                              optionViewBuilder: (context, controller) {
-                                return const Text('Wrong');
-                              },
-                            ),
-                          ];
-                        },
-                      );
-                    },
-                    child: const Text('Show Picker'),
+                  return SizedBox(
+                    height: 400,
+                    child: tabbedAttachmentPickerBuilder(
+                      context: context,
+                      controller: controller,
+                      optionsBuilder: (context, defaultOptions) {
+                        return [
+                          SystemAttachmentPickerOption(
+                            key: 'wrong',
+                            icon: const Icon(Icons.error),
+                            title: 'Wrong',
+                            supportedTypes: [AttachmentPickerType.images],
+                            onTap: (context, controller) async {},
+                          ),
+                        ];
+                      },
+                    ),
                   );
                 },
               ),
             ),
           );
-
-          await tester.tap(find.text('Show Picker'));
-
-          // Should throw ArgumentError
-          await tester.pumpAndSettle();
 
           expect(tester.takeException(), isA<ArgumentError>());
         },
@@ -222,113 +124,76 @@ void main() {
       testWidgets(
         'should filter options based on allowedTypes',
         (tester) async {
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
           await tester.pumpWidget(
             _wrapWithStreamChatApp(
               Builder(
                 builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        allowedTypes: [AttachmentPickerType.images],
-                      );
-                    },
-                    child: const Text('Show Picker'),
+                  return SizedBox(
+                    height: 400,
+                    child: tabbedAttachmentPickerBuilder(
+                      context: context,
+                      controller: controller,
+                      allowedTypes: [AttachmentPickerType.images],
+                    ),
                   );
                 },
               ),
             ),
           );
 
-          await tester.tap(find.text('Show Picker'));
           await tester.pumpAndSettle();
 
-          final bottomSheet = tester.widget<StreamSystemAttachmentPickerBottomSheet>(
-            find.byType(StreamSystemAttachmentPickerBottomSheet),
+          final picker = tester.widget<StreamTabbedAttachmentPicker>(
+            find.byType(StreamTabbedAttachmentPicker),
           );
 
-          // All options should support images
           expect(
-            bottomSheet.options.every(
-              (option) => option.supportedTypes.contains(AttachmentPickerType.images),
+            picker.options.every(
+              (option) =>
+                  option.supportedTypes.contains(AttachmentPickerType.images),
             ),
             isTrue,
           );
         },
       );
-
-      testWidgets(
-        'should work with optionsBuilder and allowedTypes together',
-        (tester) async {
-          await tester.pumpWidget(
-            _wrapWithStreamChatApp(
-              Builder(
-                builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        allowedTypes: [
-                          AttachmentPickerType.images,
-                          AttachmentPickerType.videos,
-                        ],
-                        optionsBuilder: (context, defaultOptions) {
-                          return defaultOptions;
-                        },
-                      );
-                    },
-                    child: const Text('Show Picker'),
-                  );
-                },
-              ),
-            ),
-          );
-
-          await tester.tap(find.text('Show Picker'));
-          await tester.pumpAndSettle();
-
-          expect(
-            find.byType(StreamSystemAttachmentPickerBottomSheet),
-            findsOneWidget,
-          );
-        },
-      );
     });
+  });
 
-    group('System picker with optionsBuilder', () {
+  group('systemAttachmentPickerBuilder', () {
+    group('optionsBuilder', () {
       testWidgets(
-        'should use optionsBuilder with system picker',
+        'should call optionsBuilder with default options',
         (tester) async {
           var builderCalled = false;
 
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
           await tester.pumpWidget(
             _wrapWithStreamChatApp(
               Builder(
                 builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        useSystemAttachmentPicker: true,
-                        optionsBuilder: (context, defaultOptions) {
-                          builderCalled = true;
-                          return defaultOptions;
-                        },
-                      );
+                  return systemAttachmentPickerBuilder(
+                    context: context,
+                    controller: controller,
+                    optionsBuilder: (context, defaultOptions) {
+                      builderCalled = true;
+                      return defaultOptions;
                     },
-                    child: const Text('Show Picker'),
                   );
                 },
               ),
             ),
           );
 
-          await tester.tap(find.text('Show Picker'));
           await tester.pumpAndSettle();
 
           expect(builderCalled, isTrue);
           expect(
-            find.byType(StreamSystemAttachmentPickerBottomSheet),
+            find.byType(StreamSystemAttachmentPicker),
             findsOneWidget,
           );
         },
@@ -337,40 +202,111 @@ void main() {
       testWidgets(
         'should allow adding custom system picker options',
         (tester) async {
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
           await tester.pumpWidget(
             _wrapWithStreamChatApp(
               Builder(
                 builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      showStreamAttachmentPickerModalBottomSheet(
-                        context: context,
-                        useSystemAttachmentPicker: true,
-                        optionsBuilder: (context, defaultOptions) {
-                          return [
-                            ...defaultOptions,
-                            SystemAttachmentPickerOption(
-                              key: 'custom-upload',
-                              icon: const Icon(Icons.cloud_upload),
-                              title: 'Custom Upload',
-                              supportedTypes: [AttachmentPickerType.files],
-                              onTap: (context, controller) async {},
-                            ),
-                          ];
-                        },
-                      );
+                  return systemAttachmentPickerBuilder(
+                    context: context,
+                    controller: controller,
+                    optionsBuilder: (context, defaultOptions) {
+                      return [
+                        ...defaultOptions,
+                        SystemAttachmentPickerOption(
+                          key: 'custom-upload',
+                          icon: const Icon(Icons.cloud_upload),
+                          title: 'Custom Upload',
+                          supportedTypes: [AttachmentPickerType.files],
+                          onTap: (context, controller) async {},
+                        ),
+                      ];
                     },
-                    child: const Text('Show Picker'),
                   );
                 },
               ),
             ),
           );
 
-          await tester.tap(find.text('Show Picker'));
           await tester.pumpAndSettle();
 
           expect(find.text('Custom Upload'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'should throw ArgumentError when wrong option types are provided',
+        (tester) async {
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
+          await tester.pumpWidget(
+            _wrapWithStreamChatApp(
+              Builder(
+                builder: (context) {
+                  return systemAttachmentPickerBuilder(
+                    context: context,
+                    controller: controller,
+                    optionsBuilder: (context, defaultOptions) {
+                      return [
+                        TabbedAttachmentPickerOption(
+                          key: 'wrong',
+                          icon: const Icon(Icons.error),
+                          title: 'Wrong',
+                          supportedTypes: [AttachmentPickerType.images],
+                          optionViewBuilder: (context, controller) {
+                            return const Text('Wrong');
+                          },
+                        ),
+                      ];
+                    },
+                  );
+                },
+              ),
+            ),
+          );
+
+          expect(tester.takeException(), isA<ArgumentError>());
+        },
+      );
+    });
+
+    group('allowedTypes', () {
+      testWidgets(
+        'should filter options based on allowedTypes',
+        (tester) async {
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
+          await tester.pumpWidget(
+            _wrapWithStreamChatApp(
+              Builder(
+                builder: (context) {
+                  return systemAttachmentPickerBuilder(
+                    context: context,
+                    controller: controller,
+                    allowedTypes: [AttachmentPickerType.images],
+                  );
+                },
+              ),
+            ),
+          );
+
+          await tester.pumpAndSettle();
+
+          final picker = tester.widget<StreamSystemAttachmentPicker>(
+            find.byType(StreamSystemAttachmentPicker),
+          );
+
+          expect(
+            picker.options.every(
+              (option) =>
+                  option.supportedTypes.contains(AttachmentPickerType.images),
+            ),
+            isTrue,
+          );
         },
       );
     });

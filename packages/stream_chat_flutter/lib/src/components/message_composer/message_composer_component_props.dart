@@ -22,6 +22,7 @@ class MessageComposerComponentProps {
     required this.onSendPressed,
     this.voiceRecordingCallback,
     this.onAttachmentButtonPressed,
+    this.isPickerOpen = false,
     this.focusNode,
     this.currentUserId,
     required this.audioRecorderState,
@@ -44,6 +45,9 @@ class MessageComposerComponentProps {
 
   /// The callback for when the attachment button is pressed.
   final VoidCallback? onAttachmentButtonPressed;
+
+  /// Whether the inline attachment picker is currently open.
+  final bool isPickerOpen;
 
   /// The focus node for the message composer component.
   final FocusNode? focusNode;
@@ -73,6 +77,7 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
+    required super.isPickerOpen,
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
@@ -87,6 +92,7 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      isPickerOpen: props.isPickerOpen,
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
@@ -103,6 +109,7 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
+    required super.isPickerOpen,
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
@@ -117,6 +124,7 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      isPickerOpen: props.isPickerOpen,
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
@@ -133,6 +141,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
+    required super.isPickerOpen,
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
@@ -147,6 +156,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      isPickerOpen: props.isPickerOpen,
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
@@ -163,6 +173,7 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
+    required super.isPickerOpen,
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
@@ -177,6 +188,7 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      isPickerOpen: props.isPickerOpen,
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
@@ -193,6 +205,7 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
+    required super.isPickerOpen,
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
@@ -207,6 +220,7 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      isPickerOpen: props.isPickerOpen,
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
@@ -223,6 +237,7 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
+    required super.isPickerOpen,
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
@@ -237,6 +252,7 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      isPickerOpen: props.isPickerOpen,
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
