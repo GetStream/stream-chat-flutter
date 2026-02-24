@@ -205,6 +205,7 @@ class _ChannelPageState extends State<ChannelPage> {
     StreamMessageWidget defaultMessageWidget,
   ) {
     final theme = StreamChatTheme.of(context);
+    final icons = context.streamIcons;
     final textTheme = theme.textTheme;
     final colorTheme = theme.colorTheme;
 
@@ -217,46 +218,53 @@ class _ChannelPageState extends State<ChannelPage> {
     final isSentByCurrentUser = message.user?.id == currentUser?.id;
     final canDeleteOwnMessage = channel.canDeleteOwnMessage;
 
-    final customOptions = <StreamMessageAction>[
-      if (isSentByCurrentUser && canDeleteOwnMessage)
-        StreamMessageAction(
-          isDestructive: true,
-          title: const Text('Delete Message for Me'),
-          action: DeleteMessageForMe(message: message),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-        ),
-      if (channelConfig?.userMessageReminders == true) ...[
-        if (reminder != null) ...[
-          StreamMessageAction(
-            title: const Text('Edit Reminder'),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.time),
-            action: EditReminder(message: message, reminder: reminder),
-          ),
-          StreamMessageAction(
-            title: const Text('Remove from later'),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.checkAll),
-            action: RemoveReminder(message: message, reminder: reminder),
-          ),
-        ] else ...[
-          StreamMessageAction(
-            title: const Text('Remind me'),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.time),
-            action: CreateReminder(message: message),
-          ),
-          StreamMessageAction(
-            title: const Text('Save for later'),
-            leading: const Icon(Icons.bookmark_border),
-            action: CreateBookmark(message: message),
-          ),
+    List<Widget> actionsBuilder(
+      BuildContext context,
+      List<StreamContextMenuAction> defaultActions,
+    ) {
+      return StreamContextMenuAction.partitioned(
+        items: [
+          ...defaultActions,
+          if (isSentByCurrentUser && canDeleteOwnMessage)
+            StreamContextMenuAction.destructive(
+              label: const Text('Delete Message for Me'),
+              leading: Icon(icons.trashBin),
+              onTap: () => _deleteMessageForMe(message),
+            ),
+          if (channelConfig?.userMessageReminders == true) ...[
+            if (reminder != null) ...[
+              StreamContextMenuAction(
+                label: const Text('Edit Reminder'),
+                leading: Icon(icons.clock),
+                onTap: () => _editReminder(message, reminder),
+              ),
+              StreamContextMenuAction(
+                label: const Text('Remove from later'),
+                leading: Icon(icons.checkmark2),
+                onTap: () => _removeReminder(message, reminder),
+              ),
+            ] else ...[
+              StreamContextMenuAction(
+                label: const Text('Remind me'),
+                leading: Icon(icons.bellNotification),
+                onTap: () => _createReminder(message),
+              ),
+              StreamContextMenuAction(
+                label: const Text('Save for later'),
+                leading: Icon(icons.fileBend),
+                onTap: () => _createBookmark(message),
+              ),
+            ],
+          ],
+          if (channelConfig?.deliveryEvents == true)
+            StreamContextMenuAction(
+              label: const Text('Message Info'),
+              leading: Icon(icons.circleInfoTooltip),
+              onTap: () => _showMessageInfo(message),
+            ),
         ],
-      ],
-      if (channelConfig?.deliveryEvents == true)
-        StreamMessageAction(
-          title: const Text('Message Info'),
-          leading: const Icon(Icons.info_outline_rounded),
-          action: ShowMessageInfo(message: message),
-        ),
-    ];
+      );
+    }
 
     final locationAttachmentBuilder = LocationAttachmentBuilder(
       onAttachmentTap: (location) => showLocationDetailDialog(
@@ -300,17 +308,8 @@ class _ChannelPageState extends State<ChannelPage> {
             ),
           defaultMessageWidget.copyWith(
             onReplyTap: _reply,
-            customActions: customOptions,
+            actionsBuilder: actionsBuilder,
             showEditMessage: message.sharedLocation == null,
-            onCustomActionTap: (it) async => await switch (it) {
-              CreateReminder() => _createReminder(it.message),
-              CreateBookmark() => _createBookmark(it.message),
-              EditReminder() => _editReminder(it.message, it.reminder),
-              RemoveReminder() => _removeReminder(it.message, it.reminder),
-              DeleteMessageForMe() => _deleteMessageForMe(it.message),
-              ShowMessageInfo() => _showMessageInfo(it.message),
-              _ => null,
-            },
             attachmentBuilders: [locationAttachmentBuilder],
             onShowMessage: (message, channel) => GoRouter.of(context).goNamed(
               Routes.CHANNEL_PAGE.name,
@@ -411,49 +410,4 @@ class _ChannelPageState extends State<ChannelPage> {
     if (isDeletedOrShadowed && !isMyMessage) return false;
     return true;
   }
-}
-
-class ReminderMessageAction extends CustomMessageAction {
-  const ReminderMessageAction({
-    required super.message,
-    this.reminder,
-  });
-
-  final MessageReminder? reminder;
-}
-
-final class CreateReminder extends ReminderMessageAction {
-  const CreateReminder({required super.message});
-}
-
-final class CreateBookmark extends ReminderMessageAction {
-  const CreateBookmark({required super.message});
-}
-
-final class EditReminder extends ReminderMessageAction {
-  const EditReminder({
-    required super.message,
-    required this.reminder,
-  }) : super(reminder: reminder);
-
-  @override
-  final MessageReminder reminder;
-}
-
-final class RemoveReminder extends ReminderMessageAction {
-  const RemoveReminder({
-    required super.message,
-    required this.reminder,
-  }) : super(reminder: reminder);
-
-  @override
-  final MessageReminder reminder;
-}
-
-final class DeleteMessageForMe extends CustomMessageAction {
-  const DeleteMessageForMe({required super.message});
-}
-
-final class ShowMessageInfo extends CustomMessageAction {
-  const ShowMessageInfo({required super.message});
 }

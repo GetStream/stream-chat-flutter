@@ -44,6 +44,7 @@ You can also use the convenience factories `StreamTheme.light()` or `StreamTheme
 | Component | Migration Guide |
 |-----------|-----------------|
 | Stream Avatar | [stream_avatar.md](stream_avatar.md) |
+| Message Actions | [message_actions.md](message_actions.md) |
 
 ## Need Help?
 

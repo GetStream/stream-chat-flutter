@@ -111,7 +111,7 @@ void main() {
     );
 
     testWidgets(
-      'calls onReactionPicked with SelectReaction when reaction is selected',
+      'pops with SelectReaction when reaction is selected',
       (tester) async {
         MessageAction? messageAction;
 
@@ -139,13 +139,24 @@ void main() {
           _wrapWithMaterialApp(
             client: mockClient,
             reactionIcons: testReactionIcons,
-            StreamMessageReactionsModal(
-              message: message,
-              messageWidget: const Text('Message Widget'),
-              onReactionPicked: (action) => messageAction = action,
+            Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  messageAction = await showStreamDialog(
+                    context: context,
+                    builder: (_) => StreamMessageReactionsModal(
+                      message: message,
+                      messageWidget: const Text('Message Widget'),
+                    ),
+                  );
+                },
+                child: const Text('Open Dialog'),
+              ),
             ),
           ),
         );
+
+        await tester.tap(find.text('Open Dialog'));
 
         // Use a longer timeout to ensure everything is rendered
         await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -153,24 +164,27 @@ void main() {
         // Verify reaction picker is shown
         expect(find.byType(StreamReactionPicker), findsOneWidget);
 
-        // Find and tap the camera reaction (camera)
+        // Find and tap the camera reaction
         final reactionIconFinder = find.byIcon(Icons.camera);
         expect(reactionIconFinder, findsOneWidget);
         await tester.tap(reactionIconFinder);
         await tester.pumpAndSettle();
 
         expect(messageAction, isA<SelectReaction>());
-        // Verify callback was called with correct reaction type
+        // Verify the popped value has correct reaction type
         expect((messageAction! as SelectReaction).reaction.type, 'camera');
 
-        // Find and tap the call reaction (call)
-        final loveIconFinder = find.byIcon(Icons.call);
-        expect(loveIconFinder, findsOneWidget);
-        await tester.tap(loveIconFinder);
+        // Open dialog again and tap the call reaction
+        await tester.tap(find.text('Open Dialog'));
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        final callIconFinder = find.byIcon(Icons.call);
+        expect(callIconFinder, findsOneWidget);
+        await tester.tap(callIconFinder);
         await tester.pumpAndSettle();
 
         expect(messageAction, isA<SelectReaction>());
-        // Verify callback was called with correct reaction type
+        // Verify the popped value has correct reaction type
         expect((messageAction! as SelectReaction).reaction.type, 'call');
       },
     );
@@ -214,7 +228,6 @@ void main() {
           StreamMessageReactionsModal(
             message: message,
             messageWidget: buildMessageWidget(),
-            onReactionPicked: (_) {},
           ),
         ),
       );
@@ -230,7 +243,6 @@ void main() {
             message: message,
             messageWidget: buildMessageWidget(reverse: true),
             reverse: true,
-            onReactionPicked: (_) {},
           ),
         ),
       );
@@ -244,35 +256,33 @@ Widget _wrapWithMaterialApp(
   Brightness? brightness,
   List<StreamReactionIcon>? reactionIcons,
 }) {
-  return Portal(
-    child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: StreamChat(
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(brightness: brightness),
+    builder: (context, child) => Portal(
+      child: StreamChat(
         client: client,
         // Mock the connectivity stream to always return wifi.
         connectivityStream: Stream.value([ConnectivityResult.wifi]),
-        child: StreamChatConfiguration(
-          data: StreamChatConfigurationData(reactionIcons: reactionIcons),
-          child: StreamChatTheme(
-            data: StreamChatThemeData(brightness: brightness),
-            child: Builder(
-              builder: (context) {
-                final theme = StreamChatTheme.of(context);
-                return Scaffold(
-                  backgroundColor: theme.colorTheme.appBg,
-                  body: ColoredBox(
-                    color: theme.colorTheme.overlay,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: child,
-                    ),
-                  ),
-                );
-              },
+        streamChatThemeData: StreamChatThemeData(brightness: brightness),
+        streamChatConfigData: StreamChatConfigurationData(reactionIcons: reactionIcons),
+        child: child,
+      ),
+    ),
+    home: Builder(
+      builder: (context) {
+        final theme = StreamChatTheme.of(context);
+        return Scaffold(
+          backgroundColor: theme.colorTheme.appBg,
+          body: ColoredBox(
+            color: theme.colorTheme.overlay,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: child,
             ),
           ),
-        ),
-      ),
+        );
+      },
     ),
   );
 }

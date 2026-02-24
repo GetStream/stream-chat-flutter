@@ -3,7 +3,15 @@ export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailF
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 export 'package:stream_core_flutter/stream_core_flutter.dart'
-    show StreamAvatarSize, StreamTheme, StreamComponentFactory;
+    show
+        StreamAvatarSize,
+        StreamTheme,
+        StreamIcons,
+        StreamThemeExtension,
+        StreamComponentFactory,
+        StreamContextMenu,
+        StreamContextMenuAction,
+        StreamContextMenuSeparator;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
 export 'src/ai_assistant/stream_typewriter_builder.dart';
@@ -57,7 +65,6 @@ export 'src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
 export 'src/message_action/message_action.dart';
-export 'src/message_action/message_action_item.dart';
 export 'src/message_action/message_actions_builder.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_bottom_sheet.dart';

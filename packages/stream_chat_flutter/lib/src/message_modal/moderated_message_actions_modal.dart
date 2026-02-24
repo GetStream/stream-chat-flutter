@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/message_action/message_action.dart';
 import 'package:stream_chat_flutter/src/misc/adaptive_dialog_action.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template moderatedMessageActionsModal}
 /// A modal that is shown when a message is flagged by moderation policies.
@@ -24,7 +23,6 @@ class ModeratedMessageActionsModal extends StatelessWidget {
     super.key,
     required this.message,
     required this.messageActions,
-    this.onActionTap,
   });
 
   /// The message object that actions will be performed on.
@@ -34,14 +32,8 @@ class ModeratedMessageActionsModal extends StatelessWidget {
 
   /// List of custom actions that will be displayed in the modal.
   ///
-  /// Each action is represented by a [StreamMessageAction] object which defines
-  /// the action's appearance and behavior.
-  final List<StreamMessageAction> messageActions;
-
-  /// Callback triggered when a moderated message action is tapped.
-  ///
-  /// Provides the tapped [MessageAction] object to the callback.
-  final OnMessageActionTap? onActionTap;
+  /// Each action is represented by a [StreamContextMenuAction] object.
+  final List<StreamContextMenuAction> messageActions;
 
   @override
   Widget build(BuildContext context) {
@@ -52,12 +44,9 @@ class ModeratedMessageActionsModal extends StatelessWidget {
     final actions = <Widget>[
       ...messageActions.map(
         (action) => AdaptiveDialogAction(
-          onPressed: switch (onActionTap) {
-            final onTap? => () => onTap.call(action.action),
-            _ => null,
-          },
-          isDestructiveAction: action.isDestructive,
-          child: action.title ?? const Empty(),
+          onPressed: () => Navigator.pop(context, action.props.value),
+          isDestructiveAction: action.props.isDestructive,
+          child: action.props.label,
         ),
       ),
     ];
