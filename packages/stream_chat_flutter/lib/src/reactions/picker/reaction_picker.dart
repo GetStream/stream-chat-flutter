@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template onReactionPicked}
 /// Callback called when a reaction is picked.
@@ -114,8 +115,6 @@ class StreamReactionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     final ownReactions = [...?message.ownReactions];
     final ownReactionsMap = {for (final it in ownReactions) it.type: it};
 
@@ -157,7 +156,7 @@ class StreamReactionPicker extends StatelessWidget {
     return Material(
       borderRadius: borderRadius,
       clipBehavior: Clip.antiAlias,
-      color: backgroundColor ?? theme.colorTheme.barsBg,
+      color: backgroundColor ?? StreamColors.transparent,
       child: Padding(
         padding: padding.add(extraPadding),
         child: switch (scrollable) {

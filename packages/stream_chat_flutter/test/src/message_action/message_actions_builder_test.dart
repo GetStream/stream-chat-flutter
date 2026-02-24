@@ -132,31 +132,6 @@ void main() {
     expect(actions.isEmpty, isTrue);
   });
 
-  testWidgets('includes custom actions', (tester) async {
-    final context = await _getContext(tester);
-    final customAction = StreamMessageAction(
-      title: const Text('Custom'),
-      leading: const Icon(Icons.star),
-      action: CustomMessageAction(
-        message: message,
-        extraData: {'customKey': 'customValue'},
-      ),
-    );
-
-    final channel = _getChannelWithCapabilities(allChannelCapabilities);
-    final actions = StreamMessageActionsBuilder.buildActions(
-      context: context,
-      message: message,
-      channel: channel,
-      currentUser: currentUser,
-      customActions: [customAction],
-    );
-
-    actions.expects<CustomMessageAction>(
-      reason: 'Custom action should be included',
-    );
-  });
-
   group('permission-based actions', () {
     testWidgets(
       'includes/excludes edit action based on authorship',
@@ -557,15 +532,15 @@ void main() {
   });
 }
 
-/// Extension on Set<StreamMessageAction> to simplify action type checks.
-extension StreamMessageActionSetExtension on List<StreamMessageAction> {
+/// Extension on action lists to simplify message action type checks.
+extension StreamMessageActionSetExtension on List<StreamContextMenuAction> {
   void expects<T extends MessageAction>({String? reason}) {
-    final containsActionType = this.any((it) => it.action is T);
+    final containsActionType = this.any((it) => it.props.value is T);
     return expect(containsActionType, isTrue, reason: reason);
   }
 
   void notExpects<T extends MessageAction>({String? reason}) {
-    final containsActionType = this.any((it) => it.action is T);
+    final containsActionType = this.any((it) => it.props.value is T);
     return expect(containsActionType, isFalse, reason: reason);
   }
 }

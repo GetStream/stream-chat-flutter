@@ -24,7 +24,6 @@ class StreamMessageReactionsModal extends StatelessWidget {
     this.reverse = false,
     this.showReactionPicker = true,
     this.reactionPickerBuilder = StreamReactionPicker.builder,
-    this.onReactionPicked,
     this.onUserAvatarTap,
   });
 
@@ -52,11 +51,6 @@ class StreamMessageReactionsModal extends StatelessWidget {
   /// {@macro reactionPickerBuilder}
   final ReactionPickerBuilder reactionPickerBuilder;
 
-  /// Callback triggered when a user adds or toggles a reaction.
-  ///
-  /// Provides the selected [Reaction] object to the callback.
-  final OnMessageActionTap<SelectReaction>? onReactionPicked;
-
   /// Callback triggered when a user avatar is tapped in the reactions list.
   ///
   /// Provides the [User] object associated with the tapped avatar.
@@ -69,14 +63,10 @@ class StreamMessageReactionsModal extends StatelessWidget {
       false => AlignmentDirectional.centerStart,
     };
 
-    final onReactionPicked = switch (this.onReactionPicked) {
-      null => null,
-      final onPicked => (reaction) {
-        return onPicked.call(
-          SelectReaction(message: message, reaction: reaction),
-        );
-      },
-    };
+    void onReactionPicked(Reaction reaction) {
+      final action = SelectReaction(message: message, reaction: reaction);
+      return Navigator.pop(context, action); // Pop the modal with the selected reaction action
+    }
 
     return StreamMessageDialog(
       spacing: 4,

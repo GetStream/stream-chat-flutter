@@ -92,8 +92,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.attachmentPadding = EdgeInsets.zero,
     this.widthFactor = 0.78,
     this.onQuotedMessageTap,
-    this.customActions = const [],
-    this.onCustomActionTap,
+    this.actionsBuilder,
     this.onAttachmentTap,
     this.imageAttachmentThumbnailSize = const Size(400, 400),
     this.imageAttachmentThumbnailResizeType = 'clip',
@@ -368,15 +367,8 @@ class StreamMessageWidget extends StatefulWidget {
   /// Note: Only used in desktop devices (web and desktop).
   final OnReactionsHover? onReactionsHover;
 
-  /// {@template customActions}
-  /// List of custom actions shown on message long tap
-  /// {@endtemplate}
-  final List<StreamMessageAction> customActions;
-
-  /// Callback for when a custom message action is tapped.
-  ///
-  /// {@macro onMessageActionTap}
-  final OnMessageActionTap<CustomMessageAction>? onCustomActionTap;
+  /// {@macro messageActionsBuilder}
+  final MessageActionsBuilder? actionsBuilder;
 
   /// {@macro onAttachmentWidgetTap}
   final OnAttachmentWidgetTap? onAttachmentTap;
@@ -463,8 +455,7 @@ class StreamMessageWidget extends StatefulWidget {
     OnMessageLongPress? onMessageLongPress,
     OnReactionsTap? onReactionsTap,
     OnReactionsHover? onReactionsHover,
-    List<StreamMessageAction>? customActions,
-    OnMessageActionTap<CustomMessageAction>? onCustomActionTap,
+    MessageActionsBuilder? actionsBuilder,
     OnAttachmentWidgetTap? onAttachmentTap,
     Widget Function(BuildContext, User)? userAvatarBuilder,
     Size? imageAttachmentThumbnailSize,
@@ -527,8 +518,7 @@ class StreamMessageWidget extends StatefulWidget {
       onMessageLongPress: onMessageLongPress ?? this.onMessageLongPress,
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
       onReactionsHover: onReactionsHover ?? this.onReactionsHover,
-      customActions: customActions ?? this.customActions,
-      onCustomActionTap: onCustomActionTap ?? this.onCustomActionTap,
+      actionsBuilder: actionsBuilder ?? this.actionsBuilder,
       onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
       userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
       imageAttachmentThumbnailSize: imageAttachmentThumbnailSize ?? this.imageAttachmentThumbnailSize,
@@ -677,11 +667,16 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
             // show any context menu actions.
             if (messageState.isDeleted || messageState.isOutgoing) return child;
 
+            final channel = StreamChannel.of(context).channel;
             final menuItems = _buildDesktopOrWebActions(context, message);
             if (menuItems.isEmpty) return MouseRegion(child: child);
 
             return ContextMenuRegion(
-              contextMenuBuilder: (_, anchor) => ContextMenu(
+              onSelected: (result) {
+                if (result is! MessageAction) return;
+                return _onActionTap(context, channel, result).ignore();
+              },
+              menuBuilder: (_, anchor) => ContextMenu(
                 anchor: anchor,
                 menuItems: menuItems,
               ),
@@ -761,24 +756,21 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     );
   }
 
-  List<StreamMessageAction> _buildBouncedErrorMessageActions({
+  List<StreamContextMenuAction> _buildBouncedErrorMessageActions({
     required BuildContext context,
     required Message message,
   }) {
-    final actions = StreamMessageActionsBuilder.buildBouncedErrorActions(
+    return StreamMessageActionsBuilder.buildBouncedErrorActions(
       context: context,
       message: message,
     );
-
-    return actions;
   }
 
-  List<StreamMessageAction> _buildMessageActions({
+  List<Widget> _buildMessageActions({
     required BuildContext context,
     required Message message,
     required Channel channel,
     OwnUser? currentUser,
-    List<StreamMessageAction>? customActions,
   }) {
     final actions =
         StreamMessageActionsBuilder.buildActions(
@@ -786,9 +778,8 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           message: message,
           channel: channel,
           currentUser: currentUser,
-          customActions: customActions,
         )..retainWhere(
-          (it) => switch (it.action) {
+          (it) => switch (it.props.value) {
             QuotedReply() => widget.showReplyMessage,
             ThreadReply() => widget.showThreadReplyMessage,
             MarkUnread() => widget.showMarkUnreadMessage,
@@ -802,7 +793,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           },
         );
 
-    return actions;
+    if (widget.actionsBuilder case final builder?) {
+      return builder(context, actions);
+    }
+
+    return StreamContextMenuAction.partitioned(items: actions);
   }
 
   List<Widget> _buildDesktopOrWebActions(
@@ -820,24 +815,12 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     BuildContext context,
     Message message,
   ) {
-    final channel = StreamChannel.of(context).channel;
-
-    final actions = _buildBouncedErrorMessageActions(
+    final actions = StreamMessageActionsBuilder.buildBouncedErrorActions(
       context: context,
       message: message,
     );
 
-    return [
-      ...actions.map((action) {
-        return StreamMessageActionItem(
-          action: action,
-          onTap: (action) async {
-            final popped = await Navigator.of(context).maybePop();
-            if (popped) return _onActionTap(context, channel, action).ignore();
-          },
-        );
-      }),
-    ];
+    return StreamContextMenuAction.partitioned(items: actions);
   }
 
   List<Widget> _buildMessageDesktopOrWebActions(
@@ -853,45 +836,27 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       message: message,
       channel: channel,
       currentUser: currentUser,
-      customActions: widget.customActions,
     );
 
-    void onActionTap(MessageAction action) async {
-      final popped = await Navigator.of(context).maybePop();
-      if (popped) return _onActionTap(context, channel, action).ignore();
+    void onReactionPicked(Reaction reaction) {
+      final action = SelectReaction(message: message, reaction: reaction);
+      return Navigator.pop(context, action); // Pop the modal with the selected reaction action
     }
 
     return [
-      if (showPicker)
-        widget.reactionPickerBuilder(
-          context,
-          message,
-          (reaction) => onActionTap(
-            SelectReaction(message: message, reaction: reaction),
-          ),
-        ),
-      ...actions.map((action) {
-        return StreamMessageActionItem(
-          action: action,
-          onTap: onActionTap,
-        );
-      }),
+      if (showPicker) widget.reactionPickerBuilder(context, message, onReactionPicked),
+      ...actions,
     ];
   }
 
   Future<void> _showMessageReactionsModal(
     BuildContext context,
     Message message,
-  ) {
+  ) async {
     final channel = StreamChannel.of(context).channel;
     final showPicker = widget.showReactionPicker && channel.canSendReaction;
 
-    void onReactionPicked(SelectReaction action) async {
-      final popped = await Navigator.of(context).maybePop();
-      if (popped) return _onActionTap(context, channel, action).ignore();
-    }
-
-    return showStreamDialog(
+    final action = await showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
@@ -904,7 +869,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           onUserAvatarTap: widget.onUserAvatarTap,
           showReactionPicker: showPicker,
           reactionPickerBuilder: widget.reactionPickerBuilder,
-          onReactionPicked: onReactionPicked,
           messageWidget: StreamChannel(
             channel: channel,
             child: widget.copyWith(
@@ -926,6 +890,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       ),
     );
+
+    if (action is! MessageAction) return;
+    return _onActionTap(context, channel, action).ignore();
   }
 
   Future<void> _onMessageLongPressed(
@@ -961,20 +928,17 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       message: message,
     );
 
-    void onActionTap(MessageAction action) async {
-      final popped = await Navigator.of(context).maybePop();
-      if (popped) return _onActionTap(context, channel, action).ignore();
-    }
-
-    return showStreamDialog(
+    final action = await showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => ModeratedMessageActionsModal(
         message: message,
         messageActions: actions,
-        onActionTap: onActionTap,
       ),
     );
+
+    if (action is! MessageAction) return;
+    return _onActionTap(context, channel, action).ignore();
   }
 
   Future<void> _onMessageActions(
@@ -991,7 +955,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   Future<void> _showMessageActionModalDialog(
     BuildContext context,
     Message message,
-  ) {
+  ) async {
     final channel = StreamChannel.of(context).channel;
     final currentUser = channel.client.state.currentUser;
     final showPicker = widget.showReactionPicker && channel.canSendReaction;
@@ -1001,15 +965,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       message: message,
       channel: channel,
       currentUser: currentUser,
-      customActions: widget.customActions,
     );
 
-    void onActionTap(MessageAction action) async {
-      final popped = await Navigator.of(context).maybePop();
-      if (popped) return _onActionTap(context, channel, action).ignore();
-    }
-
-    return showStreamDialog(
+    final action = await showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
@@ -1022,7 +980,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
           messageActions: actions,
           showReactionPicker: showPicker,
           reactionPickerBuilder: widget.reactionPickerBuilder,
-          onActionTap: onActionTap,
           messageWidget: StreamChannel(
             channel: channel,
             child: widget.copyWith(
@@ -1044,6 +1001,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
         ),
       ),
     );
+
+    if (action is! MessageAction) return;
+    return _onActionTap(context, channel, action).ignore();
   }
 
   Future<void> _onActionTap(
@@ -1066,7 +1026,6 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       ResendMessage() => channel.retryMessage(action.message),
       QuotedReply() => widget.onReplyTap?.call(action.message),
       ThreadReply() => widget.onThreadTap?.call(action.message),
-      CustomMessageAction() => widget.onCustomActionTap?.call(action),
     };
   }
 

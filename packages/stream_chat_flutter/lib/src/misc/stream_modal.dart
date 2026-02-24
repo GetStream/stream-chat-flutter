@@ -55,7 +55,7 @@ Future<T?> showStreamDialog<T>({
     },
     pageBuilder: (context, animation, secondaryAnimation) {
       final pageChild = Builder(builder: builder);
-      return capturedThemes.wrap(pageChild);
+      return capturedThemes.wrap(StreamChatTheme(data: theme, child: pageChild));
     },
   );
 }
