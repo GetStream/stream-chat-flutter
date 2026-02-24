@@ -13,6 +13,7 @@ import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template audioRecorderBuilder}
 /// A builder function for constructing the audio recorder UI.
@@ -643,29 +644,31 @@ class SwipeToLockButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final streamIcons = context.streamIcons;
+    final colorScheme = context.streamColorScheme;
+
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: theme.colorTheme.inputBg,
+        color: colorScheme.backgroundElevation1,
+        border: Border.all(color: colorScheme.borderDefault),
+        boxShadow: context.streamBoxShadow.elevation1,
       ),
       child: Column(
         spacing: 8,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          StreamSvgIcon(
-            icon: StreamSvgIcons.lock,
-            size: kDefaultMessageInputIconSize,
-            color: switch (isLocked) {
-              true => theme.colorTheme.accentPrimary,
-              false => theme.colorTheme.textLowEmphasis,
-            },
+          Icon(
+            isLocked ? streamIcons.lock : streamIcons.unlocked,
+            size: 20,
+            color: colorScheme.textPrimary,
           ),
           if (!isLocked) ...[
-            StreamSvgIcon(
-              icon: StreamSvgIcons.up,
-              color: theme.colorTheme.textLowEmphasis,
+            Icon(
+              streamIcons.chevronTop,
+              size: 20,
+              color: colorScheme.textPrimary,
             ),
           ],
         ],

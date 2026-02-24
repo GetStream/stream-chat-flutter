@@ -7,6 +7,7 @@ class MockClient extends Mock implements StreamChatClient {
   MockClient() {
     when(() => wsConnectionStatus).thenReturn(ConnectionStatus.connected);
     when(() => wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+    when(() => state).thenReturn(MockClientState());
   }
 }
 

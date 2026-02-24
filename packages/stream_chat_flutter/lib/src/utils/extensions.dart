@@ -670,6 +670,7 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
           title: it.title,
           waveform: it.waveform,
           duration: it.duration,
+          key: it,
         );
       }).nonNulls,
     ];

@@ -449,13 +449,6 @@ Widget tabbedAttachmentPickerBuilder({
         AttachmentPickerType.images,
         AttachmentPickerType.videos,
       ],
-      isEnabled: (value) {
-        // Enable if nothing has been selected yet.
-        if (value.isEmpty) return true;
-
-        // Otherwise, enable only if there is at least a image or a video.
-        return value.attachments.any((it) => it.isImage || it.isVideo);
-      },
       optionViewBuilder: (context, controller) {
         final attachment = controller.value.attachments;
         final selectedIds = attachment.map((it) => it.id);
@@ -480,13 +473,6 @@ Widget tabbedAttachmentPickerBuilder({
       key: 'file-picker',
       icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
       supportedTypes: [AttachmentPickerType.files],
-      isEnabled: (value) {
-        // Enable if nothing has been selected yet.
-        if (value.isEmpty) return true;
-
-        // Otherwise, enable only if there is at least a file.
-        return value.attachments.any((it) => it.isFile);
-      },
       optionViewBuilder: (context, controller) => StreamFilePicker(
         onFilePicked: (file) async {
           final result = await _handleSingePick(controller, file);
@@ -498,13 +484,6 @@ Widget tabbedAttachmentPickerBuilder({
       key: 'image-picker',
       icon: const StreamSvgIcon(icon: StreamSvgIcons.camera),
       supportedTypes: [AttachmentPickerType.images],
-      isEnabled: (value) {
-        // Enable if nothing has been selected yet.
-        if (value.isEmpty) return true;
-
-        // Otherwise, enable only if there is at least a image.
-        return value.attachments.any((it) => it.isImage);
-      },
       optionViewBuilder: (context, controller) => StreamImagePicker(
         onImagePicked: (image) async {
           final result = await _handleSingePick(controller, image);
@@ -516,13 +495,6 @@ Widget tabbedAttachmentPickerBuilder({
       key: 'video-picker',
       icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
       supportedTypes: [AttachmentPickerType.videos],
-      isEnabled: (value) {
-        // Enable if nothing has been selected yet.
-        if (value.isEmpty) return true;
-
-        // Otherwise, enable only if there is at least a video.
-        return value.attachments.any((it) => it.isVideo);
-      },
       optionViewBuilder: (context, controller) => StreamVideoPicker(
         onVideoPicked: (video) async {
           final result = await _handleSingePick(controller, video);
@@ -534,13 +506,6 @@ Widget tabbedAttachmentPickerBuilder({
       key: 'poll-creator',
       icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
       supportedTypes: [AttachmentPickerType.poll],
-      isEnabled: (value) {
-        // Enable if nothing has been selected yet.
-        if (value.isEmpty) return true;
-
-        // Otherwise, enable only if there is a poll.
-        return value.poll != null;
-      },
       optionViewBuilder: (context, controller) {
         final initialPoll = controller.value.poll;
         return StreamPollCreator(
