@@ -19,6 +19,8 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
     this.itemBuilder,
     this.separatorBuilder = _defaultVoiceRecordingPlaylistSeparatorBuilder,
     this.constraints = const BoxConstraints(),
+    this.onRemovePressed,
+    this.voiceRecordingTitle,
   });
 
   /// The shape of the attachment.
@@ -46,6 +48,12 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
 
   /// The separator to use between the voice recordings.
   final IndexedWidgetBuilder separatorBuilder;
+
+  /// Callback called when the remove button is pressed.
+  final ValueSetter<Attachment>? onRemovePressed;
+
+  /// The title to use for the voice recording.
+  final String? voiceRecordingTitle;
 
   // Default separator builder for the voice recording playlist.
   static Widget _defaultVoiceRecordingPlaylistSeparatorBuilder(
@@ -111,10 +119,18 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
               }
 
               final track = state.tracks[index];
+              Attachment? attachment = null;
+              if (track.key is Attachment) {
+                attachment = track.key as Attachment?;
+              }
               return StreamVoiceRecordingAttachment(
                 track: track,
                 speed: state.speed,
                 showTitle: true,
+                title: widget.voiceRecordingTitle,
+                onRemovePressed: attachment != null && widget.onRemovePressed != null
+                    ? () => widget.onRemovePressed?.call(attachment!)
+                    : null,
                 shape: widget.shape,
                 constraints: widget.constraints,
                 onTrackPause: _controller.pause,

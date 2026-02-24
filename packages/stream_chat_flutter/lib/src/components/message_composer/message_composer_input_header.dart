@@ -34,7 +34,12 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
     final ogAttachment = props.controller.ogAttachment;
     final nonOGAttachments = controller.attachments
         .where((it) {
-          return it.titleLink == null;
+          return it.titleLink == null && it.type != AttachmentType.voiceRecording;
+        })
+        .toList(growable: false);
+    final voiceRecordings = controller.attachments
+        .where((it) {
+          return it.type == AttachmentType.voiceRecording;
         })
         .toList(growable: false);
 
@@ -64,6 +69,16 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                   quotedMessage: quotedMessage,
                   onRemovePressed: controller.clearQuotedMessage,
                   currentUserId: props.currentUserId,
+                ),
+              ),
+            if (voiceRecordings.isNotEmpty)
+              Padding(
+                padding: contentPadding,
+                child: StreamVoiceRecordingAttachmentPlaylist(
+                  voiceRecordings: voiceRecordings,
+                  onRemovePressed: _onAttachmentRemovePressed,
+                  voiceRecordingTitle: 'Voice Message',
+                  message: props.controller.message,
                 ),
               ),
             if (hasAttachments)

@@ -130,6 +130,7 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
     return StreamMessageComposerAttachmentContainer(
       borderColor: colorScheme.borderDefault,
       onRemovePressed: onRemovePressed,
+      padding: EdgeInsets.all(spacing.sm),
       child: Row(
         crossAxisAlignment: .center,
         children: [
