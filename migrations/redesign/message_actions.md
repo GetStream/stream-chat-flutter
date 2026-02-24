@@ -111,6 +111,7 @@ StreamContextMenuAction<MessageAction>(
 | — | `enabled: bool` (new) |
 
 > **Important:**
+> - **`label` is now required** — `title: Widget?` was optional in `StreamMessageAction`; `label: Widget` is a required, non-nullable parameter in `StreamContextMenuAction`. Any call site that omitted `title` will fail to compile; you must supply a non-null `label` widget (typically a `Text`).
 > - `onTap` signature changed from `void Function(MessageAction)` to `VoidCallback?` — capture data in a closure instead
 > - Per-item colours and text styles are now unified via `StreamContextMenuActionTheme` rather than individual properties
 
@@ -194,6 +195,9 @@ StreamMessageActionsModal(
 ```
 
 **After (await return value):**
+
+> `showStreamDialog<T>` is a Stream-themed wrapper around `showGeneralDialog` — see [New Components](#showstreamdialogt) for details.
+
 ```dart
 final action = await showStreamDialog<MessageAction>(
   context: context,
@@ -447,7 +451,7 @@ final List<StreamMessageAction> actions =
 **After:**
 ```dart
 // buildActions no longer accepts customActions — add extras via actionsBuilder
-final List<StreamContextMenuAction> actions =
+final List<StreamContextMenuAction<MessageAction>> actions =
     StreamMessageActionsBuilder.buildActions(
   context: context,
   message: message,
@@ -459,6 +463,24 @@ final List<StreamContextMenuAction> actions =
 ---
 
 ## New Components
+
+### showStreamDialog\<T\>
+
+A top-level function from `package:stream_chat_flutter/stream_chat_flutter.dart` that replaces direct calls to `showDialog` when presenting Stream modals. It wraps `showGeneralDialog` and:
+
+- **Re-wraps `StreamChatTheme`** across the route boundary so the theme is available inside the dialog even when `useRootNavigator: true`
+- **Applies a blur + scale transition** for a consistent Stream look
+- **Returns `Future<T?>`** — the value passed to `Navigator.pop` inside the dialog, which is how `StreamMessageActionsModal`, `StreamMessageReactionsModal`, and `ModeratedMessageActionsModal` deliver the selected action back to the caller
+
+```dart
+// Replace showDialog with showStreamDialog when presenting Stream modals:
+final action = await showStreamDialog<MessageAction>(
+  context: context,
+  builder: (_) => StreamMessageActionsModal(/* … */),
+);
+```
+
+> **Note:** If you were calling `showDialog` directly and passing Stream modals to it, switch to `showStreamDialog` to ensure theming works correctly across the route boundary.
 
 ### StreamContextMenuAction
 
@@ -535,6 +557,7 @@ StreamContextMenu(
 ## Migration Checklist
 
 - [ ] Replace all `StreamMessageAction(action: ..., title: ..., leading: ...)` with `StreamContextMenuAction(value: ..., label: ..., leading: ...)`
+- [ ] Add a non-null `label` widget wherever `title` was previously omitted — `label` is now a required parameter and code that relied on a null/omitted `title` will not compile
 - [ ] Update `onTap` callsites: old type was `void Function(MessageAction)`, new type is `VoidCallback?` — capture needed data in a closure
 - [ ] Remove all `StreamMessageActionItem` usages
 - [ ] Remove `onActionTap` from `StreamMessageActionsModal`; handle via per-action `onTap` or await the dialog return value
