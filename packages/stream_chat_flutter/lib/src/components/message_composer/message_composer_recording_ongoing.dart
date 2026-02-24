@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget to display the recording ongoing state.
 /// This widget can be used inside of the [StreamBaseMessageComposer] instead of the default `inputBody`.
