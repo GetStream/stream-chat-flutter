@@ -1,0 +1,22 @@
+name: sample_app_jaspr
+description: Stream Chat sample app built with the Jaspr web framework.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  jaspr: ^0.22.3
+  jaspr_router: ^0.8.1
+  stream_chat_jaspr:
+    path: ../packages/stream_chat_jaspr
+
+dev_dependencies:
+  build_runner: ^2.10.0
+  build_web_compilers: ^4.4.6
+  jaspr_builder: ^0.22.3
+  jaspr_test: ^0.22.3
+
+jaspr:
+  mode: client

@@ -3,12 +3,14 @@ repository: https://github.com/GetStream/stream-chat-flutter
 
 packages:
   - sample_app
+  - sample_app_jaspr
   - packages/*
   - packages/*/example
 
 categories:
   sample_app:
     - sample_app
+    - sample_app_jaspr
   packages:
     - packages/*
   examples:

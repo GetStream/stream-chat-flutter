@@ -1,0 +1,21 @@
+name: stream_chat_jaspr
+description: Stream Chat components for the Jaspr web framework. Provides channel list and other UI components.
+version: 0.1.0
+repository: https://github.com/GetStream/stream-chat-flutter
+issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  collection: ^1.17.2
+  intl: ^0.19.0
+  jaspr: ^0.22.3
+  rxdart: ^0.28.0
+  stream_chat: ^10.0.0-beta.12
+  universal_web: ^1.1.1+1
+
+dev_dependencies:
+  jaspr_test: ^0.22.3
+  mocktail: ^1.0.0
+  test: ^1.24.6
