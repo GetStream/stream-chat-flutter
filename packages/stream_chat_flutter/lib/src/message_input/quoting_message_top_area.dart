@@ -37,7 +37,7 @@ class QuotingMessageTopArea extends StatelessWidget {
             StreamMessageInputIconButton(
               iconSize: 24,
               color: _streamChatTheme.colorTheme.disabled,
-              icon: const StreamSvgIcon(icon: StreamSvgIcons.reply),
+              icon: Icon(context.streamIcons.arrowShareLeft),
               onPressed: null,
             ),
             Text(
@@ -47,7 +47,7 @@ class QuotingMessageTopArea extends StatelessWidget {
             StreamMessageInputIconButton(
               iconSize: 24,
               color: _streamChatTheme.colorTheme.textLowEmphasis,
-              icon: const StreamSvgIcon(icon: StreamSvgIcons.closeSmall),
+              icon: Icon(context.streamIcons.crossSmall),
               onPressed: onQuotedMessageCleared?.call,
             ),
           ],

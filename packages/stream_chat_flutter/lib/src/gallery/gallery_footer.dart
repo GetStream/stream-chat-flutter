@@ -82,9 +82,9 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
               else
                 IconButton(
                   key: shareButtonKey,
-                  icon: StreamSvgIcon(
+                  icon: Icon(
+                    context.streamIcons.shareOs,
                     size: 24,
-                    icon: StreamSvgIcons.share,
                     color: galleryFooterThemeData.shareIconColor,
                   ),
                   onPressed: () async {
@@ -135,8 +135,8 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                 ),
               ),
               IconButton(
-                icon: StreamSvgIcon(
-                  icon: StreamSvgIcons.grid,
+                icon: Icon(
+                  context.streamIcons.layoutGrid1,
                   color: galleryFooterThemeData.gridIconButtonColor,
                 ),
                 onPressed: () => _showPhotosModal(context),
@@ -184,8 +184,8 @@ class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: IconButton(
-                      icon: StreamSvgIcon(
-                        icon: StreamSvgIcons.close,
+                      icon: Icon(
+                        context.streamIcons.crossMedium,
                         color: galleryFooterThemeData.bottomSheetCloseIconColor,
                       ),
                       onPressed: () => Navigator.of(context).maybePop(),

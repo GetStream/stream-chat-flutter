@@ -108,7 +108,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 color: _isGroupNameEmpty
                     ? StreamChatTheme.of(context).colorTheme.textLowEmphasis
                     : StreamChatTheme.of(context).colorTheme.accentPrimary,
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.check),
+                icon: Icon(context.streamIcons.checkmark2),
                 onPressed: _isGroupNameEmpty
                     ? null
                     : () async {
@@ -264,8 +264,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             const SizedBox(
               height: 26,
             ),
-            StreamSvgIcon(
-              icon: StreamSvgIcons.error,
+            Icon(
+              context.streamIcons.exclamationCircle1,
               color: StreamChatTheme.of(context).colorTheme.accentError,
               size: 24,
             ),

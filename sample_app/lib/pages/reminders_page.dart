@@ -81,9 +81,9 @@ class _RemindersPageState extends State<RemindersPage> {
                 children: [
                   CustomSlidableAction(
                     backgroundColor: theme.colorTheme.inputBg,
-                    child: StreamSvgIcon(
+                    child: Icon(
+                      context.streamIcons.editBig,
                       size: 24,
-                      icon: StreamSvgIcons.edit,
                       color: theme.colorTheme.accentPrimary,
                     ),
                     onPressed: (_) async {
@@ -105,9 +105,9 @@ class _RemindersPageState extends State<RemindersPage> {
                   ),
                   CustomSlidableAction(
                     backgroundColor: theme.colorTheme.inputBg,
-                    child: StreamSvgIcon(
+                    child: Icon(
+                      context.streamIcons.trashBin,
                       size: 24,
-                      icon: StreamSvgIcons.delete,
                       color: theme.colorTheme.accentError,
                     ),
                     onPressed: (context) {

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart' hide TextTheme;
 import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
 /// {@template streamChatTheme}
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
@@ -549,8 +550,8 @@ class StreamChatThemeData {
       audioWaveformSliderTheme: audioWaveformSliderTheme,
       voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
         backgroundColor: colorTheme.barsBg,
-        playIcon: const StreamSvgIcon(icon: StreamSvgIcons.play),
-        pauseIcon: const StreamSvgIcon(icon: StreamSvgIcons.pause),
+        playIcon: const Icon(StreamIconData.iconPlaySolid),
+        pauseIcon: const Icon(StreamIconData.iconPause),
         loadingIndicator: SizedBox.fromSize(
           size: const Size.square(24 - /* Padding */ 2),
           child: Center(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/misc/adaptive_dialog_action.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
@@ -55,7 +54,7 @@ class ModeratedMessageActionsModal extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       backgroundColor: colorTheme.barsBg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.flag),
+      icon: Icon(context.streamIcons.flag2),
       iconColor: colorTheme.accentPrimary,
       title: Text(context.translations.moderationReviewModalTitle),
       titleTextStyle: textTheme.headline.copyWith(

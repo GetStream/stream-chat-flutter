@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/attachment/voice_recording_attachment.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
@@ -468,7 +467,7 @@ class RemoveAttachmentButton extends StatelessWidget {
       onPressed: onPressed,
       color: colorTheme.barsBg,
       padding: EdgeInsets.zero,
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.close),
+      icon: Icon(context.streamIcons.crossMedium),
       style: IconButton.styleFrom(
         minimumSize: const Size(24, 24),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

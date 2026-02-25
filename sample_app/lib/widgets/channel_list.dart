@@ -170,8 +170,8 @@ class _ChannelListDefault extends StatelessWidget {
                   if (canDeleteChannel)
                     CustomSlidableAction(
                       backgroundColor: backgroundColor,
-                      child: StreamSvgIcon(
-                        icon: StreamSvgIcons.delete,
+                      child: Icon(
+                        context.streamIcons.trashBin,
                         color: chatTheme.colorTheme.accentError,
                       ),
                       onPressed: (_) async {
@@ -181,8 +181,8 @@ class _ChannelListDefault extends StatelessWidget {
                           question: 'Are you sure you want to delete this conversation?',
                           okText: 'Delete',
                           cancelText: 'Cancel',
-                          icon: StreamSvgIcon(
-                            icon: StreamSvgIcons.delete,
+                          icon: Icon(
+                            context.streamIcons.trashBin,
                             color: chatTheme.colorTheme.accentError,
                           ),
                         );
@@ -210,8 +210,8 @@ class _ChannelListDefault extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon(
-                    icon: StreamSvgIcons.message,
+                  emptyIcon: Icon(
+                    context.streamIcons.bubble3ChatMessage,
                     size: 148,
                     color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),
@@ -257,10 +257,10 @@ class _ChannelListSearch extends StatelessWidget {
                 child: Center(
                   child: Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.all(24),
-                        child: StreamSvgIcon(
-                          icon: StreamSvgIcons.search,
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Icon(
+                          context.streamIcons.magnifyingGlassSearch,
                           size: 96,
                           color: Colors.grey,
                         ),

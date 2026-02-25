@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template reactionIconBuilder}
 /// Signature for a function that builds a reaction icon.
@@ -73,8 +74,8 @@ class StreamReactionIcon {
       false => theme.primaryIconTheme.color,
     };
 
-    return StreamSvgIcon(
-      icon: StreamSvgIcons.loveReaction,
+    return Icon(
+      context.streamIcons.heart2,
       color: iconColor,
       size: size,
     );

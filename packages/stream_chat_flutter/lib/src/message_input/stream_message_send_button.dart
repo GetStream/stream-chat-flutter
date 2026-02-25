@@ -52,12 +52,12 @@ class StreamMessageSendButton extends StatelessWidget {
 
     final idleIcon = switch (idleSendIcon) {
       final idleIcon? => idleIcon,
-      _ => const StreamSvgIcon(icon: StreamSvgIcons.sendMessage),
+      _ => Icon(context.streamIcons.paperPlaneTopRight),
     };
 
     final activeIcon = switch (activeSendIcon) {
       final activeIcon? => activeIcon,
-      _ => const StreamSvgIcon(icon: StreamSvgIcons.circleUp),
+      _ => Icon(context.streamIcons.arrowUp),
     };
 
     final theme = StreamMessageInputTheme.of(context);

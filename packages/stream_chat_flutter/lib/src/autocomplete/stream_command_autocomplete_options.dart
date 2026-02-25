@@ -44,8 +44,8 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
         return ListTile(
           dense: true,
           horizontalTitleGap: 0,
-          leading: StreamSvgIcon(
-            icon: StreamSvgIcons.lightning,
+          leading: Icon(
+            context.streamIcons.thunder,
             color: colorTheme.accentPrimary,
             size: 28,
           ),
@@ -107,20 +107,20 @@ class _CommandIcon extends StatelessWidget {
         return CircleAvatar(
           backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
           radius: 12,
-          child: const StreamSvgIcon(
+          child: Icon(
+            context.streamIcons.peopleRemove,
             size: 16,
             color: Colors.white,
-            icon: StreamSvgIcons.userRemove,
           ),
         );
       case 'flag':
         return CircleAvatar(
           backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
           radius: 12,
-          child: const StreamSvgIcon(
+          child: Icon(
+            context.streamIcons.flag2,
             size: 14,
             color: Colors.white,
-            icon: StreamSvgIcons.flag,
           ),
         );
       case 'imgur':
@@ -138,40 +138,40 @@ class _CommandIcon extends StatelessWidget {
         return CircleAvatar(
           backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
           radius: 12,
-          child: const StreamSvgIcon(
+          child: Icon(
+            context.streamIcons.mute,
             size: 16,
             color: Colors.white,
-            icon: StreamSvgIcons.mute,
           ),
         );
       case 'unban':
         return CircleAvatar(
           backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
           radius: 12,
-          child: const StreamSvgIcon(
+          child: Icon(
+            context.streamIcons.peopleAdd,
             size: 16,
             color: Colors.white,
-            icon: StreamSvgIcons.userAdd,
           ),
         );
       case 'unmute':
         return CircleAvatar(
           backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
           radius: 12,
-          child: const StreamSvgIcon(
+          child: Icon(
+            context.streamIcons.volumeFull,
             size: 16,
             color: Colors.white,
-            icon: StreamSvgIcons.volumeUp,
           ),
         );
       default:
         return CircleAvatar(
           backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
           radius: 12,
-          child: const StreamSvgIcon(
+          child: Icon(
+            context.streamIcons.thunder,
             size: 16,
             color: Colors.white,
-            icon: StreamSvgIcons.lightning,
           ),
         );
     }

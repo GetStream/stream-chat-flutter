@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
 void main() {
   final message = Message(
@@ -17,22 +18,22 @@ void main() {
   final messageActions = <StreamContextMenuAction<MessageAction>>[
     StreamContextMenuAction<MessageAction>(
       label: const Text('Reply'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
+      leading: const Icon(StreamIconData.iconArrowShareLeft),
       value: QuotedReply(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Thread Reply'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
+      leading: const Icon(StreamIconData.iconBubbleAnnotation2ChatMessage),
       value: ThreadReply(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Copy Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
+      leading: const Icon(StreamIconData.iconSquareBehindSquare2Copy),
       value: CopyMessage(message: message),
     ),
     StreamContextMenuAction<MessageAction>.destructive(
       label: const Text('Delete Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+      leading: const Icon(StreamIconData.iconTrashBin),
       value: DeleteMessage(message: message),
     ),
   ];

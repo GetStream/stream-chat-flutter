@@ -122,8 +122,8 @@ class _PreparingState extends StatelessWidget {
         Align(
           alignment: Alignment.topRight,
           child: _IconButton(
-            icon: StreamSvgIcon(
-              icon: StreamSvgIcons.close,
+            icon: Icon(
+              context.streamIcons.crossMedium,
               color: StreamChatTheme.of(context).colorTheme.barsBg,
             ),
             onPressed: () => channel.cancelAttachmentUpload(attachmentId),
@@ -162,8 +162,8 @@ class _InProgressState extends StatelessWidget {
         Align(
           alignment: Alignment.topRight,
           child: _IconButton(
-            icon: StreamSvgIcon(
-              icon: StreamSvgIcons.close,
+            icon: Icon(
+              context.streamIcons.crossMedium,
               color: StreamChatTheme.of(context).colorTheme.barsBg,
             ),
             onPressed: () => channel.cancelAttachmentUpload(attachmentId),
@@ -201,9 +201,9 @@ class _FailedState extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _IconButton(
-          icon: StreamSvgIcon(
+          icon: Icon(
+            context.streamIcons.arrowRotateClockwise,
             size: 14,
-            icon: StreamSvgIcons.retry,
             color: theme.colorTheme.barsBg,
           ),
           onPressed: () {
@@ -245,8 +245,8 @@ class _SuccessState extends StatelessWidget {
       child: CircleAvatar(
         backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
         maxRadius: 12,
-        child: StreamSvgIcon(
-          icon: StreamSvgIcons.check,
+        child: Icon(
+          context.streamIcons.checkmark2,
           color: StreamChatTheme.of(context).colorTheme.barsBg,
         ),
       ),

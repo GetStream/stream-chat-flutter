@@ -316,9 +316,9 @@ class StreamDraftListView extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon(
+                  emptyIcon: Icon(
+                    context.streamIcons.editBig,
                     size: 148,
-                    icon: StreamSvgIcons.edit,
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(

@@ -125,7 +125,7 @@ class PollOptionListItem extends StatelessWidget {
           ),
           IconButton(
             iconSize: 24,
-            icon: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+            icon: Icon(context.streamIcons.trashBin),
             style: IconButton.styleFrom(
               foregroundColor: colorTheme.textLowEmphasis,
             ),

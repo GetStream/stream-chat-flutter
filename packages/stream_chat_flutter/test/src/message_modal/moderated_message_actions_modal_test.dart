@@ -4,6 +4,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
 void main() {
   final message = Message(
@@ -21,17 +22,17 @@ void main() {
   final messageActions = <StreamContextMenuAction<MessageAction>>[
     StreamContextMenuAction<MessageAction>(
       label: const Text('Send Anyway'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.send),
+      leading: const Icon(StreamIconData.iconPaperPlane),
       value: ResendMessage(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Edit Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
+      leading: const Icon(StreamIconData.iconEditBig),
       value: EditMessage(message: message),
     ),
     StreamContextMenuAction<MessageAction>.destructive(
       label: const Text('Delete Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+      leading: const Icon(StreamIconData.iconTrashBin),
       value: HardDeleteMessage(message: message),
     ),
   ];
@@ -51,7 +52,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Check for icon, title and content
-      expect(find.byType(StreamSvgIcon), findsWidgets);
+      expect(find.byType(Icon), findsWidgets);
       expect(find.byType(Text), findsWidgets);
 
       // Check for actions

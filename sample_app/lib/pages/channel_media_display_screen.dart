@@ -64,8 +64,8 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      StreamSvgIcon(
-                        icon: StreamSvgIcons.pictures,
+                      Icon(
+                        context.streamIcons.images1Alt,
                         size: 136,
                         color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),

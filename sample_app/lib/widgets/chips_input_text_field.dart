@@ -122,13 +122,13 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                 alignment: Alignment.bottomCenter,
                 child: IconButton(
                   icon: _chips.isEmpty
-                      ? StreamSvgIcon(
-                          icon: StreamSvgIcons.user,
+                      ? Icon(
+                          context.streamIcons.people,
                           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                           size: 24,
                         )
-                      : StreamSvgIcon(
-                          icon: StreamSvgIcons.userAdd,
+                      : Icon(
+                          context.streamIcons.peopleAdd,
                           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                           size: 24,
                         ),

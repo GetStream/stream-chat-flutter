@@ -5,7 +5,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import '../../utils/finders.dart';
+import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
 void main() {
   group('StreamAudioRecorderButton', () {
@@ -32,7 +32,7 @@ void main() {
           ),
         );
 
-        expect(find.bySvgIcon(StreamSvgIcons.mic), findsOneWidget);
+        expect(find.byIcon(StreamIconData.iconMicrophone), findsOneWidget);
       },
     );
 
@@ -176,9 +176,9 @@ void main() {
         );
 
         expect(find.byType(StreamAudioWaveform), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.delete), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.stop), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.checkSend), findsOneWidget);
+        expect(find.byIcon(StreamIconData.iconTrashBin), findsOneWidget);
+        expect(find.byIcon(StreamIconData.iconStop), findsOneWidget);
+        expect(find.byIcon(StreamIconData.iconCircleCheck), findsOneWidget);
       },
     );
 
@@ -200,7 +200,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+        await tester.tap(find.byIcon(StreamIconData.iconTrashBin));
 
         expect(onRecordCancelCalled, true);
       },
@@ -224,7 +224,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.stop));
+        await tester.tap(find.byIcon(StreamIconData.iconStop));
 
         expect(onRecordStopCalled, true);
       },
@@ -248,7 +248,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+        await tester.tap(find.byIcon(StreamIconData.iconCircleCheck));
 
         expect(onRecordFinishCalled, true);
       },
@@ -270,8 +270,8 @@ void main() {
         expect(find.byType(PlaybackControlButton), findsOneWidget);
         expect(find.byType(PlaybackTimerText), findsOneWidget);
         expect(find.byType(StreamAudioWaveformSlider), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.delete), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.checkSend), findsOneWidget);
+        expect(find.byIcon(StreamIconData.iconTrashBin), findsOneWidget);
+        expect(find.byIcon(StreamIconData.iconCircleCheck), findsOneWidget);
       },
     );
 
@@ -292,7 +292,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+        await tester.tap(find.byIcon(StreamIconData.iconCircleCheck));
 
         expect(onRecordFinishCalled, true);
       },
@@ -315,7 +315,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+        await tester.tap(find.byIcon(StreamIconData.iconTrashBin));
 
         expect(onRecordCancelCalled, true);
       },
@@ -455,7 +455,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.stop));
+        await tester.tap(find.byIcon(StreamIconData.iconStop));
 
         expect(feedbackCalled, isTrue);
       },
@@ -482,7 +482,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+        await tester.tap(find.byIcon(StreamIconData.iconTrashBin));
 
         expect(feedbackCalled, isTrue);
       },
@@ -509,7 +509,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+        await tester.tap(find.byIcon(StreamIconData.iconCircleCheck));
 
         expect(feedbackCalled, isTrue);
       },
@@ -535,7 +535,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+        await tester.tap(find.byIcon(StreamIconData.iconTrashBin));
 
         expect(feedbackCalled, isTrue);
       },
@@ -561,7 +561,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+        await tester.tap(find.byIcon(StreamIconData.iconCircleCheck));
 
         expect(feedbackCalled, isTrue);
       },

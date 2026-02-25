@@ -85,7 +85,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               if (state.users.isNotEmpty)
                 IconButton(
                   color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                  icon: const StreamSvgIcon(icon: StreamSvgIcons.arrowRight),
+                  icon: Icon(context.streamIcons.arrowRight),
                   onPressed: () async {
                     GoRouter.of(context).pushNamed(
                       Routes.NEW_GROUP_CHAT_DETAILS.name,
@@ -161,10 +161,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                                   color: StreamChatTheme.of(context).colorTheme.appBg,
                                                 ),
                                               ),
-                                              child: StreamSvgIcon(
+                                              child: Icon(
+                                                context.streamIcons.crossMedium,
                                                 color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                                                 size: 24,
-                                                icon: StreamSvgIcons.close,
                                               ),
                                             ),
                                           ),
@@ -238,8 +238,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                     children: [
                                       Padding(
                                         padding: const EdgeInsets.all(24),
-                                        child: StreamSvgIcon(
-                                          icon: StreamSvgIcons.search,
+                                        child: Icon(
+                                          context.streamIcons.magnifyingGlassSearch,
                                           size: 96,
                                           color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                                         ),
