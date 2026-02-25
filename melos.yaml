@@ -4,6 +4,7 @@ repository: https://github.com/GetStream/stream-chat-flutter
 packages:
   - docs/*
   - sample_app
+  - sample_app_jaspr
   - packages/*
   - packages/*/example
 
@@ -12,6 +13,7 @@ categories:
     - docs/*
   sample_app:
     - sample_app
+    - sample_app_jaspr
   packages:
     - packages/*
   examples:
