@@ -44,7 +44,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
         .toList(growable: false);
 
     final hasAttachments = nonOGAttachments.isNotEmpty;
-    final hasContent = quotedMessage != null || hasAttachments || ogAttachment != null;
+    final hasContent = quotedMessage != null || hasAttachments || ogAttachment != null || voiceRecordings.isNotEmpty;
 
     final spacing = context.streamSpacing;
     final contentPadding = EdgeInsets.only(

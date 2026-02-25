@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart' as sampling;
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -160,7 +159,7 @@ class MessageComposerRecordingStopped extends StatefulWidget {
   /// The state of the recording.
   final RecordStateStopped recordingState;
 
-  Attachment get audioRecording => recordingState.audioRecording;
+  Attachment get _audioRecording => recordingState.audioRecording;
 
   @override
   State<MessageComposerRecordingStopped> createState() => _MessageComposerRecordingStoppedState();
@@ -168,7 +167,7 @@ class MessageComposerRecordingStopped extends StatefulWidget {
 
 class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordingStopped> {
   late final _controller = StreamAudioPlaylistController(
-    widget.audioRecording.toPlaylist(),
+    widget._audioRecording.toPlaylist(),
   );
 
   @override
@@ -182,9 +181,9 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
     covariant MessageComposerRecordingStopped oldWidget,
   ) {
     super.didUpdateWidget(oldWidget);
-    if (widget.audioRecording != widget.audioRecording) {
+    if (widget._audioRecording != widget._audioRecording) {
       // If the playlist have changed, update the playlist.
-      _controller.updatePlaylist(widget.audioRecording.toPlaylist());
+      _controller.updatePlaylist(widget._audioRecording.toPlaylist());
     }
   }
 
@@ -201,10 +200,6 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
     final colorScheme = context.streamColorScheme;
     const index = 0;
 
-    final theme = StreamVoiceRecordingAttachmentTheme.of(context);
-    final waveformSliderTheme = theme.audioWaveformSliderTheme;
-    final waveformTheme = waveformSliderTheme?.audioWaveformTheme;
-
     final spacing = context.streamSpacing;
 
     return ValueListenableBuilder(
@@ -212,8 +207,6 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
       builder: (context, state, child) {
         final track = state.tracks.firstOrNull;
         if (track == null) return const SizedBox.shrink();
-
-        final thumbColor = track.state == TrackState.idle ? colorScheme.accentNeutral : colorScheme.accentPrimary;
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -276,13 +269,7 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
 
                         return _controller.seek(seekDuration);
                       },
-                      color: waveformTheme?.color ?? colorScheme.borderOpacity25,
-                      progressColor: waveformTheme?.progressColor,
-                      minBarHeight: waveformTheme?.minBarHeight,
-                      spacingRatio: waveformTheme?.spacingRatio,
-                      heightScale: waveformTheme?.heightScale,
-                      thumbColor: waveformSliderTheme?.thumbColor ?? thumbColor,
-                      thumbBorderColor: waveformSliderTheme?.thumbBorderColor,
+                      isActive: track.state != TrackState.idle,
                     ),
                   ),
                 ),

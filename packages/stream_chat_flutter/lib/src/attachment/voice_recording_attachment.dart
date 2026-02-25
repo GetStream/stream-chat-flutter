@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart' as sampling;
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -122,14 +121,11 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
     final theme = StreamVoiceRecordingAttachmentTheme.of(context);
     final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
-    final waveformSliderTheme = theme.audioWaveformSliderTheme;
-    final waveformTheme = waveformSliderTheme?.audioWaveformTheme;
-
-    final thumbColor = track.state == TrackState.idle ? colorScheme.accentNeutral : colorScheme.accentPrimary;
 
     return StreamMessageComposerAttachmentContainer(
       borderColor: colorScheme.borderDefault,
       onRemovePressed: onRemovePressed,
+      backgroundColor: theme.backgroundColor,
       padding: EdgeInsets.all(spacing.sm),
       child: Row(
         crossAxisAlignment: .center,
@@ -175,13 +171,7 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
                           onChangeStart: onTrackSeekStart,
                           onChanged: onTrackSeekChanged,
                           onChangeEnd: onTrackSeekEnd,
-                          color: waveformTheme?.color ?? colorScheme.borderOpacity25,
-                          progressColor: waveformTheme?.progressColor,
-                          minBarHeight: waveformTheme?.minBarHeight,
-                          spacingRatio: waveformTheme?.spacingRatio,
-                          heightScale: waveformTheme?.heightScale,
-                          thumbColor: waveformSliderTheme?.thumbColor ?? thumbColor,
-                          thumbBorderColor: waveformSliderTheme?.thumbBorderColor,
+                          isActive: track.state != TrackState.idle,
                         ),
                       ),
                     ),
@@ -355,10 +345,24 @@ class SpeedControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVoiceRecordingAttachmentTheme.of(context);
+    final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
 
+    final buttonStyle =
+        theme.speedControlButtonStyle ??
+        ElevatedButton.styleFrom(
+          elevation: 2,
+          textStyle: textTheme.metadataEmphasis,
+          foregroundColor: colorScheme.textPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          backgroundColor: Colors.white,
+          shape: StadiumBorder(side: BorderSide(color: colorScheme.borderDefault)),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          minimumSize: const Size(40, 28),
+        );
+
     return TextButton(
-      style: theme.speedControlButtonStyle,
+      style: buttonStyle,
       onPressed: switch (onChangeSpeed) {
         final it? => () => it(speed.next),
         _ => null,
