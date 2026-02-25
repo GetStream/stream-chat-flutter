@@ -119,7 +119,7 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
               }
 
               final track = state.tracks[index];
-              Attachment? attachment = null;
+              Attachment? attachment;
               if (track.key is Attachment) {
                 attachment = track.key as Attachment?;
               }

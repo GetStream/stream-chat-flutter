@@ -128,6 +128,8 @@ class MessageComposerRecordingLocked extends StatelessWidget {
   }
 }
 
+/// Widget to display the recording stopped state.
+/// This widget can be used inside of the [StreamBaseMessageComposer] instead of the default `inputBody`.
 class MessageComposerRecordingStopped extends StatefulWidget {
   /// Creates a new instance of [MessageComposerRecordingStopped].
   /// [audioRecorderController] is the controller for the audio recorder.
