@@ -214,6 +214,15 @@ Widget _wrapWithMaterialApp(
   Brightness? brightness,
 }) {
   return MaterialApp(
+    theme: ThemeData(
+      brightness: .light,
+      extensions: [StreamTheme.light()],
+    ),
+    darkTheme: ThemeData(
+      brightness: .dark,
+      extensions: [StreamTheme.dark()],
+    ),
+    themeMode: brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
     debugShowCheckedModeBanner: false,
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
