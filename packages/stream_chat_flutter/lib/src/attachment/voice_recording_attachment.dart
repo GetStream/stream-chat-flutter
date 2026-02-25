@@ -355,7 +355,6 @@ class SpeedControlButton extends StatelessWidget {
           textStyle: textTheme.metadataEmphasis,
           foregroundColor: colorScheme.textPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          backgroundColor: Colors.white,
           shape: StadiumBorder(side: BorderSide(color: colorScheme.borderDefault)),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           minimumSize: const Size(40, 28),
