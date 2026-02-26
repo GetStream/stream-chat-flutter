@@ -103,6 +103,7 @@ class StreamChannelAvatar extends StatelessWidget {
   ) => switch (size) {
     .lg => StreamAvatarSize.lg,
     .xl => StreamAvatarSize.xl,
+    .xxl => StreamAvatarSize.xxl,
   };
 }
 
