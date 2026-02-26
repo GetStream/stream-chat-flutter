@@ -60,10 +60,7 @@ dependencies:
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^10.0.0-beta.12
   stream_core_flutter:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: da18aa04ad48d4d5bb429c9e90d9f0253c418fae
-      path: packages/stream_core_flutter
+    path: /Users/renefloor/Documents/github/stream-core-flutter/packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
   thumblr: ^0.0.4

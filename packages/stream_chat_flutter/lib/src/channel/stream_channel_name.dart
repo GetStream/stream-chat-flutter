@@ -73,7 +73,7 @@ class StreamChannelName extends StatelessWidget {
           final exceedingMembers = otherMembers.length - currentMembers.length;
           channelName =
               '${currentMembers.map((e) => e.user?.name).join(', ')} '
-              '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+              '${exceedingMembers > 0 ? '+ ${exceedingMembers + 1}' : ''}';
         }
       }
 

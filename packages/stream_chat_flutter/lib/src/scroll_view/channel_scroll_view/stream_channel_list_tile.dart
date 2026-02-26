@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat_flutter/src/message_widget/sending_indicator_builder.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
@@ -9,15 +8,19 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a channel preview.
 ///
-/// This widget is intended to be used as a Tile in [StreamChannelListView]
+/// This widget is intended to be used as a Tile in [StreamChannelListView].
 ///
 /// It shows the last message of the channel, the last message time, the unread
 /// message count, the typing indicator, the sending indicator and the channel
 /// avatar.
 ///
+/// Internally uses [StreamChannelListItem] from the core design system for
+/// consistent visual presentation.
+///
 /// See also:
 /// * [StreamChannelAvatar]
 /// * [StreamChannelName]
+/// * [StreamChannelListItem]
 class StreamChannelListTile extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListTile] widget.
   StreamChannelListTile({
@@ -25,17 +28,13 @@ class StreamChannelListTile extends StatelessWidget {
     required this.channel,
     this.leading,
     this.title,
+    this.titleTrailing,
     this.subtitle,
+    this.subtitleTrailing,
     this.trailing,
     this.onTap,
     this.onLongPress,
-    this.tileColor,
-    this.visualDensity = VisualDensity.compact,
-    this.contentPadding = const EdgeInsets.symmetric(horizontal: 8),
-    this.unreadIndicatorBuilder,
     this.sendingIndicatorBuilder,
-    this.selected = false,
-    this.selectedTileColor,
   }) : assert(
          channel.state != null,
          'Channel ${channel.id} is not initialized',
@@ -44,16 +43,35 @@ class StreamChannelListTile extends StatelessWidget {
   /// The channel to display.
   final Channel channel;
 
-  /// A widget to display before the title.
+  /// A widget to display as the avatar.
+  ///
+  /// Defaults to [StreamChannelAvatar].
   final Widget? leading;
 
   /// The primary content of the list tile.
+  ///
+  /// Defaults to [StreamChannelName].
   final Widget? title;
 
+  /// An optional widget displayed after the title.
+  ///
+  /// Typically used for a mute icon or similar indicator.
+  final Widget? titleTrailing;
+
   /// Additional content displayed below the title.
+  ///
+  /// Defaults to [ChannelListTileSubtitle] which shows typing indicators,
+  /// draft messages, or the last message preview.
   final Widget? subtitle;
 
-  /// A widget to display at the end of tile.
+  /// An optional trailing widget in the subtitle row.
+  ///
+  /// When not provided, a sending indicator is shown for outgoing messages.
+  final Widget? subtitleTrailing;
+
+  /// A widget to display as the timestamp.
+  ///
+  /// Defaults to [ChannelLastMessageDate].
   final Widget? trailing;
 
   /// Called when the user taps this list tile.
@@ -62,47 +80,11 @@ class StreamChannelListTile extends StatelessWidget {
   /// Called when the user long-presses on this list tile.
   final GestureLongPressCallback? onLongPress;
 
-  /// {@template flutter.material.ListTile.tileColor}
-  /// Defines the background color of `ListTile`.
-  ///
-  /// When the value is null,
-  /// the `tileColor` is set to [ListTileTheme.tileColor]
-  /// if it's not null and to [Colors.transparent] if it's null.
-  /// {@endtemplate}
-  final Color? tileColor;
-
-  /// Defines how compact the list tile's layout will be.
-  ///
-  /// {@macro flutter.material.themedata.visualDensity}
-  ///
-  /// See also:
-  ///
-  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
-  ///    widgets within a [Theme].
-  final VisualDensity visualDensity;
-
-  /// The tile's internal padding.
-  ///
-  /// Insets a [ListTile]'s contents: its [leading], [title], [subtitle],
-  /// and [trailing] widgets.
-  ///
-  /// If null, `EdgeInsets.symmetric(horizontal: 16.0)` is used.
-  final EdgeInsetsGeometry contentPadding;
-
-  /// The widget builder for the unread indicator.
-  final WidgetBuilder? unreadIndicatorBuilder;
-
   /// The widget builder for the sending indicator.
   ///
-  /// `Message` is the last message in the channel, Use it to determine the
+  /// `Message` is the last message in the channel. Use it to determine the
   /// status using [Message.state].
   final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
-
-  /// True if the tile is in a selected state.
-  final bool selected;
-
-  /// The color of the tile in selected state.
-  final Color? selectedTileColor;
 
   /// Creates a copy of this tile but with the given fields replaced with
   /// the new values.
@@ -111,146 +93,155 @@ class StreamChannelListTile extends StatelessWidget {
     Channel? channel,
     Widget? leading,
     Widget? title,
+    Widget? titleTrailing,
     Widget? subtitle,
+    Widget? subtitleTrailing,
+    Widget? trailing,
     VoidCallback? onTap,
     VoidCallback? onLongPress,
-    VisualDensity? visualDensity,
-    EdgeInsetsGeometry? contentPadding,
-    bool? selected,
     Widget Function(BuildContext, Message)? sendingIndicatorBuilder,
-    Color? tileColor,
-    Color? selectedTileColor,
-    WidgetBuilder? unreadIndicatorBuilder,
-    Widget? trailing,
   }) {
     return StreamChannelListTile(
       key: key ?? this.key,
       channel: channel ?? this.channel,
       leading: leading ?? this.leading,
       title: title ?? this.title,
+      titleTrailing: titleTrailing ?? this.titleTrailing,
       subtitle: subtitle ?? this.subtitle,
+      subtitleTrailing: subtitleTrailing ?? this.subtitleTrailing,
+      trailing: trailing ?? this.trailing,
       onTap: onTap ?? this.onTap,
       onLongPress: onLongPress ?? this.onLongPress,
-      visualDensity: visualDensity ?? this.visualDensity,
-      contentPadding: contentPadding ?? this.contentPadding,
-      sendingIndicatorBuilder: sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
-      tileColor: tileColor ?? this.tileColor,
-      trailing: trailing ?? this.trailing,
-      unreadIndicatorBuilder: unreadIndicatorBuilder ?? this.unreadIndicatorBuilder,
-      selected: selected ?? this.selected,
-      selectedTileColor: selectedTileColor ?? this.selectedTileColor,
+      sendingIndicatorBuilder:
+          sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final channelState = channel.state!;
-    final currentUser = channel.client.state.currentUser!;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
 
-    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
-    final streamChatTheme = StreamChatTheme.of(context);
-    final streamChat = StreamChat.of(context);
-
-    final leading = this.leading ?? StreamChannelAvatar(channel: channel);
-
-    final title =
-        this.title ??
+    final avatar = leading ?? StreamChannelAvatar(channel: channel);
+    final titleWidget =
+        title ??
         StreamChannelName(
           channel: channel,
-          textStyle: channelPreviewTheme.titleStyle,
+          textStyle: textTheme.headingSm.copyWith(height: 1),
         );
-
-    final subtitle =
-        this.subtitle ??
+    final subtitleWidget =
+        subtitle ??
         ChannelListTileSubtitle(
           channel: channel,
-          textStyle: channelPreviewTheme.subtitleStyle,
+          textStyle: textTheme.captionDefault.copyWith(
+            color: colorScheme.textSecondary,
+          ),
+          sendingIndicatorBuilder: sendingIndicatorBuilder,
         );
-
-    final trailing =
-        this.trailing ??
+    final timestampWidget =
+        trailing ??
         ChannelLastMessageDate(
           channel: channel,
-          textStyle: channelPreviewTheme.lastMessageAtStyle,
-          formatter: channelPreviewTheme.lastMessageAtFormatter,
+          textStyle: textTheme.captionDefault.copyWith(
+            color: colorScheme.textTertiary,
+          ),
         );
 
     return BetterStreamBuilder<bool>(
       stream: channel.isMutedStream,
       initialData: channel.isMuted,
-      builder: (context, isMuted) => AnimatedOpacity(
-        opacity: isMuted ? 0.5 : 1,
-        duration: const Duration(milliseconds: 300),
-        child: ListTile(
-          onTap: onTap,
-          onLongPress: onLongPress,
-          visualDensity: visualDensity,
-          contentPadding: contentPadding,
-          leading: leading,
-          tileColor: tileColor,
-          selected: selected,
-          selectedTileColor: selectedTileColor ?? StreamChatTheme.of(context).colorTheme.borders,
-          title: Row(
-            children: [
-              Expanded(child: title),
-              BetterStreamBuilder<List<Member>>(
-                stream: channelState.membersStream,
-                initialData: channelState.members,
-                comparator: const ListEquality().equals,
-                builder: (context, members) {
-                  if (members.isEmpty) {
-                    return const Empty();
-                  }
-                  return unreadIndicatorBuilder?.call(context) ?? StreamUnreadIndicator.channels(cid: channel.cid);
-                },
-              ),
-            ],
-          ),
-          subtitle: Row(
-            children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: subtitle,
-                ),
-              ),
-              BetterStreamBuilder<List<Message>>(
-                stream: channelState.messagesStream,
-                initialData: channelState.messages,
-                comparator: const ListEquality().equals,
-                builder: (context, messages) {
-                  final lastMessage = messages.lastWhereOrNull(
-                    (m) => !m.shadowed && !m.isDeleted,
-                  );
-
-                  if (lastMessage == null || (lastMessage.user?.id != currentUser.id)) {
-                    return const Empty();
-                  }
-
-                  final hasNonUrlAttachments = lastMessage.attachments.any(
-                    (it) => it.type != AttachmentType.urlPreview,
-                  );
-
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child:
-                        sendingIndicatorBuilder?.call(context, lastMessage) ??
-                        SendingIndicatorBuilder(
-                          messageTheme: streamChatTheme.ownMessageTheme,
-                          message: lastMessage,
-                          hasNonUrlAttachments: hasNonUrlAttachments,
-                          streamChat: streamChat,
-                          streamChatTheme: streamChatTheme,
-                          channel: channel,
-                        ),
-                  );
-                },
-              ),
-              trailing,
-            ],
-          ),
-        ),
+      builder: (context, isMuted) => BetterStreamBuilder<int>(
+        stream: channelState.unreadCountStream,
+        initialData: channelState.unreadCount,
+        builder: (context, unreadCount) {
+          final titleTrailing = isMuted
+              ? Icon(
+                  context.streamIcons.mute,
+                  size: 20,
+                  color: colorScheme.textTertiary,
+                )
+              : null;
+          return StreamChannelListItem(
+            avatar: avatar,
+            title: titleWidget,
+            titleTrailing: titleTrailing,
+            subtitle: subtitleWidget,
+            timestamp: timestampWidget,
+            unreadCount: unreadCount,
+            onTap: onTap,
+            onLongPress: onLongPress,
+          );
+        },
       ),
+    );
+  }
+}
+
+/// Shows the delivery status icon + "You:" prefix for outgoing messages in
+/// the channel list.
+///
+/// Unlike [StreamSendingIndicator], this widget does not show a read count
+/// number. It only shows:
+/// - Clock icon + "You:" (sending)
+/// - Single check + "You:" (sent)
+/// - Double check grey + "You:" (delivered)
+/// - Double check blue + "You:" (read)
+class _ChannelListDeliveryStatus extends StatelessWidget {
+  const _ChannelListDeliveryStatus({
+    required this.channel,
+    required this.message,
+  });
+
+  final Channel channel;
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    final colorScheme = context.streamColorScheme;
+
+    return BetterStreamBuilder<List<Read>>(
+      stream: channel.state?.readStream,
+      initialData: channel.state?.read,
+      builder: (context, data) {
+        final isRead = data.readsOf(message: message).isNotEmpty;
+        final isDelivered = data.deliveriesOf(message: message).isNotEmpty;
+
+        final Widget icon;
+        if (isRead) {
+          icon = StreamSvgIcon(
+            size: 16,
+            icon: StreamSvgIcons.checkAll,
+            color: colorTheme.accentPrimary,
+          );
+        } else if (isDelivered) {
+          icon = StreamSvgIcon(
+            size: 16,
+            icon: StreamSvgIcons.checkAll,
+            color: colorScheme.textTertiary,
+          );
+        } else if (message.state.isCompleted) {
+          icon = StreamSvgIcon(
+            size: 16,
+            icon: StreamSvgIcons.check,
+            color: colorScheme.textTertiary,
+          );
+        } else if (message.state.isOutgoing) {
+          icon = StreamSvgIcon(
+            size: 16,
+            icon: StreamSvgIcons.time,
+            color: colorScheme.textTertiary,
+          );
+        } else {
+          return const Empty();
+        }
+
+        return Padding(
+          padding: const EdgeInsetsDirectional.only(end: 4),
+          child: icon,
+        );
+      },
     );
   }
 }
@@ -292,12 +283,18 @@ class ChannelLastMessageDate extends StatelessWidget {
 }
 
 /// A widget that displays the subtitle for [StreamChannelListTile].
+///
+/// Shows typing indicators, draft messages, or the last message preview.
+/// The delivery status prefix (icon + "You:") is only shown when the subtitle
+/// displays an actual sent message from the current user (not for drafts or
+/// typing indicators).
 class ChannelListTileSubtitle extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListTileSubtitle] widget.
   ChannelListTileSubtitle({
     super.key,
     required this.channel,
     this.textStyle,
+    this.sendingIndicatorBuilder,
   }) : assert(
          channel.state != null,
          'Channel ${channel.id} is not initialized',
@@ -308,6 +305,12 @@ class ChannelListTileSubtitle extends StatelessWidget {
 
   /// The style of the text displayed
   final TextStyle? textStyle;
+
+  /// The widget builder for the sending indicator.
+  ///
+  /// `Message` is the last message in the channel. Use it to determine the
+  /// status using [Message.state].
+  final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -330,10 +333,119 @@ class ChannelListTileSubtitle extends StatelessWidget {
     return StreamTypingIndicator(
       channel: channel,
       style: textStyle,
-      alternativeWidget: ChannelLastMessageText(
+      alternativeWidget: _ChannelLastMessageWithStatus(
         channel: channel,
         textStyle: textStyle,
+        sendingIndicatorBuilder: sendingIndicatorBuilder,
       ),
+    );
+  }
+}
+
+/// Combines the delivery status prefix with the last message text.
+///
+/// Shows the delivery status only when the displayed content is an actual
+/// sent message from the current user (not a draft).
+class _ChannelLastMessageWithStatus extends StatefulWidget {
+  const _ChannelLastMessageWithStatus({
+    required this.channel,
+    this.textStyle,
+    this.sendingIndicatorBuilder,
+  });
+
+  final Channel channel;
+  final TextStyle? textStyle;
+  final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
+
+  @override
+  State<_ChannelLastMessageWithStatus> createState() =>
+      _ChannelLastMessageWithStatusState();
+}
+
+class _ChannelLastMessageWithStatusState
+    extends State<_ChannelLastMessageWithStatus> {
+  Message? _currentLastMessage;
+
+  static bool _defaultLastMessagePredicate(Message message) {
+    if (message.isShadowed) return false;
+    if (message.isDeleted) return false;
+    if (message.isError) return false;
+    if (message.isEphemeral) return false;
+
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final channelState = widget.channel.state;
+    if (channelState == null) return const Empty();
+
+    final currentUser = widget.channel.client.state.currentUser;
+
+    return BetterStreamBuilder<(Draft?, List<Message>)>(
+      stream: CombineLatestStream.combine2(
+        channelState.draftStream,
+        channelState.messagesStream,
+        (draft, messages) => (draft, messages),
+      ),
+      initialData: (channelState.draft, channelState.messages),
+      builder: (context, data) {
+        final (draft, messages) = data;
+
+        // If there's a draft, show only the draft preview (no delivery status).
+        if (draft?.message case final draftMessage?) {
+          return StreamDraftMessagePreviewText(
+            draftMessage: draftMessage,
+            textStyle: widget.textStyle,
+          );
+        }
+
+        // Find the last valid message.
+        final message = messages.lastWhereOrNull(
+          _defaultLastMessagePredicate,
+        );
+        final latestLastMessage = [message, _currentLastMessage].latest;
+
+        if (latestLastMessage == null) {
+          return Text(
+            context.translations.emptyMessagesText,
+            style: widget.textStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          );
+        }
+
+        final isOwnMessage =
+            currentUser != null &&
+            latestLastMessage.user?.id == currentUser.id;
+
+        // Show delivery status prefix only for own messages.
+        final Widget deliveryPrefix;
+        if (isOwnMessage) {
+          deliveryPrefix =
+              widget.sendingIndicatorBuilder
+                  ?.call(context, latestLastMessage) ??
+              _ChannelListDeliveryStatus(
+                channel: widget.channel,
+                message: latestLastMessage,
+              );
+        } else {
+          deliveryPrefix = const Empty();
+        }
+
+        return Row(
+          children: [
+            deliveryPrefix,
+            Flexible(
+              child: StreamMessagePreviewText(
+                message: latestLastMessage,
+                textStyle: widget.textStyle,
+                channel: channelState.channelState.channel,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
