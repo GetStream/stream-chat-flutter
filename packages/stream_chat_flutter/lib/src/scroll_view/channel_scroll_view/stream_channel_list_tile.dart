@@ -112,8 +112,7 @@ class StreamChannelListTile extends StatelessWidget {
       trailing: trailing ?? this.trailing,
       onTap: onTap ?? this.onTap,
       onLongPress: onLongPress ?? this.onLongPress,
-      sendingIndicatorBuilder:
-          sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
+      sendingIndicatorBuilder: sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
     );
   }
 
@@ -122,6 +121,9 @@ class StreamChannelListTile extends StatelessWidget {
     final channelState = channel.state!;
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
+
+    // TODO: Make this configurable
+    const showMuteIconInTitle = true;
 
     final avatar = leading ?? StreamChannelAvatar(channel: channel);
     final titleWidget =
@@ -155,7 +157,7 @@ class StreamChannelListTile extends StatelessWidget {
         stream: channelState.unreadCountStream,
         initialData: channelState.unreadCount,
         builder: (context, unreadCount) {
-          final titleTrailing = isMuted
+          final muteIcon = isMuted
               ? Icon(
                   context.streamIcons.mute,
                   size: 20,
@@ -165,8 +167,9 @@ class StreamChannelListTile extends StatelessWidget {
           return StreamChannelListItem(
             avatar: avatar,
             title: titleWidget,
-            titleTrailing: titleTrailing,
+            titleTrailing: showMuteIconInTitle ? muteIcon : null,
             subtitle: subtitleWidget,
+            subtitleTrailing: showMuteIconInTitle ? null : muteIcon,
             timestamp: timestampWidget,
             unreadCount: unreadCount,
             onTap: onTap,
@@ -314,22 +317,6 @@ class ChannelListTileSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (channel.isMuted) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          const StreamSvgIcon(size: 16, icon: StreamSvgIcons.mute),
-          Expanded(
-            child: Text(
-              '  ${context.translations.channelIsMutedText}',
-              style: textStyle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      );
-    }
     return StreamTypingIndicator(
       channel: channel,
       style: textStyle,
@@ -358,12 +345,10 @@ class _ChannelLastMessageWithStatus extends StatefulWidget {
   final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
 
   @override
-  State<_ChannelLastMessageWithStatus> createState() =>
-      _ChannelLastMessageWithStatusState();
+  State<_ChannelLastMessageWithStatus> createState() => _ChannelLastMessageWithStatusState();
 }
 
-class _ChannelLastMessageWithStatusState
-    extends State<_ChannelLastMessageWithStatus> {
+class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithStatus> {
   Message? _currentLastMessage;
 
   static bool _defaultLastMessagePredicate(Message message) {
@@ -415,16 +400,13 @@ class _ChannelLastMessageWithStatusState
           );
         }
 
-        final isOwnMessage =
-            currentUser != null &&
-            latestLastMessage.user?.id == currentUser.id;
+        final isOwnMessage = currentUser != null && latestLastMessage.user?.id == currentUser.id;
 
         // Show delivery status prefix only for own messages.
         final Widget deliveryPrefix;
         if (isOwnMessage) {
           deliveryPrefix =
-              widget.sendingIndicatorBuilder
-                  ?.call(context, latestLastMessage) ??
+              widget.sendingIndicatorBuilder?.call(context, latestLastMessage) ??
               _ChannelListDeliveryStatus(
                 channel: widget.channel,
                 message: latestLastMessage,
