@@ -111,8 +111,8 @@ void main() {
     final reaction = Reaction(
       type: 'love',
       messageId: 'test-message',
-      userId: 'user-1',
-      user: User(id: 'user-1', name: 'User 1'),
+      userId: 'current-user',
+      user: User(id: 'current-user', name: 'Current User'),
       createdAt: DateTime.now(),
     );
 
@@ -139,7 +139,7 @@ void main() {
 
     expect(find.text('Tap to remove'), findsOneWidget);
 
-    await tester.tap(find.text('User 1'));
+    await tester.tap(find.text('Current User'));
     await tester.pumpAndSettle();
 
     expect(action, isA<SelectReaction>());

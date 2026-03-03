@@ -92,7 +92,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
     final ownReactionsMap = {for (final it in ownReactions) it.type: it};
     final reactionGroups = widget.message.reactionGroups ?? {};
 
-    final currentUserId = ownReactions.firstOrNull?.userId;
+    final currentUserId = StreamChatCore.of(context).currentUser?.id;
 
     final filteredReactions = switch (_selectedReactionType) {
       final type? => allReactions.where((r) => r.type == type).toList(),
@@ -159,7 +159,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
               final user = reaction.user;
               if (user == null) return const SizedBox.shrink();
 
-              final isOwnReaction = user.id == currentUserId;
+              final isOwnReaction = currentUserId != null && reaction.userId == currentUserId;
 
               return StreamListTile(
                 leading: StreamUserAvatar(size: .md, user: user, showOnlineIndicator: false),
