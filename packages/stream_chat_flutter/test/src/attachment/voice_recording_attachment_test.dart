@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
@@ -35,7 +34,6 @@ void main() {
           // Verify key components are present
           expect(find.byType(AudioControlButton), findsOneWidget);
           expect(find.byType(StreamAudioWaveformSlider), findsOneWidget);
-          expect(find.bySvgIcon(StreamSvgIcons.filetypeAudioM4a), findsOneWidget);
         },
       );
 
@@ -89,7 +87,7 @@ void main() {
             ),
           );
 
-          expect(find.text('x1.0'), findsOneWidget);
+          expect(find.text('x1'), findsOneWidget);
           expect(find.byType(SpeedControlButton), findsOneWidget);
         },
       );
@@ -281,6 +279,7 @@ Widget _wrapWithStreamChatApp(
   Brightness? brightness,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
       child: Builder(

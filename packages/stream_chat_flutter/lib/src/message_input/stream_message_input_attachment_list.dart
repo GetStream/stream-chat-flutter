@@ -89,13 +89,13 @@ class StreamMessageInputAttachmentList extends StatefulWidget {
 class _StreamMessageInputAttachmentListState extends State<StreamMessageInputAttachmentList> {
   late List<Attachment> _audioAttachments = widget._audioAttachments;
 
-  late final _controller = StreamAudioPlaylistController(_audioAttachments.toPlaylist());
+  StreamAudioPlaylistController? _controller;
   late final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _controller.initialize();
+    _updateController();
   }
 
   @override
@@ -108,7 +108,7 @@ class _StreamMessageInputAttachmentListState extends State<StreamMessageInputAtt
     if (!equals(newAudioAttachments, _audioAttachments)) {
       // If the attachments have changed, update the playlist.
       _audioAttachments = newAudioAttachments;
-      _controller.updatePlaylist(newAudioAttachments.toPlaylist());
+      _updateController();
     }
     if (oldWidget.attachments.length < widget.attachments.length) {
       // If an attachment has been added, scroll to the end.
@@ -124,9 +124,23 @@ class _StreamMessageInputAttachmentListState extends State<StreamMessageInputAtt
     }
   }
 
+  void _updateController() {
+    if (_audioAttachments.isNotEmpty) {
+      if (_controller == null) {
+        _controller = StreamAudioPlaylistController(_audioAttachments.toPlaylist());
+        _controller!.initialize();
+      } else {
+        _controller!.updatePlaylist(_audioAttachments.toPlaylist());
+      }
+    } else if (_controller != null) {
+      _controller!.dispose();
+      _controller = null;
+    }
+  }
+
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -263,15 +277,13 @@ class MessageInputVoiceRecordingAttachment extends StatelessWidget {
         final track = state.tracks.where((it) => it.key == attachment).first;
 
         return StreamVoiceRecordingAttachment(
+          title: 'Voice Message',
+          showTitle: true,
           track: track,
           speed: state.speed,
-          trailingBuilder: (_, __, ___, ____) {
-            return RemoveAttachmentButton(
-              onPressed: switch (onRemovePressed) {
-                final callback? => () => callback(attachment),
-                _ => null,
-              },
-            );
+          onRemovePressed: switch (onRemovePressed) {
+            final callback? => () => callback(attachment),
+            _ => null,
           },
           onTrackPause: controller.pause,
           onChangeSpeed: controller.setSpeed,
