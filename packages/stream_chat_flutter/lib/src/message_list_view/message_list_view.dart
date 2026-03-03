@@ -481,6 +481,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Revisit this nested Portal setup during desktop reactions refactor
+    // and remove the extra layer if a dedicated message-list portal label is
+    // no longer required.
     return Portal(
       labels: const [kPortalMessageListViewLabel],
       child: Portal(
