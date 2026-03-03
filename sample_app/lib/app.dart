@@ -322,14 +322,18 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         // Sets callback for the token refresh event.
         firebaseSubscriptions.add(FirebaseMessaging.instance.onTokenRefresh.listen(_onFirebaseTokenRefresh(client)));
 
-        final token = await FirebaseMessaging.instance.getToken();
-        debugPrint('[onTokenInit] #firebase; token: $token');
-        if (token != null) {
-          // replace with your push provider, e.g., 'PushProvider.xiaomi'
-          const pushProvider = PushProvider.firebase;
+        try {
+          final token = await FirebaseMessaging.instance.getToken();
+          debugPrint('[onTokenInit] #firebase; token: $token');
+          if (token != null) {
+            // replace with your push provider, e.g., 'PushProvider.xiaomi'
+            const pushProvider = PushProvider.firebase;
 
-          // add Token to Stream
-          await client.addDevice(token, pushProvider);
+            // add Token to Stream
+            await client.addDevice(token, pushProvider);
+          }
+        } catch (e) {
+          debugPrint('[onTokenInit] #firebase; failed to get token: $e');
         }
       }
       // User logged out
