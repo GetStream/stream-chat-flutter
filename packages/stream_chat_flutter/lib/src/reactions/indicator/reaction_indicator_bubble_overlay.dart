@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/reactions/indicator/reaction_indicator.dart';
 import 'package:stream_chat_flutter/src/reactions/reaction_bubble_overlay.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template reactionIndicatorBubbleOverlay}
@@ -21,7 +20,6 @@ class ReactionIndicatorBubbleOverlay extends StatelessWidget {
     this.visible = true,
     this.reverse = false,
     this.anchorOffset = Offset.zero,
-    this.childSizeDelta = Offset.zero,
     this.reactionIndicatorBuilder = StreamReactionIndicator.builder,
   });
 
@@ -43,25 +41,13 @@ class ReactionIndicatorBubbleOverlay extends StatelessWidget {
   /// The offset to apply to the anchor position.
   final Offset anchorOffset;
 
-  /// The additional size delta to apply to the child widget for positioning.
-  final Offset childSizeDelta;
-
   /// Builder for the reaction indicator widget.
   final ReactionIndicatorBuilder reactionIndicatorBuilder;
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final messageTheme = theme.getMessageTheme(reverse: reverse);
-
     return ReactionBubbleOverlay(
       visible: visible,
-      childSizeDelta: childSizeDelta,
-      config: ReactionBubbleConfig(
-        fillColor: messageTheme.reactionsBackgroundColor,
-        borderColor: messageTheme.reactionsBorderColor,
-        maskColor: messageTheme.reactionsMaskColor,
-      ),
       anchor: ReactionBubbleAnchor(
         offset: anchorOffset,
         follower: AlignmentDirectional.bottomCenter,

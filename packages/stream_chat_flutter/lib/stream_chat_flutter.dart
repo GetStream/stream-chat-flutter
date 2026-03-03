@@ -13,7 +13,15 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamComponentFactory,
         StreamContextMenu,
         StreamContextMenuAction,
-        StreamContextMenuSeparator;
+        StreamContextMenuSeparator,
+        StreamEmoji,
+        StreamEmojiButton,
+        StreamEmojiChipBar,
+        StreamEmojiChipItem,
+        StreamEmojiSize,
+        StreamEmojiData,
+        StreamEmojiPickerSheet,
+        streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
 export 'src/ai_assistant/stream_typewriter_builder.dart';
@@ -106,7 +114,7 @@ export 'src/misc/date_divider.dart';
 export 'src/misc/info_tile.dart';
 export 'src/misc/markdown_message.dart';
 export 'src/misc/option_list_tile.dart';
-export 'src/misc/reaction_icon.dart';
+export 'src/misc/reaction_icon_resolver.dart';
 export 'src/misc/stream_modal.dart';
 export 'src/misc/stream_neumorphic_button.dart';
 export 'src/misc/swipeable.dart';
@@ -120,11 +128,9 @@ export 'src/poll/stream_poll_option_votes_dialog.dart';
 export 'src/poll/stream_poll_options_dialog.dart';
 export 'src/poll/stream_poll_results_dialog.dart';
 export 'src/poll/stream_poll_text_field.dart';
+export 'src/reactions/detail/reaction_detail_sheet.dart';
 export 'src/reactions/indicator/reaction_indicator.dart';
-export 'src/reactions/indicator/reaction_indicator_icon_list.dart';
 export 'src/reactions/picker/reaction_picker.dart';
-export 'src/reactions/picker/reaction_picker_icon_list.dart';
-export 'src/reactions/reaction_bubble.dart';
 export 'src/reactions/user_reactions.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_grid_tile.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_grid_view.dart';

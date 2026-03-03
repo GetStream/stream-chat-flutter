@@ -77,7 +77,7 @@ void main() {
       (tester) async {
         User? tappedUser;
 
-        // Create just the StreamUserAvatar directly
+        // Render the reactions modal and assert avatar tap callback behavior.
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             client: mockClient,
@@ -98,14 +98,25 @@ void main() {
           matching: find.byType(StreamUserAvatar),
         );
 
-        // Verify the avatar is rendered
+        final avatarTapTarget = find.ancestor(
+          of: avatar.first,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is GestureDetector && widget.child is StreamUserAvatar,
+          ),
+        );
+
+        // Verify the avatar widgets and scoped tap target are rendered.
         expect(avatar, findsNWidgets(2));
+        expect(avatarTapTarget, findsOneWidget);
 
-        // Tap on the first avatar directly
-        await tester.tap(avatar.first);
-        await tester.pumpAndSettle();
+        final gestureDetector = tester.widget<GestureDetector>(avatarTapTarget);
+        expect(gestureDetector.onTap, isNotNull);
 
-        // Verify the callback was called
+        // Invoke only the tap target that wraps the first avatar.
+        gestureDetector.onTap!.call();
+        await tester.pump();
+
+        // Verify the callback was called.
         expect(tappedUser, isNotNull);
       },
     );
@@ -115,30 +126,21 @@ void main() {
       (tester) async {
         MessageAction? messageAction;
 
-        // Define custom reaction icons for testing
-        final testReactionIcons = [
-          StreamReactionIcon(
-            type: 'like',
-            builder: (context, isActive, size) => const Icon(Icons.thumb_up),
-          ),
-          StreamReactionIcon(
-            type: 'love',
-            builder: (context, isActive, size) => const Icon(Icons.favorite),
-          ),
-          StreamReactionIcon(
-            type: 'camera',
-            builder: (context, isActive, size) => const Icon(Icons.camera),
-          ),
-          StreamReactionIcon(
-            type: 'call',
-            builder: (context, isActive, size) => const Icon(Icons.call),
-          ),
-        ];
+        // Define a custom reaction resolver for testing.
+        const testReactionResolver = _TestReactionIconResolver(
+          defaultReactionTypes: {'like', 'love', 'camera', 'call'},
+          iconByType: {
+            'like': Icons.thumb_up,
+            'love': Icons.favorite,
+            'camera': Icons.camera,
+            'call': Icons.call,
+          },
+        );
 
         await tester.pumpWidget(
           _wrapWithMaterialApp(
             client: mockClient,
-            reactionIcons: testReactionIcons,
+            reactionIconResolver: testReactionResolver,
             Builder(
               builder: (context) => TextButton(
                 onPressed: () async {
@@ -254,7 +256,7 @@ Widget _wrapWithMaterialApp(
   Widget child, {
   required StreamChatClient client,
   Brightness? brightness,
-  List<StreamReactionIcon>? reactionIcons,
+  ReactionIconResolver? reactionIconResolver,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -265,7 +267,9 @@ Widget _wrapWithMaterialApp(
         // Mock the connectivity stream to always return wifi.
         connectivityStream: Stream.value([ConnectivityResult.wifi]),
         streamChatThemeData: StreamChatThemeData(brightness: brightness),
-        streamChatConfigData: StreamChatConfigurationData(reactionIcons: reactionIcons),
+        streamChatConfigData: StreamChatConfigurationData(
+          reactionIconResolver: reactionIconResolver ?? const _TestReactionIconResolver(),
+        ),
         child: child,
       ),
     ),
@@ -285,4 +289,39 @@ Widget _wrapWithMaterialApp(
       },
     ),
   );
+}
+
+class _TestReactionIconResolver extends ReactionIconResolver {
+  const _TestReactionIconResolver({
+    this.defaultReactionTypes = const {'like', 'love', 'haha', 'wow', 'sad'},
+    this.iconByType = const {},
+  });
+
+  final Set<String> defaultReactionTypes;
+  final Map<String, IconData> iconByType;
+
+  @override
+  Set<String> get defaultReactions => defaultReactionTypes;
+
+  @override
+  Set<String> get supportedReactions => {
+    ...defaultReactionTypes,
+    ...iconByType.keys,
+  };
+
+  @override
+  String? emojiCode(String type) => streamSupportedEmojis[type]?.emoji;
+
+  @override
+  Widget resolve(BuildContext context, String type) {
+    if (iconByType[type] case final icon?) {
+      return Icon(icon);
+    }
+
+    if (emojiCode(type) case final emoji?) {
+      return Text(emoji);
+    }
+
+    return const Text('❓');
+  }
 }

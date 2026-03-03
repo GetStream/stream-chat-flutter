@@ -854,41 +854,10 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     Message message,
   ) async {
     final channel = StreamChannel.of(context).channel;
-    final showPicker = widget.showReactionPicker && channel.canSendReaction;
 
-    final action = await showStreamDialog(
+    final action = await ReactionDetailSheet.show(
       context: context,
-      useRootNavigator: false,
-      builder: (_) => StreamChatConfiguration(
-        // This is needed to provide the nearest reaction icons to the
-        // StreamMessageReactionsModal.
-        data: StreamChatConfiguration.of(context),
-        child: StreamMessageReactionsModal(
-          message: message,
-          reverse: widget.reverse,
-          onUserAvatarTap: widget.onUserAvatarTap,
-          showReactionPicker: showPicker,
-          reactionPickerBuilder: widget.reactionPickerBuilder,
-          messageWidget: StreamChannel(
-            channel: channel,
-            child: widget.copyWith(
-              key: const Key('MessageWidget'),
-              message: message.trimmed,
-              showReactions: false,
-              showUsername: false,
-              showTimestamp: false,
-              translateUserAvatar: false,
-              showSendingIndicator: false,
-              padding: EdgeInsets.zero,
-              showPinHighlight: false,
-              showUserAvatar: switch (widget.reverse) {
-                true => DisplayWidget.gone,
-                false => DisplayWidget.show,
-              },
-            ),
-          ),
-        ),
-      ),
+      message: message,
     );
 
     if (action is! MessageAction) return;
