@@ -97,21 +97,22 @@ void main() {
           of: find.byType(StreamUserReactions),
           matching: find.byType(StreamUserAvatar),
         );
-        final avatarTapTarget = find.descendant(
-          of: find.byType(StreamUserReactions),
-          matching: find.byType(GestureDetector),
+
+        final avatarTapTarget = find.ancestor(
+          of: avatar.first,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is GestureDetector && widget.child is StreamUserAvatar,
+          ),
         );
 
-        // Verify the avatar widgets and tap target are rendered.
+        // Verify the avatar widgets and scoped tap target are rendered.
         expect(avatar, findsNWidgets(2));
-        expect(avatarTapTarget, findsAtLeastNWidgets(1));
+        expect(avatarTapTarget, findsOneWidget);
 
-        final gestureDetector = tester.widget<GestureDetector>(
-          avatarTapTarget.first,
-        );
+        final gestureDetector = tester.widget<GestureDetector>(avatarTapTarget);
         expect(gestureDetector.onTap, isNotNull);
 
-        // Tap the first avatar gesture target directly.
+        // Invoke only the tap target that wraps the first avatar.
         gestureDetector.onTap!.call();
         await tester.pump();
 
