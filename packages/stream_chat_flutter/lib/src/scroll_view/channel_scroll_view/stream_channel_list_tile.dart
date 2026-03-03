@@ -125,7 +125,7 @@ class StreamChannelListTile extends StatelessWidget {
     // TODO: Make this configurable
     const showMuteIconInTitle = true;
 
-    final avatar = leading ?? StreamChannelAvatar(channel: channel);
+    final avatar = leading ?? StreamChannelAvatar(channel: channel, size: StreamAvatarGroupSize.xl);
     final titleWidget =
         title ??
         StreamChannelName(

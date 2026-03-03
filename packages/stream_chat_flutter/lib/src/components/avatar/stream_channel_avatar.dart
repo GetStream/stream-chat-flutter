@@ -93,7 +93,8 @@ class StreamChannelAvatar extends StatelessWidget {
             return StreamUserAvatar(
               user: otherUser,
               size: _avatarSizeForAvatarGroupSize(effectiveSize),
-              showOnlineIndicator: true,
+              // TODO: make this configurable when the online state is shown.
+              showOnlineIndicator: otherUser.online,
             );
           }
 
