@@ -33,7 +33,7 @@ melos run update:goldens    # Regenerate all golden image files
 ```bash
 melos run lint:all       # Run analyze + format
 melos run analyze        # Run dart analyze --fatal-infos on all packages
-dart format --set-exit-if-changed .   # Check formatting (page width: 120)
+melos run format   # Check formatting (page width: 120)
 ```
 
 ### Code Generation
