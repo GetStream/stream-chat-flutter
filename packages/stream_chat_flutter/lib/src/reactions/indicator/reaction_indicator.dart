@@ -14,12 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// - [onTap]: An optional callback triggered when the reaction indicator
 ///   is tapped.
 /// {@endtemplate}
-typedef ReactionIndicatorBuilder =
-    Widget Function(
-      BuildContext context,
-      Message message,
-      VoidCallback? onTap,
-    );
+typedef ReactionIndicatorBuilder = Widget Function(BuildContext context, Message message, VoidCallback? onTap);
 
 /// {@template streamReactionIndicator}
 /// A widget that displays a horizontal list of reaction icons that users have
@@ -35,43 +30,22 @@ class StreamReactionIndicator extends StatelessWidget {
     super.key,
     this.onTap,
     required this.message,
-    required this.reactionIcons,
-    this.reactionIconBuilder,
     this.backgroundColor,
-    this.padding = const EdgeInsets.all(8),
-    this.scrollable = true,
-    this.borderRadius = const BorderRadius.all(Radius.circular(26)),
-    this.reactionSorting = ReactionSorting.byFirstReactionAt,
+    this.padding,
+    this.borderRadius,
+    this.reactionSorting,
   });
 
-  /// Creates a [StreamReactionIndicator] using the default reaction icons
-  /// provided by the [StreamChatConfiguration].
+  /// Creates a [StreamReactionIndicator] using the default configuration.
   ///
   /// This is the recommended way to create a reaction indicator
   /// as it ensures that the icons are consistent with the rest of the app.
-  ///
-  /// The [onTap] callback is optional and can be used to handle
-  /// when the reaction indicator is tapped.
   factory StreamReactionIndicator.builder(
-    BuildContext context,
+    BuildContext _,
     Message message,
     VoidCallback? onTap,
   ) {
-    final config = StreamChatConfiguration.of(context);
-    final reactionIcons = config.reactionIcons;
-
-    final currentUser = StreamChat.maybeOf(context)?.currentUser;
-    final isMyMessage = message.user?.id == currentUser?.id;
-
-    final theme = StreamChatTheme.of(context);
-    final messageTheme = theme.getMessageTheme(reverse: isMyMessage);
-
-    return StreamReactionIndicator(
-      onTap: onTap,
-      message: message,
-      reactionIcons: reactionIcons,
-      backgroundColor: messageTheme.reactionsBackgroundColor,
-    );
+    return StreamReactionIndicator(onTap: onTap, message: message);
   }
 
   /// Callback triggered when the reaction indicator is tapped.
@@ -80,86 +54,68 @@ class StreamReactionIndicator extends StatelessWidget {
   /// Message to attach the reaction to.
   final Message message;
 
-  /// The list of available reaction icons.
-  final List<StreamReactionIcon> reactionIcons;
-
-  /// Optional custom builder for reaction indicator icons.
-  final ReactionIndicatorIconBuilder? reactionIconBuilder;
-
   /// Background color for the reaction indicator.
   final Color? backgroundColor;
 
   /// Padding around the reaction indicator.
   ///
   /// Defaults to `EdgeInsets.all(8)`.
-  final EdgeInsets padding;
-
-  /// Whether the reaction indicator should be scrollable.
-  ///
-  /// Defaults to `true`.
-  final bool scrollable;
+  final EdgeInsetsGeometry? padding;
 
   /// Border radius for the reaction indicator.
   ///
   /// Defaults to a circular border with a radius of 26.
-  final BorderRadius? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
 
   /// Sorting strategy for the reaction.
   ///
   /// Defaults to sorting by the first reaction at.
-  final Comparator<ReactionGroup> reactionSorting;
+  final Comparator<ReactionGroup>? reactionSorting;
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final radius = context.streamRadius;
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
 
-    final ownReactions = {...?message.ownReactions?.map((it) => it.type)};
-    final reactionIcons = {for (final it in this.reactionIcons) it.type: it};
+    final effectivePadding = padding ?? .symmetric(horizontal: spacing.xs, vertical: spacing.xxs);
+    final effectiveBorderRadius = borderRadius ?? BorderRadius.all(radius.max);
+    final effectiveBackgroundColor = backgroundColor ?? colorScheme.backgroundElevation3;
 
-    final sortedReactionGroups = message.reactionGroups?.entries.sortedByCompare((it) => it.value, reactionSorting);
+    final side = BorderSide(color: colorScheme.borderDefault);
+    final shape = RoundedSuperellipseBorder(borderRadius: effectiveBorderRadius, side: side);
+
+    final config = StreamChatConfiguration.of(context);
+    final resolver = config.reactionIconResolver;
+
+    final reactionGroups = message.reactionGroups?.entries;
+    final effectiveReactionSorting = reactionSorting ?? ReactionSorting.byFirstReactionAt;
+    final sortedReactionGroups = reactionGroups?.sortedByCompare((it) => it.value, effectiveReactionSorting);
 
     final indicatorIcons = sortedReactionGroups?.map(
-      (group) {
-        final reactionType = group.key;
-        final reactionIcon = switch (reactionIcons[reactionType]) {
-          final icon? => icon,
-          _ => const StreamReactionIcon.unknown(),
-        };
-
-        return ReactionIndicatorIcon(
-          type: reactionType,
-          builder: reactionIcon.builder,
-          isSelected: ownReactions.contains(reactionType),
-        );
-      },
+      (group) => StreamEmoji(
+        size: StreamEmojiSize.sm,
+        emoji: resolver.resolve(context, group.key),
+      ),
     );
 
-    final reactionIndicator = ReactionIndicatorIconList(
-      iconBuilder: reactionIconBuilder,
-      indicatorIcons: [...?indicatorIcons],
+    final indicatorContent = Row(
+      mainAxisSize: .min,
+      spacing: spacing.xxs,
+      children: [...?indicatorIcons],
     );
-
-    final isSingleIndicatorIcon = indicatorIcons?.length == 1;
-    final extraPadding = switch (isSingleIndicatorIcon) {
-      true => EdgeInsets.zero,
-      false => const EdgeInsets.symmetric(horizontal: 4),
-    };
 
     return Material(
-      borderRadius: borderRadius,
-      clipBehavior: Clip.antiAlias,
-      color: backgroundColor ?? theme.colorTheme.barsBg,
+      shape: shape,
+      elevation: 3,
+      clipBehavior: .antiAlias,
+      color: effectiveBackgroundColor,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: padding.add(extraPadding),
-          child: switch (scrollable) {
-            false => reactionIndicator,
-            true => SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: reactionIndicator,
-            ),
-          },
+        child: SingleChildScrollView(
+          padding: effectivePadding,
+          scrollDirection: .horizontal,
+          child: indicatorContent,
         ),
       ),
     );

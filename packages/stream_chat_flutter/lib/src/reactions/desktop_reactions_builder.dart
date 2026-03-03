@@ -1,6 +1,5 @@
 // ignore_for_file: cascade_invocations
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -69,7 +68,8 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
     final currentUser = streamChat.currentUser!;
-    final reactionIcons = StreamChatConfiguration.of(context).reactionIcons;
+    final config = StreamChatConfiguration.of(context);
+    final resolver = config.reactionIconResolver;
     final streamChatTheme = StreamChatTheme.of(context);
 
     final reactionsMap = <String, Reaction>{};
@@ -114,17 +114,13 @@ class _DesktopReactionsBuilderState extends State<DesktopReactionsBuilder> {
             runSpacing: 4,
             children: [
               ...reactionsList.map((reaction) {
-                final reactionIcon = reactionIcons.firstWhereOrNull(
-                  (r) => r.type == reaction.type,
-                );
-
                 return _BottomReaction(
                   currentUser: currentUser,
                   reaction: reaction,
                   message: widget.message,
                   borderSide: widget.borderSide,
                   messageTheme: widget.messageTheme,
-                  reactionIcon: reactionIcon,
+                  resolver: resolver,
                   streamChatTheme: streamChatTheme,
                 );
               }).toList(),
@@ -151,7 +147,7 @@ class _BottomReaction extends StatelessWidget {
     required this.message,
     required this.borderSide,
     required this.messageTheme,
-    required this.reactionIcon,
+    required this.resolver,
     required this.streamChatTheme,
   });
 
@@ -160,7 +156,7 @@ class _BottomReaction extends StatelessWidget {
   final Message message;
   final BorderSide? borderSide;
   final StreamMessageThemeData? messageTheme;
-  final StreamReactionIcon? reactionIcon;
+  final ReactionIconResolver resolver;
   final StreamChatThemeData streamChatTheme;
 
   @override
@@ -177,10 +173,13 @@ class _BottomReaction extends StatelessWidget {
             message,
             reaction,
           );
-        } else if (reactionIcon != null) {
+        } else {
           StreamChannel.of(context).channel.sendReaction(
             message,
-            reactionIcon!.toReaction(),
+            Reaction(
+              type: reaction.type,
+              emojiCode: resolver.emojiCode(reaction.type),
+            ),
             enforceUnique: StreamChatConfiguration.of(context).enforceUniqueReactions,
           );
         }
@@ -208,19 +207,7 @@ class _BottomReaction extends StatelessWidget {
                 constraints: BoxConstraints.tight(
                   const Size.square(14),
                 ),
-                child:
-                    reactionIcon?.builder(
-                      context,
-                      reaction.user?.id == userId,
-                      14,
-                    ) ??
-                    Icon(
-                      Icons.help_outline_rounded,
-                      size: 14,
-                      color: reaction.user?.id == userId
-                          ? streamChatTheme.colorTheme.accentPrimary
-                          : streamChatTheme.colorTheme.textLowEmphasis,
-                    ),
+                child: resolver.resolve(context, reaction.type),
               ),
               const SizedBox(width: 4),
               Text(

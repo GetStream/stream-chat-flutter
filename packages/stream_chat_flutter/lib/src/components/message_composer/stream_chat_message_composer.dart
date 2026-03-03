@@ -142,33 +142,35 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
         );
 
     if (widget.props.audioRecorderController case final controller?) {
-      return ValueListenableBuilder(
-        valueListenable: controller,
-        builder: (context, state, _) {
-          final body = switch (state) {
-            RecordStateRecordingLocked() || RecordStateStopped() => MessageComposerRecordingLocked(
-              audioRecorderController: controller,
-              feedback: feedback,
-              messageInputController: _controller,
-              sendMessageCallback: widget.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
-            ),
-            RecordStateRecording() => StreamMessageComposerRecordingOngoing(audioRecorderController: controller),
-            _ => null,
-          };
+      return Portal(
+        child: ValueListenableBuilder(
+          valueListenable: controller,
+          builder: (context, state, _) {
+            final body = switch (state) {
+              RecordStateRecordingLocked() || RecordStateStopped() => MessageComposerRecordingLocked(
+                audioRecorderController: controller,
+                feedback: feedback,
+                messageInputController: _controller,
+                sendMessageCallback: widget.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
+              ),
+              RecordStateRecording() => StreamMessageComposerRecordingOngoing(audioRecorderController: controller),
+              _ => null,
+            };
 
-          final streamSpacing = context.streamSpacing;
+            final streamSpacing = context.streamSpacing;
 
-          return PortalTarget(
-            anchor: Aligned(
-              offset: Offset(-streamSpacing.md, -streamSpacing.md),
-              target: Alignment.topRight,
-              follower: Alignment.bottomRight,
-            ),
-            visible: state is RecordStateRecording,
-            portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-            child: createComposer(body: body, audioRecorderState: state),
-          );
-        },
+            return PortalTarget(
+              anchor: Aligned(
+                offset: Offset(-streamSpacing.md, -streamSpacing.md),
+                target: Alignment.topRight,
+                follower: Alignment.bottomRight,
+              ),
+              visible: state is RecordStateRecording,
+              portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
+              child: createComposer(body: body, audioRecorderState: state),
+            );
+          },
+        ),
       );
     }
 

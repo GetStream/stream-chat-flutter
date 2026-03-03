@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
@@ -684,16 +685,18 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
     final shadow = widget.shadow ?? _messageInputTheme.shadow;
     final elevation = widget.elevation ?? _messageInputTheme.elevation;
-    return Material(
-      elevation: elevation ?? 8,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: _messageInputTheme.inputBackgroundColor,
-          boxShadow: [if (shadow != null) shadow],
-        ),
-        child: SimpleSafeArea(
-          enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
-          child: Center(heightFactor: 1, child: messageInput),
+    return Portal(
+      child: Material(
+        elevation: elevation ?? 8,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: _messageInputTheme.inputBackgroundColor,
+            boxShadow: [if (shadow != null) shadow],
+          ),
+          child: SimpleSafeArea(
+            enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
+            child: Center(heightFactor: 1, child: messageInput),
+          ),
         ),
       ),
     );
