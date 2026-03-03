@@ -145,4 +145,4 @@ Components in this repo can be wrappers around those base components, adding cha
 
 Dependencies are centrally managed in `melos.yaml` under `command.bootstrap.dependencies`. Do **not** edit version constraints directly in individual `pubspec.yaml` files — update `melos.yaml` and run `melos bootstrap`.
 
-> Note: `stream_core_flutter` uses a local path dependency (pointing to a sibling repo) when making changes to both core and chat together. Use a git dependency when no changes to core are needed.
+> Note: `stream_chat_flutter` uses a local path dependency to `stream_core_flutter` (pointing to the sibling repo) when making changes to both repos together. Use a git dependency when no local changes to `stream_core_flutter` are needed.
