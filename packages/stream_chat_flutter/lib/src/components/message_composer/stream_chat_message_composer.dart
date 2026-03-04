@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_factory.dart';
+import 'package:stream_chat_flutter/src/components/message_composer/message_composer_extensions.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_header.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_leading.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_trailing.dart';
@@ -24,7 +24,7 @@ class StreamChatMessageComposer extends StatefulWidget {
   /// [placeholder] is the placeholder text of the message composer.
   StreamChatMessageComposer({
     super.key,
-    this.controller,
+    StreamMessageInputController? controller,
     required VoidCallback onSendPressed,
     VoidCallback? onAttachmentButtonPressed,
     FocusNode? focusNode,
@@ -34,6 +34,7 @@ class StreamChatMessageComposer extends StatefulWidget {
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
   }) : props = MessageComposerProps(
+         controller: controller,
          isFloating: false,
          message: null,
          onSendPressed: onSendPressed,
@@ -47,7 +48,7 @@ class StreamChatMessageComposer extends StatefulWidget {
        );
 
   /// The controller for the message composer.
-  final StreamMessageInputController? controller;
+  StreamMessageInputController? get controller => props.controller;
 
   /// The properties for the message composer.
   final MessageComposerProps props;
@@ -92,8 +93,8 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
 
   @override
   Widget build(BuildContext context) {
-    if (StreamMessageComposerFactory.maybeOf(context)?.messageComposer case final messageComposerFactory?) {
-      return messageComposerFactory(context, widget.props);
+    if (context.messageComposerBuilder?.call(context, widget.props) case final messageComposer?) {
+      return messageComposer;
     }
 
     final audioRecorderController = widget.props.audioRecorderController;
@@ -162,6 +163,7 @@ class MessageComposerProps {
   /// [focusNode] is the focus node for the message composer.
   /// [currentUserId] is the current user id.
   const MessageComposerProps({
+    this.controller,
     this.isFloating = false,
     this.message,
     this.placeholder = '',
@@ -173,6 +175,9 @@ class MessageComposerProps {
     this.sendVoiceRecordingAutomatically = false,
     this.feedback = const AudioRecorderFeedback(),
   });
+
+  /// The controller for the message composer.
+  final StreamMessageInputController? controller;
 
   /// Whether the message composer is floating.
   final bool isFloating;
@@ -206,68 +211,6 @@ class MessageComposerProps {
 
   /// The feedback for the audio recorder.
   final AudioRecorderFeedback feedback;
-}
-
-/// Properties to build any of the sub-components.
-/// These properties are all the same, so features such as 'add attachment',
-/// can be added to any of the sub-components.
-class MessageComposerComponentProps {
-  /// Creates a new instance of [MessageComposerComponentProps].
-  /// [controller] is the controller for the message composer component.
-  /// [isFloating] is whether the message composer is floating.
-  /// [message] is the message for the message composer component.
-  /// [onSendPressed] is the callback for when the send button is pressed.
-  /// [onMicrophonePressed] is the callback for when the microphone button is pressed.
-  /// [onAttachmentButtonPressed] is the callback for when the attachment button is pressed.
-  /// [focusNode] is the focus node for the message composer component.
-  /// [currentUserId] is the current user id.
-  const MessageComposerComponentProps({
-    required this.controller,
-    this.isFloating = false,
-    this.message,
-    required this.onSendPressed,
-    this.voiceRecordingCallback,
-    this.onAttachmentButtonPressed,
-    this.focusNode,
-    this.currentUserId,
-    this.audioRecorderState = const RecordStateIdle(),
-  });
-
-  /// The controller for the message composer component.
-  final StreamMessageInputController controller;
-
-  /// Whether the message composer is floating.
-  final bool isFloating;
-
-  /// The message for the message composer component.
-  final Message? message;
-
-  /// The callback for when the send button is pressed.
-  final VoidCallback onSendPressed;
-
-  /// The callback for when the microphone button is pressed.
-  final core.VoiceRecordingCallback? voiceRecordingCallback;
-
-  /// The callback for when the attachment button is pressed.
-  final VoidCallback? onAttachmentButtonPressed;
-
-  /// The focus node for the message composer component.
-  final FocusNode? focusNode;
-
-  /// The current user id.
-  final String? currentUserId;
-
-  /// Whether the audio recording flow is active.
-  final AudioRecorderState audioRecorderState;
-
-  /// Whether the audio recording flow is active.
-  bool get isAudioRecordingFlowActive => audioRecorderState is RecordStateRecording || isAudioRecordingFlowStopped;
-
-  /// Whether the audio recording flow is locked.
-  bool get isAudioRecordingFlowLocked => audioRecorderState is RecordStateRecordingLocked;
-
-  /// Whether the audio recording flow is stopped.
-  bool get isAudioRecordingFlowStopped => audioRecorderState is RecordStateStopped;
 }
 
 extension on StreamAudioRecorderController {

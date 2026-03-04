@@ -44,7 +44,6 @@ jobs:
         with:
           flutter-version: ${{ env.flutter_version }}
           channel: stable
-          cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
       - name: 📊 Analyze and test packages
