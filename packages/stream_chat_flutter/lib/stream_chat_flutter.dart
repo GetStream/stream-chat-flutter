@@ -14,6 +14,9 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamIcons,
         StreamThemeExtension,
         StreamComponentFactory,
+        StreamComponentBuilder,
+        StreamComponentBuilders,
+        StreamComponentBuilderExtension,
         StreamContextMenu,
         StreamContextMenuAction,
         StreamContextMenuSeparator,
@@ -64,6 +67,7 @@ export 'src/components/avatar/stream_user_avatar.dart';
 export 'src/components/avatar/stream_user_avatar_group.dart';
 export 'src/components/avatar/stream_user_avatar_stack.dart';
 export 'src/components/message_composer/message_composer.dart';
+export 'src/components/stream_chat_component_builders.dart';
 // endregion
 export 'src/fullscreen_media/full_screen_media.dart';
 export 'src/fullscreen_media/full_screen_media_builder.dart';

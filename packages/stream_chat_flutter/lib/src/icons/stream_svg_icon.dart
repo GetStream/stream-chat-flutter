@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 import 'package:svg_icon_widget/svg_icon_widget.dart';
 
 part 'stream_svg_icon.g.dart';
@@ -14,7 +15,23 @@ typedef StreamSvgIconData = SvgIconData;
 @Deprecated('Use Icon(context.streamIcons.*) instead')
 class StreamSvgIcon extends StatelessWidget {
   /// Creates a [StreamSvgIcon].
-  /// Replacement icons:
+  ///
+  /// Depcreated in favor of regular [Icon] widgets.
+  /// New icons can be replaced using the [StreamIcons] theme data.
+  ///
+  /// Previously:
+  ///
+  /// ```dart
+  /// StreamSvgIcon(icon: StreamSvgIcons.arrowRight)
+  /// ```
+  ///
+  /// Replacement:
+  ///
+  /// ```dart
+  /// Icon(context.streamIcons.arrowRight)
+  /// ```
+  ///
+  /// List of replacement icons:
   ///
   /// Exact / close matches:
   /// - StreamSvgIcons.arrowRight -> context.streamIcons.arrowRight
