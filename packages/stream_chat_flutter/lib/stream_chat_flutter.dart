@@ -11,6 +11,7 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamIcons,
         StreamThemeExtension,
         StreamComponentFactory,
+        StreamComponentBuilder,
         StreamComponentBuilders,
         StreamComponentBuilderExtension,
         StreamContextMenu,
