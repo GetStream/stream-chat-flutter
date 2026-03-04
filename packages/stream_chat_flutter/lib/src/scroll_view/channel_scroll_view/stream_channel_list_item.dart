@@ -108,27 +108,117 @@ class StreamChannelListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channelState = channel.state!;
+    final builder = StreamComponentFactory.of(context).extension<StreamChannelListItemProps>();
+    if (builder != null) return builder(context, _props);
+    return _DefaultStreamChannelListItem(props: _props);
+  }
+
+  StreamChannelListItemProps get _props => StreamChannelListItemProps(
+    channel: channel,
+    leading: leading,
+    title: title,
+    subtitle: subtitle,
+    trailing: trailing,
+    onTap: onTap,
+    onLongPress: onLongPress,
+    sendingIndicatorBuilder: sendingIndicatorBuilder,
+    selected: selected,
+  );
+}
+
+/// Properties for configuring a [StreamChannelListItem].
+///
+/// This class holds all the configuration options for a channel list item,
+/// allowing them to be passed through the [StreamComponentFactory].
+///
+/// See also:
+///
+///  * [StreamChannelListItem], which uses these properties.
+///  * [DefaultStreamChannelListItem], the default implementation.
+class StreamChannelListItemProps {
+  /// Creates properties for a channel list item.
+  const StreamChannelListItemProps({
+    required this.channel,
+    this.leading,
+    this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+    this.onLongPress,
+    this.sendingIndicatorBuilder,
+    this.selected = false,
+  });
+
+  /// The channel to display.
+  final Channel channel;
+
+  /// A widget to display as the avatar.
+  ///
+  /// Defaults to [StreamChannelAvatar].
+  final Widget? leading;
+
+  /// The primary content of the list tile.
+  ///
+  /// Defaults to [StreamChannelName].
+  final Widget? title;
+
+  /// Additional content displayed below the title.
+  ///
+  /// Defaults to [ChannelListTileSubtitle] which shows typing indicators,
+  /// draft messages, or the last message preview.
+  final Widget? subtitle;
+
+  /// A widget to display as the timestamp.
+  ///
+  /// Defaults to [ChannelLastMessageDate].
+  final Widget? trailing;
+
+  /// Called when the user taps this list tile.
+  final GestureTapCallback? onTap;
+
+  /// Called when the user long-presses on this list tile.
+  final GestureLongPressCallback? onLongPress;
+
+  /// The widget builder for the sending indicator.
+  ///
+  /// `Message` is the last message in the channel. Use it to determine the
+  /// status using [Message.state].
+  final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
+
+  /// True if the tile is in a selected state.
+  final bool selected;
+}
+
+class _DefaultStreamChannelListItem extends StatelessWidget {
+  const _DefaultStreamChannelListItem({
+    required this.props,
+  });
+
+  final StreamChannelListItemProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final channelState = props.channel.state!;
     final textTheme = context.streamTextTheme;
 
-    final avatar = leading ?? StreamChannelAvatar(channel: channel, size: StreamAvatarGroupSize.xl);
+    final avatar = props.leading ?? StreamChannelAvatar(channel: props.channel, size: StreamAvatarGroupSize.xl);
     final titleWidget =
-        title ??
+        props.title ??
         StreamChannelName(
-          channel: channel,
+          channel: props.channel,
           textStyle: textTheme.headingSm.copyWith(height: 1),
         );
     final subtitleWidget =
-        subtitle ??
+        props.subtitle ??
         ChannelListTileSubtitle(
-          channel: channel,
-          sendingIndicatorBuilder: sendingIndicatorBuilder,
+          channel: props.channel,
+          sendingIndicatorBuilder: props.sendingIndicatorBuilder,
         );
-    final timestampWidget = trailing ?? ChannelLastMessageDate(channel: channel);
+    final timestampWidget = props.trailing ?? ChannelLastMessageDate(channel: props.channel);
 
     return BetterStreamBuilder<bool>(
-      stream: channel.isMutedStream,
-      initialData: channel.isMuted,
+      stream: props.channel.isMutedStream,
+      initialData: props.channel.isMuted,
       builder: (context, isMuted) => BetterStreamBuilder<int>(
         stream: channelState.unreadCountStream,
         initialData: channelState.unreadCount,
@@ -140,9 +230,9 @@ class StreamChannelListItem extends StatelessWidget {
             timestamp: timestampWidget,
             unreadCount: unreadCount,
             isMuted: isMuted,
-            onTap: onTap,
-            onLongPress: onLongPress,
-            selected: selected,
+            onTap: props.onTap,
+            onLongPress: props.onLongPress,
+            selected: props.selected,
           );
         },
       ),
