@@ -481,44 +481,49 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Revisit this nested Portal setup during desktop reactions refactor
+    // and remove the extra layer if a dedicated message-list portal label is
+    // no longer required.
     return Portal(
       labels: const [kPortalMessageListViewLabel],
-      child: ScaffoldMessenger(
-        child: MessageListCore(
-          paginationLimit: widget.paginationLimit,
-          messageFilter: widget.messageFilter,
-          loadingBuilder:
-              widget.loadingBuilder ??
-              (context) => const Center(
-                child: CircularProgressIndicator.adaptive(),
-              ),
-          emptyBuilder:
-              widget.emptyBuilder ??
-              (context) => Center(
-                child: Text(
-                  context.translations.emptyChatMessagesText,
-                  style: _streamTheme.textTheme.footnote.copyWith(
-                    color: _streamTheme.colorTheme.textHighEmphasis
-                        // ignore: deprecated_member_use
-                        .withOpacity(0.5),
+      child: Portal(
+        child: ScaffoldMessenger(
+          child: MessageListCore(
+            paginationLimit: widget.paginationLimit,
+            messageFilter: widget.messageFilter,
+            loadingBuilder:
+                widget.loadingBuilder ??
+                (context) => const Center(
+                  child: CircularProgressIndicator.adaptive(),
+                ),
+            emptyBuilder:
+                widget.emptyBuilder ??
+                (context) => Center(
+                  child: Text(
+                    context.translations.emptyChatMessagesText,
+                    style: _streamTheme.textTheme.footnote.copyWith(
+                      color: _streamTheme.colorTheme.textHighEmphasis
+                          // ignore: deprecated_member_use
+                          .withOpacity(0.5),
+                    ),
                   ),
                 ),
-              ),
-          messageListBuilder: widget.messageListBuilder ?? (context, list) => _buildListView(list),
-          messageListController: _messageListController,
-          parentMessage: widget.parentMessage,
-          errorBuilder:
-              widget.errorBuilder ??
-              (BuildContext context, Object error) => Center(
-                child: Text(
-                  context.translations.genericErrorText,
-                  style: _streamTheme.textTheme.footnote.copyWith(
-                    color: _streamTheme.colorTheme.textHighEmphasis
-                        // ignore: deprecated_member_use
-                        .withOpacity(0.5),
+            messageListBuilder: widget.messageListBuilder ?? (context, list) => _buildListView(list),
+            messageListController: _messageListController,
+            parentMessage: widget.parentMessage,
+            errorBuilder:
+                widget.errorBuilder ??
+                (BuildContext context, Object error) => Center(
+                  child: Text(
+                    context.translations.genericErrorText,
+                    style: _streamTheme.textTheme.footnote.copyWith(
+                      color: _streamTheme.colorTheme.textHighEmphasis
+                          // ignore: deprecated_member_use
+                          .withOpacity(0.5),
+                    ),
                   ),
                 ),
-              ),
+          ),
         ),
       ),
     );

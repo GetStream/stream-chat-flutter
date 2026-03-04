@@ -275,11 +275,6 @@ class MessageWidgetContent extends StatelessWidget {
                             visible: isMobileDevice && showReactions,
                             anchorOffset: const Offset(0, 36),
                             reactionIndicatorBuilder: reactionIndicatorBuilder,
-                            childSizeDelta: switch (showUserAvatar) {
-                              DisplayWidget.gone => Offset.zero,
-                              // Size adjustment for the user avatar
-                              _ => const Offset(40, 0),
-                            },
                             child: Padding(
                               padding: switch (showReactions) {
                                 true => const EdgeInsets.only(top: 28),

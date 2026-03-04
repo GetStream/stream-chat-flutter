@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -104,106 +105,108 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
     final user = _client.state.currentUser;
-    return StreamConnectionStatusBuilder(
-      statusBuilder: (context, status) {
-        var statusString = '';
-        var showStatus = true;
+    return Portal(
+      child: StreamConnectionStatusBuilder(
+        statusBuilder: (context, status) {
+          var statusString = '';
+          var showStatus = true;
 
-        switch (status) {
-          case ConnectionStatus.connected:
-            statusString = context.translations.connectedLabel;
-            showStatus = false;
-            break;
-          case ConnectionStatus.connecting:
-            statusString = context.translations.reconnectingLabel;
-            break;
-          case ConnectionStatus.disconnected:
-            statusString = context.translations.disconnectedLabel;
-            break;
-        }
+          switch (status) {
+            case ConnectionStatus.connected:
+              statusString = context.translations.connectedLabel;
+              showStatus = false;
+              break;
+            case ConnectionStatus.connecting:
+              statusString = context.translations.reconnectingLabel;
+              break;
+            case ConnectionStatus.disconnected:
+              statusString = context.translations.disconnectedLabel;
+              break;
+          }
 
-        final chatThemeData = StreamChatTheme.of(context);
-        final channelListHeaderThemeData = StreamChannelListHeaderTheme.of(context);
-        final theme = Theme.of(context);
-        return StreamInfoTile(
-          showMessage: showConnectionStateTile && showStatus,
-          message: statusString,
-          child: AppBar(
-            toolbarTextStyle: theme.textTheme.bodyMedium,
-            titleTextStyle: theme.textTheme.titleLarge,
-            systemOverlayStyle: theme.brightness == Brightness.dark
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark,
-            elevation: elevation,
-            backgroundColor: backgroundColor ?? channelListHeaderThemeData.color,
-            centerTitle: centerTitle,
-            leading: switch ((leading, user)) {
-              (final leading?, _) => leading,
-              (_, final user?) => Center(
-                child: GestureDetector(
-                  onTap: switch (onUserAvatarTap) {
-                    final onTap? => () => onTap(user),
-                    _ => () {
-                      preNavigationCallback?.call();
-                      Scaffold.of(context).openDrawer();
+          final chatThemeData = StreamChatTheme.of(context);
+          final channelListHeaderThemeData = StreamChannelListHeaderTheme.of(context);
+          final theme = Theme.of(context);
+          return StreamInfoTile(
+            showMessage: showConnectionStateTile && showStatus,
+            message: statusString,
+            child: AppBar(
+              toolbarTextStyle: theme.textTheme.bodyMedium,
+              titleTextStyle: theme.textTheme.titleLarge,
+              systemOverlayStyle: theme.brightness == Brightness.dark
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark,
+              elevation: elevation,
+              backgroundColor: backgroundColor ?? channelListHeaderThemeData.color,
+              centerTitle: centerTitle,
+              leading: switch ((leading, user)) {
+                (final leading?, _) => leading,
+                (_, final user?) => Center(
+                  child: GestureDetector(
+                    onTap: switch (onUserAvatarTap) {
+                      final onTap? => () => onTap(user),
+                      _ => () {
+                        preNavigationCallback?.call();
+                        Scaffold.of(context).openDrawer();
+                      },
                     },
-                  },
-                  child: StreamUserAvatar(
-                    size: .lg,
-                    user: user,
-                    showOnlineIndicator: false,
-                  ),
-                ),
-              ),
-              _ => const Empty(),
-            },
-            actions:
-                actions ??
-                [
-                  StreamNeumorphicButton(
-                    child: IconButton(
-                      icon: StreamConnectionStatusBuilder(
-                        statusBuilder: (context, status) {
-                          final color = switch (status) {
-                            ConnectionStatus.connected => chatThemeData.colorTheme.accentPrimary,
-                            ConnectionStatus.connecting => Colors.grey,
-                            ConnectionStatus.disconnected => Colors.grey,
-                          };
-
-                          return Icon(
-                            context.streamIcons.pencil,
-                            size: 24,
-                            color: color,
-                          );
-                        },
-                      ),
-                      onPressed: onNewChatButtonTap,
+                    child: StreamUserAvatar(
+                      size: .lg,
+                      user: user,
+                      showOnlineIndicator: false,
                     ),
                   ),
-                ],
-            title: Column(
-              children: [
-                Builder(
-                  builder: (context) {
-                    if (titleBuilder != null) {
-                      return titleBuilder!(context, status, _client);
-                    }
-                    switch (status) {
-                      case ConnectionStatus.connected:
-                        return _ConnectedTitleState();
-                      case ConnectionStatus.connecting:
-                        return _ConnectingTitleState();
-                      case ConnectionStatus.disconnected:
-                        return _DisconnectedTitleState(client: _client);
-                    }
-                  },
                 ),
-                subtitle ?? const Empty(),
-              ],
+                _ => const Empty(),
+              },
+              actions:
+                  actions ??
+                  [
+                    StreamNeumorphicButton(
+                      child: IconButton(
+                        icon: StreamConnectionStatusBuilder(
+                          statusBuilder: (context, status) {
+                            final color = switch (status) {
+                              ConnectionStatus.connected => chatThemeData.colorTheme.accentPrimary,
+                              ConnectionStatus.connecting => Colors.grey,
+                              ConnectionStatus.disconnected => Colors.grey,
+                            };
+
+                            return StreamSvgIcon(
+                              size: 24,
+                              color: color,
+                              icon: StreamSvgIcons.penWrite,
+                            );
+                          },
+                        ),
+                        onPressed: onNewChatButtonTap,
+                      ),
+                    ),
+                  ],
+              title: Column(
+                children: [
+                  Builder(
+                    builder: (context) {
+                      if (titleBuilder != null) {
+                        return titleBuilder!(context, status, _client);
+                      }
+                      switch (status) {
+                        case ConnectionStatus.connected:
+                          return _ConnectedTitleState();
+                        case ConnectionStatus.connecting:
+                          return _ConnectingTitleState();
+                        case ConnectionStatus.disconnected:
+                          return _DisconnectedTitleState(client: _client);
+                      }
+                    },
+                  ),
+                  subtitle ?? const Empty(),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

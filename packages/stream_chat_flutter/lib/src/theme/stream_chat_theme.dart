@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'package:flutter/material.dart' hide TextTheme;
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
@@ -64,8 +63,6 @@ class StreamChatThemeData {
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
-    StreamAudioWaveformThemeData? audioWaveformTheme,
-    StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
@@ -98,8 +95,6 @@ class StreamChatThemeData {
       pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
       threadListTileTheme: threadListTileTheme,
       draftListTileTheme: draftListTileTheme,
-      audioWaveformTheme: audioWaveformTheme,
-      audioWaveformSliderTheme: audioWaveformSliderTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
     );
 
@@ -134,8 +129,6 @@ class StreamChatThemeData {
     required this.pollOptionVotesDialogTheme,
     required this.threadListTileTheme,
     required this.draftListTileTheme,
-    required this.audioWaveformTheme,
-    required this.audioWaveformSliderTheme,
     required this.voiceRecordingAttachmentTheme,
   });
 
@@ -190,20 +183,6 @@ class StreamChatThemeData {
         color: colorTheme.textHighEmphasis.withOpacity(0.5),
       ),
       indicatorIconSize: 16,
-    );
-
-    final audioWaveformTheme = StreamAudioWaveformThemeData(
-      color: colorTheme.textLowEmphasis,
-      progressColor: colorTheme.accentPrimary,
-      minBarHeight: 2,
-      spacingRatio: 0.3,
-      heightScale: 1,
-    );
-
-    final audioWaveformSliderTheme = StreamAudioWaveformSliderThemeData(
-      audioWaveformTheme: audioWaveformTheme,
-      thumbColor: Colors.white,
-      thumbBorderColor: colorTheme.borders,
     );
 
     return StreamChatThemeData.raw(
@@ -546,47 +525,7 @@ class StreamChatThemeData {
           color: colorTheme.textLowEmphasis,
         ),
       ),
-      audioWaveformTheme: audioWaveformTheme,
-      audioWaveformSliderTheme: audioWaveformSliderTheme,
-      voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
-        backgroundColor: colorTheme.barsBg,
-        playIcon: const Icon(StreamIconData.iconPlaySolid),
-        pauseIcon: const Icon(StreamIconData.iconPause),
-        loadingIndicator: SizedBox.fromSize(
-          size: const Size.square(24 - /* Padding */ 2),
-          child: Center(
-            child: CircularProgressIndicator.adaptive(
-              valueColor: AlwaysStoppedAnimation(colorTheme.accentPrimary),
-            ),
-          ),
-        ),
-        audioControlButtonStyle: ElevatedButton.styleFrom(
-          elevation: 2,
-          iconColor: Colors.black,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          backgroundColor: Colors.white,
-          shape: const CircleBorder(),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          minimumSize: const Size(36, 36),
-        ),
-        titleTextStyle: textTheme.bodyBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        durationTextStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        speedControlButtonStyle: ElevatedButton.styleFrom(
-          elevation: 2,
-          textStyle: textTheme.footnote,
-          foregroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          backgroundColor: Colors.white,
-          shape: const StadiumBorder(),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          minimumSize: const Size(40, 28),
-        ),
-        audioWaveformSliderTheme: audioWaveformSliderTheme,
-      ),
+      voiceRecordingAttachmentTheme: const StreamVoiceRecordingAttachmentThemeData(),
     );
   }
 
@@ -649,12 +588,6 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamThreadListTile] widget.
   final StreamThreadListTileThemeData threadListTileTheme;
 
-  /// Theme configuration for the [StreamAudioWaveform] widget.
-  final StreamAudioWaveformThemeData audioWaveformTheme;
-
-  /// Theme configuration for the [StreamAudioWaveformSlider] widget.
-  final StreamAudioWaveformSliderThemeData audioWaveformSliderTheme;
-
   /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
   final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
 
@@ -695,8 +628,6 @@ class StreamChatThemeData {
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
-    StreamAudioWaveformThemeData? audioWaveformTheme,
-    StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
   }) => StreamChatThemeData.raw(
     channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
@@ -719,8 +650,6 @@ class StreamChatThemeData {
     pollOptionVotesDialogTheme: pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
     threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
     draftListTileTheme: draftListTileTheme ?? this.draftListTileTheme,
-    audioWaveformTheme: audioWaveformTheme ?? this.audioWaveformTheme,
-    audioWaveformSliderTheme: audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
     voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
   );
 
@@ -748,8 +677,6 @@ class StreamChatThemeData {
       pollOptionVotesDialogTheme: pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
       draftListTileTheme: draftListTileTheme.merge(other.draftListTileTheme),
-      audioWaveformTheme: audioWaveformTheme.merge(other.audioWaveformTheme),
-      audioWaveformSliderTheme: audioWaveformSliderTheme.merge(other.audioWaveformSliderTheme),
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme.merge(other.voiceRecordingAttachmentTheme),
     );
   }

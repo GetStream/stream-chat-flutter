@@ -64,6 +64,8 @@ class StreamMessageActionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+
     final alignment = switch (reverse) {
       true => AlignmentDirectional.centerEnd,
       false => AlignmentDirectional.centerStart,
@@ -75,7 +77,7 @@ class StreamMessageActionsModal extends StatelessWidget {
     }
 
     return StreamMessageDialog(
-      spacing: 4,
+      spacing: spacing.xs,
       alignment: alignment,
       headerBuilder: (context) {
         final safeArea = MediaQuery.paddingOf(context);
@@ -86,7 +88,7 @@ class StreamMessageActionsModal extends StatelessWidget {
             message: message,
             reverse: reverse,
             visible: showReactionPicker,
-            anchorOffset: const Offset(0, -8),
+            anchorOffset: Offset(0, -spacing.xs),
             onReactionPicked: onReactionPicked,
             reactionPickerBuilder: reactionPickerBuilder,
             child: IgnorePointer(child: messageWidget),

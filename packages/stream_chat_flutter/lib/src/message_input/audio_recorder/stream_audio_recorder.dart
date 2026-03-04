@@ -8,7 +8,6 @@ import 'package:stream_chat_flutter/src/audio/audio_sampling.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_feedback.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_state.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';

@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
@@ -692,6 +691,7 @@ Widget _wrapWithStreamChatApp(
   Brightness? brightness,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     debugShowCheckedModeBanner: false,
     home: Portal(
       child: StreamChatTheme(
