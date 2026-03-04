@@ -38,8 +38,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
         icon: Stack(
           clipBehavior: Clip.none,
           children: [
-            StreamSvgIcon(
-              icon: StreamSvgIcons.message,
+            Icon(
+              context.streamIcons.bubble3ChatMessage,
               color: _isSelected(0) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
             ),
             const PositionedDirectional(
@@ -52,8 +52,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
         label: AppLocalizations.of(context).chats,
       ),
       BottomNavigationBarItem(
-        icon: StreamSvgIcon(
-          icon: StreamSvgIcons.mentions,
+        icon: Icon(
+          context.streamIcons.at,
           color: _isSelected(1) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: AppLocalizations.of(context).mentions,
@@ -212,8 +212,8 @@ class LeftDrawer extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  leading: StreamSvgIcon(
-                    icon: StreamSvgIcons.penWrite,
+                  leading: Icon(
+                    context.streamIcons.pencil,
                     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                   ),
                   onTap: () {
@@ -228,9 +228,9 @@ class LeftDrawer extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  leading: StreamSvgIcon(
+                  leading: Icon(
+                    context.streamIcons.users,
                     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
-                    icon: StreamSvgIcons.contacts,
                   ),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -260,8 +260,8 @@ class LeftDrawer extends StatelessWidget {
 
                         router.goNamed(Routes.CHOOSE_USER.name);
                       },
-                      leading: StreamSvgIcon(
-                        icon: StreamSvgIcons.user,
+                      leading: Icon(
+                        context.streamIcons.people,
                         color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                       ),
                       title: Text(

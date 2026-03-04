@@ -125,8 +125,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               titleTextStyle: StreamChatTheme.of(context).textTheme.body,
               leading: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22),
-                child: StreamSvgIcon(
-                  icon: StreamSvgIcons.mute,
+                child: Icon(
+                  context.streamIcons.mute,
                   size: 24,
                   color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                 ),
@@ -160,14 +160,14 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
-            child: StreamSvgIcon(
-              icon: StreamSvgIcons.pin,
+            child: Icon(
+              context.streamIcons.pin,
               size: 24,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
-          trailing: StreamSvgIcon(
-            icon: StreamSvgIcons.right,
+          trailing: Icon(
+            context.streamIcons.chevronRight,
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
@@ -190,14 +190,14 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: StreamSvgIcon(
-              icon: StreamSvgIcons.pictures,
+            child: Icon(
+              context.streamIcons.images1Alt,
               size: 36,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
-          trailing: StreamSvgIcon(
-            icon: StreamSvgIcons.right,
+          trailing: Icon(
+            context.streamIcons.chevronRight,
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
@@ -222,14 +222,14 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: StreamSvgIcon(
-              icon: StreamSvgIcons.files,
+            child: Icon(
+              context.streamIcons.fileBend,
               size: 32,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
-          trailing: StreamSvgIcon(
-            icon: StreamSvgIcons.right,
+          trailing: Icon(
+            context.streamIcons.chevronRight,
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
@@ -254,14 +254,14 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
-            child: StreamSvgIcon(
-              icon: StreamSvgIcons.group,
+            child: Icon(
+              context.streamIcons.users,
               size: 24,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
-          trailing: StreamSvgIcon(
-            icon: StreamSvgIcons.right,
+          trailing: Icon(
+            context.streamIcons.chevronRight,
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
@@ -286,8 +286,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       ),
       leading: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 22),
-        child: StreamSvgIcon(
-          icon: StreamSvgIcons.delete,
+        child: Icon(
+          context.streamIcons.trashBin,
           size: 24,
           color: StreamChatTheme.of(context).colorTheme.accentError,
         ),
@@ -305,8 +305,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       okText: AppLocalizations.of(context).delete.toUpperCase(),
       question: AppLocalizations.of(context).deleteConversationAreYouSure,
       cancelText: AppLocalizations.of(context).cancel.toUpperCase(),
-      icon: StreamSvgIcon(
-        icon: StreamSvgIcons.delete,
+      icon: Icon(
+        context.streamIcons.trashBin,
         color: StreamChatTheme.of(context).colorTheme.accentError,
       ),
     );
@@ -412,8 +412,8 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  StreamSvgIcon(
-                    icon: StreamSvgIcons.message,
+                  Icon(
+                    context.streamIcons.bubble3ChatMessage,
                     size: 136,
                     color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),

@@ -205,8 +205,8 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
                 return IconButton(
                   color: colorTheme.accentPrimary,
                   disabledColor: colorTheme.disabled,
-                  icon: const StreamSvgIcon(
-                    icon: StreamSvgIcons.emptyCircleRight,
+                  icon: Icon(
+                    context.streamIcons.chevronRight,
                   ),
                   onPressed: onPressed,
                 );
@@ -444,7 +444,7 @@ Widget tabbedAttachmentPickerBuilder({
   final defaultOptions = <TabbedAttachmentPickerOption>[
     TabbedAttachmentPickerOption(
       key: 'gallery-picker',
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
+      icon: Icon(context.streamIcons.images1Alt),
       supportedTypes: [
         AttachmentPickerType.images,
         AttachmentPickerType.videos,
@@ -471,7 +471,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'file-picker',
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
+      icon: Icon(context.streamIcons.fileBend),
       supportedTypes: [AttachmentPickerType.files],
       optionViewBuilder: (context, controller) => StreamFilePicker(
         onFilePicked: (file) async {
@@ -482,7 +482,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'image-picker',
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.camera),
+      icon: Icon(context.streamIcons.camera1),
       supportedTypes: [AttachmentPickerType.images],
       optionViewBuilder: (context, controller) => StreamImagePicker(
         onImagePicked: (image) async {
@@ -493,7 +493,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'video-picker',
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
+      icon: Icon(context.streamIcons.video),
       supportedTypes: [AttachmentPickerType.videos],
       optionViewBuilder: (context, controller) => StreamVideoPicker(
         onVideoPicked: (video) async {
@@ -504,7 +504,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'poll-creator',
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
+      icon: Icon(context.streamIcons.chart5),
       supportedTypes: [AttachmentPickerType.poll],
       optionViewBuilder: (context, controller) {
         final initialPoll = controller.value.poll;
@@ -583,7 +583,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'image-picker',
       supportedTypes: [AttachmentPickerType.images],
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
+      icon: Icon(context.streamIcons.images1Alt),
       title: context.translations.uploadAPhotoLabel,
       onTap: (context, controller) async {
         final result = await _pickSystemFile(controller, FileType.image);
@@ -593,7 +593,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'video-picker',
       supportedTypes: [AttachmentPickerType.videos],
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
+      icon: Icon(context.streamIcons.video),
       title: context.translations.uploadAVideoLabel,
       onTap: (context, controller) async {
         final result = await _pickSystemFile(controller, FileType.video);
@@ -603,7 +603,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'file-picker',
       supportedTypes: [AttachmentPickerType.files],
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
+      icon: Icon(context.streamIcons.fileBend),
       title: context.translations.uploadAFileLabel,
       onTap: (context, controller) async {
         final result = await _pickSystemFile(controller, FileType.any);
@@ -613,7 +613,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'poll-creator',
       supportedTypes: [AttachmentPickerType.poll],
-      icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
+      icon: Icon(context.streamIcons.chart5),
       title: context.translations.createPollLabel(isNew: true),
       onTap: (context, controller) async {
         final initialPoll = controller.value.poll;

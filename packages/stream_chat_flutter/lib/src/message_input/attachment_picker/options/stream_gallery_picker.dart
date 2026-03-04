@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
@@ -13,6 +12,7 @@ import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_g
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Max image resolution which can be resized by the CDN.
 /// Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
@@ -109,9 +109,9 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    StreamSvgIcon(
+                    Icon(
+                      context.streamIcons.images1Alt,
                       size: 240,
-                      icon: StreamSvgIcons.pictures,
                       color: colorTheme.disabled,
                     ),
                     Text(

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/attachment_actions_modal/attachment_actions_modal.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamGalleryHeader}
 /// Header/AppBar widget for media display screen
@@ -86,8 +86,8 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
       elevation: elevation,
       leading: showBackButton
           ? IconButton(
-              icon: StreamSvgIcon(
-                icon: StreamSvgIcons.close,
+              icon: Icon(
+                context.streamIcons.crossMedium,
                 color: galleryHeaderThemeData.closeButtonColor,
                 size: 24,
               ),
@@ -99,8 +99,8 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
       actions: <Widget>[
         if (!message.isEphemeral)
           IconButton(
-            icon: StreamSvgIcon(
-              icon: StreamSvgIcons.menuPoint,
+            icon: Icon(
+              context.streamIcons.dotsGrid1x3Vertical,
               color: galleryHeaderThemeData.iconMenuPointColor,
             ),
             onPressed: () => _showMessageActionModalBottomSheet(context),

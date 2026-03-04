@@ -4,9 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
+import 'package:svg_icon_widget/svg_icon_widget.dart';
 
 import '../mocks.dart';
-import '../utils/finders.dart';
 
 void main() {
   group(
@@ -212,7 +213,7 @@ void main() {
             PlaybackSpeed speed,
             ValueChanged<PlaybackSpeed>? onChangeSpeed,
           ) {
-            return const StreamSvgIcon(icon: StreamSvgIcons.closeSmall);
+            return const Icon(StreamIconData.iconCrossSmall);
           }
 
           await tester.pumpWidget(
@@ -226,8 +227,13 @@ void main() {
           );
 
           // Verify custom trailing widget is rendered
-          expect(find.bySvgIcon(StreamSvgIcons.closeSmall), findsOneWidget);
-          expect(find.bySvgIcon(StreamSvgIcons.filetypeAudioM4a), findsNothing);
+          expect(find.byIcon(StreamIconData.iconCrossSmall), findsOneWidget);
+          expect(
+            find.byWidgetPredicate(
+              (w) => w is SvgIcon && w.icon == StreamSvgIcons.filetypeAudioM4a,
+            ),
+            findsNothing,
+          );
         },
       );
 

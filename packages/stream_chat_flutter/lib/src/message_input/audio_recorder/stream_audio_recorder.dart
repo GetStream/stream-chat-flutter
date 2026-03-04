@@ -5,7 +5,6 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_feedback.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_state.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
@@ -173,7 +172,7 @@ class StreamAudioRecorderButton extends StatelessWidget {
         state: recordState,
         button: RecordButton(
           onPressed: () {}, // Allows showing ripple effect on tap.
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.mic),
+          icon: Icon(context.streamIcons.microphone),
         ),
         builder: (context, state, recordButton) => switch (state) {
           // Show only the record button if the recording is not in progress.
@@ -449,17 +448,17 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+                icon: Icon(context.streamIcons.trashBin),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordCancel,
               ),
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.stop),
+                icon: Icon(context.streamIcons.stop),
                 color: theme.colorTheme.accentError,
                 onPressed: onRecordStop,
               ),
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.checkSend),
+                icon: Icon(context.streamIcons.circleCheck),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordEnd,
               ),
@@ -607,12 +606,12 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+                icon: Icon(context.streamIcons.trashBin),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordCancel,
               ),
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.checkSend),
+                icon: Icon(context.streamIcons.circleCheck),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordFinish,
               ),
@@ -735,9 +734,9 @@ class PlaybackControlButton extends StatelessWidget {
             );
           },
         ),
-        TrackState.idle => const StreamSvgIcon(icon: StreamSvgIcons.play),
-        TrackState.paused => const StreamSvgIcon(icon: StreamSvgIcons.play),
-        TrackState.playing => const StreamSvgIcon(icon: StreamSvgIcons.pause),
+        TrackState.idle => Icon(context.streamIcons.playSolid),
+        TrackState.paused => Icon(context.streamIcons.playSolid),
+        TrackState.playing => Icon(context.streamIcons.pause),
       },
     );
   }
@@ -765,8 +764,8 @@ class PlaybackTimerIndicator extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     return Row(
       children: [
-        StreamSvgIcon(
-          icon: StreamSvgIcons.mic,
+        Icon(
+          context.streamIcons.microphone,
           size: kDefaultMessageInputIconSize,
           color: switch (duration.inSeconds) {
             > 0 => theme.colorTheme.accentError,
@@ -856,8 +855,8 @@ class SlideToCancelIndicator extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          StreamSvgIcon(
-            icon: StreamSvgIcons.left,
+          Icon(
+            context.streamIcons.chevronLeft,
             color: theme.colorTheme.textLowEmphasis,
           ),
         ],

@@ -135,8 +135,8 @@ class ChooseUserPage extends StatelessWidget {
                               color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                             ),
                           ),
-                          trailing: StreamSvgIcon(
-                            icon: StreamSvgIcons.arrowRight,
+                          trailing: Icon(
+                            context.streamIcons.arrowRight,
                             color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                           ),
                         );
@@ -145,8 +145,8 @@ class ChooseUserPage extends StatelessWidget {
                         onTap: () => GoRouter.of(context).pushNamed(Routes.ADVANCED_OPTIONS.name),
                         leading: CircleAvatar(
                           backgroundColor: StreamChatTheme.of(context).colorTheme.borders,
-                          child: StreamSvgIcon(
-                            icon: StreamSvgIcons.settings,
+                          child: Icon(
+                            context.streamIcons.settingsGear2,
                             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                           ),
                         ),

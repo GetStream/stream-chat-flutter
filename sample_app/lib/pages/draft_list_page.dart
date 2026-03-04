@@ -39,9 +39,9 @@ class _DraftListPageState extends State<DraftListPage> {
               children: [
                 CustomSlidableAction(
                   backgroundColor: Colors.red,
-                  child: const StreamSvgIcon(
+                  child: Icon(
+                    context.streamIcons.trashBin,
                     size: 24,
-                    icon: StreamSvgIcons.delete,
                     color: Colors.white,
                   ),
                   onPressed: (context) {

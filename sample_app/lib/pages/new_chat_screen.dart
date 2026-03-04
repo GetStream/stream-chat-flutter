@@ -223,7 +223,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 showOnlineIndicator: false,
                               ),
                             ),
-                            const StreamSvgIcon(icon: StreamSvgIcons.close),
+                            Icon(context.streamIcons.crossMedium),
                           ],
                         ),
                       );
@@ -248,10 +248,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           children: [
                             StreamNeumorphicButton(
                               child: Center(
-                                child: StreamSvgIcon(
+                                child: Icon(
+                                  context.streamIcons.users,
                                   color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                                   size: 24,
-                                  icon: StreamSvgIcons.contacts,
                                 ),
                               ),
                             ),
@@ -325,10 +325,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                         child: Center(
                                           child: Column(
                                             children: [
-                                              const Padding(
-                                                padding: EdgeInsets.all(24),
-                                                child: StreamSvgIcon(
-                                                  icon: StreamSvgIcons.search,
+                                              Padding(
+                                                padding: const EdgeInsets.all(24),
+                                                child: Icon(
+                                                  context.streamIcons.magnifyingGlassSearch,
                                                   size: 96,
                                                   color: Colors.grey,
                                                 ),

@@ -141,8 +141,8 @@ class StreamUserListTile extends StatelessWidget {
 
     final selectedWidget =
         this.selectedWidget ??
-        StreamSvgIcon(
-          icon: StreamSvgIcons.checkSend,
+        Icon(
+          context.streamIcons.circleCheck,
           color: chatThemeData.colorTheme.accentPrimary,
         );
 

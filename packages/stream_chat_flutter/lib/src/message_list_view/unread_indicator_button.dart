@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:svg_icon_widget/svg_icon_widget.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Function signature for handling the dismiss action on the unread indicator.
 typedef OnUnreadIndicatorDismissTap = Future<void> Function();
@@ -98,7 +97,7 @@ class UnreadIndicatorButton extends StatelessWidget {
                   const SizedBox(width: 12),
                   IconButton(
                     iconSize: 24,
-                    icon: const SvgIcon(StreamSvgIcons.close),
+                    icon: Icon(context.streamIcons.crossMedium),
                     padding: const EdgeInsets.all(4),
                     style: IconButton.styleFrom(
                       foregroundColor: colorTheme.barsBg,

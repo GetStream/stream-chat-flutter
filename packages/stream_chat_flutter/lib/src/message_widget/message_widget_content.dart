@@ -331,8 +331,8 @@ class MessageWidgetContent extends StatelessWidget {
                 right: reverse ? 0 : null,
                 left: reverse ? null : 0,
                 bottom: showBottomRow ? 18 : -2,
-                child: StreamSvgIcon(
-                  icon: StreamSvgIcons.error,
+                child: Icon(
+                  context.streamIcons.exclamationCircle1,
                   color: streamChatTheme.colorTheme.accentError,
                 ),
               ),

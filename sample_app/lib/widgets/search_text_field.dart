@@ -48,8 +48,8 @@ class SearchTextField extends StatelessWidget {
                     left: 8,
                     right: 8,
                   ),
-                  child: StreamSvgIcon(
-                    icon: StreamSvgIcons.search,
+                  child: Icon(
+                    context.streamIcons.magnifyingGlassSearch,
                     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                     size: 24,
                   ),
@@ -72,7 +72,7 @@ class SearchTextField extends StatelessWidget {
               child: IconButton(
                 color: Colors.grey,
                 padding: EdgeInsets.zero,
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.closeSmall),
+                icon: Icon(context.streamIcons.crossSmall),
                 splashRadius: 24,
                 onPressed: () {
                   if (controller!.text.isNotEmpty) {

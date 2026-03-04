@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/file_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamFileAttachment}
 /// Displays file attachments that have been sent in a chat.
@@ -173,8 +173,8 @@ class _Trailing extends StatelessWidget {
 
     if (message.state.isCompleted) {
       return IconButton(
-        icon: StreamSvgIcon(
-          icon: StreamSvgIcons.cloudDownload,
+        icon: Icon(
+          context.streamIcons.arrowDown,
           color: theme.colorTheme.textHighEmphasis,
         ),
         visualDensity: VisualDensity.compact,
@@ -196,8 +196,8 @@ class _Trailing extends StatelessWidget {
       preparing: () => Padding(
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
-          icon: StreamSvgIcon(
-            icon: StreamSvgIcons.close,
+          icon: Icon(
+            context.streamIcons.crossMedium,
             color: theme.colorTheme.barsBg,
           ),
           fillColor: theme.colorTheme.overlayDark,
@@ -207,8 +207,8 @@ class _Trailing extends StatelessWidget {
       inProgress: (_, __) => Padding(
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
-          icon: StreamSvgIcon(
-            icon: StreamSvgIcons.close,
+          icon: Icon(
+            context.streamIcons.crossMedium,
             color: theme.colorTheme.barsBg,
           ),
           fillColor: theme.colorTheme.overlayDark,
@@ -220,8 +220,8 @@ class _Trailing extends StatelessWidget {
         child: CircleAvatar(
           backgroundColor: theme.colorTheme.accentPrimary,
           maxRadius: 12,
-          child: StreamSvgIcon(
-            icon: StreamSvgIcons.check,
+          child: Icon(
+            context.streamIcons.checkmark2,
             color: theme.colorTheme.barsBg,
           ),
         ),
@@ -229,8 +229,8 @@ class _Trailing extends StatelessWidget {
       failed: (_) => Padding(
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
-          icon: StreamSvgIcon(
-            icon: StreamSvgIcons.retry,
+          icon: Icon(
+            context.streamIcons.arrowRotateClockwise,
             color: theme.colorTheme.barsBg,
           ),
           fillColor: theme.colorTheme.overlayDark,

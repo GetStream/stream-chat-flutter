@@ -1098,12 +1098,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   return scrollToBottomDefaultTapAction(unreadCount);
                 },
                 child: widget.reverse
-                    ? StreamSvgIcon(
-                        icon: StreamSvgIcons.down,
+                    ? Icon(
+                        context.streamIcons.chevronDown,
                         color: _streamTheme.colorTheme.textHighEmphasis,
                       )
-                    : StreamSvgIcon(
-                        icon: StreamSvgIcons.up,
+                    : Icon(
+                        context.streamIcons.chevronTop,
                         color: _streamTheme.colorTheme.textHighEmphasis,
                       ),
               ),
