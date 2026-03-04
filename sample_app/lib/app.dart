@@ -469,59 +469,66 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        if (_initNotifier.initData != null)
-          ChangeNotifierProvider.value(
-            value: _initNotifier,
-            builder: (context, child) => Builder(
-              builder: (context) {
-                context.watch<InitNotifier>(); // rebuild on change
-                return PreferenceBuilder<int>(
-                  preference: _initNotifier.initData!.preferences.getInt(
-                    'theme',
-                    defaultValue: 0,
-                  ),
-                  builder: (context, snapshot) => MaterialApp.router(
-                    theme: ThemeData(
-                      brightness: .light,
-                      extensions: [StreamTheme.light()],
+    return StreamComponentFactory(
+      builders: StreamComponentBuilders(
+        extensions: streamChatComponentBuilders(
+          /// Add your custom component builders here.
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (_initNotifier.initData != null)
+            ChangeNotifierProvider.value(
+              value: _initNotifier,
+              builder: (context, child) => Builder(
+                builder: (context) {
+                  context.watch<InitNotifier>(); // rebuild on change
+                  return PreferenceBuilder<int>(
+                    preference: _initNotifier.initData!.preferences.getInt(
+                      'theme',
+                      defaultValue: 0,
                     ),
-                    darkTheme: ThemeData(
-                      brightness: .dark,
-                      extensions: [StreamTheme.dark()],
-                    ),
-                    themeMode: const {
-                      -1: ThemeMode.dark,
-                      0: ThemeMode.system,
-                      1: ThemeMode.light,
-                    }[snapshot],
-                    supportedLocales: const [
-                      Locale('en'),
-                      Locale('it'),
-                    ],
-                    localizationsDelegates: const [
-                      AppLocalizationsDelegate(),
-                      GlobalStreamChatLocalizations.delegate,
-                      GlobalMaterialLocalizations.delegate,
-                      GlobalWidgetsLocalizations.delegate,
-                    ],
-                    builder: (context, child) => StreamChat(
-                      client: _initNotifier.initData!.client,
-                      streamChatConfigData: StreamChatConfigurationData(
-                        draftMessagesEnabled: false,
+                    builder: (context, snapshot) => MaterialApp.router(
+                      theme: ThemeData(
+                        brightness: .light,
+                        extensions: [StreamTheme.light()],
                       ),
-                      child: child,
+                      darkTheme: ThemeData(
+                        brightness: .dark,
+                        extensions: [StreamTheme.dark()],
+                      ),
+                      themeMode: const {
+                        -1: ThemeMode.dark,
+                        0: ThemeMode.system,
+                        1: ThemeMode.light,
+                      }[snapshot],
+                      supportedLocales: const [
+                        Locale('en'),
+                        Locale('it'),
+                      ],
+                      localizationsDelegates: const [
+                        AppLocalizationsDelegate(),
+                        GlobalStreamChatLocalizations.delegate,
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                      ],
+                      builder: (context, child) => StreamChat(
+                        client: _initNotifier.initData!.client,
+                        streamChatConfigData: StreamChatConfigurationData(
+                          draftMessagesEnabled: false,
+                        ),
+                        child: child,
+                      ),
+                      routerConfig: _setupRouter(),
                     ),
-                    routerConfig: _setupRouter(),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        if (!animationCompleted) buildAnimation(),
-      ],
+          if (!animationCompleted) buildAnimation(),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_factory.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/stream_chat_message_composer.dart';
+import 'package:stream_chat_flutter/src/components/message_composer/message_composer_extensions.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// A widget that shows the leading of the message composer.
@@ -16,7 +16,7 @@ class StreamMessageComposerLeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamMessageComposerFactory.maybeOf(context)?.leading?.call(context, props) ??
+    return context.messageComposerLeadingBuilder?.call(context, MessageComposerLeadingProps.from(props)) ??
         _DefaultStreamMessageComposerLeading(props: props);
   }
 }

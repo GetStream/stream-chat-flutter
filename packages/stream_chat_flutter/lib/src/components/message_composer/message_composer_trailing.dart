@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_factory.dart';
+import 'package:stream_chat_flutter/src/components/message_composer/message_composer_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that shows the trailing of the message composer.
@@ -15,6 +15,7 @@ class StreamMessageComposerTrailing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamMessageComposerFactory.maybeOf(context)?.trailing?.call(context, props) ?? const SizedBox.shrink();
+    return context.messageComposerTrailingBuilder?.call(context, MessageComposerTrailingProps.from(props)) ??
+        const SizedBox.shrink();
   }
 }
