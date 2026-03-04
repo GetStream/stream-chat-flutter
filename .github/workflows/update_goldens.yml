@@ -16,7 +16,6 @@ jobs:
         with:
           flutter-version: "3.x"
           channel: stable
-          cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
       - name: 📦 Install Tools
