@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
@@ -684,16 +685,18 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
     final shadow = widget.shadow ?? _messageInputTheme.shadow;
     final elevation = widget.elevation ?? _messageInputTheme.elevation;
-    return Material(
-      elevation: elevation ?? 8,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: _messageInputTheme.inputBackgroundColor,
-          boxShadow: [if (shadow != null) shadow],
-        ),
-        child: SimpleSafeArea(
-          enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
-          child: Center(heightFactor: 1, child: messageInput),
+    return Portal(
+      child: Material(
+        elevation: elevation ?? 8,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: _messageInputTheme.inputBackgroundColor,
+            boxShadow: [if (shadow != null) shadow],
+          ),
+          child: SimpleSafeArea(
+            enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
+            child: Center(heightFactor: 1, child: messageInput),
+          ),
         ),
       ),
     );
@@ -923,7 +926,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
               (widget.actionsLocation == ActionsLocation.right || widget.actionsLocation == ActionsLocation.rightInside)
               ? pi
               : 0,
-          child: const StreamSvgIcon(icon: StreamSvgIcons.emptyCircleRight),
+          child: Icon(context.streamIcons.chevronRight),
         ),
         onPressed: () {
           if (_actionsShrunk) {
@@ -1178,10 +1181,10 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const StreamSvgIcon(
+                  Icon(
+                    context.streamIcons.thunder,
                     size: 16,
                     color: Colors.white,
-                    icon: StreamSvgIcons.lightning,
                   ),
                   Text(
                     _effectiveController.message.command!.toUpperCase(),
@@ -1209,7 +1212,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
               child: StreamMessageInputIconButton(
                 iconSize: 24,
                 color: _messageInputTheme.actionButtonIdleColor,
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.closeSmall),
+                icon: Icon(context.streamIcons.crossSmall),
                 onPressed: _effectiveController.clear,
               ),
             ),
@@ -1483,8 +1486,8 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             .any((element) => element.group(0)?.split('.').last.isValidTLD() == true)) {
       showInfoBottomSheet(
         context,
-        icon: StreamSvgIcon(
-          icon: StreamSvgIcons.error,
+        icon: Icon(
+          context.streamIcons.exclamationCircle1,
           color: StreamChatTheme.of(context).colorTheme.accentError,
           size: 24,
         ),
@@ -1664,8 +1667,8 @@ class OGAttachmentPreview extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
-          child: StreamSvgIcon(
-            icon: StreamSvgIcons.link,
+          child: Icon(
+            context.streamIcons.chainLink3,
             color: colorTheme.accentPrimary,
           ),
         ),
@@ -1703,7 +1706,7 @@ class OGAttachmentPreview extends StatelessWidget {
         ),
         IconButton(
           visualDensity: VisualDensity.compact,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.closeSmall),
+          icon: Icon(context.streamIcons.crossSmall),
           onPressed: onDismissPreviewPressed,
         ),
       ],

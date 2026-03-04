@@ -33,33 +33,33 @@ class StreamSendingIndicator extends StatelessWidget {
     final colorTheme = streamChatTheme.colorTheme;
 
     if (isMessageRead) {
-      return StreamSvgIcon(
+      return Icon(
+        context.streamIcons.doupleCheckmark1Small,
         size: size,
-        icon: StreamSvgIcons.checkAll,
         color: colorTheme.accentPrimary,
       );
     }
 
     if (isMessageDelivered) {
-      return StreamSvgIcon(
+      return Icon(
+        context.streamIcons.doupleCheckmark1Small,
         size: size,
-        icon: StreamSvgIcons.checkAll,
         color: colorTheme.textLowEmphasis,
       );
     }
 
     if (message.state.isCompleted) {
-      return StreamSvgIcon(
+      return Icon(
+        context.streamIcons.checkmark2,
         size: size,
-        icon: StreamSvgIcons.check,
         color: colorTheme.textLowEmphasis,
       );
     }
 
     if (message.state.isOutgoing) {
-      return StreamSvgIcon(
+      return Icon(
+        context.streamIcons.clock,
         size: size,
-        icon: StreamSvgIcons.time,
         color: colorTheme.textLowEmphasis,
       );
     }

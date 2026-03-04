@@ -27,9 +27,9 @@ class PinnedMessage extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const StreamSvgIcon(
+          Icon(
+            context.streamIcons.pin,
             size: 16,
-            icon: StreamSvgIcons.pin,
           ),
           const SizedBox(
             width: 4,

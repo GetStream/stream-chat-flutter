@@ -34,9 +34,9 @@ class ClearInputItemButton extends StatelessWidget {
             // ignore: deprecated_member_use
             _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
         child: Center(
-          child: StreamSvgIcon(
+          child: Icon(
+            context.streamIcons.crossMedium,
             size: 24,
-            icon: StreamSvgIcons.close,
             color: _streamChatTheme.colorTheme.barsBg,
           ),
         ),

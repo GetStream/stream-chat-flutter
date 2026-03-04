@@ -104,7 +104,7 @@ void main() {
       await tester.pump(Duration.zero);
 
       expect(find.byType(PhotoView), findsOneWidget);
-      expect(find.byType(StreamSvgIcon), findsNWidgets(4));
+      expect(find.byType(Icon), findsNWidgets(4));
     },
   );
 }

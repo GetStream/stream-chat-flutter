@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -155,36 +154,34 @@ class StreamChatState extends State<StreamChat> {
   @override
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
-    return Portal(
-      child: StreamChatConfiguration(
-        data: streamChatConfigData,
-        child: StreamChatTheme(
-          data: theme,
-          child: Builder(
-            builder: (context) {
-              final materialTheme = Theme.of(context);
-              final streamTheme = StreamChatTheme.of(context);
-              return Theme(
-                data: materialTheme.copyWith(
-                  primaryIconTheme: streamTheme.primaryIconTheme,
-                  colorScheme: materialTheme.colorScheme.copyWith(
-                    secondary: streamTheme.colorTheme.accentPrimary,
-                  ),
+    return StreamChatConfiguration(
+      data: streamChatConfigData,
+      child: StreamChatTheme(
+        data: theme,
+        child: Builder(
+          builder: (context) {
+            final materialTheme = Theme.of(context);
+            final streamTheme = StreamChatTheme.of(context);
+            return Theme(
+              data: materialTheme.copyWith(
+                primaryIconTheme: streamTheme.primaryIconTheme,
+                colorScheme: materialTheme.colorScheme.copyWith(
+                  secondary: streamTheme.colorTheme.accentPrimary,
                 ),
-                child: StreamChatCore(
-                  client: client,
-                  onBackgroundEventReceived: widget.onBackgroundEventReceived,
-                  backgroundKeepAlive: widget.backgroundKeepAlive,
-                  connectivityStream: widget.connectivityStream,
-                  child: Builder(
-                    builder: (context) {
-                      return widget.child ?? const Empty();
-                    },
-                  ),
+              ),
+              child: StreamChatCore(
+                client: client,
+                onBackgroundEventReceived: widget.onBackgroundEventReceived,
+                backgroundKeepAlive: widget.backgroundKeepAlive,
+                connectivityStream: widget.connectivityStream,
+                child: Builder(
+                  builder: (context) {
+                    return widget.child ?? const Empty();
+                  },
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

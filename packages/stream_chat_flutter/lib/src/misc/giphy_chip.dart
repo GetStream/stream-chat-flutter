@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template giphy_chip}
 /// Simple widget which displays a Giphy attribution chip.
@@ -21,9 +21,9 @@ class GiphyChip extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
       child: Row(
         children: [
-          StreamSvgIcon(
+          Icon(
+            context.streamIcons.thunder,
             size: 16,
-            icon: StreamSvgIcons.lightning,
             color: colorTheme.barsBg,
           ),
           Text(

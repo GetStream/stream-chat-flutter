@@ -111,9 +111,9 @@ class AttachmentActionsModal extends StatelessWidget {
                             _buildButton(
                               context,
                               context.translations.replyLabel,
-                              StreamSvgIcon(
+                              Icon(
+                                context.streamIcons.arrowShareLeft,
                                 size: 24,
-                                icon: StreamSvgIcons.reply,
                                 color: theme.colorTheme.textLowEmphasis,
                               ),
                               onReply,
@@ -122,9 +122,9 @@ class AttachmentActionsModal extends StatelessWidget {
                             _buildButton(
                               context,
                               context.translations.showInChatLabel,
-                              StreamSvgIcon(
+                              Icon(
+                                context.streamIcons.eyeOpen,
                                 size: 24,
-                                icon: StreamSvgIcons.eye,
                                 color: theme.colorTheme.textHighEmphasis,
                               ),
                               onShowMessage,
@@ -135,9 +135,9 @@ class AttachmentActionsModal extends StatelessWidget {
                               attachment.type == AttachmentType.video
                                   ? context.translations.saveVideoLabel
                                   : context.translations.saveImageLabel,
-                              StreamSvgIcon(
+                              Icon(
+                                context.streamIcons.bookmark,
                                 size: 24,
-                                icon: StreamSvgIcons.save,
                                 color: theme.colorTheme.textLowEmphasis,
                               ),
                               () {
@@ -195,9 +195,9 @@ class AttachmentActionsModal extends StatelessWidget {
                             _buildButton(
                               context,
                               context.translations.deleteLabel.sentenceCase,
-                              StreamSvgIcon(
+                              Icon(
+                                context.streamIcons.trashBin,
                                 size: 24,
-                                icon: StreamSvgIcons.delete,
                                 color: theme.colorTheme.accentError,
                               ),
                               () {
@@ -328,8 +328,8 @@ class AttachmentActionsModal extends StatelessWidget {
                         ? SizedBox(
                             height: 100,
                             width: 100,
-                            child: StreamSvgIcon(
-                              icon: StreamSvgIcons.error,
+                            child: Icon(
+                              context.streamIcons.exclamationCircle1,
                               color: theme.colorTheme.disabled,
                             ),
                           )
@@ -338,8 +338,8 @@ class AttachmentActionsModal extends StatelessWidget {
                             key: const Key('completedIcon'),
                             height: 160,
                             width: 160,
-                            child: StreamSvgIcon(
-                              icon: StreamSvgIcons.check,
+                            child: Icon(
+                              context.streamIcons.checkmark2,
                               color: theme.colorTheme.disabled,
                             ),
                           )

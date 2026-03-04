@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/reactions/picker/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/reactions/reaction_bubble_overlay.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template reactionPickerBubbleOverlay}
@@ -21,7 +20,6 @@ class ReactionPickerBubbleOverlay extends StatelessWidget {
     this.visible = true,
     this.reverse = false,
     this.anchorOffset = Offset.zero,
-    this.childSizeDelta = Offset.zero,
     this.reactionPickerBuilder = StreamReactionPicker.builder,
   });
 
@@ -46,26 +44,14 @@ class ReactionPickerBubbleOverlay extends StatelessWidget {
   /// The offset to apply to the anchor position.
   final Offset anchorOffset;
 
-  /// The additional size delta to apply to the child widget for positioning.
-  final Offset childSizeDelta;
-
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-
     return ReactionBubbleOverlay(
       visible: visible,
-      childSizeDelta: childSizeDelta,
-      config: ReactionBubbleConfig(
-        fillColor: colorTheme.barsBg,
-        maskColor: Colors.transparent,
-        borderColor: Colors.transparent,
-      ),
       anchor: ReactionBubbleAnchor(
         offset: anchorOffset,
-        follower: AlignmentDirectional.bottomCenter,
-        target: AlignmentDirectional(reverse ? -1 : 1, -1),
+        follower: AlignmentDirectional(reverse ? 1 : -1, 1),
+        target: AlignmentDirectional(reverse ? 1 : -1, -1),
       ),
       reaction: reactionPickerBuilder.call(context, message, onReactionPicked),
       child: child,

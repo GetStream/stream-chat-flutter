@@ -32,7 +32,7 @@ typedef ReactionPickerBuilder =
 /// A widget that displays a horizontal list of reaction icons that users can
 /// select to react to a message.
 ///
-/// The reaction picker can be configured with custom reaction icons, padding,
+/// The reaction picker can be configured with custom reaction types, padding,
 /// border radius, and can be made scrollable or static depending on the
 /// specific needs.
 /// {@endtemplate}
@@ -42,15 +42,12 @@ class StreamReactionPicker extends StatelessWidget {
     super.key,
     this.onReactionPicked,
     required this.message,
-    required this.reactionIcons,
-    this.reactionIconBuilder,
     this.backgroundColor,
-    this.padding = const EdgeInsets.all(4),
-    this.scrollable = true,
-    this.borderRadius = const BorderRadius.all(Radius.circular(24)),
+    this.padding,
+    this.borderRadius,
   });
 
-  /// Creates a [StreamReactionPicker] using the default reaction icons
+  /// Creates a [StreamReactionPicker] using the default reaction types
   /// provided by the [StreamChatConfiguration].
   ///
   /// This is the recommended way to create a reaction picker
@@ -63,21 +60,15 @@ class StreamReactionPicker extends StatelessWidget {
     Message message,
     OnReactionPicked? onReactionPicked,
   ) {
-    final config = StreamChatConfiguration.of(context);
-    final reactionIcons = config.reactionIcons;
-
     final platform = Theme.of(context).platform;
     return switch (platform) {
       TargetPlatform.iOS || TargetPlatform.android => StreamReactionPicker(
         message: message,
-        reactionIcons: reactionIcons,
         onReactionPicked: onReactionPicked,
       ),
       _ => StreamReactionPicker(
         message: message,
-        scrollable: false,
         borderRadius: BorderRadius.zero,
-        reactionIcons: reactionIcons,
         onReactionPicked: onReactionPicked,
       ),
     };
@@ -86,14 +77,8 @@ class StreamReactionPicker extends StatelessWidget {
   /// Message to attach the reaction to.
   final Message message;
 
-  /// List of reaction icons to display.
-  final List<StreamReactionIcon> reactionIcons;
-
   /// {@macro onReactionPressed}
   final OnReactionPicked? onReactionPicked;
-
-  /// Optional custom builder for reaction picker icons.
-  final ReactionPickerIconBuilder? reactionIconBuilder;
 
   /// Background color for the reaction picker.
   final Color? backgroundColor;
@@ -101,71 +86,90 @@ class StreamReactionPicker extends StatelessWidget {
   /// Padding around the reaction picker.
   ///
   /// Defaults to `EdgeInsets.all(4)`.
-  final EdgeInsets padding;
-
-  /// Whether the reaction picker should be scrollable.
-  ///
-  /// Defaults to `true`.
-  final bool scrollable;
+  final EdgeInsetsGeometry? padding;
 
   /// Border radius for the reaction picker.
   ///
   /// Defaults to a circular border with a radius of 24.
-  final BorderRadius? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+    final radius = context.streamRadius;
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+
+    final effectivePadding = padding ?? EdgeInsetsDirectional.only(start: spacing.xxs);
+    final effectiveBorderRadius = borderRadius ?? BorderRadius.all(radius.xxxxl);
+    final effectiveBackgroundColor = backgroundColor ?? colorScheme.backgroundElevation2;
+
+    final side = BorderSide(color: colorScheme.borderDefault);
+    final shape = RoundedSuperellipseBorder(borderRadius: effectiveBorderRadius, side: side);
+
+    final config = StreamChatConfiguration.of(context);
+    final resolver = config.reactionIconResolver;
+    final reactionTypes = resolver.defaultReactions;
+
     final ownReactions = [...?message.ownReactions];
     final ownReactionsMap = {for (final it in ownReactions) it.type: it};
 
-    final indicatorIcons = reactionIcons.map(
-      (reactionIcon) {
-        final reactionType = reactionIcon.type;
+    final reactionButtons = reactionTypes.map(
+      (type) => StreamEmojiButton(
+        key: Key(type),
+        size: .lg,
+        emoji: resolver.resolve(context, type),
+        // If the reaction is present in ownReactions, it is selected.
+        isSelected: ownReactionsMap[type] != null,
+        onPressed: () {
+          final reactionEmojiCode = resolver.emojiCode(type);
+          final pickedReaction = switch (ownReactionsMap[type]) {
+            final reaction? => reaction,
+            _ => Reaction(type: type, emojiCode: reactionEmojiCode),
+          };
 
-        return ReactionPickerIcon(
-          type: reactionType,
-          builder: reactionIcon.builder,
-          emojiCode: reactionIcon.emojiCode,
-          // If the reaction is present in ownReactions, it is selected.
-          isSelected: ownReactionsMap[reactionType] != null,
-        );
-      },
+          return onReactionPicked?.call(pickedReaction);
+        },
+      ),
     );
 
-    final reactionPicker = ReactionPickerIconList(
-      iconBuilder: reactionIconBuilder,
-      reactionIcons: [...indicatorIcons],
-      onIconPicked: (reactionIcon) {
-        final reactionType = reactionIcon.type;
-        final reactionEmojiCode = reactionIcon.emojiCode;
-        final pickedReaction = switch (ownReactionsMap[reactionType]) {
-          final reaction? => reaction,
-          _ => Reaction(type: reactionType, emojiCode: reactionEmojiCode),
-        };
+    final pickerContent = Row(
+      mainAxisSize: .min,
+      spacing: spacing.none,
+      children: [
+        // TODO: Re-enable staggered animation when MessageWidget redesign is finalized.
+        ...reactionButtons,
+        StreamButton.icon(
+          key: const Key('add_reaction'),
+          size: .small,
+          type: .outline,
+          style: .secondary,
+          icon: icons.plusLarge,
+          onTap: () async {
+            final selectedReactions = ownReactionsMap.keys.toSet();
+            final emoji = await StreamEmojiPickerSheet.show(
+              context: context,
+              selectedReactions: selectedReactions,
+            );
 
-        return onReactionPicked?.call(pickedReaction);
-      },
+            if (!context.mounted || emoji == null) return;
+
+            final reaction = Reaction(type: emoji.shortName, emojiCode: emoji.emoji);
+            return onReactionPicked?.call(reaction);
+          },
+        ),
+      ],
     );
-
-    final isSinglePickerIcon = reactionIcons.length == 1;
-    final extraPadding = switch (isSinglePickerIcon) {
-      true => EdgeInsets.zero,
-      false => const EdgeInsets.symmetric(horizontal: 4),
-    };
 
     return Material(
-      borderRadius: borderRadius,
-      clipBehavior: Clip.antiAlias,
-      color: backgroundColor ?? StreamColors.transparent,
-      child: Padding(
-        padding: padding.add(extraPadding),
-        child: switch (scrollable) {
-          false => reactionPicker,
-          true => SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: reactionPicker,
-          ),
-        },
+      shape: shape,
+      elevation: 3,
+      clipBehavior: .antiAlias,
+      color: effectiveBackgroundColor,
+      child: SingleChildScrollView(
+        padding: effectivePadding,
+        scrollDirection: .horizontal,
+        child: pickerContent,
       ),
     );
   }

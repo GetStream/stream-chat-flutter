@@ -306,9 +306,9 @@ class LocationPickerOptionItem extends StatelessWidget {
                 ],
               ),
             ),
-            StreamSvgIcon(
+            Icon(
+              context.streamIcons.chevronRight,
               size: 24,
-              icon: StreamSvgIcons.right,
               color: colorTheme.textLowEmphasis,
             ),
           ],

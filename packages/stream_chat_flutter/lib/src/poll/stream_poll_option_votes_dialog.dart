@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
 import 'package:stream_chat_flutter/src/theme/poll_option_votes_dialog_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template showStreamPollOptionVotesDialog}
 /// Displays an interactive dialog to show all the votes for a poll option.
@@ -128,8 +128,8 @@ class _StreamPollOptionVotesDialogState extends State<StreamPollOptionVotesDialo
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (isOptionWinner) ...[
-                  StreamSvgIcon(
-                    icon: StreamSvgIcons.award,
+                  Icon(
+                    context.streamIcons.trophy,
                     color: theme.pollOptionWinnerVoteCountTextStyle?.color,
                   ),
                   const SizedBox(width: 8),

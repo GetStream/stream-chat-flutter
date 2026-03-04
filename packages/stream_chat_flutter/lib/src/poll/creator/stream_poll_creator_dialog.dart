@@ -241,7 +241,7 @@ class _StreamPollCreatorFullScreenDialogState extends State<StreamPollCreatorFul
               return IconButton(
                 color: colorTheme.accentPrimary,
                 disabledColor: colorTheme.disabled,
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.send),
+                icon: Icon(context.streamIcons.paperPlane),
                 onPressed: isValid
                     ? () {
                         final errors = _controller.validateGranularly();

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart' as sampling;
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 const _kDefaultWaveformLimit = 35;
-const _kDefaultWaveformHeight = 28.0;
+const _kDefaultWaveformHeight = 20.0;
 
 /// Signature for building trailing widgets in voice recording attachments.
 ///
@@ -47,7 +47,9 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
     this.shape,
     this.constraints = const BoxConstraints(),
     this.showTitle = false,
+    this.title,
     this.trailingBuilder = _defaultTrailingBuilder,
+    this.onRemovePressed,
   });
 
   /// The audio track to display.
@@ -85,6 +87,10 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
   /// The constraints to use when displaying the voice recording.
   final BoxConstraints constraints;
 
+  /// The title of the audio message to display when [showTitle] is `true`.
+  /// If not provided, the [track.title] will be used.
+  final String? title;
+
   /// Whether to show the title of the audio message.
   ///
   /// Defaults to `false`.
@@ -93,49 +99,36 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
   /// The builder to use for the trailing widget.
   final StreamVoiceRecordingAttachmentTrailingWidgetBuilder trailingBuilder;
 
+  /// Callback called when the remove button is pressed.
+  /// If not provided, the remove button will not be shown.
+  final VoidCallback? onRemovePressed;
+
   static Widget _defaultTrailingBuilder(
     BuildContext context,
     PlaylistTrack track,
     PlaybackSpeed speed,
     ValueChanged<PlaybackSpeed>? onChangeSpeed,
   ) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: switch (track.state.isPlaying) {
-        true => SpeedControlButton(
-          speed: speed,
-          onChangeSpeed: onChangeSpeed,
-        ),
-        false => getFileTypeImage(track.title?.mediaType?.mimeType),
-      },
+    return SpeedControlButton(
+      speed: speed,
+      onChangeSpeed: onChangeSpeed,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
     final theme = StreamVoiceRecordingAttachmentTheme.of(context);
-    final waveformSliderTheme = theme.audioWaveformSliderTheme;
-    final waveformTheme = waveformSliderTheme?.audioWaveformTheme;
+    final textTheme = context.streamTextTheme;
+    final spacing = context.streamSpacing;
 
-    final shape =
-        this.shape ??
-        RoundedRectangleBorder(
-          side: BorderSide(
-            color: StreamChatTheme.of(context).colorTheme.borders,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-          borderRadius: BorderRadius.circular(14),
-        );
-
-    return Container(
-      constraints: constraints,
-      clipBehavior: Clip.hardEdge,
-      padding: const EdgeInsets.all(8),
-      decoration: ShapeDecoration(
-        shape: shape,
-        color: theme.backgroundColor,
-      ),
+    return StreamMessageComposerAttachmentContainer(
+      borderColor: colorScheme.borderDefault,
+      onRemovePressed: onRemovePressed,
+      backgroundColor: theme.backgroundColor,
+      padding: EdgeInsets.all(spacing.sm),
       child: Row(
+        crossAxisAlignment: .center,
         children: [
           AudioControlButton(
             state: track.state,
@@ -149,21 +142,22 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (track.title case final title? when showTitle) ...[
+                if (title ?? track.title case final title? when showTitle)
                   AudioTitleText(
                     title: title,
-                    style: theme.titleTextStyle,
+                    style: theme.titleTextStyle ?? textTheme.metadataEmphasis,
                   ),
-                  const SizedBox(height: 6),
-                ],
+
                 Row(
                   children: [
                     AudioDurationText(
                       duration: track.duration,
                       position: track.position,
-                      style: theme.durationTextStyle,
+                      style:
+                          theme.durationTextStyle ??
+                          textTheme.metadataEmphasis.copyWith(color: colorScheme.textSecondary),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: spacing.xs),
                     Expanded(
                       child: SizedBox(
                         height: _kDefaultWaveformHeight,
@@ -177,13 +171,7 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
                           onChangeStart: onTrackSeekStart,
                           onChanged: onTrackSeekChanged,
                           onChangeEnd: onTrackSeekEnd,
-                          color: waveformTheme?.color,
-                          progressColor: waveformTheme?.progressColor,
-                          minBarHeight: waveformTheme?.minBarHeight,
-                          spacingRatio: waveformTheme?.spacingRatio,
-                          heightScale: waveformTheme?.heightScale,
-                          thumbColor: waveformSliderTheme?.thumbColor,
-                          thumbBorderColor: waveformSliderTheme?.thumbBorderColor,
+                          isActive: track.state != TrackState.idle,
                         ),
                       ),
                     ),
@@ -285,6 +273,9 @@ class AudioControlButton extends StatelessWidget {
     this.onPlay,
     this.onPause,
     this.onReplay,
+    this.style = .secondary,
+    this.type = .outline,
+    this.size = .medium,
   });
 
   /// The current state of the audio track.
@@ -299,23 +290,34 @@ class AudioControlButton extends StatelessWidget {
   /// Callback when the track is replayed.
   final VoidCallback? onReplay;
 
+  /// The style of the button.
+  final StreamButtonStyle style;
+
+  /// The type of the button.
+  final StreamButtonType type;
+
+  /// The size of the button.
+  final StreamButtonSize size;
+
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVoiceRecordingAttachmentTheme.of(context);
+    final icons = context.streamIcons;
 
-    return ElevatedButton(
-      style: theme.audioControlButtonStyle,
-      onPressed: switch (state) {
+    return StreamButton.icon(
+      style: style,
+      type: type,
+      size: size,
+      icon: switch (state) {
+        TrackState.loading => icons.playSolid,
+        TrackState.idle => icons.playSolid,
+        TrackState.playing => icons.pause,
+        TrackState.paused => icons.playSolid,
+      },
+      onTap: switch (state) {
         TrackState.loading => null,
         TrackState.idle => onPlay,
         TrackState.playing => onPause,
         TrackState.paused => onPlay,
-      },
-      child: switch (state) {
-        TrackState.loading => theme.loadingIndicator,
-        TrackState.idle => theme.playIcon,
-        TrackState.playing => theme.pauseIcon,
-        TrackState.paused => theme.playIcon,
       },
     );
   }
@@ -343,14 +345,35 @@ class SpeedControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVoiceRecordingAttachmentTheme.of(context);
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
 
-    return ElevatedButton(
-      style: theme.speedControlButtonStyle,
+    final buttonStyle =
+        theme.speedControlButtonStyle ??
+        ElevatedButton.styleFrom(
+          elevation: 2,
+          textStyle: textTheme.metadataEmphasis,
+          foregroundColor: colorScheme.textPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          shape: StadiumBorder(side: BorderSide(color: colorScheme.borderDefault)),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          minimumSize: const Size(40, 28),
+        );
+
+    return TextButton(
+      style: buttonStyle,
       onPressed: switch (onChangeSpeed) {
         final it? => () => it(speed.next),
         _ => null,
       },
-      child: Text('x${speed.speed}'),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 28),
+        child: Text(
+          'x${speed.speed.toString().replaceFirst('.0', '')}',
+          style: textTheme.metadataEmphasis.copyWith(height: 1),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }

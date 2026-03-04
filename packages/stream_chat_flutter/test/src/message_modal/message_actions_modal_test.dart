@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
 void main() {
   final message = Message(
@@ -17,22 +18,22 @@ void main() {
   final messageActions = <StreamContextMenuAction<MessageAction>>[
     StreamContextMenuAction<MessageAction>(
       label: const Text('Reply'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
+      leading: const Icon(StreamIconData.iconArrowShareLeft),
       value: QuotedReply(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Thread Reply'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
+      leading: const Icon(StreamIconData.iconBubbleAnnotation2ChatMessage),
       value: ThreadReply(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Copy Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
+      leading: const Icon(StreamIconData.iconSquareBehindSquare2Copy),
       value: CopyMessage(message: message),
     ),
     StreamContextMenuAction<MessageAction>.destructive(
       label: const Text('Delete Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+      leading: const Icon(StreamIconData.iconTrashBin),
       value: DeleteMessage(message: message),
     ),
   ];
@@ -80,21 +81,18 @@ void main() {
       (tester) async {
         MessageAction? messageAction;
 
-        // Define custom reaction icons for testing
-        final testReactionIcons = [
-          StreamReactionIcon(
-            type: 'like',
-            builder: (context, isActive, size) => const Icon(Icons.thumb_up),
-          ),
-          StreamReactionIcon(
-            type: 'love',
-            builder: (context, isActive, size) => const Icon(Icons.favorite),
-          ),
-        ];
+        // Define custom reaction icons via resolver for testing.
+        const testReactionResolver = _TestReactionIconResolver(
+          defaultReactionTypes: {'like', 'love'},
+          iconByType: {
+            'like': Icons.thumb_up,
+            'love': Icons.favorite,
+          },
+        );
 
         await tester.pumpWidget(
           _wrapWithMaterialApp(
-            reactionIcons: testReactionIcons,
+            reactionIconResolver: testReactionResolver,
             Builder(
               builder: (context) => TextButton(
                 onPressed: () async {
@@ -241,14 +239,16 @@ void main() {
 Widget _wrapWithMaterialApp(
   Widget child, {
   Brightness? brightness,
-  List<StreamReactionIcon>? reactionIcons,
+  ReactionIconResolver? reactionIconResolver,
 }) {
   return Portal(
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(brightness: brightness),
       builder: (context, child) => StreamChatConfiguration(
-        data: StreamChatConfigurationData(reactionIcons: reactionIcons),
+        data: StreamChatConfigurationData(
+          reactionIconResolver: reactionIconResolver ?? const _TestReactionIconResolver(),
+        ),
         child: StreamChatTheme(
           data: StreamChatThemeData(brightness: brightness),
           child: child ?? const SizedBox.shrink(),
@@ -271,4 +271,39 @@ Widget _wrapWithMaterialApp(
       ),
     ),
   );
+}
+
+class _TestReactionIconResolver extends ReactionIconResolver {
+  const _TestReactionIconResolver({
+    this.defaultReactionTypes = const {'like', 'love', 'haha', 'wow', 'sad'},
+    this.iconByType = const {},
+  });
+
+  final Set<String> defaultReactionTypes;
+  final Map<String, IconData> iconByType;
+
+  @override
+  Set<String> get defaultReactions => defaultReactionTypes;
+
+  @override
+  Set<String> get supportedReactions => {
+    ...defaultReactionTypes,
+    ...iconByType.keys,
+  };
+
+  @override
+  String? emojiCode(String type) => streamSupportedEmojis[type]?.emoji;
+
+  @override
+  Widget resolve(BuildContext context, String type) {
+    if (iconByType[type] case final icon?) {
+      return Icon(icon);
+    }
+
+    if (emojiCode(type) case final emoji?) {
+      return Text(emoji);
+    }
+
+    return const Text('❓');
+  }
 }

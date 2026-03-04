@@ -45,6 +45,7 @@ You can also use the convenience factories `StreamTheme.light()` or `StreamTheme
 |-----------|-----------------|
 | Stream Avatar | [stream_avatar.md](stream_avatar.md) |
 | Message Actions | [message_actions.md](message_actions.md) |
+| Reaction Picker / Reactions | [reaction_picker.md](reaction_picker.md) |
 
 ## Need Help?
 

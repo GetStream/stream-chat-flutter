@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChannelHeader}
@@ -149,84 +150,86 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
               )
             : const SizedBox());
 
-    return StreamConnectionStatusBuilder(
-      statusBuilder: (context, status) {
-        var statusString = '';
-        var showStatus = true;
+    return Portal(
+      child: StreamConnectionStatusBuilder(
+        statusBuilder: (context, status) {
+          var statusString = '';
+          var showStatus = true;
 
-        switch (status) {
-          case ConnectionStatus.connected:
-            statusString = context.translations.connectedLabel;
-            showStatus = false;
-            break;
-          case ConnectionStatus.connecting:
-            statusString = context.translations.reconnectingLabel;
-            break;
-          case ConnectionStatus.disconnected:
-            statusString = context.translations.disconnectedLabel;
-            break;
-        }
+          switch (status) {
+            case ConnectionStatus.connected:
+              statusString = context.translations.connectedLabel;
+              showStatus = false;
+              break;
+            case ConnectionStatus.connecting:
+              statusString = context.translations.reconnectingLabel;
+              break;
+            case ConnectionStatus.disconnected:
+              statusString = context.translations.disconnectedLabel;
+              break;
+          }
 
-        final theme = Theme.of(context);
+          final theme = Theme.of(context);
 
-        return StreamInfoTile(
-          showMessage: showConnectionStateTile && showStatus,
-          message: statusString,
-          child: AppBar(
-            toolbarTextStyle: theme.textTheme.bodyMedium,
-            titleTextStyle: theme.textTheme.titleLarge,
-            systemOverlayStyle: theme.brightness == Brightness.dark
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark,
-            elevation: elevation,
-            leading: leadingWidget,
-            bottom: bottom,
-            bottomOpacity: bottomOpacity,
-            backgroundColor: backgroundColor ?? channelHeaderTheme.color,
-            actions:
-                actions ??
-                <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: onImageTap,
-                        child: StreamChannelAvatar(
-                          size: .lg,
-                          channel: channel,
+          return StreamInfoTile(
+            showMessage: showConnectionStateTile && showStatus,
+            message: statusString,
+            child: AppBar(
+              toolbarTextStyle: theme.textTheme.bodyMedium,
+              titleTextStyle: theme.textTheme.titleLarge,
+              systemOverlayStyle: theme.brightness == Brightness.dark
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark,
+              elevation: elevation,
+              leading: leadingWidget,
+              bottom: bottom,
+              bottomOpacity: bottomOpacity,
+              backgroundColor: backgroundColor ?? channelHeaderTheme.color,
+              actions:
+                  actions ??
+                  <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: onImageTap,
+                          child: StreamChannelAvatar(
+                            size: .lg,
+                            channel: channel,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-            centerTitle: centerTitle,
-            title: InkWell(
-              onTap: onTitleTap,
-              child: SizedBox(
-                height: preferredSize.height,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: effectiveCenterTitle ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    title ??
-                        StreamChannelName(
-                          channel: channel,
-                          textStyle: channelHeaderTheme.titleStyle,
-                        ),
-                    const SizedBox(height: 2),
-                    subtitle ??
-                        StreamChannelInfo(
-                          showTypingIndicator: showTypingIndicator,
-                          channel: channel,
-                          textStyle: channelHeaderTheme.subtitleStyle,
-                        ),
                   ],
+              centerTitle: centerTitle,
+              title: InkWell(
+                onTap: onTitleTap,
+                child: SizedBox(
+                  height: preferredSize.height,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: effectiveCenterTitle ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      title ??
+                          StreamChannelName(
+                            channel: channel,
+                            textStyle: channelHeaderTheme.titleStyle,
+                          ),
+                      const SizedBox(height: 2),
+                      subtitle ??
+                          StreamChannelInfo(
+                            showTypingIndicator: showTypingIndicator,
+                            channel: channel,
+                            textStyle: channelHeaderTheme.subtitleStyle,
+                          ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

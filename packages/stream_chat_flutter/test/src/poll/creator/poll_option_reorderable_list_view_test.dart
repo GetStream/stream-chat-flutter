@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import '../../utils/finders.dart';
+import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
 void main() {
   for (final brightness in Brightness.values) {
@@ -374,7 +373,7 @@ void main() {
       );
 
       // Find the delete buttons
-      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      final deleteButtons = find.byIcon(StreamIconData.iconTrashBin);
       expect(deleteButtons, findsNWidgets(3));
 
       // Tap the first delete button
@@ -412,7 +411,7 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(3));
 
       // Find and tap the delete button for the first option
-      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      final deleteButtons = find.byIcon(StreamIconData.iconTrashBin);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 
@@ -446,7 +445,7 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(3));
 
       // Find and tap the delete button for the first option
-      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      final deleteButtons = find.byIcon(StreamIconData.iconTrashBin);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 
@@ -480,7 +479,7 @@ void main() {
         expect(find.byType(TextField), findsNWidgets(2));
 
         // Try to delete the first option
-        final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+        final deleteButtons = find.byIcon(StreamIconData.iconTrashBin);
         await tester.tap(deleteButtons.first);
         await tester.pumpAndSettle();
 

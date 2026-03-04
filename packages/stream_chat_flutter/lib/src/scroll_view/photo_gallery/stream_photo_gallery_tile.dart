@@ -3,8 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget that displays a photo or video item from the gallery.
 class StreamPhotoGalleryTile extends StatelessWidget {
@@ -112,9 +112,9 @@ class StreamPhotoGalleryTile extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 12,
                   backgroundColor: chatThemeData.colorTheme.barsBg,
-                  child: StreamSvgIcon(
+                  child: Icon(
+                    context.streamIcons.checkmark2,
                     size: 24,
-                    icon: StreamSvgIcons.check,
                     color: chatThemeData.colorTheme.textHighEmphasis,
                   ),
                 ),
@@ -123,10 +123,10 @@ class StreamPhotoGalleryTile extends StatelessWidget {
           ),
         ),
         if (media.type == AssetType.video) ...[
-          const Positioned(
+          Positioned(
             left: 8,
             bottom: 10,
-            child: StreamSvgIcon(icon: StreamSvgIcons.videoCall),
+            child: Icon(context.streamIcons.videoSolid),
           ),
           Positioned(
             right: 4,

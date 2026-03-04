@@ -161,7 +161,7 @@ class StreamChatConfigurationData {
     Widget loadingIndicator = const StreamLoadingIndicator(),
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
-    List<StreamReactionIcon>? reactionIcons,
+    ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = false,
     MessagePreviewFormatter? messagePreviewFormatter,
@@ -170,7 +170,7 @@ class StreamChatConfigurationData {
       loadingIndicator: loadingIndicator,
       defaultUserImage: defaultUserImage ?? _defaultUserImage,
       placeholderUserImage: placeholderUserImage,
-      reactionIcons: reactionIcons ?? StreamReactionIcon.defaultReactions,
+      reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
       enforceUniqueReactions: enforceUniqueReactions ?? true,
       draftMessagesEnabled: draftMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
@@ -181,7 +181,7 @@ class StreamChatConfigurationData {
     required this.loadingIndicator,
     required this.defaultUserImage,
     required this.placeholderUserImage,
-    required this.reactionIcons,
+    required this.reactionIconResolver,
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
     required this.messagePreviewFormatter,
@@ -193,13 +193,13 @@ class StreamChatConfigurationData {
     Widget? loadingIndicator,
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
-    List<StreamReactionIcon>? reactionIcons,
+    ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
   }) {
     return StreamChatConfigurationData(
-      reactionIcons: reactionIcons ?? this.reactionIcons,
+      reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
       defaultUserImage: defaultUserImage ?? this.defaultUserImage,
       placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
       loadingIndicator: loadingIndicator ?? this.loadingIndicator,
@@ -223,8 +223,11 @@ class StreamChatConfigurationData {
   /// The widget that will be built when the user image is loading.
   final Widget Function(BuildContext, User)? placeholderUserImage;
 
-  /// Assets used for rendering reactions.
-  final List<StreamReactionIcon> reactionIcons;
+  /// The resolver used to convert reaction types into widgets and to
+  /// provide the list of supported/default reaction types.
+  ///
+  /// Defaults to [DefaultReactionIconResolver].
+  final ReactionIconResolver reactionIconResolver;
 
   /// Whether a new reaction should replace the existing one.
   final bool enforceUniqueReactions;

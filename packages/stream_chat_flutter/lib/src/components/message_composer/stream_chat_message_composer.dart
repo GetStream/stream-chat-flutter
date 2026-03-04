@@ -31,7 +31,8 @@ class StreamChatMessageComposer extends StatefulWidget {
     String? currentUserId,
     String placeholder = '',
     StreamAudioRecorderController? audioRecorderController,
-    this.sendVoiceRecordingAutomatically = false,
+    bool sendVoiceRecordingAutomatically = false,
+    AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
   }) : props = MessageComposerProps(
          isFloating: false,
          message: null,
@@ -41,6 +42,8 @@ class StreamChatMessageComposer extends StatefulWidget {
          currentUserId: currentUserId,
          placeholder: placeholder,
          audioRecorderController: audioRecorderController,
+         sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
+         feedback: feedback,
        );
 
   /// The controller for the message composer.
@@ -49,25 +52,12 @@ class StreamChatMessageComposer extends StatefulWidget {
   /// The properties for the message composer.
   final MessageComposerProps props;
 
-  /// Whether the voice recording should be sent automatically.
-  /// If enabled, the voice recording will be sent automatically when the recording is finished.
-  /// If disabled, the voice recording will be added as an attachment to the message
-  /// and the user will need to send the message manually.
-  final bool sendVoiceRecordingAutomatically;
-
   @override
   State<StreamChatMessageComposer> createState() => _StreamChatMessageComposerState();
 }
 
 class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
   late StreamMessageInputController _controller;
-  final AudioRecorderFeedback feedback = const AudioRecorderFeedback();
-
-  /// The threshold to lock the recording.
-  final double lockRecordThreshold = 50;
-
-  /// The threshold to cancel the recording.
-  final double cancelRecordThreshold = 75;
 
   @override
   void initState() {
@@ -102,141 +92,61 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
 
   @override
   Widget build(BuildContext context) {
-    final voiceRecordingCallback = createVoiceRecordingCallback();
+    if (StreamMessageComposerFactory.maybeOf(context)?.messageComposer case final messageComposerFactory?) {
+      return messageComposerFactory(context, widget.props);
+    }
 
-    MessageComposerComponentProps componentProps({required AudioRecorderState audioRecorderState}) =>
-        MessageComposerComponentProps(
-          controller: _controller,
-          isFloating: widget.props.isFloating,
-          message: widget.props.message,
-          currentUserId: widget.props.currentUserId,
-          onSendPressed: widget.props.onSendPressed,
-          voiceRecordingCallback: voiceRecordingCallback,
-          onAttachmentButtonPressed: widget.props.onAttachmentButtonPressed,
-          audioRecorderState: audioRecorderState,
-          focusNode: widget.props.focusNode,
-        );
-
-    Widget createComposer({
-      Widget? body,
-      AudioRecorderState audioRecorderState = const RecordStateIdle(),
-    }) =>
-        StreamMessageComposerFactory.maybeOf(context)?.messageComposer?.call(context, widget.props) ??
-        core.StreamCoreMessageComposer(
-          placeholder: widget.props.placeholder,
-          controller: _controller.textFieldController,
-          isFloating: widget.props.isFloating,
-          focusNode: widget.props.focusNode,
-          composerLeading: StreamMessageComposerLeading(props: componentProps(audioRecorderState: audioRecorderState)),
-          composerTrailing: StreamMessageComposerTrailing(
-            props: componentProps(audioRecorderState: audioRecorderState),
-          ),
-          inputHeader: StreamMessageComposerInputHeader(props: componentProps(audioRecorderState: audioRecorderState)),
-          inputTrailing: StreamMessageComposerInputTrailing(
-            props: componentProps(audioRecorderState: audioRecorderState),
-          ),
-          inputLeading: StreamMessageComposerInputLeading(
-            props: componentProps(audioRecorderState: audioRecorderState),
-          ),
-          inputBody: body,
-        );
-
-    if (widget.props.audioRecorderController case final controller?) {
-      return ValueListenableBuilder(
-        valueListenable: controller,
-        builder: (context, state, _) {
-          final body = switch (state) {
-            RecordStateRecordingLocked() || RecordStateStopped() => MessageComposerRecordingLocked(
-              audioRecorderController: controller,
-              feedback: feedback,
-              messageInputController: _controller,
-              sendMessageCallback: widget.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
-            ),
-            RecordStateRecording() => StreamMessageComposerRecordingOngoing(audioRecorderController: controller),
-            _ => null,
-          };
-
-          final streamSpacing = context.streamSpacing;
-
-          return PortalTarget(
-            anchor: Aligned(
-              offset: Offset(-streamSpacing.md, -streamSpacing.md),
-              target: Alignment.topRight,
-              follower: Alignment.bottomRight,
-            ),
-            visible: state is RecordStateRecording,
-            portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-            child: createComposer(body: body, audioRecorderState: state),
-          );
-        },
+    final audioRecorderController = widget.props.audioRecorderController;
+    if (audioRecorderController == null) {
+      return DefaultStreamChatMessageComposer(
+        props: widget.props,
+        inputController: _controller,
       );
     }
 
-    return createComposer();
-  }
+    return ValueListenableBuilder(
+      valueListenable: audioRecorderController,
+      builder: (context, state, _) {
+        final body = switch (state) {
+          RecordStateRecordingLocked() => MessageComposerRecordingLocked(
+            audioRecorderController: audioRecorderController,
+            feedback: widget.props.feedback,
+            messageInputController: _controller,
+            sendMessageCallback: widget.props.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
+            state: state,
+          ),
+          RecordStateStopped() => MessageComposerRecordingStopped(
+            audioRecorderController: audioRecorderController,
+            feedback: widget.props.feedback,
+            messageInputController: _controller,
+            sendMessageCallback: widget.props.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
+            recordingState: state,
+          ),
+          RecordStateRecording() => StreamMessageComposerRecordingOngoing(
+            audioRecorderController: audioRecorderController,
+          ),
+          _ => null,
+        };
 
-  core.VoiceRecordingCallback? createVoiceRecordingCallback() {
-    if (widget.props.audioRecorderController case final controller?) {
-      return core.VoiceRecordingCallback(
-        onLongPressStart: () async {
-          // Return if the recording is already started.
-          if (controller.isRecording) return;
+        final streamSpacing = context.streamSpacing;
 
-          await feedback.onRecordStart(context);
-          return controller.startRecord();
-        },
-        onLongPressEnd: (_) async {
-          // Return if the recording not yet started or already locked.
-          if (!controller.isRecording || controller.isLocked) return;
-
-          await feedback.onRecordFinish(context);
-          final audio = await controller.finishRecord();
-          if (audio != null) {
-            _controller.addAttachment(audio);
-          }
-
-          // Once the recording is finished, cancel the recorder.
-          controller.cancelRecord(discardTrack: false);
-
-          // Send the message if the user has enabled the option to
-          // send the voice recording automatically.
-          if (widget.sendVoiceRecordingAutomatically) {
-            return widget.props.onSendPressed.call();
-          }
-        },
-        onLongPressCancel: () async {
-          // Return if the recording is already started.
-          if (controller.isRecording) return;
-
-          // Notify the parent that the recorder is canceled before it starts.
-          await feedback.onRecordStartCancel(context);
-          // Show a message to the user to hold to record.
-          controller.showInfo(
-            context.translations.holdToRecordLabel,
-          );
-        },
-        onLongPressMoveUpdate: (details) async {
-          // Return if the recording not yet started or already locked.
-          if (!controller.isRecording || controller.isLocked) return;
-          final dragOffset = details.offsetFromOrigin;
-
-          // Lock recording if the drag offset is greater than the threshold.
-          if (dragOffset.dy <= -lockRecordThreshold) {
-            await feedback.onRecordLock(context);
-            return controller.lockRecord();
-          }
-          // Cancel recording if the drag offset is greater than the threshold.
-          if (dragOffset.dx <= -cancelRecordThreshold) {
-            await feedback.onRecordCancel(context);
-            return controller.cancelRecord();
-          }
-
-          // Update the drag offset.
-          return controller.dragRecord(dragOffset);
-        },
-      );
-    }
-    return null;
+        return PortalTarget(
+          anchor: Aligned(
+            offset: Offset(-streamSpacing.md, -streamSpacing.md),
+            target: Alignment.topRight,
+            follower: Alignment.bottomRight,
+          ),
+          visible: state is RecordStateRecording,
+          portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
+          child: DefaultStreamChatMessageComposer(
+            props: widget.props,
+            inputController: _controller,
+            audioRecorderState: state,
+            body: body,
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -260,6 +170,8 @@ class MessageComposerProps {
     this.focusNode,
     this.currentUserId,
     this.audioRecorderController,
+    this.sendVoiceRecordingAutomatically = false,
+    this.feedback = const AudioRecorderFeedback(),
   });
 
   /// Whether the message composer is floating.
@@ -285,6 +197,15 @@ class MessageComposerProps {
 
   /// The audio recorder controller.
   final StreamAudioRecorderController? audioRecorderController;
+
+  /// Whether the voice recording should be sent automatically.
+  /// If enabled, the voice recording will be sent automatically when the recording is finished.
+  /// If disabled, the voice recording will be added as an attachment to the message
+  /// and the user will need to send the message manually.
+  final bool sendVoiceRecordingAutomatically;
+
+  /// The feedback for the audio recorder.
+  final AudioRecorderFeedback feedback;
 }
 
 /// Properties to build any of the sub-components.
@@ -352,4 +273,139 @@ class MessageComposerComponentProps {
 extension on StreamAudioRecorderController {
   bool get isRecording => value is RecordStateRecording;
   bool get isLocked => isRecording && value is! RecordStateRecordingHold;
+}
+
+/// Default implementation of the message composer.
+/// Shows the message composer with the default components.
+/// Does not include the audio recording flow in the body.
+class DefaultStreamChatMessageComposer extends StatelessWidget {
+  /// Creates a new instance of [DefaultStreamChatMessageComposer].
+  /// [props] contains the properties for the message composer.
+  /// [inputController] is the controller for the message input.
+  /// [audioRecorderState] is the state of the audio recorder.
+  /// [body] is the body of the message composer.
+  const DefaultStreamChatMessageComposer({
+    super.key,
+    required this.props,
+    required this.inputController,
+    this.audioRecorderState = const RecordStateIdle(),
+    this.body,
+  });
+
+  /// The properties for the message composer.
+  final MessageComposerProps props;
+
+  /// The controller for the message input.
+  final StreamMessageInputController inputController;
+
+  /// The state of the audio recorder.
+  /// Used for the microphone button state.
+  final AudioRecorderState audioRecorderState;
+
+  /// The body of the message composer.
+  final Widget? body;
+
+  /// The threshold to lock the recording.
+  static const double _lockRecordThreshold = 50;
+
+  /// The threshold to cancel the recording.
+  static const double _cancelRecordThreshold = 75;
+
+  @override
+  Widget build(BuildContext context) {
+    final componentProps = MessageComposerComponentProps(
+      controller: inputController,
+      isFloating: props.isFloating,
+      message: props.message,
+      currentUserId: props.currentUserId,
+      onSendPressed: props.onSendPressed,
+      voiceRecordingCallback: _createVoiceRecordingCallback(context),
+      onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      audioRecorderState: audioRecorderState,
+      focusNode: props.focusNode,
+    );
+
+    return core.StreamCoreMessageComposer(
+      placeholder: props.placeholder,
+      controller: inputController.textFieldController,
+      isFloating: props.isFloating,
+      focusNode: props.focusNode,
+      composerLeading: StreamMessageComposerLeading(props: componentProps),
+      composerTrailing: StreamMessageComposerTrailing(
+        props: componentProps,
+      ),
+      inputHeader: StreamMessageComposerInputHeader(props: componentProps),
+      inputTrailing: StreamMessageComposerInputTrailing(
+        props: componentProps,
+      ),
+      inputLeading: StreamMessageComposerInputLeading(
+        props: componentProps,
+      ),
+      inputBody: body,
+    );
+  }
+
+  core.VoiceRecordingCallback? _createVoiceRecordingCallback(BuildContext context) {
+    if (props.audioRecorderController case final audioRecorderController?) {
+      return core.VoiceRecordingCallback(
+        onLongPressStart: () async {
+          // Return if the recording is already started.
+          if (audioRecorderController.isRecording) return;
+
+          await props.feedback.onRecordStart(context);
+          return audioRecorderController.startRecord();
+        },
+        onLongPressEnd: (_) async {
+          // Return if the recording not yet started or already locked.
+          if (!audioRecorderController.isRecording || audioRecorderController.isLocked) return;
+
+          await props.feedback.onRecordFinish(context);
+          final audio = await audioRecorderController.finishRecord();
+          if (audio != null) {
+            inputController.addAttachment(audio);
+          }
+
+          // Once the recording is finished, cancel the recorder.
+          audioRecorderController.cancelRecord(discardTrack: false);
+
+          // Send the message if the user has enabled the option to
+          // send the voice recording automatically.
+          if (props.sendVoiceRecordingAutomatically) {
+            return props.onSendPressed.call();
+          }
+        },
+        onLongPressCancel: () async {
+          // Return if the recording is already started.
+          if (audioRecorderController.isRecording) return;
+
+          // Notify the parent that the recorder is canceled before it starts.
+          await props.feedback.onRecordStartCancel(context);
+          // Show a message to the user to hold to record.
+          audioRecorderController.showInfo(
+            context.translations.holdToRecordLabel,
+          );
+        },
+        onLongPressMoveUpdate: (details) async {
+          // Return if the recording not yet started or already locked.
+          if (!audioRecorderController.isRecording || audioRecorderController.isLocked) return;
+          final dragOffset = details.offsetFromOrigin;
+
+          // Lock recording if the drag offset is greater than the threshold.
+          if (dragOffset.dy <= -_lockRecordThreshold) {
+            await props.feedback.onRecordLock(context);
+            return audioRecorderController.lockRecord();
+          }
+          // Cancel recording if the drag offset is greater than the threshold.
+          if (dragOffset.dx <= -_cancelRecordThreshold) {
+            await props.feedback.onRecordCancel(context);
+            return audioRecorderController.cancelRecord();
+          }
+
+          // Update the drag offset.
+          return audioRecorderController.dragRecord(dragOffset);
+        },
+      );
+    }
+    return null;
+  }
 }
