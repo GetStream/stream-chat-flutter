@@ -247,7 +247,7 @@ class StreamChannelListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    final channelListItemTheme = context.streamChannelListItemTheme;
+    final channelListItemTheme = StreamChannelListItemTheme.of(context);
     final defaults = _StreamChannelListItemThemeDefaults(context);
 
     final effectiveTitleStyle = channelListItemTheme.titleStyle ?? defaults.titleStyle;
