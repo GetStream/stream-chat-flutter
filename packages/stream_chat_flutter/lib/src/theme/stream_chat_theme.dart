@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart' hide TextTheme;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
 
 /// {@template streamChatTheme}
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
