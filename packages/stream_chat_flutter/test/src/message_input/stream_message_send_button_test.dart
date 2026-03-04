@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_
 import 'package:stream_chat_flutter/src/message_input/stream_message_send_button.dart';
 import 'package:stream_chat_flutter/src/theme/message_input_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_core_flutter/src/theme/primitives/stream_icons.g.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   group('StreamMessageSendButton', () {
