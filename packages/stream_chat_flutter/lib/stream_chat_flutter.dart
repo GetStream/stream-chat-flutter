@@ -137,7 +137,7 @@ export 'src/reactions/picker/reaction_picker.dart';
 export 'src/reactions/user_reactions.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_grid_tile.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_grid_view.dart';
-export 'src/scroll_view/channel_scroll_view/stream_channel_list_tile.dart';
+export 'src/scroll_view/channel_scroll_view/stream_channel_list_item.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_list_view.dart';
 export 'src/scroll_view/draft_scroll_view/stream_draft_list_tile.dart';
 export 'src/scroll_view/draft_scroll_view/stream_draft_list_view.dart';

@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// A widget that displays a channel preview.
 ///
@@ -14,16 +15,15 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// message count, the typing indicator, the sending indicator and the channel
 /// avatar.
 ///
-/// Internally uses [StreamChannelListItem] from the core design system for
+/// Internally uses [StreamListTileContainer] from the core design system for
 /// consistent visual presentation.
 ///
 /// See also:
 /// * [StreamChannelAvatar]
 /// * [StreamChannelName]
-/// * [StreamChannelListItem]
-class StreamChannelListTile extends StatelessWidget {
-  /// Creates a new instance of [StreamChannelListTile] widget.
-  StreamChannelListTile({
+class StreamChannelListItem extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListItem] widget.
+  StreamChannelListItem({
     super.key,
     required this.channel,
     this.leading,
@@ -80,7 +80,7 @@ class StreamChannelListTile extends StatelessWidget {
 
   /// Creates a copy of this tile but with the given fields replaced with
   /// the new values.
-  StreamChannelListTile copyWith({
+  StreamChannelListItem copyWith({
     Key? key,
     Channel? channel,
     Widget? leading,
@@ -92,7 +92,7 @@ class StreamChannelListTile extends StatelessWidget {
     Widget Function(BuildContext, Message)? sendingIndicatorBuilder,
     bool? selected,
   }) {
-    return StreamChannelListTile(
+    return StreamChannelListItem(
       key: key ?? this.key,
       channel: channel ?? this.channel,
       leading: leading ?? this.leading,
@@ -133,7 +133,7 @@ class StreamChannelListTile extends StatelessWidget {
         stream: channelState.unreadCountStream,
         initialData: channelState.unreadCount,
         builder: (context, unreadCount) {
-          return StreamChannelListItem(
+          return _StreamChannelListTile(
             avatar: avatar,
             title: titleWidget,
             subtitle: subtitleWidget,
@@ -148,6 +148,253 @@ class StreamChannelListTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StreamChannelListTile extends StatelessWidget {
+  const _StreamChannelListTile({
+    required this.avatar,
+    required this.title,
+    this.subtitle,
+    this.timestamp,
+    this.unreadCount = 0,
+    this.isMuted = false,
+    this.onTap,
+    this.onLongPress,
+    this.selected = false,
+  });
+
+  /// The avatar widget displayed at the leading edge.
+  ///
+  /// Typically a [StreamAvatar], [StreamAvatarGroup], or an avatar wrapped
+  /// in a [StreamOnlineIndicator].
+  final Widget avatar;
+
+  /// The channel title widget.
+  ///
+  /// Typically a [Text] widget with the channel name. The default text style
+  /// is provided by the theme's title style via [DefaultTextStyle].
+  final Widget title;
+
+  /// The message preview widget displayed below the title.
+  ///
+  /// Typically a [Text] widget with the last message, but can be any widget
+  /// for richer content (e.g., icons, read receipts, sender prefix).
+  final Widget? subtitle;
+
+  /// The timestamp widget displayed in the trailing section of the title row.
+  ///
+  /// Typically a [Text] widget with a formatted date string. The default text
+  /// style is provided by the theme's timestamp style via [DefaultTextStyle].
+  final Widget? timestamp;
+
+  /// The number of unread messages.
+  ///
+  /// When greater than zero, a [StreamBadgeNotification] is displayed.
+  final int unreadCount;
+
+  /// Whether the channel is muted.
+  ///
+  /// When true, a mute icon is displayed in the title or subtitle.
+  final bool isMuted;
+
+  /// Called when the list item is tapped.
+  final VoidCallback? onTap;
+
+  /// Called when the list item is long-pressed.
+  final VoidCallback? onLongPress;
+
+  /// Whether the list item is in a selected state.
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final channelListItemTheme = context.streamChannelListItemTheme;
+    final defaults = _StreamChannelListItemThemeDefaults(context);
+
+    final effectiveTitleStyle = channelListItemTheme.titleStyle ?? defaults.titleStyle;
+    final effectiveSubtitleStyle = channelListItemTheme.subtitleStyle ?? defaults.subtitleStyle;
+    final effectiveTimestampStyle = channelListItemTheme.timestampStyle ?? defaults.timestampStyle;
+    final effectiveMuteIconPosition = channelListItemTheme.muteIconPosition ?? defaults.muteIconPosition;
+
+    final muteIcon = isMuted
+        ? Icon(
+            context.streamIcons.mute,
+            size: 20,
+            color: context.streamColorScheme.textTertiary,
+          )
+        : null;
+
+    final hasMuteIconInSubtitle = effectiveMuteIconPosition == MuteIconPosition.subtitle && isMuted;
+
+    return StreamListTileTheme(
+      data: context.streamListTileTheme.copyWith(
+        contentPadding: EdgeInsets.all(spacing.md - 4),
+        backgroundColor: channelListItemTheme.backgroundColor,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Material(
+          type: MaterialType.transparency,
+          child: StreamListTileContainer(
+            enabled: true,
+            selected: selected,
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: spacing.md,
+              children: [
+                avatar,
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: spacing.xxxs),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: spacing.xxs,
+                      children: [
+                        _TitleRow(
+                          title: title,
+                          titleTrailing: effectiveMuteIconPosition == MuteIconPosition.title ? muteIcon : null,
+                          timestamp: timestamp,
+                          unreadCount: unreadCount,
+                          titleStyle: effectiveTitleStyle,
+                          timestampStyle: effectiveTimestampStyle,
+                          spacing: spacing,
+                        ),
+                        if (subtitle != null || hasMuteIconInSubtitle)
+                          _SubtitleRow(
+                            subtitle: subtitle,
+                            subtitleTrailing: effectiveMuteIconPosition == MuteIconPosition.subtitle ? muteIcon : null,
+                            subtitleStyle: effectiveSubtitleStyle,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TitleRow extends StatelessWidget {
+  const _TitleRow({
+    required this.title,
+    this.titleTrailing,
+    this.timestamp,
+    required this.unreadCount,
+    required this.titleStyle,
+    required this.timestampStyle,
+    required this.spacing,
+  });
+
+  final Widget title;
+  final Widget? titleTrailing;
+  final Widget? timestamp;
+  final int unreadCount;
+  final TextStyle titleStyle;
+  final TextStyle timestampStyle;
+  final StreamSpacing spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: spacing.md,
+      children: [
+        Expanded(
+          child: Row(
+            spacing: spacing.xxs,
+            children: [
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: StreamBadgeNotificationSize.sm.value),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    widthFactor: 1,
+                    child: DefaultTextStyle.merge(
+                      style: titleStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      child: title,
+                    ),
+                  ),
+                ),
+              ),
+              ?titleTrailing,
+            ],
+          ),
+        ),
+        if (timestamp != null || unreadCount > 0)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing.xs,
+            children: [
+              if (timestamp case final timestamp?)
+                DefaultTextStyle.merge(
+                  style: timestampStyle,
+                  child: timestamp,
+                ),
+              if (unreadCount > 0) StreamBadgeNotification(label: '$unreadCount'),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _SubtitleRow extends StatelessWidget {
+  const _SubtitleRow({
+    required this.subtitle,
+    this.subtitleTrailing,
+    required this.subtitleStyle,
+  });
+
+  final Widget? subtitle;
+  final Widget? subtitleTrailing;
+  final TextStyle subtitleStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle(
+      style: subtitleStyle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      child: Row(
+        children: [
+          Expanded(child: subtitle ?? const SizedBox.shrink()),
+          ?subtitleTrailing,
+        ],
+      ),
+    );
+  }
+}
+
+class _StreamChannelListItemThemeDefaults extends StreamChannelListItemThemeData {
+  _StreamChannelListItemThemeDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final _colorScheme = _context.streamColorScheme;
+  late final _textTheme = _context.streamTextTheme;
+
+  @override
+  TextStyle get titleStyle => _textTheme.headingSm.copyWith(color: _colorScheme.textPrimary);
+
+  @override
+  TextStyle get subtitleStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textSecondary);
+
+  @override
+  TextStyle get timestampStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
+
+  @override
+  Color get borderColor => _colorScheme.borderSubtle;
+
+  @override
+  MuteIconPosition get muteIconPosition => MuteIconPosition.title;
 }
 
 /// Shows the delivery status icon + "You:" prefix for outgoing messages in
@@ -254,7 +501,7 @@ class ChannelLastMessageDate extends StatelessWidget {
   }
 }
 
-/// A widget that displays the subtitle for [StreamChannelListTile].
+/// A widget that displays the subtitle for [StreamChannelListItem].
 ///
 /// Shows typing indicators, draft messages, or the last message preview.
 /// The delivery status prefix (icon + "You:") is only shown when the subtitle
