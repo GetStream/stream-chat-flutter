@@ -35,6 +35,7 @@ class StreamChannelListTile extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.sendingIndicatorBuilder,
+    this.selected = false,
   }) : assert(
          channel.state != null,
          'Channel ${channel.id} is not initialized',
@@ -86,6 +87,9 @@ class StreamChannelListTile extends StatelessWidget {
   /// status using [Message.state].
   final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
 
+  /// True if the tile is in a selected state.
+  final bool selected;
+
   /// Creates a copy of this tile but with the given fields replaced with
   /// the new values.
   StreamChannelListTile copyWith({
@@ -100,6 +104,7 @@ class StreamChannelListTile extends StatelessWidget {
     VoidCallback? onTap,
     VoidCallback? onLongPress,
     Widget Function(BuildContext, Message)? sendingIndicatorBuilder,
+    bool? selected,
   }) {
     return StreamChannelListTile(
       key: key ?? this.key,
@@ -113,17 +118,14 @@ class StreamChannelListTile extends StatelessWidget {
       onTap: onTap ?? this.onTap,
       onLongPress: onLongPress ?? this.onLongPress,
       sendingIndicatorBuilder: sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
+      selected: selected ?? this.selected,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final channelState = channel.state!;
-    final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
-
-    // TODO: Make this configurable
-    const showMuteIconInTitle = true;
 
     final avatar = leading ?? StreamChannelAvatar(channel: channel, size: StreamAvatarGroupSize.xl);
     final titleWidget =
@@ -136,19 +138,9 @@ class StreamChannelListTile extends StatelessWidget {
         subtitle ??
         ChannelListTileSubtitle(
           channel: channel,
-          textStyle: textTheme.captionDefault.copyWith(
-            color: colorScheme.textSecondary,
-          ),
           sendingIndicatorBuilder: sendingIndicatorBuilder,
         );
-    final timestampWidget =
-        trailing ??
-        ChannelLastMessageDate(
-          channel: channel,
-          textStyle: textTheme.captionDefault.copyWith(
-            color: colorScheme.textTertiary,
-          ),
-        );
+    final timestampWidget = trailing ?? ChannelLastMessageDate(channel: channel);
 
     return BetterStreamBuilder<bool>(
       stream: channel.isMutedStream,
@@ -157,23 +149,16 @@ class StreamChannelListTile extends StatelessWidget {
         stream: channelState.unreadCountStream,
         initialData: channelState.unreadCount,
         builder: (context, unreadCount) {
-          final muteIcon = isMuted
-              ? Icon(
-                  context.streamIcons.mute,
-                  size: 20,
-                  color: colorScheme.textTertiary,
-                )
-              : null;
           return StreamChannelListItem(
             avatar: avatar,
             title: titleWidget,
-            titleTrailing: showMuteIconInTitle ? muteIcon : null,
             subtitle: subtitleWidget,
-            subtitleTrailing: showMuteIconInTitle ? null : muteIcon,
             timestamp: timestampWidget,
             unreadCount: unreadCount,
+            isMuted: isMuted,
             onTap: onTap,
             onLongPress: onLongPress,
+            selected: selected,
           );
         },
       ),

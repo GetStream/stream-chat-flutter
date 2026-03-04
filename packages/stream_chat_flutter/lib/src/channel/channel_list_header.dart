@@ -172,10 +172,10 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
                               ConnectionStatus.disconnected => Colors.grey,
                             };
 
-                            return StreamSvgIcon(
+                            return Icon(
+                              context.streamIcons.pencil,
                               size: 24,
                               color: color,
-                              icon: StreamSvgIcons.penWrite,
                             );
                           },
                         ),

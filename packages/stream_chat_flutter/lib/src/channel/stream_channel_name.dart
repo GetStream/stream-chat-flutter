@@ -59,21 +59,15 @@ class StreamChannelName extends StatelessWidget {
           }
         } else {
           final maxWidth = constraints.maxWidth;
-          final maxChars = maxWidth / (textStyle?.fontSize ?? 1);
-          var currentChars = 0;
+          channelName = '';
           final currentMembers = <Member>[];
           otherMembers.forEach((element) {
-            final newLength = currentChars + (element.user?.name.length ?? 0);
-            if (newLength < maxChars) {
-              currentChars = newLength;
+            final newTitle = _getChannelName(currentMembers: [...currentMembers, element], members: members);
+            if (_calculateTextSize(newTitle).width < maxWidth) {
               currentMembers.add(element);
+              channelName = newTitle;
             }
           });
-
-          final exceedingMembers = otherMembers.length - currentMembers.length;
-          channelName =
-              '${currentMembers.map((e) => e.user?.name).join(', ')} '
-              '${exceedingMembers > 0 ? '+ ${exceedingMembers + 1}' : ''}';
         }
       }
 
@@ -84,4 +78,19 @@ class StreamChannelName extends StatelessWidget {
       );
     },
   );
+
+  String _getChannelName({required List<Member> currentMembers, required List<Member> members}) {
+    final exceedingMembers = members.length - currentMembers.length;
+    return '${currentMembers.map((e) => e.user?.name).join(', ')} '
+        '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+  }
+
+  Size _calculateTextSize(String text) {
+    final textPainter = TextPainter(
+      text: TextSpan(text: text, style: textStyle),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: double.infinity);
+    return textPainter.size;
+  }
 }
