@@ -72,6 +72,6 @@ class LocationUserMarker extends StatelessWidget {
     .sm => StreamAvatarSize.sm,
     .md => StreamAvatarSize.md,
     .lg => StreamAvatarSize.lg,
-    .xl => StreamAvatarSize.xxl,
+    .xl => StreamAvatarSize.xl,
   };
 }
