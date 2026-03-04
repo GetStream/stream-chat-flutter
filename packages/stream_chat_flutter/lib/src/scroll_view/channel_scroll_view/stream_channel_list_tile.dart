@@ -28,9 +28,7 @@ class StreamChannelListTile extends StatelessWidget {
     required this.channel,
     this.leading,
     this.title,
-    this.titleTrailing,
     this.subtitle,
-    this.subtitleTrailing,
     this.trailing,
     this.onTap,
     this.onLongPress,
@@ -54,21 +52,11 @@ class StreamChannelListTile extends StatelessWidget {
   /// Defaults to [StreamChannelName].
   final Widget? title;
 
-  /// An optional widget displayed after the title.
-  ///
-  /// Typically used for a mute icon or similar indicator.
-  final Widget? titleTrailing;
-
   /// Additional content displayed below the title.
   ///
   /// Defaults to [ChannelListTileSubtitle] which shows typing indicators,
   /// draft messages, or the last message preview.
   final Widget? subtitle;
-
-  /// An optional trailing widget in the subtitle row.
-  ///
-  /// When not provided, a sending indicator is shown for outgoing messages.
-  final Widget? subtitleTrailing;
 
   /// A widget to display as the timestamp.
   ///
@@ -97,9 +85,7 @@ class StreamChannelListTile extends StatelessWidget {
     Channel? channel,
     Widget? leading,
     Widget? title,
-    Widget? titleTrailing,
     Widget? subtitle,
-    Widget? subtitleTrailing,
     Widget? trailing,
     VoidCallback? onTap,
     VoidCallback? onLongPress,
@@ -111,9 +97,7 @@ class StreamChannelListTile extends StatelessWidget {
       channel: channel ?? this.channel,
       leading: leading ?? this.leading,
       title: title ?? this.title,
-      titleTrailing: titleTrailing ?? this.titleTrailing,
       subtitle: subtitle ?? this.subtitle,
-      subtitleTrailing: subtitleTrailing ?? this.subtitleTrailing,
       trailing: trailing ?? this.trailing,
       onTap: onTap ?? this.onTap,
       onLongPress: onLongPress ?? this.onLongPress,
