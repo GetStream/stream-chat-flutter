@@ -25,105 +25,48 @@ class StreamChannelListItem extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListItem] widget.
   StreamChannelListItem({
     super.key,
-    required this.channel,
-    this.leading,
-    this.title,
-    this.subtitle,
-    this.trailing,
-    this.onTap,
-    this.onLongPress,
-    this.sendingIndicatorBuilder,
-    this.selected = false,
+    required Channel channel,
+    GestureTapCallback? onTap,
+    GestureLongPressCallback? onLongPress,
+    bool selected = false,
   }) : assert(
          channel.state != null,
          'Channel ${channel.id} is not initialized',
+       ),
+       props = .new(
+         channel: channel,
+         onTap: onTap,
+         onLongPress: onLongPress,
+         selected: selected,
        );
 
-  /// The channel to display.
-  final Channel channel;
-
-  /// A widget to display as the avatar.
-  ///
-  /// Defaults to [StreamChannelAvatar].
-  final Widget? leading;
-
-  /// The primary content of the list tile.
-  ///
-  /// Defaults to [StreamChannelName].
-  final Widget? title;
-
-  /// Additional content displayed below the title.
-  ///
-  /// Defaults to [ChannelListTileSubtitle] which shows typing indicators,
-  /// draft messages, or the last message preview.
-  final Widget? subtitle;
-
-  /// A widget to display as the timestamp.
-  ///
-  /// Defaults to [ChannelLastMessageDate].
-  final Widget? trailing;
-
-  /// Called when the user taps this list tile.
-  final GestureTapCallback? onTap;
-
-  /// Called when the user long-presses on this list tile.
-  final GestureLongPressCallback? onLongPress;
-
-  /// The widget builder for the sending indicator.
-  ///
-  /// `Message` is the last message in the channel. Use it to determine the
-  /// status using [Message.state].
-  final Widget Function(BuildContext, Message)? sendingIndicatorBuilder;
-
-  /// True if the tile is in a selected state.
-  final bool selected;
+  /// The properties for the channel list item.
+  final StreamChannelListItemProps props;
 
   /// Creates a copy of this tile but with the given fields replaced with
   /// the new values.
   StreamChannelListItem copyWith({
     Key? key,
     Channel? channel,
-    Widget? leading,
-    Widget? title,
-    Widget? subtitle,
-    Widget? trailing,
     VoidCallback? onTap,
     VoidCallback? onLongPress,
-    Widget Function(BuildContext, Message)? sendingIndicatorBuilder,
     bool? selected,
   }) {
     return StreamChannelListItem(
       key: key ?? this.key,
-      channel: channel ?? this.channel,
-      leading: leading ?? this.leading,
-      title: title ?? this.title,
-      subtitle: subtitle ?? this.subtitle,
-      trailing: trailing ?? this.trailing,
-      onTap: onTap ?? this.onTap,
-      onLongPress: onLongPress ?? this.onLongPress,
-      sendingIndicatorBuilder: sendingIndicatorBuilder ?? this.sendingIndicatorBuilder,
-      selected: selected ?? this.selected,
+      channel: channel ?? props.channel,
+      onTap: onTap ?? props.onTap,
+      onLongPress: onLongPress ?? props.onLongPress,
+      selected: selected ?? props.selected,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final builder = StreamComponentFactory.of(context).extension<StreamChannelListItemProps>();
-    if (builder != null) return builder(context, _props);
-    return _DefaultStreamChannelListItem(props: _props);
+    if (builder != null) return builder(context, props);
+    return _DefaultStreamChannelListItem(props: props);
   }
-
-  StreamChannelListItemProps get _props => StreamChannelListItemProps(
-    channel: channel,
-    leading: leading,
-    title: title,
-    subtitle: subtitle,
-    trailing: trailing,
-    onTap: onTap,
-    onLongPress: onLongPress,
-    sendingIndicatorBuilder: sendingIndicatorBuilder,
-    selected: selected,
-  );
 }
 
 /// Properties for configuring a [StreamChannelListItem].
@@ -223,7 +166,7 @@ class _DefaultStreamChannelListItem extends StatelessWidget {
         stream: channelState.unreadCountStream,
         initialData: channelState.unreadCount,
         builder: (context, unreadCount) {
-          return _StreamChannelListTile(
+          return StreamChannelListTile(
             avatar: avatar,
             title: titleWidget,
             subtitle: subtitleWidget,
@@ -240,8 +183,13 @@ class _DefaultStreamChannelListItem extends StatelessWidget {
   }
 }
 
-class _StreamChannelListTile extends StatelessWidget {
-  const _StreamChannelListTile({
+/// A widget that displays a channel list tile.
+/// It's the basic component for [StreamChannelListItem] without any of the logic.
+/// It can be used to fully customize the list tile data being shown.
+class StreamChannelListTile extends StatelessWidget {
+  /// Creates a new instance of [StreamChannelListTile] widget.
+  const StreamChannelListTile({
+    super.key,
     required this.avatar,
     required this.title,
     this.subtitle,
