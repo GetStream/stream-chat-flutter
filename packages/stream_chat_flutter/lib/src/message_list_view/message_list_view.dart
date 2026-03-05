@@ -94,6 +94,7 @@ class StreamMessageListView extends StatefulWidget {
     this.parentMessage,
     this.threadBuilder,
     this.onThreadTap,
+    this.onEditMessageTap,
     this.dateDividerBuilder,
     this.floatingDateDividerBuilder,
     // we need to use ClampingScrollPhysics to avoid the list view to bounce
@@ -179,6 +180,11 @@ class StreamMessageListView extends StatefulWidget {
   /// By default it calls [Navigator.push] using the widget
   /// built using [threadBuilder]
   final ThreadTapCallback? onThreadTap;
+
+  /// {@macro onEditMessageTap}
+  ///
+  /// If provided, the inline edit flow is used instead of the edit bottom sheet.
+  final void Function(Message)? onEditMessageTap;
 
   /// If true will show a scroll to bottom button when
   /// the scroll offset is not zero
@@ -1278,6 +1284,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showFlagButton: !isMyMessage,
       borderSide: borderSide,
       onThreadTap: _onThreadTap,
+      onEditMessageTap: widget.onEditMessageTap,
       attachmentShape: RoundedRectangleBorder(
         side: BorderSide(
           color: _streamTheme.colorTheme.borders,

@@ -51,6 +51,13 @@ class _ChannelPageState extends State<ChannelPage> {
     });
   }
 
+  void _editMessage(Message message) {
+    _messageInputController.editMessage(message);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _focusNode!.requestFocus();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
@@ -98,6 +105,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   initialScrollIndex: widget.initialScrollIndex,
                   initialAlignment: widget.initialAlignment,
                   highlightInitialMessage: widget.highlightInitialMessage,
+                  onEditMessageTap: _editMessage,
                   //onMessageSwiped: _reply,
                   messageFilter: defaultFilter,
                   messageBuilder: customMessageBuilder,
