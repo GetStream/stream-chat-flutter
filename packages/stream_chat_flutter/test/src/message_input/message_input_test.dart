@@ -393,10 +393,18 @@ void main() {
       when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': 'test'}));
       when(() => channelState.isUpToDate).thenReturn(true);
       when(() => channelState.members).thenReturn([
-        Member(userId: 'user-id', user: User(id: 'user-id')),
+        Member(
+          userId: 'user-id',
+          user: User(id: 'user-id'),
+        ),
       ]);
       when(() => channelState.membersStream).thenAnswer(
-        (_) => Stream.value([Member(userId: 'user-id', user: User(id: 'user-id'))]),
+        (_) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          ),
+        ]),
       );
       when(() => channelState.messages).thenReturn([]);
       when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
@@ -410,8 +418,7 @@ void main() {
         );
 
         final existingMessage = Message(id: 'msg-1', text: 'Original text');
-        final messageInputController = StreamMessageInputController();
-        messageInputController.editMessage(existingMessage);
+        final messageInputController = StreamMessageInputController()..editMessage(existingMessage);
         addTearDown(messageInputController.dispose);
 
         final key = GlobalKey<StreamMessageInputState>();
