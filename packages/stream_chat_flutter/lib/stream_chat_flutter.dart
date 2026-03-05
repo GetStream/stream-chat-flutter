@@ -8,8 +8,6 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAvatarSize,
         StreamAudioWaveformSlider,
         StreamAudioWaveform,
-        StreamChannelListItem,
-        StreamChannelListItemProps,
         StreamTheme,
         StreamIcons,
         StreamThemeExtension,

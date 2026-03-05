@@ -132,7 +132,13 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
   ) => _$StreamChannelListItemThemeData.lerp(a, b, t);
 }
 
+/// The position of the mute icon.
+/// By default the mute icon will be shown directly next to the title.
+/// When choosing for subtitle, the mute icon will be shown at the end of the list item.
 enum MuteIconPosition {
+  /// Top row of the list item, next to the title.
   title,
+
+  /// Bottom row, at the end of the list item.
   subtitle,
 }
