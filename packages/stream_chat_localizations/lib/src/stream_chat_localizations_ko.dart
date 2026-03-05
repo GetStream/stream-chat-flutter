@@ -279,7 +279,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get deleteConversationQuestion => '대화를 삭제하시겠습니까?';
 
   @override
-  String get streamChatLabel => '스트림 채팅';
+  String get streamChatLabel => '채팅';
 
   @override
   String get searchingForNetworkText => '네트워크를 검색하는 중입니다.';

@@ -68,7 +68,8 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     this.actions,
     this.bottom,
     this.backgroundColor,
-    this.elevation = 1,
+    this.elevation = 0,
+    this.scrolledUnderElevation = 0,
     this.bottomOpacity = 1,
   });
 
@@ -122,6 +123,9 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   /// The elevation for this [StreamChannelHeader].
   final double elevation;
 
+  /// The scrolled under elevation for this [StreamChannelHeader].
+  final double scrolledUnderElevation;
+
   /// The opacity of the bottom widget.
   final double bottomOpacity;
 
@@ -170,6 +174,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
           }
 
           final theme = Theme.of(context);
+          final colorScheme = context.streamColorScheme;
 
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
@@ -181,9 +186,17 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
                   ? SystemUiOverlayStyle.light
                   : SystemUiOverlayStyle.dark,
               elevation: elevation,
+              scrolledUnderElevation: scrolledUnderElevation,
               leading: leadingWidget,
               bottom: bottom,
               bottomOpacity: bottomOpacity,
+              shape: LinearBorder(
+                side: BorderSide(
+                  color: colorScheme.borderDefault,
+                  width: 1,
+                ),
+                bottom: const LinearBorderEdge(),
+              ),
               backgroundColor: backgroundColor ?? channelHeaderTheme.color,
               actions:
                   actions ??
@@ -213,7 +226,11 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
                       title ??
                           StreamChannelName(
                             channel: channel,
-                            textStyle: channelHeaderTheme.titleStyle,
+                            textStyle:
+                                channelHeaderTheme.titleStyle ??
+                                context.streamTextTheme.headingSm.copyWith(
+                                  color: context.streamColorScheme.textPrimary,
+                                ),
                           ),
                       const SizedBox(height: 2),
                       subtitle ??

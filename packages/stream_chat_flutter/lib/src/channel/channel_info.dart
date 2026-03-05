@@ -33,6 +33,12 @@ class StreamChannelInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
+    final effectiveTextStyle =
+        textStyle ??
+        context.streamTextTheme.captionDefault.copyWith(
+          color: context.streamColorScheme.textSecondary,
+        );
+
     return BetterStreamBuilder<List<Member>>(
       stream: channel.state!.membersStream,
       initialData: channel.state!.members,
@@ -43,16 +49,16 @@ class StreamChannelInfo extends StatelessWidget {
               return _ConnectedTitleState(
                 channel: channel,
                 showTypingIndicator: showTypingIndicator,
-                textStyle: textStyle,
+                textStyle: effectiveTextStyle,
                 members: data,
                 parentId: parentId,
               );
             case ConnectionStatus.connecting:
-              return _ConnectingTitleState(textStyle: textStyle);
+              return _ConnectingTitleState(textStyle: effectiveTextStyle);
             case ConnectionStatus.disconnected:
               return _DisconnectedTitleState(
                 client: client,
-                textStyle: textStyle,
+                textStyle: effectiveTextStyle,
               );
           }
         },

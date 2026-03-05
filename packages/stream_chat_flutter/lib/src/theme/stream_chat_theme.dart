@@ -162,10 +162,6 @@ class StreamChatThemeData {
         ),
       ),
       color: colorTheme.barsBg,
-      titleStyle: textTheme.headlineBold,
-      subtitleStyle: textTheme.footnote.copyWith(
-        color: colorTheme.textLowEmphasis,
-      ),
     );
     final channelPreviewTheme = StreamChannelPreviewThemeData(
       unreadCounterColor: colorTheme.accentError,
