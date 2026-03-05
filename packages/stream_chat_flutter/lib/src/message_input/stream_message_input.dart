@@ -649,8 +649,14 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   @override
   String? get restorationId => widget.restorationId;
 
-  // ignore: no-empty-block
-  void _focusNodeListener() {}
+  void _focusNodeListener() {
+    if (_effectiveFocusNode.hasFocus && _isPickerVisible) {
+      setState(() {
+        _isPickerVisible = false;
+        _closePicker();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1067,6 +1073,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   }
 
   void _openPicker() {
+    _effectiveFocusNode.unfocus();
     _pickerController = StreamAttachmentPickerController(
       initialAttachments: _effectiveController.attachments,
       initialPoll: _effectiveController.poll,
