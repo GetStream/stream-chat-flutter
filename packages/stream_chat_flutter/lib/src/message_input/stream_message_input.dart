@@ -695,6 +695,8 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
     final shadow = widget.shadow ?? _messageInputTheme.shadow;
     final elevation = widget.elevation ?? _messageInputTheme.elevation;
+    final spacing = context.streamSpacing;
+
     return Portal(
       child: Material(
         elevation: elevation ?? 8,
@@ -705,6 +707,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
           ),
           child: SimpleSafeArea(
             enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
+            minimum: EdgeInsets.only(bottom: _isPickerVisible ? 0 : spacing.md),
             child: Center(heightFactor: 1, child: messageInput),
           ),
         ),
@@ -1072,8 +1075,11 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     });
   }
 
-  void _openPicker() {
-    _effectiveFocusNode.unfocus();
+  Future<void> _openPicker() async {
+    if (_effectiveFocusNode.hasFocus) {
+      _effectiveFocusNode.unfocus();
+      await Future.delayed(const Duration(milliseconds: 30));
+    }
     _pickerController = StreamAttachmentPickerController(
       initialAttachments: _effectiveController.attachments,
       initialPoll: _effectiveController.poll,
