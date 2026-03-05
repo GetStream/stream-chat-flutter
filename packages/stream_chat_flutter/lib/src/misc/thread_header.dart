@@ -172,6 +172,13 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
       backgroundColor: backgroundColor ?? channelHeaderTheme.color,
       centerTitle: centerTitle,
       actions: actions,
+      shape: LinearBorder(
+        side: BorderSide(
+          color: colorScheme.borderDefault,
+          width: 1,
+        ),
+        bottom: const LinearBorderEdge(),
+      ),
       title: InkWell(
         onTap: onTitleTap,
         child: SizedBox(

@@ -93,10 +93,7 @@ class _ConnectedTitleState extends StatelessWidget {
       if (onlineCount > 0) {
         text += ', ${context.translations.watchersCountText(onlineCount)}';
       }
-      alternativeWidget = Text(
-        text,
-        style: StreamChannelHeaderTheme.of(context).subtitleStyle,
-      );
+      alternativeWidget = Text(text, style: textStyle);
     } else {
       final userId = StreamChat.of(context).currentUser?.id;
       final otherMember = members?.firstWhereOrNull(
