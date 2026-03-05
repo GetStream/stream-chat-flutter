@@ -81,12 +81,10 @@ class StreamTabbedAttachmentPicker extends StatefulWidget {
   final StreamAttachmentPickerController controller;
 
   @override
-  State<StreamTabbedAttachmentPicker> createState() =>
-      _StreamTabbedAttachmentPickerState();
+  State<StreamTabbedAttachmentPicker> createState() => _StreamTabbedAttachmentPickerState();
 }
 
-class _StreamTabbedAttachmentPickerState
-    extends State<StreamTabbedAttachmentPicker> {
+class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPicker> {
   late var _currentOption = _calculateInitialOption();
   TabbedAttachmentPickerOption _calculateInitialOption() {
     if (widget.initialOption case final option?) return option;
@@ -108,6 +106,7 @@ class _StreamTabbedAttachmentPickerState
       valueListenable: widget.controller,
       builder: (context, value, _) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _TabbedAttachmentPickerOptions(
@@ -147,6 +146,8 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorTheme = StreamChatTheme.of(context).colorTheme;
+    final spacing = context.streamSpacing;
+
     return ValueListenableBuilder<AttachmentPickerValue>(
       valueListenable: controller,
       builder: (context, value, __) {
@@ -154,7 +155,9 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
 
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
           child: Row(
+            spacing: spacing.xxxs,
             children: [
               ...options.map(
                 (option) {
@@ -162,21 +165,17 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
                   final isEnabled = enabledTypes.any(supported.contains);
                   final isSelected = option == currentOption;
 
-                  final color = switch (isSelected) {
-                    true => colorTheme.accentPrimary,
-                    _ => colorTheme.textLowEmphasis,
-                  };
-
                   final onPressed = switch (isEnabled) {
                     true => () => onOptionSelected?.call(option),
                     _ => null,
                   };
 
-                  return IconButton(
-                    color: color,
-                    disabledColor: colorTheme.disabled,
+                  return _AttachmentPickerTabButton(
                     icon: option.icon,
+                    isSelected: isSelected,
+                    isEnabled: isEnabled,
                     onPressed: onPressed,
+                    colorTheme: colorTheme,
                   );
                 },
               ),
@@ -184,6 +183,51 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _AttachmentPickerTabButton extends StatelessWidget {
+  const _AttachmentPickerTabButton({
+    required this.icon,
+    required this.isSelected,
+    required this.isEnabled,
+    required this.onPressed,
+    required this.colorTheme,
+  });
+
+  final Widget icon;
+  final bool isSelected;
+  final bool isEnabled;
+  final VoidCallback? onPressed;
+  final StreamColorTheme colorTheme;
+
+  static const _buttonSize = 48.0;
+  static const _iconSize = 20.0;
+  static const _selectedOverlayColor = Color.fromRGBO(30, 37, 43, 0.15);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: _buttonSize,
+      child: Material(
+        color: isSelected ? _selectedOverlayColor : Colors.transparent,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: Center(
+            child: IconTheme(
+              data: IconThemeData(
+                color: isEnabled ? colorTheme.textHighEmphasis : colorTheme.disabled,
+                size: _iconSize,
+              ),
+              child: icon,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -223,8 +267,7 @@ class EndOfFrameCallbackWidget extends StatefulWidget {
   final EndOfFrameCallbackErrorWidgetBuilder? errorBuilder;
 
   @override
-  State<EndOfFrameCallbackWidget> createState() =>
-      _EndOfFrameCallbackWidgetState();
+  State<EndOfFrameCallbackWidget> createState() => _EndOfFrameCallbackWidgetState();
 }
 
 class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
