@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_extensions.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_header.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_leading.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_trailing.dart';
@@ -93,7 +92,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
 
   @override
   Widget build(BuildContext context) {
-    if (context.messageComposerBuilder?.call(context, widget.props) case final messageComposer?) {
+    if (context.chatComponentBuilder<MessageComposerProps>()?.call(context, widget.props) case final messageComposer?) {
       return messageComposer;
     }
 

@@ -11,6 +11,9 @@ import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 ///
 ///  * [StreamChannelPreviewThemeData], which is used to configure this theme.
 /// {@endtemplate}
+///
+/// This is deprecated, but currently still used by `StreamChannelInfoBottomSheet`.
+@Deprecated('Use StreamChannelListItemTheme instead.')
 class StreamChannelPreviewTheme extends InheritedTheme {
   /// Creates a [StreamChannelPreviewTheme].
   ///

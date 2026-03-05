@@ -39,11 +39,89 @@ MaterialApp(
 
 You can also use the convenience factories `StreamTheme.light()` or `StreamTheme.dark()` as a starting point.
 
+
+## Component factories
+
+In the redesigned components we don't use builders in the constructors anymore, but have a centralized component factory.
+The component factory contains product agnotic component builders, such as the button and the avatar, and also product specific component builders, such as the channel list item.
+You can supply your component factory at any point in the widget tree, but you would usually wrap your full app around it.
+
+An example of a component factory with custom buttons and a custom channel list item:
+
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamComponentFactory(
+      builders: StreamComponentBuilders(
+        button: (context, props) => switch (props.type) {
+          StreamButtonType.solid => ElevatedButton(
+            onPressed: props.onTap,
+            child: Text(props.label ?? ''),
+          ),
+          StreamButtonType.outline => OutlinedButton(onPressed: props.onTap, child: Text(props.label ?? '')),
+          StreamButtonType.ghost => TextButton(onPressed: props.onTap, child: Text(props.label ?? '')),
+        },
+        extensions: streamChatComponentBuilders(
+          channelListItem: (context, props) => StreamChannelListTile(
+            title: Text(props.channel.name ?? ''),
+            avatar: StreamChannelAvatar(channel: props.channel),
+            onTap: props.onTap,
+            onLongPress: props.onLongPress,
+            selected: props.selected,
+          ),
+        ),
+      ),
+      child: ...
+    );
+  }
+}
+```
+
+You should make the builder themselves as simple as possible by extracting this into separate widgets, such as this:
+
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamComponentFactory(
+      builders: StreamComponentBuilders(
+        button: (context, props) => MyCustomButton(props: props),
+      ),
+      child: ...
+    );
+  }
+}
+
+class MyCustomButton extends StatelessWidget {
+  const MyCustomButton({super.key, required this.props});
+
+  final StreamButtonProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (props.type) {
+      StreamButtonType.solid => ElevatedButton(
+        onPressed: props.onTap,
+        child: Text(props.label ?? ''),
+      ),
+      StreamButtonType.outline => OutlinedButton(onPressed: props.onTap, child: Text(props.label ?? '')),
+      StreamButtonType.ghost => TextButton(onPressed: props.onTap, child: Text(props.label ?? '')),
+    };
+  }
+}
+```
+
 ## Components
 
 | Component | Migration Guide |
 |-----------|-----------------|
 | Stream Avatar | [stream_avatar.md](stream_avatar.md) |
+| Channel List Item | [channel_list_item.md](channel_list_item.md) |
 | Message Actions | [message_actions.md](message_actions.md) |
 | Reaction Picker / Reactions | [reaction_picker.md](reaction_picker.md) |
 

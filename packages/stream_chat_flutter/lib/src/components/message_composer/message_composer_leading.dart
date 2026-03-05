@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -16,7 +15,10 @@ class StreamMessageComposerLeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.messageComposerLeadingBuilder?.call(context, MessageComposerLeadingProps.from(props)) ??
+    return context.chatComponentBuilder<MessageComposerLeadingProps>()?.call(
+          context,
+          MessageComposerLeadingProps.from(props),
+        ) ??
         _DefaultStreamMessageComposerLeading(props: props);
   }
 }

@@ -82,13 +82,25 @@ class StreamChannelAvatar extends StatelessWidget {
         stream: channel.state!.membersStream,
         initialData: channel.state!.members,
         builder: (context, members) {
-          final users = members.map((it) => it.user!);
+          final users = members.map((it) => it.user!).toList();
           final currentUserId = channel.client.state.currentUser?.id;
+
+          if (channel.isDistinct && users.length == 2) {
+            final otherUser = users.firstWhere(
+              (u) => u.id != currentUserId,
+              orElse: () => users.first,
+            );
+            return StreamUserAvatar(
+              user: otherUser,
+              size: _avatarSizeForAvatarGroupSize(effectiveSize),
+              // TODO: make this configurable when the online state is shown.
+              showOnlineIndicator: otherUser.online,
+            );
+          }
 
           return StreamUserAvatarGroup(
             size: effectiveSize,
-            // Sort users by current user first.
-            users: users.sortedBy((it) => it.id == currentUserId ? 0 : 1),
+            users: users.sortedBy((it) => it.id == currentUserId ? 1 : 0),
           );
         },
       ),
@@ -103,6 +115,7 @@ class StreamChannelAvatar extends StatelessWidget {
   ) => switch (size) {
     .lg => StreamAvatarSize.lg,
     .xl => StreamAvatarSize.xl,
+    .xxl => StreamAvatarSize.xxl,
   };
 }
 

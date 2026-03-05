@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that shows the input leading of the message composer.
@@ -14,7 +13,10 @@ class StreamMessageComposerInputLeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.messageComposerInputLeadingBuilder?.call(context, MessageComposerInputLeadingProps.from(props)) ??
+    return context.chatComponentBuilder<MessageComposerInputLeadingProps>()?.call(
+          context,
+          MessageComposerInputLeadingProps.from(props),
+        ) ??
         const SizedBox.shrink();
   }
 }

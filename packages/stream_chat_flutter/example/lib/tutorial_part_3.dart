@@ -17,7 +17,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// We're passing a custom widget
 /// to [StreamChannelListView.itemBuilder];
-/// this will override the default [StreamChannelListTile] and allows you
+/// this will override the default [StreamChannelListItem] and allows you
 /// to create one yourself.
 ///
 /// There are a couple interesting things we do in this widget:
@@ -116,7 +116,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     BuildContext context,
     List<Channel> channels,
     int index,
-    StreamChannelListTile defaultTile,
+    StreamChannelListItem defaultTile,
   ) {
     final channel = channels[index];
     final lastMessage = channel.state?.messages.reversed.firstWhereOrNull(
@@ -142,7 +142,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
         channel: channel,
       ),
       title: StreamChannelName(
-        textStyle: StreamChannelPreviewTheme.of(context).titleStyle!.copyWith(
+        textStyle: StreamChannelListItemTheme.of(context).titleStyle!.copyWith(
           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis
               // ignore: deprecated_member_use
               .withOpacity(opacity),

@@ -135,7 +135,7 @@ class StreamUserAvatar extends StatelessWidget {
     .xs || .sm => StreamOnlineIndicatorSize.sm,
     .md => StreamOnlineIndicatorSize.md,
     .lg => StreamOnlineIndicatorSize.lg,
-    .xl => StreamOnlineIndicatorSize.xl,
+    .xl || .xxl => StreamOnlineIndicatorSize.xl,
   };
 }
 
@@ -158,7 +158,7 @@ class _StreamUserAvatarPlaceholder extends StatelessWidget {
     final userInitials = user.name.initials;
     if (userInitials != null && userInitials.isNotEmpty) {
       return switch (size) {
-        .md || .lg || .xl => Text(userInitials),
+        .md || .lg || .xl || .xxl => Text(userInitials),
         .xs || .sm => Text(userInitials.characters.first),
       };
     }

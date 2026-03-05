@@ -16,10 +16,10 @@ Widget defaultChannelListViewSeparatorBuilder(
 /// Signature for the item builder that creates the children of the
 /// [StreamChannelListView].
 typedef StreamChannelListViewIndexedWidgetBuilder =
-    StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelListTile>;
+    StreamScrollViewIndexedWidgetBuilder<Channel, StreamChannelListItem>;
 
 /// A [ListView] that shows a list of [Channel]s,
-/// it uses [StreamChannelListTile] as a default item.
+/// it uses [StreamChannelListItem] as a default item.
 ///
 /// This is the new version of [StreamChannelListView] that uses
 /// [StreamChannelListController].
@@ -39,7 +39,7 @@ typedef StreamChannelListViewIndexedWidgetBuilder =
 /// ```
 ///
 /// See also:
-/// * [StreamChannelListTile]
+/// * [StreamChannelListItem]
 /// * [StreamChannelListController]
 class StreamChannelListView extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListView].
@@ -303,7 +303,7 @@ class StreamChannelListView extends StatelessWidget {
         final onTap = onChannelTap;
         final onLongPress = onChannelLongPress;
 
-        final streamChannelListTile = StreamChannelListTile(
+        final streamChannelListTile = StreamChannelListItem(
           channel: channel,
           onTap: onTap == null ? null : () => onTap(channel),
           onLongPress: onLongPress == null ? null : () => onLongPress(channel),
@@ -365,7 +365,7 @@ class StreamChannelListView extends StatelessWidget {
 }
 
 /// A widget that is used to display a separator between
-/// [StreamChannelListTile] items.
+/// [StreamChannelListItem] items.
 class StreamChannelListSeparator extends StatelessWidget {
   /// Creates a new instance of [StreamChannelListSeparator].
   const StreamChannelListSeparator({super.key});

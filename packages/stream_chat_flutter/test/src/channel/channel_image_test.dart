@@ -60,6 +60,7 @@ void main() {
       when(() => channel.client).thenReturn(client);
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
+      when(() => channel.isDistinct).thenReturn(true);
       when(() => channel.imageStream).thenAnswer((i) => Stream.value(null));
       when(() => channel.image).thenReturn(null);
       when(() => channelState.membersStream).thenAnswer(
@@ -137,6 +138,7 @@ void main() {
       when(() => clientState.currentUser).thenReturn(currentUser);
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
+      when(() => channel.isDistinct).thenReturn(false);
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
       when(() => channel.imageStream).thenAnswer((i) => Stream.value(null));

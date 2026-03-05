@@ -63,6 +63,7 @@ class StreamChatThemeData {
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
+    StreamChannelListItemThemeData? channelListItemTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     textTheme ??= StreamTextTheme(brightness: brightness);
@@ -95,6 +96,7 @@ class StreamChatThemeData {
       threadListTileTheme: threadListTileTheme,
       draftListTileTheme: draftListTileTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
+      channelListItemTheme: channelListItemTheme,
     );
 
     return defaultData.merge(customizedData);
@@ -129,6 +131,7 @@ class StreamChatThemeData {
     required this.threadListTileTheme,
     required this.draftListTileTheme,
     required this.voiceRecordingAttachmentTheme,
+    required this.channelListItemTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -525,6 +528,7 @@ class StreamChatThemeData {
         ),
       ),
       voiceRecordingAttachmentTheme: const StreamVoiceRecordingAttachmentThemeData(),
+      channelListItemTheme: const StreamChannelListItemThemeData(),
     );
   }
 
@@ -590,6 +594,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
   final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
 
+  /// Theme configuration for the [StreamChannelListItem] widget.
+  final StreamChannelListItemThemeData channelListItemTheme;
+
   /// Theme configuration for the [StreamDraftListTile] widget.
   final StreamDraftListTileThemeData draftListTileTheme;
 
@@ -628,6 +635,7 @@ class StreamChatThemeData {
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
+    StreamChannelListItemThemeData? channelListItemTheme,
   }) => StreamChatThemeData.raw(
     channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
     textTheme: this.textTheme.merge(textTheme),
@@ -650,6 +658,7 @@ class StreamChatThemeData {
     threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
     draftListTileTheme: draftListTileTheme ?? this.draftListTileTheme,
     voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
+    channelListItemTheme: channelListItemTheme ?? this.channelListItemTheme,
   );
 
   /// Merge themes
@@ -677,6 +686,7 @@ class StreamChatThemeData {
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
       draftListTileTheme: draftListTileTheme.merge(other.draftListTileTheme),
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme.merge(other.voiceRecordingAttachmentTheme),
+      channelListItemTheme: channelListItemTheme.merge(other.channelListItemTheme),
     );
   }
 }
