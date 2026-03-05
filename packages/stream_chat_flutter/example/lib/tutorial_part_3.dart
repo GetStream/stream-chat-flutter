@@ -142,7 +142,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
         channel: channel,
       ),
       title: StreamChannelName(
-        textStyle: StreamChannelPreviewTheme.of(context).titleStyle!.copyWith(
+        textStyle: StreamChannelListItemTheme.of(context).titleStyle!.copyWith(
           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis
               // ignore: deprecated_member_use
               .withOpacity(opacity),
