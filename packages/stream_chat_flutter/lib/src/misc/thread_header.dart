@@ -72,7 +72,8 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
     this.onTitleTap,
     this.showTypingIndicator = true,
     this.backgroundColor,
-    this.elevation = 1,
+    this.elevation = 0,
+    this.scrolledUnderElevation = 0,
   }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// Whether to show the leading back button.
@@ -117,6 +118,9 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
   /// The elevation for this [StreamThreadHeader].
   final double elevation;
 
+  /// The scrolled under elevation for this [StreamThreadHeader].
+  final double scrolledUnderElevation;
+
   @override
   Widget build(BuildContext context) {
     final effectiveCenterTitle = getEffectiveCenterTitle(
@@ -126,25 +130,27 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
     );
 
     final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    final replyCount = parent.replyCount;
 
     final defaultSubtitle =
         subtitle ??
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${context.translations.withText} ',
-              style: channelHeaderTheme.subtitleStyle,
-            ),
-            Flexible(
-              child: StreamChannelName(
-                channel: StreamChannel.of(context).channel,
-                textStyle: channelHeaderTheme.subtitleStyle,
-              ),
-            ),
-          ],
-        );
+        (replyCount != null
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    context.translations.threadReplyCountText(replyCount),
+                    style:
+                        channelHeaderTheme.subtitleStyle ??
+                        textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
+                  ),
+                ],
+              )
+            : const SizedBox.shrink());
 
     final theme = Theme.of(context);
     return AppBar(
@@ -153,6 +159,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
       titleTextStyle: theme.textTheme.titleLarge,
       systemOverlayStyle: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       elevation: elevation,
+      scrolledUnderElevation: scrolledUnderElevation,
       leading:
           leading ??
           (showBackButton
@@ -177,7 +184,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
               title ??
                   Text(
                     context.translations.threadReplyLabel,
-                    style: channelHeaderTheme.titleStyle,
+                    style: channelHeaderTheme.titleStyle ?? textTheme.headingSm,
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)

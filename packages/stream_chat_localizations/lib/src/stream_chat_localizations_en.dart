@@ -39,13 +39,13 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get threadReplyLabel => 'Thread Reply';
+  String get threadReplyLabel => 'Thread';
 
   @override
   String get onlyVisibleToYouText => 'Only visible to you';
 
   @override
-  String threadReplyCountText(int count) => '$count Thread Replies';
+  String threadReplyCountText(int count) => count == 1 ? '1 reply' : '$count replies';
 
   @override
   String attachmentsUploadProgressText({
