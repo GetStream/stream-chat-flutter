@@ -101,7 +101,7 @@ void main() {
                         return [
                           SystemAttachmentPickerOption(
                             key: 'wrong',
-                            icon: const Icon(Icons.error),
+                            icon: Icons.error,
                             title: 'Wrong',
                             supportedTypes: [AttachmentPickerType.images],
                             onTap: (context, controller) async {},
@@ -216,7 +216,7 @@ void main() {
                         ...defaultOptions,
                         SystemAttachmentPickerOption(
                           key: 'custom-upload',
-                          icon: const Icon(Icons.cloud_upload),
+                          icon: Icons.cloud_upload,
                           title: 'Custom Upload',
                           supportedTypes: [AttachmentPickerType.files],
                           onTap: (context, controller) async {},
@@ -252,7 +252,7 @@ void main() {
                       return [
                         TabbedAttachmentPickerOption(
                           key: 'wrong',
-                          icon: const Icon(Icons.error),
+                          icon: Icons.error,
                           title: 'Wrong',
                           supportedTypes: [AttachmentPickerType.images],
                           optionViewBuilder: (context, controller) {
