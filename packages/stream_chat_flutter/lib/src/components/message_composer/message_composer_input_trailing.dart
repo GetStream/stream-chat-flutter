@@ -43,20 +43,26 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
       valueListenable: _controller,
       builder: (context, value, child) {
         final hasText = _controller.text.isNotEmpty;
+        final hasContent = hasText || _controller.attachments.isNotEmpty;
+        final isEditing = !_controller.message.state.isInitial;
         var buttonState = StreamMessageComposerInputTrailingState.microphone;
         if (props.isAudioRecordingFlowActive) {
           buttonState = StreamMessageComposerInputTrailingState.voiceRecordingActive;
         }
 
-        if (hasText || _controller.attachments.isNotEmpty) {
+        if (isEditing) {
+          buttonState = StreamMessageComposerInputTrailingState.edit;
+        } else if (hasContent) {
           buttonState = StreamMessageComposerInputTrailingState.send;
         }
+
+        final isEnabled = !isEditing || hasContent;
 
         return props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped
             ? const SizedBox.shrink()
             : StreamCoreMessageComposerInputTrailing(
                 controller: _controller.textFieldController,
-                onSendPressed: props.onSendPressed,
+                onSendPressed: isEnabled ? props.onSendPressed : null,
                 voiceRecordingCallback: props.voiceRecordingCallback,
                 buttonState: buttonState,
               );
