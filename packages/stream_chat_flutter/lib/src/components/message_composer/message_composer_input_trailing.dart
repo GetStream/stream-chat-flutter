@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -17,7 +16,10 @@ class StreamMessageComposerInputTrailing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.messageComposerInputTrailingBuilder?.call(context, MessageComposerInputTrailingProps.from(props)) ??
+    return context.chatComponentBuilder<MessageComposerInputTrailingProps>()?.call(
+          context,
+          MessageComposerInputTrailingProps.from(props),
+        ) ??
         DefaultStreamMessageComposerInputTrailing(props: props);
   }
 }

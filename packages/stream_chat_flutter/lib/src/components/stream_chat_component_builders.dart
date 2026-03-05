@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Builds the list of component builders for the stream chat components.
@@ -23,4 +24,10 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   ];
 
   return builders;
+}
+
+/// Helper extensions for the factory builders.
+extension StreamChatComponentBuildersExtension on BuildContext {
+  /// The builder for the given component type.
+  StreamComponentBuilder<T>? chatComponentBuilder<T>() => StreamComponentFactory.of(this).extension<T>();
 }

@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -17,7 +16,10 @@ class StreamMessageComposerInputHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.messageComposerInputHeaderBuilder?.call(context, MessageComposerInputHeaderProps.from(props)) ??
+    return context.chatComponentBuilder<MessageComposerInputHeaderProps>()?.call(
+          context,
+          MessageComposerInputHeaderProps.from(props),
+        ) ??
         _DefaultStreamMessageComposerInputHeader(props: props);
   }
 }

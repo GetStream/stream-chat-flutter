@@ -63,9 +63,8 @@ class StreamChannelListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final builder = StreamComponentFactory.of(context).extension<StreamChannelListItemProps>();
-    if (builder != null) return builder(context, props);
-    return _DefaultStreamChannelListItem(props: props);
+    final builder = context.chatComponentBuilder<StreamChannelListItemProps>();
+    return builder?.call(context, props) ?? _DefaultStreamChannelListItem(props: props);
   }
 }
 
