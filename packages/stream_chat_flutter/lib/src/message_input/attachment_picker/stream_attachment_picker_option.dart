@@ -31,7 +31,7 @@ abstract class AttachmentPickerOption {
   final String? key;
 
   /// The icon of the option.
-  final Widget icon;
+  final IconData icon;
 
   /// The title of the option.
   final String? title;

@@ -35,9 +35,7 @@ class _DefaultStreamMessageComposerLeading extends StatelessWidget {
 
     return AnimatedOpacity(
       opacity: props.isAudioRecordingFlowActive ? 0.0 : 1.0,
-      duration: props.isAudioRecordingFlowActive
-          ? Duration.zero
-          : const Duration(milliseconds: 200),
+      duration: props.isAudioRecordingFlowActive ? Duration.zero : const Duration(milliseconds: 200),
       curve: Curves.easeInQuint,
       child: AnimatedSize(
         duration: const Duration(milliseconds: 200),

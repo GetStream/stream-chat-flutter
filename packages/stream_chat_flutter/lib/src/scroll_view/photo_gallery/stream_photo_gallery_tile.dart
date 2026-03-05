@@ -100,26 +100,20 @@ class StreamPhotoGalleryTile extends StatelessWidget {
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
               opacity: selected ? 1.0 : 0.0,
-              child: Container(
-                color:
-                    // ignore: deprecated_member_use
-                    chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.5),
-                alignment: Alignment.topRight,
-                padding: const EdgeInsets.only(
-                  top: 8,
-                  right: 8,
-                ),
-                child: CircleAvatar(
-                  radius: 12,
-                  backgroundColor: chatThemeData.colorTheme.barsBg,
-                  child: Icon(
-                    context.streamIcons.checkmark2,
-                    size: 24,
-                    color: chatThemeData.colorTheme.textHighEmphasis,
-                  ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
+                  color: chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.15),
                 ),
               ),
             ),
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IgnorePointer(
+            child: _GallerySelectedIndicator(selected: selected),
           ),
         ),
         if (media.type == AssetType.video) ...[
@@ -150,6 +144,34 @@ class StreamPhotoGalleryTile extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _GallerySelectedIndicator extends StatelessWidget {
+  const _GallerySelectedIndicator({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? const Color(0xFF005FFF) : Colors.transparent,
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      child: selected
+          ? Icon(
+              context.streamIcons.checkmark1Small,
+              fontWeight: FontWeight.w900,
+              size: 12,
+              color: Colors.white,
+            )
+          : null,
     );
   }
 }

@@ -142,7 +142,7 @@ class _ChannelPageState extends State<ChannelPage> {
               ...defaultOptions,
               TabbedAttachmentPickerOption(
                 key: 'location-picker',
-                icon: const Icon(Icons.near_me_rounded),
+                icon: Icons.near_me_rounded,
                 supportedTypes: [const LocationPickerType()],
                 isEnabled: (value) {
                   // Enable if nothing has been selected yet.

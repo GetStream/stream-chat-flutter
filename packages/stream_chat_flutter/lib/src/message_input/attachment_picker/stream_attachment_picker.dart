@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Inline widget for the system attachment picker interface.
 ///
@@ -41,7 +42,7 @@ class StreamSystemAttachmentPicker extends StatelessWidget {
 
                 return ListTile(
                   enabled: isEnabled,
-                  leading: option.icon,
+                  leading: Icon(option.icon),
                   title: Text(option.title),
                   onTap: () => option.onTap(context, controller),
                 );
@@ -145,7 +146,6 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
     final spacing = context.streamSpacing;
 
     return ValueListenableBuilder<AttachmentPickerValue>(
@@ -170,12 +170,13 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
                     _ => null,
                   };
 
-                  return _AttachmentPickerTabButton(
+                  return StreamButton.icon(
+                    style: StreamButtonStyle.secondary,
+                    type: StreamButtonType.ghost,
+                    size: StreamButtonSize.large,
                     icon: option.icon,
+                    onTap: onPressed,
                     isSelected: isSelected,
-                    isEnabled: isEnabled,
-                    onPressed: onPressed,
-                    colorTheme: colorTheme,
                   );
                 },
               ),
@@ -183,51 +184,6 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _AttachmentPickerTabButton extends StatelessWidget {
-  const _AttachmentPickerTabButton({
-    required this.icon,
-    required this.isSelected,
-    required this.isEnabled,
-    required this.onPressed,
-    required this.colorTheme,
-  });
-
-  final Widget icon;
-  final bool isSelected;
-  final bool isEnabled;
-  final VoidCallback? onPressed;
-  final StreamColorTheme colorTheme;
-
-  static const _buttonSize = 48.0;
-  static const _iconSize = 20.0;
-  static const _selectedOverlayColor = Color.fromRGBO(30, 37, 43, 0.15);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: _buttonSize,
-      child: Material(
-        color: isSelected ? _selectedOverlayColor : Colors.transparent,
-        shape: const CircleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onPressed,
-          child: Center(
-            child: IconTheme(
-              data: IconThemeData(
-                color: isEnabled ? colorTheme.textHighEmphasis : colorTheme.disabled,
-                size: _iconSize,
-              ),
-              child: icon,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -370,7 +326,7 @@ class OptionDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorTheme = StreamChatTheme.of(context).colorTheme;
 
-    var height = 20.0;
+    var height = 0.0;
     if (title != null || actions.isNotEmpty) {
       height = 40.0;
     }
@@ -389,34 +345,20 @@ class OptionDrawer extends StatelessWidget {
       trailing = const Empty();
     }
 
-    return Card(
-      elevation: elevation,
-      color: color ?? colorTheme.barsBg,
-      margin: margin,
-      shape: shape,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: height,
-            child: Row(
-              children: [
-                Expanded(child: leading),
-                Container(
-                  height: 4,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: colorTheme.disabled,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                Expanded(child: trailing),
-              ],
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: height,
+          child: Row(
+            children: [
+              Expanded(child: leading),
+              Expanded(child: trailing),
+            ],
           ),
-          Expanded(child: child),
-        ],
-      ),
+        ),
+        Expanded(child: child),
+      ],
     );
   }
 }
@@ -449,7 +391,7 @@ Widget tabbedAttachmentPickerBuilder({
   final defaultOptions = <TabbedAttachmentPickerOption>[
     TabbedAttachmentPickerOption(
       key: 'gallery-picker',
-      icon: Icon(context.streamIcons.images1Alt),
+      icon: context.streamIcons.images1Alt,
       supportedTypes: [
         AttachmentPickerType.images,
         AttachmentPickerType.videos,
@@ -477,7 +419,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'file-picker',
-      icon: Icon(context.streamIcons.fileBend),
+      icon: context.streamIcons.fileBend,
       supportedTypes: [AttachmentPickerType.files],
       optionViewBuilder: (context, controller) => StreamFilePicker(
         onFilePicked: (file) async {
@@ -493,7 +435,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'image-picker',
-      icon: Icon(context.streamIcons.camera1),
+      icon: context.streamIcons.camera1,
       supportedTypes: [AttachmentPickerType.images],
       optionViewBuilder: (context, controller) => StreamImagePicker(
         onImagePicked: (image) async {
@@ -509,7 +451,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'video-picker',
-      icon: Icon(context.streamIcons.video),
+      icon: context.streamIcons.video,
       supportedTypes: [AttachmentPickerType.videos],
       optionViewBuilder: (context, controller) => StreamVideoPicker(
         onVideoPicked: (video) async {
@@ -525,7 +467,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'poll-creator',
-      icon: Icon(context.streamIcons.chart5),
+      icon: context.streamIcons.chart5,
       supportedTypes: [AttachmentPickerType.poll],
       optionViewBuilder: (context, controller) {
         final initialPoll = controller.value.poll;
@@ -604,7 +546,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'image-picker',
       supportedTypes: [AttachmentPickerType.images],
-      icon: Icon(context.streamIcons.images1Alt),
+      icon: context.streamIcons.images1Alt,
       title: context.translations.uploadAPhotoLabel,
       onTap: (context, controller) async {
         await pickSystemFile(controller, FileType.image);
@@ -613,7 +555,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'video-picker',
       supportedTypes: [AttachmentPickerType.videos],
-      icon: Icon(context.streamIcons.video),
+      icon: context.streamIcons.video,
       title: context.translations.uploadAVideoLabel,
       onTap: (context, controller) async {
         await pickSystemFile(controller, FileType.video);
@@ -622,7 +564,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'file-picker',
       supportedTypes: [AttachmentPickerType.files],
-      icon: Icon(context.streamIcons.fileBend),
+      icon: context.streamIcons.fileBend,
       title: context.translations.uploadAFileLabel,
       onTap: (context, controller) async {
         await pickSystemFile(controller, FileType.any);
@@ -631,7 +573,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'poll-creator',
       supportedTypes: [AttachmentPickerType.poll],
-      icon: Icon(context.streamIcons.chart5),
+      icon: context.streamIcons.chart5,
       title: context.translations.createPollLabel(isNew: true),
       onTap: (context, controller) async {
         final initialPoll = controller.value.poll;

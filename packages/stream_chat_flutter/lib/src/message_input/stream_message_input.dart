@@ -698,7 +698,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             boxShadow: [if (shadow != null) shadow],
           ),
           child: SimpleSafeArea(
-            enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
+            enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
             child: Center(heightFactor: 1, child: messageInput),
           ),
         ),
@@ -785,8 +785,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             onSendPressed: sendMessage,
             audioRecorderController: _audioRecorderController,
           ),
-          if (_isPickerVisible && _pickerController != null)
-            _buildInlineAttachmentPicker(context),
+          if (_isPickerVisible && _pickerController != null) _buildInlineAttachmentPicker(context),
         ],
       ),
     );
@@ -800,29 +799,28 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
-    final useSystemPicker = widget.useSystemAttachmentPicker ||
-        (messageInputTheme.useSystemAttachmentPicker ?? false) ||
-        isWebOrDesktop;
+    final useSystemPicker =
+        widget.useSystemAttachmentPicker || (messageInputTheme.useSystemAttachmentPicker ?? false) || isWebOrDesktop;
 
     final builder = switch (useSystemPicker) {
       true => () => systemAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.pollConfig,
-            optionsBuilder: widget.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-          ),
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.pollConfig,
+        optionsBuilder: widget.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      ),
       false => () => tabbedAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.pollConfig,
-            optionsBuilder: widget.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-          ),
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.pollConfig,
+        optionsBuilder: widget.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      ),
     };
 
     return SizedBox(
@@ -1102,10 +1100,8 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       final pickerController = _pickerController;
       if (pickerController == null) return;
 
-      final messageAttachmentIds =
-          _effectiveController.attachments.map((a) => a.id).toSet();
-      final pickerAttachmentIds =
-          pickerController.value.attachments.map((a) => a.id).toSet();
+      final messageAttachmentIds = _effectiveController.attachments.map((a) => a.id).toSet();
+      final pickerAttachmentIds = pickerController.value.attachments.map((a) => a.id).toSet();
 
       // Remove attachments from picker that were removed from the composer.
       for (final id in pickerAttachmentIds.difference(messageAttachmentIds)) {

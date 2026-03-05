@@ -152,8 +152,7 @@ void main() {
 
           expect(
             picker.options.every(
-              (option) =>
-                  option.supportedTypes.contains(AttachmentPickerType.images),
+              (option) => option.supportedTypes.contains(AttachmentPickerType.images),
             ),
             isTrue,
           );
@@ -302,8 +301,7 @@ void main() {
 
           expect(
             picker.options.every(
-              (option) =>
-                  option.supportedTypes.contains(AttachmentPickerType.images),
+              (option) => option.supportedTypes.contains(AttachmentPickerType.images),
             ),
             isTrue,
           );
