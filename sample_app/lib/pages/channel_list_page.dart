@@ -33,13 +33,15 @@ class _ChannelListPageState extends State<ChannelListPage> {
   bool _isSelected(int index) => _currentIndex == index;
 
   List<BottomNavigationBarItem> get _navBarItems {
+    final icons = context.streamIcons;
+
     return <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: Stack(
           clipBehavior: Clip.none,
           children: [
             Icon(
-              context.streamIcons.bubble3ChatMessage,
+              _isSelected(0) ? icons.bubble3Solid : icons.bubble3ChatMessage,
               color: _isSelected(0) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
             ),
             const PositionedDirectional(
@@ -53,7 +55,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       BottomNavigationBarItem(
         icon: Icon(
-          context.streamIcons.at,
+          _isSelected(1) ? icons.atSolid : icons.at,
           color: _isSelected(1) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: AppLocalizations.of(context).mentions,
@@ -63,7 +65,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           clipBehavior: Clip.none,
           children: [
             Icon(
-              Icons.message_outlined,
+              _isSelected(2) ? icons.bubbleText6Solid : icons.bubbleText6ChatMessage,
               color: _isSelected(2) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
             ),
             PositionedDirectional(
@@ -77,14 +79,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       BottomNavigationBarItem(
         icon: Icon(
-          Icons.edit_note_rounded,
+          _isSelected(3) ? icons.editBigSolid : icons.editBig,
           color: _isSelected(3) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: 'Drafts',
       ),
       BottomNavigationBarItem(
         icon: Icon(
-          Icons.bookmark_border_rounded,
+          icons.bookmark,
           color: _isSelected(4) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: 'Reminders',
