@@ -524,6 +524,10 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool _actionsShrunk = false;
+  bool _isPickerVisible = false;
+
+  StreamAttachmentPickerController? _pickerController;
+  bool _isSyncingControllers = false;
 
   late StreamChatThemeData _streamChatTheme;
   late StreamMessageInputThemeData _messageInputTheme;
@@ -645,8 +649,14 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   @override
   String? get restorationId => widget.restorationId;
 
-  // ignore: no-empty-block
-  void _focusNodeListener() {}
+  void _focusNodeListener() {
+    if (_effectiveFocusNode.hasFocus && _isPickerVisible) {
+      setState(() {
+        _isPickerVisible = false;
+        _closePicker();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -685,6 +695,8 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
     final shadow = widget.shadow ?? _messageInputTheme.shadow;
     final elevation = widget.elevation ?? _messageInputTheme.elevation;
+    final spacing = context.streamSpacing;
+
     return Portal(
       child: Material(
         elevation: elevation ?? 8,
@@ -694,7 +706,8 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             boxShadow: [if (shadow != null) shadow],
           ),
           child: SimpleSafeArea(
-            enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
+            enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
+            minimum: EdgeInsets.only(bottom: _isPickerVisible ? 0 : spacing.md),
             child: Center(heightFactor: 1, child: messageInput),
           ),
         ),
@@ -768,15 +781,60 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
-      builder: (context, value, _) => StreamChatMessageComposer(
-        controller: controller,
-        currentUserId: currentUserId,
-        onAttachmentButtonPressed: _onAttachmentButtonPressed,
-        placeholder: _getHint(context) ?? '',
-        focusNode: focusNode,
-        onSendPressed: sendMessage,
-        audioRecorderController: _audioRecorderController,
+      builder: (context, value, _) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          StreamChatMessageComposer(
+            controller: controller,
+            currentUserId: currentUserId,
+            onAttachmentButtonPressed: _onAttachmentButtonPressed,
+            isPickerOpen: _isPickerVisible,
+            placeholder: _getHint(context) ?? '',
+            focusNode: focusNode,
+            onSendPressed: sendMessage,
+            audioRecorderController: _audioRecorderController,
+          ),
+          if (_isPickerVisible && _pickerController != null) _buildInlineAttachmentPicker(context),
+        ],
       ),
+    );
+  }
+
+  Widget _buildInlineAttachmentPicker(BuildContext context) {
+    final allowedTypes = _getAllowedAttachmentPickerTypes();
+
+    final messageInputTheme = StreamMessageInputTheme.of(context);
+    final isWebOrDesktop = switch (CurrentPlatform.type) {
+      PlatformType.android || PlatformType.ios => false,
+      _ => true,
+    };
+    final useSystemPicker =
+        widget.useSystemAttachmentPicker || (messageInputTheme.useSystemAttachmentPicker ?? false) || isWebOrDesktop;
+
+    final builder = switch (useSystemPicker) {
+      true => () => systemAttachmentPickerBuilder(
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.pollConfig,
+        optionsBuilder: widget.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      ),
+      false => () => tabbedAttachmentPickerBuilder(
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.pollConfig,
+        optionsBuilder: widget.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      ),
+    };
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.4,
+      child: builder(),
     );
   }
 
@@ -972,6 +1030,14 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   }
 
   Future<void> _onPollCreated(Poll poll) async {
+    // Close the picker after poll creation.
+    if (_isPickerVisible) {
+      setState(() {
+        _isPickerVisible = false;
+        _closePicker();
+      });
+    }
+
     final channel = StreamChannel.maybeOf(context)?.channel;
     if (channel == null) return;
 
@@ -997,52 +1063,70 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     return allowedTypes.toList(growable: false);
   }
 
-  /// Handle the platform-specific logic for selecting files.
-  ///
-  /// On mobile, this will open the file selection bottom sheet. On desktop,
-  /// this will open the native file system and allow the user to select one
-  /// or more files.
-  Future<void> _onAttachmentButtonPressed() async {
-    final initialPoll = _effectiveController.poll;
-    final initialAttachments = _effectiveController.attachments;
-    final allowedTypes = _getAllowedAttachmentPickerTypes();
+  /// Toggles the inline attachment picker visibility.
+  void _onAttachmentButtonPressed() {
+    setState(() {
+      _isPickerVisible = !_isPickerVisible;
+      if (_isPickerVisible) {
+        _openPicker();
+      } else {
+        _closePicker();
+      }
+    });
+  }
 
-    final messageInputTheme = StreamMessageInputTheme.of(context);
-    final useSystemPicker = widget.useSystemAttachmentPicker || (messageInputTheme.useSystemAttachmentPicker ?? false);
-
-    final result = await showStreamAttachmentPickerModalBottomSheet(
-      context: context,
-      allowedTypes: allowedTypes,
-      initialPoll: initialPoll,
-      pollConfig: widget.pollConfig,
-      initialAttachments: initialAttachments,
-      useSystemAttachmentPicker: useSystemPicker,
-      optionsBuilder: widget.attachmentPickerOptionsBuilder,
+  Future<void> _openPicker() async {
+    if (_effectiveFocusNode.hasFocus) {
+      _effectiveFocusNode.unfocus();
+      await Future.delayed(const Duration(milliseconds: 30));
+    }
+    _pickerController = StreamAttachmentPickerController(
+      initialAttachments: _effectiveController.attachments,
+      initialPoll: _effectiveController.poll,
     );
+    _pickerController!.addListener(_onPickerControllerChanged);
+    _effectiveController.addListener(_onMessageInputControllerChanged);
+  }
 
-    if (result == null || result is! StreamAttachmentPickerResult) return;
+  void _closePicker() {
+    _pickerController?.removeListener(_onPickerControllerChanged);
+    _effectiveController.removeListener(_onMessageInputControllerChanged);
+    _pickerController?.dispose();
+    _pickerController = null;
+  }
 
-    // Returns early if the result is already handled by the user.
-    final resultHandled = await widget.onAttachmentPickerResult?.call(result);
-    if (resultHandled ?? false) return;
-
-    void _onAttachmentsPicked(List<Attachment> attachments) {
-      _effectiveController.attachments = attachments;
+  void _onPickerControllerChanged() {
+    if (_isSyncingControllers) return;
+    _isSyncingControllers = true;
+    try {
+      final pickerAttachments = _pickerController?.value.attachments ?? [];
+      _effectiveController.attachments = pickerAttachments;
+    } finally {
+      _isSyncingControllers = false;
     }
+  }
 
-    void _onAttachmentPickerError(AttachmentPickerError error) {
-      return widget.onError?.call(error.error, error.stackTrace);
+  void _onMessageInputControllerChanged() {
+    if (_isSyncingControllers) return;
+    _isSyncingControllers = true;
+    try {
+      final pickerController = _pickerController;
+      if (pickerController == null) return;
+
+      final messageAttachmentIds = _effectiveController.attachments.map((a) => a.id).toSet();
+      final pickerAttachmentIds = pickerController.value.attachments.map((a) => a.id).toSet();
+
+      // Remove attachments from picker that were removed from the composer.
+      for (final id in pickerAttachmentIds.difference(messageAttachmentIds)) {
+        pickerController.removeAttachmentById(id);
+      }
+    } finally {
+      _isSyncingControllers = false;
     }
+  }
 
-    return switch (result) {
-      // Add the attachments to the controller.
-      AttachmentsPicked() => _onAttachmentsPicked(result.attachments),
-      // Send the created poll in the channel.
-      PollCreated() => _onPollCreated(result.poll),
-      // Handle/Notify returned errors.
-      AttachmentPickerError() => _onAttachmentPickerError(result),
-      _ => Future.value(), // Ignore other results.
-    };
+  void _onPickerError(AttachmentPickerError error) {
+    widget.onError?.call(error.error, error.stackTrace);
   }
 
   Widget _buildTextInput(BuildContext context) {
@@ -1474,6 +1558,14 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     if (_effectiveController.isSlowModeActive) return;
     if (!widget.validator(_effectiveController.message)) return;
 
+    // Close the picker when sending a message.
+    if (_isPickerVisible) {
+      setState(() {
+        _isPickerVisible = false;
+        _closePicker();
+      });
+    }
+
     final streamChannel = StreamChannel.maybeOf(context);
     if (streamChannel == null) return;
 
@@ -1631,6 +1723,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
   @override
   void dispose() {
+    _closePicker();
     _effectiveController.removeListener(_onChangedDebounced);
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);

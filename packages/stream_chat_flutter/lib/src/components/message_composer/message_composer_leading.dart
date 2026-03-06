@@ -30,6 +30,9 @@ class _DefaultStreamMessageComposerLeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 45 degrees = 0.125 turns
+    const closedRotation = 0.125;
+
     return AnimatedOpacity(
       opacity: props.isAudioRecordingFlowActive ? 0.0 : 1.0,
       duration: props.isAudioRecordingFlowActive ? Duration.zero : const Duration(milliseconds: 200),
@@ -40,15 +43,20 @@ class _DefaultStreamMessageComposerLeading extends StatelessWidget {
         child: Row(
           children: [
             if (!props.isAudioRecordingFlowActive) ...[
-              StreamButton.icon(
-                icon: context.streamIcons.plusLarge,
-                style: StreamButtonStyle.secondary,
-                type: StreamButtonType.outline,
-                size: StreamButtonSize.large,
-                isFloating: props.isFloating,
-                onTap: () {
-                  props.onAttachmentButtonPressed?.call();
-                },
+              AnimatedRotation(
+                turns: props.isPickerOpen ? closedRotation : 0,
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOut,
+                child: StreamButton.icon(
+                  icon: context.streamIcons.plusLarge,
+                  style: StreamButtonStyle.secondary,
+                  type: StreamButtonType.outline,
+                  size: StreamButtonSize.large,
+                  isFloating: props.isFloating,
+                  onTap: () {
+                    props.onAttachmentButtonPressed?.call();
+                  },
+                ),
               ),
               SizedBox(width: context.streamSpacing.xs),
             ],

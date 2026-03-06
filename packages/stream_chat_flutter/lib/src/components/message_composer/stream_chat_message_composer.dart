@@ -26,6 +26,7 @@ class StreamChatMessageComposer extends StatefulWidget {
     StreamMessageInputController? controller,
     required VoidCallback onSendPressed,
     VoidCallback? onAttachmentButtonPressed,
+    bool isPickerOpen = false,
     FocusNode? focusNode,
     String? currentUserId,
     String placeholder = '',
@@ -38,6 +39,7 @@ class StreamChatMessageComposer extends StatefulWidget {
          message: null,
          onSendPressed: onSendPressed,
          onAttachmentButtonPressed: onAttachmentButtonPressed,
+         isPickerOpen: isPickerOpen,
          focusNode: focusNode,
          currentUserId: currentUserId,
          placeholder: placeholder,
@@ -168,6 +170,7 @@ class MessageComposerProps {
     this.placeholder = '',
     required this.onSendPressed,
     this.onAttachmentButtonPressed,
+    this.isPickerOpen = false,
     this.focusNode,
     this.currentUserId,
     this.audioRecorderController,
@@ -192,6 +195,9 @@ class MessageComposerProps {
 
   /// The callback for when the attachment button is pressed.
   final VoidCallback? onAttachmentButtonPressed;
+
+  /// Whether the inline attachment picker is currently open.
+  final bool isPickerOpen;
 
   /// The focus node for the message composer.
   final FocusNode? focusNode;
@@ -263,6 +269,7 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: _createVoiceRecordingCallback(context),
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      isPickerOpen: props.isPickerOpen,
       audioRecorderState: audioRecorderState,
       focusNode: props.focusNode,
     );

@@ -5,13 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
-/// Bottom sheet widget for the system attachment picker interface.
-/// This is used when the attachment picker uses system integration,
-/// typically on web/desktop or when useSystemAttachmentPicker is true.
-class StreamSystemAttachmentPickerBottomSheet extends StatelessWidget {
-  /// Creates a new instance of [StreamSystemAttachmentPickerBottomSheet].
-  const StreamSystemAttachmentPickerBottomSheet({
+/// Inline widget for the system attachment picker interface.
+///
+/// Shows a list of options that launch native platform dialogs.
+/// Selections are applied in real-time via the [controller].
+class StreamSystemAttachmentPicker extends StatelessWidget {
+  /// Creates a new instance of [StreamSystemAttachmentPicker].
+  const StreamSystemAttachmentPicker({
     super.key,
     required this.options,
     required this.controller,
@@ -40,7 +42,7 @@ class StreamSystemAttachmentPickerBottomSheet extends StatelessWidget {
 
                 return ListTile(
                   enabled: isEnabled,
-                  leading: option.icon,
+                  leading: Icon(option.icon),
                   title: Text(option.title),
                   onTap: () => option.onTap(context, controller),
                 );
@@ -53,17 +55,21 @@ class StreamSystemAttachmentPickerBottomSheet extends StatelessWidget {
   }
 }
 
-/// Bottom sheet widget for the tabbed attachment picker interface.
-/// This is used when the attachment picker displays a tabbed interface,
-/// typically on mobile when useSystemAttachmentPicker is false.
-class StreamTabbedAttachmentPickerBottomSheet extends StatefulWidget {
-  /// Creates a new instance of [StreamTabbedAttachmentPickerBottomSheet].
-  const StreamTabbedAttachmentPickerBottomSheet({
+/// Inline widget for the tabbed attachment picker interface.
+///
+/// Displays a tabbed interface with horizontal tabs for different attachment
+/// types (gallery, camera, files, etc.). Each tab shows a specialized
+/// interface for selecting that type of attachment.
+///
+/// Selections are applied in real-time via the [controller] rather than
+/// through a modal result pattern.
+class StreamTabbedAttachmentPicker extends StatefulWidget {
+  /// Creates a new instance of [StreamTabbedAttachmentPicker].
+  const StreamTabbedAttachmentPicker({
     super.key,
     required this.options,
     required this.controller,
     this.initialOption,
-    this.onSendValue,
   });
 
   /// The list of options.
@@ -75,15 +81,11 @@ class StreamTabbedAttachmentPickerBottomSheet extends StatefulWidget {
   /// The controller of the attachment picker.
   final StreamAttachmentPickerController controller;
 
-  /// The callback when the send button gets tapped.
-  final ValueSetter<StreamAttachmentPickerResult>? onSendValue;
-
   @override
-  State<StreamTabbedAttachmentPickerBottomSheet> createState() => _StreamTabbedAttachmentPickerBottomSheetState();
+  State<StreamTabbedAttachmentPicker> createState() => _StreamTabbedAttachmentPickerState();
 }
 
-class _StreamTabbedAttachmentPickerBottomSheetState extends State<StreamTabbedAttachmentPickerBottomSheet> {
-  // The current option selected in the tabbed attachment picker.
+class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPicker> {
   late var _currentOption = _calculateInitialOption();
   TabbedAttachmentPickerOption _calculateInitialOption() {
     if (widget.initialOption case final option?) return option;
@@ -105,13 +107,13 @@ class _StreamTabbedAttachmentPickerBottomSheetState extends State<StreamTabbedAt
       valueListenable: widget.controller,
       builder: (context, value, _) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _TabbedAttachmentPickerOptions(
               controller: widget.controller,
               options: widget.options,
               currentOption: _currentOption,
-              onSendValue: widget.onSendValue,
               onOptionSelected: (option) async {
                 setState(() => _currentOption = option);
               },
@@ -135,84 +137,51 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
     required this.currentOption,
     required this.controller,
     this.onOptionSelected,
-    this.onSendValue,
   });
 
   final Iterable<TabbedAttachmentPickerOption> options;
   final TabbedAttachmentPickerOption currentOption;
   final StreamAttachmentPickerController controller;
   final ValueSetter<TabbedAttachmentPickerOption>? onOptionSelected;
-  final ValueSetter<StreamAttachmentPickerResult>? onSendValue;
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    final spacing = context.streamSpacing;
+
     return ValueListenableBuilder<AttachmentPickerValue>(
       valueListenable: controller,
       builder: (context, value, __) {
         final enabledTypes = value.filterEnabledTypes(options: options);
 
-        return Row(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    ...options.map(
-                      (option) {
-                        final supported = option.supportedTypes;
-                        final isEnabled = enabledTypes.any(supported.contains);
-                        final isSelected = option == currentOption;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          child: Row(
+            spacing: spacing.xxxs,
+            children: [
+              ...options.map(
+                (option) {
+                  final supported = option.supportedTypes;
+                  final isEnabled = enabledTypes.any(supported.contains);
+                  final isSelected = option == currentOption;
 
-                        final color = switch (isSelected) {
-                          true => colorTheme.accentPrimary,
-                          _ => colorTheme.textLowEmphasis,
-                        };
+                  final onPressed = switch (isEnabled) {
+                    true => () => onOptionSelected?.call(option),
+                    _ => null,
+                  };
 
-                        final onPressed = switch (isEnabled) {
-                          true => () => onOptionSelected?.call(option),
-                          _ => null,
-                        };
-
-                        return IconButton(
-                          color: color,
-                          disabledColor: colorTheme.disabled,
-                          icon: option.icon,
-                          onPressed: onPressed,
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                  return StreamButton.icon(
+                    style: StreamButtonStyle.secondary,
+                    type: StreamButtonType.ghost,
+                    size: StreamButtonSize.large,
+                    icon: option.icon,
+                    onTap: onPressed,
+                    isSelected: isSelected,
+                  );
+                },
               ),
-            ),
-            Builder(
-              builder: (context) {
-                final initialValue = controller.initialValue;
-                final isValueChanged = value != initialValue;
-
-                final onPressed = switch (onSendValue) {
-                  final onSendValue? when isValueChanged => () {
-                    final result = AttachmentsPicked(
-                      attachments: value.attachments,
-                    );
-                    return onSendValue(result);
-                  },
-                  _ => null,
-                };
-
-                return IconButton(
-                  color: colorTheme.accentPrimary,
-                  disabledColor: colorTheme.disabled,
-                  icon: Icon(
-                    context.streamIcons.chevronRight,
-                  ),
-                  onPressed: onPressed,
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -246,7 +215,7 @@ class EndOfFrameCallbackWidget extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget? child;
 
-  /// The callback that is called when the end of the frame is reached.x
+  /// The callback that is called when the end of the frame is reached.
   final EndOfFrameCallback onEndOfFrame;
 
   /// The callback that will be called if the [onEndOfFrame] callback throws an
@@ -291,8 +260,6 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
       return const Text('An error occurred');
     }
 
-    // Reset the error and stack trace so that we don't keep showing the same
-    // error over and over.
     _error = null;
     _stackTrace = null;
 
@@ -357,9 +324,7 @@ class OptionDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-
-    var height = 20.0;
+    var height = 0.0;
     if (title != null || actions.isNotEmpty) {
       height = 40.0;
     }
@@ -378,34 +343,20 @@ class OptionDrawer extends StatelessWidget {
       trailing = const Empty();
     }
 
-    return Card(
-      elevation: elevation,
-      color: color ?? colorTheme.barsBg,
-      margin: margin,
-      shape: shape,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: height,
-            child: Row(
-              children: [
-                Expanded(child: leading),
-                Container(
-                  height: 4,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: colorTheme.disabled,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                Expanded(child: trailing),
-              ],
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: height,
+          child: Row(
+            children: [
+              Expanded(child: leading),
+              Expanded(child: trailing),
+            ],
           ),
-          Expanded(child: child),
-        ],
-      ),
+        ),
+        Expanded(child: child),
+      ],
     );
   }
 }
@@ -418,9 +369,13 @@ class OptionDrawer extends StatelessWidget {
 /// attachment. Tabs get enabled or disabled based on what you've already
 /// selected.
 ///
-/// This is the default interface for mobile platforms. Configure with
-/// [customOptions], [galleryPickerConfig], [pollConfig], and
-/// [allowedTypes].
+/// Selections are applied in real-time via the [controller].
+///
+/// The [onError] callback is invoked when an error occurs during attachment
+/// selection (e.g., file too large or attachment limit reached).
+///
+/// The [onPollCreated] callback is invoked when a poll is created, allowing
+/// the caller to handle poll-specific logic.
 Widget tabbedAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
@@ -428,23 +383,13 @@ Widget tabbedAttachmentPickerBuilder({
   GalleryPickerConfig? galleryPickerConfig,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   AttachmentPickerOptionsBuilder? optionsBuilder,
+  ValueSetter<AttachmentPickerError>? onError,
+  ValueSetter<Poll>? onPollCreated,
 }) {
-  Future<StreamAttachmentPickerResult> _handleSingePick(
-    StreamAttachmentPickerController controller,
-    Attachment? attachment,
-  ) async {
-    try {
-      if (attachment != null) await controller.addAttachment(attachment);
-      return AttachmentsPicked(attachments: controller.value.attachments);
-    } catch (error, stk) {
-      return AttachmentPickerError(error: error, stackTrace: stk);
-    }
-  }
-
   final defaultOptions = <TabbedAttachmentPickerOption>[
     TabbedAttachmentPickerOption(
       key: 'gallery-picker',
-      icon: Icon(context.streamIcons.images1Alt),
+      icon: context.streamIcons.images1Alt,
       supportedTypes: [
         AttachmentPickerType.images,
         AttachmentPickerType.videos,
@@ -462,8 +407,9 @@ Widget tabbedAttachmentPickerBuilder({
               }
               return await controller.addAssetAttachment(media);
             } catch (e, stk) {
-              final err = AttachmentPickerError(error: e, stackTrace: stk);
-              return Navigator.pop(context, err);
+              onError?.call(
+                AttachmentPickerError(error: e, stackTrace: stk),
+              );
             }
           },
         );
@@ -471,40 +417,55 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'file-picker',
-      icon: Icon(context.streamIcons.fileBend),
+      icon: context.streamIcons.fileBend,
       supportedTypes: [AttachmentPickerType.files],
       optionViewBuilder: (context, controller) => StreamFilePicker(
         onFilePicked: (file) async {
-          final result = await _handleSingePick(controller, file);
-          return Navigator.pop(context, result);
+          try {
+            if (file != null) await controller.addAttachment(file);
+          } catch (e, stk) {
+            onError?.call(
+              AttachmentPickerError(error: e, stackTrace: stk),
+            );
+          }
         },
       ),
     ),
     TabbedAttachmentPickerOption(
       key: 'image-picker',
-      icon: Icon(context.streamIcons.camera1),
+      icon: context.streamIcons.camera1,
       supportedTypes: [AttachmentPickerType.images],
       optionViewBuilder: (context, controller) => StreamImagePicker(
         onImagePicked: (image) async {
-          final result = await _handleSingePick(controller, image);
-          return Navigator.pop(context, result);
+          try {
+            if (image != null) await controller.addAttachment(image);
+          } catch (e, stk) {
+            onError?.call(
+              AttachmentPickerError(error: e, stackTrace: stk),
+            );
+          }
         },
       ),
     ),
     TabbedAttachmentPickerOption(
       key: 'video-picker',
-      icon: Icon(context.streamIcons.video),
+      icon: context.streamIcons.video,
       supportedTypes: [AttachmentPickerType.videos],
       optionViewBuilder: (context, controller) => StreamVideoPicker(
         onVideoPicked: (video) async {
-          final result = await _handleSingePick(controller, video);
-          return Navigator.pop(context, result);
+          try {
+            if (video != null) await controller.addAttachment(video);
+          } catch (e, stk) {
+            onError?.call(
+              AttachmentPickerError(error: e, stackTrace: stk),
+            );
+          }
         },
       ),
     ),
     TabbedAttachmentPickerOption(
       key: 'poll-creator',
-      icon: Icon(context.streamIcons.chart5),
+      icon: context.streamIcons.chart5,
       supportedTypes: [AttachmentPickerType.poll],
       optionViewBuilder: (context, controller) {
         final initialPoll = controller.value.poll;
@@ -512,11 +473,9 @@ Widget tabbedAttachmentPickerBuilder({
           poll: initialPoll,
           config: pollConfig,
           onPollCreated: (poll) {
-            if (poll == null) return Navigator.pop(context);
+            if (poll == null) return;
             controller.poll = poll;
-
-            final result = PollCreated(poll: poll);
-            return Navigator.pop(context, result);
+            onPollCreated?.call(poll);
           },
         );
       },
@@ -537,9 +496,8 @@ Widget tabbedAttachmentPickerBuilder({
     );
   }
 
-  return StreamTabbedAttachmentPickerBottomSheet(
+  return StreamTabbedAttachmentPicker(
     controller: controller,
-    onSendValue: Navigator.of(context).pop,
     options: {
       ...validOptions.where(
         (option) => option.supportedTypes.every(allowedTypes.contains),
@@ -554,9 +512,12 @@ Widget tabbedAttachmentPickerBuilder({
 /// built-in file browser, camera app, or other native tools instead of
 /// custom interfaces.
 ///
-/// This is the default for web and desktop platforms, and can be enabled on
-/// mobile with `useSystemAttachmentPicker`. Configure with [customOptions],
-/// [pollConfig], and [allowedTypes].
+/// Selections are applied in real-time via the [controller].
+///
+/// The [onError] callback is invoked when an error occurs during attachment
+/// selection.
+///
+/// The [onPollCreated] callback is invoked when a poll is created.
 Widget systemAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
@@ -564,18 +525,18 @@ Widget systemAttachmentPickerBuilder({
   GalleryPickerConfig? galleryPickerConfig = const GalleryPickerConfig(),
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
   AttachmentPickerOptionsBuilder? optionsBuilder,
+  ValueSetter<AttachmentPickerError>? onError,
+  ValueSetter<Poll>? onPollCreated,
 }) {
-  Future<StreamAttachmentPickerResult> _pickSystemFile(
+  Future<void> pickSystemFile(
     StreamAttachmentPickerController controller,
     FileType type,
   ) async {
     try {
       final file = await StreamAttachmentHandler.instance.pickFile(type: type);
       if (file != null) await controller.addAttachment(file);
-
-      return AttachmentsPicked(attachments: controller.value.attachments);
-    } catch (error, stk) {
-      return AttachmentPickerError(error: error, stackTrace: stk);
+    } catch (e, stk) {
+      onError?.call(AttachmentPickerError(error: e, stackTrace: stk));
     }
   }
 
@@ -583,37 +544,34 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'image-picker',
       supportedTypes: [AttachmentPickerType.images],
-      icon: Icon(context.streamIcons.images1Alt),
+      icon: context.streamIcons.images1Alt,
       title: context.translations.uploadAPhotoLabel,
       onTap: (context, controller) async {
-        final result = await _pickSystemFile(controller, FileType.image);
-        return Navigator.pop(context, result);
+        await pickSystemFile(controller, FileType.image);
       },
     ),
     SystemAttachmentPickerOption(
       key: 'video-picker',
       supportedTypes: [AttachmentPickerType.videos],
-      icon: Icon(context.streamIcons.video),
+      icon: context.streamIcons.video,
       title: context.translations.uploadAVideoLabel,
       onTap: (context, controller) async {
-        final result = await _pickSystemFile(controller, FileType.video);
-        return Navigator.pop(context, result);
+        await pickSystemFile(controller, FileType.video);
       },
     ),
     SystemAttachmentPickerOption(
       key: 'file-picker',
       supportedTypes: [AttachmentPickerType.files],
-      icon: Icon(context.streamIcons.fileBend),
+      icon: context.streamIcons.fileBend,
       title: context.translations.uploadAFileLabel,
       onTap: (context, controller) async {
-        final result = await _pickSystemFile(controller, FileType.any);
-        return Navigator.pop(context, result);
+        await pickSystemFile(controller, FileType.any);
       },
     ),
     SystemAttachmentPickerOption(
       key: 'poll-creator',
       supportedTypes: [AttachmentPickerType.poll],
-      icon: Icon(context.streamIcons.chart5),
+      icon: context.streamIcons.chart5,
       title: context.translations.createPollLabel(isNew: true),
       onTap: (context, controller) async {
         final initialPoll = controller.value.poll;
@@ -623,11 +581,9 @@ Widget systemAttachmentPickerBuilder({
           config: pollConfig,
         );
 
-        if (poll == null) return Navigator.pop(context);
+        if (poll == null) return;
         controller.poll = poll;
-
-        final result = PollCreated(poll: poll);
-        return Navigator.pop(context, result);
+        onPollCreated?.call(poll);
       },
     ),
   ];
@@ -646,7 +602,7 @@ Widget systemAttachmentPickerBuilder({
     );
   }
 
-  return StreamSystemAttachmentPickerBottomSheet(
+  return StreamSystemAttachmentPicker(
     controller: controller,
     options: {
       ...validOptions.where(
