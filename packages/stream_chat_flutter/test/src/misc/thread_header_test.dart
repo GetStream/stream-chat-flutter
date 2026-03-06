@@ -54,7 +54,8 @@ void main() {
               channel: channel,
               child: Scaffold(
                 body: StreamThreadHeader(
-                  parent: Message(),
+                  parent: Message(replyCount: 1),
+                  showTypingIndicator: false,
                 ),
               ),
             ),
@@ -65,11 +66,9 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      expect(find.text('with '), findsOneWidget);
-      expect(find.byType(StreamChannelName), findsOneWidget);
       expect(find.byType(StreamBackButton), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('Thread Reply'), findsOneWidget);
+      expect(find.text('1 reply'), findsOneWidget);
+      expect(find.text('Thread'), findsOneWidget);
     },
   );
 

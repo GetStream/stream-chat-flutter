@@ -54,9 +54,7 @@ class _ThreadPageState extends State<ThreadPage> {
 
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: StreamThreadHeader(
-        parent: widget.parent,
-      ),
+      appBar: StreamThreadHeader(parent: widget.parent),
       body: Column(
         children: <Widget>[
           Expanded(

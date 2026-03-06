@@ -283,7 +283,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get deleteConversationQuestion => 'Er du sikker på at du ønsker å slette denne samtalen?';
 
   @override
-  String get streamChatLabel => 'Stream Chat';
+  String get streamChatLabel => 'Samtaler';
 
   @override
   String get searchingForNetworkText => 'Søker etter nettverk';

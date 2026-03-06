@@ -291,7 +291,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get deleteConversationQuestion => 'Sei sicuro di voler eliminare questa conversazione?';
 
   @override
-  String get streamChatLabel => 'Stream Chat';
+  String get streamChatLabel => 'Conversazioni';
 
   @override
   String get searchingForNetworkText => 'Cercando una connessione';

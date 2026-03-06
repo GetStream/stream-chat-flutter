@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamChannelListHeader}
 /// Shows the current [StreamChatClient] status.
@@ -53,7 +54,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
     this.leading,
     this.actions,
     this.backgroundColor,
-    this.elevation = 1,
+    this.elevation = 0,
   });
 
   /// Use this if you don't have a [StreamChatClient] in your widget tree.
@@ -124,9 +125,10 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
               break;
           }
 
-          final chatThemeData = StreamChatTheme.of(context);
           final channelListHeaderThemeData = StreamChannelListHeaderTheme.of(context);
           final theme = Theme.of(context);
+          final colorScheme = context.streamColorScheme;
+
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
@@ -139,6 +141,13 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
               elevation: elevation,
               backgroundColor: backgroundColor ?? channelListHeaderThemeData.color,
               centerTitle: centerTitle,
+              shape: LinearBorder(
+                side: BorderSide(
+                  color: colorScheme.borderDefault,
+                  width: 1,
+                ),
+                bottom: const LinearBorderEdge(),
+              ),
               leading: switch ((leading, user)) {
                 (final leading?, _) => leading,
                 (_, final user?) => Center(
@@ -162,25 +171,19 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
               actions:
                   actions ??
                   [
-                    StreamNeumorphicButton(
-                      child: IconButton(
-                        icon: StreamConnectionStatusBuilder(
-                          statusBuilder: (context, status) {
-                            final color = switch (status) {
-                              ConnectionStatus.connected => chatThemeData.colorTheme.accentPrimary,
-                              ConnectionStatus.connecting => Colors.grey,
-                              ConnectionStatus.disconnected => Colors.grey,
-                            };
+                    StreamConnectionStatusBuilder(
+                      statusBuilder: (context, status) {
+                        final callback = switch (status) {
+                          ConnectionStatus.connected => onNewChatButtonTap,
+                          ConnectionStatus.connecting => null,
+                          ConnectionStatus.disconnected => null,
+                        };
 
-                            return Icon(
-                              context.streamIcons.pencil,
-                              size: 24,
-                              color: color,
-                            );
-                          },
-                        ),
-                        onPressed: onNewChatButtonTap,
-                      ),
+                        return StreamButton.icon(
+                          icon: context.streamIcons.plusLarge,
+                          onTap: callback,
+                        );
+                      },
                     ),
                   ],
               title: Column(

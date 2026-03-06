@@ -284,7 +284,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get deleteConversationQuestion => 'Tem certeza que deseja apagar essa conversa?';
 
   @override
-  String get streamChatLabel => 'Stream Chat';
+  String get streamChatLabel => 'Conversas';
 
   @override
   String get searchingForNetworkText => 'Pesquisando rede';
