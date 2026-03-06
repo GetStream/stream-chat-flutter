@@ -26,19 +26,19 @@ class StreamDateDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
         decoration: BoxDecoration(
-          color: chatThemeData.colorTheme.overlayDark,
+          color: colorScheme.backgroundSurfaceSubtle,
           borderRadius: BorderRadius.circular(8),
         ),
         child: StreamTimestamp(
           date: dateTime.toLocal(),
-          style: chatThemeData.textTheme.footnote.copyWith(
-            color: chatThemeData.colorTheme.barsBg,
-          ),
+          style: textTheme.metadataEmphasis.copyWith(color: colorScheme.textSecondary),
           formatter: (context, date) {
             if (formatter case final formatter?) {
               final timestamp = formatter.call(context, date);
