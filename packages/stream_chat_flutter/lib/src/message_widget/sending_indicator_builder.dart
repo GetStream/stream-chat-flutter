@@ -40,7 +40,6 @@ class SendingIndicatorBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = messageTheme.createdAtStyle;
     final channel = this.channel ?? StreamChannel.of(context).channel;
-    final memberCount = channel.memberCount ?? 0;
 
     if (hasNonUrlAttachments && message.state.isOutgoing) {
       final totalAttachments = message.attachments.length;
@@ -69,31 +68,12 @@ class SendingIndicatorBuilder extends StatelessWidget {
         final deliveriesList = data.deliveriesOf(message: message);
         final isMessageDelivered = deliveriesList.isNotEmpty;
 
-        Widget child = StreamSendingIndicator(
+        return StreamSendingIndicator(
           message: message,
           isMessageRead: isMessageRead,
           isMessageDelivered: isMessageDelivered,
-          size: style?.fontSize,
+          size: 16,
         );
-
-        if (isMessageRead) {
-          child = Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (memberCount > 2)
-                Text(
-                  readList.length.toString(),
-                  style: style?.copyWith(
-                    color: streamChatTheme.colorTheme.accentPrimary,
-                  ),
-                ),
-              const SizedBox(width: 2),
-              child,
-            ],
-          );
-        }
-
-        return child;
       },
     );
   }

@@ -210,7 +210,6 @@ class StreamChatThemeData {
         createdAtStyle: textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
         messageBackgroundColor: colorTheme.inputBg,
-        messageBorderColor: colorTheme.borders,
         reactionsBackgroundColor: colorTheme.barsBg,
         reactionsBorderColor: colorTheme.borders,
         reactionsMaskColor: colorTheme.appBg,
@@ -243,7 +242,6 @@ class StreamChatThemeData {
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
         messageLinksStyle: TextStyle(color: accentColor),
         messageBackgroundColor: colorTheme.barsBg,
-        messageBorderColor: colorTheme.borders,
         avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(

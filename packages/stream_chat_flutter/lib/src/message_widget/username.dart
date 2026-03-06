@@ -9,14 +9,14 @@ class Username extends StatelessWidget {
   const Username({
     super.key,
     required this.message,
-    required this.messageTheme,
+    required this.textStyle,
   });
 
   /// {@macro message}
   final Message message;
 
   /// {@macro messageTheme}
-  final StreamMessageThemeData messageTheme;
+  final TextStyle textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class Username extends StatelessWidget {
       message.user?.name ?? '',
       maxLines: 1,
       key: key,
-      style: messageTheme.messageAuthorStyle,
+      style: textStyle,
       overflow: TextOverflow.ellipsis,
     );
   }

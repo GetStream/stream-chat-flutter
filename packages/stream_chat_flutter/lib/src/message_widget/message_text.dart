@@ -10,7 +10,7 @@ class StreamMessageText extends StatelessWidget {
   const StreamMessageText({
     super.key,
     required this.message,
-    required this.messageTheme,
+    this.messageTheme,
     this.onMentionTap,
     this.onLinkTap,
   });
@@ -25,7 +25,7 @@ class StreamMessageText extends StatelessWidget {
   final void Function(String)? onLinkTap;
 
   /// [StreamMessageThemeData] whose text theme is to be applied
-  final StreamMessageThemeData messageTheme;
+  final StreamMessageThemeData? messageTheme;
 
   @override
   Widget build(BuildContext context) {

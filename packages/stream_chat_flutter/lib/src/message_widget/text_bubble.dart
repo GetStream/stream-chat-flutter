@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// {@template textBubble}
 /// The bubble around a [StreamMessageText].
@@ -14,7 +15,7 @@ class TextBubble extends StatelessWidget {
     required this.message,
     required this.isOnlyEmoji,
     required this.textPadding,
-    required this.messageTheme,
+    required this.messageStyle,
     required this.hasUrlAttachments,
     required this.hasQuotedMessage,
     this.textBuilder,
@@ -40,8 +41,8 @@ class TextBubble extends StatelessWidget {
   /// {@macro onMentionTap}
   final void Function(User)? onMentionTap;
 
-  /// {@macro messageTheme}
-  final StreamMessageThemeData messageTheme;
+  /// TODO: merge with messageTheme
+  final core.StreamMessageStyle messageStyle;
 
   /// {@macro hasUrlAttachments}
   final bool hasUrlAttachments;
@@ -52,22 +53,21 @@ class TextBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (message.text?.trim().isEmpty ?? true) return const Empty();
-    return Padding(
-      padding: isOnlyEmoji ? EdgeInsets.zero : textPadding,
-      child: textBuilder != null
-          ? textBuilder!(context, message)
-          : StreamMessageText(
-              onLinkTap: onLinkTap,
-              message: message,
-              onMentionTap: onMentionTap,
-              messageTheme: isOnlyEmoji
-                  ? messageTheme.copyWith(
-                      messageTextStyle: messageTheme.messageTextStyle!.copyWith(
-                        fontSize: 42,
-                      ),
-                    )
-                  : messageTheme,
-            ),
+    return DefaultTextStyle(
+      style: context.streamTextTheme.bodyDefault.copyWith(
+        color: messageStyle.textColor,
+        fontSize: isOnlyEmoji ? 42 : null,
+      ),
+      child: Padding(
+        padding: isOnlyEmoji ? EdgeInsets.zero : textPadding,
+        child: textBuilder != null
+            ? textBuilder!(context, message)
+            : StreamMessageText(
+                onLinkTap: onLinkTap,
+                message: message,
+                onMentionTap: onMentionTap,
+              ),
+      ),
     );
   }
 }

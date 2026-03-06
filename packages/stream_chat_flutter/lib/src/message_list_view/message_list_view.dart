@@ -15,6 +15,7 @@ import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separa
 import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
 /// of how much space / which widget to build after it)
@@ -84,7 +85,7 @@ class StreamMessageListView extends StatefulWidget {
   const StreamMessageListView({
     super.key,
     this.showScrollToBottom = true,
-    this.showUnreadCountOnScrollToBottom = false,
+    this.showUnreadCountOnScrollToBottom = true,
     this.scrollToBottomBuilder,
     this.showUnreadIndicator = true,
     this.unreadIndicatorBuilder,
@@ -1019,7 +1020,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showDeleteMessage: false,
       showEditMessage: false,
       showMarkUnreadMessage: false,
-      padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
       attachmentPadding: EdgeInsets.all(
         hasUrlAttachment
@@ -1047,8 +1047,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         bottomRight: isMyMessage ? Radius.zero : const Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
-        vertical: 8,
-        horizontal: isOnlyEmoji ? 0 : 16.0,
+        vertical: context.streamSpacing.xs,
+        horizontal: isOnlyEmoji ? 0 : context.streamSpacing.sm,
       ),
       borderSide: borderSide,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
@@ -1099,45 +1099,30 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             clipBehavior: Clip.none,
             children: [
               FloatingActionButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 backgroundColor: _streamTheme.colorTheme.barsBg,
                 onPressed: () async {
                   return scrollToBottomDefaultTapAction(unreadCount);
                 },
                 child: widget.reverse
                     ? Icon(
-                        context.streamIcons.chevronDown,
+                        context.streamIcons.arrowDown,
                         color: _streamTheme.colorTheme.textHighEmphasis,
                       )
                     : Icon(
-                        context.streamIcons.chevronTop,
+                        context.streamIcons.arrowUp,
                         color: _streamTheme.colorTheme.textHighEmphasis,
                       ),
               ),
               if (showUnreadCount && widget.showUnreadCountOnScrollToBottom)
                 Positioned(
-                  left: 0,
-                  right: 0,
-                  top: -10,
-                  child: Center(
-                    child: Material(
-                      borderRadius: BorderRadius.circular(8),
-                      color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 5,
-                          right: 5,
-                          top: 2,
-                          bottom: 2,
-                        ),
-                        child: Text(
-                          '${unreadCount > 99 ? '99+' : unreadCount}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                  right: -4,
+                  top: -4,
+                  child: StreamBadgeNotification(
+                    label: '${unreadCount > 99 ? '99+' : unreadCount}',
+                    size: StreamBadgeNotificationSize.sm,
                   ),
                 ),
             ],
@@ -1248,13 +1233,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
 
     final borderSide = isOnlyEmoji ? BorderSide.none : null;
+    final defaultBorderRadius = context.streamRadius.xxl;
 
     Widget messageWidget = StreamMessageWidget(
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted && !message.state.isDeletingFailed,
       showReactionPicker: !message.isDeleted && !message.state.isDeletingFailed,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
       showInChannelIndicator: showInChannelIndicator,
       showThreadReplyIndicator: showThreadReplyIndicator,
       showUsername: showUsername,
@@ -1319,22 +1304,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             : 2,
       ),
       borderRadiusGeometry: BorderRadius.only(
-        topLeft: const Radius.circular(16),
-        bottomLeft: isMyMessage
-            ? const Radius.circular(16)
-            : Radius.circular(
-                (hasTimeDiff || !isNextUserSame) && !(hasReplies || isThreadMessage) ? 0 : 16,
-              ),
-        topRight: const Radius.circular(16),
-        bottomRight: isMyMessage
-            ? Radius.circular(
-                (hasTimeDiff || !isNextUserSame) && !(hasReplies || isThreadMessage) ? 0 : 16,
-              )
-            : const Radius.circular(16),
+        topLeft: defaultBorderRadius,
+        bottomLeft: isMyMessage || !((hasTimeDiff || !isNextUserSame) && !(hasReplies || isThreadMessage))
+            ? defaultBorderRadius
+            : Radius.zero,
+        topRight: defaultBorderRadius,
+        bottomRight: isMyMessage && (hasTimeDiff || !isNextUserSame) && !(hasReplies || isThreadMessage)
+            ? Radius.zero
+            : defaultBorderRadius,
       ),
       textPadding: EdgeInsets.symmetric(
-        vertical: 8,
-        horizontal: isOnlyEmoji ? 0 : 16.0,
+        vertical: context.streamSpacing.xs,
+        horizontal: isOnlyEmoji ? 0 : context.streamSpacing.sm,
       ),
       messageTheme: isMyMessage ? _streamTheme.ownMessageTheme : _streamTheme.otherMessageTheme,
       onMessageTap: widget.onMessageTap,

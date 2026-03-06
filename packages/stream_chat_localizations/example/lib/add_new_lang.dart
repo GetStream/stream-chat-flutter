@@ -118,8 +118,8 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String threadSeparatorText(int replyCount) {
-    if (replyCount == 1) return '1 Reply';
-    return '$replyCount Replies';
+    if (replyCount == 1) return '1 reply';
+    return '$replyCount replies';
   }
 
   @override
