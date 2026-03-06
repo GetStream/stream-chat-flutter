@@ -101,7 +101,6 @@ extension StringExtension on String {
 
   /// Levenshtein distance between this and [t].
   int levenshteinDistance(String t) => levenshtein(this, t);
-
 }
 
 /// List extension
