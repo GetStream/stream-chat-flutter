@@ -59,15 +59,13 @@ void main() {
         expect(capturedDeliveries, hasLength(2));
         expect(
           capturedDeliveries.any(
-            (d) =>
-                d.channelCid == 'test:channel-1' && d.messageId == 'message-1',
+            (d) => d.channelCid == 'test:channel-1' && d.messageId == 'message-1',
           ),
           isTrue,
         );
         expect(
           capturedDeliveries.any(
-            (d) =>
-                d.channelCid == 'test:channel-2' && d.messageId == 'message-2',
+            (d) => d.channelCid == 'test:channel-2' && d.messageId == 'message-2',
           ),
           isTrue,
         );
@@ -504,6 +502,340 @@ void main() {
         await delay(150);
 
         expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should be safe to call multiple times', () {
+        reporter.cancel();
+        reporter.cancel();
+        reporter.cancel();
+        // Should not throw
+      });
+    });
+
+    group('edge cases', () {
+      test('should handle empty channel list in submitForDelivery', () async {
+        await reporter.submitForDelivery([]);
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should handle empty channel list in reconcileDelivery', () async {
+        await reporter.reconcileDelivery([]);
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should handle empty channel list in cancelDelivery', () async {
+        await reporter.cancelDelivery([]);
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should handle channel with empty state', () async {
+        final channel = Channel(client, 'test-type', 'test-id');
+        await reporter.submitForDelivery([channel]);
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should handle concurrent submitForDelivery calls', () async {
+        final channels = List.generate(10, (i) {
+          final message = _createMessage((m) => m.copyWith(id: 'message-$i'));
+          return _createDeliverableChannel(
+            client,
+            cid: 'test:channel-$i',
+            message: message,
+          );
+        });
+
+        // Submit concurrently
+        await Future.wait([
+          reporter.submitForDelivery(channels.sublist(0, 5)),
+          reporter.submitForDelivery(channels.sublist(5, 10)),
+        ]);
+
+        await delay(150);
+
+        expect(capturedDeliveries, hasLength(10));
+      });
+
+      test('should handle concurrent reconcileDelivery calls', () async {
+        final message = _createMessage((m) => m.copyWith(id: 'message-1'));
+        final channel = _createDeliverableChannel(
+          client,
+          cid: 'test:channel-1',
+          message: message,
+        );
+
+        await reporter.submitForDelivery([channel]);
+
+        // Reconcile concurrently
+        await Future.wait([
+          reporter.reconcileDelivery([channel]),
+          reporter.reconcileDelivery([channel]),
+        ]);
+
+        await delay(150);
+
+        expect(capturedDeliveries, hasLength(1));
+      });
+
+      test('should handle concurrent cancelDelivery calls', () async {
+        final message = _createMessage((m) => m.copyWith(id: 'message-1'));
+        final channel = _createDeliverableChannel(
+          client,
+          cid: 'test:channel-1',
+          message: message,
+        );
+
+        await reporter.submitForDelivery([channel]);
+
+        // Cancel concurrently
+        await Future.wait([
+          reporter.cancelDelivery(['test:channel-1']),
+          reporter.cancelDelivery(['test:channel-1']),
+        ]);
+
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should preserve newer message when updated during delivery', () async {
+        var deliveryCount = 0;
+        final slowReporter = ChannelDeliveryReporter(
+          throttleDuration: const Duration(milliseconds: 50),
+          onMarkChannelsDelivered: (deliveries) async {
+            deliveryCount++;
+            if (deliveryCount == 1) {
+              // Simulate slow network
+              await Future.delayed(const Duration(milliseconds: 100));
+            }
+            capturedDeliveries.addAll(deliveries);
+          },
+        );
+
+        try {
+          final message1 = _createMessage((m) => m.copyWith(id: 'message-1'));
+          final channel1 = _createDeliverableChannel(
+            client,
+            cid: 'test:channel-1',
+            message: message1,
+          );
+
+          await slowReporter.submitForDelivery([channel1]);
+          await delay(75);
+
+          // Update with newer message while first delivery is in progress
+          final message2 = _createMessage((m) => m.copyWith(id: 'message-2'));
+          final channel1Updated = _createDeliverableChannel(
+            client,
+            cid: 'test:channel-1',
+            message: message2,
+          );
+          await slowReporter.submitForDelivery([channel1Updated]);
+
+          await delay(200);
+
+          // Should have both deliveries
+          expect(deliveryCount, 2);
+          expect(
+            capturedDeliveries.any((d) => d.messageId == 'message-1'),
+            isTrue,
+          );
+          expect(
+            capturedDeliveries.any((d) => d.messageId == 'message-2'),
+            isTrue,
+          );
+        } finally {
+          slowReporter.cancel();
+        }
+      });
+
+      test('should handle message without id', () async {
+        final message = Message(
+          text: 'Test message',
+          user: User(id: 'other-user-id'),
+          createdAt: DateTime.now(),
+        );
+
+        final channel = _createChannel(
+          client,
+          cid: 'test:channel-1',
+          lastMessage: message,
+        );
+
+        await reporter.submitForDelivery([channel]);
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should handle very long throttle duration', () async {
+        final longReporter = ChannelDeliveryReporter(
+          throttleDuration: const Duration(seconds: 10),
+          onMarkChannelsDelivered: (deliveries) async {
+            capturedDeliveries.addAll(deliveries);
+          },
+        );
+
+        try {
+          final message = _createMessage((m) => m.copyWith(id: 'message-1'));
+          final channel = _createDeliverableChannel(
+            client,
+            cid: 'test:channel-1',
+            message: message,
+          );
+
+          await longReporter.submitForDelivery([channel]);
+          await delay(100);
+
+          // Should not have delivered yet
+          expect(capturedDeliveries, isEmpty);
+
+          longReporter.cancel();
+        } finally {
+          longReporter.cancel();
+        }
+      });
+
+      test('should handle zero throttle duration', () async {
+        final zeroReporter = ChannelDeliveryReporter(
+          throttleDuration: Duration.zero,
+          onMarkChannelsDelivered: (deliveries) async {
+            capturedDeliveries.addAll(deliveries);
+          },
+        );
+
+        try {
+          final message = _createMessage((m) => m.copyWith(id: 'message-1'));
+          final channel = _createDeliverableChannel(
+            client,
+            cid: 'test:channel-1',
+            message: message,
+          );
+
+          await zeroReporter.submitForDelivery([channel]);
+          await delay(50);
+
+          expect(capturedDeliveries, hasLength(1));
+        } finally {
+          zeroReporter.cancel();
+        }
+      });
+
+      test('should handle exactly 100 channels', () async {
+        final channels = List.generate(100, (i) {
+          final message = _createMessage((m) => m.copyWith(id: 'message-$i'));
+          return _createDeliverableChannel(
+            client,
+            cid: 'test:channel-$i',
+            message: message,
+          );
+        });
+
+        await reporter.submitForDelivery(channels);
+        await delay(150);
+
+        expect(capturedDeliveries, hasLength(100));
+      });
+
+      test('should handle 101 channels in two batches', () async {
+        final channels = List.generate(101, (i) {
+          final message = _createMessage((m) => m.copyWith(id: 'message-$i'));
+          return _createDeliverableChannel(
+            client,
+            cid: 'test:channel-$i',
+            message: message,
+          );
+        });
+
+        await reporter.submitForDelivery(channels);
+        await delay(150);
+
+        expect(capturedDeliveries, hasLength(100));
+
+        await delay(150);
+
+        expect(capturedDeliveries, hasLength(101));
+      });
+
+      test('should handle reporter with logger', () async {
+        final loggedReporter = ChannelDeliveryReporter(
+          logger: client.logger,
+          throttleDuration: const Duration(milliseconds: 50),
+          onMarkChannelsDelivered: (deliveries) async {
+            capturedDeliveries.addAll(deliveries);
+          },
+        );
+
+        try {
+          final message = _createMessage((m) => m.copyWith(id: 'message-1'));
+          final channel = _createDeliverableChannel(
+            client,
+            cid: 'test:channel-1',
+            message: message,
+          );
+
+          await loggedReporter.submitForDelivery([channel]);
+          await delay(100);
+
+          expect(capturedDeliveries, hasLength(1));
+        } finally {
+          loggedReporter.cancel();
+        }
+      });
+
+      test('should handle submitForDelivery after cancel', () async {
+        final message = _createMessage((m) => m.copyWith(id: 'message-1'));
+        final channel = _createDeliverableChannel(
+          client,
+          cid: 'test:channel-1',
+          message: message,
+        );
+
+        await reporter.submitForDelivery([channel]);
+        reporter.cancel();
+
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should handle reconcileDelivery with channel that was never submitted', () async {
+        final message = _createMessage((m) => m.copyWith(id: 'message-1'));
+        final channel = _createDeliverableChannel(
+          client,
+          cid: 'test:channel-1',
+          message: message,
+        );
+
+        // Reconcile without submitting first
+        await reporter.reconcileDelivery([channel]);
+        await delay(150);
+
+        expect(capturedDeliveries, isEmpty);
+      });
+
+      test('should handle mixed valid and invalid channels', () async {
+        final validMessage = _createMessage((m) => m.copyWith(id: 'valid'));
+        final validChannel = _createDeliverableChannel(
+          client,
+          cid: 'test:valid',
+          message: validMessage,
+        );
+
+        final invalidChannel = Channel(client, 'test-type', null);
+
+        await reporter.submitForDelivery([validChannel, invalidChannel]);
+        await delay(150);
+
+        expect(capturedDeliveries, hasLength(1));
+        expect(capturedDeliveries.first.messageId, 'valid');
       });
     });
   });
