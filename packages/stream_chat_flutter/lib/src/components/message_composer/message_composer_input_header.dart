@@ -32,8 +32,16 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quotedMessage = props.controller.message.quotedMessage;
-    final ogAttachment = props.controller.ogAttachment;
+    return ValueListenableBuilder(
+      valueListenable: props.controller,
+      builder: (context, _, __) => _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    final isEditing = !controller.message.state.isInitial;
+    final quotedMessage = !isEditing ? controller.message.quotedMessage : null;
+    final ogAttachment = controller.ogAttachment;
     final nonOGAttachments = controller.attachments
         .where((it) {
           return it.titleLink == null && it.type != AttachmentType.voiceRecording;
@@ -46,7 +54,8 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
         .toList(growable: false);
 
     final hasAttachments = nonOGAttachments.isNotEmpty;
-    final hasContent = quotedMessage != null || hasAttachments || ogAttachment != null || voiceRecordings.isNotEmpty;
+    final hasContent =
+        isEditing || quotedMessage != null || hasAttachments || ogAttachment != null || voiceRecordings.isNotEmpty;
 
     final spacing = context.streamSpacing;
     final contentPadding = EdgeInsets.only(
@@ -64,7 +73,15 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (quotedMessage != null)
+            if (isEditing)
+              Padding(
+                padding: contentPadding,
+                child: _EditMessageInHeader(
+                  message: controller.editingOriginalMessage ?? controller.message,
+                  onRemovePressed: controller.cancelEditMessage,
+                ),
+              )
+            else if (quotedMessage != null)
               Padding(
                 padding: contentPadding,
                 child: _QuotedMessageInHeader(
@@ -120,6 +137,26 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
     }
 
     controller.removeAttachmentById(attachment.id);
+  }
+}
+
+class _EditMessageInHeader extends StatelessWidget {
+  const _EditMessageInHeader({
+    required this.message,
+    required this.onRemovePressed,
+  });
+
+  final Message message;
+  final VoidCallback onRemovePressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return MessageComposerReplyAttachment(
+      title: context.translations.editMessageLabel,
+      subtitle: message.text ?? '',
+      onRemovePressed: onRemovePressed,
+      style: ReplyStyle.outgoing,
+    );
   }
 }
 

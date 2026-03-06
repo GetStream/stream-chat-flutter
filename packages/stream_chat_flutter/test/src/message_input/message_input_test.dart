@@ -369,6 +369,129 @@ void main() {
     );
   });
 
+  group('Edit message routing', () {
+    final client = MockClient();
+    final clientState = MockClientState();
+    final channel = MockChannel();
+    final channelState = MockChannelState();
+
+    setUp(() {
+      registerFallbackValue(Message());
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUserStream).thenAnswer(
+        (_) => Stream.value(OwnUser(id: 'user-id')),
+      );
+
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(channel.getRemainingCooldown).thenReturn(0);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
+      when(() => channel.extraData).thenReturn({'name': 'test'});
+      when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': 'test'}));
+      when(() => channelState.isUpToDate).thenReturn(true);
+      when(() => channelState.members).thenReturn([
+        Member(
+          userId: 'user-id',
+          user: User(id: 'user-id'),
+        ),
+      ]);
+      when(() => channelState.membersStream).thenAnswer(
+        (_) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          ),
+        ]),
+      );
+      when(() => channelState.messages).thenReturn([]);
+      when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
+    });
+
+    testWidgets(
+      'calls updateMessage when controller is in edit state',
+      (tester) async {
+        when(() => channel.updateMessage(any())).thenAnswer(
+          (_) async => UpdateMessageResponse()..message = Message(id: 'msg-1', text: 'Edited text'),
+        );
+
+        final existingMessage = Message(id: 'msg-1', text: 'Original text');
+        final messageInputController = StreamMessageInputController()..editMessage(existingMessage);
+        addTearDown(messageInputController.dispose);
+
+        final key = GlobalKey<StreamMessageInputState>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              child: StreamChannel(
+                channel: channel,
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageInput(
+                    key: key,
+                    messageInputController: messageInputController,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        await key.currentState!.sendMessage();
+        await tester.pumpAndSettle();
+
+        verify(() => channel.updateMessage(any())).called(1);
+        verifyNever(() => channel.sendMessage(any()));
+      },
+    );
+
+    testWidgets(
+      'calls sendMessage when controller is in normal (non-edit) state',
+      (tester) async {
+        when(() => channel.sendMessage(any())).thenAnswer(
+          (_) async => SendMessageResponse()..message = Message(text: 'Hello'),
+        );
+
+        final messageInputController = StreamMessageInputController(
+          message: Message(text: 'Hello'),
+        );
+        addTearDown(messageInputController.dispose);
+
+        final key = GlobalKey<StreamMessageInputState>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: client,
+              child: StreamChannel(
+                channel: channel,
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageInput(
+                    key: key,
+                    messageInputController: messageInputController,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        await key.currentState!.sendMessage();
+        await tester.pumpAndSettle();
+
+        verify(() => channel.sendMessage(any())).called(1);
+        verifyNever(() => channel.updateMessage(any()));
+      },
+    );
+  });
+
   group('DmCheckboxListTile integration in MessageInput', () {
     final client = MockClient();
     final clientState = MockClientState();
