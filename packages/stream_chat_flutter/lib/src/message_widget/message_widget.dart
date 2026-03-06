@@ -57,6 +57,7 @@ class StreamMessageWidget extends StatefulWidget {
     this.showInChannelIndicator = false,
     this.onReplyTap,
     this.onThreadTap,
+    this.onEditMessageTap,
     this.onConfirmDeleteTap,
     this.showUsername = true,
     this.showTimestamp = true,
@@ -116,6 +117,12 @@ class StreamMessageWidget extends StatefulWidget {
   /// The function called when tapping on replies
   /// {@endtemplate}
   final void Function(Message)? onReplyTap;
+
+  /// {@template onEditMessageTap}
+  /// The function called when tapping the edit action on a message.
+  /// If provided, the inline edit flow is used instead of the bottom sheet.
+  /// {@endtemplate}
+  final void Function(Message)? onEditMessageTap;
 
   /// {@template onDeleteTap}
   /// The function called when delete confirmation button is tapped.
@@ -404,6 +411,7 @@ class StreamMessageWidget extends StatefulWidget {
     void Function(User)? onMentionTap,
     void Function(Message)? onThreadTap,
     void Function(Message)? onReplyTap,
+    void Function(Message)? onEditMessageTap,
     Future<void> Function(Message)? onConfirmDeleteTap,
     Widget Function(BuildContext, Message)? editMessageInputBuilder,
     Widget Function(BuildContext, Message)? textBuilder,
@@ -470,6 +478,7 @@ class StreamMessageWidget extends StatefulWidget {
       onMentionTap: onMentionTap ?? this.onMentionTap,
       onThreadTap: onThreadTap ?? this.onThreadTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
+      onEditMessageTap: onEditMessageTap ?? this.onEditMessageTap,
       onConfirmDeleteTap: onConfirmDeleteTap ?? this.onConfirmDeleteTap,
       editMessageInputBuilder: editMessageInputBuilder ?? this.editMessageInputBuilder,
       textBuilder: textBuilder ?? this.textBuilder,
@@ -1036,6 +1045,11 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     Message message,
     Channel channel,
   ) {
+    final onEditMessageTap = widget.onEditMessageTap;
+    if (onEditMessageTap != null) {
+      onEditMessageTap(message);
+      return Future.value();
+    }
     return showEditMessageSheet(
       context: context,
       channel: channel,

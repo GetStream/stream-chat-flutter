@@ -315,6 +315,32 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     message = Message();
   }
 
+  /// The original message being edited, before any user changes.
+  ///
+  /// This is set by [editMessage] and cleared by [cancelEditMessage].
+  /// Use this to display a stable preview of the original message while the
+  /// user is typing their edits.
+  Message? get editingOriginalMessage => _editingOriginalMessage;
+  Message? _editingOriginalMessage;
+
+  /// Sets the controller to edit an existing [message].
+  ///
+  /// Stores a snapshot of [message] in [editingOriginalMessage] so the
+  /// original content stays visible while the user types.
+  /// Resets [_initialMessage] to an empty message so that [cancelEditMessage]
+  /// returns to a clean empty state.
+  void editMessage(Message message) {
+    _editingOriginalMessage = message;
+    _initialMessage = Message();
+    this.message = message.copyWith(state: MessageState.updating);
+  }
+
+  /// Cancels the current edit and resets the controller to an empty state.
+  void cancelEditMessage() {
+    _editingOriginalMessage = null;
+    reset();
+  }
+
   /// Sets the [message] to the initial [Message] value.
   void reset({bool resetId = true}) {
     if (resetId) {

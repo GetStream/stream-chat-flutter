@@ -1534,14 +1534,17 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     try {
       // Note: edited messages which are bounced back with an error needs to be
       // sent as new messages as the backend doesn't store them.
-      final resp = await switch (_isEditing && !message.isBouncedWithError) {
+      // Use message.state directly rather than _isEditing, because the
+      // controller is reset before this method is called.
+      final isEditing = !message.state.isInitial;
+      final resp = await switch (isEditing && !message.isBouncedWithError) {
         true => channel.updateMessage(message),
         false => channel.sendMessage(message),
       };
 
       // We don't want to start the cooldown if an already sent message is
       // being edited.
-      if (!_isEditing) {
+      if (!isEditing) {
         _effectiveController.startCooldown(channel.getRemainingCooldown());
       }
 
