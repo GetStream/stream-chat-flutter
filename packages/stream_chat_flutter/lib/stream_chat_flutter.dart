@@ -1,7 +1,6 @@
 export 'package:jiffy/jiffy.dart';
 export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
 export 'package:stream_core_flutter/stream_core_flutter.dart'
     show
         StreamAvatarGroupSize,
@@ -172,4 +171,5 @@ export 'src/utils/device_segmentation.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
 export 'src/utils/message_preview_formatter.dart';
+export 'src/utils/stream_image_cdn.dart';
 export 'src/utils/typedefs.dart';
