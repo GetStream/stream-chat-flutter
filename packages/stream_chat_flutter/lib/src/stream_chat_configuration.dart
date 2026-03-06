@@ -245,9 +245,8 @@ class StreamChatConfigurationData {
   /// The image CDN used for generating resized image URLs and stable
   /// cache keys.
   ///
-  /// Defaults to [StreamImageCDN], which supports Stream's own CDN
-  /// and the Stream Dashboard CDN. Extend [StreamImageCDN] to customize
-  /// behavior for a custom CDN.
+  /// Defaults to [StreamImageCDN], which supports Stream's own CDN.
+  /// Extend [StreamImageCDN] to customize behavior for a custom CDN.
   final StreamImageCDN imageCDN;
 
   static Widget _defaultUserImage(
