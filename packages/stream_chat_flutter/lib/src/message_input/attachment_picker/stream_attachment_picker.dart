@@ -324,8 +324,6 @@ class OptionDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-
     var height = 0.0;
     if (title != null || actions.isNotEmpty) {
       height = 40.0;
