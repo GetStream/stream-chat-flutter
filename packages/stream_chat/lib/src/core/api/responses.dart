@@ -131,12 +131,17 @@ class QueryBannedUsersResponse extends _BaseResponse {
   static QueryBannedUsersResponse fromJson(Map<String, dynamic> json) => _$QueryBannedUsersResponseFromJson(json);
 }
 
-/// Model response for [channel.getReactions] api call
+/// Model response for [channel.getReactions] or [channel.queryReactions] api call
 @JsonSerializable(createToJson: false)
 class QueryReactionsResponse extends _BaseResponse {
   /// List of reactions returned by the query
   @JsonKey(defaultValue: [])
   late List<Reaction> reactions;
+
+  /// The cursor for the next page of results.
+  ///
+  /// Will be `null` if there are no more results.
+  late String? next;
 
   /// Create a new instance from a json
   static QueryReactionsResponse fromJson(Map<String, dynamic> json) => _$QueryReactionsResponseFromJson(json);

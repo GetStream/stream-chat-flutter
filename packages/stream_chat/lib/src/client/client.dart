@@ -1784,6 +1784,23 @@ class StreamChatClient {
     pagination: pagination,
   );
 
+  /// Queries reactions for a [messageId] with optional [filter], [sort],
+  /// and [pagination].
+  ///
+  /// Unlike [getReactions], this method supports filtering by reaction type,
+  /// user ID, or creation date, sorting, and cursor-based pagination.
+  Future<QueryReactionsResponse> queryReactions(
+    String messageId, {
+    Filter? filter,
+    SortOrder<Reaction>? sort,
+    PaginationParams? pagination,
+  }) => _chatApi.message.queryReactions(
+    messageId,
+    filter: filter,
+    sort: sort,
+    pagination: pagination,
+  );
+
   /// Update the given message
   Future<UpdateMessageResponse> updateMessage(
     Message message, {
