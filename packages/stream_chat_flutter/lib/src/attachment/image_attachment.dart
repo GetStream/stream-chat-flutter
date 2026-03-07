@@ -12,9 +12,7 @@ class StreamImageAttachment extends StatelessWidget {
     required this.image,
     this.shape,
     this.constraints = const BoxConstraints(),
-    this.imageThumbnailSize,
-    this.imageThumbnailResizeType = 'clip',
-    this.imageThumbnailCropType = 'center',
+    this.resize,
   });
 
   /// The [Message] that the image is attached to.
@@ -31,18 +29,14 @@ class StreamImageAttachment extends StatelessWidget {
   /// The constraints to use when displaying the image.
   final BoxConstraints constraints;
 
-  /// Size of the attachment image thumbnail.
-  final Size? imageThumbnailSize;
-
-  /// Resize type of the image attachment thumbnail.
+  /// The resize configuration for the image attachment thumbnail.
   ///
-  /// Defaults to [crop]
-  final String /*clip|crop|scale|fill*/ imageThumbnailResizeType;
-
-  /// Crop type of the image attachment thumbnail.
+  /// When provided, its [ImageResize.width] and [ImageResize.height] are used
+  /// directly as the CDN resize dimensions.
   ///
-  /// Defaults to [center]
-  final String /*center|top|bottom|left|right*/ imageThumbnailCropType;
+  /// When null, the size is auto-calculated from the layout constraints
+  /// and defaults to [ResizeMode.clip] and [CropMode.center].
+  final ImageResize? resize;
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +80,7 @@ class StreamImageAttachment extends StatelessWidget {
               fit: fit,
               width: double.infinity,
               height: double.infinity,
-              thumbnailSize: imageThumbnailSize,
-              thumbnailResizeType: imageThumbnailResizeType,
-              thumbnailCropType: imageThumbnailCropType,
+              resize: resize,
             ),
             Padding(
               padding: const EdgeInsets.all(8),

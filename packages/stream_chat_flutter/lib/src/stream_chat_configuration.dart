@@ -165,6 +165,7 @@ class StreamChatConfigurationData {
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = false,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamImageCDN imageCDN = const StreamImageCDN(),
   }) {
     return StreamChatConfigurationData._(
       loadingIndicator: loadingIndicator,
@@ -174,6 +175,7 @@ class StreamChatConfigurationData {
       enforceUniqueReactions: enforceUniqueReactions ?? true,
       draftMessagesEnabled: draftMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
+      imageCDN: imageCDN,
     );
   }
 
@@ -185,6 +187,7 @@ class StreamChatConfigurationData {
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
     required this.messagePreviewFormatter,
+    required this.imageCDN,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
@@ -197,6 +200,7 @@ class StreamChatConfigurationData {
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamImageCDN? imageCDN,
   }) {
     return StreamChatConfigurationData(
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
@@ -206,6 +210,7 @@ class StreamChatConfigurationData {
       enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
+      imageCDN: imageCDN ?? this.imageCDN,
     );
   }
 
@@ -236,6 +241,13 @@ class StreamChatConfigurationData {
   ///
   /// Defaults to [MessagePreviewFormatter].
   final MessagePreviewFormatter messagePreviewFormatter;
+
+  /// The image CDN used for generating resized image URLs and stable
+  /// cache keys.
+  ///
+  /// Defaults to [StreamImageCDN], which supports Stream's own CDN.
+  /// Extend [StreamImageCDN] to customize behavior for a custom CDN.
+  final StreamImageCDN imageCDN;
 
   static Widget _defaultUserImage(
     BuildContext context,
