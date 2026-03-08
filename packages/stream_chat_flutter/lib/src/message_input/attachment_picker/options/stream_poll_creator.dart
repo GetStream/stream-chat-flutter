@@ -36,7 +36,7 @@ class StreamPollCreator extends StatelessWidget {
         config: config,
       );
 
-      onPollCreated?.call(result);
+      return onPollCreated?.call(result);
     }
 
     return OptionDrawer(
