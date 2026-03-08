@@ -125,6 +125,41 @@ void main() {
       expect(newReaction.userId, 'test');
     });
 
+    group('ComparableFieldProvider', () {
+      test('should return ComparableField for reaction.createdAt', () {
+        final createdAt = DateTime(2020, 1, 28);
+        final reaction = Reaction(type: 'like', createdAt: createdAt);
+
+        final field = reaction.getComparableField(ReactionSortKey.createdAt);
+        expect(field, isNotNull);
+        expect(field!.value, equals(createdAt));
+      });
+
+      test('should return null for non-existent field keys', () {
+        final reaction = Reaction(type: 'like');
+
+        final field = reaction.getComparableField('non_existent_key');
+        expect(field, isNull);
+      });
+
+      test('should compare two reactions correctly using createdAt', () {
+        final recentReaction = Reaction(
+          type: 'like',
+          createdAt: DateTime(2020, 6, 15),
+        );
+        final olderReaction = Reaction(
+          type: 'like',
+          createdAt: DateTime(2020, 6, 10),
+        );
+
+        final field1 = recentReaction.getComparableField(ReactionSortKey.createdAt);
+        final field2 = olderReaction.getComparableField(ReactionSortKey.createdAt);
+
+        expect(field1!.compareTo(field2!), greaterThan(0)); // more recent > older
+        expect(field2.compareTo(field1), lessThan(0)); // older < more recent
+      });
+    });
+
     test('merge', () {
       final reaction = Reaction.fromJson(jsonFixture('reaction.json'));
       final newUserCreateTime = DateTime.now();

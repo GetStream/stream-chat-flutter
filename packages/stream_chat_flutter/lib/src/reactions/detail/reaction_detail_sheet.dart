@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
 import 'package:stream_chat_flutter/src/message_action/message_action.dart';
+import 'package:stream_chat_flutter/src/scroll_view/reaction_scroll_view/stream_reaction_list_view.dart';
+import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -8,7 +10,10 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 /// A bottom sheet that displays detailed reaction information for a message.
 ///
 /// Shows the total reaction count, emoji filter chips for each reaction type,
-/// and a scrollable list of users who reacted.
+/// and a paginated scrollable list of users who reacted.
+///
+/// Reactions are fetched from the server using [StreamReactionListController],
+/// supporting cursor-based pagination for large reaction lists.
 ///
 /// Use [ReactionDetailSheet.show] to display the sheet.
 class ReactionDetailSheet extends StatefulWidget {
@@ -77,7 +82,54 @@ class ReactionDetailSheet extends StatefulWidget {
 }
 
 class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
-  late String? _selectedReactionType = widget.initialReactionType;
+  late StreamReactionListController _controller;
+  late String? _currentReactionType = widget.initialReactionType;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeController();
+  }
+
+  @override
+  void didUpdateWidget(covariant ReactionDetailSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.message.id != widget.message.id) {
+      _controller.dispose(); // Dispose the old controller.
+      _initializeController(); // Initialize a new controller.
+    }
+  }
+
+  void _initializeController() {
+    _controller = .new(
+      client: StreamChat.of(context).client,
+      messageId: widget.message.id,
+      sort: const [.desc(ReactionSortKey.createdAt)],
+      filter: switch (_currentReactionType) {
+        final type? => .equal('type', type),
+        _ => null,
+      },
+    );
+  }
+
+  void _onReactionTypeSelected(String? type) {
+    if (type == _currentReactionType) return;
+    setState(() => _currentReactionType = type);
+
+    final updatedFilter = switch (type) {
+      final type? => Filter.equal('type', type),
+      _ => null,
+    };
+
+    _controller.filter = updatedFilter;
+    _controller.doInitialLoad();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,19 +139,13 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
     final config = StreamChatConfiguration.of(context);
     final resolver = config.reactionIconResolver;
 
-    final allReactions = widget.message.latestReactions ?? [];
     final ownReactions = [...?widget.message.ownReactions];
     final ownReactionsMap = {for (final it in ownReactions) it.type: it};
     final reactionGroups = widget.message.reactionGroups ?? {};
 
     final currentUserId = StreamChatCore.of(context).currentUser?.id;
 
-    final filteredReactions = switch (_selectedReactionType) {
-      final type? => allReactions.where((r) => r.type == type).toList(),
-      _ => allReactions,
-    };
-
-    final visibleCount = switch (_selectedReactionType) {
+    final visibleCount = switch (_currentReactionType) {
       final type? => reactionGroups[type]?.count ?? 0,
       _ => reactionGroups.values.fold(0, (sum, g) => sum + g.count),
     };
@@ -109,7 +155,6 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
       crossAxisAlignment: .stretch,
       children: [
         Padding(
-          //visibleCount == 1 ? '1 Reaction' : '$visibleCount Reactions',
           padding: .symmetric(horizontal: spacing.sm),
           child: Text(
             switch (visibleCount) {
@@ -122,8 +167,8 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
         ),
         SizedBox(height: spacing.sm),
         StreamEmojiChipBar(
-          selected: _selectedReactionType,
-          onSelected: (type) => setState(() => _selectedReactionType = type),
+          selected: _currentReactionType,
+          onSelected: _onReactionTypeSelected,
           items: [
             for (final MapEntry(:key, :value) in reactionGroups.entries)
               StreamEmojiChipItem(
@@ -150,12 +195,12 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
         ),
         SizedBox(height: spacing.md),
         Expanded(
-          child: ListView.builder(
-            controller: widget.scrollController,
+          child: StreamReactionListView(
+            controller: _controller,
+            scrollController: widget.scrollController,
             padding: .symmetric(horizontal: spacing.xxs),
-            itemCount: filteredReactions.length,
-            itemBuilder: (context, index) {
-              final reaction = filteredReactions[index];
+            itemBuilder: (context, reactions, index) {
+              final reaction = reactions[index];
               final user = reaction.user;
               if (user == null) return const SizedBox.shrink();
 

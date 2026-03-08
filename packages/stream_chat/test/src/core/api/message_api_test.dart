@@ -689,6 +689,84 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('queryReactions', () async {
+    const messageId = 'test-message-id';
+    const path = '/messages/$messageId/reactions';
+
+    final reactions = List.generate(
+      3,
+      (index) => Reaction(
+        type: 'test-reaction-type-$index',
+        messageId: messageId,
+      ),
+    );
+
+    when(
+      () => client.post(path, data: any(named: 'data')),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'reactions': [
+            ...reactions.map(
+              (it) => {...it.toJson(), 'message_id': messageId},
+            ),
+          ],
+          'next': null,
+        },
+      ),
+    );
+
+    final res = await messageApi.queryReactions(messageId);
+
+    expect(res, isNotNull);
+    expect(res.reactions.length, reactions.length);
+    expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+    expect(res.next, isNull);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('queryReactions with next cursor', () async {
+    const messageId = 'test-message-id';
+    const path = '/messages/$messageId/reactions';
+    const nextCursor = 'next_page_cursor';
+
+    final reactions = List.generate(
+      3,
+      (index) => Reaction(
+        type: 'test-reaction-type-$index',
+        messageId: messageId,
+      ),
+    );
+
+    when(
+      () => client.post(path, data: any(named: 'data')),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'reactions': [
+            ...reactions.map(
+              (it) => {...it.toJson(), 'message_id': messageId},
+            ),
+          ],
+          'next': nextCursor,
+        },
+      ),
+    );
+
+    final res = await messageApi.queryReactions(messageId);
+
+    expect(res, isNotNull);
+    expect(res.reactions.length, reactions.length);
+    expect(res.next, nextCursor);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
   test('queryDrafts', () async {
     const path = '/drafts/query';
 

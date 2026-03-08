@@ -3709,6 +3709,34 @@ void main() {
       verifyNoMoreInteractions(api.message);
     });
 
+    test('`.queryReactions`', () async {
+      const messageId = 'test-message-id';
+
+      final reactions = List.generate(
+        3,
+        (index) => Reaction(
+          type: 'test-reactions-type-$index',
+          messageId: messageId,
+        ),
+      );
+
+      when(
+        () => api.message.queryReactions(messageId),
+      ).thenAnswer(
+        (_) async => QueryReactionsResponse()
+          ..reactions = reactions
+          ..next = null,
+      );
+
+      final res = await client.queryReactions(messageId);
+      expect(res, isNotNull);
+      expect(res.reactions.length, reactions.length);
+      expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+
+      verify(() => api.message.queryReactions(messageId)).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
     test('`.updateMessage`', () async {
       final message = Message(id: 'test-message-id', text: 'Hello!');
 

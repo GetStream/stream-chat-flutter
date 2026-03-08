@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 
@@ -7,7 +8,7 @@ part 'reaction.g.dart';
 
 /// The class that defines a reaction
 @JsonSerializable()
-class Reaction extends Equatable {
+class Reaction extends Equatable implements ComparableFieldProvider {
   /// Constructor used for json serialization
   Reaction({
     this.messageId,
@@ -130,4 +131,25 @@ class Reaction extends Equatable {
     updatedAt,
     extraData,
   ];
+
+  @override
+  ComparableField? getComparableField(String sortKey) {
+    final value = switch (sortKey) {
+      ReactionSortKey.createdAt => createdAt,
+      _ => null,
+    };
+
+    return ComparableField.fromValue(value);
+  }
+}
+
+/// Extension type representing sortable fields for [Reaction].
+///
+/// This type provides type-safe keys that can be used for sorting reactions
+/// in queries. Each constant represents a field that can be sorted on.
+extension type const ReactionSortKey(String key) implements String {
+  /// Sort reactions by their creation date.
+  ///
+  /// This is the default sort field (in ascending order).
+  static const createdAt = ReactionSortKey('created_at');
 }

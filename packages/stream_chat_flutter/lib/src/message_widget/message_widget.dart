@@ -629,7 +629,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   /// `true`, if there are reactions to show, and if the message is not deleted.
   /// {@endtemplate}
   bool get shouldShowReactions =>
-      widget.showReactions && (widget.message.latestReactions?.isNotEmpty == true) && !widget.message.isDeleted;
+      widget.showReactions && (widget.message.reactionGroups?.isNotEmpty == true) && !widget.message.isDeleted;
 
   @override
   bool get wantKeepAlive => widget.message.attachments.isNotEmpty;
