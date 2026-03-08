@@ -283,7 +283,7 @@ class OptionDrawer extends StatelessWidget {
     required this.child,
     this.color,
     this.elevation = 2,
-    this.margin = EdgeInsets.zero,
+    this.margin,
     this.clipBehavior = Clip.hardEdge,
     this.shape = _kDefaultOptionDrawerShape,
     this.title,
@@ -304,9 +304,7 @@ class OptionDrawer extends StatelessWidget {
   final double elevation;
 
   /// The margin of the options card.
-  ///
-  /// The default value is [EdgeInsets.zero].
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? margin;
 
   /// The clip behavior of the options card.
   ///
@@ -343,6 +341,9 @@ class OptionDrawer extends StatelessWidget {
       trailing = const Empty();
     }
 
+    final spacing = context.streamSpacing;
+    final effectiveMargin = margin ?? .symmetric(horizontal: spacing.md, vertical: spacing.xxxl);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -355,7 +356,12 @@ class OptionDrawer extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(child: child),
+        Expanded(
+          child: Container(
+            margin: effectiveMargin,
+            child: child,
+          ),
+        ),
       ],
     );
   }

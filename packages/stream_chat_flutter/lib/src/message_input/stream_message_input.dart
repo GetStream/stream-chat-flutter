@@ -833,7 +833,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     };
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.4,
+      height: 333,
       child: builder(),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget used to create a poll.
 class StreamPollCreator extends StatelessWidget {
@@ -24,6 +25,10 @@ class StreamPollCreator extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
     Future<void> _openCreatePollFlow() async {
       final result = await showStreamPollCreatorDialog(
         context: context,
@@ -36,10 +41,28 @@ class StreamPollCreator extends StatelessWidget {
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: Icon(
-          context.streamIcons.chart5,
-          size: 180,
-          color: theme.colorTheme.disabled,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              size: 32,
+              context.streamIcons.chart5,
+              color: colorScheme.textTertiary,
+            ),
+            SizedBox(height: spacing.xs),
+            Text(
+              'Create a poll and let everyone vote!',
+              style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: spacing.md),
+            StreamButton(
+              type: .outline,
+              style: .secondary,
+              onTap: _openCreatePollFlow,
+              label: 'Create Poll',
+            ),
+          ],
         ),
         onEndOfFrame: (_) => _openCreatePollFlow(),
         errorBuilder: (context, error, stacktrace) {

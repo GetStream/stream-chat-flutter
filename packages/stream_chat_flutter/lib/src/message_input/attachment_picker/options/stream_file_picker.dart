@@ -57,56 +57,79 @@ class StreamFilePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    Future<void> onPickFile() async {
+      final pickedFile = await runInPermissionRequestLock(() {
+        return StreamAttachmentHandler.instance.pickFile(
+          dialogTitle: dialogTitle,
+          initialDirectory: initialDirectory,
+          type: type,
+          allowedExtensions: allowedExtensions,
+          onFileLoading: onFileLoading,
+          compressionQuality: compressionQuality,
+          withData: withData,
+          withReadStream: withReadStream,
+          lockParentWindow: lockParentWindow,
+        );
+      });
+
+      return onFilePicked.call(pickedFile);
+    }
+
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: Icon(
-          context.streamIcons.fileBend,
-          size: 240,
-          color: theme.colorTheme.disabled,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              size: 32,
+              context.streamIcons.fileBend,
+              color: colorScheme.textTertiary,
+            ),
+            SizedBox(height: spacing.xs),
+            Text(
+              'Select files to share',
+              style: textTheme.bodyDefault.copyWith(
+                color: colorScheme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: spacing.md),
+            StreamButton(
+              type: .outline,
+              style: .secondary,
+              onTap: onPickFile,
+              label: 'Open files',
+            ),
+          ],
         ),
-        onEndOfFrame: (_) async {
-          final pickedFile = await runInPermissionRequestLock(() {
-            return StreamAttachmentHandler.instance.pickFile(
-              dialogTitle: dialogTitle,
-              initialDirectory: initialDirectory,
-              type: type,
-              allowedExtensions: allowedExtensions,
-              onFileLoading: onFileLoading,
-              compressionQuality: compressionQuality,
-              withData: withData,
-              withReadStream: withReadStream,
-              lockParentWindow: lockParentWindow,
-            );
-          });
-
-          onFilePicked.call(pickedFile);
-        },
+        onEndOfFrame: (_) => onPickFile(),
         errorBuilder: (context, error, stacktrace) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
+                size: 32,
                 context.streamIcons.fileBend,
-                size: 240,
-                color: theme.colorTheme.disabled,
+                color: colorScheme.textTertiary,
               ),
+              SizedBox(height: spacing.xs),
               Text(
                 context.translations.enablePhotoAndVideoAccessMessage,
-                style: theme.textTheme.body.copyWith(
-                  color: theme.colorTheme.textLowEmphasis,
+                style: textTheme.bodyDefault.copyWith(
+                  color: colorScheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: PhotoManager.openSetting,
-                child: Text(
-                  context.translations.allowGalleryAccessMessage,
-                  style: theme.textTheme.bodyBold.copyWith(
-                    color: theme.colorTheme.accentPrimary,
-                  ),
-                ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: PhotoManager.openSetting,
+                label: context.translations.allowGalleryAccessMessage,
               ),
             ],
           );

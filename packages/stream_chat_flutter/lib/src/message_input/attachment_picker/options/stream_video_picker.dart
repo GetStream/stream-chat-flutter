@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget used to capture video using the device camera.
 class StreamVideoPicker extends StatelessWidget {
@@ -28,50 +29,71 @@ class StreamVideoPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    Future<void> onPickVideo() async {
+      final pickedVideo = await runInPermissionRequestLock(() {
+        return StreamAttachmentHandler.instance.pickVideo(
+          source: source,
+          preferredCameraDevice: preferredCameraDevice,
+          maxDuration: maxDuration,
+        );
+      });
+
+      return onVideoPicked.call(pickedVideo);
+    }
+
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: Icon(
-          context.streamIcons.video,
-          size: 240,
-          color: theme.colorTheme.disabled,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              size: 32,
+              context.streamIcons.video,
+              color: colorScheme.textTertiary,
+            ),
+            SizedBox(height: spacing.xs),
+            Text(
+              'Take a video and share',
+              style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: spacing.md),
+            StreamButton(
+              type: .outline,
+              style: .secondary,
+              onTap: onPickVideo,
+              label: 'Open camera',
+            ),
+          ],
         ),
-        onEndOfFrame: (_) async {
-          final pickedVideo = await runInPermissionRequestLock(() {
-            return StreamAttachmentHandler.instance.pickVideo(
-              source: source,
-              preferredCameraDevice: preferredCameraDevice,
-              maxDuration: maxDuration,
-            );
-          });
-
-          onVideoPicked.call(pickedVideo);
-        },
+        onEndOfFrame: (_) => onPickVideo(),
         errorBuilder: (context, error, stacktrace) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
+                size: 32,
                 context.streamIcons.video,
-                size: 240,
-                color: theme.colorTheme.disabled,
+                color: colorScheme.textTertiary,
               ),
+              SizedBox(height: spacing.xs),
               Text(
                 context.translations.enablePhotoAndVideoAccessMessage,
-                style: theme.textTheme.body.copyWith(
-                  color: theme.colorTheme.textLowEmphasis,
+                style: textTheme.bodyDefault.copyWith(
+                  color: colorScheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: PhotoManager.openSetting,
-                child: Text(
-                  context.translations.allowGalleryAccessMessage,
-                  style: theme.textTheme.bodyBold.copyWith(
-                    color: theme.colorTheme.accentPrimary,
-                  ),
-                ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: PhotoManager.openSetting,
+                label: context.translations.allowGalleryAccessMessage,
               ),
             ],
           );
