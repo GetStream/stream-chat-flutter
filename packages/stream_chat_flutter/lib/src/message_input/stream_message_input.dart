@@ -794,8 +794,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             onSendPressed: sendMessage,
             audioRecorderController: _audioRecorderController,
           ),
+          _buildDmCheckbox(context),
           if (_isPickerVisible && _pickerController != null) _buildInlineAttachmentPicker(context),
-        ],
+        ].nonNulls.toList(),
       ),
     );
   }
@@ -812,29 +813,21 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
         widget.useSystemAttachmentPicker || (messageInputTheme.useSystemAttachmentPicker ?? false) || isWebOrDesktop;
 
     final builder = switch (useSystemPicker) {
-      true => () => systemAttachmentPickerBuilder(
-        context: context,
-        controller: _pickerController!,
-        allowedTypes: allowedTypes,
-        pollConfig: widget.pollConfig,
-        optionsBuilder: widget.attachmentPickerOptionsBuilder,
-        onError: _onPickerError,
-        onPollCreated: _onPollCreated,
-      ),
-      false => () => tabbedAttachmentPickerBuilder(
-        context: context,
-        controller: _pickerController!,
-        allowedTypes: allowedTypes,
-        pollConfig: widget.pollConfig,
-        optionsBuilder: widget.attachmentPickerOptionsBuilder,
-        onError: _onPickerError,
-        onPollCreated: _onPollCreated,
-      ),
+      true => systemAttachmentPickerBuilder,
+      false => tabbedAttachmentPickerBuilder,
     };
 
     return SizedBox(
       height: 333,
-      child: builder(),
+      child: builder.call(
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.pollConfig,
+        optionsBuilder: widget.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      ),
     );
   }
 
@@ -871,7 +864,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
     return DmCheckboxListTile(
       value: _effectiveController.showInChannel,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: context.streamSpacing.md,
+      ),
       onChanged: (value) => _effectiveController.showInChannel = value,
     );
   }
