@@ -60,7 +60,7 @@ class StreamPollCreator extends StatelessWidget {
               type: .outline,
               style: .secondary,
               onTap: _openCreatePollFlow,
-              label: 'Create Poll',
+              label: context.translations.createPollLabel(),
             ),
           ],
         ),
@@ -70,19 +70,16 @@ class StreamPollCreator extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
+                size: 32,
                 context.streamIcons.chart5,
-                size: 240,
-                color: theme.colorTheme.disabled,
+                color: colorScheme.textTertiary,
               ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: _openCreatePollFlow,
-                child: Text(
-                  context.translations.createPollLabel(isNew: true),
-                  style: theme.textTheme.bodyBold.copyWith(
-                    color: theme.colorTheme.accentPrimary,
-                  ),
-                ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: _openCreatePollFlow,
+                label: context.translations.createPollLabel(isNew: true),
               ),
             ],
           );
