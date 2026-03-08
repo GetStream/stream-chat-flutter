@@ -263,33 +263,12 @@ void main() {
       ),
     ];
 
-    setUp(() {
-      when(
-        () => mockClient.queryReactions(
-          'test-message',
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer(
-        (_) async => QueryReactionsResponse()
-          ..reactions = reactions
-          ..next = null,
-      );
-    });
-
     final message = _buildMessage(
       reactionGroups: {
         'love': ReactionGroup(count: 1, sumScores: 1),
         'like': ReactionGroup(count: 1, sumScores: 1),
       },
     );
-
-    Future<void> settleSheet(WidgetTester tester) async {
-      // Pump once to trigger post-frame modal opening, then settle animation.
-      await tester.pump();
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-    }
 
     for (final brightness in Brightness.values) {
       final theme = brightness.name;
@@ -298,7 +277,23 @@ void main() {
         'ReactionDetailSheet in $theme theme',
         fileName: 'reaction_detail_sheet_$theme',
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 700),
-        pumpBeforeTest: settleSheet,
+        pumpBeforeTest: (tester) async {
+          when(
+            () => mockClient.queryReactions(
+              'test-message',
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+          ).thenAnswer(
+            (_) async => QueryReactionsResponse()
+              ..reactions = reactions
+              ..next = null,
+          );
+          // Pump once to trigger post-frame modal opening, then settle animation.
+          await tester.pump();
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+        },
         builder: () => _wrapWithMaterialApp(
           client: mockClient,
           brightness: brightness,
@@ -310,7 +305,23 @@ void main() {
         'ReactionDetailSheet filtered in $theme theme',
         fileName: 'reaction_detail_sheet_filtered_$theme',
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 700),
-        pumpBeforeTest: settleSheet,
+        pumpBeforeTest: (tester) async {
+          when(
+            () => mockClient.queryReactions(
+              'test-message',
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+          ).thenAnswer(
+            (_) async => QueryReactionsResponse()
+              ..reactions = reactions.where((r) => r.type == 'love').toList()
+              ..next = null,
+          );
+          // Pump once to trigger post-frame modal opening, then settle animation.
+          await tester.pump();
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+        },
         builder: () => _wrapWithMaterialApp(
           client: mockClient,
           brightness: brightness,
