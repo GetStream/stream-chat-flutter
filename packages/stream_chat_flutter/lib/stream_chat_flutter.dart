@@ -1,7 +1,6 @@
 export 'package:jiffy/jiffy.dart';
 export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailFormat;
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
 export 'package:stream_core_flutter/stream_core_flutter.dart'
     show
         StreamAvatarGroupSize,
@@ -153,6 +152,7 @@ export 'src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
 export 'src/scroll_view/photo_gallery/stream_photo_gallery_tile.dart';
 export 'src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_tile.dart';
 export 'src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
+export 'src/scroll_view/reaction_scroll_view/stream_reaction_list_view.dart';
 export 'src/scroll_view/stream_scroll_view_empty_widget.dart';
 export 'src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_tile.dart';
@@ -172,4 +172,5 @@ export 'src/utils/device_segmentation.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
 export 'src/utils/message_preview_formatter.dart';
+export 'src/utils/stream_image_cdn.dart';
 export 'src/utils/typedefs.dart';

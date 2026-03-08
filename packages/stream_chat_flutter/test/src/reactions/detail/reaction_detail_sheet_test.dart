@@ -9,6 +9,11 @@ import '../../mocks.dart';
 void main() {
   late MockClient mockClient;
 
+  setUpAll(() {
+    registerFallbackValue(const PaginationParams());
+    registerFallbackValue(Filter.equal('type', 'like'));
+  });
+
   setUp(() {
     mockClient = MockClient();
 
@@ -22,23 +27,37 @@ void main() {
   tearDown(() => reset(mockClient));
 
   testWidgets('shows total reaction count and all reactions by default', (tester) async {
+    final reactions = [
+      Reaction(
+        type: 'love',
+        messageId: 'test-message',
+        userId: 'user-1',
+        user: User(id: 'user-1', name: 'User 1'),
+        createdAt: DateTime.now(),
+      ),
+      Reaction(
+        type: 'like',
+        messageId: 'test-message',
+        userId: 'user-2',
+        user: User(id: 'user-2', name: 'User 2'),
+        createdAt: DateTime.now(),
+      ),
+    ];
+
+    when(
+      () => mockClient.queryReactions(
+        'test-message',
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer(
+      (_) async => QueryReactionsResponse()
+        ..reactions = reactions
+        ..next = null,
+    );
+
     final message = _buildMessage(
-      latestReactions: [
-        Reaction(
-          type: 'love',
-          messageId: 'test-message',
-          userId: 'user-1',
-          user: User(id: 'user-1', name: 'User 1'),
-          createdAt: DateTime.now(),
-        ),
-        Reaction(
-          type: 'like',
-          messageId: 'test-message',
-          userId: 'user-2',
-          user: User(id: 'user-2', name: 'User 2'),
-          createdAt: DateTime.now(),
-        ),
-      ],
       reactionGroups: {
         'love': ReactionGroup(count: 1, sumScores: 1),
         'like': ReactionGroup(count: 1, sumScores: 1),
@@ -63,23 +82,30 @@ void main() {
   });
 
   testWidgets('applies initial reaction filter when provided', (tester) async {
+    final loveReaction = Reaction(
+      type: 'love',
+      messageId: 'test-message',
+      userId: 'user-1',
+      user: User(id: 'user-1', name: 'User 1'),
+      createdAt: DateTime.now(),
+    );
+
+    // The controller is initialised with filter: type == 'love', so
+    // queryReactions will return only the love reaction.
+    when(
+      () => mockClient.queryReactions(
+        'test-message',
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer(
+      (_) async => QueryReactionsResponse()
+        ..reactions = [loveReaction]
+        ..next = null,
+    );
+
     final message = _buildMessage(
-      latestReactions: [
-        Reaction(
-          type: 'love',
-          messageId: 'test-message',
-          userId: 'user-1',
-          user: User(id: 'user-1', name: 'User 1'),
-          createdAt: DateTime.now(),
-        ),
-        Reaction(
-          type: 'like',
-          messageId: 'test-message',
-          userId: 'user-2',
-          user: User(id: 'user-2', name: 'User 2'),
-          createdAt: DateTime.now(),
-        ),
-      ],
       reactionGroups: {
         'love': ReactionGroup(count: 1, sumScores: 1),
         'like': ReactionGroup(count: 1, sumScores: 1),
@@ -116,8 +142,20 @@ void main() {
       createdAt: DateTime.now(),
     );
 
+    when(
+      () => mockClient.queryReactions(
+        'test-message',
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer(
+      (_) async => QueryReactionsResponse()
+        ..reactions = [reaction]
+        ..next = null,
+    );
+
     final message = _buildMessage(
-      latestReactions: [reaction],
       ownReactions: [reaction],
       reactionGroups: {
         'love': ReactionGroup(count: 1, sumScores: 1),
@@ -149,16 +187,28 @@ void main() {
   testWidgets('does not pop when non-own reaction row is tapped', (tester) async {
     MessageAction? action;
 
+    final otherReaction = Reaction(
+      type: 'love',
+      messageId: 'test-message',
+      userId: 'user-1',
+      user: User(id: 'user-1', name: 'User 1'),
+      createdAt: DateTime.now(),
+    );
+
+    when(
+      () => mockClient.queryReactions(
+        'test-message',
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer(
+      (_) async => QueryReactionsResponse()
+        ..reactions = [otherReaction]
+        ..next = null,
+    );
+
     final message = _buildMessage(
-      latestReactions: [
-        Reaction(
-          type: 'love',
-          messageId: 'test-message',
-          userId: 'user-1',
-          user: User(id: 'user-1', name: 'User 1'),
-          createdAt: DateTime.now(),
-        ),
-      ],
       ownReactions: [
         Reaction(
           type: 'love',
@@ -196,34 +246,29 @@ void main() {
   });
 
   group('ReactionDetailSheet Golden Tests', () {
+    final reactions = [
+      Reaction(
+        type: 'love',
+        messageId: 'test-message',
+        userId: 'user-1',
+        user: User(id: 'user-1', name: 'User 1'),
+        createdAt: DateTime(2026, 1, 1, 10, 0),
+      ),
+      Reaction(
+        type: 'like',
+        messageId: 'test-message',
+        userId: 'user-2',
+        user: User(id: 'user-2', name: 'User 2'),
+        createdAt: DateTime(2026, 1, 1, 10, 1),
+      ),
+    ];
+
     final message = _buildMessage(
-      latestReactions: [
-        Reaction(
-          type: 'love',
-          messageId: 'test-message',
-          userId: 'user-1',
-          user: User(id: 'user-1', name: 'User 1'),
-          createdAt: DateTime(2026, 1, 1, 10, 0),
-        ),
-        Reaction(
-          type: 'like',
-          messageId: 'test-message',
-          userId: 'user-2',
-          user: User(id: 'user-2', name: 'User 2'),
-          createdAt: DateTime(2026, 1, 1, 10, 1),
-        ),
-      ],
       reactionGroups: {
         'love': ReactionGroup(count: 1, sumScores: 1),
         'like': ReactionGroup(count: 1, sumScores: 1),
       },
     );
-
-    Future<void> settleSheet(WidgetTester tester) async {
-      // Pump once to trigger post-frame modal opening, then settle animation.
-      await tester.pump();
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-    }
 
     for (final brightness in Brightness.values) {
       final theme = brightness.name;
@@ -232,7 +277,23 @@ void main() {
         'ReactionDetailSheet in $theme theme',
         fileName: 'reaction_detail_sheet_$theme',
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 700),
-        pumpBeforeTest: settleSheet,
+        pumpBeforeTest: (tester) async {
+          when(
+            () => mockClient.queryReactions(
+              'test-message',
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+          ).thenAnswer(
+            (_) async => QueryReactionsResponse()
+              ..reactions = reactions
+              ..next = null,
+          );
+          // Pump once to trigger post-frame modal opening, then settle animation.
+          await tester.pump();
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+        },
         builder: () => _wrapWithMaterialApp(
           client: mockClient,
           brightness: brightness,
@@ -244,7 +305,23 @@ void main() {
         'ReactionDetailSheet filtered in $theme theme',
         fileName: 'reaction_detail_sheet_filtered_$theme',
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 700),
-        pumpBeforeTest: settleSheet,
+        pumpBeforeTest: (tester) async {
+          when(
+            () => mockClient.queryReactions(
+              'test-message',
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              pagination: any(named: 'pagination'),
+            ),
+          ).thenAnswer(
+            (_) async => QueryReactionsResponse()
+              ..reactions = reactions.where((r) => r.type == 'love').toList()
+              ..next = null,
+          );
+          // Pump once to trigger post-frame modal opening, then settle animation.
+          await tester.pump();
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+        },
         builder: () => _wrapWithMaterialApp(
           client: mockClient,
           brightness: brightness,

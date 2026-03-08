@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_size_calculator.dart';
+import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/stream_image_cdn.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -22,9 +24,7 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
     this.width,
     this.height,
     this.fit,
-    this.thumbnailSize,
-    this.thumbnailResizeType = 'clip',
-    this.thumbnailCropType = 'center',
+    this.resize,
     this.errorBuilder = _defaultErrorBuilder,
   });
 
@@ -40,18 +40,14 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
   /// Fit of the attachment image thumbnail.
   final BoxFit? fit;
 
-  /// Size of the attachment image thumbnail.
-  final Size? thumbnailSize;
-
-  /// Resize type of the image attachment thumbnail.
+  /// The resize configuration for the image attachment thumbnail.
   ///
-  /// Defaults to [crop]
-  final String /*clip|crop|scale|fill*/ thumbnailResizeType;
-
-  /// Crop type of the image attachment thumbnail.
+  /// When provided, its [ImageResize.width] and [ImageResize.height] are used
+  /// directly as the CDN resize dimensions.
   ///
-  /// Defaults to [center]
-  final String /*center|top|bottom|left|right*/ thumbnailCropType;
+  /// When null, the size is auto-calculated from the layout constraints
+  /// and defaults to [ResizeMode.clip] and [CropMode.center].
+  final ImageResize? resize;
 
   /// Builder used when the thumbnail fails to load.
   final ThumbnailErrorBuilder errorBuilder;
@@ -75,35 +71,31 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate optimal thumbnail size once for all paths
-        final effectiveThumbnailSize = switch (thumbnailSize) {
-          final thumbnailSize? => thumbnailSize,
-          _ => ThumbnailSizeCalculator.calculate(
+        var effectiveResize = resize;
+        if (effectiveResize == null) {
+          final size = ThumbnailSizeCalculator.calculate(
             targetSize: constraints.biggest,
             originalSize: image.originalSize,
             pixelRatio: MediaQuery.devicePixelRatioOf(context),
-          ),
-        };
+          );
 
-        final cacheWidth = effectiveThumbnailSize?.width.round();
-        final cacheHeight = effectiveThumbnailSize?.height.round();
+          if (size != null) effectiveResize = .new(width: size.width, height: size.height);
+        }
+
+        final cacheWidth = effectiveResize?.width.round();
+        final cacheHeight = effectiveResize?.height.round();
 
         // If the remote image URL is available, we can directly show it using
         // the _RemoteImageAttachment widget.
         final imageUrl = image.thumbUrl ?? image.imageUrl ?? image.assetUrl;
         if (imageUrl case final imageUrl?) {
-          var resizedImageUrl = imageUrl;
-          if (effectiveThumbnailSize case final thumbnailSize?) {
-            resizedImageUrl = imageUrl.getResizedImageUrl(
-              crop: thumbnailCropType,
-              resize: thumbnailResizeType,
-              width: thumbnailSize.width,
-              height: thumbnailSize.height,
-            );
-          }
+          final imageCDN = StreamChatConfiguration.maybeOf(context)?.imageCDN ?? const StreamImageCDN();
+          final resolvedUrl = imageCDN.resolveUrl(imageUrl, resize: effectiveResize);
+          final resolvedCacheKey = imageCDN.cacheKey(resolvedUrl);
 
           return _RemoteImageAttachment(
-            url: resizedImageUrl,
+            url: resolvedUrl,
+            cacheKey: resolvedCacheKey,
             width: width,
             height: height,
             fit: fit,
@@ -195,6 +187,7 @@ class _LocalImageAttachment extends StatelessWidget {
 class _RemoteImageAttachment extends StatelessWidget {
   const _RemoteImageAttachment({
     required this.url,
+    this.cacheKey,
     required this.errorBuilder,
     this.width,
     this.height,
@@ -204,6 +197,7 @@ class _RemoteImageAttachment extends StatelessWidget {
   });
 
   final String url;
+  final String? cacheKey;
   final double? width;
   final double? height;
   final int? cacheWidth;
@@ -215,6 +209,7 @@ class _RemoteImageAttachment extends StatelessWidget {
   Widget build(BuildContext context) {
     return CachedNetworkImage(
       imageUrl: url,
+      cacheKey: cacheKey,
       width: width,
       height: height,
       memCacheWidth: cacheWidth,
