@@ -88,20 +88,22 @@ class _IconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 24,
-      width: 24,
-      child: RawMaterialButton(
-        elevation: 0,
-        highlightElevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        onPressed: onPressed,
-        fillColor: StreamChatTheme.of(context).colorTheme.overlayDark,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+    return SizedBox.square(
+      dimension: 20,
+      child: IconTheme.merge(
+        data: const IconThemeData(size: 16),
+        child: RawMaterialButton(
+          elevation: 0,
+          highlightElevation: 0,
+          focusElevation: 0,
+          hoverElevation: 0,
+          onPressed: onPressed,
+          fillColor: StreamChatTheme.of(context).colorTheme.overlayDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: icon,
         ),
-        child: icon,
       ),
     );
   }
@@ -203,7 +205,6 @@ class _FailedState extends StatelessWidget {
         _IconButton(
           icon: Icon(
             context.streamIcons.arrowRotateClockwise,
-            size: 14,
             color: theme.colorTheme.barsBg,
           ),
           onPressed: () {
@@ -244,8 +245,9 @@ class _SuccessState extends StatelessWidget {
       alignment: Alignment.topRight,
       child: CircleAvatar(
         backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
-        maxRadius: 12,
+        maxRadius: 10,
         child: Icon(
+          size: 16,
           context.streamIcons.checkmark2,
           color: StreamChatTheme.of(context).colorTheme.barsBg,
         ),

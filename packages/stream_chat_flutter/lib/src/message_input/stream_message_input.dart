@@ -702,7 +702,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
         elevation: elevation ?? 8,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: _messageInputTheme.inputBackgroundColor,
+            color: context.streamColorScheme.backgroundElevation1,
             boxShadow: [if (shadow != null) shadow],
           ),
           child: SimpleSafeArea(
