@@ -189,8 +189,8 @@ class _MessageCardState extends State<MessageCard> {
                       widget.message.quotedMessage!,
                     ) ??
                     core.MessageComposerReplyAttachment(
-                      title: widget.message.quotedMessage!.user?.name ?? '',
-                      subtitle: widget.message.quotedMessage!.text ?? '',
+                      title: Text(widget.message.quotedMessage!.user?.name ?? ''),
+                      subtitle: StreamMessagePreviewText(message: widget.message.quotedMessage!),
                       style: currentUser?.id == widget.message.quotedMessage!.user?.id ? .outgoing : .incoming,
                     ),
               ),
