@@ -120,6 +120,7 @@ class _ContextMenuRegionState extends State<ContextMenuRegion> {
     BuildContext context,
     Offset position,
   ) async {
+    FocusScope.of(context).unfocus();
     final result = await showContextMenu(
       context: context,
       menuBuilder: (context) => widget.menuBuilder(context, position),

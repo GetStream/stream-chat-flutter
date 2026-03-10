@@ -144,6 +144,7 @@ class ParseAttachments extends StatelessWidget {
         },
       );
 
+      FocusScope.of(context).unfocus();
       final navigator = Navigator.of(context);
       final channel = StreamChannel.of(context).channel;
       final startIndex = attachments.indexWhere(

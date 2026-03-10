@@ -862,6 +862,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     BuildContext context,
     Message message,
   ) async {
+    FocusScope.of(context).unfocus();
     final channel = StreamChannel.of(context).channel;
 
     final action = await ReactionDetailSheet.show(
@@ -899,6 +900,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     BuildContext context,
     Message message,
   ) async {
+    FocusScope.of(context).unfocus();
     final channel = StreamChannel.of(context).channel;
 
     final actions = _buildBouncedErrorMessageActions(
@@ -934,6 +936,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     BuildContext context,
     Message message,
   ) async {
+    FocusScope.of(context).unfocus();
     final channel = StreamChannel.of(context).channel;
     final currentUser = channel.client.state.currentUser;
     final showPicker = widget.showReactionPicker && channel.canSendReaction;

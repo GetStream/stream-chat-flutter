@@ -1065,9 +1065,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       _pickerController!.addListener(_syncPickerToMessage);
       _effectiveController.addListener(_syncMessageToPicker);
 
-      if (_effectiveFocusNode.hasFocus) {
-        _effectiveFocusNode.unfocus();
-      }
+      _effectiveFocusNode.unfocus();
     });
   }
 
