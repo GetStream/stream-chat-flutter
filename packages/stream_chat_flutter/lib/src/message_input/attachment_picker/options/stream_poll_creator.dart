@@ -23,8 +23,6 @@ class StreamPollCreator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     final spacing = context.streamSpacing;
     final textTheme = context.streamTextTheme;
     final colorScheme = context.streamColorScheme;
