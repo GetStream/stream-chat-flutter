@@ -176,24 +176,54 @@ class _QuotedMessageInHeader extends StatelessWidget {
     if (attachments.isEmpty || attachments.length > 1) return null;
 
     final attachment = attachments.first;
+    if (attachment.type == AttachmentType.file) return null;
     final imageUrl = attachment.imageUrl ?? attachment.thumbUrl ?? attachment.assetUrl;
 
     if (imageUrl == null) return null;
     return CachedNetworkImageProvider(imageUrl);
   }
 
+  String? _mimeTypeAttachment(Message message) {
+    final attachments = message.attachments;
+    if (attachments.isEmpty) return null;
+    final attachment = attachments.first;
+
+    if (attachment.type != AttachmentType.file) return null;
+    if (attachments.any((it) => it.mimeType != attachment.mimeType)) return null;
+
+    return attachment.mimeType;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isIncoming = currentUserId != quotedMessage.user?.id;
 
+    final image = _imageProvider(quotedMessage);
+    final mimeType = _mimeTypeAttachment(quotedMessage);
+
+    Widget? trailing;
+    if (image != null) {
+      Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(context.streamRadius.md),
+          image: DecorationImage(image: image, fit: BoxFit.cover),
+        ),
+      );
+    } else if (mimeType != null) {
+      trailing = StreamFileTypeIcon.fromMimeType(mimeType: mimeType);
+    } else {
+      trailing = null;
+    }
+
     return
-    // TODO: improve attachment and add trailing to the component instead.
     // TODO: localize strings
     MessageComposerReplyAttachment(
       title: Text(isIncoming ? 'Reply to ${quotedMessage.user?.name}' : 'You'),
       subtitle: StreamMessagePreviewText(message: quotedMessage),
       onRemovePressed: onRemovePressed,
-      image: _imageProvider(quotedMessage),
+      trailing: trailing,
       style: isIncoming ? .incoming : .outgoing,
     );
   }
