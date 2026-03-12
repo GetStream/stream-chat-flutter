@@ -9,7 +9,6 @@ import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_a
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery.dart';
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -80,9 +79,9 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Empty();
 
-        final theme = StreamChatTheme.of(context);
-        final textTheme = theme.textTheme;
-        final colorTheme = theme.colorTheme;
+        final spacing = context.streamSpacing;
+        final textTheme = context.streamTextTheme;
+        final colorScheme = context.streamColorScheme;
 
         // Available on both Android and iOS.
         final isAuthorized = snapshot.data == PermissionState.authorized;
@@ -92,10 +91,11 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
         final isPermissionGranted = isAuthorized || isLimited;
 
         return OptionDrawer(
+          margin: .zero,
           actions: [
             if (isLimited)
               IconButton(
-                color: colorTheme.accentPrimary,
+                color: colorScheme.accentPrimary,
                 icon: const Icon(Icons.add_circle_outline_rounded),
                 onPressed: () async {
                   await PhotoManager.presentLimited();
@@ -110,26 +110,24 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
+                      size: 32,
                       context.streamIcons.images1Alt,
-                      size: 240,
-                      color: colorTheme.disabled,
+                      color: colorScheme.textTertiary,
                     ),
+                    SizedBox(height: spacing.xs),
                     Text(
                       context.translations.enablePhotoAndVideoAccessMessage,
-                      style: textTheme.body.copyWith(
-                        color: colorTheme.textLowEmphasis,
+                      style: textTheme.bodyDefault.copyWith(
+                        color: colorScheme.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: PhotoManager.openSetting,
-                      child: Text(
-                        context.translations.allowGalleryAccessMessage,
-                        style: textTheme.bodyBold.copyWith(
-                          color: colorTheme.accentPrimary,
-                        ),
-                      ),
+                    SizedBox(height: spacing.md),
+                    StreamButton(
+                      type: .outline,
+                      style: .secondary,
+                      onTap: PhotoManager.openSetting,
+                      label: context.translations.allowGalleryAccessMessage,
                     ),
                   ],
                 );

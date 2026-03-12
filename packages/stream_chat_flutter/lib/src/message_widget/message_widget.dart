@@ -699,7 +699,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
               false => AlignmentDirectional.centerStart,
             },
             child: Padding(
-              padding: widget.padding ?? const EdgeInsets.all(8),
+              padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16),
               child: MessageWidgetContent(
                 streamChatTheme: theme,
                 showUsername: showUsername,

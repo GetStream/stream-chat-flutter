@@ -231,6 +231,8 @@ class MessageWidgetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasThreadParticipants = message.threadParticipants?.isNotEmpty == true;
+
     return Column(
       crossAxisAlignment: reverse ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -321,7 +323,7 @@ class MessageWidgetContent extends StatelessWidget {
                   ],
                   if (showBottomRow)
                     SizedBox(
-                      height: context.textScaleFactor * 18.0,
+                      height: context.textScaleFactor * (hasThreadParticipants ? 24.0 : 18.0),
                     ),
                 ],
               ),

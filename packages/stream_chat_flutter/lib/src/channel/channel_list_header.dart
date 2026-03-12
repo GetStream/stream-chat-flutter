@@ -55,6 +55,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
     this.actions,
     this.backgroundColor,
     this.elevation = 0,
+    this.scrolledUnderElevation = 0,
   });
 
   /// Use this if you don't have a [StreamChatClient] in your widget tree.
@@ -99,6 +100,9 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
   /// The elevation for this [StreamChannelListHeader].
   final double elevation;
 
+  /// The scrolled under elevation for this [StreamChannelListHeader].
+  final double scrolledUnderElevation;
+
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
@@ -139,6 +143,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
                   ? SystemUiOverlayStyle.light
                   : SystemUiOverlayStyle.dark,
               elevation: elevation,
+              scrolledUnderElevation: scrolledUnderElevation,
               backgroundColor: backgroundColor ?? channelListHeaderThemeData.color,
               centerTitle: centerTitle,
               shape: LinearBorder(

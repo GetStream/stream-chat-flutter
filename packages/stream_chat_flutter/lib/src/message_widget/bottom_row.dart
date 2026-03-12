@@ -155,14 +155,17 @@ class BottomRow extends StatelessWidget {
         return deletedBottomRowBuilder(context, message);
       }
     }
-
+    final textTheme = context.streamTextTheme;
+    final textStyle = textTheme.metadataDefault.copyWith(
+      color: context.streamColorScheme.textTertiary,
+    );
     final threadParticipants = message.threadParticipants?.take(2);
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
     final replyCount = message.replyCount;
     final isEdited = message.messageTextUpdatedAt != null;
 
     var msg = context.translations.threadReplyLabel;
-    if (showThreadReplyIndicator && replyCount! > 1) {
+    if (showThreadReplyIndicator && replyCount! > 0) {
       msg = context.translations.threadReplyCountText(replyCount);
     }
 
@@ -199,18 +202,18 @@ class BottomRow extends StatelessWidget {
           _ => Username(
             key: usernameKey,
             message: message,
-            messageTheme: messageTheme,
+            textStyle: textStyle,
           ),
         },
       if (showEditedLabel && isEdited)
         Text(
           context.translations.editedMessageLabel,
-          style: messageTheme.createdAtStyle,
+          style: textStyle,
         ),
       if (showTimeStamp)
         StreamTimestamp(
           date: message.createdAt.toLocal(),
-          style: messageTheme.createdAtStyle,
+          style: textStyle,
           formatter: (context, date) {
             if (messageTheme.createdAtFormatter case final formatter?) {
               return formatter.call(context, date);
@@ -234,7 +237,7 @@ class BottomRow extends StatelessWidget {
                 bottom: context.textScaleFactor * ((messageTheme.repliesStyle?.fontSize ?? 1) / 2),
               ),
               child: CustomPaint(
-                size: const Size(16, 32) * context.textScaleFactor,
+                size: const Size(16, 40) * context.textScaleFactor,
                 painter: ThreadReplyPainter(
                   context: context,
                   color: messageTheme.messageBorderColor,

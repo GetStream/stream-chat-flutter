@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// {@template messageCard}
 /// The widget containing a quoted message.
@@ -151,6 +152,10 @@ class _MessageCardState extends State<MessageCard> {
   Widget build(BuildContext context) {
     final onQuotedMessageTap = widget.onQuotedMessageTap;
     final quotedMessageBuilder = widget.quotedMessageBuilder;
+    final coreTheme = context.streamMessageTheme.mergeWithDefaults(context);
+    final messageStyle = widget.reverse ? coreTheme.outgoing! : coreTheme.incoming!;
+    final currentUser = StreamChat.maybeOf(context)?.currentUser;
+    final colorScheme = context.streamColorScheme;
 
     return Container(
       constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
@@ -159,7 +164,7 @@ class _MessageCardState extends State<MessageCard> {
         start: !widget.reverse && widget.isFailedState ? 12.0 : 0.0,
       ),
       clipBehavior: Clip.hardEdge,
-      decoration: _buildDecoration(widget.messageTheme),
+      decoration: _buildDecoration(messageStyle, widget.messageTheme),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,16 +174,26 @@ class _MessageCardState extends State<MessageCard> {
               onTap: !widget.message.quotedMessage!.isDeleted && onQuotedMessageTap != null
                   ? () => onQuotedMessageTap(widget.message.quotedMessageId)
                   : null,
-              child:
-                  quotedMessageBuilder?.call(
-                    context,
-                    widget.message.quotedMessage!,
-                  ) ??
-                  QuotedMessage(
-                    message: widget.message,
-                    textBuilder: widget.textBuilder,
-                    hasNonUrlAttachments: widget.hasNonUrlAttachments,
+              child: core.StreamMessageTheme(
+                data: core.StreamMessageThemeData(
+                  incoming: core.StreamMessageStyle(
+                    backgroundColor: colorScheme.backgroundSurfaceStrong,
                   ),
+                  outgoing: core.StreamMessageStyle(
+                    backgroundColor: colorScheme.brand.shade150,
+                  ),
+                ),
+                child:
+                    quotedMessageBuilder?.call(
+                      context,
+                      widget.message.quotedMessage!,
+                    ) ??
+                    core.MessageComposerReplyAttachment(
+                      title: Text(widget.message.quotedMessage!.user?.name ?? ''),
+                      subtitle: StreamMessagePreviewText(message: widget.message.quotedMessage!),
+                      style: currentUser?.id == widget.message.quotedMessage!.user?.id ? .outgoing : .incoming,
+                    ),
+              ),
             ),
           ParseAttachments(
             key: attachmentsKey,
@@ -193,7 +208,7 @@ class _MessageCardState extends State<MessageCard> {
             attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
           ),
           TextBubble(
-            messageTheme: widget.messageTheme,
+            messageStyle: messageStyle,
             message: widget.message,
             textPadding: widget.textPadding,
             textBuilder: widget.textBuilder,
@@ -208,9 +223,9 @@ class _MessageCardState extends State<MessageCard> {
     );
   }
 
-  ShapeDecoration _buildDecoration(StreamMessageThemeData theme) {
+  ShapeDecoration _buildDecoration(core.StreamMessageStyle messageStyle, StreamMessageThemeData theme) {
     final gradient = _getBackgroundGradient(theme);
-    final color = gradient == null ? _getBackgroundColor(theme) : null;
+    final color = gradient == null ? _getBackgroundColor(messageStyle) : null;
 
     final borderColor = theme.messageBorderColor ?? Colors.transparent;
     final borderRadius = widget.borderRadiusGeometry ?? BorderRadius.zero;
@@ -231,20 +246,20 @@ class _MessageCardState extends State<MessageCard> {
     );
   }
 
-  Color? _getBackgroundColor(StreamMessageThemeData theme) {
+  Color? _getBackgroundColor(core.StreamMessageStyle theme) {
     if (widget.hasQuotedMessage) {
-      return theme.messageBackgroundColor;
+      return theme.backgroundColor;
     }
 
     final containsOnlyUrlAttachment = widget.hasUrlAttachments && !widget.hasNonUrlAttachments;
 
     if (containsOnlyUrlAttachment) {
-      return theme.urlAttachmentBackgroundColor;
+      return theme.backgroundAttachmentColor;
     }
 
     if (widget.isOnlyEmoji) return null;
 
-    return theme.messageBackgroundColor;
+    return theme.backgroundColor;
   }
 
   Gradient? _getBackgroundGradient(StreamMessageThemeData theme) {

@@ -18,16 +18,27 @@ class ThreadSeparator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final replyCount = parentMessage!.replyCount!;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Text(
-          context.translations.threadSeparatorText(replyCount),
-          textAlign: TextAlign.center,
-          style: StreamChannelHeaderTheme.of(context).subtitleStyle,
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: spacing.xs),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundSurfaceSubtle,
+          border: Border(
+            top: BorderSide(color: colorScheme.borderSubtle),
+            bottom: BorderSide(color: colorScheme.borderSubtle),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.xs),
+          child: Text(
+            context.translations.threadSeparatorText(replyCount),
+            textAlign: TextAlign.center,
+            style: textTheme.metadataEmphasis,
+          ),
         ),
       ),
     );

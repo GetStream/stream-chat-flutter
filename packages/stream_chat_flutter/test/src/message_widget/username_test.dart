@@ -11,7 +11,7 @@ void main() {
           body: Center(
             child: Username(
               message: Message(),
-              messageTheme: StreamChatThemeData.light().ownMessageTheme,
+              textStyle: StreamChatThemeData.light().ownMessageTheme.messageAuthorStyle!,
             ),
           ),
         ),

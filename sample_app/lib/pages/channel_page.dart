@@ -1,5 +1,8 @@
 // ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
 
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -281,7 +284,7 @@ class _ChannelPageState extends State<ChannelPage> {
       ),
     );
 
-    return Container(
+    final child = Container(
       color: reminder != null ? colorTheme.accentPrimary.withOpacity(.1) : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -336,6 +339,63 @@ class _ChannelPageState extends State<ChannelPage> {
           if (reminder != null) const SizedBox(height: 4),
         ],
       ),
+    );
+
+    // We do not support quoting deleted messages.
+    if (message.isDeleted || message.state.isFailed) return child;
+
+    // The threshold after which the message is considered swiped.
+    const threshold = 0.2;
+
+    final isMyMessage = details.isMyMessage;
+    // The direction in which the message can be swiped.
+    final swipeDirection = details.isMyMessage ? SwipeDirection.endToStart : SwipeDirection.startToEnd;
+
+    return Swipeable(
+      key: ValueKey(details.message.id),
+      direction: swipeDirection,
+      swipeThreshold: threshold,
+      onSwiped: (_) => _reply(details.message),
+      backgroundBuilder: (context, details) {
+        // The alignment of the swipe action.
+        final alignment = isMyMessage ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart;
+
+        // The progress of the swipe action.
+        final progress = math.min(details.progress, threshold) / threshold;
+
+        // The offset for the reply icon.
+        var offset = Offset.lerp(const Offset(-24, 0), const Offset(12, 0), progress)!;
+
+        // If the message is mine, we need to flip the offset.
+        if (isMyMessage) offset = Offset(-offset.dx, -offset.dy);
+
+        return Align(
+          alignment: alignment,
+          child: Transform.translate(
+            offset: offset,
+            child: Opacity(
+              opacity: progress,
+              child: SizedBox.square(
+                dimension: 30,
+                child: CustomPaint(
+                  painter: AnimatedCircleBorderPainter(
+                    progress: progress,
+                    color: context.streamColorScheme.borderDefault,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      context.streamIcons.arrowShareLeft,
+                      size: lerpDouble(0, 18, progress),
+                      color: context.streamColorScheme.accentPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: child,
     );
   }
 

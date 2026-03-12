@@ -152,8 +152,8 @@ class _EditMessageInHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MessageComposerReplyAttachment(
-      title: context.translations.editMessageLabel,
-      subtitle: message.text ?? '',
+      title: Text(context.translations.editMessageLabel),
+      subtitle: StreamMessagePreviewText(message: message),
       onRemovePressed: onRemovePressed,
       style: ReplyStyle.outgoing,
     );
@@ -171,17 +171,29 @@ class _QuotedMessageInHeader extends StatelessWidget {
   final VoidCallback onRemovePressed;
   final String? currentUserId;
 
+  ImageProvider<Object>? _imageProvider(Message message) {
+    final attachments = message.attachments;
+    if (attachments.isEmpty || attachments.length > 1) return null;
+
+    final attachment = attachments.first;
+    final imageUrl = attachment.imageUrl ?? attachment.thumbUrl ?? attachment.assetUrl;
+
+    if (imageUrl == null) return null;
+    return CachedNetworkImageProvider(imageUrl);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isIncoming = currentUserId != quotedMessage.user?.id;
 
     return
-    // TODO: show image if available
+    // TODO: improve attachment and add trailing to the component instead.
     // TODO: localize strings
     MessageComposerReplyAttachment(
-      title: isIncoming ? 'Reply to ${quotedMessage.user?.name}' : 'You',
-      subtitle: quotedMessage.text ?? '',
+      title: Text(isIncoming ? 'Reply to ${quotedMessage.user?.name}' : 'You'),
+      subtitle: StreamMessagePreviewText(message: quotedMessage),
       onRemovePressed: onRemovePressed,
+      image: _imageProvider(quotedMessage),
       style: isIncoming ? .incoming : .outgoing,
     );
   }
