@@ -26,7 +26,6 @@ class DmCheckboxListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = context.streamTextTheme;
-    final colorScheme = context.streamColorScheme;
 
     const visualDensity = VisualDensity(
       vertical: VisualDensity.minimumDensity,
@@ -55,10 +54,7 @@ class DmCheckboxListTile extends StatelessWidget {
         contentPadding: contentPadding,
         title: Text(
           context.translations.alsoSendAsDirectMessageLabel,
-          style: textTheme.metadataDefault.copyWith(
-            // ignore: deprecated_member_use
-            color: colorScheme.textPrimary,
-          ),
+          style: textTheme.metadataDefault,
         ),
       ),
     );
