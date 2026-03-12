@@ -7,6 +7,7 @@ import 'package:stream_chat_flutter/src/components/message_composer/message_comp
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_locked.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_ongoing.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_trailing.dart';
+import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
@@ -33,6 +34,7 @@ class StreamChatMessageComposer extends StatefulWidget {
     StreamAudioRecorderController? audioRecorderController,
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
+    bool canAlsoSendAsToChannel = false,
   }) : props = MessageComposerProps(
          controller: controller,
          isFloating: false,
@@ -46,6 +48,7 @@ class StreamChatMessageComposer extends StatefulWidget {
          audioRecorderController: audioRecorderController,
          sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
          feedback: feedback,
+         canAlsoSendAsToChannel: canAlsoSendAsToChannel,
        );
 
   /// The controller for the message composer.
@@ -176,6 +179,7 @@ class MessageComposerProps {
     this.audioRecorderController,
     this.sendVoiceRecordingAutomatically = false,
     this.feedback = const AudioRecorderFeedback(),
+    this.canAlsoSendAsToChannel = false,
   });
 
   /// The controller for the message composer.
@@ -216,6 +220,10 @@ class MessageComposerProps {
 
   /// The feedback for the audio recorder.
   final AudioRecorderFeedback feedback;
+
+  /// Whether the user can also send the message as a direct message.
+  /// Usually used in threads.
+  final bool canAlsoSendAsToChannel;
 }
 
 extension on StreamAudioRecorderController {
@@ -290,7 +298,29 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
       inputLeading: StreamMessageComposerInputLeading(
         props: componentProps,
       ),
-      inputBody: body,
+      inputBody:
+          body ??
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              core.StreamMessageComposerInputField(
+                controller: inputController.textFieldController,
+                placeholder: props.placeholder,
+                focusNode: props.focusNode,
+              ),
+              if (props.canAlsoSendAsToChannel)
+                DmCheckboxListTile(
+                  value: props.controller?.showInChannel ?? false,
+                  // height of list tile is 34px, height of checkbox is 16px, so we need to subtract 8px to make the spacing correct.
+                  contentPadding: EdgeInsets.only(
+                    right: context.streamSpacing.md,
+                    left: context.streamSpacing.md,
+                    bottom: context.streamSpacing.md - 8,
+                  ),
+                  onChanged: (value) => props.controller?.showInChannel = value,
+                ),
+            ],
+          ),
     );
   }
 

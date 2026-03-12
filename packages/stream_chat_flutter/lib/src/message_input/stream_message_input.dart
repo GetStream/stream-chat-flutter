@@ -790,8 +790,8 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             focusNode: focusNode,
             onSendPressed: sendMessage,
             audioRecorderController: _audioRecorderController,
+            canAlsoSendAsToChannel: _shouldShowDmCheckbox(),
           ),
-          _buildDmCheckbox(context),
           _buildInlineAttachmentPicker(context),
         ].nonNulls.toList(),
       ),
@@ -855,19 +855,11 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     return null;
   }
 
-  Widget? _buildDmCheckbox(BuildContext context) {
-    if (widget.hideSendAsDm) return null;
+  bool _shouldShowDmCheckbox() {
+    if (widget.hideSendAsDm) return false;
 
     final insideThread = _effectiveController.message.parentId != null;
-    if (!insideThread) return null;
-
-    return DmCheckboxListTile(
-      value: _effectiveController.showInChannel,
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: context.streamSpacing.md,
-      ),
-      onChanged: (value) => _effectiveController.showInChannel = value,
-    );
+    return insideThread;
   }
 
   Widget _buildNoPermissionMessage(BuildContext context) {
