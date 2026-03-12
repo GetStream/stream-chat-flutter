@@ -11,7 +11,6 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
-import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';

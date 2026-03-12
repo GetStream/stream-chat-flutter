@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
