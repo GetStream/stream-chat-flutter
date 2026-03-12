@@ -30,31 +30,34 @@ void main() {
     final onThreadTap = MockValueChanged<Message>();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: StreamChannel(
-              channel: channel,
-              child: BottomRow(
-                message: Message(
-                  parentId: 'parentId',
+      StreamChatTheme(
+        data: theme,
+        child: MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: StreamChannel(
+                channel: channel,
+                child: BottomRow(
+                  message: Message(
+                    parentId: 'parentId',
+                  ),
+                  isDeleted: false,
+                  showThreadReplyIndicator: false,
+                  showUsername: false,
+                  showInChannel: true,
+                  showTimeStamp: false,
+                  showEditedLabel: false,
+                  reverse: false,
+                  showSendingIndicator: false,
+                  hasUrlAttachments: false,
+                  isGiphy: false,
+                  isOnlyEmoji: false,
+                  messageTheme: theme.otherMessageTheme,
+                  streamChatTheme: theme,
+                  hasNonUrlAttachments: false,
+                  streamChat: StreamChatState(),
+                  onThreadTap: onThreadTap,
                 ),
-                isDeleted: false,
-                showThreadReplyIndicator: false,
-                showUsername: false,
-                showInChannel: true,
-                showTimeStamp: false,
-                showEditedLabel: false,
-                reverse: false,
-                showSendingIndicator: false,
-                hasUrlAttachments: false,
-                isGiphy: false,
-                isOnlyEmoji: false,
-                messageTheme: theme.otherMessageTheme,
-                streamChatTheme: theme,
-                hasNonUrlAttachments: false,
-                streamChat: StreamChatState(),
-                onThreadTap: onThreadTap,
               ),
             ),
           ),
