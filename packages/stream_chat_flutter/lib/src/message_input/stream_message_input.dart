@@ -790,7 +790,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             placeholder: _getHint(context) ?? '',
             focusNode: focusNode,
             onSendPressed: sendMessage,
-            canAlsoSendAsToChannel: _shouldShowDmCheckbox(),
+            canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
             audioRecorderController: widget.enableVoiceRecording ? _audioRecorderController : null,
           ),
           _buildInlineAttachmentPicker(context),
@@ -856,7 +856,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     return null;
   }
 
-  bool _shouldShowDmCheckbox() {
+  bool _shouldShowSendToChannelCheckbox() {
     if (!widget.canAlsoSendToChannelFromThread) return false;
 
     final insideThread = _effectiveController.message.parentId != null;

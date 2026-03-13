@@ -34,7 +34,7 @@ class StreamChatMessageComposer extends StatefulWidget {
     StreamAudioRecorderController? audioRecorderController,
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
-    bool canAlsoSendAsToChannel = false,
+    bool canAlsoSendToChannel = false,
   }) : props = MessageComposerProps(
          controller: controller,
          isFloating: false,
@@ -48,7 +48,7 @@ class StreamChatMessageComposer extends StatefulWidget {
          audioRecorderController: audioRecorderController,
          sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
          feedback: feedback,
-         canAlsoSendAsToChannel: canAlsoSendAsToChannel,
+         canAlsoSendToChannel: canAlsoSendToChannel,
        );
 
   /// The controller for the message composer.
@@ -179,7 +179,7 @@ class MessageComposerProps {
     this.audioRecorderController,
     this.sendVoiceRecordingAutomatically = false,
     this.feedback = const AudioRecorderFeedback(),
-    this.canAlsoSendAsToChannel = false,
+    this.canAlsoSendToChannel = false,
   });
 
   /// The controller for the message composer.
@@ -223,7 +223,7 @@ class MessageComposerProps {
 
   /// Whether the user can also send the message as a direct message.
   /// Usually used in threads.
-  final bool canAlsoSendAsToChannel;
+  final bool canAlsoSendToChannel;
 }
 
 extension on StreamAudioRecorderController {
@@ -308,7 +308,7 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
                 placeholder: props.placeholder,
                 focusNode: props.focusNode,
               ),
-              if (props.canAlsoSendAsToChannel)
+              if (props.canAlsoSendToChannel)
                 DmCheckboxListTile(
                   value: props.controller?.showInChannel ?? false,
                   // height of list tile is 34px, height of checkbox is 16px, so we need to subtract 8px to make the spacing correct.
