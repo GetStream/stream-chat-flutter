@@ -126,7 +126,7 @@ class StreamMessageInput extends StatefulWidget {
     this.focusNode,
     this.sendButtonLocation = SendButtonLocation.outside,
     this.autofocus = false,
-    this.hideSendAsDm = false,
+    this.canAlsoSendToChannelFromThread = true,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
@@ -218,8 +218,10 @@ class StreamMessageInput extends StatefulWidget {
   /// Use this property to hide/show the commands button.
   final bool showCommandsButton;
 
-  /// Hide send as dm checkbox.
-  final bool hideSendAsDm;
+  /// Show the checkbox to send the message as a direct message to the channel.
+  ///
+  /// Defaults to true.
+  final bool canAlsoSendToChannelFromThread;
 
   /// If true the voice recording button will be displayed.
   ///
@@ -788,8 +790,8 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             placeholder: _getHint(context) ?? '',
             focusNode: focusNode,
             onSendPressed: sendMessage,
-            audioRecorderController: _audioRecorderController,
             canAlsoSendAsToChannel: _shouldShowDmCheckbox(),
+            audioRecorderController: widget.enableVoiceRecording ? _audioRecorderController : null,
           ),
           _buildInlineAttachmentPicker(context),
         ].nonNulls.toList(),
@@ -855,7 +857,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   }
 
   bool _shouldShowDmCheckbox() {
-    if (widget.hideSendAsDm) return false;
+    if (!widget.canAlsoSendToChannelFromThread) return false;
 
     final insideThread = _effectiveController.message.parentId != null;
     return insideThread;
