@@ -7,7 +7,6 @@ import 'dart:math';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
@@ -695,19 +694,17 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     final elevation = widget.elevation ?? _messageInputTheme.elevation;
     final spacing = context.streamSpacing;
 
-    return Portal(
-      child: Material(
-        elevation: elevation ?? 8,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: context.streamColorScheme.backgroundElevation1,
-            boxShadow: [if (shadow != null) shadow],
-          ),
-          child: SimpleSafeArea(
-            enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
-            minimum: _isPickerVisible ? .zero : .only(bottom: spacing.md),
-            child: Center(heightFactor: 1, child: messageInput),
-          ),
+    return Material(
+      elevation: elevation ?? 8,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.streamColorScheme.backgroundElevation1,
+          boxShadow: [if (shadow != null) shadow],
+        ),
+        child: SimpleSafeArea(
+          enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
+          minimum: _isPickerVisible ? .zero : .only(bottom: spacing.md),
+          child: Center(heightFactor: 1, child: messageInput),
         ),
       ),
     );
