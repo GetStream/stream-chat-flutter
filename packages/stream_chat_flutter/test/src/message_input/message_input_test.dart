@@ -539,7 +539,7 @@ void main() {
                 channel: channel,
                 child: const Scaffold(
                   bottomNavigationBar: StreamMessageInput(
-                    hideSendAsDm: true,
+                    canAlsoSendToChannelFromThread: false,
                   ),
                 ),
               ),

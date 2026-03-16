@@ -682,7 +682,7 @@ class DefaultTranslations implements Translations {
   String get reconnectingLabel => 'Reconnecting...';
 
   @override
-  String get alsoSendAsDirectMessageLabel => 'Also send as direct message';
+  String get alsoSendAsDirectMessageLabel => 'Also send in Channel';
 
   @override
   String get addACommentOrSendLabel => 'Add a comment or send';
