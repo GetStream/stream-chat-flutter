@@ -546,7 +546,7 @@ void main() {
       expect(_extractText(tester), isEmpty);
     });
 
-    testWidgets('poll in group channel includes sender prefix', (tester) async {
+    testWidgets('poll in group channel doesnt includes sender prefix', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -569,7 +569,7 @@ void main() {
       expect(_findIcons(tester), hasLength(1));
 
       final text = _extractText(tester);
-      expect(text, contains('You: '));
+      expect(text, isNot(contains('You: ')));
       expect(text, contains('Lunch spot?'));
     });
   });

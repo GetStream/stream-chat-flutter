@@ -638,16 +638,16 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     DraftMessage draftMessage, {
     TextStyle? textStyle,
   }) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
+    final colorScheme = context.streamColorScheme;
 
     return TextSpan(
-      text: getDraftPrefix(context),
-      style: textStyle?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: colorTheme.accentPrimary,
-      ),
       children: [
+        TextSpan(
+          text: getDraftPrefix(context),
+          style: (textStyle ?? context.streamTextTheme.captionEmphasis).copyWith(
+            color: colorScheme.accentPrimary,
+          ),
+        ),
         const TextSpan(text: ' '), // Space between prefix and message
         TextSpan(text: draftMessage.text, style: textStyle),
       ],
