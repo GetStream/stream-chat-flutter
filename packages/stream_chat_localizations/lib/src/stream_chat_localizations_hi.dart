@@ -651,6 +651,18 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get videoAttachmentText => 'वीडियो';
 
   @override
+  String get fileAttachmentText => 'फ़ाइल';
+
+  @override
+  String filesAttachmentCountText(int count) => '$count फ़ाइलें';
+
+  @override
+  String photosAttachmentCountText(int count) => '$count फ़ोटो';
+
+  @override
+  String videosAttachmentCountText(int count) => '$count वीडियो';
+
+  @override
   String get pollYouVotedText => 'आपने वोट दिया';
 
   @override

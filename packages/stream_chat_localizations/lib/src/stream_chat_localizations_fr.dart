@@ -653,6 +653,18 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get videoAttachmentText => 'Vidéo';
 
   @override
+  String get fileAttachmentText => 'Fichier';
+
+  @override
+  String filesAttachmentCountText(int count) => '$count fichiers';
+
+  @override
+  String photosAttachmentCountText(int count) => '$count photos';
+
+  @override
+  String videosAttachmentCountText(int count) => '$count vidéos';
+
+  @override
   String get pollYouVotedText => 'Vous avez voté';
 
   @override

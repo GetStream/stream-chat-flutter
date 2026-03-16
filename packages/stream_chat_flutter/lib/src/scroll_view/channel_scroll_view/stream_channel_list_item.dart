@@ -454,7 +454,7 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    final colorTheme = context.streamMessageTheme.mergeWithDefaults(context);
     final colorScheme = context.streamColorScheme;
 
     return BetterStreamBuilder<List<Read>>(
@@ -466,28 +466,28 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
 
         final Widget icon;
         if (isRead) {
-          icon = StreamSvgIcon(
+          icon = Icon(
+            context.streamIcons.doupleCheckmark1Small,
             size: 16,
-            icon: StreamSvgIcons.checkAll,
-            color: colorTheme.accentPrimary,
+            color: colorTheme.outgoing?.textReadColor ?? colorScheme.accentPrimary,
           );
         } else if (isDelivered) {
-          icon = StreamSvgIcon(
+          icon = Icon(
+            context.streamIcons.doupleCheckmark1Small,
             size: 16,
-            icon: StreamSvgIcons.checkAll,
-            color: colorScheme.textTertiary,
+            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );
         } else if (message.state.isCompleted) {
-          icon = StreamSvgIcon(
+          icon = Icon(
+            context.streamIcons.checkmark1Small,
             size: 16,
-            icon: StreamSvgIcons.check,
-            color: colorScheme.textTertiary,
+            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );
         } else if (message.state.isOutgoing) {
-          icon = StreamSvgIcon(
+          icon = Icon(
+            context.streamIcons.clock,
             size: 16,
-            icon: StreamSvgIcons.time,
-            color: colorScheme.textTertiary,
+            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );
         } else {
           return const Empty();
@@ -647,7 +647,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         if (latestLastMessage == null) {
           return Text(
             context.translations.emptyMessagesText,
-            style: widget.textStyle,
+            style: widget.textStyle?.copyWith(color: context.streamColorScheme.textTertiary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           );
