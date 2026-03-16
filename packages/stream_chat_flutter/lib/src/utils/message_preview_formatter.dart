@@ -203,11 +203,13 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       return formatSystemMessage(context, message);
     }
 
+    if (message.poll case final poll?) {
+      return formatPollMessage(context, poll, currentUser);
+    }
+
     TextSpan? messageSpan;
 
-    if (message.poll case final poll?) {
-      messageSpan = formatPollMessage(context, poll, currentUser);
-    } else if (message.sharedLocation case final location?) {
+    if (message.sharedLocation case final location?) {
       messageSpan = formatLocationMessage(
         context,
         message,
@@ -530,8 +532,13 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
 
   /// The formatted preview [TextSpan] for a [poll] message.
   ///
-  /// Shows a poll chart icon followed by the poll name. If the poll name
-  /// is empty, only the icon is shown.
+  /// Shows a poll chart icon followed by the latest vote activity when
+  /// available, or the poll name as a fallback. Specifically:
+  ///
+  /// - If the [currentUser] cast the latest vote, shows "You voted: {answer}".
+  /// - If another user cast the latest vote, shows "{name} voted: {answer}".
+  /// - Otherwise, falls back to displaying the [poll] name (trimmed). If the
+  ///   name is empty, only the icon is shown.
   ///
   /// Override to customize poll formatting:
   ///
@@ -553,13 +560,29 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     Poll poll,
     User? currentUser,
   ) {
+    final translations = context.translations;
+    TextSpan? latestVoterSpan;
+
+    if (poll.latestVotes.firstOrNull case final latestVote?) {
+      if (latestVote.user?.id == currentUser?.id) {
+        final youVoted = translations.pollYouVotedText;
+        latestVoterSpan = TextSpan(text: '$youVoted: ${latestVote.answerText}');
+      } else if (latestVote.user case final latestVoter?) {
+        if (latestVote.answerText != null) {
+          final someoneVoted = translations.pollSomeoneVotedText(latestVoter.name.split(' ')[0]);
+          latestVoterSpan = TextSpan(text: '$someoneVoted: ${latestVote.answerText}');
+        }
+      }
+    }
+
     return TextSpan(
       children: [
         WidgetSpan(child: Icon(context.streamIcons.chart5, size: 16)),
-        if (poll.name.trim() case final pollName when pollName.isNotEmpty) ...[
-          WidgetSpan(
-            child: SizedBox(width: context.streamSpacing.xxs),
-          ),
+        if (latestVoterSpan case final latestVoterSpan?) ...[
+          WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+          latestVoterSpan,
+        ] else if (poll.name.trim() case final pollName when pollName.isNotEmpty) ...[
+          WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
           TextSpan(text: pollName),
         ],
       ],
