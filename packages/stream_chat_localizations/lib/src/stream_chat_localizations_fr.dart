@@ -656,13 +656,13 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get fileAttachmentText => 'Fichier';
 
   @override
-  String filesAttachmentCountText(int count) => '$count fichiers';
+  String filesAttachmentCountText(int count) => count == 1 ? 'Fichier' : '$count fichiers';
 
   @override
-  String photosAttachmentCountText(int count) => '$count photos';
+  String photosAttachmentCountText(int count) => count == 1 ? 'Photo' : '$count photos';
 
   @override
-  String videosAttachmentCountText(int count) => '$count vidéos';
+  String videosAttachmentCountText(int count) => count == 1 ? 'Vidéo' : '$count vidéos';
 
   @override
   String get pollYouVotedText => 'Vous avez voté';

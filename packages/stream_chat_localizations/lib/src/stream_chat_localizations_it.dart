@@ -659,13 +659,13 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get fileAttachmentText => 'File';
 
   @override
-  String filesAttachmentCountText(int count) => '$count file';
+  String filesAttachmentCountText(int count) => count == 1 ? 'File' : '$count file';
 
   @override
-  String photosAttachmentCountText(int count) => '$count foto';
+  String photosAttachmentCountText(int count) => count == 1 ? 'Foto' : '$count foto';
 
   @override
-  String videosAttachmentCountText(int count) => '$count video';
+  String videosAttachmentCountText(int count) => count == 1 ? 'Video' : '$count video';
 
   @override
   String get pollYouVotedText => 'Hai votato';

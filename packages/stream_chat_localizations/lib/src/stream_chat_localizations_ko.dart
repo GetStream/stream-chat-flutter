@@ -639,13 +639,13 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => '파일';
 
   @override
-  String filesAttachmentCountText(int count) => '파일 $count개';
+  String filesAttachmentCountText(int count) => count == 1 ? '파일' : '파일 $count개';
 
   @override
-  String photosAttachmentCountText(int count) => '사진 $count장';
+  String photosAttachmentCountText(int count) => count == 1 ? '사진' : '사진 $count장';
 
   @override
-  String videosAttachmentCountText(int count) => '동영상 $count개';
+  String videosAttachmentCountText(int count) => count == 1 ? '동영상' : '동영상 $count개';
 
   @override
   String get pollYouVotedText => '투표했습니다';

@@ -475,7 +475,6 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       attachment,
       count: attachments.length,
       isMixed: mixedTypes,
-      isMultiple: attachments.length > 1,
     );
 
     return TextSpan(
@@ -503,7 +502,6 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     Attachment attachment, {
     required int count,
     required bool isMixed,
-    required bool isMultiple,
   }) {
     final translations = context.translations;
 
@@ -514,18 +512,11 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       AttachmentType.voiceRecording => TextSpan(
         text: '${translations.voiceRecordingText} (${attachment.duration.toMinutesAndSeconds()})',
       ),
-      AttachmentType.file =>
-        isMultiple
-            ? TextSpan(text: translations.filesAttachmentCountText(count))
-            : TextSpan(text: attachment.file?.name ?? translations.fileAttachmentText),
-      AttachmentType.image =>
-        isMultiple
-            ? TextSpan(text: translations.photosAttachmentCountText(count))
-            : TextSpan(text: translations.imageAttachmentText),
-      AttachmentType.video =>
-        isMultiple
-            ? TextSpan(text: translations.videosAttachmentCountText(count))
-            : TextSpan(text: translations.videoAttachmentText),
+      AttachmentType.file => TextSpan(
+        text: (count == 1 ? attachment.file?.name : null) ?? translations.filesAttachmentCountText(count),
+      ),
+      AttachmentType.image => TextSpan(text: translations.photosAttachmentCountText(count)),
+      AttachmentType.video => TextSpan(text: translations.videosAttachmentCountText(count)),
       _ => null,
     };
   }

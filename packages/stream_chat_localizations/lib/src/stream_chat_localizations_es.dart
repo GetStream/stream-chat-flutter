@@ -654,13 +654,13 @@ No es posible añadir más de $limit archivos adjuntos
   String get fileAttachmentText => 'Archivo';
 
   @override
-  String filesAttachmentCountText(int count) => '$count archivos';
+  String filesAttachmentCountText(int count) => count == 1 ? 'Archivo' : '$count archivos';
 
   @override
-  String photosAttachmentCountText(int count) => '$count fotos';
+  String photosAttachmentCountText(int count) => count == 1 ? 'Foto' : '$count fotos';
 
   @override
-  String videosAttachmentCountText(int count) => '$count vídeos';
+  String videosAttachmentCountText(int count) => count == 1 ? 'Vídeo' : '$count vídeos';
 
   @override
   String get pollYouVotedText => 'Has votado';

@@ -653,13 +653,13 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get fileAttachmentText => 'Arquivo';
 
   @override
-  String filesAttachmentCountText(int count) => '$count arquivos';
+  String filesAttachmentCountText(int count) => count == 1 ? 'Arquivo' : '$count arquivos';
 
   @override
-  String photosAttachmentCountText(int count) => '$count fotos';
+  String photosAttachmentCountText(int count) => count == 1 ? 'Foto' : '$count fotos';
 
   @override
-  String videosAttachmentCountText(int count) => '$count vídeos';
+  String videosAttachmentCountText(int count) => count == 1 ? 'Vídeo' : '$count vídeos';
 
   @override
   String get pollYouVotedText => 'Você votou';

@@ -636,13 +636,13 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => 'ファイル';
 
   @override
-  String filesAttachmentCountText(int count) => '$count件のファイル';
+  String filesAttachmentCountText(int count) => count == 1 ? 'ファイル' : '$count件のファイル';
 
   @override
-  String photosAttachmentCountText(int count) => '$count枚の写真';
+  String photosAttachmentCountText(int count) => count == 1 ? '写真' : '$count枚の写真';
 
   @override
-  String videosAttachmentCountText(int count) => '$count本の動画';
+  String videosAttachmentCountText(int count) => count == 1 ? '動画' : '$count本の動画';
 
   @override
   String get pollYouVotedText => '投票しました';

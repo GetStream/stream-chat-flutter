@@ -654,13 +654,13 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => 'फ़ाइल';
 
   @override
-  String filesAttachmentCountText(int count) => '$count फ़ाइलें';
+  String filesAttachmentCountText(int count) => count == 1 ? 'फ़ाइल' : '$count फ़ाइलें';
 
   @override
-  String photosAttachmentCountText(int count) => '$count फ़ोटो';
+  String photosAttachmentCountText(int count) => count == 1 ? 'फ़ोटो' : '$count फ़ोटो';
 
   @override
-  String videosAttachmentCountText(int count) => '$count वीडियो';
+  String videosAttachmentCountText(int count) => count == 1 ? 'वीडियो' : '$count वीडियो';
 
   @override
   String get pollYouVotedText => 'आपने वोट दिया';
