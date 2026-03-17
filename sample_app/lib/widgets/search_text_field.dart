@@ -25,7 +25,7 @@ class SearchTextField extends StatelessWidget {
     final textTheme = context.streamTextTheme;
 
     return Container(
-      height: 36,
+      height: 44,
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border.all(
@@ -33,9 +33,11 @@ class SearchTextField extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(24),
       ),
-      margin: const EdgeInsets.symmetric(
-        vertical: 8,
-        horizontal: 8,
+      margin: EdgeInsets.only(
+        top: spacing.md,
+        bottom: spacing.xs,
+        left: spacing.md,
+        right: spacing.md,
       ),
       child: Row(
         children: [
@@ -45,7 +47,7 @@ class SearchTextField extends StatelessWidget {
               controller: controller,
               onChanged: onChanged,
               decoration: InputDecoration(
-                prefixIconConstraints: BoxConstraints.tight(const Size(40, 24)),
+                prefixIconConstraints: BoxConstraints.tight(const Size(36, 24)),
                 prefixIcon: Padding(
                   padding: EdgeInsets.only(left: spacing.md),
                   child: Icon(
@@ -58,7 +60,6 @@ class SearchTextField extends StatelessWidget {
                 hintStyle: textTheme.bodyDefault.copyWith(
                   color: colorScheme.textTertiary,
                 ),
-                contentPadding: EdgeInsets.zero,
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.circular(24),
