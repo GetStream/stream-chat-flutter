@@ -1722,6 +1722,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     _effectiveFocusNode.removeListener(_focusNodeListener);
     _focusNode?.dispose();
     _onChangedDebounced.cancel();
+    _onChangedThrottled.cancel();
     _audioRecorderController.dispose();
     _draftStreamSubscription?.cancel();
     super.dispose();
