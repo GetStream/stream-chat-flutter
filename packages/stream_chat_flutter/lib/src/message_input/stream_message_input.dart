@@ -1712,8 +1712,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   @override
   void dispose() {
     _disposePickerResources();
-    _effectiveController.removeListener(_onTextChangedKeyStroke);
-    _effectiveController.removeListener(_onChangedDebounced);
+    _effectiveController
+      ..removeListener(_onTextChangedKeyStroke)
+      ..removeListener(_onChangedDebounced);
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);
     _focusNode?.dispose();
