@@ -558,7 +558,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
   void _initialiseEffectiveController() {
     _effectiveController
+      ..removeListener(_onTextChangedKeyStroke)
       ..removeListener(_onChangedDebounced)
+      ..addListener(_onTextChangedKeyStroke)
       ..addListener(_onChangedDebounced);
   }
 
@@ -1292,6 +1294,22 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     ).merge(passedDecoration);
   }
 
+  void _onTextChangedKeyStroke() {
+    if (!mounted) return;
+
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    if (channel == null) return;
+
+    final value = _effectiveController.text.trim();
+    if (value.isNotEmpty && channel.canUseTypingEvents) {
+      channel.keyStroke(_effectiveController.message.parentId).onError(
+        (error, stackTrace) {
+          widget.onError?.call(error!, stackTrace);
+        },
+      );
+    }
+  }
+
   late final _onChangedDebounced = debounce(
     () {
       if (!mounted) return;
@@ -1300,14 +1318,6 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       if (channel == null) return;
 
       final value = _effectiveController.text.trim();
-      if (value.isNotEmpty && channel.canUseTypingEvents) {
-        // Notify the server that the user started typing.
-        channel.keyStroke(_effectiveController.message.parentId).onError(
-          (error, stackTrace) {
-            widget.onError?.call(error!, stackTrace);
-          },
-        );
-      }
 
       int actionsLength;
       if (widget.actionsBuilder != null) {
@@ -1702,6 +1712,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   @override
   void dispose() {
     _disposePickerResources();
+    _effectiveController.removeListener(_onTextChangedKeyStroke);
     _effectiveController.removeListener(_onChangedDebounced);
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);
