@@ -558,9 +558,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
   void _initialiseEffectiveController() {
     _effectiveController
-      ..removeListener(_onTextChangedKeyStroke)
+      ..removeListener(_onChangedThrottled)
       ..removeListener(_onChangedDebounced)
-      ..addListener(_onTextChangedKeyStroke)
+      ..addListener(_onChangedThrottled)
       ..addListener(_onChangedDebounced);
   }
 
@@ -1294,21 +1294,24 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     ).merge(passedDecoration);
   }
 
-  void _onTextChangedKeyStroke() {
-    if (!mounted) return;
+  late final _onChangedThrottled = throttle(
+    () {
+      if (!mounted) return;
 
-    final channel = StreamChannel.maybeOf(context)?.channel;
-    if (channel == null) return;
+      final channel = StreamChannel.maybeOf(context)?.channel;
+      if (channel == null) return;
 
-    final value = _effectiveController.text.trim();
-    if (value.isNotEmpty && channel.canUseTypingEvents) {
-      channel.keyStroke(_effectiveController.message.parentId).onError(
-        (error, stackTrace) {
-          widget.onError?.call(error!, stackTrace);
-        },
-      );
-    }
-  }
+      final value = _effectiveController.text.trim();
+      if (value.isNotEmpty && channel.canUseTypingEvents) {
+        channel.keyStroke(_effectiveController.message.parentId).onError(
+          (error, stackTrace) {
+            widget.onError?.call(error!, stackTrace);
+          },
+        );
+      }
+    },
+    const Duration(milliseconds: 350),
+  );
 
   late final _onChangedDebounced = debounce(
     () {
@@ -1713,7 +1716,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   void dispose() {
     _disposePickerResources();
     _effectiveController
-      ..removeListener(_onTextChangedKeyStroke)
+      ..removeListener(_onChangedThrottled)
       ..removeListener(_onChangedDebounced);
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);
