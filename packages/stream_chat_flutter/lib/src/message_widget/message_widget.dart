@@ -1,763 +1,494 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/platform_widget_builder.dart';
+import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
-import 'package:stream_chat_flutter/src/message_widget/message_widget_content.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_header.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_leading.dart';
 import 'package:stream_chat_flutter/src/misc/flexible_fractionally_sized_box.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessageContent;
 
-/// The display behaviour of a widget
-enum DisplayWidget {
-  /// Hides the widget replacing its space with a spacer
-  hide,
-
-  /// Hides the widget not replacing its space
-  gone,
-
-  /// Shows the widget normally
-  show,
-}
-
-/// {@template messageWidget}
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_widget.png)
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_widget_paint.png)
+/// A chat message widget that renders a single message with its attachments,
+/// reactions, and interaction callbacks.
 ///
-/// Shows a message with reactions, replies and user avatar.
+/// [StreamMessageWidget] displays a single [Message] within a chat message
+/// list. It handles the complete message layout including the author avatar,
+/// message content (text, attachments, polls, quoted messages), reactions,
+/// thread indicators, and user interaction gestures such as tap, long-press,
+/// and context menus.
 ///
-/// Usually you don't use this widget as it's the default message widget used by
-/// [MessageListView].
+/// On mobile platforms, a long-press opens the [StreamMessageActionsModal]
+/// with available actions (reply, edit, delete, pin, etc.). On desktop and
+/// web, those same actions appear in a right-click context menu.
 ///
-/// The widget components render the ui based on the first ancestor of type
-/// [StreamChatTheme].
-/// Modify it to change the widget appearance.
-/// {@endtemplate}
-class StreamMessageWidget extends StatefulWidget {
-  /// {@macro messageWidget}
-  const StreamMessageWidget({
+/// This widget delegates rendering to either a custom builder registered via
+/// [StreamComponentFactory], or [DefaultStreamMessage] when no custom builder
+/// is provided. Register a custom builder through [StreamChatConfigurationData]
+/// to fully replace the default message layout while still receiving the same
+/// [StreamMessageWidgetProps].
+///
+/// {@tool snippet}
+///
+/// Display a message with default settings:
+///
+/// ```dart
+/// StreamMessageWidget(
+///   message: message,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// Customise interaction callbacks:
+///
+/// ```dart
+/// StreamMessageWidget(
+///   message: message,
+///   onMessageTap: (msg) => print('Tapped: ${msg.id}'),
+///   onThreadTap: (msg) => Navigator.push(...),
+///   onUserAvatarTap: (user) => showProfile(user),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamMessageWidgetProps], which holds every configurable property.
+///  * [DefaultStreamMessage], the default implementation used when no custom
+///    builder is registered.
+///  * [StreamMessageActionsModal], the modal shown on long-press (mobile).
+///  * [StreamMessageListView], which hosts a scrollable list of these widgets.
+class StreamMessageWidget extends StatelessWidget {
+  /// Creates a chat message widget.
+  ///
+  /// The [message] is required. All other parameters are optional and have
+  /// sensible defaults resolved from the ambient theme and message data.
+  StreamMessageWidget({
     super.key,
-    required this.message,
-    required this.messageTheme,
-    this.reverse = false,
-    this.translateUserAvatar = true,
-    this.shape,
-    this.borderSide,
-    this.borderRadiusGeometry,
-    this.attachmentShape,
-    this.onMentionTap,
-    this.onMessageTap,
-    this.onMessageLongPress,
-    this.onReactionsTap,
-    this.onReactionsHover,
-    this.showReactionPicker = true,
-    this.showUserAvatar = DisplayWidget.show,
-    this.showSendingIndicator = true,
-    this.showThreadReplyIndicator = false,
-    this.showInChannelIndicator = false,
-    this.onReplyTap,
-    this.onThreadTap,
-    this.onEditMessageTap,
-    this.onConfirmDeleteTap,
-    this.showUsername = true,
-    this.showTimestamp = true,
-    this.showEditedLabel = true,
-    this.showReactions = true,
-    this.showDeleteMessage = true,
-    this.showEditMessage = true,
-    this.showReplyMessage = true,
-    this.showThreadReplyMessage = true,
-    this.showMarkUnreadMessage = true,
-    this.showResendMessage = true,
-    this.showCopyMessage = true,
-    this.showFlagButton = true,
-    this.showPinButton = true,
-    this.showPinHighlight = true,
-    this.onUserAvatarTap,
-    this.onLinkTap,
-    this.onMessageActions,
-    this.onBouncedErrorMessageActions,
-    this.onShowMessage,
-    this.userAvatarBuilder,
-    this.quotedMessageBuilder,
-    this.deletedMessageBuilder,
-    this.editMessageInputBuilder,
-    this.textBuilder,
-    this.bottomRowBuilderWithDefaultWidget,
-    this.attachmentBuilders,
-    this.padding,
-    this.textPadding = const EdgeInsets.symmetric(
-      horizontal: 16,
-      vertical: 8,
-    ),
-    this.attachmentPadding = EdgeInsets.zero,
-    this.widthFactor = 0.78,
-    this.onQuotedMessageTap,
-    this.actionsBuilder,
-    this.onAttachmentTap,
-    this.imageAttachmentThumbnailSize = const Size(400, 400),
-    this.imageAttachmentThumbnailResizeType = 'clip',
-    this.imageAttachmentThumbnailCropType = 'center',
-    this.attachmentActionsModalBuilder,
-    this.reactionPickerBuilder = StreamReactionPicker.builder,
-    this.reactionIndicatorBuilder = StreamReactionIndicator.builder,
-  });
-
-  /// {@template onMentionTap}
-  /// Function called on mention tap
-  /// {@endtemplate}
-  final void Function(User)? onMentionTap;
-
-  /// {@template onThreadTap}
-  /// The function called when tapping on threads
-  /// {@endtemplate}
-  final void Function(Message)? onThreadTap;
-
-  /// {@template onReplyTap}
-  /// The function called when tapping on replies
-  /// {@endtemplate}
-  final void Function(Message)? onReplyTap;
-
-  /// {@template onEditMessageTap}
-  /// The function called when tapping the edit action on a message.
-  /// If provided, the inline edit flow is used instead of the bottom sheet.
-  /// {@endtemplate}
-  final void Function(Message)? onEditMessageTap;
-
-  /// {@template onDeleteTap}
-  /// The function called when delete confirmation button is tapped.
-  /// {@endtemplate}
-  final Future<void> Function(Message)? onConfirmDeleteTap;
-
-  /// {@template editMessageInputBuilder}
-  /// Widget builder for edit message layout
-  /// {@endtemplate}
-  final Widget Function(BuildContext, Message)? editMessageInputBuilder;
-
-  /// {@template textBuilder}
-  /// Widget builder for building text
-  /// {@endtemplate}
-  final Widget Function(BuildContext, Message)? textBuilder;
-
-  /// {@template onMessageActions}
-  /// Function called when a message is long-pressed to show actions.
-  /// If provided, this callback will be called instead of showing the default
-  /// message actions modal dialog.
-  /// {@endtemplate}
-  final void Function(BuildContext, Message)? onMessageActions;
-
-  /// {@template onBouncedErrorMessageActions}
-  /// Function called when a message that has bounced with an error is long
-  /// pressed. If provided, this callback will be called instead of showing the
-  /// default bounced error message actions dialog.
-  /// {@endtemplate}
-  final void Function(BuildContext, Message)? onBouncedErrorMessageActions;
-
-  /// {@template bottomRowBuilderWithDefaultWidget}
-  /// Widget builder for building a bottom row below the message.
-  /// Also contains the default bottom row widget.
-  /// {@endtemplate}
-  final BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget;
-
-  /// {@template userAvatarBuilder}
-  /// Widget builder for building user avatar
-  /// {@endtemplate}
-  final Widget Function(BuildContext, User)? userAvatarBuilder;
-
-  /// {@template quotedMessageBuilder}
-  /// Widget builder for building quoted message
-  /// {@endtemplate}
-  final Widget Function(BuildContext, Message)? quotedMessageBuilder;
-
-  /// {@template deletedMessageBuilder}
-  /// Widget builder for building deleted message
-  /// {@endtemplate}
-  final Widget Function(BuildContext, Message)? deletedMessageBuilder;
-
-  /// {@template message}
-  /// The message to display.
-  /// {@endtemplate}
-  final Message message;
-
-  /// {@template messageTheme}
-  /// The message theme
-  /// {@endtemplate}
-  final StreamMessageThemeData messageTheme;
-
-  /// {@template reverse}
-  /// If true the widget will be mirrored
-  /// {@endtemplate}
-  final bool reverse;
-
-  /// {@template shape}
-  /// The shape of the message text
-  /// {@endtemplate}
-  final ShapeBorder? shape;
-
-  /// {@template attachmentShape}
-  /// The shape of an attachment
-  /// {@endtemplate}
-  final ShapeBorder? attachmentShape;
-
-  /// {@template borderSide}
-  /// The borderSide of the message text
-  /// {@endtemplate}
-  final BorderSide? borderSide;
-
-  /// {@template borderRadiusGeometry}
-  /// The border radius of the message text
-  /// {@endtemplate}
-  final BorderRadiusGeometry? borderRadiusGeometry;
-
-  /// {@template padding}
-  /// The padding of the widget
-  /// {@endtemplate}
-  final EdgeInsetsGeometry? padding;
-
-  /// {@template textPadding}
-  /// The internal padding of the message text
-  /// {@endtemplate}
-  final EdgeInsets textPadding;
-
-  /// {@template attachmentPadding}
-  /// The internal padding of an attachment
-  /// {@endtemplate}
-  final EdgeInsetsGeometry attachmentPadding;
-
-  /// {@template widthFactor}
-  /// The percentage of the available width the message content should take
-  /// {@endtemplate}
-  final double widthFactor;
-
-  /// {@template showUserAvatar}
-  /// It controls the display behaviour of the user avatar
-  /// {@endtemplate}
-  final DisplayWidget showUserAvatar;
-
-  /// {@template showSendingIndicator}
-  /// It controls the display behaviour of the sending indicator
-  /// {@endtemplate}
-  final bool showSendingIndicator;
-
-  /// {@template showReactions}
-  /// If `true` the message's reactions will be shown.
-  /// {@endtemplate}
-  final bool showReactions;
-
-  /// {@template showThreadReplyIndicator}
-  /// If true the widget will show the thread reply indicator
-  /// {@endtemplate}
-  final bool showThreadReplyIndicator;
-
-  /// {@template showInChannelIndicator}
-  /// If true the widget will show the show in channel indicator
-  /// {@endtemplate}
-  final bool showInChannelIndicator;
-
-  /// {@template onUserAvatarTap}
-  /// The function called when tapping on UserAvatar
-  /// {@endtemplate}
-  final void Function(User)? onUserAvatarTap;
-
-  /// {@template onLinkTap}
-  /// The function called when tapping on a link
-  /// {@endtemplate}
-  final void Function(String)? onLinkTap;
-
-  /// {@template showReactionPicker}
-  /// Whether or not to show the reaction picker.
-  /// Used in [StreamMessageReactionsModal] and [StreamMessageActionsModal].
-  /// {@endtemplate}
-  final bool showReactionPicker;
-
-  /// {@template onShowMessage}
-  /// Callback when show message is tapped
-  /// {@endtemplate}
-  final ShowMessageCallback? onShowMessage;
-
-  /// {@template showUsername}
-  /// If true show the users username next to the timestamp of the message
-  /// {@endtemplate}
-  final bool showUsername;
-
-  /// {@template showTimestamp}
-  /// Show message timestamp
-  /// {@endtemplate}
-  final bool showTimestamp;
-
-  /// {@template showTimestamp}
-  /// Show edited label if message is edited
-  /// {@endtemplate}
-  final bool showEditedLabel;
-
-  /// {@template showReplyMessage}
-  /// Show reply action
-  /// {@endtemplate}
-  final bool showReplyMessage;
-
-  /// {@template showThreadReplyMessage}
-  /// Show thread reply action
-  /// {@endtemplate}
-  final bool showThreadReplyMessage;
-
-  /// {@template showMarkUnreadMessage}
-  /// Show mark unread action
-  /// {@endtemplate}
-  final bool showMarkUnreadMessage;
-
-  /// {@template showEditMessage}
-  /// Show edit action
-  /// {@endtemplate}
-  final bool showEditMessage;
-
-  /// {@template showCopyMessage}
-  /// Show copy action
-  /// {@endtemplate}
-  final bool showCopyMessage;
-
-  /// {@template showDeleteMessage}
-  /// Show delete action
-  /// {@endtemplate}
-  final bool showDeleteMessage;
-
-  /// {@template showResendMessage}
-  /// Show resend action
-  /// {@endtemplate}
-  final bool showResendMessage;
-
-  /// {@template showFlagButton}
-  /// Show flag action
-  /// {@endtemplate}
-  final bool showFlagButton;
-
-  /// {@template showPinButton}
-  /// Show pin action
-  /// {@endtemplate}
-  final bool showPinButton;
-
-  /// {@template showPinHighlight}
-  /// Display Pin Highlight
-  /// {@endtemplate}
-  final bool showPinHighlight;
-
-  /// {@template attachmentBuilders}
-  /// List of attachment builders for rendering attachment widgets pre-defined
-  /// and custom attachment types.
-  ///
-  /// If null, the widget will create a default list of attachment builders
-  /// based on the [Attachment.type] of the attachment.
-  /// {@endtemplate}
-  final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
-
-  /// {@template translateUserAvatar}
-  /// Center user avatar with bottom of the message
-  /// {@endtemplate}
-  final bool translateUserAvatar;
-
-  /// {@macro onQuotedMessageTap}
-  final OnQuotedMessageTap? onQuotedMessageTap;
-
-  /// {@macro onMessageTap}
-  final OnMessageTap? onMessageTap;
-
-  /// {@macro onMessageLongPress}
-  final OnMessageLongPress? onMessageLongPress;
-
-  /// {@macro onReactionsTap}
-  ///
-  /// Note: Only used in mobile devices (iOS and Android). Do not confuse this
-  /// with the tap action on the reactions picker.
-  final OnReactionsTap? onReactionsTap;
-
-  /// {@macro onReactionsHover}
-  ///
-  /// Note: Only used in desktop devices (web and desktop).
-  final OnReactionsHover? onReactionsHover;
-
-  /// {@macro messageActionsBuilder}
-  final MessageActionsBuilder? actionsBuilder;
-
-  /// {@macro onAttachmentWidgetTap}
-  final OnAttachmentWidgetTap? onAttachmentTap;
-
-  /// {@macro attachmentActionsBuilder}
-  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
-
-  /// {@macro reactionPickerBuilder}
-  final ReactionPickerBuilder reactionPickerBuilder;
-
-  /// {@macro reactionIndicatorBuilder}
-  final ReactionIndicatorBuilder reactionIndicatorBuilder;
-
-  /// Size of the image attachment thumbnail.
-  final Size imageAttachmentThumbnailSize;
-
-  /// Resize type of the image attachment thumbnail.
-  ///
-  /// Defaults to [crop]
-  final String /*clip|crop|scale|fill*/ imageAttachmentThumbnailResizeType;
-
-  /// Crop type of the image attachment thumbnail.
-  ///
-  /// Defaults to [center]
-  final String /*center|top|bottom|left|right*/ imageAttachmentThumbnailCropType;
-
-  /// {@template copyWith}
-  /// Creates a copy of [StreamMessageWidget] with specified attributes
-  /// overridden.
-  /// {@endtemplate}
-  StreamMessageWidget copyWith({
-    Key? key,
-    void Function(User)? onMentionTap,
+    required Message message,
+    EdgeInsetsGeometry? padding,
+    double? spacing,
+    Color? backgroundColor,
+    double widthFactor = 0.8,
+    void Function(Message)? onMessageTap,
+    void Function(Message)? onMessageLongPress,
+    void Function(User)? onUserAvatarTap,
+    void Function(Message message, String url)? onMessageLinkTap,
+    void Function(User user)? onUserMentionTap,
     void Function(Message)? onThreadTap,
     void Function(Message)? onReplyTap,
-    void Function(Message)? onEditMessageTap,
-    Future<void> Function(Message)? onConfirmDeleteTap,
-    Widget Function(BuildContext, Message)? editMessageInputBuilder,
-    Widget Function(BuildContext, Message)? textBuilder,
-    Widget Function(BuildContext, Message)? quotedMessageBuilder,
-    Widget Function(BuildContext, Message)? deletedMessageBuilder,
-    BottomRowBuilderWithDefaultWidget? bottomRowBuilderWithDefaultWidget,
+    void Function(Message)? onReactionsTap,
+    void Function(Message quotedMessage)? onQuotedMessageTap,
+    Comparator<ReactionGroup>? reactionSorting,
+    MessageActionsBuilder? actionsBuilder,
     void Function(BuildContext, Message)? onMessageActions,
     void Function(BuildContext, Message)? onBouncedErrorMessageActions,
-    Message? message,
-    StreamMessageThemeData? messageTheme,
-    bool? reverse,
-    ShapeBorder? shape,
-    ShapeBorder? attachmentShape,
-    BorderSide? borderSide,
-    BorderRadiusGeometry? borderRadiusGeometry,
-    EdgeInsetsGeometry? padding,
-    EdgeInsets? textPadding,
-    EdgeInsetsGeometry? attachmentPadding,
-    double? widthFactor,
-    DisplayWidget? showUserAvatar,
-    bool? showSendingIndicator,
-    bool? showReactions,
-    bool? allRead,
-    bool? showThreadReplyIndicator,
-    bool? showInChannelIndicator,
-    void Function(User)? onUserAvatarTap,
-    void Function(String)? onLinkTap,
-    bool? showReactionBrowser,
-    bool? showReactionPicker,
-    List<Read>? readList,
-    ShowMessageCallback? onShowMessage,
-    bool? showUsername,
-    bool? showTimestamp,
-    bool? showEditedLabel,
-    bool? showReplyMessage,
-    bool? showThreadReplyMessage,
-    bool? showEditMessage,
-    bool? showCopyMessage,
-    bool? showDeleteMessage,
-    bool? showResendMessage,
-    bool? showFlagButton,
-    bool? showPinButton,
-    bool? showPinHighlight,
-    bool? showMarkUnreadMessage,
+    void Function(Message)? onEditMessageTap,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
-    bool? translateUserAvatar,
-    OnQuotedMessageTap? onQuotedMessageTap,
-    OnMessageTap? onMessageTap,
-    OnMessageLongPress? onMessageLongPress,
-    OnReactionsTap? onReactionsTap,
-    OnReactionsHover? onReactionsHover,
-    MessageActionsBuilder? actionsBuilder,
-    OnAttachmentWidgetTap? onAttachmentTap,
-    Widget Function(BuildContext, User)? userAvatarBuilder,
-    Size? imageAttachmentThumbnailSize,
-    String? imageAttachmentThumbnailResizeType,
-    String? imageAttachmentThumbnailCropType,
-    AttachmentActionsBuilder? attachmentActionsModalBuilder,
-    ReactionPickerBuilder? reactionPickerBuilder,
-    ReactionIndicatorBuilder? reactionIndicatorBuilder,
-  }) {
-    return StreamMessageWidget(
-      key: key ?? this.key,
-      onMentionTap: onMentionTap ?? this.onMentionTap,
-      onThreadTap: onThreadTap ?? this.onThreadTap,
-      onReplyTap: onReplyTap ?? this.onReplyTap,
-      onEditMessageTap: onEditMessageTap ?? this.onEditMessageTap,
-      onConfirmDeleteTap: onConfirmDeleteTap ?? this.onConfirmDeleteTap,
-      editMessageInputBuilder: editMessageInputBuilder ?? this.editMessageInputBuilder,
-      textBuilder: textBuilder ?? this.textBuilder,
-      quotedMessageBuilder: quotedMessageBuilder ?? this.quotedMessageBuilder,
-      deletedMessageBuilder: deletedMessageBuilder ?? this.deletedMessageBuilder,
-      bottomRowBuilderWithDefaultWidget: bottomRowBuilderWithDefaultWidget ?? this.bottomRowBuilderWithDefaultWidget,
-      onMessageActions: onMessageActions ?? this.onMessageActions,
-      onBouncedErrorMessageActions: onBouncedErrorMessageActions ?? this.onBouncedErrorMessageActions,
-      message: message ?? this.message,
-      messageTheme: messageTheme ?? this.messageTheme,
-      reverse: reverse ?? this.reverse,
-      shape: shape ?? this.shape,
-      attachmentShape: attachmentShape ?? this.attachmentShape,
-      borderSide: borderSide ?? this.borderSide,
-      borderRadiusGeometry: borderRadiusGeometry ?? this.borderRadiusGeometry,
-      padding: padding ?? this.padding,
-      textPadding: textPadding ?? this.textPadding,
-      attachmentPadding: attachmentPadding ?? this.attachmentPadding,
-      widthFactor: widthFactor ?? this.widthFactor,
-      showUserAvatar: showUserAvatar ?? this.showUserAvatar,
-      showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
-      showEditedLabel: showEditedLabel ?? this.showEditedLabel,
-      showReactions: showReactions ?? this.showReactions,
-      showThreadReplyIndicator: showThreadReplyIndicator ?? this.showThreadReplyIndicator,
-      showInChannelIndicator: showInChannelIndicator ?? this.showInChannelIndicator,
-      onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
-      onLinkTap: onLinkTap ?? this.onLinkTap,
-      showReactionPicker: showReactionPicker ?? this.showReactionPicker,
-      onShowMessage: onShowMessage ?? this.onShowMessage,
-      showUsername: showUsername ?? this.showUsername,
-      showTimestamp: showTimestamp ?? this.showTimestamp,
-      showReplyMessage: showReplyMessage ?? this.showReplyMessage,
-      showThreadReplyMessage: showThreadReplyMessage ?? this.showThreadReplyMessage,
-      showEditMessage: showEditMessage ?? this.showEditMessage,
-      showCopyMessage: showCopyMessage ?? this.showCopyMessage,
-      showDeleteMessage: showDeleteMessage ?? this.showDeleteMessage,
-      showResendMessage: showResendMessage ?? this.showResendMessage,
-      showFlagButton: showFlagButton ?? this.showFlagButton,
-      showPinButton: showPinButton ?? this.showPinButton,
-      showPinHighlight: showPinHighlight ?? this.showPinHighlight,
-      showMarkUnreadMessage: showMarkUnreadMessage ?? this.showMarkUnreadMessage,
-      attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
-      translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
-      onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
-      onMessageTap: onMessageTap ?? this.onMessageTap,
-      onMessageLongPress: onMessageLongPress ?? this.onMessageLongPress,
-      onReactionsTap: onReactionsTap ?? this.onReactionsTap,
-      onReactionsHover: onReactionsHover ?? this.onReactionsHover,
-      actionsBuilder: actionsBuilder ?? this.actionsBuilder,
-      onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
-      userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
-      imageAttachmentThumbnailSize: imageAttachmentThumbnailSize ?? this.imageAttachmentThumbnailSize,
-      imageAttachmentThumbnailResizeType: imageAttachmentThumbnailResizeType ?? this.imageAttachmentThumbnailResizeType,
-      imageAttachmentThumbnailCropType: imageAttachmentThumbnailCropType ?? this.imageAttachmentThumbnailCropType,
-      attachmentActionsModalBuilder: attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
-      reactionPickerBuilder: reactionPickerBuilder ?? this.reactionPickerBuilder,
-      reactionIndicatorBuilder: reactionIndicatorBuilder ?? this.reactionIndicatorBuilder,
-    );
-  }
+  }) : props = .new(
+         message: message,
+         padding: padding,
+         spacing: spacing,
+         backgroundColor: backgroundColor,
+         widthFactor: widthFactor,
+         onMessageTap: onMessageTap,
+         onMessageLongPress: onMessageLongPress,
+         onUserAvatarTap: onUserAvatarTap,
+         onMessageLinkTap: onMessageLinkTap,
+         onUserMentionTap: onUserMentionTap,
+         onThreadTap: onThreadTap,
+         onReplyTap: onReplyTap,
+         onReactionsTap: onReactionsTap,
+         onQuotedMessageTap: onQuotedMessageTap,
+         reactionSorting: reactionSorting,
+         actionsBuilder: actionsBuilder,
+         onMessageActions: onMessageActions,
+         onBouncedErrorMessageActions: onBouncedErrorMessageActions,
+         onEditMessageTap: onEditMessageTap,
+         attachmentBuilders: attachmentBuilders,
+       );
 
-  @override
-  _StreamMessageWidgetState createState() => _StreamMessageWidgetState();
-}
+  /// Creates a chat message widget from pre-built [props].
+  const StreamMessageWidget.fromProps({super.key, required this.props});
 
-class _StreamMessageWidgetState extends State<StreamMessageWidget>
-    with AutomaticKeepAliveClientMixin<StreamMessageWidget> {
-  bool get showThreadReplyIndicator => widget.showThreadReplyIndicator;
-
-  bool get showSendingIndicator => widget.showSendingIndicator;
-
-  bool get isDeleted => widget.message.isDeleted;
-
-  bool get showUsername => widget.showUsername;
-
-  bool get showTimeStamp => widget.showTimestamp;
-
-  bool get showEditedLabel => widget.showEditedLabel;
-
-  bool get isTextEdited => widget.message.messageTextUpdatedAt != null;
-
-  bool get showInChannel => widget.showInChannelIndicator;
-
-  /// {@template hasQuotedMessage}
-  /// `true` if [StreamMessageWidget.quotedMessage] is not null.
-  /// {@endtemplate}
-  bool get hasQuotedMessage => widget.message.quotedMessage != null;
-
-  bool get isSendFailed => widget.message.state.isSendingFailed;
-
-  bool get isUpdateFailed => widget.message.state.isUpdatingFailed;
-
-  bool get isDeleteFailed => widget.message.state.isDeletingFailed;
-
-  bool get isBouncedWithError => widget.message.isBouncedWithError;
-
-  /// {@template isFailedState}
-  /// Whether the message has failed to be sent, updated, deleted or is bounced
-  /// back with the message type as error.
-  /// {@endtemplate}
-  bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed || isBouncedWithError;
-
-  /// {@template isGiphy}
-  /// `true` if any of the [message]'s attachments are a giphy.
-  /// {@endtemplate}
-  bool get isGiphy => widget.message.attachments.any((element) => element.type == AttachmentType.giphy);
-
-  /// {@template isOnlyEmoji}
-  /// `true` if [message.text] contains only emoji.
-  /// {@endtemplate}
-  bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
-
-  /// {@template hasNonUrlAttachments}
-  /// `true` if any of the [message]'s attachments are a giphy and do not
-  /// have a [Attachment.titleLink].
-  /// {@endtemplate}
-  bool get hasNonUrlAttachments => widget.message.attachments.any((it) => it.type != AttachmentType.urlPreview);
-
-  /// {@template hasUrlAttachments}
-  /// `true` if any of the [message]'s attachments are a giphy with a
-  /// [Attachment.titleLink].
-  /// {@endtemplate}
-  bool get hasUrlAttachments => widget.message.attachments.any((it) => it.type == AttachmentType.urlPreview);
-
-  /// {@template showBottomRow}
-  /// Show the [BottomRow] widget if any of the following are `true`:
-  /// * [StreamMessageWidget.showThreadReplyIndicator]
-  /// * [StreamMessageWidget.showUsername]
-  /// * [StreamMessageWidget.showTimestamp]
-  /// * [StreamMessageWidget.showInChannelIndicator]
-  /// * [StreamMessageWidget.showSendingIndicator]
-  /// * [StreamMessageWidget.message.isDeleted]
-  /// {@endtemplate}
-  bool get showBottomRow =>
-      showThreadReplyIndicator ||
-      showUsername ||
-      showTimeStamp ||
-      showInChannel ||
-      showSendingIndicator ||
-      isTextEdited;
-
-  /// {@template isPinned}
-  /// Whether [StreamMessageWidget.message] is pinned or not.
-  /// {@endtemplate}
-  bool get isPinned => widget.message.pinned && !widget.message.isDeleted;
-
-  /// {@template shouldShowReactions}
-  /// Should show message reactions if [StreamMessageWidget.showReactions] is
-  /// `true`, if there are reactions to show, and if the message is not deleted.
-  /// {@endtemplate}
-  bool get shouldShowReactions =>
-      widget.showReactions && (widget.message.reactionGroups?.isNotEmpty == true) && !widget.message.isDeleted;
-
-  @override
-  bool get wantKeepAlive => widget.message.attachments.isNotEmpty;
+  /// The properties that configure this message widget.
+  final StreamMessageWidgetProps props;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    final theme = StreamChatTheme.of(context);
-    final streamChat = StreamChat.of(context);
+    final builder = context.chatComponentBuilder<StreamMessageWidgetProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamMessage(props: props);
+  }
+}
 
-    final avatarWidth = widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
-    final bottomRowPadding = widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
+/// Properties for configuring a [StreamMessageWidget].
+///
+/// This class holds every configuration option for a chat message widget,
+/// allowing them to be passed through the [StreamComponentFactory] when a
+/// custom builder is registered.
+///
+/// Visual properties such as [padding], [spacing], and [backgroundColor]
+/// override the corresponding values from [StreamMessageItemThemeData] when
+/// non-null. When left null, the theme values are used instead.
+///
+/// See also:
+///
+///  * [StreamMessageWidget], which uses these properties.
+///  * [DefaultStreamMessage], the default implementation.
+class StreamMessageWidgetProps {
+  /// Creates properties for a chat message widget.
+  const StreamMessageWidgetProps({
+    required this.message,
+    this.padding,
+    this.spacing,
+    this.backgroundColor,
+    this.widthFactor = 0.8,
+    this.onMessageTap,
+    this.onMessageLongPress,
+    this.onUserAvatarTap,
+    this.onMessageLinkTap,
+    this.onUserMentionTap,
+    this.onThreadTap,
+    this.onReplyTap,
+    this.onReactionsTap,
+    this.onQuotedMessageTap,
+    this.reactionSorting,
+    this.actionsBuilder,
+    this.onMessageActions,
+    this.onBouncedErrorMessageActions,
+    this.onEditMessageTap,
+    this.attachmentBuilders,
+  });
 
-    return Portal(
-      child: Material(
-        color: switch (isPinned && widget.showPinHighlight) {
-          true => theme.colorTheme.highlight,
-          false => Colors.transparent,
+  /// The message to display.
+  final Message message;
+
+  /// Outer padding around the entire message item.
+  ///
+  /// When non-null, takes precedence over the theme value from
+  /// [StreamMessageItemThemeData.padding].
+  ///
+  /// When null (the default), the padding is determined by the theme.
+  final EdgeInsetsGeometry? padding;
+
+  /// Horizontal spacing between the leading avatar and the content.
+  ///
+  /// When non-null, takes precedence over the theme value from
+  /// [StreamMessageItemThemeData.spacing].
+  ///
+  /// When null (the default), the spacing is determined by the theme.
+  final double? spacing;
+
+  /// Background color for the entire message item row.
+  ///
+  /// When non-null, takes precedence over the theme value from
+  /// [StreamMessageItemThemeData.backgroundColor].
+  ///
+  /// When null (the default), the background color is determined by the theme.
+  final Color? backgroundColor;
+
+  /// Maximum width of the message content as a fraction of the parent width.
+  ///
+  /// Values should be between 0.0 and 1.0. Defaults to 0.8 when not specified.
+  final double widthFactor;
+
+  /// Called when the message is tapped.
+  ///
+  /// If null, no tap gesture is registered on mobile. On desktop and web,
+  /// tap behaviour is unaffected because interactions are driven by the
+  /// context menu instead.
+  final void Function(Message message)? onMessageTap;
+
+  /// Called when the message is long-pressed.
+  ///
+  /// If null, the default long-press behaviour is used, which opens the
+  /// [StreamMessageActionsModal] on mobile. Provide this callback to
+  /// override that behaviour entirely.
+  final void Function(Message message)? onMessageLongPress;
+
+  /// Called when the author's avatar is tapped.
+  ///
+  /// If null, tapping the avatar has no effect. A common use is to navigate
+  /// to the user's profile screen.
+  final void Function(User user)? onUserAvatarTap;
+
+  /// Called when a link is tapped in the message text.
+  ///
+  /// Receives the [Message] containing the link and the tapped URL string.
+  /// If null, the default link handling behaviour is used.
+  final void Function(Message message, String url)? onMessageLinkTap;
+
+  /// Called when a `@mention` is tapped in the message text.
+  ///
+  /// Receives the mentioned [User] resolved from the message's
+  /// [Message.mentionedUsers] list. If null, tapping a mention has no effect.
+  final void Function(User user)? onUserMentionTap;
+
+  /// Called when the thread reply indicator is tapped.
+  ///
+  /// Receives the parent [Message] of the thread. If the message was shown
+  /// in-channel via [Message.showInChannel], the original parent message is
+  /// fetched before invoking the callback.
+  ///
+  /// If null, tapping the thread indicator has no effect.
+  final void Function(Message message)? onThreadTap;
+
+  /// Called when the quoted-reply action is selected from the actions list.
+  ///
+  /// Receives the [Message] that should be quoted. Typically used to set the
+  /// quoted message on the message input.
+  ///
+  /// If null, the quoted-reply action is still shown but has no effect.
+  final void Function(Message message)? onReplyTap;
+
+  /// Called when the reactions row beneath the message bubble is tapped.
+  ///
+  /// If null, the default behaviour opens a [ReactionDetailSheet] showing
+  /// the full list of reactions. Provide this callback to replace that
+  /// default with custom handling.
+  final void Function(Message message)? onReactionsTap;
+
+  /// Called when an inline quoted message is tapped.
+  ///
+  /// Receives the [Message] that was quoted. Typically used to scroll to
+  /// the original message in the list.
+  ///
+  /// If null, tapping the quoted message has no effect.
+  final void Function(Message quotedMessage)? onQuotedMessageTap;
+
+  /// Controls how reaction groups are sorted when displayed.
+  ///
+  /// Defaults to [ReactionSorting.byFirstReactionAt].
+  final Comparator<ReactionGroup>? reactionSorting;
+
+  /// Allows customizing the default message actions list.
+  ///
+  /// Receives the [BuildContext] and the default list of
+  /// [StreamContextMenuAction] items built by the widget. Return a modified
+  /// list to add, remove, or reorder actions.
+  final MessageActionsBuilder? actionsBuilder;
+
+  /// Called when a normal message is long-pressed to show actions.
+  ///
+  /// When provided, this callback replaces the default behaviour of showing
+  /// the [StreamMessageActionsModal].
+  final void Function(BuildContext context, Message message)? onMessageActions;
+
+  /// Called when a bounced-error message is long-pressed.
+  ///
+  /// When provided, this callback replaces the default behaviour of showing
+  /// the [ModeratedMessageActionsModal].
+  final void Function(BuildContext context, Message message)? onBouncedErrorMessageActions;
+
+  /// Called when the edit-message action is selected.
+  ///
+  /// When provided, this callback replaces the default behaviour of showing
+  /// the edit-message bottom sheet via [showEditMessageSheet].
+  final void Function(Message message)? onEditMessageTap;
+
+  /// Custom attachment builders for rendering message attachments.
+  ///
+  /// When non-null, these builders are used instead of the default ones
+  /// provided by [StreamChatConfigurationData.attachmentBuilders].
+  ///
+  /// Custom builders are prepended to the default builder list, so they take
+  /// priority for attachment types they can handle.
+  final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
+
+  /// Returns a copy of this [StreamMessageWidgetProps] with the given fields
+  /// replaced with new values.
+  StreamMessageWidgetProps copyWith({
+    Message? message,
+    EdgeInsetsGeometry? padding,
+    double? spacing,
+    Color? backgroundColor,
+    double? widthFactor,
+    void Function(Message)? onMessageTap,
+    void Function(Message)? onMessageLongPress,
+    void Function(User)? onUserAvatarTap,
+    void Function(Message, String)? onMessageLinkTap,
+    void Function(User)? onUserMentionTap,
+    void Function(Message)? onThreadTap,
+    void Function(Message)? onReplyTap,
+    void Function(Message)? onReactionsTap,
+    void Function(Message)? onQuotedMessageTap,
+    Comparator<ReactionGroup>? reactionSorting,
+    MessageActionsBuilder? actionsBuilder,
+    void Function(BuildContext, Message)? onMessageActions,
+    void Function(BuildContext, Message)? onBouncedErrorMessageActions,
+    void Function(Message)? onEditMessageTap,
+    List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+  }) {
+    return StreamMessageWidgetProps(
+      message: message ?? this.message,
+      padding: padding ?? this.padding,
+      spacing: spacing ?? this.spacing,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      widthFactor: widthFactor ?? this.widthFactor,
+      onMessageTap: onMessageTap ?? this.onMessageTap,
+      onMessageLongPress: onMessageLongPress ?? this.onMessageLongPress,
+      onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
+      onMessageLinkTap: onMessageLinkTap ?? this.onMessageLinkTap,
+      onUserMentionTap: onUserMentionTap ?? this.onUserMentionTap,
+      onThreadTap: onThreadTap ?? this.onThreadTap,
+      onReplyTap: onReplyTap ?? this.onReplyTap,
+      onReactionsTap: onReactionsTap ?? this.onReactionsTap,
+      onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
+      reactionSorting: reactionSorting ?? this.reactionSorting,
+      actionsBuilder: actionsBuilder ?? this.actionsBuilder,
+      onMessageActions: onMessageActions ?? this.onMessageActions,
+      onBouncedErrorMessageActions: onBouncedErrorMessageActions ?? this.onBouncedErrorMessageActions,
+      onEditMessageTap: onEditMessageTap ?? this.onEditMessageTap,
+      attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
+    );
+  }
+}
+
+/// The default implementation of [StreamMessageWidget].
+///
+/// Composes a full message row with an author avatar, content bubble,
+/// header annotations, footer metadata, and platform-adaptive interaction
+/// handling (tap and long-press on mobile, right-click context menu on
+/// desktop and web).
+///
+/// Message actions can be customised through
+/// [StreamMessageWidgetProps.actionsBuilder].
+///
+/// See also:
+///
+///  * [StreamMessageWidget], the public API widget.
+///  * [StreamMessageWidgetProps], which configures this widget.
+///  * [StreamMessageItemTheme], provides theme data to this widget.
+class DefaultStreamMessage extends StatelessWidget {
+  /// Creates a default chat message widget with the given [props].
+  const DefaultStreamMessage({super.key, required this.props});
+
+  /// The properties that configure this widget.
+  final StreamMessageWidgetProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final message = props.message;
+
+    final placement = StreamMessagePlacement.of(context);
+    final theme = StreamMessageItemTheme.of(context);
+    final defaults = _StreamMessageWidgetDefaults(context, isPinned: message.pinned, state: message.state);
+
+    final resolve = StreamMessageStyleResolver(placement, [theme, defaults]);
+
+    final effectivePadding = props.padding ?? theme.padding ?? defaults.padding;
+    final effectiveSpacing = props.spacing ?? theme.spacing ?? defaults.spacing;
+    final effectiveBackgroundColor = props.backgroundColor ?? theme.backgroundColor ?? defaults.backgroundColor;
+    final effectiveLeadingVisibility = resolve((theme) => theme?.leadingVisibility);
+    final effectiveHeaderVisibility = resolve((theme) => theme?.headerVisibility);
+    final effectiveFooterVisibility = resolve((theme) => theme?.footerVisibility);
+
+    Widget? leadingWidget;
+    if (props.message.user case final user?) {
+      final effectiveAvatarSize = theme.avatarSize ?? defaults.avatarSize;
+
+      leadingWidget = effectiveLeadingVisibility.apply(
+        StreamAvatarTheme(
+          data: .new(size: effectiveAvatarSize),
+          child: StreamMessageLeading(author: user),
+        ),
+      );
+    }
+
+    final headerWidget = effectiveHeaderVisibility.apply(
+      streamMessageHeader(
+        context: context,
+        message: message,
+        onViewChannelTap: () => _onViewThread(context, message),
+      ),
+    );
+    final footerWidget = effectiveFooterVisibility.apply(StreamMessageFooter(message: message));
+
+    final contentWidget = StreamMessageContent(
+      message: message,
+      header: headerWidget,
+      footer: footerWidget,
+      attachmentBuilders: props.attachmentBuilders,
+      reactionSorting: props.reactionSorting,
+      onQuotedMessageTap: props.onQuotedMessageTap,
+      onRepliesTap: () => _onViewThread(context, message),
+      onLinkTap: (_, href, __) {
+        if (href == null) return;
+        if (props.onMessageLinkTap case final onTap?) return onTap(message, href);
+        return launchURL(context, href).ignore();
+      },
+      onMentionTap: switch (props.onUserMentionTap) {
+        final onTap? => (_, id) {
+          final user = message.mentionedUsers.firstWhereOrNull((u) => u.id == id);
+          if (user != null) onTap(user);
         },
-        child: PlatformWidgetBuilder(
-          mobile: (context, child) {
-            final message = widget.message;
-            return InkWell(
-              onTap: switch (widget.onMessageTap) {
-                final onTap? => () => onTap(message),
-                _ => null,
-              },
-              onLongPress: switch (widget.onMessageLongPress) {
-                final onLongPress? => () => onLongPress(message),
-                // If the message is not yet sent or deleted, we don't want
-                // to handle long press events by default.
-                _ when message.state.isDeleted => null,
-                _ when message.state.isOutgoing => null,
-                _ => () => _onMessageLongPressed(context, message),
-              },
-              child: child,
-            );
+        _ => null,
+      },
+      onReactionsTap: switch (props.onReactionsTap) {
+        final onReactionsTap? => () => onReactionsTap(message),
+        _ => () => _showMessageReactionsModal(context, message),
+      },
+    );
+
+    return Material(
+      animateColor: true,
+      color: effectiveBackgroundColor,
+      child: PlatformWidgetBuilder(
+        mobile: (context, child) => InkWell(
+          onTap: switch (props.onMessageTap) {
+            final onMessageTap? => () => onMessageTap(message),
+            _ => null,
           },
-          desktopOrWeb: (context, child) {
-            final message = widget.message;
-            final messageState = message.state;
-
-            // If the message is deleted or not yet sent, we don't want to
-            // show any context menu actions.
-            if (messageState.isDeleted || messageState.isOutgoing) return child;
-
-            final channel = StreamChannel.of(context).channel;
-            final menuItems = _buildDesktopOrWebActions(context, message);
-            if (menuItems.isEmpty) return MouseRegion(child: child);
-
-            return ContextMenuRegion(
-              onSelected: (result) {
-                if (result is! MessageAction) return;
-                return _onActionTap(context, channel, result).ignore();
-              },
-              menuBuilder: (_, anchor) => ContextMenu(
-                anchor: anchor,
-                menuItems: menuItems,
-              ),
-              child: MouseRegion(child: child),
-            );
+          onLongPress: switch (props.onMessageLongPress) {
+            final onMessageLongPress? => () => onMessageLongPress(message),
+            _ when message.state.isDeleted => null,
+            _ when message.state.isOutgoing => null,
+            _ => () => _onMessageLongPressed(context, message),
           },
-          child: FlexibleFractionallySizedBox(
-            widthFactor: widget.widthFactor,
-            alignment: switch (widget.reverse) {
-              true => AlignmentDirectional.centerEnd,
-              false => AlignmentDirectional.centerStart,
+          child: child,
+        ),
+        desktopOrWeb: (context, child) {
+          final messageState = message.state;
+
+          // If the message is deleted or not yet sent, we don't want to
+          // show any context menu actions.
+          if (messageState.isDeleted || messageState.isOutgoing) return child;
+
+          final channel = StreamChannel.of(context).channel;
+          final menuItems = _buildDesktopOrWebActions(context, message);
+          if (menuItems.isEmpty) return MouseRegion(child: child);
+
+          return ContextMenuRegion(
+            onSelected: (result) {
+              if (result is! MessageAction) return;
+              return _onActionTap(context, channel, result).ignore();
             },
-            child: Padding(
-              padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16),
-              child: MessageWidgetContent(
-                streamChatTheme: theme,
-                showUsername: showUsername,
-                showTimeStamp: showTimeStamp,
-                showEditedLabel: showEditedLabel,
-                showThreadReplyIndicator: showThreadReplyIndicator,
-                showSendingIndicator: showSendingIndicator,
-                showInChannel: showInChannel,
-                isGiphy: isGiphy,
-                isOnlyEmoji: isOnlyEmoji,
-                hasUrlAttachments: hasUrlAttachments,
-                messageTheme: widget.messageTheme,
-                reverse: widget.reverse,
-                message: widget.message,
-                hasNonUrlAttachments: hasNonUrlAttachments,
-                hasQuotedMessage: hasQuotedMessage,
-                textPadding: widget.textPadding,
-                attachmentBuilders: widget.attachmentBuilders,
-                attachmentPadding: widget.attachmentPadding,
-                attachmentShape: widget.attachmentShape,
-                onAttachmentTap: widget.onAttachmentTap,
-                onReplyTap: widget.onReplyTap,
-                onThreadTap: widget.onThreadTap,
-                onShowMessage: widget.onShowMessage,
-                attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
-                avatarWidth: avatarWidth,
-                bottomRowPadding: bottomRowPadding,
-                isFailedState: isFailedState,
-                isPinned: isPinned,
-                messageWidget: widget,
-                showBottomRow: showBottomRow,
-                showPinHighlight: widget.showPinHighlight,
-                showReactions: shouldShowReactions,
-                onReactionsTap: () {
-                  final message = widget.message;
-                  return switch (widget.onReactionsTap) {
-                    final onReactionsTap? => onReactionsTap(message),
-                    _ => _showMessageReactionsModal(context, message),
-                  };
-                },
-                onReactionsHover: widget.onReactionsHover,
-                showUserAvatar: widget.showUserAvatar,
-                streamChat: streamChat,
-                translateUserAvatar: widget.translateUserAvatar,
-                shape: widget.shape,
-                borderSide: widget.borderSide,
-                borderRadiusGeometry: widget.borderRadiusGeometry,
-                textBuilder: widget.textBuilder,
-                quotedMessageBuilder: widget.quotedMessageBuilder,
-                deletedMessageBuilder: widget.deletedMessageBuilder,
-                onLinkTap: widget.onLinkTap,
-                onMentionTap: widget.onMentionTap,
-                onQuotedMessageTap: widget.onQuotedMessageTap,
-                bottomRowBuilderWithDefaultWidget: widget.bottomRowBuilderWithDefaultWidget,
-                onUserAvatarTap: widget.onUserAvatarTap,
-                userAvatarBuilder: widget.userAvatarBuilder,
-                reactionIndicatorBuilder: widget.reactionIndicatorBuilder,
-              ),
+            menuBuilder: (_, anchor) => ContextMenu(
+              anchor: anchor,
+              menuItems: menuItems,
+            ),
+            child: MouseRegion(child: child),
+          );
+        },
+        child: FlexibleFractionallySizedBox(
+          widthFactor: props.widthFactor,
+          alignment: StreamMessagePlacement.alignmentDirectionalOf(context),
+          child: Padding(
+            padding: effectivePadding,
+            child: Row(
+              mainAxisSize: .min,
+              spacing: effectiveSpacing,
+              crossAxisAlignment: .end,
+              children: [
+                ?leadingWidget,
+                Flexible(child: contentWidget),
+              ],
             ),
           ),
         ),
@@ -765,6 +496,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     );
   }
 
+  // Builds the action list for a bounced (moderation-error) message.
   List<StreamContextMenuAction> _buildBouncedErrorMessageActions({
     required BuildContext context,
     required Message message,
@@ -775,51 +507,40 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     );
   }
 
+  // Builds the standard action list, applying the custom actionsBuilder if set.
   List<Widget> _buildMessageActions({
     required BuildContext context,
     required Message message,
     required Channel channel,
     OwnUser? currentUser,
   }) {
-    final actions =
-        StreamMessageActionsBuilder.buildActions(
-          context: context,
-          message: message,
-          channel: channel,
-          currentUser: currentUser,
-        )..retainWhere(
-          (it) => switch (it.props.value) {
-            QuotedReply() => widget.showReplyMessage,
-            ThreadReply() => widget.showThreadReplyMessage,
-            MarkUnread() => widget.showMarkUnreadMessage,
-            ResendMessage() => widget.showResendMessage,
-            EditMessage() => widget.showEditMessage,
-            CopyMessage() => widget.showCopyMessage,
-            FlagMessage() => widget.showFlagButton,
-            PinMessage() => widget.showPinButton,
-            DeleteMessage() => widget.showDeleteMessage,
-            _ => true, // Retain all the remaining actions.
-          },
-        );
+    final actions = StreamMessageActionsBuilder.buildActions(
+      context: context,
+      message: message,
+      channel: channel,
+      currentUser: currentUser,
+    );
 
-    if (widget.actionsBuilder case final builder?) {
+    if (props.actionsBuilder case final builder?) {
       return builder(context, actions);
     }
 
     return StreamContextMenuAction.partitioned(items: actions);
   }
 
+  // Dispatches to bounced-error or normal actions for desktop/web.
   List<Widget> _buildDesktopOrWebActions(
     BuildContext context,
     Message message,
   ) {
-    if (isBouncedWithError) {
+    if (message.isBouncedWithError) {
       return _buildBouncedErrorMessageDesktopOrWebActions(context, message);
     }
 
     return _buildMessageDesktopOrWebActions(context, message);
   }
 
+  // Builds partitioned bounced-error actions for the desktop/web context menu.
   List<Widget> _buildBouncedErrorMessageDesktopOrWebActions(
     BuildContext context,
     Message message,
@@ -832,13 +553,14 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return StreamContextMenuAction.partitioned(items: actions);
   }
 
+  // Builds normal actions + reaction picker for the desktop/web context menu.
   List<Widget> _buildMessageDesktopOrWebActions(
     BuildContext context,
     Message message,
   ) {
     final channel = StreamChannel.of(context).channel;
     final currentUser = channel.client.state.currentUser;
-    final showPicker = widget.showReactionPicker && channel.canSendReaction;
+    final showPicker = channel.canSendReaction;
 
     final actions = _buildMessageActions(
       context: context,
@@ -853,11 +575,12 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     }
 
     return [
-      if (showPicker) widget.reactionPickerBuilder(context, message, onReactionPicked),
+      if (showPicker) StreamMessageReactionPicker(message: message, onReactionPicked: onReactionPicked),
       ...actions,
     ];
   }
 
+  // Opens the reaction detail sheet and handles the returned action.
   Future<void> _showMessageReactionsModal(
     BuildContext context,
     Message message,
@@ -873,28 +596,49 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return _onActionTap(context, channel, action).ignore();
   }
 
+  // Resolves the thread parent (fetching if shown in-channel) and invokes
+  // the onThreadTap callback.
+  Future<void> _onViewThread(
+    BuildContext context,
+    Message message,
+  ) async {
+    try {
+      var threadMessage = message;
+      if (message.showInChannel case true) {
+        final streamChannel = StreamChannel.of(context);
+        threadMessage = await streamChannel.getMessage(message.parentId!);
+      }
+      return props.onThreadTap?.call(threadMessage);
+    } catch (e, stk) {
+      debugPrint('Error while fetching message: $e, $stk');
+    }
+  }
+
+  // Routes a long-press to bounced-error or normal actions handler.
   Future<void> _onMessageLongPressed(
     BuildContext context,
     Message message,
   ) {
-    if (isBouncedWithError) {
+    if (message.isBouncedWithError) {
       return _onBouncedErrorMessageActions(context, message);
     }
 
     return _onMessageActions(context, message);
   }
 
+  // Delegates to the custom callback or falls back to the default dialog.
   Future<void> _onBouncedErrorMessageActions(
     BuildContext context,
     Message message,
   ) async {
-    if (widget.onBouncedErrorMessageActions case final onActions?) {
+    if (props.onBouncedErrorMessageActions case final onActions?) {
       return onActions(context, message);
     }
 
     return _showBouncedErrorMessageActionsDialog(context, message);
   }
 
+  // Shows the ModeratedMessageActionsModal for a bounced-error message.
   Future<void> _showBouncedErrorMessageActionsDialog(
     BuildContext context,
     Message message,
@@ -919,24 +663,26 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return _onActionTap(context, channel, action).ignore();
   }
 
+  // Delegates to the custom callback or falls back to the default modal.
   Future<void> _onMessageActions(
     BuildContext context,
     Message message,
   ) async {
-    if (widget.onMessageActions case final onActions?) {
+    if (props.onMessageActions case final onActions?) {
       return onActions(context, message);
     }
 
     return _showMessageActionModalDialog(context, message);
   }
 
+  // Shows the StreamMessageActionsModal with a reaction picker and actions.
   Future<void> _showMessageActionModalDialog(
     BuildContext context,
     Message message,
   ) async {
     final channel = StreamChannel.of(context).channel;
     final currentUser = channel.client.state.currentUser;
-    final showPicker = widget.showReactionPicker && channel.canSendReaction;
+    final showPicker = channel.canSendReaction;
 
     final actions = _buildMessageActions(
       context: context,
@@ -949,31 +695,21 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
-        // This is needed to provide the nearest reaction icons to the
-        // StreamMessageActionsModal.
         data: StreamChatConfiguration.of(context),
-        child: StreamMessageActionsModal(
-          message: message,
-          reverse: widget.reverse,
-          messageActions: actions,
-          showReactionPicker: showPicker,
-          reactionPickerBuilder: widget.reactionPickerBuilder,
-          messageWidget: StreamChannel(
-            channel: channel,
-            child: widget.copyWith(
-              key: const Key('MessageWidget'),
-              message: message.trimmed,
-              showReactions: false,
-              showUsername: false,
-              showTimestamp: false,
-              translateUserAvatar: false,
-              showSendingIndicator: false,
-              padding: EdgeInsets.zero,
-              showPinHighlight: false,
-              showUserAvatar: switch (widget.reverse) {
-                true => DisplayWidget.gone,
-                false => DisplayWidget.show,
-              },
+        child: StreamMessagePlacement(
+          data: StreamMessagePlacement.of(context),
+          child: StreamMessageActionsModal(
+            message: message,
+            messageActions: actions,
+            showReactionPicker: showPicker,
+            messageWidget: StreamChannel(
+              channel: channel,
+              child: StreamMessageWidget(
+                key: const Key('MessageWidget'),
+                message: message.trimmed,
+                padding: EdgeInsets.zero,
+                backgroundColor: StreamColors.transparent,
+              ),
             ),
           ),
         ),
@@ -984,29 +720,29 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return _onActionTap(context, channel, action).ignore();
   }
 
+  // Dispatches a MessageAction to the appropriate channel or callback handler.
   Future<void> _onActionTap(
     BuildContext context,
     Channel channel,
     MessageAction action,
-  ) async {
-    return switch (action) {
-      SelectReaction() => _selectReaction(context, action.message, channel, action.reaction),
-      CopyMessage() => _copyMessage(action.message, channel),
-      DeleteMessage() => _maybeDeleteMessage(context, action.message, channel),
-      HardDeleteMessage() => channel.deleteMessage(action.message, hard: true),
-      EditMessage() => _editMessage(context, action.message, channel),
-      FlagMessage() => _maybeFlagMessage(context, action.message, channel),
-      MarkUnread() => channel.markUnread(action.message.id),
-      MuteUser() => channel.client.muteUser(action.user.id),
-      UnmuteUser() => channel.client.unmuteUser(action.user.id),
-      PinMessage() => channel.pinMessage(action.message),
-      UnpinMessage() => channel.unpinMessage(action.message),
-      ResendMessage() => channel.retryMessage(action.message),
-      QuotedReply() => widget.onReplyTap?.call(action.message),
-      ThreadReply() => widget.onThreadTap?.call(action.message),
-    };
-  }
+  ) async => switch (action) {
+    SelectReaction() => _selectReaction(context, action.message, channel, action.reaction),
+    CopyMessage() => _copyMessage(action.message, channel),
+    DeleteMessage() => _maybeDeleteMessage(context, action.message, channel),
+    HardDeleteMessage() => channel.deleteMessage(action.message, hard: true),
+    EditMessage() => props.onEditMessageTap?.call(action.message),
+    FlagMessage() => _maybeFlagMessage(context, action.message, channel),
+    MarkUnread() => channel.markUnread(action.message.id),
+    MuteUser() => channel.client.muteUser(action.user.id),
+    UnmuteUser() => channel.client.unmuteUser(action.user.id),
+    PinMessage() => channel.pinMessage(action.message),
+    UnpinMessage() => channel.unpinMessage(action.message),
+    ResendMessage() => channel.retryMessage(action.message),
+    QuotedReply() => props.onReplyTap?.call(action.message),
+    ThreadReply() => props.onThreadTap?.call(action.message),
+  };
 
+  // Copies the message text (with mentions replaced) to the clipboard.
   Future<void> _copyMessage(
     Message message,
     Channel channel,
@@ -1019,6 +755,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return Clipboard.setData(ClipboardData(text: messageText));
   }
 
+  // Shows a confirmation dialog before deleting the message.
   Future<EmptyResponse?> _maybeDeleteMessage(
     BuildContext context,
     Message message,
@@ -1040,24 +777,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return channel.deleteMessage(message);
   }
 
-  Future<void> _editMessage(
-    BuildContext context,
-    Message message,
-    Channel channel,
-  ) {
-    final onEditMessageTap = widget.onEditMessageTap;
-    if (onEditMessageTap != null) {
-      onEditMessageTap(message);
-      return Future.value();
-    }
-    return showEditMessageSheet(
-      context: context,
-      channel: channel,
-      message: message,
-      editMessageInputBuilder: widget.editMessageInputBuilder,
-    );
-  }
-
+  // Shows a confirmation dialog before flagging the message.
   Future<EmptyResponse?> _maybeFlagMessage(
     BuildContext context,
     Message message,
@@ -1080,6 +800,7 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
     return channel.client.flagMessage(messageId);
   }
 
+  // Toggles a reaction: removes it if already present, otherwise sends it.
   Future<Object> _selectReaction(
     BuildContext context,
     Message message,
@@ -1104,7 +825,9 @@ class _StreamMessageWidgetState extends State<StreamMessageWidget>
   }
 }
 
+// Truncates long message text for display in the actions modal preview.
 extension on Message {
+  // Returns a copy with text and nested content truncated to 100 characters.
   Message get trimmed {
     final trimmedText = switch (text) {
       final text? when text.length > 100 => '${text.substring(0, 100)}...',
@@ -1119,7 +842,9 @@ extension on Message {
   }
 }
 
+// Truncates long poll names for display in the actions modal preview.
 extension on Poll {
+  // Returns a copy with name truncated to 100 characters.
   Poll get trimmed {
     final trimmedName = switch (name) {
       final name when name.length > 100 => '${name.substring(0, 100)}...',
@@ -1128,4 +853,59 @@ extension on Poll {
 
     return copyWith(name: trimmedName);
   }
+}
+
+// Built-in fallback theme values for [DefaultStreamMessage].
+//
+// Used when neither the explicit props nor the ambient
+// [StreamMessageItemThemeData] provide a value for a given property.
+class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
+  _StreamMessageWidgetDefaults(
+    this._context, {
+    this.isPinned = false,
+    required MessageState state,
+  }) : _messageState = state;
+
+  final bool isPinned;
+
+  final BuildContext _context;
+  final MessageState _messageState;
+
+  late final StreamSpacing _spacing = _context.streamSpacing;
+  late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+
+  @override
+  double get spacing => _spacing.xs;
+
+  @override
+  StreamAvatarSize get avatarSize => .md;
+
+  @override
+  EdgeInsetsGeometry get padding => .symmetric(horizontal: _spacing.md);
+
+  @override
+  Color? get backgroundColor {
+    if (isPinned && !_messageState.isDeleted) return _colorScheme.backgroundHighlight;
+    return StreamColors.transparent;
+  }
+
+  @override
+  StreamMessageStyleVisibility get leadingVisibility => .resolveWith(
+    (placement) => switch ((placement.channelKind, placement.alignment, placement.stackPosition)) {
+      (.direct, _, _) || (_, .end, _) => .gone,
+      (_, _, .top || .middle) => .hidden,
+      (_, _, .single || .bottom) => .visible,
+    },
+  );
+
+  @override
+  StreamMessageStyleVisibility get headerVisibility => .all(.visible);
+
+  @override
+  StreamMessageStyleVisibility get footerVisibility => .resolveWith(
+    (placement) => switch (placement.stackPosition) {
+      .single || .bottom => .visible,
+      _ => .gone,
+    },
+  );
 }

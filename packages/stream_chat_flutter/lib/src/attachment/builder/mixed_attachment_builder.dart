@@ -97,10 +97,12 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
 
     final shouldBuildGallery = [...?images, ...?videos, ...?giphys].length > 1;
 
+    final spacing = context.streamSpacing;
+
     return Padding(
       padding: padding,
       child: Column(
-        spacing: padding.vertical / 2,
+        spacing: spacing.xs,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (urls != null)

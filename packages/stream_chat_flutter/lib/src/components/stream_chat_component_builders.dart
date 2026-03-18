@@ -11,6 +11,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   StreamComponentBuilder<MessageComposerInputLeadingProps>? messageComposerInputLeading,
   StreamComponentBuilder<MessageComposerInputHeaderProps>? messageComposerInputHeader,
   StreamComponentBuilder<MessageComposerInputTrailingProps>? messageComposerInputTrailing,
+  StreamComponentBuilder<StreamMessageWidgetProps>? messageWidget,
 }) {
   final builders = [
     if (channelListItem != null) StreamComponentBuilderExtension(builder: channelListItem),
@@ -21,6 +22,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
     if (messageComposerInputLeading != null) StreamComponentBuilderExtension(builder: messageComposerInputLeading),
     if (messageComposerInputHeader != null) StreamComponentBuilderExtension(builder: messageComposerInputHeader),
     if (messageComposerInputTrailing != null) StreamComponentBuilderExtension(builder: messageComposerInputTrailing),
+    if (messageWidget != null) StreamComponentBuilderExtension(builder: messageWidget),
   ];
 
   return builders;

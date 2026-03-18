@@ -443,7 +443,8 @@ void main() {
         await tester.pumpAndSettle();
 
         await key.currentState!.sendMessage();
-        await tester.pumpAndSettle();
+        // Pump past the debounce/throttle timers (350ms)
+        await tester.pump(const Duration(seconds: 1));
 
         verify(() => channel.updateMessage(any())).called(1);
         verifyNever(() => channel.sendMessage(any()));
@@ -484,7 +485,8 @@ void main() {
         await tester.pumpAndSettle();
 
         await key.currentState!.sendMessage();
-        await tester.pumpAndSettle();
+        // Pump past the debounce/throttle timers (350ms)
+        await tester.pump(const Duration(seconds: 1));
 
         verify(() => channel.sendMessage(any())).called(1);
         verifyNever(() => channel.updateMessage(any()));

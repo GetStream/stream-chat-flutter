@@ -12,7 +12,7 @@ class StreamSendingIndicator extends StatelessWidget {
     required this.message,
     this.isMessageRead = false,
     this.isMessageDelivered = false,
-    this.size = 12,
+    this.size,
   });
 
   /// The message whose sending status is to be shown.

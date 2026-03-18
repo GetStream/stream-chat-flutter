@@ -688,6 +688,24 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     if (isLive) return '📍 Live Location';
     return '📍 Location';
   }
+
+  @override
+  String get fileAttachmentText => 'File';
+
+  @override
+  String filesAttachmentCountText(int count) {
+    return count == 1 ? 'File' : '$count files';
+  }
+
+  @override
+  String photosAttachmentCountText(int count) {
+    return count == 1 ? 'Photo' : '$count photos';
+  }
+
+  @override
+  String videosAttachmentCountText(int count) {
+    return count == 1 ? 'Video' : '$count videos';
+  }
 }
 
 void main() async {
