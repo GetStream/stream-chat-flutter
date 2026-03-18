@@ -307,6 +307,8 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
                 controller: inputController.textFieldController,
                 placeholder: props.placeholder,
                 focusNode: props.focusNode,
+                command: inputController.message.command?.toUpperCase(),
+                onDismissCommand: inputController.clear,
               ),
               if (props.canAlsoSendToChannel)
                 DmCheckboxListTile(
