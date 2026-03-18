@@ -1,7 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messagePreviewFormatter}
 /// Formats message previews for display.
@@ -46,13 +44,14 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// ```dart
 /// class CustomFormatter extends StreamMessagePreviewFormatter {
 ///   @override
-///   String formatGroupMessage(
+///   TextSpan? formatGroupMessage(
 ///     BuildContext context,
 ///     User? messageAuthor,
-///     String messageText,
+///     User? currentUser,
 ///   ) {
-///     if (messageAuthor == null) return messageText;
-///     return '${messageAuthor.name} says: $messageText';
+///     final name = messageAuthor?.name;
+///     if (name == null || name.isEmpty) return null;
+///     return TextSpan(text: '$name says: ');
 ///   }
 /// }
 /// ```
@@ -93,25 +92,29 @@ abstract interface class MessagePreviewFormatter {
 ///
 /// This formatter applies context-aware formatting based on message type,
 /// sender identity, and channel configuration. It handles various message
-/// types including regular text, attachments, polls, system messages, and
-/// deleted messages.
+/// types including regular text, attachments, polls, locations, system
+/// messages, and deleted messages.
 ///
 /// ## Message Type Handling
 ///
 /// The formatter handles messages differently based on their type:
 ///
-/// * **Deleted messages** - Shows "Message deleted"
+/// * **Deleted messages** - Shows a ban icon with localized deleted label
 /// * **System messages** - Shows the message text directly
-/// * **Poll messages** - Shows poll emoji with voter/creator info
+/// * **Poll messages** - Shows a poll icon with the poll name
+/// * **Location messages** - Shows a map pin icon with location label or
+///   message caption
 /// * **Regular messages** - Shows text with optional attachment previews
 ///
 /// ## Sender Context
 ///
-/// The formatting adapts based on who sent the message:
+/// In group channels (member count > 2), [formatGroupMessage] prepends
+/// a sender prefix:
 ///
-/// * **Current user** - Adds "You:" prefix
-/// * **Direct messages (1-on-1)** - No prefix
-/// * **Group messages** - Adds sender name prefix
+/// * **Current user** - Adds bold "You:" prefix
+/// * **Other users** - Adds bold first-name prefix
+///
+/// In direct (1-on-1) channels, no sender prefix is added.
 ///
 /// ## Customization
 ///
@@ -120,19 +123,22 @@ abstract interface class MessagePreviewFormatter {
 /// ```dart
 /// class ShortFormatter extends StreamMessagePreviewFormatter {
 ///   @override
-///   String formatCurrentUserMessage(BuildContext context, String text) {
-///     // Remove "You:" prefix for cleaner display.
-///     return text;
+///   TextSpan? formatGroupMessage(
+///     BuildContext context,
+///     User? messageAuthor,
+///     User? currentUser,
+///   ) {
+///     // Remove sender prefix for cleaner display.
+///     return null;
 ///   }
 ///
 ///   @override
-///   String formatPollMessage(
+///   TextSpan formatPollMessage(
 ///     BuildContext context,
 ///     Poll poll,
 ///     User? currentUser,
 ///   ) {
-///     // Always show just the poll name.
-///     return poll.name.isEmpty ? '📊 Poll' : '📊 ${poll.name}';
+///     return TextSpan(text: poll.name.isEmpty ? 'Poll' : poll.name);
 ///   }
 /// }
 /// ```
@@ -143,18 +149,17 @@ abstract interface class MessagePreviewFormatter {
 ///
 /// **Content Extraction:**
 /// * [formatRegularMessage] - Extracts message content (text + attachments)
-/// * [formatMessageAttachments] - Formats attachment previews
+/// * [formatMessageAttachments] - Formats attachment previews with icons
 ///
 /// **Message Types:**
 /// * [formatDeletedMessage] - Formats deleted messages
 /// * [formatSystemMessage] - Formats system messages
 /// * [formatEmptyMessage] - Formats empty messages
 /// * [formatPollMessage] - Formats poll messages
+/// * [formatLocationMessage] - Formats shared location messages
 ///
 /// **Sender Context:**
-/// * [formatCurrentUserMessage] - Formats messages from current user
-/// * [formatDirectMessage] - Formats messages in 1-on-1 channels
-/// * [formatGroupMessage] - Formats messages in group channels
+/// * [formatGroupMessage] - Adds sender prefix in group channels
 ///
 /// **Draft Messages:**
 /// * [getDraftPrefix] - Returns the draft message prefix text
@@ -167,6 +172,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   TextSpan formatMessage(
     BuildContext context,
     Message message, {
+    bool showCaption = true,
     ChannelModel? channel,
     User? currentUser,
     TextStyle? textStyle,
@@ -176,41 +182,19 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       message,
       channel,
       currentUser,
+      showCaption: showCaption,
     );
 
-    final mentionedUsers = message.mentionedUsers;
-    if (mentionedUsers.isEmpty) {
-      return TextSpan(text: previewText, style: textStyle);
-    }
-
-    final mentionedUsersRegex = RegExp(
-      mentionedUsers.map((it) => '@${RegExp.escape(it.name)}').join('|'),
-    );
-
-    final children = <TextSpan>[
-      ...previewText.splitByRegExp(mentionedUsersRegex).map(
-        (text) {
-          if (mentionedUsers.any((it) => '@${it.name}' == text)) {
-            return TextSpan(
-              text: text,
-              style: textStyle?.copyWith(fontWeight: FontWeight.bold),
-            );
-          }
-
-          return TextSpan(text: text, style: textStyle);
-        },
-      ),
-    ];
-
-    return TextSpan(children: children);
+    return TextSpan(children: [previewText], style: textStyle);
   }
 
-  String _buildPreviewText(
+  TextSpan _buildPreviewText(
     BuildContext context,
     Message message,
     ChannelModel? channel,
-    User? currentUser,
-  ) {
+    User? currentUser, {
+    bool showCaption = true,
+  }) {
     if (message.isDeleted) {
       return formatDeletedMessage(context, message);
     }
@@ -223,285 +207,420 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       return formatPollMessage(context, poll, currentUser);
     }
 
+    TextSpan? messageSpan;
+
     if (message.sharedLocation case final location?) {
-      return formatLocationMessage(context, location);
+      messageSpan = formatLocationMessage(
+        context,
+        message,
+        location,
+        showCaption: showCaption,
+      );
+    } else {
+      messageSpan = formatRegularMessage(
+        context,
+        message,
+        showCaption: showCaption,
+      );
     }
 
-    final messagePreviewText = formatRegularMessage(context, message);
-    if (messagePreviewText == null) return formatEmptyMessage(context, message);
+    if (messageSpan == null) return formatEmptyMessage(context, message);
 
-    if (channel == null) return messagePreviewText;
+    if (channel == null) return messageSpan;
 
-    if (message.user?.id == currentUser?.id) {
-      return formatCurrentUserMessage(context, messagePreviewText);
-    }
-
-    if (channel.memberCount > 2) {
-      return formatGroupMessage(context, message.user, messagePreviewText);
-    }
-
-    return formatDirectMessage(context, messagePreviewText);
+    return TextSpan(
+      children: [
+        if (channel.memberCount > 2) ?formatGroupMessage(context, message.user, currentUser),
+        messageSpan,
+      ],
+    );
   }
 
-  /// The text content of a regular [message], including attachment previews.
+  TextSpan _textSpanWithMentions(String text, List<User> mentionedUsers) {
+    if (mentionedUsers.isEmpty) return TextSpan(text: text);
+
+    final mentionRegex = RegExp(
+      mentionedUsers.map((it) => '@${RegExp.escape(it.name)}').join('|'),
+    );
+
+    final parts = text.splitByRegExp(mentionRegex);
+    if (parts.length <= 1) return TextSpan(text: text);
+
+    return TextSpan(
+      children: parts.map((part) {
+        if (mentionedUsers.any((it) => '@${it.name}' == part)) {
+          return TextSpan(
+            text: part,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          );
+        }
+        return TextSpan(text: part);
+      }).toList(),
+    );
+  }
+
+  /// The content of a regular [message] as a [TextSpan], including attachment
+  /// previews.
   ///
   /// Extracts the message text and formats any attachments using
-  /// [formatMessageAttachments]. Returns `null` if the message has no text
-  /// or attachments.
+  /// [formatMessageAttachments]. Mentions within the text are bolded.
+  /// Returns `null` if the message has no text or attachments.
+  ///
+  /// When [showCaption] is `true` and the message has both text and
+  /// attachments, the text is shown alongside the attachment icon.
   ///
   /// Override to customize how message content is extracted:
   ///
   /// ```dart
   /// @override
-  /// String? formatRegularMessage(BuildContext context, Message message) {
-  ///   // Only show text, ignore attachments
-  ///   return message.text;
+  /// TextSpan? formatRegularMessage(
+  ///   BuildContext context,
+  ///   Message message, {
+  ///   bool showCaption = true,
+  /// }) {
+  ///   final text = message.text;
+  ///   if (text == null || text.isEmpty) return null;
+  ///   return TextSpan(text: text);
   /// }
   /// ```
   @protected
-  String? formatRegularMessage(BuildContext context, Message message) {
+  TextSpan? formatRegularMessage(
+    BuildContext context,
+    Message message, {
+    bool showCaption = true,
+  }) {
     final messageText = switch (message.text?.trim()) {
       final text? when text.isNotEmpty => text,
       _ => null,
     };
 
     final attachments = message.attachments;
-    if (attachments.isEmpty) return messageText;
+    final mentionedUsers = message.mentionedUsers;
 
-    return formatMessageAttachments(context, messageText, message.attachments);
+    if (attachments.isEmpty) {
+      return messageText != null ? _textSpanWithMentions(messageText, mentionedUsers) : null;
+    }
+
+    return formatMessageAttachments(
+      context,
+      messageText,
+      message.attachments,
+      mentionedUsers: mentionedUsers,
+      showCaption: showCaption,
+    );
   }
 
-  /// The preview text for a deleted [message].
-  @protected
-  String formatDeletedMessage(BuildContext context, Message message) {
-    return context.translations.messageDeletedLabel;
-  }
-
-  /// The preview text for a system [message].
-  @protected
-  String formatSystemMessage(BuildContext context, Message message) {
-    if (message.text case final text? when text.isNotEmpty) return text;
-    return context.translations.systemMessageLabel;
-  }
-
-  /// The preview text for an empty [message].
-  @protected
-  String formatEmptyMessage(BuildContext context, Message message) {
-    return context.translations.emptyMessagePreviewText;
-  }
-
-  /// The formatted [messageText] with "You:" prefix for the current user.
+  /// The preview [TextSpan] for a deleted [message].
   ///
-  /// Override this to customize how messages from the current user are
-  /// displayed:
+  /// Shows a ban icon followed by the localized deleted message label,
+  /// both styled with the tertiary text color.
+  @protected
+  TextSpan formatDeletedMessage(BuildContext context, Message message) {
+    return TextSpan(
+      children: [
+        WidgetSpan(
+          child: Icon(
+            context.streamIcons.circleBanSign,
+            size: 16,
+            color: context.streamColorScheme.textTertiary,
+          ),
+        ),
+        WidgetSpan(
+          child: SizedBox(width: context.streamSpacing.xxs),
+        ),
+        TextSpan(
+          text: context.translations.messageDeletedLabel,
+          style: TextStyle(color: context.streamColorScheme.textTertiary),
+        ),
+      ],
+    );
+  }
+
+  /// The preview [TextSpan] for a system [message].
+  ///
+  /// Returns the message text if available, otherwise a localized
+  /// system message label.
+  @protected
+  TextSpan formatSystemMessage(BuildContext context, Message message) {
+    if (message.text case final text? when text.isNotEmpty) return TextSpan(text: text);
+    return TextSpan(text: context.translations.systemMessageLabel);
+  }
+
+  /// The preview [TextSpan] for an empty [message].
+  ///
+  /// Returns the localized empty message preview text, styled with the
+  /// tertiary text color.
+  @protected
+  TextSpan formatEmptyMessage(BuildContext context, Message message) {
+    return TextSpan(
+      text: context.translations.emptyMessagePreviewText,
+      style: TextStyle(color: context.streamColorScheme.textTertiary),
+    );
+  }
+
+  /// A bold sender prefix [TextSpan] for group channel previews.
+  ///
+  /// Returns a "You: " prefix when [messageAuthor] matches [currentUser],
+  /// or the author's first name followed by ": " for other users. Returns
+  /// `null` if the author name is unavailable.
+  ///
+  /// Override to customize the sender prefix:
   ///
   /// ```dart
   /// @override
-  /// String formatCurrentUserMessage(
-  ///   BuildContext context,
-  ///   String messageText,
-  /// ) {
-  ///   return messageText; // Remove prefix
-  /// }
-  /// ```
-  @protected
-  String formatCurrentUserMessage(BuildContext context, String messageText) {
-    return '${context.translations.youText}: $messageText';
-  }
-
-  /// The [messageText] without prefix for 1-on-1 channels.
-  ///
-  /// No prefix is added since the other user's identity is clear from the
-  /// channel itself. Override to add context if needed:
-  ///
-  /// ```dart
-  /// @override
-  /// String formatDirectMessage(BuildContext context, String messageText) {
-  ///   return '💬 $messageText';
-  /// }
-  /// ```
-  @protected
-  String formatDirectMessage(BuildContext context, String messageText) {
-    return messageText;
-  }
-
-  /// The formatted [messageText] with [messageAuthor] name prefix for groups.
-  ///
-  /// Adds the author's name as a prefix. Returns [messageText] without
-  /// prefix if [messageAuthor] is `null`.
-  ///
-  /// Override to customize author name formatting:
-  ///
-  /// ```dart
-  /// @override
-  /// String formatGroupMessage(
+  /// TextSpan? formatGroupMessage(
   ///   BuildContext context,
   ///   User? messageAuthor,
-  ///   String messageText,
+  ///   User? currentUser,
   /// ) {
-  ///   if (messageAuthor == null) return messageText;
-  ///   return '${messageAuthor.name} says: $messageText';
+  ///   final name = messageAuthor?.name;
+  ///   if (name == null || name.isEmpty) return null;
+  ///   return TextSpan(text: '$name: ');
   /// }
   /// ```
   @protected
-  String formatGroupMessage(
+  TextSpan? formatGroupMessage(
     BuildContext context,
     User? messageAuthor,
-    String messageText,
+    User? currentUser,
   ) {
-    final authorName = messageAuthor?.name;
-    if (authorName == null || authorName.isEmpty) return messageText;
+    if (messageAuthor?.id == currentUser?.id) {
+      return TextSpan(
+        text: '${context.translations.youText}: ',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: context.streamColorScheme.textTertiary,
+        ),
+      );
+    }
 
-    return '$authorName: $messageText';
+    final authorName = messageAuthor?.name.split(' ')[0];
+    if (authorName == null || authorName.isEmpty) return null;
+
+    return TextSpan(
+      text: '$authorName: ',
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        color: context.streamColorScheme.textTertiary,
+      ),
+    );
   }
 
-  /// The formatted preview for the first attachment in [attachments].
+  /// The formatted preview [TextSpan] for [attachments].
   ///
-  /// Formats each attachment type with an emoji icon and title. The
-  /// [messageText] is used as fallback for certain types. Returns
-  /// [messageText] if no attachments are present or the type is unsupported.
+  /// Renders an icon prefix based on the attachment type, followed by either
+  /// the [messageText] (when [showCaption] is `true`) or a descriptive suffix
+  /// (attachment name, count, or duration). [mentionedUsers] in the message
+  /// text are bolded.
   ///
-  /// Supported types: Audio (🎧), File (📄), Image (📷), Video (📹),
-  /// Giphy (/giphy), and Voice Recording (🎤).
+  /// Returns `null` if [attachments] is empty and [messageText] is `null`.
+  ///
+  /// When attachments have mixed types, a generic file icon is used with the
+  /// total file count. For uniform types, a type-specific icon is shown:
+  /// Audio/Voice Recording (microphone), Image (camera), Video (video),
+  /// Giphy (/giphy), and File (file).
   ///
   /// Override to handle custom attachment types:
   ///
   /// ```dart
   /// @override
-  /// String? formatMessageAttachments(
+  /// TextSpan? formatMessageAttachments(
   ///   BuildContext context,
   ///   String? messageText,
-  ///   Iterable<Attachment> attachments,
-  /// ) {
+  ///   Iterable<Attachment> attachments, {
+  ///   List<User> mentionedUsers = const [],
+  ///   bool showCaption = true,
+  /// }) {
   ///   final attachment = attachments.firstOrNull;
   ///   if (attachment?.type == 'product') {
-  ///     return '🛍️ ${attachment?.extraData['title'] ?? "Product"}';
+  ///     return TextSpan(text: '🛍️ Product');
   ///   }
   ///   return super.formatMessageAttachments(
   ///     context,
   ///     messageText,
   ///     attachments,
+  ///     mentionedUsers: mentionedUsers,
+  ///     showCaption: showCaption,
   ///   );
   /// }
   /// ```
   @protected
-  String? formatMessageAttachments(
+  TextSpan? formatMessageAttachments(
     BuildContext context,
     String? messageText,
-    Iterable<Attachment> attachments,
-  ) {
-    final translations = context.translations;
+    Iterable<Attachment> attachments, {
+    List<User> mentionedUsers = const [],
+    bool showCaption = true,
+  }) {
     final attachment = attachments.firstOrNull;
-    if (attachment == null) return messageText;
-
-    // If the message contains some attachments, we will show the first one
-    // and the text if it exists.
-    final attachmentIcon = switch (attachment.type) {
-      AttachmentType.audio => '🎧',
-      AttachmentType.file => '📄',
-      AttachmentType.image => '📷',
-      AttachmentType.video => '📹',
-      AttachmentType.giphy => '/giphy',
-      AttachmentType.voiceRecording => '🎤',
-      _ => null,
-    };
-
-    final attachmentTitle = switch (attachment.type) {
-      AttachmentType.audio => messageText ?? translations.audioAttachmentText,
-      AttachmentType.file => attachment.title ?? messageText,
-      AttachmentType.image => messageText ?? translations.imageAttachmentText,
-      AttachmentType.video => messageText ?? translations.videoAttachmentText,
-      AttachmentType.giphy => messageText,
-      AttachmentType.voiceRecording => translations.voiceRecordingText,
-      _ => null,
-    };
-
-    if (attachmentIcon != null || attachmentTitle != null) {
-      return [attachmentIcon, attachmentTitle].nonNulls.join(' ');
+    if (attachment == null) {
+      return messageText != null ? _textSpanWithMentions(messageText, mentionedUsers) : null;
     }
 
-    return messageText;
+    final mixedTypes = attachments.any((it) => it.type != attachment.type);
+    final prefix = _attachmentPrefix(context, mixedTypes ? null : attachment.type);
+
+    if (showCaption && messageText != null) {
+      return TextSpan(
+        children: [
+          prefix,
+          WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+          _textSpanWithMentions(messageText, mentionedUsers),
+        ],
+      );
+    }
+
+    final suffix = _attachmentSuffix(
+      context,
+      attachment,
+      count: attachments.length,
+      isMixed: mixedTypes,
+    );
+
+    return TextSpan(
+      children: [
+        prefix,
+        WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+        ?suffix,
+      ],
+    );
   }
 
-  /// The formatted preview for a [poll] message with voter or creator info.
+  InlineSpan _attachmentPrefix(BuildContext context, String? type) {
+    final icons = context.streamIcons;
+    return switch (type) {
+      AttachmentType.audio || AttachmentType.voiceRecording => WidgetSpan(child: Icon(icons.microphone, size: 16)),
+      AttachmentType.image => WidgetSpan(child: Icon(icons.camera1, size: 16)),
+      AttachmentType.video => WidgetSpan(child: Icon(icons.video, size: 16)),
+      AttachmentType.giphy => const TextSpan(text: '/giphy'),
+      _ => WidgetSpan(child: Icon(icons.fileBend, size: 16)),
+    };
+  }
+
+  TextSpan? _attachmentSuffix(
+    BuildContext context,
+    Attachment attachment, {
+    required int count,
+    required bool isMixed,
+  }) {
+    final translations = context.translations;
+
+    if (isMixed) return TextSpan(text: translations.filesAttachmentCountText(count));
+
+    return switch (attachment.type) {
+      AttachmentType.audio => TextSpan(text: translations.audioAttachmentText),
+      AttachmentType.voiceRecording => TextSpan(
+        text: '${translations.voiceRecordingText} (${attachment.duration.toMinutesAndSeconds()})',
+      ),
+      AttachmentType.file => TextSpan(
+        text: (count == 1 ? attachment.file?.name : null) ?? translations.filesAttachmentCountText(count),
+      ),
+      AttachmentType.image => TextSpan(text: translations.photosAttachmentCountText(count)),
+      AttachmentType.video => TextSpan(text: translations.videosAttachmentCountText(count)),
+      _ => null,
+    };
+  }
+
+  /// The formatted preview [TextSpan] for a [poll] message.
   ///
-  /// Shows the latest voter and poll name if the poll has votes, otherwise
-  /// shows the creator and poll name. If the poll has no votes or creator,
-  /// shows just the poll name. Actions by [currentUser] show as "You",
-  /// while actions by other users show their name.
+  /// Shows a poll chart icon followed by the latest vote activity when
+  /// available, or the poll name as a fallback. Specifically:
+  ///
+  /// - If the [currentUser] cast the latest vote, shows "You voted: {answer}".
+  /// - If another user cast the latest vote, shows "{name} voted: {answer}".
+  /// - Otherwise, falls back to displaying the [poll] name (trimmed). If the
+  ///   name is empty, only the icon is shown.
   ///
   /// Override to customize poll formatting:
   ///
   /// ```dart
   /// @override
-  /// String formatPollMessage(
+  /// TextSpan formatPollMessage(
   ///   BuildContext context,
   ///   Poll poll,
   ///   User? currentUser,
   /// ) {
-  ///   return poll.name.isEmpty ? '📊 Poll' : '📊 ${poll.name}';
+  ///   return TextSpan(
+  ///     text: poll.name.isEmpty ? 'Poll' : poll.name,
+  ///   );
   /// }
   /// ```
   @protected
-  String formatPollMessage(
+  TextSpan formatPollMessage(
     BuildContext context,
     Poll poll,
     User? currentUser,
   ) {
     final translations = context.translations;
+    TextSpan? latestVoterSpan;
 
-    // If the poll already contains some votes, we will preview the latest voter
-    // and the poll name
-    if (poll.latestVotes.firstOrNull?.user case final latestVoter?) {
-      if (latestVoter.id == currentUser?.id) {
+    if (poll.latestVotes.firstOrNull case final latestVote?) {
+      if (latestVote.user?.id == currentUser?.id) {
         final youVoted = translations.pollYouVotedText;
-        return '📊 $youVoted: "${poll.name}"';
+        latestVoterSpan = TextSpan(text: '$youVoted: ${latestVote.answerText}');
+      } else if (latestVote.user case final latestVoter?) {
+        if (latestVote.answerText != null) {
+          final someoneVoted = translations.pollSomeoneVotedText(latestVoter.name.split(' ')[0]);
+          latestVoterSpan = TextSpan(text: '$someoneVoted: ${latestVote.answerText}');
+        }
       }
-
-      final someoneVoted = translations.pollSomeoneVotedText(latestVoter.name);
-      return '📊 $someoneVoted: "${poll.name}"';
     }
 
-    // Otherwise, we will show the creator of the poll and the poll name
-    if (poll.createdBy case final creator?) {
-      if (creator.id == currentUser?.id) {
-        final youCreated = translations.pollYouCreatedText;
-        return '📊 $youCreated: "${poll.name}"';
-      }
-
-      final someoneCreated = translations.pollSomeoneCreatedText(creator.name);
-      return '📊 $someoneCreated: "${poll.name}"';
-    }
-
-    // Otherwise, we will show the poll name if it exists.
-    if (poll.name.trim() case final pollName when pollName.isNotEmpty) {
-      return '📊 $pollName';
-    }
-
-    // If nothing else, we will show the default poll emoji.
-    return '📊';
+    return TextSpan(
+      children: [
+        WidgetSpan(child: Icon(context.streamIcons.chart5, size: 16)),
+        if (latestVoterSpan case final latestVoterSpan?) ...[
+          WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+          latestVoterSpan,
+        ] else if (poll.name.trim() case final pollName when pollName.isNotEmpty) ...[
+          WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+          TextSpan(text: pollName),
+        ],
+      ],
+    );
   }
 
-  /// The formatted preview for a shared [location] message.
+  /// The formatted preview [TextSpan] for a shared [location] message.
+  ///
+  /// Shows a map pin icon followed by the [message] text (when [showCaption]
+  /// is `true` and text is available) or a localized location label. Live
+  /// locations use a distinct label from static ones.
   ///
   /// Override to customize shared location formatting:
   ///
   /// ```dart
   /// @override
-  /// String formatLocationMessage(
+  /// TextSpan formatLocationMessage(
   ///   BuildContext context,
-  ///   Location location,
-  /// ) {
-  ///   return '📍 (${location.latitude}, ${location.longitude})';
+  ///   Message message,
+  ///   Location location, {
+  ///   bool showCaption = true,
+  /// }) {
+  ///   return TextSpan(
+  ///     text: '📍 (${location.latitude}, ${location.longitude})',
+  ///   );
   /// }
   /// ```
   @protected
-  String formatLocationMessage(
+  TextSpan formatLocationMessage(
     BuildContext context,
-    Location location,
-  ) {
-    final translations = context.translations;
-    return translations.locationLabel(isLive: location.isLive);
+    Message message,
+    Location location, {
+    bool showCaption = true,
+  }) {
+    return TextSpan(
+      children: [
+        WidgetSpan(child: Icon(context.streamIcons.mapPin, size: 16)),
+        WidgetSpan(
+          child: SizedBox(width: context.streamSpacing.xxs),
+        ),
+        if (message.text?.trim() case final messageText? when messageText.isNotEmpty && showCaption) ...[
+          _textSpanWithMentions(messageText, message.mentionedUsers),
+        ] else ...[
+          TextSpan(text: context.translations.locationLabel(isLive: location.isLive)),
+        ],
+      ],
+    );
   }
 
   @override
@@ -510,16 +629,16 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     DraftMessage draftMessage, {
     TextStyle? textStyle,
   }) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
+    final colorScheme = context.streamColorScheme;
 
     return TextSpan(
-      text: getDraftPrefix(context),
-      style: textStyle?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: colorTheme.accentPrimary,
-      ),
       children: [
+        TextSpan(
+          text: getDraftPrefix(context),
+          style: (textStyle ?? context.streamTextTheme.captionEmphasis).copyWith(
+            color: colorScheme.accentPrimary,
+          ),
+        ),
         const TextSpan(text: ' '), // Space between prefix and message
         TextSpan(text: draftMessage.text, style: textStyle),
       ],
