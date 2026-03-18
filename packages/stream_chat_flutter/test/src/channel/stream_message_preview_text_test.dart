@@ -204,7 +204,7 @@ void main() {
   });
 
   group('Single attachments', () {
-    testWidgets('image attachment shows camera icon and "Image" label', (tester) async {
+    testWidgets('image attachment shows camera icon and "Photo" label', (tester) async {
       final message = Message(
         text: '',
         user: User(id: 'other-user-id', name: 'Other User'),
@@ -216,7 +216,7 @@ void main() {
       final icons = _findIcons(tester);
       expect(icons, hasLength(1));
       expect(icons.first.size, 16);
-      expect(_extractText(tester), 'Image');
+      expect(_extractText(tester), 'Photo');
     });
 
     testWidgets('image attachment with caption shows icon and caption', (tester) async {
@@ -728,7 +728,7 @@ void main() {
 
       final text = _extractText(tester);
       expect(text, contains('Jane: '));
-      expect(text, contains('Image'));
+      expect(text, contains('Photo'));
     });
   });
 
@@ -936,7 +936,7 @@ void main() {
       );
 
       expect(_findIcons(tester), hasLength(1));
-      expect(_extractText(tester), 'Image');
+      expect(_extractText(tester), 'Photo');
     });
 
     testWidgets('can customize direct message via formatMessage override', (tester) async {
