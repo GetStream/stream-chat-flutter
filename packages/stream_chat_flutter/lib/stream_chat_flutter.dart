@@ -108,6 +108,7 @@ export 'src/message_input/stream_message_send_button.dart';
 export 'src/message_input/stream_message_text_field.dart';
 export 'src/message_list_view/message_details.dart';
 export 'src/message_list_view/message_list_view.dart';
+export 'src/message_list_view/unread_indicator_button.dart';
 export 'src/message_modal/message_action_confirmation_modal.dart';
 export 'src/message_modal/message_actions_modal.dart';
 export 'src/message_modal/message_modal.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:stream_chat_flutter/src/message_list_view/unread_indicator_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Builds the list of component builders for the stream chat components.
@@ -12,6 +13,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   StreamComponentBuilder<MessageComposerInputHeaderProps>? messageComposerInputHeader,
   StreamComponentBuilder<MessageComposerInputTrailingProps>? messageComposerInputTrailing,
   StreamComponentBuilder<StreamMessageWidgetProps>? messageWidget,
+  StreamComponentBuilder<UnreadIndicatorProps>? unreadIndicator,
 }) {
   final builders = [
     if (channelListItem != null) StreamComponentBuilderExtension(builder: channelListItem),
@@ -23,6 +25,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
     if (messageComposerInputHeader != null) StreamComponentBuilderExtension(builder: messageComposerInputHeader),
     if (messageComposerInputTrailing != null) StreamComponentBuilderExtension(builder: messageComposerInputTrailing),
     if (messageWidget != null) StreamComponentBuilderExtension(builder: messageWidget),
+    if (unreadIndicator != null) StreamComponentBuilderExtension(builder: unreadIndicator),
   ];
 
   return builders;

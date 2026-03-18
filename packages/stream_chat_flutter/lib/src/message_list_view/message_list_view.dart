@@ -1115,8 +1115,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             );
 
         return Positioned(
-          bottom: 8,
-          right: 8,
+          bottom: 16,
+          right: 16,
           width: 40,
           height: 40,
           child: Stack(
