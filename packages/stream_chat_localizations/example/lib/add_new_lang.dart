@@ -132,7 +132,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get reconnectingLabel => 'Reconnecting...';
 
   @override
-  String get alsoSendAsDirectMessageLabel => 'Also send as direct message';
+  String get alsoSendAsDirectMessageLabel => 'Also send in Channel';
 
   @override
   String get addACommentOrSendLabel => 'Add a comment or send';
@@ -687,6 +687,24 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String locationLabel({bool isLive = false}) {
     if (isLive) return '📍 Live Location';
     return '📍 Location';
+  }
+
+  @override
+  String get fileAttachmentText => 'File';
+
+  @override
+  String filesAttachmentCountText(int count) {
+    return count == 1 ? 'File' : '$count files';
+  }
+
+  @override
+  String photosAttachmentCountText(int count) {
+    return count == 1 ? 'Photo' : '$count photos';
+  }
+
+  @override
+  String videosAttachmentCountText(int count) {
+    return count == 1 ? 'Video' : '$count videos';
   }
 }
 

@@ -650,6 +650,18 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get videoAttachmentText => 'Vídeo';
 
   @override
+  String get fileAttachmentText => 'Arquivo';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'Arquivo' : '$count arquivos';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? 'Foto' : '$count fotos';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? 'Vídeo' : '$count vídeos';
+
+  @override
   String get pollYouVotedText => 'Você votou';
 
   @override

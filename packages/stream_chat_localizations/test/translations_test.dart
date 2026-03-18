@@ -301,6 +301,10 @@ void main() {
       expect(localizations.audioAttachmentText, isNotNull);
       expect(localizations.imageAttachmentText, isNotNull);
       expect(localizations.videoAttachmentText, isNotNull);
+      expect(localizations.fileAttachmentText, isNotNull);
+      expect(localizations.filesAttachmentCountText(3), isNotNull);
+      expect(localizations.photosAttachmentCountText(3), isNotNull);
+      expect(localizations.videosAttachmentCountText(3), isNotNull);
       expect(localizations.pollYouVotedText, isNotNull);
       expect(localizations.pollSomeoneVotedText('TestUser'), isNotNull);
       expect(localizations.pollYouCreatedText, isNotNull);

@@ -116,13 +116,13 @@ class _ChannelListDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chatTheme = StreamChatTheme.of(context);
     return SlidableAutoCloseBehavior(
       child: RefreshIndicator(
         onRefresh: channelListController.refresh,
         child: StreamChannelListView(
           controller: channelListController,
           itemBuilder: (context, channels, index, defaultWidget) {
-            final chatTheme = StreamChatTheme.of(context);
             final channel = channels[index];
             final backgroundColor = chatTheme.colorTheme.inputBg;
             final canDeleteChannel = channel.canDeleteChannel;
