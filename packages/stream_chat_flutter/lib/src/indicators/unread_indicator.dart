@@ -32,7 +32,6 @@ class StreamUnreadIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
     final client = StreamChat.of(context).client;
 
     final stream = switch (_unreadType) {
