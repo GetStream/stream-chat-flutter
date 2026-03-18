@@ -216,7 +216,9 @@ class StreamChatState extends State<StreamChat> {
       child = StreamComponentFactory(builders: builders, child: child);
     }
 
-    return PoraStreamChatConfiguration(data: streamChatConfigData, child: child);
+    return Portal(
+      child: StreamChatConfiguration(data: streamChatConfigData, child: child),
+    );
   }
 
   StreamChatThemeData _getTheme(
