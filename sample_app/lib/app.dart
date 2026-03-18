@@ -20,6 +20,9 @@ import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/utils/local_notification_observer.dart';
 import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/widgets/custom_message_actions.dart';
+import 'package:sample_app/widgets/location/location_attachment.dart';
+import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
@@ -469,66 +472,72 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 
   @override
   Widget build(BuildContext context) {
-    return StreamComponentFactory(
-      builders: StreamComponentBuilders(
-        extensions: streamChatComponentBuilders(
-          /// Add your custom component builders here.
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          if (_initNotifier.initData != null)
-            ChangeNotifierProvider.value(
-              value: _initNotifier,
-              builder: (context, child) => Builder(
-                builder: (context) {
-                  context.watch<InitNotifier>(); // rebuild on change
-                  return PreferenceBuilder<int>(
-                    preference: _initNotifier.initData!.preferences.getInt(
-                      'theme',
-                      defaultValue: 0,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        if (_initNotifier.initData != null)
+          ChangeNotifierProvider.value(
+            value: _initNotifier,
+            builder: (context, child) => Builder(
+              builder: (context) {
+                context.watch<InitNotifier>(); // rebuild on change
+                return PreferenceBuilder<int>(
+                  preference: _initNotifier.initData!.preferences.getInt(
+                    'theme',
+                    defaultValue: 0,
+                  ),
+                  builder: (context, snapshot) => MaterialApp.router(
+                    theme: ThemeData(
+                      brightness: .light,
+                      extensions: [StreamTheme.light()],
                     ),
-                    builder: (context, snapshot) => MaterialApp.router(
-                      theme: ThemeData(
-                        brightness: .light,
-                        extensions: [StreamTheme.light()],
-                      ),
-                      darkTheme: ThemeData(
-                        brightness: .dark,
-                        extensions: [StreamTheme.dark()],
-                      ),
-                      themeMode: const {
-                        -1: ThemeMode.dark,
-                        0: ThemeMode.system,
-                        1: ThemeMode.light,
-                      }[snapshot],
-                      supportedLocales: const [
-                        Locale('en'),
-                        Locale('it'),
-                      ],
-                      localizationsDelegates: const [
-                        AppLocalizationsDelegate(),
-                        GlobalStreamChatLocalizations.delegate,
-                        GlobalMaterialLocalizations.delegate,
-                        GlobalWidgetsLocalizations.delegate,
-                      ],
-                      builder: (context, child) => StreamChat(
-                        client: _initNotifier.initData!.client,
-                        streamChatConfigData: StreamChatConfigurationData(
-                          draftMessagesEnabled: false,
+                    darkTheme: ThemeData(
+                      brightness: .dark,
+                      extensions: [StreamTheme.dark()],
+                    ),
+                    themeMode: const {
+                      -1: ThemeMode.dark,
+                      0: ThemeMode.system,
+                      1: ThemeMode.light,
+                    }[snapshot],
+                    supportedLocales: const [
+                      Locale('en'),
+                      Locale('it'),
+                    ],
+                    localizationsDelegates: const [
+                      AppLocalizationsDelegate(),
+                      GlobalStreamChatLocalizations.delegate,
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                    ],
+                    builder: (context, child) => StreamChat(
+                      client: _initNotifier.initData!.client,
+                      componentBuilders: StreamComponentBuilders(
+                        extensions: streamChatComponentBuilders(
+                          messageWidget: customMessageWidgetBuilder,
                         ),
-                        child: child,
                       ),
-                      routerConfig: _setupRouter(),
+                      streamChatConfigData: StreamChatConfigurationData(
+                        draftMessagesEnabled: false,
+                        attachmentBuilders: [
+                          LocationAttachmentBuilder(
+                            onAttachmentTap: (context, location) {
+                              showLocationDetailDialog(context: context, location: location);
+                            },
+                          ),
+                        ],
+                      ),
+
+                      child: child,
                     ),
-                  );
-                },
-              ),
+                    routerConfig: _setupRouter(),
+                  ),
+                );
+              },
             ),
-          if (!animationCompleted) buildAnimation(),
-        ],
-      ),
+          ),
+        if (!animationCompleted) buildAnimation(),
+      ],
     );
   }
 }

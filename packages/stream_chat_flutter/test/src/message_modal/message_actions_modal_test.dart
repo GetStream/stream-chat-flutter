@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' show StreamIconData;
 
 void main() {
   final message = Message(
@@ -46,6 +46,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: const Text('Message Widget'),
+            alignment: AlignmentDirectional.centerStart,
           ),
         ),
       );
@@ -66,6 +67,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: const Text('Message Widget'),
+            alignment: AlignmentDirectional.centerStart,
             showReactionPicker: true,
           ),
         ),
@@ -73,7 +75,7 @@ void main() {
 
       // Use a longer timeout to ensure everything is rendered
       await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(find.byType(StreamReactionPicker), findsOneWidget);
+      expect(find.byType(StreamMessageReactionPicker), findsOneWidget);
     });
 
     testWidgets(
@@ -102,6 +104,7 @@ void main() {
                       message: message,
                       messageActions: messageActions,
                       messageWidget: const Text('Message Widget'),
+                      alignment: AlignmentDirectional.centerStart,
                       showReactionPicker: true,
                     ),
                   );
@@ -117,7 +120,7 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         // Verify reaction picker is shown
-        expect(find.byType(StreamReactionPicker), findsOneWidget);
+        expect(find.byType(StreamMessageReactionPicker), findsOneWidget);
 
         // Find and tap the first reaction (like)
         final reactionIconFinder = find.byIcon(Icons.thumb_up);
@@ -183,6 +186,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(),
+            alignment: AlignmentDirectional.centerStart,
           ),
         ),
       );
@@ -197,6 +201,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(),
+            alignment: AlignmentDirectional.centerStart,
             showReactionPicker: true,
           ),
         ),
@@ -212,7 +217,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(reverse: true),
-            reverse: true,
+            alignment: AlignmentDirectional.centerEnd,
           ),
         ),
       );
@@ -227,8 +232,8 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(reverse: true),
+            alignment: AlignmentDirectional.centerEnd,
             showReactionPicker: true,
-            reverse: true,
           ),
         ),
       );

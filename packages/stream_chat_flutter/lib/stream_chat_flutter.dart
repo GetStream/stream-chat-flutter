@@ -24,6 +24,16 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamEmojiSize,
         StreamEmojiData,
         StreamEmojiPickerSheet,
+        StreamMessageAlignment,
+        StreamMessagePlacement,
+        StreamMessageStackPosition,
+        StreamReactionPicker,
+        StreamReactionPickerItem,
+        StreamReactionPickerProps,
+        StreamReactionPickerTheme,
+        StreamReactionPickerThemeData,
+        StreamReactionsPosition,
+        StreamReactionsType,
         streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
@@ -101,15 +111,10 @@ export 'src/message_list_view/message_list_view.dart';
 export 'src/message_modal/message_action_confirmation_modal.dart';
 export 'src/message_modal/message_actions_modal.dart';
 export 'src/message_modal/message_modal.dart';
-export 'src/message_modal/message_reactions_modal.dart';
 export 'src/message_modal/moderated_message_actions_modal.dart';
-export 'src/message_widget/deleted_message.dart';
-export 'src/message_widget/message_text.dart';
 export 'src/message_widget/message_widget.dart';
-export 'src/message_widget/message_widget_content_components.dart';
 export 'src/message_widget/moderated_message.dart';
 export 'src/message_widget/system_message.dart';
-export 'src/message_widget/text_bubble.dart';
 export 'src/misc/adaptive_dialog_action.dart';
 export 'src/misc/animated_circle_border_painter.dart';
 export 'src/misc/back_button.dart';
@@ -133,7 +138,6 @@ export 'src/poll/stream_poll_options_dialog.dart';
 export 'src/poll/stream_poll_results_dialog.dart';
 export 'src/poll/stream_poll_text_field.dart';
 export 'src/reactions/detail/reaction_detail_sheet.dart';
-export 'src/reactions/indicator/reaction_indicator.dart';
 export 'src/reactions/picker/reaction_picker.dart';
 export 'src/reactions/user_reactions.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_grid_tile.dart';

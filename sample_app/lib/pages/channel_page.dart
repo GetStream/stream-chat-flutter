@@ -8,12 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/widgets/location/location_attachment.dart';
-import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:sample_app/widgets/location/location_picker_dialog.dart';
 import 'package:sample_app/widgets/location/location_picker_option.dart';
-import 'package:sample_app/widgets/message_info_sheet.dart';
-import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChannelPage extends StatefulWidget {
@@ -109,9 +105,9 @@ class _ChannelPageState extends State<ChannelPage> {
                   initialAlignment: widget.initialAlignment,
                   highlightInitialMessage: widget.highlightInitialMessage,
                   onEditMessageTap: _editMessage,
-                  //onMessageSwiped: _reply,
+                  onReplyTap: _reply,
                   messageFilter: defaultFilter,
-                  messageBuilder: customMessageBuilder,
+                  messageBuilder: _messageBuilder,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(parent: parentMessage!);
                   },
@@ -209,165 +205,30 @@ class _ChannelPageState extends State<ChannelPage> {
     return channel.sendStaticLocation(location: result.coordinates);
   }
 
-  Widget customMessageBuilder(
+  Widget _messageBuilder(
     BuildContext context,
-    MessageDetails details,
-    List<Message> messages,
-    StreamMessageWidget defaultMessageWidget,
+    Message message,
+    StreamMessageWidgetProps defaultProps,
   ) {
-    final theme = StreamChatTheme.of(context);
-    final icons = context.streamIcons;
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
+    final defaultWidget = StreamMessageWidget.fromProps(props: defaultProps);
 
-    final message = details.message;
-    final reminder = message.reminder;
-    final channel = StreamChannel.of(context).channel;
-    final channelConfig = channel.config;
+    if (message.isDeleted || message.state.isFailed) return defaultWidget;
 
-    final currentUser = StreamChat.of(context).currentUser;
-    final isSentByCurrentUser = message.user?.id == currentUser?.id;
-    final canDeleteOwnMessage = channel.canDeleteOwnMessage;
+    final alignment = StreamMessagePlacement.alignmentDirectionalOf(context);
+    final isEnd = alignment == AlignmentDirectional.centerEnd;
 
-    List<Widget> actionsBuilder(
-      BuildContext context,
-      List<StreamContextMenuAction> defaultActions,
-    ) {
-      return StreamContextMenuAction.partitioned(
-        items: [
-          ...defaultActions,
-          if (isSentByCurrentUser && canDeleteOwnMessage)
-            StreamContextMenuAction.destructive(
-              label: const Text('Delete Message for Me'),
-              leading: Icon(icons.trashBin),
-              onTap: () => _deleteMessageForMe(message),
-            ),
-          if (channelConfig?.userMessageReminders == true) ...[
-            if (reminder != null) ...[
-              StreamContextMenuAction(
-                label: const Text('Edit Reminder'),
-                leading: Icon(icons.clock),
-                onTap: () => _editReminder(message, reminder),
-              ),
-              StreamContextMenuAction(
-                label: const Text('Remove from later'),
-                leading: Icon(icons.checkmark2),
-                onTap: () => _removeReminder(message, reminder),
-              ),
-            ] else ...[
-              StreamContextMenuAction(
-                label: const Text('Remind me'),
-                leading: Icon(icons.bellNotification),
-                onTap: () => _createReminder(message),
-              ),
-              StreamContextMenuAction(
-                label: const Text('Save for later'),
-                leading: Icon(icons.fileBend),
-                onTap: () => _createBookmark(message),
-              ),
-            ],
-          ],
-          if (channelConfig?.deliveryEvents == true)
-            StreamContextMenuAction(
-              label: const Text('Message Info'),
-              leading: Icon(icons.circleInfoTooltip),
-              onTap: () => _showMessageInfo(message),
-            ),
-        ],
-      );
-    }
-
-    final locationAttachmentBuilder = LocationAttachmentBuilder(
-      onAttachmentTap: (location) => showLocationDetailDialog(
-        context: context,
-        location: location,
-      ),
-    );
-
-    final child = Container(
-      color: reminder != null ? colorTheme.accentPrimary.withOpacity(.1) : null,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (reminder != null)
-            Align(
-              alignment: switch (defaultMessageWidget.reverse) {
-                true => AlignmentDirectional.centerEnd,
-                false => AlignmentDirectional.centerStart,
-              },
-              child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 8),
-                child: Row(
-                  spacing: 4,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      size: 16,
-                      Icons.bookmark_rounded,
-                      color: colorTheme.accentPrimary,
-                    ),
-                    Text(
-                      'Saved for later',
-                      style: textTheme.footnote.copyWith(
-                        color: colorTheme.accentPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          defaultMessageWidget.copyWith(
-            onReplyTap: _reply,
-            actionsBuilder: actionsBuilder,
-            showEditMessage: message.sharedLocation == null,
-            attachmentBuilders: [locationAttachmentBuilder],
-            onShowMessage: (message, channel) => GoRouter.of(context).goNamed(
-              Routes.CHANNEL_PAGE.name,
-              pathParameters: Routes.CHANNEL_PAGE.params(channel),
-              queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
-            ),
-            bottomRowBuilderWithDefaultWidget: (_, __, defaultWidget) {
-              return defaultWidget.copyWith(
-                deletedBottomRowBuilder: (context, message) {
-                  return const StreamVisibleFootnote();
-                },
-              );
-            },
-          ),
-          // If the message has a reminder, add some space below it.
-          if (reminder != null) const SizedBox(height: 4),
-        ],
-      ),
-    );
-
-    // We do not support quoting deleted messages.
-    if (message.isDeleted || message.state.isFailed) return child;
-
-    // The threshold after which the message is considered swiped.
     const threshold = 0.2;
 
-    final isMyMessage = details.isMyMessage;
-    // The direction in which the message can be swiped.
-    final swipeDirection = details.isMyMessage ? SwipeDirection.endToStart : SwipeDirection.startToEnd;
-
     return Swipeable(
-      key: ValueKey(details.message.id),
-      direction: swipeDirection,
+      key: ValueKey(message.id),
+      direction: isEnd ? SwipeDirection.endToStart : SwipeDirection.startToEnd,
       swipeThreshold: threshold,
-      onSwiped: (_) => _reply(details.message),
+      onSwiped: (_) => _reply(message),
       backgroundBuilder: (context, details) {
-        // The alignment of the swipe action.
-        final alignment = isMyMessage ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart;
-
-        // The progress of the swipe action.
         final progress = math.min(details.progress, threshold) / threshold;
 
-        // The offset for the reply icon.
         var offset = Offset.lerp(const Offset(-24, 0), const Offset(12, 0), progress)!;
-
-        // If the message is mine, we need to flip the offset.
-        if (isMyMessage) offset = Offset(-offset.dx, -offset.dy);
+        if (isEnd) offset = Offset(-offset.dx, -offset.dy);
 
         return Align(
           alignment: alignment,
@@ -395,80 +256,8 @@ class _ChannelPageState extends State<ChannelPage> {
           ),
         );
       },
-      child: child,
+      child: defaultWidget,
     );
-  }
-
-  Future<void> _editReminder(
-    Message message,
-    MessageReminder reminder,
-  ) async {
-    final option = await showDialog<ReminderOption>(
-      context: context,
-      builder: (_) => EditReminderDialog(
-        isBookmarkReminder: reminder.remindAt == null,
-      ),
-    );
-
-    if (option == null) return;
-    final client = StreamChat.of(context).client;
-    final messageId = message.id;
-    final remindAt = option.remindAt;
-
-    return client.updateReminder(messageId, remindAt: remindAt).ignore();
-  }
-
-  Future<void> _removeReminder(
-    Message message,
-    MessageReminder reminder,
-  ) async {
-    final client = StreamChat.of(context).client;
-    final messageId = message.id;
-
-    return client.deleteReminder(messageId).ignore();
-  }
-
-  Future<void> _createReminder(Message message) async {
-    final reminder = await showDialog<ScheduledReminder>(
-      context: context,
-      builder: (_) => const CreateReminderDialog(),
-    );
-
-    if (reminder == null) return;
-    final client = StreamChat.of(context).client;
-    final messageId = message.id;
-    final remindAt = reminder.remindAt;
-
-    return client.createReminder(messageId, remindAt: remindAt).ignore();
-  }
-
-  Future<void> _createBookmark(Message message) async {
-    final client = StreamChat.of(context).client;
-    final messageId = message.id;
-
-    return client.createReminder(messageId).ignore();
-  }
-
-  Future<void> _deleteMessageForMe(Message message) async {
-    final confirmDelete = await showStreamDialog<bool>(
-      context: context,
-      builder: (context) => const StreamMessageActionConfirmationModal(
-        isDestructiveAction: true,
-        title: Text('Delete for me'),
-        content: Text('Are you sure you want to delete this message for you?'),
-        cancelActionTitle: Text('Cancel'),
-        confirmActionTitle: Text('Delete'),
-      ),
-    );
-
-    if (confirmDelete != true) return;
-
-    final channel = StreamChannel.of(context).channel;
-    return channel.deleteMessageForMe(message).ignore();
-  }
-
-  Future<void> _showMessageInfo(Message message) async {
-    return MessageInfoSheet.show(context: context, message: message);
   }
 
   bool defaultFilter(Message m) {

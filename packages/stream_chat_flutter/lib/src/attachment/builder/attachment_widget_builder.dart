@@ -68,67 +68,69 @@ abstract class StreamAttachmentWidgetBuilder {
   static List<StreamAttachmentWidgetBuilder> defaultBuilders({
     required Message message,
     ShapeBorder? shape,
-    EdgeInsetsGeometry padding = const EdgeInsets.all(4),
+    EdgeInsetsGeometry? padding,
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
     List<StreamAttachmentWidgetBuilder>? customAttachmentBuilders,
   }) {
+    final effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 8);
+
     return [
       ...?customAttachmentBuilders,
 
       // Handles poll attachments.
       PollAttachmentBuilder(
         shape: shape,
-        padding: padding,
+        padding: effectivePadding,
       ),
 
       // Handles a mix of image, gif, video, url, file and voice recording
       // attachments.
       MixedAttachmentBuilder(
-        padding: padding,
+        padding: effectivePadding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles a mix of image, gif, and video attachments.
       GalleryAttachmentBuilder(
         shape: shape,
-        padding: padding,
-        runSpacing: padding.vertical / 2,
-        spacing: padding.horizontal / 2,
+        padding: effectivePadding,
+        runSpacing: effectivePadding.vertical / 2,
+        spacing: effectivePadding.horizontal / 2,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles file attachments.
       FileAttachmentBuilder(
         shape: shape,
-        padding: padding,
+        padding: effectivePadding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles giphy attachments.
       GiphyAttachmentBuilder(
         shape: shape,
-        padding: padding,
+        padding: effectivePadding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles image attachments.
       ImageAttachmentBuilder(
         shape: shape,
-        padding: padding,
+        padding: effectivePadding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles video attachments.
       VideoAttachmentBuilder(
         shape: shape,
-        padding: padding,
+        padding: effectivePadding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles voice recording attachments.
       VoiceRecordingAttachmentPlaylistBuilder(
         shape: shape,
-        padding: padding,
+        padding: effectivePadding,
         onAttachmentTap: onAttachmentTap,
       ),
 
@@ -136,7 +138,7 @@ abstract class StreamAttachmentWidgetBuilder {
       if (message.quotedMessage == null)
         UrlAttachmentBuilder(
           shape: shape,
-          padding: padding,
+          padding: effectivePadding,
           onAttachmentTap: onAttachmentTap,
         ),
 

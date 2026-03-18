@@ -128,11 +128,9 @@ class ChannelPage extends StatelessWidget {
 
   Widget _messageBuilder(
     BuildContext context,
-    MessageDetails details,
-    List<Message> messages,
-    StreamMessageWidget _,
+    Message message,
+    StreamMessageWidgetProps defaultProps,
   ) {
-    final message = details.message;
     final isCurrentUser = StreamChat.of(context).currentUser!.id == message.user!.id;
     final textAlign = isCurrentUser ? TextAlign.right : TextAlign.left;
     final color = isCurrentUser ? Colors.blueGrey : Colors.blue;
