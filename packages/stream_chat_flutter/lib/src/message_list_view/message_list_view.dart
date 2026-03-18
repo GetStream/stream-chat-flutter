@@ -1,4 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
 import 'dart:async';
 import 'dart:math';
 
@@ -15,7 +14,7 @@ import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separa
 import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessageWidget, StreamMessageWidgetProps;
 
 /// Spacing Types (These are properties of a message to help inform the decision
 /// of how much space / which widget to build after it)
@@ -36,6 +35,21 @@ enum SpacingType {
   /// only rule in the list provided)
   defaultSpacing,
 }
+
+/// Signature for a function that builds a message widget from its
+/// [StreamMessageWidgetProps].
+///
+/// Receives the [BuildContext], the [Message] data, and the pre-configured
+/// [StreamMessageWidgetProps] with all list-level callbacks already wired in.
+///
+/// Use [DefaultStreamMessage] to build the default UI, optionally modifying
+/// the props via [StreamMessageWidgetProps.copyWith] first.
+typedef StreamMessageWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      Message message,
+      StreamMessageWidgetProps defaultProps,
+    );
 
 /// {@template streamMessageListView}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_listview.png)
@@ -96,6 +110,12 @@ class StreamMessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.onEditMessageTap,
+    this.onReplyTap,
+    this.onUserAvatarTap,
+    this.onReactionsTap,
+    this.onQuotedMessageTap,
+    this.onMessageLinkTap,
+    this.onUserMentionTap,
     this.dateDividerBuilder,
     this.floatingDateDividerBuilder,
     // we need to use ClampingScrollPhysics to avoid the list view to bounce
@@ -140,8 +160,22 @@ class StreamMessageListView extends StatefulWidget {
   /// dismiss the keyboard automatically.
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
-  /// {@macro messageBuilder}
-  final MessageBuilder? messageBuilder;
+  /// Optional builder for per-instance message customization.
+  ///
+  /// When set, this builder is called for each regular message with
+  /// pre-configured [StreamMessageWidgetProps] that have all list-level
+  /// callbacks already wired in. Use [StreamMessageWidgetProps.copyWith]
+  /// to modify properties, and [DefaultStreamMessage] to build the default
+  /// widget.
+  ///
+  /// For app-wide customization, use [StreamComponentFactory] instead.
+  final StreamMessageWidgetBuilder? messageBuilder;
+
+  /// Optional builder for the parent message at the top of a thread.
+  ///
+  /// Works the same as [messageBuilder] but is called for the parent
+  /// message only.
+  final StreamMessageWidgetBuilder? parentMessageBuilder;
 
   /// Whether the view scrolls in the reading direction.
   ///
@@ -170,9 +204,6 @@ class StreamMessageListView extends StatefulWidget {
   /// {@macro moderatedMessageBuilder}
   final ModeratedMessageBuilder? moderatedMessageBuilder;
 
-  /// {@macro parentMessageBuilder}
-  final ParentMessageBuilder? parentMessageBuilder;
-
   /// {@macro threadBuilder}
   final ThreadBuilder? threadBuilder;
 
@@ -186,6 +217,41 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// If provided, the inline edit flow is used instead of the edit bottom sheet.
   final void Function(Message)? onEditMessageTap;
+
+  /// Called when the reply action is triggered on a message.
+  ///
+  /// Forwarded to each [StreamMessageWidget] in the list.
+  final void Function(Message)? onReplyTap;
+
+  /// Called when a user avatar is tapped.
+  ///
+  /// Forwarded to each [StreamMessageWidget] in the list.
+  final void Function(User)? onUserAvatarTap;
+
+  /// Called when the message reactions are tapped.
+  ///
+  /// Forwarded to each [StreamMessageWidget] in the list.
+  final void Function(Message)? onReactionsTap;
+
+  /// Called when a quoted message is tapped.
+  ///
+  /// When provided, this callback is forwarded to each
+  /// [StreamMessageWidget] in the list.
+  ///
+  /// When null (the default), tapping a quoted message scrolls to it in
+  /// the list, loading it if necessary.
+  final void Function(Message quotedMessage)? onQuotedMessageTap;
+
+  /// Called when a link is tapped in message text.
+  ///
+  /// Receives the [Message] containing the link and the tapped URL.
+  /// Forwarded to each [StreamMessageWidget] in the list.
+  final void Function(Message message, String url)? onMessageLinkTap;
+
+  /// Called when a user mention is tapped in message text.
+  ///
+  /// Forwarded to each [StreamMessageWidget] in the list.
+  final void Function(User user)? onUserMentionTap;
 
   /// If true will show a scroll to bottom button when
   /// the scroll offset is not zero
@@ -992,80 +1058,38 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget buildParentMessage(
     Message message,
   ) {
-    final isMyMessage = message.user!.id == StreamChat.of(context).currentUser!.id;
-    final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
-
-    final hasFileAttachment = message.attachments.any((it) => it.type == AttachmentType.file);
-
-    final hasUrlAttachment = message.attachments.any((it) => it.type == AttachmentType.urlPreview);
-
-    final attachmentBorderRadius = hasUrlAttachment
-        ? 8.0
-        : hasFileAttachment
-        ? 12.0
-        : 14.0;
-
-    final borderSide = isOnlyEmoji ? BorderSide.none : null;
-
-    final defaultMessageWidget = StreamMessageWidget(
+    final parentMessageProps = StreamMessageWidgetProps(
       message: message,
-      reverse: isMyMessage,
-      showUsername: !isMyMessage,
-      showReactions: !message.isDeleted && !message.state.isDeletingFailed,
-      showReactionPicker: !message.isDeleted && !message.state.isDeletingFailed,
-      showReplyMessage: false,
-      showResendMessage: false,
-      showThreadReplyMessage: false,
-      showCopyMessage: false,
-      showDeleteMessage: false,
-      showEditMessage: false,
-      showMarkUnreadMessage: false,
-      showSendingIndicator: false,
-      attachmentPadding: EdgeInsets.all(
-        hasUrlAttachment
-            ? 8
-            : hasFileAttachment
-            ? 4
-            : 2,
-      ),
-      attachmentShape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: _streamTheme.colorTheme.borders,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(attachmentBorderRadius),
-          bottomLeft: isMyMessage ? Radius.circular(attachmentBorderRadius) : Radius.zero,
-          topRight: Radius.circular(attachmentBorderRadius),
-          bottomRight: isMyMessage ? Radius.zero : Radius.circular(attachmentBorderRadius),
-        ),
-      ),
-      borderRadiusGeometry: BorderRadius.only(
-        topLeft: const Radius.circular(16),
-        bottomLeft: isMyMessage ? const Radius.circular(16) : Radius.zero,
-        topRight: const Radius.circular(16),
-        bottomRight: isMyMessage ? Radius.zero : const Radius.circular(16),
-      ),
-      textPadding: EdgeInsets.symmetric(
-        vertical: context.streamSpacing.xs,
-        horizontal: isOnlyEmoji ? 0 : context.streamSpacing.sm,
-      ),
-      borderSide: borderSide,
-      showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
-      messageTheme: isMyMessage ? _streamTheme.ownMessageTheme : _streamTheme.otherMessageTheme,
+      onThreadTap: _onThreadTap,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
+      onEditMessageTap: widget.onEditMessageTap,
+      onReplyTap: widget.onReplyTap,
+      onUserAvatarTap: widget.onUserAvatarTap,
+      onReactionsTap: widget.onReactionsTap,
+      onQuotedMessageTap: widget.onQuotedMessageTap,
+      onMessageLinkTap: widget.onMessageLinkTap,
+      onUserMentionTap: widget.onUserMentionTap,
     );
 
-    if (widget.parentMessageBuilder != null) {
-      return widget.parentMessageBuilder!.call(
-        context,
-        widget.parentMessage,
-        defaultMessageWidget,
-      );
-    }
+    final userId = StreamChat.of(context).currentUser!.id;
+    final isMyMessage = message.user?.id == userId;
 
-    return defaultMessageWidget;
+    final isInThread = widget.parentMessage != null;
+
+    return StreamMessagePlacement(
+      data: StreamMessagePlacementData(
+        stackPosition: .single,
+        alignment: isMyMessage ? .end : .start,
+        listKind: isInThread ? .thread : .channel,
+      ),
+      child: Builder(
+        builder: (context) => switch (widget.parentMessageBuilder) {
+          final builder? => builder.call(context, message, parentMessageProps),
+          _ => StreamMessageWidget.fromProps(props: parentMessageProps),
+        },
+      ),
+    );
   }
 
   Widget _buildScrollToBottom() {
@@ -1178,186 +1202,75 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       return buildModeratedMessage(message);
     }
 
+    final messageWidgetProps = StreamMessageWidgetProps(
+      message: message,
+      onThreadTap: _onThreadTap,
+      onMessageTap: widget.onMessageTap,
+      onMessageLongPress: widget.onMessageLongPress,
+      onEditMessageTap: widget.onEditMessageTap,
+      onReplyTap: widget.onReplyTap,
+      onUserAvatarTap: widget.onUserAvatarTap,
+      onReactionsTap: widget.onReactionsTap,
+      onMessageLinkTap: widget.onMessageLinkTap,
+      onUserMentionTap: widget.onUserMentionTap,
+      onQuotedMessageTap: switch (widget.onQuotedMessageTap) {
+        final onTap? => onTap,
+        _ => (quotedMessage) async {
+          final quotedMessageId = quotedMessage.id;
+          if (messages.map((e) => e.id).contains(quotedMessageId)) {
+            final index = messages.indexWhere((m) => m.id == quotedMessageId);
+            _scrollController?.scrollTo(
+              index: index + 2, // +2 to account for loader and footer
+              duration: const Duration(seconds: 1),
+              curve: Curves.easeInOut,
+              alignment: 0.1,
+            );
+          } else {
+            await streamChannel!.loadChannelAtMessage(quotedMessageId).then((_) async {
+              initialIndex = 21; // 19 + 2 | 19 is the index of the message
+              initialAlignment = 0.1;
+            });
+          }
+        },
+      },
+    );
+
     final userId = StreamChat.of(context).currentUser!.id;
     final isMyMessage = message.user?.id == userId;
     final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
-    final isNextUserSame = nextMessage != null && message.user!.id == nextMessage.user!.id;
+    final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
 
-    var hasTimeDiff = false;
-    if (nextMessage != null) {
-      final createdAt = Jiffy.parseFromDateTime(message.createdAt.toLocal());
-      final nextCreatedAt = Jiffy.parseFromDateTime(
-        nextMessage.createdAt.toLocal(),
-      );
+    final stackPosition = computeStackPosition(message: message, previous: prevMessage, next: nextMessage);
 
-      hasTimeDiff = !createdAt.isSame(nextCreatedAt, unit: Unit.minute);
-    }
+    final isInThread = widget.parentMessage != null;
 
-    final hasVoiceRecordingAttachment = message.attachments.any((it) => it.type == AttachmentType.voiceRecording);
-
-    final hasFileAttachment = message.attachments.any((it) => it.type == AttachmentType.file);
-
-    final hasUrlAttachment = message.attachments.any((it) => it.type == AttachmentType.urlPreview);
-
-    final isThreadMessage = message.parentId != null && message.showInChannel == true;
-
-    final hasReplies = message.replyCount! > 0;
-
-    final attachmentBorderRadius = hasUrlAttachment
-        ? 8.0
-        : hasFileAttachment
-        ? 12.0
-        : 14.0;
-
-    final showTimeStamp =
-        (!isThreadMessage || _isThreadConversation) && !hasReplies && (hasTimeDiff || !isNextUserSame);
-
-    final showUsername =
-        !isMyMessage && (!isThreadMessage || _isThreadConversation) && !hasReplies && (hasTimeDiff || !isNextUserSame);
-
-    final showMarkUnread =
-        streamChannel?.channel.config?.readEvents == true &&
-        !isMyMessage &&
-        (!isThreadMessage || _isThreadConversation);
-
-    final showUserAvatar = isMyMessage
-        ? DisplayWidget.gone
-        : (hasTimeDiff || !isNextUserSame)
-        ? DisplayWidget.show
-        : DisplayWidget.hide;
-
-    final showSendingIndicator = isMyMessage && (index == 0 || hasTimeDiff || !isNextUserSame);
-
-    final showInChannelIndicator = !_isThreadConversation && isThreadMessage;
-    final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
-    final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
-
-    final borderSide = isOnlyEmoji ? BorderSide.none : null;
-    final defaultBorderRadius = context.streamRadius.xxl;
-
-    Widget messageWidget = StreamMessageWidget(
-      message: message,
-      reverse: isMyMessage,
-      showReactions: !message.isDeleted && !message.state.isDeletingFailed,
-      showReactionPicker: !message.isDeleted && !message.state.isDeletingFailed,
-      showInChannelIndicator: showInChannelIndicator,
-      showThreadReplyIndicator: showThreadReplyIndicator,
-      showUsername: showUsername,
-      showTimestamp: showTimeStamp,
-      showSendingIndicator: showSendingIndicator,
-      showUserAvatar: showUserAvatar,
-      showMarkUnreadMessage: showMarkUnread,
-      onQuotedMessageTap: (quotedMessageId) async {
-        if (messages.map((e) => e.id).contains(quotedMessageId)) {
-          final index = messages.indexWhere((m) => m.id == quotedMessageId);
-          _scrollController?.scrollTo(
-            index: index + 2, // +2 to account for loader and footer
-            duration: const Duration(seconds: 1),
-            curve: Curves.easeInOut,
-            alignment: 0.1,
-          );
-        } else {
-          await streamChannel!.loadChannelAtMessage(quotedMessageId).then((_) async {
-            initialIndex = 21; // 19 + 2 | 19 is the index of the message
-            initialAlignment = 0.1;
-          });
-        }
-      },
-      showEditMessage: isMyMessage,
-      showDeleteMessage: isMyMessage,
-      showThreadReplyMessage: !isThreadMessage && streamChannel?.channel.canSendReply == true,
-      showFlagButton: !isMyMessage,
-      borderSide: borderSide,
-      onThreadTap: _onThreadTap,
-      onEditMessageTap: widget.onEditMessageTap,
-      attachmentShape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: _streamTheme.colorTheme.borders,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(attachmentBorderRadius),
-          bottomLeft: isMyMessage
-              ? Radius.circular(attachmentBorderRadius)
-              : Radius.circular(
-                  (hasTimeDiff || !isNextUserSame) &&
-                          !(hasReplies || isThreadMessage || hasFileAttachment || hasVoiceRecordingAttachment)
-                      ? 0
-                      : attachmentBorderRadius,
-                ),
-          topRight: Radius.circular(attachmentBorderRadius),
-          bottomRight: isMyMessage
-              ? Radius.circular(
-                  (hasTimeDiff || !isNextUserSame) &&
-                          !(hasReplies || isThreadMessage || hasFileAttachment || hasVoiceRecordingAttachment)
-                      ? 0
-                      : attachmentBorderRadius,
-                )
-              : Radius.circular(attachmentBorderRadius),
-        ),
+    Widget child = StreamMessagePlacement(
+      data: StreamMessagePlacementData(
+        stackPosition: stackPosition,
+        alignment: isMyMessage ? .end : .start,
+        listKind: isInThread ? .thread : .channel,
+        // channelKind: ,
       ),
-      attachmentPadding: EdgeInsets.all(
-        hasUrlAttachment
-            ? 8
-            : hasFileAttachment || hasVoiceRecordingAttachment
-            ? 4
-            : 2,
+      child: Builder(
+        builder: (context) => switch (widget.messageBuilder) {
+          final builder? => builder.call(context, message, messageWidgetProps),
+          _ => StreamMessageWidget.fromProps(props: messageWidgetProps),
+        },
       ),
-      borderRadiusGeometry: BorderRadius.only(
-        topLeft: defaultBorderRadius,
-        bottomLeft: isMyMessage || !((hasTimeDiff || !isNextUserSame) && !(hasReplies || isThreadMessage))
-            ? defaultBorderRadius
-            : Radius.zero,
-        topRight: defaultBorderRadius,
-        bottomRight: isMyMessage && (hasTimeDiff || !isNextUserSame) && !(hasReplies || isThreadMessage)
-            ? Radius.zero
-            : defaultBorderRadius,
-      ),
-      textPadding: EdgeInsets.symmetric(
-        vertical: context.streamSpacing.xs,
-        horizontal: isOnlyEmoji ? 0 : context.streamSpacing.sm,
-      ),
-      messageTheme: isMyMessage ? _streamTheme.ownMessageTheme : _streamTheme.otherMessageTheme,
-      onMessageTap: widget.onMessageTap,
-      onMessageLongPress: widget.onMessageLongPress,
     );
 
-    if (widget.messageBuilder != null) {
-      messageWidget = widget.messageBuilder!(
-        context,
-        MessageDetails(
-          userId,
-          message,
-          messages,
-          index,
-        ),
-        messages,
-        messageWidget as StreamMessageWidget,
-      );
-    }
-
-    var child = messageWidget;
+    // Highlight the initial message with an animated background color flash.
     if (!initialMessageHighlightComplete &&
         widget.highlightInitialMessage &&
         isInitialMessage(message.id, streamChannel)) {
-      final colorTheme = _streamTheme.colorTheme;
-      final highlightColor = widget.messageHighlightColor ?? colorTheme.highlight;
+      final colorScheme = context.streamColorScheme;
+      final highlightColor = widget.messageHighlightColor ?? colorScheme.backgroundHighlight;
       child = TweenAnimationBuilder<Color?>(
-        tween: ColorTween(
-          begin: highlightColor,
-          // ignore: deprecated_member_use
-          end: colorTheme.barsBg.withOpacity(0),
-        ),
+        tween: ColorTween(begin: highlightColor, end: highlightColor.withValues(alpha: 0)),
         duration: const Duration(seconds: 3),
         onEnd: () => initialMessageHighlightComplete = true,
-        builder: (_, color, child) => ColoredBox(
-          color: color!,
-          child: child,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: child,
-        ),
+        builder: (_, color, child) => ColoredBox(color: color!, child: child),
+        child: Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: child),
       );
     }
 

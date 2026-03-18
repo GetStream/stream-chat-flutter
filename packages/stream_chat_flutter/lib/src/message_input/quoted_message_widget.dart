@@ -173,8 +173,8 @@ class _QuotedMessage extends StatelessWidget {
           Flexible(
             child:
                 textBuilder?.call(context, msg) ??
-                StreamMessageText(
-                  message: msg,
+                StreamMarkdownMessage(
+                  data: msg.replaceMentions().text ?? '',
                   messageTheme: isOnlyEmoji && _containsText
                       ? messageTheme.copyWith(
                           messageTextStyle: messageTheme.messageTextStyle?.copyWith(

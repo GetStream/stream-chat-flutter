@@ -256,32 +256,8 @@ typedef MessageSearchItemBuilder =
       GetMessageResponse,
     );
 
-/// {@template messageBuilder}
-/// A widget builder for creating custom message UI.
-///
-/// [defaultMessageWidget] is the default [StreamMessageWidget] configuration.
-/// Use [defaultMessageWidget.copyWith] to customize it.
-/// {@endtemplate}
-typedef MessageBuilder =
-    Widget Function(
-      BuildContext,
-      MessageDetails,
-      List<Message>,
-      StreamMessageWidget defaultMessageWidget,
-    );
-
-/// {@template parentMessageBuilder}
-/// A widget builder for creating custom parent message UI.
-///
-/// [defaultMessageWidget] is the default [StreamMessageWidget] configuration.
-/// Use [defaultMessageWidget.copyWith] to customize it.
-/// {@endtemplate}
-typedef ParentMessageBuilder =
-    Widget Function(
-      BuildContext,
-      Message?,
-      StreamMessageWidget defaultMessageWidget,
-    );
+// Legacy MessageBuilder and ParentMessageBuilder typedefs removed.
+// Use StreamMessageWidgetBuilder from message_list_view.dart instead.
 
 /// {@template systemMessageBuilder}
 /// A widget builder for creating custom system messages.

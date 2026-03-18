@@ -254,18 +254,13 @@ class _ChannelPageState extends State<ChannelPage> {
           Expanded(
             child: StreamMessageListView(
               threadBuilder: (_, parent) => ThreadPage(parent: parent!),
-              messageBuilder:
-                  (
-                    context,
-                    messageDetails,
-                    messages,
-                    defaultWidget,
-                  ) {
+              messageBuilder: (context, message, defaultProps) {
                     // The threshold after which the message is considered
                     // swiped.
                     const threshold = 0.2;
 
-                    final isMyMessage = messageDetails.isMyMessage;
+                    final currentUser = StreamChat.of(context).currentUser;
+                    final isMyMessage = message.user?.id == currentUser?.id;
 
                     // The direction in which the message can be swiped.
                     final swipeDirection = isMyMessage
@@ -274,10 +269,10 @@ class _ChannelPageState extends State<ChannelPage> {
                         : SwipeDirection.startToEnd;
 
                     return Swipeable(
-                      key: ValueKey(messageDetails.message.id),
+                      key: ValueKey(message.id),
                       direction: swipeDirection,
                       swipeThreshold: threshold,
-                      onSwiped: (details) => reply(messageDetails.message),
+                      onSwiped: (details) => reply(message),
                       backgroundBuilder: (context, details) {
                         // The alignment of the swipe action.
                         final alignment = isMyMessage
@@ -328,7 +323,9 @@ class _ChannelPageState extends State<ChannelPage> {
                           ),
                         );
                       },
-                      child: defaultWidget.copyWith(onReplyTap: reply),
+                      child: DefaultStreamMessage(
+                        props: defaultProps.copyWith(onReplyTap: reply),
+                      ),
                     );
                   },
             ),

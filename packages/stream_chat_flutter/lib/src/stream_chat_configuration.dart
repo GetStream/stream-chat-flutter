@@ -166,6 +166,9 @@ class StreamChatConfigurationData {
     bool draftMessagesEnabled = false,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN imageCDN = const StreamImageCDN(),
+    List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    StreamReactionsType? reactionType,
+    StreamReactionsPosition? reactionPosition,
   }) {
     return StreamChatConfigurationData._(
       loadingIndicator: loadingIndicator,
@@ -176,6 +179,9 @@ class StreamChatConfigurationData {
       draftMessagesEnabled: draftMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
       imageCDN: imageCDN,
+      attachmentBuilders: attachmentBuilders,
+      reactionType: reactionType,
+      reactionPosition: reactionPosition,
     );
   }
 
@@ -188,6 +194,9 @@ class StreamChatConfigurationData {
     required this.draftMessagesEnabled,
     required this.messagePreviewFormatter,
     required this.imageCDN,
+    required this.attachmentBuilders,
+    this.reactionType,
+    this.reactionPosition,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
@@ -201,6 +210,9 @@ class StreamChatConfigurationData {
     bool? draftMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN? imageCDN,
+    List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    StreamReactionsType? reactionType,
+    StreamReactionsPosition? reactionPosition,
   }) {
     return StreamChatConfigurationData(
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
@@ -211,6 +223,9 @@ class StreamChatConfigurationData {
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
       imageCDN: imageCDN ?? this.imageCDN,
+      attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
+      reactionType: reactionType ?? this.reactionType,
+      reactionPosition: reactionPosition ?? this.reactionPosition,
     );
   }
 
@@ -248,6 +263,26 @@ class StreamChatConfigurationData {
   /// Defaults to [StreamImageCDN], which supports Stream's own CDN.
   /// Extend [StreamImageCDN] to customize behavior for a custom CDN.
   final StreamImageCDN imageCDN;
+
+  /// Custom attachment builders for rendering attachment widgets in messages.
+  ///
+  /// When non-null, these builders are prepended to the default builders
+  /// based on the [Attachment.type], allowing custom attachment types to be
+  /// rendered globally across all message widgets.
+  final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
+
+  /// The visual type of the reactions display used across all message widgets.
+  ///
+  /// When null, the widget resolves its own default
+  /// ([StreamReactionsType.segmented]).
+  final StreamReactionsType? reactionType;
+
+  /// Where reactions appear relative to the message bubble across all
+  /// message widgets.
+  ///
+  /// When null, the widget resolves its own default
+  /// ([StreamReactionsPosition.header]).
+  final StreamReactionsPosition? reactionPosition;
 
   static Widget _defaultUserImage(
     BuildContext context,

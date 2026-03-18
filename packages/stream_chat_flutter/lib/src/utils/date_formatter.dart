@@ -3,11 +3,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
 /// Represents a function type that formats a date.
-typedef DateFormatter =
-    String Function(
-      BuildContext context,
-      DateTime date,
-    );
+typedef DateFormatter = String Function(BuildContext context, DateTime date);
 
 /// Formats the given [date] as a String.
 String formatDate(BuildContext context, DateTime date) {

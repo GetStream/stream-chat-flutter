@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart'
+    show StreamIconData;
 
 void main() {
   final message = Message(
@@ -46,6 +47,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: const Text('Message Widget'),
+            alignment: AlignmentDirectional.centerStart,
           ),
         ),
       );
@@ -66,6 +68,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: const Text('Message Widget'),
+            alignment: AlignmentDirectional.centerStart,
             showReactionPicker: true,
           ),
         ),
@@ -102,6 +105,7 @@ void main() {
                       message: message,
                       messageActions: messageActions,
                       messageWidget: const Text('Message Widget'),
+                      alignment: AlignmentDirectional.centerStart,
                       showReactionPicker: true,
                     ),
                   );
@@ -183,6 +187,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(),
+            alignment: AlignmentDirectional.centerStart,
           ),
         ),
       );
@@ -197,6 +202,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(),
+            alignment: AlignmentDirectional.centerStart,
             showReactionPicker: true,
           ),
         ),
@@ -212,7 +218,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(reverse: true),
-            reverse: true,
+            alignment: AlignmentDirectional.centerEnd,
           ),
         ),
       );
@@ -227,8 +233,8 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(reverse: true),
+            alignment: AlignmentDirectional.centerEnd,
             showReactionPicker: true,
-            reverse: true,
           ),
         ),
       );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/reactions/picker/reaction_picker_bubble_overlay.dart';
-
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' show StreamMessagePlacement;
 
 /// {@template streamMessageActionsModal}
 /// A modal that displays a list of actions that can be performed on a message.
@@ -19,9 +18,8 @@ class StreamMessageActionsModal extends StatelessWidget {
     required this.message,
     required this.messageActions,
     required this.messageWidget,
-    this.reverse = false,
+    this.alignment,
     this.showReactionPicker = false,
-    this.reactionPickerBuilder = StreamReactionPicker.builder,
   });
 
   /// The message object that actions will be performed on.
@@ -38,18 +36,15 @@ class StreamMessageActionsModal extends StatelessWidget {
 
   /// The widget representing the message being acted upon.
   ///
-  /// This is typically displayed at the top of the modal as a reference for the
-  /// user.
+  /// This is typically displayed in the content section of the modal as a
+  /// reference for the user.
   final Widget messageWidget;
 
-  /// Whether the message should be displayed in reverse direction.
+  /// Alignment of the modal content.
   ///
-  /// This affects how the modal and reactions are displayed and aligned.
-  /// Set to `true` for right-aligned messages (typically the current user's).
-  /// Set to `false` for left-aligned messages (typically other users').
-  ///
-  /// Defaults to `false`.
-  final bool reverse;
+  /// When null (the default), falls back to
+  /// [StreamMessagePlacement.alignmentDirectionalOf].
+  final AlignmentGeometry? alignment;
 
   /// Controls whether to show the reaction picker at the top of the modal.
   ///
@@ -59,43 +54,28 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// Defaults to `false`.
   final bool showReactionPicker;
 
-  /// {@macro reactionPickerBuilder}
-  final ReactionPickerBuilder reactionPickerBuilder;
-
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-
-    final alignment = switch (reverse) {
-      true => AlignmentDirectional.centerEnd,
-      false => AlignmentDirectional.centerStart,
-    };
+    final effectiveAlignment = alignment ?? StreamMessagePlacement.alignmentDirectionalOf(context);
 
     void onReactionPicked(Reaction reaction) {
       final action = SelectReaction(message: message, reaction: reaction);
-      return Navigator.pop(context, action); // Pop the modal with the selected reaction action
+      return Navigator.pop(context, action);
     }
 
     return StreamMessageDialog(
       spacing: spacing.xs,
-      alignment: alignment,
-      headerBuilder: (context) {
-        final safeArea = MediaQuery.paddingOf(context);
-
-        return Padding(
-          padding: EdgeInsets.only(top: safeArea.top),
-          child: ReactionPickerBubbleOverlay(
-            message: message,
-            reverse: reverse,
-            visible: showReactionPicker,
-            anchorOffset: Offset(0, -spacing.xs),
-            onReactionPicked: onReactionPicked,
-            reactionPickerBuilder: reactionPickerBuilder,
-            child: IgnorePointer(child: messageWidget),
-          ),
-        );
+      alignment: effectiveAlignment,
+      headerBuilder: switch (showReactionPicker) {
+        true => (context) => StreamReactionPicker(
+          message: message,
+          onReactionPicked: onReactionPicked,
+        ),
+        false => null,
       },
-      contentBuilder: (context) => StreamContextMenu(children: messageActions),
+      contentBuilder: (context) => IgnorePointer(child: messageWidget),
+      footerBuilder: (context) => StreamContextMenu(children: messageActions),
     );
   }
 }

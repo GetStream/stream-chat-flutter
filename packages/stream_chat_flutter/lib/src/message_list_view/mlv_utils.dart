@@ -100,3 +100,39 @@ bool isElementAtIndexVisible(
 bool isInitialMessage(String id, StreamChannelState? channelState) {
   return channelState!.initialMessageId == id;
 }
+
+/// Computes the [StreamMessageStackPosition] for [message] based on its
+/// [previous] and [next] neighbors in the message list.
+///
+/// A new group starts when:
+/// - The neighbor is null (first/last message)
+/// - The sender changes
+/// - The timestamps fall in different calendar minutes
+/// - The neighbor is a system, ephemeral, or error message
+StreamMessageStackPosition computeStackPosition({
+  required Message message,
+  Message? previous,
+  Message? next,
+}) {
+  final isFirst = _isGroupBoundary(message, previous);
+  final isLast = _isGroupBoundary(message, next);
+
+  return switch ((isFirst, isLast)) {
+    (true, true) => StreamMessageStackPosition.single,
+    (true, false) => StreamMessageStackPosition.top,
+    (false, false) => StreamMessageStackPosition.middle,
+    (false, true) => StreamMessageStackPosition.bottom,
+  };
+}
+
+bool _isGroupBoundary(Message message, Message? neighbor) {
+  if (neighbor == null) return true;
+  if (message.user?.id != neighbor.user?.id) return true;
+  if (neighbor.isSystem || neighbor.isEphemeral || neighbor.isError) return true;
+
+  final createdAt = Jiffy.parseFromDateTime(message.createdAt.toLocal());
+  final neighborCreatedAt = Jiffy.parseFromDateTime(neighbor.createdAt.toLocal());
+  if (!createdAt.isSame(neighborCreatedAt, unit: Unit.minute)) return true;
+
+  return false;
+}

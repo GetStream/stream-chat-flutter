@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/components/stream_chat_component_builders.dart';
+import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template onReactionPicked}
@@ -35,27 +37,37 @@ typedef ReactionPickerBuilder =
 /// The reaction picker can be configured with custom reaction types, padding,
 /// border radius, and can be made scrollable or static depending on the
 /// specific needs.
+///
+/// See also:
+///
+///  * [StreamReactionPickerProps], which configures this widget.
+///  * [DefaultStreamReactionPicker], the default implementation.
 /// {@endtemplate}
 class StreamReactionPicker extends StatelessWidget {
   /// {@macro streamReactionPicker}
-  const StreamReactionPicker({
+  StreamReactionPicker({
     super.key,
-    this.onReactionPicked,
-    required this.message,
-    this.backgroundColor,
-    this.padding,
-    this.borderRadius,
-  });
+    required Message message,
+    OnReactionPicked? onReactionPicked,
+    Color? backgroundColor,
+    EdgeInsetsGeometry? padding,
+    BorderRadiusGeometry? borderRadius,
+  }) : props = StreamReactionPickerProps(
+         message: message,
+         onReactionPicked: onReactionPicked,
+         backgroundColor: backgroundColor,
+         padding: padding,
+         borderRadius: borderRadius,
+       );
 
-  /// Creates a [StreamReactionPicker] using the default reaction types
-  /// provided by the [StreamChatConfiguration].
+  /// The properties that configure this reaction picker.
+  final StreamReactionPickerProps props;
+
+  /// Creates a [StreamReactionPicker] with platform-appropriate defaults.
   ///
-  /// This is the recommended way to create a reaction picker
-  /// as it ensures that the icons are consistent with the rest of the app.
-  ///
-  /// The [onReactionPicked] callback is optional and can be used to handle
-  /// the reaction selection.
-  factory StreamReactionPicker.builder(
+  /// On iOS/Android the picker uses rounded corners; on desktop/web the
+  /// border radius is set to zero.
+  static Widget builder(
     BuildContext context,
     Message message,
     OnReactionPicked? onReactionPicked,
@@ -74,10 +86,35 @@ class StreamReactionPicker extends StatelessWidget {
     };
   }
 
-  /// Message to attach the reaction to.
+  @override
+  Widget build(BuildContext context) {
+    final builder = context.chatComponentBuilder<StreamReactionPickerProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamReactionPicker(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamReactionPicker].
+///
+/// See also:
+///
+///  * [StreamReactionPicker], which uses these properties.
+///  * [DefaultStreamReactionPicker], the default implementation.
+@immutable
+class StreamReactionPickerProps {
+  /// Creates properties for a reaction picker.
+  const StreamReactionPickerProps({
+    required this.message,
+    this.onReactionPicked,
+    this.backgroundColor,
+    this.padding,
+    this.borderRadius,
+  });
+
+  /// The message to attach the reaction to.
   final Message message;
 
-  /// {@macro onReactionPressed}
+  /// {@macro onReactionPicked}
   final OnReactionPicked? onReactionPicked;
 
   /// Background color for the reaction picker.
@@ -85,13 +122,31 @@ class StreamReactionPicker extends StatelessWidget {
 
   /// Padding around the reaction picker.
   ///
-  /// Defaults to `EdgeInsets.all(4)`.
+  /// When null, defaults to `EdgeInsetsDirectional.only(start: spacing.xxs)`.
   final EdgeInsetsGeometry? padding;
 
   /// Border radius for the reaction picker.
   ///
-  /// Defaults to a circular border with a radius of 24.
+  /// When null, defaults to a circular border with radius `xxxxl`.
   final BorderRadiusGeometry? borderRadius;
+}
+
+/// The default implementation of [StreamReactionPicker].
+///
+/// Resolves [StreamReactionPickerProps] into a horizontal row of reaction
+/// emoji buttons plus an "add reaction" button that opens the emoji picker
+/// sheet.
+///
+/// See also:
+///
+///  * [StreamReactionPicker], the public API widget.
+///  * [StreamReactionPickerProps], which configures this widget.
+class DefaultStreamReactionPicker extends StatelessWidget {
+  /// Creates a default reaction picker with the given [props].
+  const DefaultStreamReactionPicker({super.key, required this.props});
+
+  /// The properties that configure this widget.
+  final StreamReactionPickerProps props;
 
   @override
   Widget build(BuildContext context) {
@@ -100,9 +155,9 @@ class StreamReactionPicker extends StatelessWidget {
     final spacing = context.streamSpacing;
     final colorScheme = context.streamColorScheme;
 
-    final effectivePadding = padding ?? EdgeInsetsDirectional.only(start: spacing.xxs);
-    final effectiveBorderRadius = borderRadius ?? BorderRadius.all(radius.xxxxl);
-    final effectiveBackgroundColor = backgroundColor ?? colorScheme.backgroundElevation2;
+    final effectivePadding = props.padding ?? EdgeInsetsDirectional.only(start: spacing.xxs);
+    final effectiveBorderRadius = props.borderRadius ?? BorderRadius.all(radius.xxxxl);
+    final effectiveBackgroundColor = props.backgroundColor ?? colorScheme.backgroundElevation2;
 
     final side = BorderSide(color: colorScheme.borderDefault);
     final shape = RoundedSuperellipseBorder(borderRadius: effectiveBorderRadius, side: side);
@@ -110,6 +165,9 @@ class StreamReactionPicker extends StatelessWidget {
     final config = StreamChatConfiguration.of(context);
     final resolver = config.reactionIconResolver;
     final reactionTypes = resolver.defaultReactions;
+
+    final message = props.message;
+    final onReactionPicked = props.onReactionPicked;
 
     final ownReactions = [...?message.ownReactions];
     final ownReactionsMap = {for (final it in ownReactions) it.type: it};
