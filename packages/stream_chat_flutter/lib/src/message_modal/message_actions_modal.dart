@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' show StreamMessagePlacement;
 
 /// {@template streamMessageActionsModal}
 /// A modal that displays a list of actions that can be performed on a message.
@@ -68,7 +67,7 @@ class StreamMessageActionsModal extends StatelessWidget {
       spacing: spacing.xs,
       alignment: effectiveAlignment,
       headerBuilder: switch (showReactionPicker) {
-        true => (context) => StreamReactionPicker(
+        true => (context) => StreamMessageReactionPicker(
           message: message,
           onReactionPicked: onReactionPicked,
         ),

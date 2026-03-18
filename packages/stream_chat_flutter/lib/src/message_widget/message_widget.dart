@@ -575,7 +575,7 @@ class DefaultStreamMessage extends StatelessWidget {
     }
 
     return [
-      if (showPicker) StreamReactionPicker.builder(context, message, onReactionPicked),
+      if (showPicker) StreamMessageReactionPicker(message: message, onReactionPicked: onReactionPicked),
       ...actions,
     ];
   }

@@ -18,7 +18,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
           ),
@@ -29,7 +29,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Verify the widget renders with correct structure.
-      expect(find.byType(StreamReactionPicker), findsOneWidget);
+      expect(find.byType(StreamMessageReactionPicker), findsOneWidget);
       // Verify the correct number of reaction buttons.
       expect(
         find.byType(StreamEmojiButton),
@@ -52,7 +52,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (reaction) {
               pickedReaction = reaction;
@@ -96,7 +96,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (reaction) {
               pickedReaction = reaction;
@@ -134,7 +134,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
           ),
@@ -170,7 +170,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
           ),
@@ -184,7 +184,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
           ),
@@ -214,7 +214,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
           ),
@@ -244,7 +244,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
           ),
@@ -270,7 +270,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          StreamReactionPicker(
+          StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
           ),
@@ -289,7 +289,7 @@ void main() {
       final theme = brightness.name;
 
       goldenTest(
-        'StreamReactionPicker in $theme theme',
+        'StreamMessageReactionPicker in $theme theme',
         fileName: 'stream_reaction_picker_$theme',
         constraints: const BoxConstraints.tightFor(width: 400, height: 100),
         builder: () {
@@ -301,7 +301,7 @@ void main() {
 
           return _wrapWithMaterialApp(
             brightness: brightness,
-            StreamReactionPicker(
+            StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
             ),
@@ -311,7 +311,7 @@ void main() {
       );
 
       goldenTest(
-        'StreamReactionPicker with selected reaction in $theme theme',
+        'StreamMessageReactionPicker with selected reaction in $theme theme',
         fileName: 'stream_reaction_picker_selected_$theme',
         constraints: const BoxConstraints.tightFor(width: 400, height: 100),
         builder: () {
@@ -330,7 +330,7 @@ void main() {
 
           return _wrapWithMaterialApp(
             brightness: brightness,
-            StreamReactionPicker(
+            StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
             ),
@@ -340,7 +340,7 @@ void main() {
       );
 
       goldenTest(
-        'StreamReactionPicker with subset defaults in $theme theme',
+        'StreamMessageReactionPicker with subset defaults in $theme theme',
         fileName: 'stream_reaction_picker_subset_$theme',
         constraints: const BoxConstraints.tightFor(width: 400, height: 100),
         builder: () {
@@ -352,7 +352,7 @@ void main() {
 
           return _wrapWithMaterialApp(
             brightness: brightness,
-            StreamReactionPicker(
+            StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
             ),

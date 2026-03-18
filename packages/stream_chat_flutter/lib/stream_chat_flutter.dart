@@ -27,6 +27,11 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamMessageAlignment,
         StreamMessagePlacement,
         StreamMessageStackPosition,
+        StreamReactionPicker,
+        StreamReactionPickerItem,
+        StreamReactionPickerProps,
+        StreamReactionPickerTheme,
+        StreamReactionPickerThemeData,
         StreamReactionsPosition,
         StreamReactionsType,
         streamSupportedEmojis;

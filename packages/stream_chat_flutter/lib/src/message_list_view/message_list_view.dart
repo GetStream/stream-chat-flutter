@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separa
 import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessageWidget, StreamMessageWidgetProps;
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
 /// of how much space / which widget to build after it)
