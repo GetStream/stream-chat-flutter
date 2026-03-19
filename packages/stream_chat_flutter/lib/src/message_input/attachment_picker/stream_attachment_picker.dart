@@ -491,7 +491,7 @@ Widget tabbedAttachmentPickerBuilder({
     TabbedAttachmentPickerOption(
       key: 'command-picker',
       icon: context.streamIcons.runShortcut,
-      supportedTypes: const [],
+      supportedTypes: [AttachmentPickerType.command],
       optionViewBuilder: (context, controller) => StreamCommandPicker(
         onCommandSelected: onCommandSelected,
       ),
