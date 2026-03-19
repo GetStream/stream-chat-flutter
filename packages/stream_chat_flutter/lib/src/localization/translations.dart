@@ -734,7 +734,7 @@ class DefaultTranslations implements Translations {
   String get somethingWentWrongError => 'Something went wrong';
 
   @override
-  String get addMoreFilesLabel => 'Add more files';
+  String get addMoreFilesLabel => 'Add more';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>

@@ -169,7 +169,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get somethingWentWrongError => 'Qualcosa è andato storto';
 
   @override
-  String get addMoreFilesLabel => 'Aggiungi altri file';
+  String get addMoreFilesLabel => 'Aggiungi altri';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
