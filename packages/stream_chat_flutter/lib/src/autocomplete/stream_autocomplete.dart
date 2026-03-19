@@ -491,7 +491,8 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
       _focusNode.dispose();
     }
     _onChangedField.cancel();
-    closeSuggestions();
+    _currentQuery = null;
+    _currentTrigger = null;
     super.dispose();
   }
 
