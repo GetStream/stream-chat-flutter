@@ -551,6 +551,19 @@ const _kDefaultStreamAutocompleteOptionsShape = RoundedRectangleBorder(
   borderRadius: BorderRadius.all(Radius.circular(8)),
 );
 
+/// Defines the visual style of autocomplete options overlay.
+enum AutocompleteOptionsStyle {
+  /// Flat overlay with no elevation or margin.
+  ///
+  /// Used for overlays that appear directly above the composer (default).
+  fixed,
+
+  /// Floating card with elevation and rounded corners.
+  ///
+  /// Used for overlays that appear in open space away from the composer.
+  floating,
+}
+
 /// A helper widget used to show the options of a [StreamAutocomplete].
 class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   /// Creates a [StreamAutocompleteOptions] widget.

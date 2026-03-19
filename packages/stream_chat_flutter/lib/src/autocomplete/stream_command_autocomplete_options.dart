@@ -12,6 +12,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
     required this.query,
     required this.channel,
     this.onCommandSelected,
+    this.style = AutocompleteOptionsStyle.fixed,
     super.key,
   });
 
@@ -23,6 +24,11 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
 
   /// Callback called when a command is selected.
   final ValueSetter<Command>? onCommandSelected;
+
+  /// The visual style of the autocomplete options overlay.
+  ///
+  /// Defaults to [AutocompleteOptionsStyle.fixed].
+  final AutocompleteOptionsStyle style;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +44,27 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
     final colorTheme = streamChatTheme.colorTheme;
     final textTheme = streamChatTheme.textTheme;
 
+    final (elevation, margin, shape) = switch (style) {
+      AutocompleteOptionsStyle.fixed => (
+        0.0,
+        EdgeInsets.zero,
+        const RoundedRectangleBorder() as ShapeBorder,
+      ),
+      AutocompleteOptionsStyle.floating => (
+        4.0,
+        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            )
+            as ShapeBorder,
+      ),
+    };
+
     return StreamAutocompleteOptions<Command>(
       options: commands,
+      elevation: elevation,
+      margin: margin,
+      shape: shape,
       headerBuilder: (context) {
         return ListTile(
           dense: true,
@@ -93,87 +118,24 @@ class _CommandIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _streamChatTheme = StreamChatTheme.of(context);
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
     switch (command.name) {
       case 'giphy':
-        return const CircleAvatar(
-          radius: 12,
-          child: StreamSvgIcon(
-            size: 24,
-            icon: StreamSvgIcons.giphy,
-          ),
-        );
-      case 'ban':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: Icon(
-            context.streamIcons.peopleRemove,
-            size: 16,
-            color: Colors.white,
-          ),
-        );
-      case 'flag':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: Icon(
-            context.streamIcons.flag2,
-            size: 14,
-            color: Colors.white,
-          ),
-        );
+        return const StreamSvgIcon(size: 20, icon: StreamSvgIcons.giphy);
       case 'imgur':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: const ClipOval(
-            child: StreamSvgIcon(
-              size: 24,
-              icon: StreamSvgIcons.imgur,
-            ),
-          ),
-        );
+        return const StreamSvgIcon(size: 20, icon: StreamSvgIcons.imgur);
+      case 'ban':
+        return Icon(context.streamIcons.peopleRemove, size: 20, color: colorTheme.textHighEmphasis);
+      case 'flag':
+        return Icon(context.streamIcons.flag2, size: 20, color: colorTheme.textHighEmphasis);
       case 'mute':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: Icon(
-            context.streamIcons.mute,
-            size: 16,
-            color: Colors.white,
-          ),
-        );
+        return Icon(context.streamIcons.mute, size: 20, color: colorTheme.textHighEmphasis);
       case 'unban':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: Icon(
-            context.streamIcons.peopleAdd,
-            size: 16,
-            color: Colors.white,
-          ),
-        );
+        return Icon(context.streamIcons.peopleAdd, size: 20, color: colorTheme.textHighEmphasis);
       case 'unmute':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: Icon(
-            context.streamIcons.volumeFull,
-            size: 16,
-            color: Colors.white,
-          ),
-        );
+        return Icon(context.streamIcons.volumeFull, size: 20, color: colorTheme.textHighEmphasis);
       default:
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: Icon(
-            context.streamIcons.thunder,
-            size: 16,
-            color: Colors.white,
-          ),
-        );
+        return Icon(context.streamIcons.thunder, size: 20, color: colorTheme.textHighEmphasis);
     }
   }
 }

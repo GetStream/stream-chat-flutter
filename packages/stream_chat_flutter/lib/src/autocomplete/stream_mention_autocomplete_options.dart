@@ -83,13 +83,43 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
 
         return StreamAutocompleteOptions<User>(
           options: users,
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          shape: const RoundedRectangleBorder(),
           optionBuilder: (context, user) {
-            final colorTheme = StreamChatTheme.of(context).colorTheme;
-            return Material(
-              color: colorTheme.barsBg,
+            final mentionsTileBuilder = widget.mentionsTileBuilder;
+            if (mentionsTileBuilder != null) {
+              final colorTheme = StreamChatTheme.of(context).colorTheme;
+              return Material(
+                color: colorTheme.barsBg,
+                child: InkWell(
+                  onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
+                  child: mentionsTileBuilder(context, user),
+                ),
+              );
+            }
+
+            final textTheme = StreamChatTheme.of(context).textTheme;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: InkWell(
+                borderRadius: BorderRadius.circular(12),
                 onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
-                child: widget.mentionsTileBuilder?.call(context, user) ?? StreamUserMentionTile(user),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    spacing: 12,
+                    children: [
+                      StreamUserAvatar(size: .sm, user: user),
+                      Text(
+                        user.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyBold,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
