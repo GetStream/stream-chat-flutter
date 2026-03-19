@@ -16,6 +16,7 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
     this.mentionAllAppUsers = false,
     this.mentionsTileBuilder,
     this.onMentionUserTap,
+    this.style = AutocompleteOptionsStyle.fixed,
   }) : assert(
          channel.state != null,
          'Channel ${channel.cid} is not yet initialized',
@@ -47,6 +48,11 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
 
   /// Callback called when a user is selected.
   final ValueSetter<User>? onMentionUserTap;
+
+  /// The visual style of the autocomplete options overlay.
+  ///
+  /// Defaults to [AutocompleteOptionsStyle.fixed].
+  final AutocompleteOptionsStyle style;
 
   @override
   _StreamMentionAutocompleteOptionsState createState() => _StreamMentionAutocompleteOptionsState();
@@ -81,11 +87,15 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
         if (!snapshot.hasData) return const Empty();
         final users = snapshot.data!;
 
+        final colorScheme = context.streamColorScheme;
+        final spacing = context.streamSpacing;
+        final (:elevation, :margin, :shape) = widget.style.resolve(colorScheme.borderDefault);
+
         return StreamAutocompleteOptions<User>(
           options: users,
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          shape: const RoundedRectangleBorder(),
+          elevation: elevation,
+          margin: margin,
+          shape: shape,
           optionBuilder: (context, user) {
             final mentionsTileBuilder = widget.mentionsTileBuilder;
             if (mentionsTileBuilder != null) {
@@ -99,23 +109,22 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
               );
             }
 
-            final textTheme = StreamChatTheme.of(context).textTheme;
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
                 onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
                   child: Row(
-                    spacing: 12,
+                    spacing: spacing.sm,
                     children: [
-                      StreamUserAvatar(size: .sm, user: user),
+                      StreamUserAvatar(size: .md, user: user),
                       Text(
                         user.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: textTheme.bodyBold,
+                        style: context.streamTextTheme.bodyDefault,
                       ),
                     ],
                   ),

@@ -564,6 +564,59 @@ enum AutocompleteOptionsStyle {
   floating,
 }
 
+/// Resolves visual parameters for a [StreamAutocompleteOptions] widget based
+/// on [AutocompleteOptionsStyle].
+extension AutocompleteOptionsStyleX on AutocompleteOptionsStyle {
+  /// Returns the elevation, margin, and shape for [StreamAutocompleteOptions].
+  ///
+  /// [borderColor] is used for the top border (fixed) or outline (floating).
+  ({double elevation, EdgeInsetsGeometry margin, ShapeBorder shape}) resolve(
+    Color borderColor,
+  ) {
+    return switch (this) {
+      AutocompleteOptionsStyle.fixed => (
+        elevation: 0.0,
+        margin: EdgeInsets.zero,
+        shape: _TopBorderShape(BorderSide(color: borderColor)),
+      ),
+      AutocompleteOptionsStyle.floating => (
+        elevation: 4.0,
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.all(Radius.circular(24)),
+          side: BorderSide(color: borderColor),
+        ),
+      ),
+    };
+  }
+}
+
+/// A [ShapeBorder] that paints only a top border, with no rounding or sides.
+class _TopBorderShape extends ShapeBorder {
+  const _TopBorderShape(this.top);
+
+  final BorderSide top;
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.only(top: top.width);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    final paint = top.toPaint()..strokeCap = StrokeCap.square;
+    final y = rect.top + top.width / 2;
+    canvas.drawLine(Offset(rect.left, y), Offset(rect.right, y), paint);
+  }
+
+  @override
+  ShapeBorder scale(double t) => _TopBorderShape(top.scale(t));
+}
+
 /// A helper widget used to show the options of a [StreamAutocomplete].
 class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   /// Creates a [StreamAutocompleteOptions] widget.

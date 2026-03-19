@@ -44,21 +44,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
 
-    final (elevation, margin, shape) = switch (style) {
-      AutocompleteOptionsStyle.fixed => (
-        0.0,
-        EdgeInsets.zero,
-        _TopBorderShape(BorderSide(color: colorScheme.borderDefault)) as ShapeBorder,
-      ),
-      AutocompleteOptionsStyle.floating => (
-        4.0,
-        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            )
-            as ShapeBorder,
-      ),
-    };
+    final (:elevation, :margin, :shape) = style.resolve(colorScheme.borderDefault);
 
     return StreamAutocompleteOptions<Command>(
       options: commands,
@@ -111,28 +97,3 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
   }
 }
 
-/// A [ShapeBorder] that paints only a top border, with no rounding or sides.
-class _TopBorderShape extends ShapeBorder {
-  const _TopBorderShape(this.top);
-
-  final BorderSide top;
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.only(top: top.width);
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
-    final paint = top.toPaint()..strokeCap = StrokeCap.square;
-    final y = rect.top + top.width / 2;
-    canvas.drawLine(Offset(rect.left, y), Offset(rect.right, y), paint);
-  }
-
-  @override
-  ShapeBorder scale(double t) => _TopBorderShape(top.scale(t));
-}
