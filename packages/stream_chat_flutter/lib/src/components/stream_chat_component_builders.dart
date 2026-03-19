@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/message_list_view/unread_indicator_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Builds the list of component builders for the stream chat components.
