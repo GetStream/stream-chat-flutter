@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/stream_command_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget shown in the attachment picker for browsing and selecting commands.
@@ -45,7 +46,7 @@ class StreamCommandPicker extends StatelessWidget {
                 child: Row(
                   spacing: spacing.sm,
                   children: [
-                    _CommandPickerIcon(command: command),
+                    StreamCommandIcon(command: command),
                     Text(
                       command.name.sentenceCase,
                       style: textTheme.bodyBold.copyWith(
@@ -70,34 +71,5 @@ class StreamCommandPicker extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-class _CommandPickerIcon extends StatelessWidget {
-  const _CommandPickerIcon({required this.command});
-
-  final Command command;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-    switch (command.name) {
-      case 'giphy':
-        return const StreamSvgIcon(size: 20, icon: StreamSvgIcons.giphy);
-      case 'imgur':
-        return const StreamSvgIcon(size: 20, icon: StreamSvgIcons.imgur);
-      case 'ban':
-        return Icon(context.streamIcons.peopleRemove, size: 20, color: colorTheme.textHighEmphasis);
-      case 'flag':
-        return Icon(context.streamIcons.flag2, size: 20, color: colorTheme.textHighEmphasis);
-      case 'mute':
-        return Icon(context.streamIcons.mute, size: 20, color: colorTheme.textHighEmphasis);
-      case 'unban':
-        return Icon(context.streamIcons.peopleAdd, size: 20, color: colorTheme.textHighEmphasis);
-      case 'unmute':
-        return Icon(context.streamIcons.volumeFull, size: 20, color: colorTheme.textHighEmphasis);
-      default:
-        return Icon(context.streamIcons.thunder, size: 20, color: colorTheme.textHighEmphasis);
-    }
   }
 }
