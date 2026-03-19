@@ -7,11 +7,9 @@ import 'dart:math';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
-import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
@@ -127,7 +125,7 @@ class StreamMessageInput extends StatefulWidget {
     this.focusNode,
     this.sendButtonLocation = SendButtonLocation.outside,
     this.autofocus = false,
-    this.hideSendAsDm = false,
+    this.canAlsoSendToChannelFromThread = true,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
@@ -219,8 +217,10 @@ class StreamMessageInput extends StatefulWidget {
   /// Use this property to hide/show the commands button.
   final bool showCommandsButton;
 
-  /// Hide send as dm checkbox.
-  final bool hideSendAsDm;
+  /// Show the checkbox to send the message as a direct message to the channel.
+  ///
+  /// Defaults to true.
+  final bool canAlsoSendToChannelFromThread;
 
   /// If true the voice recording button will be displayed.
   ///
@@ -558,7 +558,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
   void _initialiseEffectiveController() {
     _effectiveController
+      ..removeListener(_onChangedThrottled)
       ..removeListener(_onChangedDebounced)
+      ..addListener(_onChangedThrottled)
       ..addListener(_onChangedDebounced);
   }
 
@@ -694,19 +696,17 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     final elevation = widget.elevation ?? _messageInputTheme.elevation;
     final spacing = context.streamSpacing;
 
-    return Portal(
-      child: Material(
-        elevation: elevation ?? 8,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: context.streamColorScheme.backgroundElevation1,
-            boxShadow: [if (shadow != null) shadow],
-          ),
-          child: SimpleSafeArea(
-            enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
-            minimum: _isPickerVisible ? .zero : .only(bottom: spacing.md),
-            child: Center(heightFactor: 1, child: messageInput),
-          ),
+    return Material(
+      elevation: elevation ?? 8,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.streamColorScheme.backgroundElevation1,
+          boxShadow: [if (shadow != null) shadow],
+        ),
+        child: SimpleSafeArea(
+          enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
+          minimum: _isPickerVisible ? .zero : .only(bottom: spacing.md),
+          child: Center(heightFactor: 1, child: messageInput),
         ),
       ),
     );
@@ -789,9 +789,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
             placeholder: _getHint(context) ?? '',
             focusNode: focusNode,
             onSendPressed: sendMessage,
-            audioRecorderController: _audioRecorderController,
+            canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
+            audioRecorderController: widget.enableVoiceRecording ? _audioRecorderController : null,
           ),
-          _buildDmCheckbox(context),
           _buildInlineAttachmentPicker(context),
         ].nonNulls.toList(),
       ),
@@ -855,19 +855,11 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     return null;
   }
 
-  Widget? _buildDmCheckbox(BuildContext context) {
-    if (widget.hideSendAsDm) return null;
+  bool _shouldShowSendToChannelCheckbox() {
+    if (!widget.canAlsoSendToChannelFromThread) return false;
 
     final insideThread = _effectiveController.message.parentId != null;
-    if (!insideThread) return null;
-
-    return DmCheckboxListTile(
-      value: _effectiveController.showInChannel,
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: context.streamSpacing.md,
-      ),
-      onChanged: (value) => _effectiveController.showInChannel = value,
-    );
+    return insideThread;
   }
 
   Widget _buildNoPermissionMessage(BuildContext context) {
@@ -1302,7 +1294,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     ).merge(passedDecoration);
   }
 
-  late final _onChangedDebounced = debounce(
+  late final _onChangedThrottled = throttle(
     () {
       if (!mounted) return;
 
@@ -1311,13 +1303,24 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
       final value = _effectiveController.text.trim();
       if (value.isNotEmpty && channel.canUseTypingEvents) {
-        // Notify the server that the user started typing.
         channel.keyStroke(_effectiveController.message.parentId).onError(
           (error, stackTrace) {
             widget.onError?.call(error!, stackTrace);
           },
         );
       }
+    },
+    const Duration(milliseconds: 350),
+  );
+
+  late final _onChangedDebounced = debounce(
+    () {
+      if (!mounted) return;
+
+      final channel = StreamChannel.maybeOf(context)?.channel;
+      if (channel == null) return;
+
+      final value = _effectiveController.text.trim();
 
       int actionsLength;
       if (widget.actionsBuilder != null) {
@@ -1712,11 +1715,14 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   @override
   void dispose() {
     _disposePickerResources();
-    _effectiveController.removeListener(_onChangedDebounced);
+    _effectiveController
+      ..removeListener(_onChangedThrottled)
+      ..removeListener(_onChangedDebounced);
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);
     _focusNode?.dispose();
     _onChangedDebounced.cancel();
+    _onChangedThrottled.cancel();
     _audioRecorderController.dispose();
     _draftStreamSubscription?.cancel();
     super.dispose();

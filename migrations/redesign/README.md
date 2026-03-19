@@ -125,6 +125,7 @@ class MyCustomButton extends StatelessWidget {
 | Message Actions | [message_actions.md](message_actions.md) |
 | Reaction Picker / Reactions | [reaction_picker.md](reaction_picker.md) |
 | Image CDN & Thumbnails | [image_cdn.md](image_cdn.md) |
+| Message Widget & Message List | [message_widget.md](message_widget.md) |
 
 ## Need Help?
 

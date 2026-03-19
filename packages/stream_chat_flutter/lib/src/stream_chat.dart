@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -36,6 +37,7 @@ class StreamChat extends StatefulWidget {
     required this.child,
     this.streamChatThemeData,
     this.streamChatConfigData,
+    this.componentBuilders,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
     this.connectivityStream,
@@ -52,6 +54,36 @@ class StreamChat extends StatefulWidget {
 
   /// Non-theme related UI configuration options.
   final StreamChatConfigurationData? streamChatConfigData;
+
+  /// Custom component builders for overriding default UI components.
+  ///
+  /// When provided, a [StreamComponentFactory] is inserted into the widget
+  /// tree below the theme and above [StreamChatCore], allowing all descendant
+  /// widgets to resolve custom builders.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Override the default message widget with a custom builder:
+  ///
+  /// ```dart
+  /// StreamChat(
+  ///   client: client,
+  ///   componentBuilders: StreamComponentBuilders(
+  ///     extensions: streamChatComponentBuilders(
+  ///       messageWidget: (context, props) {
+  ///         return DefaultStreamMessage(
+  ///           props: props.copyWith(
+  ///             actionsBuilder: myActionsBuilder,
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   ),
+  ///   child: MyApp(),
+  /// )
+  /// ```
+  /// {@end-tool}
+  final StreamComponentBuilders? componentBuilders;
 
   /// The amount of time that will pass before disconnecting the client
   /// in the background
@@ -154,36 +186,38 @@ class StreamChatState extends State<StreamChat> {
   @override
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
-    return StreamChatConfiguration(
-      data: streamChatConfigData,
-      child: StreamChatTheme(
-        data: theme,
-        child: Builder(
-          builder: (context) {
-            final materialTheme = Theme.of(context);
-            final streamTheme = StreamChatTheme.of(context);
-            return Theme(
-              data: materialTheme.copyWith(
-                primaryIconTheme: streamTheme.primaryIconTheme,
-                colorScheme: materialTheme.colorScheme.copyWith(
-                  secondary: streamTheme.colorTheme.accentPrimary,
-                ),
+
+    Widget child = StreamChatTheme(
+      data: theme,
+      child: Builder(
+        builder: (context) {
+          final materialTheme = Theme.of(context);
+          final streamTheme = StreamChatTheme.of(context);
+          return Theme(
+            data: materialTheme.copyWith(
+              primaryIconTheme: streamTheme.primaryIconTheme,
+              colorScheme: materialTheme.colorScheme.copyWith(
+                secondary: streamTheme.colorTheme.accentPrimary,
               ),
-              child: StreamChatCore(
-                client: client,
-                onBackgroundEventReceived: widget.onBackgroundEventReceived,
-                backgroundKeepAlive: widget.backgroundKeepAlive,
-                connectivityStream: widget.connectivityStream,
-                child: Builder(
-                  builder: (context) {
-                    return widget.child ?? const Empty();
-                  },
-                ),
-              ),
-            );
-          },
-        ),
+            ),
+            child: StreamChatCore(
+              client: client,
+              onBackgroundEventReceived: widget.onBackgroundEventReceived,
+              backgroundKeepAlive: widget.backgroundKeepAlive,
+              connectivityStream: widget.connectivityStream,
+              child: widget.child ?? const Empty(),
+            ),
+          );
+        },
       ),
+    );
+
+    if (widget.componentBuilders case final builders?) {
+      child = StreamComponentFactory(builders: builders, child: child);
+    }
+
+    return Portal(
+      child: StreamChatConfiguration(data: streamChatConfigData, child: child),
     );
   }
 

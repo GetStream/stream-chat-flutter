@@ -537,6 +537,18 @@ abstract class Translations {
   /// The text for video attachment in channel list preview
   String get videoAttachmentText;
 
+  /// The text for file attachment in channel list preview
+  String get fileAttachmentText;
+
+  /// The text for multiple files attachment in channel list preview
+  String filesAttachmentCountText(int count);
+
+  /// The text for multiple photos attachment in channel list preview
+  String photosAttachmentCountText(int count);
+
+  /// The text for multiple videos attachment in channel list preview
+  String videosAttachmentCountText(int count);
+
   /// The text for poll when current user voted
   String get pollYouVotedText;
 
@@ -670,7 +682,7 @@ class DefaultTranslations implements Translations {
   String get reconnectingLabel => 'Reconnecting...';
 
   @override
-  String get alsoSendAsDirectMessageLabel => 'Also send as direct message';
+  String get alsoSendAsDirectMessageLabel => 'Also send in Channel';
 
   @override
   String get addACommentOrSendLabel => 'Add a comment or send';
@@ -1207,6 +1219,18 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get videoAttachmentText => 'Video';
+
+  @override
+  String get fileAttachmentText => 'File';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'File' : '$count files';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? 'Photo' : '$count photos';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? 'Video' : '$count videos';
 
   @override
   String get pollYouVotedText => 'You voted';

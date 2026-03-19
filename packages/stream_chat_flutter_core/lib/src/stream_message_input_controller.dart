@@ -182,7 +182,7 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   }
 
   /// Sets a command for the message.
-  set command(String command) {
+  set command(String? command) {
     // Setting the command should also clear the text and attachments.
     message = message.copyWith(
       text: '',

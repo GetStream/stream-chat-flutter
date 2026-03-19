@@ -10,7 +10,7 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 - [StreamChatConfigurationData](#streamchatconfigurationdata)
 - [Removed Icon-List APIs](#removed-icon-list-apis)
 - [ReactionIconResolver and DefaultReactionIconResolver](#reactioniconresolver-and-defaultreactioniconresolver)
-- [StreamReactionPicker](#streamreactionpicker)
+- [StreamMessageReactionPicker](#streammessagereactionpicker-formerly-streamreactionpicker)
 - [StreamReactionIndicator](#streamreactionindicator)
 - [New Components](#new-components)
 - [Migration Checklist](#migration-checklist)
@@ -27,7 +27,8 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 | `DefaultReactionIconResolver` | **New** — ready-to-use default; extend to customize `defaultReactions`, `emojiCode`, or rendering hooks |
 | `ReactionPickerIconList` / `ReactionIndicatorIconList` | **Removed** — list rendering now lives inside picker/indicator widgets |
 | `ReactionPickerIcon` / `ReactionIndicatorIcon` | **Removed** — use resolver-based reaction mapping instead |
-| `StreamReactionPicker` | **Changed** — reaction set from `config.reactionIconResolver.defaultReactions` only |
+| `StreamReactionPicker` | **Renamed** to `StreamMessageReactionPicker` — reaction set from `config.reactionIconResolver.defaultReactions` only |
+| `StreamReactionPickerTheme` / `StreamReactionPickerThemeData` | **New** (from `stream_core_flutter`) — theme-based visual customisation for the picker |
 | `StreamReactionIndicator` | **Changed** — uses `config.reactionIconResolver.resolve(context, type)` only |
 | `ReactionDetailSheet` | **New** — `ReactionDetailSheet.show()` for reaction details bottom sheet |
 
@@ -204,27 +205,36 @@ class MyReactionIconResolver extends DefaultReactionIconResolver {
 
 ---
 
-## StreamReactionPicker
+## StreamMessageReactionPicker (formerly StreamReactionPicker)
 
 ### Breaking Changes:
 
+- **Renamed** from `StreamReactionPicker` to `StreamMessageReactionPicker`
+- `StreamReactionPicker` now refers to the domain-agnostic core component from `stream_core_flutter`
 - Picker icons are no longer configured with per-widget icon models
 - Quick-pick entries now come from `config.reactionIconResolver.defaultReactions`
+- Visual properties (`backgroundColor`, `padding`, `shape`) removed from the widget — use `StreamReactionPickerTheme` instead
+- The core picker now uses a `StreamComponentFactory` pattern with `StreamReactionPickerProps` for full customization
 
 ### Migration
 
 **Before:**
 ```dart
-StreamChat(
-  client: client,
-  streamChatConfigData: StreamChatConfigurationData(
-    reactionIcons: [ /* old icon list */ ],
-  ),
-  child: MyApp(),
+StreamReactionPicker(
+  message: message,
 )
 ```
 
 **After:**
+```dart
+StreamMessageReactionPicker(
+  message: message,
+  onReactionPicked: onReactionPicked,
+)
+```
+
+Configure reactions globally via `reactionIconResolver`:
+
 ```dart
 StreamChat(
   client: client,
@@ -235,16 +245,22 @@ StreamChat(
 )
 ```
 
-Then keep picker usage unchanged:
+Customize visual appearance via theme:
 
 ```dart
-StreamReactionPicker(
-  message: message,
-  onReactionPicked: onReactionPicked,
+StreamReactionPickerTheme(
+  data: StreamReactionPickerThemeData(
+    backgroundColor: Colors.white,
+    elevation: 4,
+    spacing: 2,
+    shape: RoundedSuperellipseBorder(
+      borderRadius: BorderRadius.all(Radius.circular(24)),
+    ),
+    side: BorderSide(color: Colors.grey),
+  ),
+  child: // ...
 )
 ```
-
-Set `reactionIconResolver` on `StreamChatConfigurationData` to customize.
 
 ---
 
@@ -315,7 +331,9 @@ Exported for `StreamChatConfigurationData`. See [ReactionIconResolver and Defaul
 
 ## Migration Checklist
 
+- [ ] Rename `StreamReactionPicker` → `StreamMessageReactionPicker` in your code
 - [ ] Remove `reactionIcons` from `StreamChatConfigurationData`
+- [ ] Remove `backgroundColor`, `padding`, `shape` props from picker usage — use `StreamReactionPickerTheme` instead
 - [ ] Custom quick-pick: extend `DefaultReactionIconResolver`, override `defaultReactions` with types from `streamSupportedEmojis` (so `emojiCode` returns emoji); set `reactionIconResolver`
 - [ ] Custom types not in `streamSupportedEmojis`: also override `emojiCode` to return Unicode emoji for each; optionally `supportedReactions`
 - [ ] Custom rendering (e.g. Twemoji): extend `DefaultReactionIconResolver`, override `resolve(context, type)` and branch by type, set `reactionIconResolver`

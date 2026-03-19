@@ -32,17 +32,18 @@ class _DefaultStreamMessageComposerLeading extends StatelessWidget {
   Widget build(BuildContext context) {
     // 45 degrees = 0.125 turns
     const closedRotation = 0.125;
+    final showButton = !props.isAudioRecordingFlowActive && props.controller.message.command == null;
 
     return AnimatedOpacity(
-      opacity: props.isAudioRecordingFlowActive ? 0.0 : 1.0,
-      duration: props.isAudioRecordingFlowActive ? Duration.zero : const Duration(milliseconds: 200),
+      opacity: showButton ? 1.0 : 0.0,
+      duration: showButton ? const Duration(milliseconds: 200) : Duration.zero,
       curve: Curves.easeInQuint,
       child: AnimatedSize(
         duration: const Duration(milliseconds: 200),
         alignment: Alignment.bottomCenter,
         child: Row(
           children: [
-            if (!props.isAudioRecordingFlowActive) ...[
+            if (showButton) ...[
               AnimatedRotation(
                 turns: props.isPickerOpen ? closedRotation : 0,
                 duration: const Duration(milliseconds: 150),
