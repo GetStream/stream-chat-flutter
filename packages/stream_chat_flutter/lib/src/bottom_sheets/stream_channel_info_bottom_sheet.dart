@@ -157,7 +157,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Icon(
-              context.streamIcons.crossSmall,
+              context.streamIcons.crossMedium,
               color: colorTheme.textLowEmphasis,
             ),
           ),
