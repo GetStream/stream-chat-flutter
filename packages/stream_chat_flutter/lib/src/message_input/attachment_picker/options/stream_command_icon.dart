@@ -19,8 +19,8 @@ class StreamCommandIcon extends StatelessWidget {
     return IconTheme.merge(
       data: IconThemeData(size: size, color: color),
       child: switch (command.name) {
-        'giphy' => const StreamSvgIcon(size: size, icon: StreamSvgIcons.giphy),
-        'imgur' => const StreamSvgIcon(size: size, icon: StreamSvgIcons.imgur),
+        'giphy' => const StreamSvgIcon(icon: StreamSvgIcons.giphy),
+        'imgur' => const StreamSvgIcon(icon: StreamSvgIcons.imgur),
         'ban' => Icon(context.streamIcons.peopleRemove),
         'flag' => Icon(context.streamIcons.flag2),
         'mute' => Icon(context.streamIcons.mute),
