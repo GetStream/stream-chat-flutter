@@ -167,13 +167,14 @@ class _AddMoreTile extends StatelessWidget {
     final spacing = context.streamSpacing;
 
     return Material(
+      color: colorScheme.backgroundSurfaceCard,
       child: InkWell(
         onTap: onTap,
         overlayColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.pressed)) return colorScheme.statePressed;
           if (states.contains(WidgetState.hovered)) return colorScheme.stateHover;
           if (states.contains(WidgetState.focused)) return colorScheme.stateFocused;
-          return colorScheme.backgroundSurfaceCard;
+          return null;
         }),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

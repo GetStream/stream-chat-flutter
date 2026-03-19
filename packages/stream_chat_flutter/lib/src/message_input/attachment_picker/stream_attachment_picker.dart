@@ -267,13 +267,6 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
   }
 }
 
-const _kDefaultOptionDrawerShape = RoundedRectangleBorder(
-  borderRadius: BorderRadius.only(
-    topLeft: Radius.circular(16),
-    topRight: Radius.circular(16),
-  ),
-);
-
 /// A widget that will be shown in the attachment picker.
 /// It can be used to show a custom view for each attachment picker option.
 class OptionDrawer extends StatelessWidget {
@@ -281,36 +274,14 @@ class OptionDrawer extends StatelessWidget {
   const OptionDrawer({
     super.key,
     required this.child,
-    this.color,
-    this.elevation = 2,
     this.margin,
-    this.clipBehavior = Clip.hardEdge,
-    this.shape = _kDefaultOptionDrawerShape,
   });
 
   /// The widget below this widget in the tree.
   final Widget child;
 
-  /// The background color of the options card.
-  ///
-  /// Defaults to [StreamColorTheme.barsBg].
-  final Color? color;
-
-  /// The elevation of the options card.
-  ///
-  /// The default value is 2.
-  final double elevation;
-
   /// The margin of the options card.
   final EdgeInsetsGeometry? margin;
-
-  /// The clip behavior of the options card.
-  ///
-  /// The default value is [Clip.hardEdge].
-  final Clip clipBehavior;
-
-  /// The shape of the options card.
-  final ShapeBorder shape;
 
   @override
   Widget build(BuildContext context) {

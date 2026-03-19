@@ -121,5 +121,27 @@ void main() {
       expect(find.text('item-0'), findsOneWidget);
       expect(builtIndices, [0]);
     });
+
+    testWidgets('renders load-more indicator at correct position with leading item', (tester) async {
+      final controller = _TestController(['item-0', 'item-1'], nextPageKey: 1);
+      final builtIndices = <int>[];
+
+      await tester.pumpWidget(
+        _wrap(
+          _buildGrid(
+            controller,
+            leadingItemBuilder: (_) => const Text('leading'),
+            builtIndices: builtIndices,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('leading'), findsOneWidget);
+      expect(find.text('item-0'), findsOneWidget);
+      expect(find.text('item-1'), findsOneWidget);
+      expect(find.text('load-more-indicator'), findsOneWidget);
+      expect(builtIndices, [0, 1]);
+    });
   });
 }
