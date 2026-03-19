@@ -5,7 +5,6 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_empty_wid
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
@@ -343,10 +342,10 @@ class StreamPollVoteListView extends StatelessWidget {
       onTap: controller.retry,
       error: Text(context.translations.loadingPollVotesError),
     ),
-    loadMoreIndicatorBuilder: (context) => const Center(
+    loadMoreIndicatorBuilder: (context) => Center(
       child: Padding(
-        padding: EdgeInsets.all(16),
-        child: StreamScrollViewLoadMoreIndicator(),
+        padding: const EdgeInsets.all(16),
+        child: StreamLoadingSpinner(),
       ),
     ),
     loadingBuilder: (context) =>
