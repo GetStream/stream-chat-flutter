@@ -81,7 +81,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
                 command.name.sentenceCase,
                 style: textTheme.bodyDefault,
               ),
-              const SizedBox(width: 8),
+              SizedBox(height: context.streamSpacing.xxs),
               Text(
                 command.description,
                 style: textTheme.captionDefault.copyWith(

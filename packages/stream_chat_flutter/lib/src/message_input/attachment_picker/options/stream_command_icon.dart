@@ -13,24 +13,21 @@ class StreamCommandIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-    switch (command.name) {
-      case 'giphy':
-        return const StreamSvgIcon(size: 20, icon: StreamSvgIcons.giphy);
-      case 'imgur':
-        return const StreamSvgIcon(size: 20, icon: StreamSvgIcons.imgur);
-      case 'ban':
-        return Icon(context.streamIcons.peopleRemove, size: 20, color: colorTheme.textHighEmphasis);
-      case 'flag':
-        return Icon(context.streamIcons.flag2, size: 20, color: colorTheme.textHighEmphasis);
-      case 'mute':
-        return Icon(context.streamIcons.mute, size: 20, color: colorTheme.textHighEmphasis);
-      case 'unban':
-        return Icon(context.streamIcons.peopleAdd, size: 20, color: colorTheme.textHighEmphasis);
-      case 'unmute':
-        return Icon(context.streamIcons.volumeFull, size: 20, color: colorTheme.textHighEmphasis);
-      default:
-        return Icon(context.streamIcons.thunder, size: 20, color: colorTheme.textHighEmphasis);
-    }
+    const size = 20.0;
+    final color = context.streamColorScheme.textSecondary;
+
+    return IconTheme.merge(
+      data: IconThemeData(size: size, color: color),
+      child: switch (command.name) {
+        'giphy' => const StreamSvgIcon(size: size, icon: StreamSvgIcons.giphy),
+        'imgur' => const StreamSvgIcon(size: size, icon: StreamSvgIcons.imgur),
+        'ban' => Icon(context.streamIcons.peopleRemove),
+        'flag' => Icon(context.streamIcons.flag2),
+        'mute' => Icon(context.streamIcons.mute),
+        'unban' => Icon(context.streamIcons.peopleAdd),
+        'unmute' => Icon(context.streamIcons.volumeFull),
+        _ => Icon(context.streamIcons.thunder),
+      },
+    );
   }
 }

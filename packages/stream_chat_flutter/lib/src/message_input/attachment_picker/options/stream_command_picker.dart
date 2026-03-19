@@ -55,7 +55,7 @@ class StreamCommandPicker extends StatelessWidget {
                     ),
                     Expanded(
                       child: Text(
-                        command.args,
+                        '/${command.name} ${command.args}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: textTheme.body.copyWith(
