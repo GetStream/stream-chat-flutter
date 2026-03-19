@@ -96,4 +96,3 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
     );
   }
 }
-
