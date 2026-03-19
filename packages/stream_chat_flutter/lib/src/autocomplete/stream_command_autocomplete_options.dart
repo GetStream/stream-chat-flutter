@@ -41,15 +41,14 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
 
     if (commands == null || commands.isEmpty) return const Empty();
 
-    final streamChatTheme = StreamChatTheme.of(context);
-    final colorTheme = streamChatTheme.colorTheme;
-    final textTheme = streamChatTheme.textTheme;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
 
     final (elevation, margin, shape) = switch (style) {
       AutocompleteOptionsStyle.fixed => (
         0.0,
         EdgeInsets.zero,
-        const RoundedRectangleBorder() as ShapeBorder,
+        _TopBorderShape(BorderSide(color: colorScheme.borderDefault)) as ShapeBorder,
       ),
       AutocompleteOptionsStyle.floating => (
         4.0,
@@ -67,18 +66,18 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
       margin: margin,
       shape: shape,
       headerBuilder: (context) {
-        return ListTile(
-          dense: true,
-          horizontalTitleGap: 0,
-          leading: Icon(
-            context.streamIcons.thunder,
-            color: colorTheme.accentPrimary,
-            size: 28,
+        return Padding(
+          padding: EdgeInsets.only(
+            left: context.streamSpacing.sm,
+            right: context.streamSpacing.sm,
+            top: context.streamSpacing.md,
+            bottom: context.streamSpacing.xs,
           ),
-          title: Text(
-            context.translations.instantCommandsLabel,
-            style: textTheme.body.copyWith(
-              color: colorTheme.textLowEmphasis,
+          child: Align(
+            alignment: .centerStart,
+            child: Text(
+              context.translations.instantCommandsLabel,
+              style: textTheme.headingXs.copyWith(color: colorScheme.textTertiary),
             ),
           ),
         );
@@ -86,21 +85,21 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
       optionBuilder: (context, command) {
         return ListTile(
           dense: true,
-          horizontalTitleGap: 8,
+          horizontalTitleGap: context.streamSpacing.sm,
           leading: StreamCommandIcon(command: command),
-          title: Row(
+          title: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 command.name.sentenceCase,
-                style: textTheme.bodyBold.copyWith(
-                  color: colorTheme.textHighEmphasis,
-                ),
+                style: textTheme.bodyDefault,
               ),
               const SizedBox(width: 8),
               Text(
-                '/${command.name} ${command.args}',
-                style: textTheme.body.copyWith(
-                  color: colorTheme.textLowEmphasis,
+                command.description,
+                style: textTheme.captionDefault.copyWith(
+                  color: colorScheme.textTertiary,
                 ),
               ),
             ],
@@ -110,4 +109,30 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
       },
     );
   }
+}
+
+/// A [ShapeBorder] that paints only a top border, with no rounding or sides.
+class _TopBorderShape extends ShapeBorder {
+  const _TopBorderShape(this.top);
+
+  final BorderSide top;
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.only(top: top.width);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    final paint = top.toPaint()..strokeCap = StrokeCap.square;
+    final y = rect.top + top.width / 2;
+    canvas.drawLine(Offset(rect.left, y), Offset(rect.right, y), paint);
+  }
+
+  @override
+  ShapeBorder scale(double t) => _TopBorderShape(top.scale(t));
 }

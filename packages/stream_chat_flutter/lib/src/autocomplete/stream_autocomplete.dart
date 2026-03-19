@@ -630,10 +630,7 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (headerBuilder != null) ...[
-            headerBuilder!(context),
-            Divider(height: 0, color: colorTheme.borders),
-          ],
+          if (headerBuilder != null) headerBuilder!(context),
           LimitedBox(
             maxHeight: maxHeight ?? height * 0.5,
             child: ListView.builder(
