@@ -286,8 +286,6 @@ class OptionDrawer extends StatelessWidget {
     this.margin,
     this.clipBehavior = Clip.hardEdge,
     this.shape = _kDefaultOptionDrawerShape,
-    this.title,
-    this.actions = const [],
   });
 
   /// The widget below this widget in the tree.
@@ -314,55 +312,14 @@ class OptionDrawer extends StatelessWidget {
   /// The shape of the options card.
   final ShapeBorder shape;
 
-  /// The title of the options card.
-  final Widget? title;
-
-  /// The actions available for the options card.
-  final List<Widget> actions;
-
   @override
   Widget build(BuildContext context) {
-    var height = 0.0;
-    if (title != null || actions.isNotEmpty) {
-      height = 40.0;
-    }
-
-    final leading = title ?? const Empty();
-
-    Widget trailing;
-    if (actions.isNotEmpty) {
-      trailing = Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: actions,
-      );
-    } else {
-      trailing = const Empty();
-    }
-
     final spacing = context.streamSpacing;
     final effectiveMargin = margin ?? .symmetric(horizontal: spacing.md, vertical: spacing.xxxl);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          height: height,
-          child: Row(
-            children: [
-              Expanded(child: leading),
-              Expanded(child: trailing),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Container(
-            margin: effectiveMargin,
-            child: child,
-          ),
-        ),
-      ],
+    return Container(
+      margin: effectiveMargin,
+      child: child,
     );
   }
 }

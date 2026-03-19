@@ -165,7 +165,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Alguna cosa ha anat malament';
 
   @override
-  String get addMoreFilesLabel => 'Afegir més fitxers';
+  String get addMoreFilesLabel => 'Afegir més';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>

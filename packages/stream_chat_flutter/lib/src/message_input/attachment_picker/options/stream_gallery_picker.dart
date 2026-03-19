@@ -92,17 +92,6 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
 
         return OptionDrawer(
           margin: .zero,
-          actions: [
-            if (isLimited)
-              IconButton(
-                color: colorScheme.accentPrimary,
-                icon: const Icon(Icons.add_circle_outline_rounded),
-                onPressed: () async {
-                  await PhotoManager.presentLimited();
-                  _controller.doInitialLoad();
-                },
-              ),
-          ],
           child: Builder(
             builder: (context) {
               if (!isPermissionGranted) {
@@ -143,6 +132,14 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                 thumbnailFormat: widget.config.mediaThumbnailFormat,
                 thumbnailQuality: widget.config.mediaThumbnailQuality,
                 thumbnailScale: widget.config.mediaThumbnailScale,
+                addMoreBuilder: isLimited
+                    ? (context) => _AddMoreTile(
+                        onTap: () async {
+                          await PhotoManager.presentLimited();
+                          _controller.doInitialLoad();
+                        },
+                      )
+                    : null,
                 itemBuilder: (context, mediaItems, index, defaultWidget) {
                   final media = mediaItems[index];
                   return defaultWidget.copyWith(
@@ -154,6 +151,49 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
           ),
         );
       },
+    );
+  }
+}
+
+class _AddMoreTile extends StatelessWidget {
+  const _AddMoreTile({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+    final spacing = context.streamSpacing;
+
+    return Material(
+      child: InkWell(
+        onTap: onTap,
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return colorScheme.statePressed;
+          if (states.contains(WidgetState.hovered)) return colorScheme.stateHover;
+          if (states.contains(WidgetState.focused)) return colorScheme.stateFocused;
+          return colorScheme.backgroundSurfaceCard;
+        }),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              context.streamIcons.plusLarge,
+              size: 20,
+              color: colorScheme.textTertiary,
+            ),
+            SizedBox(height: spacing.xs),
+            Text(
+              context.translations.addMoreFilesLabel,
+              style: textTheme.captionEmphasis.copyWith(
+                color: colorScheme.textTertiary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

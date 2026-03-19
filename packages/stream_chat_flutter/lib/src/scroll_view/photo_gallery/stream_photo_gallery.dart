@@ -56,6 +56,7 @@ class StreamPhotoGallery extends StatelessWidget {
     this.thumbnailFormat = ThumbnailFormat.jpeg,
     this.thumbnailQuality = 100,
     this.thumbnailScale = 1,
+    this.addMoreBuilder,
   });
 
   /// The [StreamPhotoGalleryController] used to control the grid of users.
@@ -307,6 +308,11 @@ class StreamPhotoGallery extends StatelessWidget {
   /// Scale of the image.
   final double thumbnailScale;
 
+  /// An optional builder for a leading "Add more" tile shown as the first item
+  /// in the gallery grid. Useful when the user has limited photo library access
+  /// and needs a way to expand the selection.
+  final WidgetBuilder? addMoreBuilder;
+
   @override
   Widget build(BuildContext context) {
     return PagedValueGridView<int, AssetEntity>(
@@ -328,6 +334,7 @@ class StreamPhotoGallery extends StatelessWidget {
       restorationId: restorationId,
       clipBehavior: clipBehavior,
       loadMoreTriggerIndex: loadMoreTriggerIndex,
+      leadingItemBuilder: addMoreBuilder,
       gridDelegate: gridDelegate,
       itemBuilder: (context, mediaList, index) {
         final media = mediaList[index];

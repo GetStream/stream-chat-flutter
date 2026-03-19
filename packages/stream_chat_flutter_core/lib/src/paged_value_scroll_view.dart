@@ -365,6 +365,7 @@ class PagedValueGridView<K, V> extends StatefulWidget {
     required this.loadingBuilder,
     required this.errorBuilder,
     this.loadMoreTriggerIndex = 3,
+    this.leadingItemBuilder,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.scrollController,
@@ -412,6 +413,13 @@ class PagedValueGridView<K, V> extends StatefulWidget {
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
+
+  /// An optional builder for a single item prepended before the paged items.
+  ///
+  /// When provided, [itemBuilder] still receives regular item indices starting
+  /// at 0 — the leading item is handled separately, similar to
+  /// [loadMoreIndicatorBuilder].
+  final WidgetBuilder? leadingItemBuilder;
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
   /// The axis along which the scroll view scrolls.
@@ -665,13 +673,18 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
           keyboardDismissBehavior: widget.keyboardDismissBehavior,
           restorationId: widget.restorationId,
           clipBehavior: widget.clipBehavior,
-          itemCount: value.itemCount,
+          itemCount: value.itemCount + (widget.leadingItemBuilder != null ? 1 : 0),
           gridDelegate: widget.gridDelegate,
           itemBuilder: (context, index) {
+            var adjustedIndex = index;
+            if (widget.leadingItemBuilder != null) {
+              if (index == 0) return widget.leadingItemBuilder!(context);
+              adjustedIndex = index - 1;
+            }
+
             if (!_hasRequestedNextPage) {
               final newPageRequestTriggerIndex = items.length - widget.loadMoreTriggerIndex;
-              final isBuildingTriggerIndexItem = index == newPageRequestTriggerIndex;
-              if (nextPageKey != null && isBuildingTriggerIndexItem) {
+              if (nextPageKey != null && adjustedIndex == newPageRequestTriggerIndex) {
                 // Schedules the request for the end of this frame.
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
                   if (error == null) {
@@ -683,14 +696,14 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
               }
             }
 
-            if (index == items.length) {
+            if (adjustedIndex == items.length) {
               if (error != null) {
                 return widget.loadMoreErrorBuilder(context, error);
               }
               return widget.loadMoreIndicatorBuilder(context);
             }
 
-            return widget.itemBuilder(context, items, index);
+            return widget.itemBuilder(context, items, adjustedIndex);
           },
         );
       },

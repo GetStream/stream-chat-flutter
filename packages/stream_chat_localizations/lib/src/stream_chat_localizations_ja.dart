@@ -158,7 +158,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'エラーが発生しました';
 
   @override
-  String get addMoreFilesLabel => 'ファイルの追加';
+  String get addMoreFilesLabel => 'さらに追加';
 
   @override
   String get enablePhotoAndVideoAccessMessage => 'お友達と共有できるように、写真やビデオへのアクセスを有効にしてください。';
