@@ -160,7 +160,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Noe gikk galt';
 
   @override
-  String get addMoreFilesLabel => 'Legg til flere filer';
+  String get addMoreFilesLabel => 'Legg til flere';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>

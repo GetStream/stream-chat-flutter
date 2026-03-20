@@ -65,7 +65,7 @@ GestureDetector(
 
 > **Important:**
 > - Use `GestureDetector` or `InkWell` to handle tap events
-> - Use `StreamAvatarSize` enum values (`.xs`, `.sm`, `.md`, `.lg`, `.xl`) instead of `BoxConstraints`
+> - Use `StreamAvatarSize` enum values (`.xs`, `.sm`, `.md`, `.lg`, `.xl`, `.xxl`) instead of `BoxConstraints`
 > - See [Size Reference](#size-reference) for mapping old constraints to new enum values
 
 ---
@@ -104,7 +104,7 @@ GestureDetector(
 ```
 
 > **Important:**
-> - Use `StreamAvatarGroupSize` enum values (`.lg`, `.xl`) instead of `BoxConstraints`
+> - Use `StreamAvatarGroupSize` enum values (`.lg`, `.xl`, `.xxl`) instead of `BoxConstraints`
 > - Custom avatar builders are no longer supported
 
 ---
@@ -192,14 +192,16 @@ StreamUserAvatarStack(
 | `BoxConstraints.tight(Size(24, 24))` | `.sm` | 24px |
 | `BoxConstraints.tight(Size(32, 32))` | `.md` | 32px |
 | `BoxConstraints.tight(Size(40, 40))` | `.lg` | 40px |
-| `BoxConstraints.tight(Size(64, 64))` | `.xl` | 64px |
+| `BoxConstraints.tight(Size(48, 48))` | `.xl` | 48px |
+| `BoxConstraints.tight(Size(80, 80))` | `.xxl` | 80px |
 
 ### StreamAvatarGroupSize
 
 | Old Constraints | New Size | Diameter |
 |-----------------|----------|----------|
 | `BoxConstraints.tight(Size(40, 40))` | `.lg` | 40px |
-| `BoxConstraints.tight(Size(64, 64))` | `.xl` | 64px |
+| `BoxConstraints.tight(Size(48, 48))` | `.xl` | 48px |
+| `BoxConstraints.tight(Size(80, 80))` | `.xxl` | 80px |
 
 ### StreamAvatarStackSize
 

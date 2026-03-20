@@ -164,7 +164,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'लोड करने में समस्या';
 
   @override
-  String get addMoreFilesLabel => 'और फ़ाइलें जोड़ें';
+  String get addMoreFilesLabel => 'और जोड़ें';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
