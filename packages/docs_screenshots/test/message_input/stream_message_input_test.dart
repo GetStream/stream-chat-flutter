@@ -102,11 +102,33 @@ void main() {
         channelState: channelState,
       );
 
-      return _buildMessageInputScaffold(
-        client: client,
-        channel: channel,
-        messageInput: const StreamMessageInput(
-          actionsLocation: ActionsLocation.right,
+      final controller = StreamMessageInputController();
+
+      return MaterialApp(
+        theme: docsScreenshotsTheme(),
+        debugShowCheckedModeBanner: false,
+        home: StreamChat(
+          client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          componentBuilders: StreamComponentBuilders(
+            extensions: streamChatComponentBuilders(
+              messageComposerInputTrailing: (context, props) => const SizedBox.shrink(),
+              messageComposerTrailing: (context, props) => DefaultStreamMessageComposerInputTrailing(props: props),
+            ),
+          ),
+          child: StreamChannel(
+            showLoading: false,
+            channel: channel,
+            child: Scaffold(
+              body: Column(
+                children: [
+                  const Expanded(child: SizedBox()),
+                  StreamMessageInput(messageInputController: controller),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     },
@@ -129,12 +151,12 @@ void main() {
         channelState: channelState,
       );
 
-      final controller = StreamMessageInputController();
-      controller.quotedMessage = Message(
-        id: 'quoted-msg',
-        text: 'This is the original message',
-        user: User(id: 'other-user', name: 'Alice'),
-      );
+      final controller = StreamMessageInputController()
+        ..quotedMessage = Message(
+          id: 'quoted-msg',
+          text: 'This is the original message',
+          user: User(id: 'other-user', name: 'Alice'),
+        );
 
       return _buildMessageInputScaffold(
         client: client,
