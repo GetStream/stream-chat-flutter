@@ -165,7 +165,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Quelque chose a mal tourné';
 
   @override
-  String get addMoreFilesLabel => "Ajouter d'autres fichiers";
+  String get addMoreFilesLabel => 'Ajouter plus';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
