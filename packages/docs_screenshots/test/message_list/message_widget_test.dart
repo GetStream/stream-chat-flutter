@@ -20,6 +20,7 @@ Widget _buildMessageScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
+      streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,
@@ -103,12 +104,13 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChatTheme(
             data: StreamChatThemeData.light().copyWith(
               ownMessageTheme: StreamMessageThemeData(
                 messageBackgroundColor: Colors.purple.shade100,
-                messageTextStyle: const TextStyle(color: Colors.purple),
+                messageTextStyle: const TextStyle(color: Colors.purple, fontFamily: 'Roboto'),
               ),
             ),
             child: StreamChannel(
@@ -208,6 +210,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChannel(
             showLoading: false,

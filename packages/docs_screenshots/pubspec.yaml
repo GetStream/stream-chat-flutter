@@ -20,8 +20,7 @@ dependencies:
   stream_chat_flutter: ^10.0.0-beta.12
 
 dev_dependencies:
-  alchemist: ^0.13.0
-  golden_toolkit: ^0.15.0
+  alchemist: ^0.14.0
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.0

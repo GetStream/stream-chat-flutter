@@ -71,7 +71,7 @@ dependencies:
   video_player: ^2.8.7
 
 dev_dependencies:
-  alchemist: ^0.13.0
+  alchemist: ^0.14.0
   build_runner: ^2.4.9
   connectivity_plus_platform_interface: ^2.0.0
   faker_dart: ^0.2.1

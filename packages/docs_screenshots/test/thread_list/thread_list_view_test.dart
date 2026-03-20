@@ -67,6 +67,7 @@ Widget _buildThreadListScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
+      streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: Scaffold(
         body: StreamThreadListView(
@@ -182,25 +183,25 @@ void main() {
         unreadCount: 3,
       );
 
-      final controller = StreamThreadListController.fromValue(
-        PagedValue(items: [thread]),
-        client: client,
-      );
-
-      stubQueryThreadsForGoldens(client, [thread]);
-
-      return _buildThreadListScaffold(
-        client: client,
-        controller: controller,
-        customItemBuilder: (context, t) => Container(
-          decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(color: Theme.of(context).colorScheme.primary, width: 4),
+      return MaterialApp(
+        theme: docsScreenshotsTheme(),
+        debugShowCheckedModeBanner: false,
+        home: StreamChat(
+          client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          child: Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(color: Colors.blue.shade700, width: 4),
+                ),
+              ),
+              child: StreamThreadListTile(
+                thread: thread,
+                currentUser: _user1,
+              ),
             ),
-          ),
-          child: StreamThreadListTile(
-            thread: t,
-            currentUser: _user1,
           ),
         ),
       );
@@ -218,6 +219,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: StreamUnreadThreadsBanner(

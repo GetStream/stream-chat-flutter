@@ -20,6 +20,7 @@ Widget _buildRecorderButtonScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
+      streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,
@@ -43,6 +44,7 @@ Widget _buildVoiceRecordingMessageInputScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
+      streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,
@@ -244,6 +246,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: Padding(
@@ -282,6 +285,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: Padding(
@@ -319,6 +323,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: Padding(

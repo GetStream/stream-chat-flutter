@@ -16,6 +16,7 @@ Widget _buildChannelHeaderScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
+      streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,

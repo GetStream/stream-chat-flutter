@@ -38,6 +38,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: StreamUserListView(

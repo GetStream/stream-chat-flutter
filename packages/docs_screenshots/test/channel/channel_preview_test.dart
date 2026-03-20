@@ -35,6 +35,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: StreamChannelListItem(channel: channel),
@@ -119,6 +120,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: StreamChannelListView(
@@ -156,6 +158,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: Swipeable(
