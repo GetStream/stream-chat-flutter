@@ -116,23 +116,16 @@ class StreamPhotoGalleryTile extends StatelessWidget {
             child: _GallerySelectedIndicator(selected: selected),
           ),
         ),
-        if (media.type == AssetType.video) ...[
+        if (media.type == AssetType.video)
           Positioned(
             left: 8,
-            bottom: 10,
-            child: Icon(context.streamIcons.videoSolid),
-          ),
-          Positioned(
-            right: 4,
-            bottom: 10,
-            child: Text(
-              media.videoDuration.format(),
-              style: TextStyle(
-                color: chatThemeData.colorTheme.barsBg,
-              ),
+            bottom: 8,
+            child: StreamMediaBadge(
+              type: MediaBadgeType.video,
+              duration: media.videoDuration,
+              durationFormat: MediaBadgeDurationFormat.exact,
             ),
           ),
-        ],
         // https://stackoverflow.com/a/59317162/10036882
         Positioned.fill(
           child: Material(
@@ -173,17 +166,6 @@ class _GallerySelectedIndicator extends StatelessWidget {
             )
           : null,
     );
-  }
-}
-
-extension on Duration {
-  String format() {
-    final s = '$this'.split('.')[0].padLeft(8, '0');
-    if (s.startsWith('00:')) {
-      return s.replaceFirst('00:', '');
-    }
-
-    return s;
   }
 }
 

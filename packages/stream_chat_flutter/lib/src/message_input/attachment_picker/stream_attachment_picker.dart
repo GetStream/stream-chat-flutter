@@ -268,13 +268,6 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
   }
 }
 
-const _kDefaultOptionDrawerShape = RoundedRectangleBorder(
-  borderRadius: BorderRadius.only(
-    topLeft: Radius.circular(16),
-    topRight: Radius.circular(16),
-  ),
-);
-
 /// A widget that will be shown in the attachment picker.
 /// It can be used to show a custom view for each attachment picker option.
 class OptionDrawer extends StatelessWidget {
@@ -282,88 +275,23 @@ class OptionDrawer extends StatelessWidget {
   const OptionDrawer({
     super.key,
     required this.child,
-    this.color,
-    this.elevation = 2,
     this.margin,
-    this.clipBehavior = Clip.hardEdge,
-    this.shape = _kDefaultOptionDrawerShape,
-    this.title,
-    this.actions = const [],
   });
 
   /// The widget below this widget in the tree.
   final Widget child;
 
-  /// The background color of the options card.
-  ///
-  /// Defaults to [StreamColorTheme.barsBg].
-  final Color? color;
-
-  /// The elevation of the options card.
-  ///
-  /// The default value is 2.
-  final double elevation;
-
   /// The margin of the options card.
   final EdgeInsetsGeometry? margin;
 
-  /// The clip behavior of the options card.
-  ///
-  /// The default value is [Clip.hardEdge].
-  final Clip clipBehavior;
-
-  /// The shape of the options card.
-  final ShapeBorder shape;
-
-  /// The title of the options card.
-  final Widget? title;
-
-  /// The actions available for the options card.
-  final List<Widget> actions;
-
   @override
   Widget build(BuildContext context) {
-    var height = 0.0;
-    if (title != null || actions.isNotEmpty) {
-      height = 40.0;
-    }
-
-    final leading = title ?? const Empty();
-
-    Widget trailing;
-    if (actions.isNotEmpty) {
-      trailing = Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: actions,
-      );
-    } else {
-      trailing = const Empty();
-    }
-
     final spacing = context.streamSpacing;
     final effectiveMargin = margin ?? .symmetric(horizontal: spacing.md, vertical: spacing.xxxl);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          height: height,
-          child: Row(
-            children: [
-              Expanded(child: leading),
-              Expanded(child: trailing),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Container(
-            margin: effectiveMargin,
-            child: child,
-          ),
-        ),
-      ],
+    return Container(
+      margin: effectiveMargin,
+      child: child,
     );
   }
 }

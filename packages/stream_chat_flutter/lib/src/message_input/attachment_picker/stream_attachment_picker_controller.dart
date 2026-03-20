@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_result.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// The default maximum size for media attachments.
@@ -40,6 +43,8 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
        ),
        super(initialValue);
 
+  final _customResultController = StreamController<CustomAttachmentPickerResult>.broadcast();
+
   /// Initial value for the controller.
   final AttachmentPickerValue initialValue;
 
@@ -66,6 +71,26 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
   /// attachment picker option is used.
   set extraData(Map<String, Object?>? extraData) {
     value = value.copyWith(extraData: extraData);
+  }
+
+  /// A stream of custom attachment picker results emitted via
+  /// [notifyCustomResult].
+  Stream<CustomAttachmentPickerResult> get customResults => _customResultController.stream;
+
+  /// Emits a [CustomAttachmentPickerResult] to notify the parent widget
+  /// (e.g. [StreamMessageInput]) that a custom attachment has been picked.
+  ///
+  /// Use this from a [TabbedAttachmentPickerOption.optionViewBuilder] instead
+  /// of calling `Navigator.pop` — the picker is an inline widget, not a modal
+  /// route, so popping the navigator would close the wrong page.
+  void notifyCustomResult(CustomAttachmentPickerResult result) {
+    if (!_customResultController.isClosed) _customResultController.add(result);
+  }
+
+  @override
+  void dispose() {
+    _customResultController.close();
+    super.dispose();
   }
 
   Future<String> _saveToCache(AttachmentFile file) async {

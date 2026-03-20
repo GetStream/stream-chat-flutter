@@ -442,8 +442,11 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final durationSecs = attachment.extraData['duration'] as num?;
+    final videoDuration = durationSecs != null ? Duration(seconds: durationSecs.round()) : null;
+
     final mediaBadge = attachment.type == AttachmentType.video
-        ? const StreamMediaBadge(type: MediaBadgeType.video)
+        ? StreamMediaBadge(type: MediaBadgeType.video, duration: videoDuration)
         : null;
 
     return Container(

@@ -527,6 +527,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
   bool get _isPickerVisible => _pickerController != null;
   StreamAttachmentPickerController? _pickerController;
+  StreamSubscription<CustomAttachmentPickerResult>? _customResultSubscription;
   bool _isSyncingControllers = false;
 
   late StreamChatThemeData _streamChatTheme;
@@ -1066,6 +1067,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       );
       _pickerController!.addListener(_syncPickerToMessage);
       _effectiveController.addListener(_syncMessageToPicker);
+      _customResultSubscription = _pickerController!.customResults.listen(_onCustomResult);
 
       if (_effectiveFocusNode.hasFocus) {
         _effectiveFocusNode.unfocus();
@@ -1079,10 +1081,17 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   }
 
   void _disposePickerResources() {
+    _customResultSubscription?.cancel();
+    _customResultSubscription = null;
     _pickerController?.removeListener(_syncPickerToMessage);
     _effectiveController.removeListener(_syncMessageToPicker);
     _pickerController?.dispose();
     _pickerController = null;
+  }
+
+  Future<void> _onCustomResult(CustomAttachmentPickerResult result) async {
+    final handled = await widget.onAttachmentPickerResult?.call(result) ?? false;
+    if (handled && mounted) _hidePicker();
   }
 
   /// Copies picker attachments into the message controller when the user
