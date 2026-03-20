@@ -8,6 +8,7 @@ import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positi
 import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
 import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
+import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_empty_state.dart';
 import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
@@ -565,18 +566,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             paginationLimit: widget.paginationLimit,
             messageFilter: widget.messageFilter,
             loadingBuilder: widget.loadingBuilder ?? (context) => const StreamMessageListSkeletonLoading(),
-            emptyBuilder:
-                widget.emptyBuilder ??
-                (context) => Center(
-                  child: Text(
-                    context.translations.emptyChatMessagesText,
-                    style: _streamTheme.textTheme.footnote.copyWith(
-                      color: _streamTheme.colorTheme.textHighEmphasis
-                          // ignore: deprecated_member_use
-                          .withOpacity(0.5),
-                    ),
-                  ),
-                ),
+            emptyBuilder: widget.emptyBuilder ?? (context) => const StreamMessageListEmptyState(),
             messageListBuilder: widget.messageListBuilder ?? (context, list) => _buildListView(list),
             messageListController: _messageListController,
             parentMessage: widget.parentMessage,

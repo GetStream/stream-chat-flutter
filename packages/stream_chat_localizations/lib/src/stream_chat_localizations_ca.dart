@@ -680,4 +680,15 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
     if (isLive) return '📍 Ubicació en directe';
     return '📍 Ubicació';
   }
+
+  @override
+  String get noConversationsYetText => 'Encara no hi ha converses';
+
+  @override
+  String get replyToStartThreadText =>
+      'Respon a un missatge per iniciar un fil';
+
+  @override
+  String get sendMessageToStartConversationText =>
+      'Envia un missatge per iniciar la conversa';
 }

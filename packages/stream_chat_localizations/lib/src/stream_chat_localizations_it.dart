@@ -687,4 +687,15 @@ Attenzione: il limite massimo di $limit file è stato superato.
     if (isLive) return '📍 Posizione dal vivo';
     return '📍 Posizione';
   }
+
+  @override
+  String get noConversationsYetText => 'Ancora nessuna conversazione';
+
+  @override
+  String get replyToStartThreadText =>
+      'Rispondi a un messaggio per avviare un thread';
+
+  @override
+  String get sendMessageToStartConversationText =>
+      'Invia un messaggio per iniziare la conversazione';
 }

@@ -678,4 +678,14 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
     if (isLive) return '📍 Live Location';
     return '📍 Location';
   }
+
+  @override
+  String get noConversationsYetText => 'No conversations yet';
+
+  @override
+  String get replyToStartThreadText => 'Reply to a message to start a thread';
+
+  @override
+  String get sendMessageToStartConversationText =>
+      'Send a message to start the conversation';
 }

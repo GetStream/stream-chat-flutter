@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/scroll_view/channel_scroll_view/stream_channel_list_empty_state.dart';
 import 'package:stream_chat_flutter/src/scroll_view/channel_scroll_view/stream_channel_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
@@ -317,26 +318,7 @@ class StreamChannelListView extends StatelessWidget {
             ) ??
             streamChannelListTile;
       },
-      emptyBuilder: (context) {
-        final chatThemeData = StreamChatTheme.of(context);
-        return emptyBuilder?.call(context) ??
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamScrollViewEmptyWidget(
-                  emptyIcon: Icon(
-                    context.streamIcons.bubble3ChatMessage,
-                    size: 148,
-                    color: chatThemeData.colorTheme.disabled,
-                  ),
-                  emptyTitle: Text(
-                    context.translations.letsStartChattingLabel,
-                    style: chatThemeData.textTheme.headline,
-                  ),
-                ),
-              ),
-            );
-      },
+      emptyBuilder: (context) => emptyBuilder?.call(context) ?? const StreamChannelListEmptyState(),
       loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingChannelsError),

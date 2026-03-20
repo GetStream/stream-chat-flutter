@@ -684,4 +684,15 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     if (isLive) return '📍 Position en direct';
     return '📍 Position';
   }
+
+  @override
+  String get noConversationsYetText => 'Pas encore de conversations';
+
+  @override
+  String get replyToStartThreadText =>
+      'Répondez à un message pour démarrer un fil';
+
+  @override
+  String get sendMessageToStartConversationText =>
+      'Envoyez un message pour démarrer la conversation';
 }
