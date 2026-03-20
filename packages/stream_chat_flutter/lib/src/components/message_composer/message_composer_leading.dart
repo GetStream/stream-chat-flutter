@@ -26,7 +26,6 @@ class StreamMessageComposerLeading extends StatelessWidget {
 /// Default implementation of the leading of the message composer.
 /// Shows the attachment button when the message composer is not in audio recording flow and no command is selected.
 class DefaultStreamMessageComposerLeading extends StatelessWidget {
-  
   /// Creates a new instance of [DefaultStreamMessageComposerLeading].
   /// [props] contains the properties for the message composer component.
   const DefaultStreamMessageComposerLeading({super.key, required this.props});
