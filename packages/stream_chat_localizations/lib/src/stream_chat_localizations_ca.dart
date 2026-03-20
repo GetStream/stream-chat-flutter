@@ -685,10 +685,8 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get noConversationsYetText => 'Encara no hi ha converses';
 
   @override
-  String get replyToStartThreadText =>
-      'Respon a un missatge per iniciar un fil';
+  String get replyToStartThreadText => 'Respon a un missatge per iniciar un fil';
 
   @override
-  String get sendMessageToStartConversationText =>
-      'Envia un missatge per iniciar la conversa';
+  String get sendMessageToStartConversationText => 'Envia un missatge per iniciar la conversa';
 }

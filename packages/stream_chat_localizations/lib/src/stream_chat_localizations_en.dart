@@ -686,6 +686,5 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get replyToStartThreadText => 'Reply to a message to start a thread';
 
   @override
-  String get sendMessageToStartConversationText =>
-      'Send a message to start the conversation';
+  String get sendMessageToStartConversationText => 'Send a message to start the conversation';
 }

@@ -669,10 +669,8 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get noConversationsYetText => 'まだ会話がありません';
 
   @override
-  String get replyToStartThreadText =>
-      'スレッドを開始するにはメッセージに返信してください';
+  String get replyToStartThreadText => 'スレッドを開始するにはメッセージに返信してください';
 
   @override
-  String get sendMessageToStartConversationText =>
-      '会話を始めるにはメッセージを送信してください';
+  String get sendMessageToStartConversationText => '会話を始めるにはメッセージを送信してください';
 }

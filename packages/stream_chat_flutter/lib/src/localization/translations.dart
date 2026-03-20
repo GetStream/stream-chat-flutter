@@ -1269,6 +1269,5 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get replyToStartThreadText => 'Reply to a message to start a thread';
 
   @override
-  String get sendMessageToStartConversationText =>
-      'Send a message to start the conversation';
+  String get sendMessageToStartConversationText => 'Send a message to start the conversation';
 }

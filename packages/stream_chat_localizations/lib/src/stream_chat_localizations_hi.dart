@@ -687,10 +687,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get noConversationsYetText => 'अभी तक कोई बातचीत नहीं';
 
   @override
-  String get replyToStartThreadText =>
-      'थ्रेड शुरू करने के लिए किसी संदेश का जवाब दें';
+  String get replyToStartThreadText => 'थ्रेड शुरू करने के लिए किसी संदेश का जवाब दें';
 
   @override
-  String get sendMessageToStartConversationText =>
-      'बातचीत शुरू करने के लिए एक संदेश भेजें';
+  String get sendMessageToStartConversationText => 'बातचीत शुरू करने के लिए एक संदेश भेजें';
 }

@@ -671,10 +671,8 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get noConversationsYetText => 'Ingen samtaler ennå';
 
   @override
-  String get replyToStartThreadText =>
-      'Svar på en melding for å starte en tråd';
+  String get replyToStartThreadText => 'Svar på en melding for å starte en tråd';
 
   @override
-  String get sendMessageToStartConversationText =>
-      'Send en melding for å starte samtalen';
+  String get sendMessageToStartConversationText => 'Send en melding for å starte samtalen';
 }

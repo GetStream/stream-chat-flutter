@@ -686,10 +686,8 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get noConversationsYetText => 'Ainda não há conversas';
 
   @override
-  String get replyToStartThreadText =>
-      'Responda a uma mensagem para iniciar uma thread';
+  String get replyToStartThreadText => 'Responda a uma mensagem para iniciar uma thread';
 
   @override
-  String get sendMessageToStartConversationText =>
-      'Envie uma mensagem para iniciar a conversa';
+  String get sendMessageToStartConversationText => 'Envie uma mensagem para iniciar a conversa';
 }

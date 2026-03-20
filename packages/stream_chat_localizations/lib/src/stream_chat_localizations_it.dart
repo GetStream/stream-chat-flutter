@@ -692,10 +692,8 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get noConversationsYetText => 'Ancora nessuna conversazione';
 
   @override
-  String get replyToStartThreadText =>
-      'Rispondi a un messaggio per avviare un thread';
+  String get replyToStartThreadText => 'Rispondi a un messaggio per avviare un thread';
 
   @override
-  String get sendMessageToStartConversationText =>
-      'Invia un messaggio per iniziare la conversazione';
+  String get sendMessageToStartConversationText => 'Invia un messaggio per iniziare la conversazione';
 }

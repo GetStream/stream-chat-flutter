@@ -689,10 +689,8 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get noConversationsYetText => 'Pas encore de conversations';
 
   @override
-  String get replyToStartThreadText =>
-      'Répondez à un message pour démarrer un fil';
+  String get replyToStartThreadText => 'Répondez à un message pour démarrer un fil';
 
   @override
-  String get sendMessageToStartConversationText =>
-      'Envoyez un message pour démarrer la conversation';
+  String get sendMessageToStartConversationText => 'Envoyez un message pour démarrer la conversation';
 }
