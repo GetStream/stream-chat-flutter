@@ -24,18 +24,18 @@ class StreamCommandPicker extends StatelessWidget {
 
     return OptionDrawer(
       margin: EdgeInsets.zero,
-      title: Padding(
-        padding: EdgeInsets.symmetric(horizontal: spacing.md),
-        child: Text(
-          context.translations.instantCommandsLabel,
-          style: textTheme.headlineBold,
-        ),
-      ),
       child: ListView.builder(
         padding: EdgeInsets.zero,
-        itemCount: commands.length,
+        itemCount: commands.length + 1,
         itemBuilder: (context, index) {
-          final command = commands[index];
+          final command = index == 0 ? null : commands[index - 1];
+          if (command == null) {
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: spacing.md),
+              child: Text(context.translations.instantCommandsLabel, style: textTheme.headlineBold),
+            );
+          }
+          
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: InkWell(
