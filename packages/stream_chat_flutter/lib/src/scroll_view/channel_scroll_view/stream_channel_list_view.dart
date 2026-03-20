@@ -1,7 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/scroll_view/channel_scroll_view/stream_channel_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -347,11 +349,7 @@ class StreamChannelListView extends StatelessWidget {
           child: StreamLoadingSpinner(),
         ),
       ),
-      loadingBuilder: (context) =>
-          loadingBuilder?.call(context) ??
-          const Center(
-            child: StreamScrollViewLoadingWidget(),
-          ),
+      loadingBuilder: (context) => loadingBuilder?.call(context) ?? const StreamChannelListSkeletonLoading(),
       errorBuilder: (context, error) =>
           errorBuilder?.call(context, error) ??
           Center(

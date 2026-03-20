@@ -126,6 +126,10 @@ class MyCustomButton extends StatelessWidget {
 | Reaction Picker / Reactions | [reaction_picker.md](reaction_picker.md) |
 | Image CDN & Thumbnails | [image_cdn.md](image_cdn.md) |
 | Message Widget & Message List | [message_widget.md](message_widget.md) |
+| Message Composer | [message_composer.md](message_composer.md) |
+| Unread Indicator | [unread_indicator.md](unread_indicator.md) |
+| Reaction List & Detail Sheet | [reaction_list.md](reaction_list.md) |
+| Audio Waveform Theme | [audio_theme.md](audio_theme.md) |
 
 ## Need Help?
 

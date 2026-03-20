@@ -8,8 +8,8 @@ import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positi
 import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
 import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
+import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
-import 'package:stream_chat_flutter/src/message_list_view/unread_indicator_button.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
 import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
@@ -564,11 +564,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           child: MessageListCore(
             paginationLimit: widget.paginationLimit,
             messageFilter: widget.messageFilter,
-            loadingBuilder:
-                widget.loadingBuilder ??
-                (context) => const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
+            loadingBuilder: widget.loadingBuilder ?? (context) => const StreamMessageListSkeletonLoading(),
             emptyBuilder:
                 widget.emptyBuilder ??
                 (context) => Center(
@@ -1115,8 +1111,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             );
 
         return Positioned(
-          bottom: 8,
-          right: 8,
+          bottom: 16,
+          right: 16,
           width: 40,
           height: 40,
           child: Stack(

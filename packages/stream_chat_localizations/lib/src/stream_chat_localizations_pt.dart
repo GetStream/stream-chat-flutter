@@ -162,7 +162,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Algo deu errado';
 
   @override
-  String get addMoreFilesLabel => 'Adicionar mais arquivos';
+  String get addMoreFilesLabel => 'Adicionar mais';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>

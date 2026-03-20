@@ -158,7 +158,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => '뭔가 잘못됐습느다';
 
   @override
-  String get addMoreFilesLabel => '파일을 추가함';
+  String get addMoreFilesLabel => '더 추가';
 
   @override
   String get enablePhotoAndVideoAccessMessage => '친구와 공유할 수 있도록 사진과 동영상에 액세스할 수 있도록 설정하십시오.';
