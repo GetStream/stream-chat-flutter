@@ -812,23 +812,33 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     final useSystemPicker =
         widget.useSystemAttachmentPicker || (messageInputTheme.useSystemAttachmentPicker ?? false) || isWebOrDesktop;
 
-    final builder = switch (useSystemPicker) {
-      true => systemAttachmentPickerBuilder,
-      false => tabbedAttachmentPickerBuilder,
-    };
+    final child = useSystemPicker
+        ? systemAttachmentPickerBuilder(
+            context: context,
+            controller: _pickerController!,
+            allowedTypes: allowedTypes,
+            pollConfig: widget.pollConfig,
+            optionsBuilder: widget.attachmentPickerOptionsBuilder,
+            onError: _onPickerError,
+            onPollCreated: _onPollCreated,
+          )
+        : tabbedAttachmentPickerBuilder(
+            context: context,
+            controller: _pickerController!,
+            allowedTypes: allowedTypes,
+            pollConfig: widget.pollConfig,
+            optionsBuilder: widget.attachmentPickerOptionsBuilder,
+            onError: _onPickerError,
+            onPollCreated: _onPollCreated,
+            onCommandSelected: _onCommandSelectedFromPicker,
+          );
 
-    return SizedBox(
-      height: 333,
-      child: builder.call(
-        context: context,
-        controller: _pickerController!,
-        allowedTypes: allowedTypes,
-        pollConfig: widget.pollConfig,
-        optionsBuilder: widget.attachmentPickerOptionsBuilder,
-        onError: _onPickerError,
-        onPollCreated: _onPollCreated,
-      ),
-    );
+    return SizedBox(height: 333, child: child);
+  }
+
+  void _onCommandSelectedFromPicker(Command command) {
+    _hidePicker();
+    _effectiveController.command = command.name;
   }
 
   Widget? _buildTopMessageArea(BuildContext context) {
