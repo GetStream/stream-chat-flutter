@@ -160,15 +160,11 @@ class _ChannelPageState extends State<ChannelPage> {
                 },
                 optionViewBuilder: (context, controller) => LocationPicker(
                   onLocationPicked: (locationResult) {
-                    if (locationResult == null) return Navigator.pop(context);
+                    if (locationResult == null) return;
 
-                    controller.extraData = {
-                      ...controller.value.extraData,
-                      'location': locationResult,
-                    };
-
-                    final result = LocationPicked(location: locationResult);
-                    return Navigator.pop(context, result);
+                    controller.notifyCustomResult(
+                      LocationPicked(location: locationResult),
+                    );
                   },
                 ),
               ),
