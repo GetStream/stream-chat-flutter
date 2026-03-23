@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -130,49 +129,39 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
           }
 
           final channelListHeaderThemeData = StreamChannelListHeaderTheme.of(context);
-          final theme = Theme.of(context);
-          final colorScheme = context.streamColorScheme;
 
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
-            child: AppBar(
-              toolbarTextStyle: theme.textTheme.bodyMedium,
-              titleTextStyle: theme.textTheme.titleLarge,
-              systemOverlayStyle: theme.brightness == Brightness.dark
-                  ? SystemUiOverlayStyle.light
-                  : SystemUiOverlayStyle.dark,
+            child: StreamAppBar(
               elevation: elevation,
               scrolledUnderElevation: scrolledUnderElevation,
               backgroundColor: backgroundColor ?? channelListHeaderThemeData.color,
               centerTitle: centerTitle,
-              shape: LinearBorder(
-                side: BorderSide(
-                  color: colorScheme.borderDefault,
-                  width: 1,
-                ),
-                bottom: const LinearBorderEdge(),
-              ),
               leading: switch ((leading, user)) {
                 (final leading?, _) => leading,
-                (_, final user?) => Center(
-                  child: GestureDetector(
-                    onTap: switch (onUserAvatarTap) {
-                      final onTap? => () => onTap(user),
-                      _ => () {
-                        preNavigationCallback?.call();
-                        Scaffold.of(context).openDrawer();
+                (_, final user?) => Padding(
+                  padding: EdgeInsets.only(left: context.streamSpacing.sm),
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: switch (onUserAvatarTap) {
+                        final onTap? => () => onTap(user),
+                        _ => () {
+                          preNavigationCallback?.call();
+                          Scaffold.of(context).openDrawer();
+                        },
                       },
-                    },
-                    child: StreamUserAvatar(
-                      size: .lg,
-                      user: user,
-                      showOnlineIndicator: false,
+                      child: StreamUserAvatar(
+                        size: .lg,
+                        user: user,
+                        showOnlineIndicator: false,
+                      ),
                     ),
                   ),
                 ),
                 _ => const Empty(),
               },
+              actionsPadding: EdgeInsets.only(right: context.streamSpacing.sm),
               actions:
                   actions ??
                   [
@@ -222,12 +211,10 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
 class _ConnectedTitleState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final textTheme = context.streamTextTheme;
     return Text(
       context.translations.streamChatLabel,
-      style: chatThemeData.textTheme.headlineBold.copyWith(
-        color: chatThemeData.colorTheme.textHighEmphasis,
-      ),
+      style: textTheme.headingSm,
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamThreadHeader}
@@ -152,12 +151,8 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
               )
             : const SizedBox.shrink());
 
-    final theme = Theme.of(context);
-    return AppBar(
+    return StreamAppBar(
       automaticallyImplyLeading: false,
-      toolbarTextStyle: theme.textTheme.bodyMedium,
-      titleTextStyle: theme.textTheme.titleLarge,
-      systemOverlayStyle: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       elevation: elevation,
       scrolledUnderElevation: scrolledUnderElevation,
       leading:
@@ -172,13 +167,6 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
       backgroundColor: backgroundColor ?? channelHeaderTheme.color,
       centerTitle: centerTitle,
       actions: actions,
-      shape: LinearBorder(
-        side: BorderSide(
-          color: colorScheme.borderDefault,
-          width: 1,
-        ),
-        bottom: const LinearBorderEdge(),
-      ),
       title: InkWell(
         onTap: onTitleTap,
         child: SizedBox(
@@ -197,7 +185,9 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
               if (showTypingIndicator)
                 StreamTypingIndicator(
                   channel: StreamChannel.of(context).channel,
-                  style: channelHeaderTheme.subtitleStyle,
+                  style:
+                      channelHeaderTheme.subtitleStyle ??
+                      textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
                   parentId: parent.id,
                   alternativeWidget: defaultSubtitle,
                 )

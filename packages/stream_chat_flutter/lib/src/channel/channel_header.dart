@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -173,75 +172,89 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
               break;
           }
 
-          final theme = Theme.of(context);
-          final colorScheme = context.streamColorScheme;
-
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
-            child: AppBar(
-              toolbarTextStyle: theme.textTheme.bodyMedium,
-              titleTextStyle: theme.textTheme.titleLarge,
-              systemOverlayStyle: theme.brightness == Brightness.dark
-                  ? SystemUiOverlayStyle.light
-                  : SystemUiOverlayStyle.dark,
+            child: StreamAppBar(
+              titleTextStyle: Theme.of(context).textTheme.titleLarge,
               elevation: elevation,
               scrolledUnderElevation: scrolledUnderElevation,
-              leading: leadingWidget,
+              leading: Padding(
+                padding: EdgeInsets.only(left: context.streamSpacing.sm),
+                child: leadingWidget,
+              ),
+              leadingWidth: StreamAvatarSize.lg.value,
+              titleSpacing: context.streamSpacing.sm,
               bottom: bottom,
               bottomOpacity: bottomOpacity,
-              shape: LinearBorder(
-                side: BorderSide(
-                  color: colorScheme.borderDefault,
-                  width: 1,
-                ),
-                bottom: const LinearBorderEdge(),
-              ),
               backgroundColor: backgroundColor ?? channelHeaderTheme.color,
               actions:
                   actions ??
                   <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: onImageTap,
-                          child: StreamChannelAvatar(
-                            size: .lg,
-                            channel: channel,
+                    if (effectiveCenterTitle)
+                      Padding(
+                        padding: EdgeInsets.only(right: context.streamSpacing.sm),
+                        child: Center(
+                          child: GestureDetector(
+                            onTap: onImageTap,
+                            child: StreamChannelAvatar(
+                              size: .lg,
+                              channel: channel,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
               centerTitle: centerTitle,
-              title: InkWell(
-                onTap: onTitleTap,
-                child: SizedBox(
-                  height: preferredSize.height,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: effectiveCenterTitle ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      title ??
-                          StreamChannelName(
-                            channel: channel,
-                            textStyle:
-                                channelHeaderTheme.titleStyle ??
-                                context.streamTextTheme.headingSm.copyWith(
-                                  color: context.streamColorScheme.textPrimary,
+              title: Row(
+                spacing: context.streamSpacing.sm,
+                children: [
+                  if (!effectiveCenterTitle) ...[
+                    GestureDetector(
+                      onTap: onImageTap,
+                      child: StreamChannelAvatar(
+                        size: .lg,
+                        channel: channel,
+                      ),
+                    ),
+                  ],
+                  Expanded(
+                    child: InkWell(
+                      onTap: onTitleTap,
+                      child: SizedBox(
+                        height: preferredSize.height,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: effectiveCenterTitle
+                              ? CrossAxisAlignment.center
+                              : CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            title ??
+                                StreamChannelName(
+                                  channel: channel,
+                                  textStyle:
+                                      channelHeaderTheme.titleStyle ??
+                                      context.streamTextTheme.headingSm.copyWith(
+                                        color: context.streamColorScheme.textPrimary,
+                                      ),
                                 ),
-                          ),
-                      const SizedBox(height: 2),
-                      subtitle ??
-                          StreamChannelInfo(
-                            showTypingIndicator: showTypingIndicator,
-                            channel: channel,
-                            textStyle: channelHeaderTheme.subtitleStyle,
-                          ),
-                    ],
+                            const SizedBox(height: 2),
+                            subtitle ??
+                                StreamChannelInfo(
+                                  showTypingIndicator: showTypingIndicator,
+                                  channel: channel,
+                                  textStyle:
+                                      channelHeaderTheme.subtitleStyle ??
+                                      context.streamTextTheme.captionDefault.copyWith(
+                                        color: context.streamColorScheme.textSecondary,
+                                      ),
+                                ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           );

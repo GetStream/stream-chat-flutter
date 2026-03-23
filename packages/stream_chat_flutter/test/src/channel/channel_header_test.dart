@@ -268,6 +268,7 @@ void main() {
               channel: channel,
               child: const Scaffold(
                 body: StreamChannelHeader(
+                  centerTitle: true,
                   leading: Text('leading'),
                   subtitle: Text('subtitle'),
                   actions: [

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/attachment_actions_modal/attachment_actions_modal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/misc/stream_app_bar.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
@@ -78,18 +78,16 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
   @override
   Widget build(BuildContext context) {
     final galleryHeaderThemeData = StreamGalleryHeaderTheme.of(context);
-    final theme = Theme.of(context);
-    return AppBar(
-      toolbarTextStyle: theme.textTheme.bodyMedium,
-      titleTextStyle: theme.textTheme.titleLarge,
-      systemOverlayStyle: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    final textTheme = context.streamTextTheme;
+
+    return StreamAppBar(
       elevation: elevation,
       leading: showBackButton
           ? IconButton(
               icon: Icon(
-                context.streamIcons.crossMedium,
+                context.streamIcons.arrowLeft,
                 color: galleryHeaderThemeData.closeButtonColor,
-                size: 24,
+                size: 20,
               ),
               onPressed: onBackPressed,
             )
@@ -100,7 +98,7 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
         if (!message.isEphemeral)
           IconButton(
             icon: Icon(
-              context.streamIcons.dotsGrid1x3Vertical,
+              context.streamIcons.dotGrid1x3Horizontal,
               color: galleryHeaderThemeData.iconMenuPointColor,
             ),
             onPressed: () => _showMessageActionModalBottomSheet(context),
@@ -119,11 +117,13 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
                   children: <Widget>[
                     Text(
                       userName,
-                      style: galleryHeaderThemeData.titleTextStyle,
+                      style: galleryHeaderThemeData.titleTextStyle ?? textTheme.headingSm,
                     ),
                     Text(
                       sentAt,
-                      style: galleryHeaderThemeData.subtitleTextStyle,
+                      style:
+                          galleryHeaderThemeData.subtitleTextStyle ??
+                          textTheme.captionDefault.copyWith(color: context.streamColorScheme.textSecondary),
                     ),
                   ],
                 ),
