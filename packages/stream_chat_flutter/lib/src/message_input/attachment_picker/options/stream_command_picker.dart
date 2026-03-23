@@ -35,7 +35,7 @@ class StreamCommandPicker extends StatelessWidget {
               child: Text(context.translations.instantCommandsLabel, style: textTheme.headlineBold),
             );
           }
-          
+
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: InkWell(
