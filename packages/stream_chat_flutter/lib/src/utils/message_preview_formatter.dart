@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template messagePreviewFormatter}
 /// Formats message previews for display.
@@ -236,7 +237,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     );
   }
 
-  TextSpan _textSpanWithMentions(String text, List<User> mentionedUsers) {
+  TextSpan _textSpanWithMentions(String text, List<User> mentionedUsers, StreamColorScheme colorScheme) {
     if (mentionedUsers.isEmpty) return TextSpan(text: text);
 
     final mentionRegex = RegExp(
@@ -251,7 +252,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
         if (mentionedUsers.any((it) => '@${it.name}' == part)) {
           return TextSpan(
             text: part,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.accentPrimary),
           );
         }
         return TextSpan(text: part);
@@ -296,9 +297,10 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
 
     final attachments = message.attachments;
     final mentionedUsers = message.mentionedUsers;
+    final colorScheme = context.streamColorScheme;
 
     if (attachments.isEmpty) {
-      return messageText != null ? _textSpanWithMentions(messageText, mentionedUsers) : null;
+      return messageText != null ? _textSpanWithMentions(messageText, mentionedUsers, colorScheme) : null;
     }
 
     return formatMessageAttachments(
@@ -452,9 +454,10 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     List<User> mentionedUsers = const [],
     bool showCaption = true,
   }) {
+    final colorScheme = context.streamColorScheme;
     final attachment = attachments.firstOrNull;
     if (attachment == null) {
-      return messageText != null ? _textSpanWithMentions(messageText, mentionedUsers) : null;
+      return messageText != null ? _textSpanWithMentions(messageText, mentionedUsers, colorScheme) : null;
     }
 
     final mixedTypes = attachments.any((it) => it.type != attachment.type);
@@ -465,7 +468,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
         children: [
           prefix,
           WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
-          _textSpanWithMentions(messageText, mentionedUsers),
+          _textSpanWithMentions(messageText, mentionedUsers, colorScheme),
         ],
       );
     }
@@ -608,6 +611,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     Location location, {
     bool showCaption = true,
   }) {
+    final colorScheme = context.streamColorScheme;
     return TextSpan(
       children: [
         WidgetSpan(child: Icon(context.streamIcons.mapPin, size: 16)),
@@ -615,7 +619,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
           child: SizedBox(width: context.streamSpacing.xxs),
         ),
         if (message.text?.trim() case final messageText? when messageText.isNotEmpty && showCaption) ...[
-          _textSpanWithMentions(messageText, message.mentionedUsers),
+          _textSpanWithMentions(messageText, message.mentionedUsers, colorScheme),
         ] else ...[
           TextSpan(text: context.translations.locationLabel(isLive: location.isLive)),
         ],
