@@ -101,7 +101,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                 ),
               ),
             if (hasAttachments)
-              StreamMessageInputAttachmentList(
+              StreamMessageComposerAttachmentList(
                 attachments: nonOGAttachments,
                 onRemovePressed: _onAttachmentRemovePressed,
               ),

@@ -115,13 +115,6 @@ class StreamMessageInput extends StatefulWidget {
     this.actionsBuilder,
     this.spaceBetweenActions = 0,
     this.actionsLocation = ActionsLocation.left,
-    this.attachmentListBuilder,
-    this.fileAttachmentListBuilder,
-    this.mediaAttachmentListBuilder,
-    this.voiceRecordingAttachmentListBuilder,
-    this.fileAttachmentBuilder,
-    this.mediaAttachmentBuilder,
-    this.voiceRecordingAttachmentBuilder,
     this.focusNode,
     this.sendButtonLocation = SendButtonLocation.outside,
     this.autofocus = false,
@@ -275,39 +268,6 @@ class StreamMessageInput extends StatefulWidget {
   /// The location of the custom actions.
   final ActionsLocation actionsLocation;
 
-  /// Builder used to build the attachment list present in the message input.
-  ///
-  /// In case you want to customize only sub-parts of the attachment list,
-  /// consider using [fileAttachmentListBuilder], [mediaAttachmentListBuilder].
-  final AttachmentListBuilder? attachmentListBuilder;
-
-  /// Builder used to build the file type attachment list.
-  ///
-  /// In case you want to customize the attachment item, consider using
-  /// [fileAttachmentBuilder].
-  final AttachmentListBuilder? fileAttachmentListBuilder;
-
-  /// Builder used to build the media type attachment list.
-  ///
-  /// In case you want to customize the attachment item, consider using
-  /// [mediaAttachmentBuilder].
-  final AttachmentListBuilder? mediaAttachmentListBuilder;
-
-  /// Builder used to build the voice recording attachment list.
-  ///
-  /// In case you want to customize the attachment item, consider using
-  /// [voiceRecordingAttachmentBuilder].
-  final AttachmentListBuilder? voiceRecordingAttachmentListBuilder;
-
-  /// Builder used to build the file attachment item.
-  final AttachmentItemBuilder? fileAttachmentBuilder;
-
-  /// Builder used to build the media attachment item.
-  final AttachmentItemBuilder? mediaAttachmentBuilder;
-
-  /// Builder used to build the voice recording attachment item.
-  final AttachmentItemBuilder? voiceRecordingAttachmentBuilder;
-
   /// Map that defines a thumbnail builder for an attachment type.
   ///
   /// This is used to build the thumbnail for the attachment in the quoted
@@ -317,8 +277,6 @@ class StreamMessageInput extends StatefulWidget {
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
 
-  /// The location of the send button
-  final SendButtonLocation sendButtonLocation;
 
   /// Autofocus property passed to the TextField
   final bool autofocus;
