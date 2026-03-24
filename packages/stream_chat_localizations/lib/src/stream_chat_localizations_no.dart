@@ -663,7 +663,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Direkte posisjon';
-    return '📍 Posisjon';
+    if (isLive) return 'Direkte posisjon';
+    return 'Posisjon';
   }
 }
