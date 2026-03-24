@@ -111,6 +111,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onThreadTap,
     this.onEditMessageTap,
     this.onReplyTap,
+    this.swipeToReply = false,
     this.onUserAvatarTap,
     this.onReactionsTap,
     this.onQuotedMessageTap,
@@ -222,6 +223,14 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Forwarded to each [StreamMessageWidget] in the list.
   final void Function(Message)? onReplyTap;
+
+  /// Whether swiping a message triggers a quoted-reply action.
+  ///
+  /// Forwarded to each [StreamMessageWidget] in the list via
+  /// [StreamMessageWidgetProps.swipeToReply].
+  ///
+  /// Defaults to false.
+  final bool swipeToReply;
 
   /// Called when a user avatar is tapped.
   ///
@@ -1056,6 +1065,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   ) {
     final parentMessageProps = StreamMessageWidgetProps(
       message: message,
+      swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
@@ -1200,6 +1210,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final messageWidgetProps = StreamMessageWidgetProps(
       message: message,
+      swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
