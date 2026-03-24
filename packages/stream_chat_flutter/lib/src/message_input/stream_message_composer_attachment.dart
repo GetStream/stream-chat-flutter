@@ -1,6 +1,12 @@
 part of 'stream_message_composer_attachment_list.dart';
 
+/// A widget that renders a single attachment in the message composer.
+///
+/// Delegates rendering to a custom builder registered via
+/// [StreamChatComponentBuilder], or falls back to
+/// [DefaultMessageComposerAttachment].
 class StreamMessageComposerAttachment extends StatelessWidget {
+  /// Creates a [StreamMessageComposerAttachment].
   StreamMessageComposerAttachment({
     super.key,
     required Attachment attachment,
@@ -22,25 +28,44 @@ class StreamMessageComposerAttachment extends StatelessWidget {
   }
 }
 
+/// Properties passed to [StreamMessageComposerAttachment] and its default
+/// implementation [DefaultMessageComposerAttachment].
 class StreamMessageComposerAttachmentProps {
+  /// Creates a [StreamMessageComposerAttachmentProps].
   const StreamMessageComposerAttachmentProps({
     required this.attachment,
     required this.onRemovePressed,
     required this.audioPlaylistController,
   });
 
+  /// The attachment to display.
   final Attachment attachment;
+
+  /// Callback called when the remove button is pressed.
   final ValueSetter<Attachment>? onRemovePressed;
+
+  /// Controller used for audio/voice-recording attachment playback.
   final StreamAudioPlaylistController? audioPlaylistController;
 }
 
+/// Default implementation of a message composer attachment widget.
+///
+/// Renders file, audio/voice-recording, or media attachments depending on the
+/// attachment type.
 class DefaultMessageComposerAttachment extends StatelessWidget {
+  /// Creates a [DefaultMessageComposerAttachment].
   const DefaultMessageComposerAttachment({super.key, required this.props});
 
+  /// The properties used to render this attachment.
   final StreamMessageComposerAttachmentProps props;
 
+  /// The attachment to display.
   Attachment get attachment => props.attachment;
+
+  /// Callback called when the remove button is pressed.
   ValueSetter<Attachment>? get onRemovePressed => props.onRemovePressed;
+
+  /// Controller used for audio/voice-recording attachment playback.
   StreamAudioPlaylistController? get audioPlaylistController => props.audioPlaylistController;
 
   @override
