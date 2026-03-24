@@ -378,7 +378,12 @@ class DefaultStreamMessage extends StatelessWidget {
 
     final placement = StreamMessagePlacement.of(context);
     final theme = StreamMessageItemTheme.of(context);
-    final defaults = _StreamMessageWidgetDefaults(context, isPinned: message.pinned, state: message.state);
+    final defaults = _StreamMessageWidgetDefaults(
+      context,
+      isPinned: message.pinned,
+      isEdited: message.messageTextUpdatedAt != null,
+      state: message.state,
+    );
 
     final resolve = StreamMessageStyleResolver(placement, [theme, defaults]);
 
@@ -863,10 +868,12 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   _StreamMessageWidgetDefaults(
     this._context, {
     this.isPinned = false,
+    this.isEdited = false,
     required MessageState state,
   }) : _messageState = state;
 
   final bool isPinned;
+  final bool isEdited;
 
   final BuildContext _context;
   final MessageState _messageState;
@@ -902,10 +909,12 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   StreamMessageStyleVisibility get headerVisibility => .all(.visible);
 
   @override
-  StreamMessageStyleVisibility get footerVisibility => .resolveWith(
-    (placement) => switch (placement.stackPosition) {
-      .single || .bottom => .visible,
-      _ => .gone,
-    },
-  );
+  StreamMessageStyleVisibility get footerVisibility => isEdited
+      ? .all(.visible)
+      : .resolveWith(
+          (placement) => switch (placement.stackPosition) {
+            .single || .bottom => .visible,
+            _ => .gone,
+          },
+        );
 }
