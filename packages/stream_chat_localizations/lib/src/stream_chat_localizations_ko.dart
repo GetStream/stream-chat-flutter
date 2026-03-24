@@ -667,4 +667,22 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
     if (isLive) return '📍 실시간 위치';
     return '📍 위치';
   }
+
+  @override
+  String get createPollPromptLabel => '투표를 만들고 모두에게 투표하게 하세요!';
+
+  @override
+  String get takePhotoAndShareLabel => '사진을 찍고 공유';
+
+  @override
+  String get takeVideoAndShareLabel => '동영상을 찍고 공유';
+
+  @override
+  String get openCameraLabel => '카메라 열기';
+
+  @override
+  String get selectFilesToShareLabel => '공유할 파일 선택';
+
+  @override
+  String get openFilesLabel => '파일 열기';
 }

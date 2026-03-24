@@ -568,6 +568,24 @@ abstract class Translations {
   ///
   /// [isLive] indicates if the location is live or not.
   String locationLabel({bool isLive = false});
+
+  /// The label for "Create a poll and let everyone vote!"
+  String get createPollPromptLabel;
+
+  /// The label for "Take a photo and share"
+  String get takePhotoAndShareLabel;
+
+  /// The label for "Take a video and share"
+  String get takeVideoAndShareLabel;
+
+  /// The label for "Open camera"
+  String get openCameraLabel;
+
+  /// The label for "Select files to share"
+  String get selectFilesToShareLabel;
+
+  /// The label for "Open files"
+  String get openFilesLabel;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1252,4 +1270,22 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
     if (isLive) return '📍 Live Location';
     return '📍 Location';
   }
+
+  @override
+  String get createPollPromptLabel => 'Create a poll and let everyone vote!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Take a photo and share';
+
+  @override
+  String get takeVideoAndShareLabel => 'Take a video and share';
+
+  @override
+  String get openCameraLabel => 'Open camera';
+
+  @override
+  String get selectFilesToShareLabel => 'Select files to share';
+
+  @override
+  String get openFilesLabel => 'Open files';
 }

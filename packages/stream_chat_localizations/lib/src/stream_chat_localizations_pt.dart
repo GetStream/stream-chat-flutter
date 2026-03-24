@@ -681,4 +681,22 @@ Não é possível adicionar mais de $limit arquivos de uma vez
     if (isLive) return '📍 Localização ao Vivo';
     return '📍 Localização';
   }
+
+  @override
+  String get createPollPromptLabel => 'Crie uma enquete e deixe todos votarem!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Tire uma foto e compartilhe';
+
+  @override
+  String get takeVideoAndShareLabel => 'Grave um vídeo e compartilhe';
+
+  @override
+  String get openCameraLabel => 'Abrir câmera';
+
+  @override
+  String get selectFilesToShareLabel => 'Selecione arquivos para compartilhar';
+
+  @override
+  String get openFilesLabel => 'Abrir arquivos';
 }

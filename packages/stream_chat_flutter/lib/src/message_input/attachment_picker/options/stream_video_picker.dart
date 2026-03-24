@@ -47,28 +47,31 @@ class StreamVideoPicker extends StatelessWidget {
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              size: 32,
-              context.streamIcons.video,
-              color: colorScheme.textTertiary,
-            ),
-            SizedBox(height: spacing.xs),
-            Text(
-              'Take a video and share',
-              style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.md),
-            StreamButton(
-              type: .outline,
-              style: .secondary,
-              onTap: onPickVideo,
-              label: 'Open camera',
-            ),
-          ],
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                size: 32,
+                context.streamIcons.video,
+                color: colorScheme.textTertiary,
+              ),
+              SizedBox(height: spacing.xs),
+              Text(
+                context.translations.takeVideoAndShareLabel,
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: onPickVideo,
+                label: context.translations.openCameraLabel,
+              ),
+            ],
+          ),
         ),
         onEndOfFrame: (_) => onPickVideo(),
         errorBuilder: (context, error, stacktrace) {

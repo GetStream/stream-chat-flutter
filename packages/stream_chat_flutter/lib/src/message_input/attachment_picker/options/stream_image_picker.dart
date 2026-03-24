@@ -57,28 +57,31 @@ class StreamImagePicker extends StatelessWidget {
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              size: 32,
-              context.streamIcons.camera1,
-              color: colorScheme.textTertiary,
-            ),
-            SizedBox(height: spacing.xs),
-            Text(
-              'Take a photo and share',
-              style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.md),
-            StreamButton(
-              type: .outline,
-              style: .secondary,
-              onTap: onPickImage,
-              label: 'Open camera',
-            ),
-          ],
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                size: 32,
+                context.streamIcons.camera1,
+                color: colorScheme.textTertiary,
+              ),
+              SizedBox(height: spacing.xs),
+              Text(
+                context.translations.takePhotoAndShareLabel,
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: onPickImage,
+                label: context.translations.openCameraLabel,
+              ),
+            ],
+          ),
         ),
         onEndOfFrame: (_) => onPickImage(),
         errorBuilder: (context, error, stacktrace) {

@@ -65,7 +65,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
     this.onBackPressed,
     this.title,
     this.subtitle,
-    this.centerTitle,
+    this.centerTitle = true,
     this.leading,
     this.actions,
     this.onTitleTap,
@@ -98,7 +98,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
   final Widget? subtitle;
 
   /// Whether the title should be centered
-  final bool? centerTitle;
+  final bool centerTitle;
 
   /// Leading widget
   final Widget? leading;
