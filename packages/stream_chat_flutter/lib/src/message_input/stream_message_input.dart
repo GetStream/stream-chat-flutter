@@ -1,7 +1,8 @@
 import 'dart:async';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
+import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/misc/simple_safe_area.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -93,7 +94,7 @@ class StreamMessageInput extends StatefulWidget {
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
     this.userMentionsTileBuilder,
     this.onError,
-    this.attachmentLimit = 10,
+    this.attachmentLimit,
     this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
     this.onAttachmentLimitExceed,
     this.customAutocompleteTriggers = const [],
@@ -102,8 +103,6 @@ class StreamMessageInput extends StatefulWidget {
     this.validator = _defaultValidator,
     this.restorationId,
     this.enableSafeArea,
-    this.elevation,
-    this.shadow,
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
     this.ogPreviewFilter = _defaultOgPreviewFilter,
@@ -112,6 +111,8 @@ class StreamMessageInput extends StatefulWidget {
     this.pollConfig,
     this.attachmentPickerOptionsBuilder,
     this.onAttachmentPickerResult,
+    this.sendMessageKeyPredicate = _defaultSendMessageKeyPredicate,
+    this.clearQuotedMessageKeyPredicate = _defaultClearQuotedMessageKeyPredicate,
   });
 
   /// List of triggers for showing autocomplete.
@@ -184,7 +185,7 @@ class StreamMessageInput extends StatefulWidget {
   final ErrorListener? onError;
 
   /// A limit for the no. of attachments that can be sent with a single message.
-  final int attachmentLimit;
+  final int? attachmentLimit;
 
   /// The list of allowed attachment types which can be picked using the
   /// attachment button.
@@ -214,12 +215,6 @@ class StreamMessageInput extends StatefulWidget {
 
   /// Wrap [StreamMessageInput] with a [SafeArea widget]
   final bool? enableSafeArea;
-
-  /// Elevation of the [StreamMessageInput]
-  final double? elevation;
-
-  /// Shadow for the [StreamMessageInput] widget
-  final BoxShadow? shadow;
 
   /// Disable the mentions overlay by passing false
   /// Enabled by default
@@ -265,6 +260,25 @@ class StreamMessageInput extends StatefulWidget {
   /// Return `true` if the result is handled. Otherwise, return `false` to
   /// allow the result to be handled internally.
   final OnAttachmentPickerResult? onAttachmentPickerResult;
+
+  /// Predicate to determine if the current key event should trigger sending
+  /// the message. Defaults to Enter on non-mobile platforms (without Shift).
+  final KeyEventPredicate sendMessageKeyPredicate;
+
+  /// Predicate to determine if the current key event should clear the quoted
+  /// message. Defaults to Escape on non-mobile platforms.
+  final KeyEventPredicate clearQuotedMessageKeyPredicate;
+
+  static bool _defaultSendMessageKeyPredicate(FocusNode node, KeyEvent event) {
+    if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) return false;
+    if (HardwareKeyboard.instance.isShiftPressed) return false;
+    return event.logicalKey == LogicalKeyboardKey.enter && event is KeyDownEvent;
+  }
+
+  static bool _defaultClearQuotedMessageKeyPredicate(FocusNode node, KeyEvent event) {
+    if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) return false;
+    return event.logicalKey == LogicalKeyboardKey.escape && event is KeyDownEvent;
+  }
 
   static String? _defaultHintGetter(
     BuildContext context,
@@ -437,6 +451,22 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     }
   }
 
+  KeyEventResult _handleKeyPressed(FocusNode node, KeyEvent event) {
+    if (widget.sendMessageKeyPredicate(node, event)) {
+      sendMessage();
+      return KeyEventResult.handled;
+    }
+    if (widget.clearQuotedMessageKeyPredicate(node, event)) {
+      final hasQuote = _effectiveController.message.quotedMessage != null;
+      if (hasQuote && _effectiveController.text.isEmpty) {
+        _effectiveController.clearQuotedMessage();
+        widget.onQuotedMessageCleared?.call();
+      }
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     bool canSendOrUpdateMessage(List<ChannelCapability> capabilities) {
@@ -472,16 +502,12 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       final messageInput => messageInput,
     };
 
-    final shadow = widget.shadow ?? _messageInputTheme.shadow;
-    final elevation = widget.elevation ?? _messageInputTheme.elevation;
     final spacing = context.streamSpacing;
 
     return Material(
-      elevation: elevation ?? 8,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: context.streamColorScheme.backgroundElevation1,
-          boxShadow: [if (shadow != null) shadow],
         ),
         child: SimpleSafeArea(
           enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
@@ -561,18 +587,37 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       builder: (context, value, _) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StreamChatMessageComposer(
-            controller: controller,
-            currentUserId: currentUserId,
-            onAttachmentButtonPressed: _onAttachmentButtonPressed,
-            isPickerOpen: _isPickerVisible,
-            placeholder: _getHint(context) ?? '',
-            focusNode: focusNode,
-            onSendPressed: sendMessage,
-            canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-            audioRecorderController: widget.enableVoiceRecording ? _audioRecorderController : null,
-            sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
-            feedback: widget.voiceRecordingFeedback,
+          DropTarget(
+            onDragDone: (details) async {
+              final attachments = <Attachment>[];
+              for (final file in details.files) {
+                attachments.add(await file.toAttachment(type: AttachmentType.file));
+              }
+              if (attachments.isNotEmpty) _addAttachments(attachments);
+            },
+            onDragEntered: (_) {},
+            onDragExited: (_) {},
+            child: Focus(
+              skipTraversal: true,
+              onKeyEvent: _handleKeyPressed,
+              child: StreamChatMessageComposer(
+                controller: controller,
+                currentUserId: currentUserId,
+                onAttachmentButtonPressed: _onAttachmentButtonPressed,
+                isPickerOpen: _isPickerVisible,
+                placeholder: _getHint(context) ?? '',
+                focusNode: focusNode,
+                onSendPressed: sendMessage,
+                canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
+                audioRecorderController: widget.enableVoiceRecording ? _audioRecorderController : null,
+                sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
+                feedback: widget.voiceRecordingFeedback,
+                onQuotedMessageCleared: () {
+                  _effectiveController.clearQuotedMessage();
+                  widget.onQuotedMessageCleared?.call();
+                },
+              ),
+            ),
           ),
           _buildInlineAttachmentPicker(context),
         ].nonNulls.toList(),
@@ -674,10 +719,17 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     if (_isPickerVisible) return;
 
     setState(() {
-      _pickerController = StreamAttachmentPickerController(
-        initialAttachments: _effectiveController.attachments,
-        initialPoll: _effectiveController.poll,
-      );
+      final attachmentLimit = widget.attachmentLimit;
+      _pickerController = attachmentLimit != null
+          ? StreamAttachmentPickerController(
+              initialAttachments: _effectiveController.attachments,
+              initialPoll: _effectiveController.poll,
+              maxAttachmentCount: attachmentLimit,
+            )
+          : StreamAttachmentPickerController(
+              initialAttachments: _effectiveController.attachments,
+              initialPoll: _effectiveController.poll,
+            );
       _pickerController!.addListener(_syncPickerToMessage);
       _effectiveController.addListener(_syncMessageToPicker);
       _customResultSubscription = _pickerController!.customResults.listen(_onCustomResult);
@@ -867,35 +919,22 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     return response;
   }
 
-  // Default callback for removing an attachment.
-  Future<void> _onAttachmentRemovePressed(Attachment attachment) async {
-    final file = attachment.file;
-    final uploadState = attachment.uploadState;
-
-    if (file != null && !uploadState.isSuccess && !isWeb) {
-      await StreamAttachmentHandler.instance.deleteAttachmentFile(
-        attachmentFile: file,
-      );
-    }
-
-    _effectiveController.removeAttachmentById(attachment.id);
-  }
-
   /// Adds an attachment to the [messageInputController.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
-    final limit = widget.attachmentLimit;
-    final length = _effectiveController.attachments.length + attachments.length;
-    if (length > limit) {
-      final onAttachmentLimitExceed = widget.onAttachmentLimitExceed;
-      if (onAttachmentLimitExceed != null) {
-        return onAttachmentLimitExceed(
-          widget.attachmentLimit,
+    if (widget.attachmentLimit case final limit?) {
+      final length = _effectiveController.attachments.length + attachments.length;
+      if (length > limit) {
+        final onAttachmentLimitExceed = widget.onAttachmentLimitExceed;
+        if (onAttachmentLimitExceed != null) {
+          return onAttachmentLimitExceed(
+            limit,
+            context.translations.attachmentLimitExceedError(limit),
+          );
+        }
+        return _showErrorAlert(
           context.translations.attachmentLimitExceedError(limit),
         );
       }
-      return _showErrorAlert(
-        context.translations.attachmentLimitExceedError(limit),
-      );
     }
     for (final attachment in attachments) {
       _effectiveController.addAttachment(attachment);
@@ -1080,4 +1119,3 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     super.dispose();
   }
 }
-

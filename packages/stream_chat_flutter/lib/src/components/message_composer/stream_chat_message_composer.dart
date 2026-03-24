@@ -35,6 +35,7 @@ class StreamChatMessageComposer extends StatefulWidget {
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
     bool canAlsoSendToChannel = false,
+    VoidCallback? onQuotedMessageCleared,
   }) : props = MessageComposerProps(
          controller: controller,
          isFloating: false,
@@ -49,6 +50,7 @@ class StreamChatMessageComposer extends StatefulWidget {
          sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
          feedback: feedback,
          canAlsoSendToChannel: canAlsoSendToChannel,
+         onQuotedMessageCleared: onQuotedMessageCleared,
        );
 
   /// The controller for the message composer.
@@ -180,6 +182,7 @@ class MessageComposerProps {
     this.sendVoiceRecordingAutomatically = false,
     this.feedback = const AudioRecorderFeedback(),
     this.canAlsoSendToChannel = false,
+    this.onQuotedMessageCleared,
   });
 
   /// The controller for the message composer.
@@ -224,6 +227,9 @@ class MessageComposerProps {
   /// Whether the user can also send the message as a direct message.
   /// Usually used in threads.
   final bool canAlsoSendToChannel;
+
+  /// Callback for when the quoted message is cleared.
+  final VoidCallback? onQuotedMessageCleared;
 }
 
 extension on StreamAudioRecorderController {
@@ -280,6 +286,7 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
       isPickerOpen: props.isPickerOpen,
       audioRecorderState: audioRecorderState,
       focusNode: props.focusNode,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
     );
 
     return core.StreamCoreMessageComposer(

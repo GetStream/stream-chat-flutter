@@ -86,7 +86,10 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                 padding: contentPadding,
                 child: _QuotedMessageInHeader(
                   quotedMessage: quotedMessage,
-                  onRemovePressed: controller.clearQuotedMessage,
+                  onRemovePressed: () {
+                    controller.clearQuotedMessage();
+                    props.onQuotedMessageCleared?.call();
+                  },
                   currentUserId: props.currentUserId,
                 ),
               ),

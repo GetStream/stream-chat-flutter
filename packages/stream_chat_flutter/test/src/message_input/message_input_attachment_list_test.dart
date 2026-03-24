@@ -30,7 +30,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
@@ -55,7 +55,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
               onRemovePressed: (attachment) {
                 removedAttachment = attachment;
@@ -83,7 +83,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
@@ -106,7 +106,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            MessageInputFileAttachments(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
@@ -128,7 +128,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            MessageInputFileAttachments(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
               onRemovePressed: (attachment) {
                 removedAttachment = attachment;
