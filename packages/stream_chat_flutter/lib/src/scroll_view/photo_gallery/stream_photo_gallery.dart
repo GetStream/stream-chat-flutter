@@ -4,9 +4,9 @@ import 'package:photo_manager/photo_manager.dart' show AssetEntity, ThumbnailFor
 
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Default grid delegate  for [StreamPhotoGallery].
 const defaultStreamPhotoGalleryDelegate = SliverGridDelegateWithFixedCrossAxisCount(
@@ -389,10 +389,10 @@ class StreamPhotoGallery extends StatelessWidget {
         );
       },
       loadMoreIndicatorBuilder: (context) {
-        return const Center(
+        return Center(
           child: Padding(
-            padding: EdgeInsets.all(16),
-            child: StreamScrollViewLoadMoreIndicator(),
+            padding: const EdgeInsets.all(16),
+            child: StreamLoadingSpinner(),
           ),
         );
       },

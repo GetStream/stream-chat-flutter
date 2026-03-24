@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more
 import 'package:stream_chat_flutter/src/scroll_view/thread_scroll_view/stream_thread_list_empty_state.dart';
 import 'package:stream_chat_flutter/src/scroll_view/thread_scroll_view/stream_thread_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Default separator builder for [StreamThreadListView].
 Widget defaultThreadListViewSeparatorBuilder(
@@ -315,10 +316,10 @@ class StreamThreadListView extends StatelessWidget {
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
       ),
-      loadMoreIndicatorBuilder: (context) => const Center(
+      loadMoreIndicatorBuilder: (context) => Center(
         child: Padding(
-          padding: EdgeInsets.all(16),
-          child: StreamScrollViewLoadMoreIndicator(),
+          padding: const EdgeInsets.all(16),
+          child: StreamLoadingSpinner(),
         ),
       ),
       loadingBuilder: (context) =>
