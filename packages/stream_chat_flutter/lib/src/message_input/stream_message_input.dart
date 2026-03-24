@@ -88,6 +88,8 @@ class StreamMessageInput extends StatefulWidget {
     this.preMessageSending,
     this.messageInputController,
     this.focusNode,
+    this.disableAttachments = false,
+    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.canAlsoSendToChannelFromThread = true,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
@@ -113,6 +115,11 @@ class StreamMessageInput extends StatefulWidget {
     this.onAttachmentPickerResult,
     this.sendMessageKeyPredicate = _defaultSendMessageKeyPredicate,
     this.clearQuotedMessageKeyPredicate = _defaultClearQuotedMessageKeyPredicate,
+    this.textInputAction,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.sentences,
+    this.autofocus = false,
+    this.autoCorrect = true,
   });
 
   /// List of triggers for showing autocomplete.
@@ -131,6 +138,16 @@ class StreamMessageInput extends StatefulWidget {
 
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
+
+  /// If true the attachments button will not be displayed.
+  ///
+  /// Defaults to false.
+  final bool disableAttachments;
+
+  /// Max attachment size in bytes.
+  ///
+  /// Defaults to 100 MB.
+  final int maxAttachmentSize;
 
   /// Show the checkbox to send the message as a direct message to the channel.
   ///
@@ -268,6 +285,23 @@ class StreamMessageInput extends StatefulWidget {
   /// Predicate to determine if the current key event should clear the quoted
   /// message. Defaults to Escape on non-mobile platforms.
   final KeyEventPredicate clearQuotedMessageKeyPredicate;
+
+  /// The type of action button to use for the keyboard.
+  final TextInputAction? textInputAction;
+
+  /// The keyboard type assigned to the TextField.
+  final TextInputType? keyboardType;
+
+  /// {@macro flutter.widgets.editableText.textCapitalization}
+  final TextCapitalization textCapitalization;
+
+  /// Autofocus property passed to the TextField.
+  final bool autofocus;
+
+  /// Whether to enable autocorrect.
+  ///
+  /// Defaults to true.
+  final bool autoCorrect;
 
   static bool _defaultSendMessageKeyPredicate(FocusNode node, KeyEvent event) {
     if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) return false;
@@ -603,7 +637,7 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
               child: StreamChatMessageComposer(
                 controller: controller,
                 currentUserId: currentUserId,
-                onAttachmentButtonPressed: _onAttachmentButtonPressed,
+                onAttachmentButtonPressed: widget.disableAttachments ? null : _onAttachmentButtonPressed,
                 isPickerOpen: _isPickerVisible,
                 placeholder: _getHint(context) ?? '',
                 focusNode: focusNode,
@@ -616,6 +650,11 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
                   _effectiveController.clearQuotedMessage();
                   widget.onQuotedMessageCleared?.call();
                 },
+                textInputAction: widget.textInputAction,
+                keyboardType: widget.keyboardType,
+                textCapitalization: widget.textCapitalization,
+                autofocus: widget.autofocus,
+                autocorrect: widget.autoCorrect,
               ),
             ),
           ),
@@ -725,10 +764,12 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
               initialAttachments: _effectiveController.attachments,
               initialPoll: _effectiveController.poll,
               maxAttachmentCount: attachmentLimit,
+              maxAttachmentSize: widget.maxAttachmentSize,
             )
           : StreamAttachmentPickerController(
               initialAttachments: _effectiveController.attachments,
               initialPoll: _effectiveController.poll,
+              maxAttachmentSize: widget.maxAttachmentSize,
             );
       _pickerController!.addListener(_syncPickerToMessage);
       _effectiveController.addListener(_syncMessageToPicker);
