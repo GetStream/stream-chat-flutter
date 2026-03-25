@@ -39,28 +39,31 @@ class StreamPollCreator extends StatelessWidget {
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              size: 32,
-              context.streamIcons.chart5,
-              color: colorScheme.textTertiary,
-            ),
-            SizedBox(height: spacing.xs),
-            Text(
-              'Create a poll and let everyone vote!',
-              style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: spacing.md),
-            StreamButton(
-              type: .outline,
-              style: .secondary,
-              onTap: _openCreatePollFlow,
-              label: context.translations.createPollLabel(),
-            ),
-          ],
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                size: 32,
+                context.streamIcons.chart5,
+                color: colorScheme.textTertiary,
+              ),
+              SizedBox(height: spacing.xs),
+              Text(
+                context.translations.createPollPromptLabel,
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: _openCreatePollFlow,
+                label: context.translations.createPollLabel(),
+              ),
+            ],
+          ),
         ),
         onEndOfFrame: (_) => _openCreatePollFlow(),
         errorBuilder: (context, error, stacktrace) {

@@ -687,4 +687,22 @@ Attenzione: il limite massimo di $limit file è stato superato.
     if (isLive) return '📍 Posizione dal vivo';
     return '📍 Posizione';
   }
+
+  @override
+  String get createPollPromptLabel => 'Crea un sondaggio e fai votare tutti!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Scatta una foto e condividi';
+
+  @override
+  String get takeVideoAndShareLabel => 'Registra un video e condividi';
+
+  @override
+  String get openCameraLabel => 'Apri fotocamera';
+
+  @override
+  String get selectFilesToShareLabel => 'Seleziona i file da condividere';
+
+  @override
+  String get openFilesLabel => 'Apri file';
 }

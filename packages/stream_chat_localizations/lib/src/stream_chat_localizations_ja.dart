@@ -664,4 +664,22 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     if (isLive) return '📍 ライブ位置情報';
     return '📍 位置情報';
   }
+
+  @override
+  String get createPollPromptLabel => '投票を作成してみんなに投票してもらおう！';
+
+  @override
+  String get takePhotoAndShareLabel => '写真を撮って共有';
+
+  @override
+  String get takeVideoAndShareLabel => '動画を撮って共有';
+
+  @override
+  String get openCameraLabel => 'カメラを開く';
+
+  @override
+  String get selectFilesToShareLabel => '共有するファイルを選択';
+
+  @override
+  String get openFilesLabel => 'ファイルを開く';
 }

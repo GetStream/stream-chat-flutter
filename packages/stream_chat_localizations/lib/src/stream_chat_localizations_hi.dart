@@ -682,4 +682,22 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
     if (isLive) return '📍 लाइव लोकेशन';
     return '📍 लोकेशन';
   }
+
+  @override
+  String get createPollPromptLabel => 'पोल बनाएं और सबको वोट करने दें!';
+
+  @override
+  String get takePhotoAndShareLabel => 'फ़ोटो लें और साझा करें';
+
+  @override
+  String get takeVideoAndShareLabel => 'वीडियो लें और साझा करें';
+
+  @override
+  String get openCameraLabel => 'कैमरा खोलें';
+
+  @override
+  String get selectFilesToShareLabel => 'साझा करने के लिए फ़ाइलें चुनें';
+
+  @override
+  String get openFilesLabel => 'फ़ाइलें खोलें';
 }

@@ -63,7 +63,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     this.showConnectionStateTile = false,
     this.title,
     this.subtitle,
-    this.centerTitle,
+    this.centerTitle = true,
     this.leading,
     this.actions,
     this.bottom,
@@ -104,7 +104,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   final Widget? subtitle;
 
   /// Whether the title should be centered
-  final bool? centerTitle;
+  final bool centerTitle;
 
   /// Leading widget
   final Widget? leading;

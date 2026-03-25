@@ -21,7 +21,7 @@ class StreamAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleTextStyle,
     this.actions,
     this.actionsPadding,
-    this.centerTitle,
+    this.centerTitle = true,
     this.bottom,
     this.bottomOpacity = 1.0,
     this.elevation = 0,
@@ -58,7 +58,7 @@ class StreamAppBar extends StatelessWidget implements PreferredSizeWidget {
   final EdgeInsetsGeometry? actionsPadding;
 
   /// Whether the title should be centered.
-  final bool? centerTitle;
+  final bool centerTitle;
 
   /// An app bar bottom widget, displayed below the [title].
   final PreferredSizeWidget? bottom;

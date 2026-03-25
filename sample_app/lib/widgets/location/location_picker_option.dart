@@ -27,10 +27,12 @@ class LocationPicker extends StatelessWidget {
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: Icon(
-          size: 148,
-          Icons.near_me_rounded,
-          color: colorTheme.disabled,
+        child: Center(
+          child: Icon(
+            size: 148,
+            Icons.near_me_rounded,
+            color: colorTheme.disabled,
+          ),
         ),
         onEndOfFrame: (context) async {
           final result = await runInPermissionRequestLock(() {

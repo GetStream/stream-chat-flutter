@@ -684,4 +684,22 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     if (isLive) return '📍 Position en direct';
     return '📍 Position';
   }
+
+  @override
+  String get createPollPromptLabel => 'Créez un sondage et laissez tout le monde voter !';
+
+  @override
+  String get takePhotoAndShareLabel => 'Prendre une photo et partager';
+
+  @override
+  String get takeVideoAndShareLabel => 'Prendre une vidéo et partager';
+
+  @override
+  String get openCameraLabel => 'Ouvrir la caméra';
+
+  @override
+  String get selectFilesToShareLabel => 'Sélectionnez des fichiers à partager';
+
+  @override
+  String get openFilesLabel => 'Ouvrir des fichiers';
 }
