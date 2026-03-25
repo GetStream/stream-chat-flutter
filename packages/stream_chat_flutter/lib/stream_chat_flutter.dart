@@ -125,7 +125,7 @@ export 'src/misc/info_tile.dart';
 export 'src/misc/markdown_message.dart';
 export 'src/misc/option_list_tile.dart';
 export 'src/misc/reaction_icon_resolver.dart';
-export 'src/misc/stream_app_bar.dart';
+
 export 'src/misc/stream_modal.dart';
 export 'src/misc/stream_neumorphic_button.dart';
 export 'src/misc/swipeable.dart';

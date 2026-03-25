@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment_actions_modal/attachment_actions_modal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/misc/stream_app_bar.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
