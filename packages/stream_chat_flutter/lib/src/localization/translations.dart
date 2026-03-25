@@ -568,6 +568,15 @@ abstract class Translations {
   ///
   /// [isLive] indicates if the location is live or not.
   String locationLabel({bool isLive = false});
+
+  /// The text shown when there are no conversations yet.
+  String get noConversationsYetText;
+
+  /// The text shown when there are no threads yet.
+  String get replyToStartThreadText;
+
+  /// The text shown to prompt the user to send a message.
+  String get sendMessageToStartConversationText;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1252,4 +1261,13 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
     if (isLive) return 'Live Location';
     return 'Location';
   }
+
+  @override
+  String get noConversationsYetText => 'No conversations yet';
+
+  @override
+  String get replyToStartThreadText => 'Reply to a message to start a thread';
+
+  @override
+  String get sendMessageToStartConversationText => 'Send a message to start the conversation';
 }

@@ -682,4 +682,13 @@ No es posible añadir más de $limit archivos adjuntos
     if (isLive) return 'Ubicación en vivo';
     return 'Ubicación';
   }
+
+  @override
+  String get noConversationsYetText => 'Aún no hay conversaciones';
+
+  @override
+  String get replyToStartThreadText => 'Responde a un mensaje para iniciar un hilo';
+
+  @override
+  String get sendMessageToStartConversationText => 'Envía un mensaje para iniciar la conversación';
 }
