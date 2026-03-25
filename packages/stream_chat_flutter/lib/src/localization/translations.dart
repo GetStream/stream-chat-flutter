@@ -1249,7 +1249,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live Location';
-    return '📍 Location';
+    if (isLive) return 'Live Location';
+    return 'Location';
   }
 }

@@ -684,7 +684,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Posizione dal vivo';
-    return '📍 Posizione';
+    if (isLive) return 'Posizione dal vivo';
+    return 'Posizione';
   }
 }

@@ -685,8 +685,8 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live Location';
-    return '📍 Location';
+    if (isLive) return 'Live Location';
+    return 'Location';
   }
 
   @override

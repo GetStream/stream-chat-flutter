@@ -681,7 +681,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Position en direct';
-    return '📍 Position';
+    if (isLive) return 'Position en direct';
+    return 'Position';
   }
 }

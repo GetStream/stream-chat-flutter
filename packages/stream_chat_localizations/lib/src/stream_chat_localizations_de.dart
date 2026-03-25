@@ -675,7 +675,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live-Standort';
-    return '📍 Standort';
+    if (isLive) return 'Live-Standort';
+    return 'Standort';
   }
 }
