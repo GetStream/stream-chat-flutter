@@ -312,6 +312,9 @@ void main() {
       expect(localizations.systemMessageLabel, isNotNull);
       expect(localizations.draftLabel, isNotNull);
       expect(localizations.locationLabel(), isNotNull);
+      expect(localizations.noConversationsYetText, isNotNull);
+      expect(localizations.replyToStartThreadText, isNotNull);
+      expect(localizations.sendMessageToStartConversationText, isNotNull);
     });
   }
 
