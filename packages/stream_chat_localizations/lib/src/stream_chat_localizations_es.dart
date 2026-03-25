@@ -679,8 +679,8 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Ubicación en vivo';
-    return '📍 Ubicación';
+    if (isLive) return 'Ubicación en vivo';
+    return 'Ubicación';
   }
 
   @override

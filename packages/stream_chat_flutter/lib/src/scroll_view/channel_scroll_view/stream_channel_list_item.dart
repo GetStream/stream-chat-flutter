@@ -606,7 +606,6 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
 
   static bool _defaultLastMessagePredicate(Message message) {
     if (message.isShadowed) return false;
-    if (message.isDeleted) return false;
     if (message.isError) return false;
     if (message.isEphemeral) return false;
 
@@ -715,7 +714,6 @@ class ChannelLastMessageText extends StatefulWidget {
   // considered for the last message.
   static bool _defaultLastMessagePredicate(Message message) {
     if (message.isShadowed) return false;
-    if (message.isDeleted) return false;
     if (message.isError) return false;
     if (message.isEphemeral) return false;
 
