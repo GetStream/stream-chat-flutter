@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/thread_scroll_view/stream_thread_list_empty_state.dart';
 import 'package:stream_chat_flutter/src/scroll_view/thread_scroll_view/stream_thread_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
