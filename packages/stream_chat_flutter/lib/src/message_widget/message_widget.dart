@@ -727,17 +727,37 @@ class DefaultStreamMessage extends StatelessWidget {
       currentUser: currentUser,
     );
 
+    final placement = StreamMessagePlacement.of(context);
+    final theme = StreamMessageItemTheme.of(context);
+    final defaults = _StreamMessageWidgetDefaults(
+      context,
+      isPinned: message.pinned,
+      isEdited: message.messageTextUpdatedAt != null,
+      state: message.state,
+    );
+
+    final resolve = StreamMessageStyleResolver(placement, [theme, defaults]);
+    final leadingVisibility = resolve((theme) => theme?.leadingVisibility);
+
+    var leadingInset = 0.0;
+    if (leadingVisibility != StreamVisibility.gone) {
+      final effectiveAvatarSize = theme.avatarSize ?? defaults.avatarSize;
+      final effectiveSpacing = props.spacing ?? theme.spacing ?? defaults.spacing;
+      leadingInset = effectiveAvatarSize.value + effectiveSpacing;
+    }
+
     final action = await showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
         data: StreamChatConfiguration.of(context),
         child: StreamMessagePlacement(
-          data: StreamMessagePlacement.of(context),
+          data: placement,
           child: StreamMessageActionsModal(
             message: message,
             messageActions: actions,
             showReactionPicker: showPicker,
+            leadingInset: leadingInset,
             messageWidget: StreamChannel(
               channel: channel,
               child: StreamMessageWidget(
