@@ -693,4 +693,22 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get sendMessageToStartConversationText => 'Envoyez un message pour démarrer la conversation';
+
+  @override
+  String get savedForLaterLabel => 'Enregistré pour plus tard';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'A répondu à un fil';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Également envoyé dans le canal';
+
+  @override
+  String get viewLabel => 'Voir';
+
+  @override
+  String get reminderSetLabel => 'Rappel défini';
+
+  @override
+  String reminderAtText(String time) => "Aujourd'hui à $time";
 }

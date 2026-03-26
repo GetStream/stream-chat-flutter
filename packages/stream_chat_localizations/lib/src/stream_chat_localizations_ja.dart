@@ -673,4 +673,22 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get sendMessageToStartConversationText => '会話を始めるにはメッセージを送信してください';
+
+  @override
+  String get savedForLaterLabel => '後で確認';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'スレッドに返信しました';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'チャンネルにも送信されました';
+
+  @override
+  String get viewLabel => '表示';
+
+  @override
+  String get reminderSetLabel => 'リマインダー設定済み';
+
+  @override
+  String reminderAtText(String time) => '今日 $time';
 }

@@ -691,4 +691,22 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get sendMessageToStartConversationText => 'बातचीत शुरू करने के लिए एक संदेश भेजें';
+
+  @override
+  String get savedForLaterLabel => 'बाद के लिए सहेजा गया';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'एक थ्रेड का जवाब दिया';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'चैनल में भी भेजा गया';
+
+  @override
+  String get viewLabel => 'देखें';
+
+  @override
+  String get reminderSetLabel => 'रिमाइंडर सेट';
+
+  @override
+  String reminderAtText(String time) => 'आज $time पर';
 }

@@ -690,4 +690,22 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get sendMessageToStartConversationText => 'Envie uma mensagem para iniciar a conversa';
+
+  @override
+  String get savedForLaterLabel => 'Guardado para depois';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Respondeu a uma thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Também enviado no canal';
+
+  @override
+  String get viewLabel => 'Ver';
+
+  @override
+  String get reminderSetLabel => 'Lembrete definido';
+
+  @override
+  String reminderAtText(String time) => 'Hoje às $time';
 }
