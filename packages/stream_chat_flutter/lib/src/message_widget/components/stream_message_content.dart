@@ -172,12 +172,13 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                             ),
                           ),
                         ),
-                      ParseAttachments(
-                        key: attachmentsKey,
-                        message: widget.message,
-                        attachmentBuilders: widget.attachmentBuilders,
-                        attachmentPadding: .symmetric(horizontal: spacing.xs),
-                      ),
+                      if (widget.message.attachments.isNotEmpty)
+                        ParseAttachments(
+                          key: attachmentsKey,
+                          message: widget.message,
+                          attachmentBuilders: widget.attachmentBuilders,
+                          attachmentPadding: .symmetric(horizontal: spacing.xs),
+                        ),
                       if (widget.message.text case final text? when text.isNotEmpty)
                         StreamMessageText(
                           message: widget.message,
