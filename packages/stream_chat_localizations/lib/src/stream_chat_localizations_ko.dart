@@ -664,7 +664,16 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 실시간 위치';
-    return '📍 위치';
+    if (isLive) return '실시간 위치';
+    return '위치';
   }
+
+  @override
+  String get noConversationsYetText => '아직 대화가 없습니다';
+
+  @override
+  String get replyToStartThreadText => '스레드를 시작하려면 메시지에 답장하세요';
+
+  @override
+  String get sendMessageToStartConversationText => '대화를 시작하려면 메시지를 보내세요';
 }

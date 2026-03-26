@@ -597,7 +597,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   ///   bool showCaption = true,
   /// }) {
   ///   return TextSpan(
-  ///     text: '📍 (${location.latitude}, ${location.longitude})',
+  ///     text: '(${location.latitude}, ${location.longitude})',
   ///   );
   /// }
   /// ```

@@ -54,7 +54,7 @@ dependencies:
   photo_manager: ^3.8.3
   photo_view: ^0.15.0
   rate_limiter: ^1.0.0
-  record: ">=5.2.0 <7.0.0"
+  record: ^6.2.0
   rxdart: ^0.28.0
   share_plus: ">=11.0.0 <13.0.0"
   shimmer: ^3.0.0
@@ -62,7 +62,7 @@ dependencies:
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 05d145a011ec770e8c0236fc134819b98870d70d
+      ref: 7f559b97f2dea7853047bcfb338d43390ad033e5
       path: packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1

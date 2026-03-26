@@ -61,8 +61,13 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
     // Only start the recorder if it is currently idle.
     if (value case RecordStateIdle()) {
       // Return if the recorder does not have permission to record audio.
-      final hasPermission = await _recorder.hasPermission();
-      if (!hasPermission) return;
+      final hasPermission = await _recorder.hasPermission(request: false);
+      if (!hasPermission) {
+        /// Request permission to record audio.
+        /// User has to start the recording session again to record audio.
+        await _recorder.hasPermission(request: true);
+        return;
+      }
 
       // Start the recording session.
       final tempPath = await _getOutputFilePath(config.encoder);

@@ -675,7 +675,16 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live-Standort';
-    return '📍 Standort';
+    if (isLive) return 'Live-Standort';
+    return 'Standort';
   }
+
+  @override
+  String get noConversationsYetText => 'Noch keine Unterhaltungen';
+
+  @override
+  String get replyToStartThreadText => 'Antworten Sie auf eine Nachricht, um einen Thread zu starten';
+
+  @override
+  String get sendMessageToStartConversationText => 'Senden Sie eine Nachricht, um die Unterhaltung zu starten';
 }

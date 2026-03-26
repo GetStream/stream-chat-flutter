@@ -9,6 +9,7 @@
 - Replaced `ArgumentError` with typed errors in `StreamAttachmentPickerController`:
   `AttachmentTooLargeError` (file size exceeds limit) and `AttachmentLimitReachedError`
   (attachment count exceeds limit). [[#2476]](https://github.com/GetStream/stream-chat-flutter/issues/2476)
+- By default the preview of the last message will show deleted message indicator instead of filtering it out. 
 
 For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
 

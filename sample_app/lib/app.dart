@@ -518,7 +518,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         ),
                       ),
                       streamChatConfigData: StreamChatConfigurationData(
-                        draftMessagesEnabled: false,
+                        draftMessagesEnabled: true,
                         attachmentBuilders: [
                           LocationAttachmentBuilder(
                             onAttachmentTap: (context, location) {

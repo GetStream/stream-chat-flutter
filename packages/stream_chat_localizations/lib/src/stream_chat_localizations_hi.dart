@@ -679,7 +679,16 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 लाइव लोकेशन';
-    return '📍 लोकेशन';
+    if (isLive) return 'लाइव लोकेशन';
+    return 'लोकेशन';
   }
+
+  @override
+  String get noConversationsYetText => 'अभी तक कोई बातचीत नहीं';
+
+  @override
+  String get replyToStartThreadText => 'थ्रेड शुरू करने के लिए किसी संदेश का जवाब दें';
+
+  @override
+  String get sendMessageToStartConversationText => 'बातचीत शुरू करने के लिए एक संदेश भेजें';
 }

@@ -439,7 +439,12 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
     // Otherwise, update the controller with the draft message.
     if (draft.message case final draftMessage) {
-      _effectiveController.message = draftMessage.toMessage();
+      _effectiveController.message = draftMessage
+          .copyWith(
+            quotedMessage: draftMessage.quotedMessage ?? draft.quotedMessage,
+            parentId: draftMessage.parentId ?? draft.parentId,
+          )
+          .toMessage();
     }
   }
 
