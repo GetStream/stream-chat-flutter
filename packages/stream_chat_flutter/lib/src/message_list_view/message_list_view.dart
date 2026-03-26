@@ -461,7 +461,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   List<Message> messages = <Message>[];
   Map<String, int> messagesIndex = {};
 
-  bool initialMessageHighlightComplete = false;
+  String? _highlightedMessageId;
+  int _highlightGeneration = 0;
 
   bool _inBetweenList = false;
 
@@ -502,6 +503,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
       _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
+
+      if (widget.highlightInitialMessage) {
+        final initialMessageId = streamChannel?.initialMessageId;
+        if (initialMessageId != null) {
+          _highlightedMessageId = initialMessageId;
+          _highlightGeneration++;
+        }
+      }
 
       initialIndex = getInitialIndex(
         widget.initialScrollIndex,
@@ -551,6 +560,30 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     _userReadListener?.cancel();
     _itemPositionListener.itemPositions.removeListener(_handleItemPositionsChanged);
     super.dispose();
+  }
+
+  void _highlightMessage(String messageId) {
+    setState(() {
+      _highlightedMessageId = messageId;
+      _highlightGeneration++;
+    });
+  }
+
+  Future<void> _scrollToAndHighlight(
+    String messageId, {
+    required List<Message> messages,
+  }) async {
+    final index = messages.indexWhere((m) => m.id == messageId);
+    if (index >= 0) {
+      await _scrollController?.scrollTo(
+        index: index + 2, // +2 to account for loader and footer
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeInOut,
+        alignment: 0.1,
+      );
+
+      _highlightMessage(messageId);
+    }
   }
 
   @override
@@ -1201,23 +1234,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onUserMentionTap: widget.onUserMentionTap,
       onQuotedMessageTap: switch (widget.onQuotedMessageTap) {
         final onTap? => onTap,
-        _ => (quotedMessage) async {
-          final quotedMessageId = quotedMessage.id;
-          if (messages.map((e) => e.id).contains(quotedMessageId)) {
-            final index = messages.indexWhere((m) => m.id == quotedMessageId);
-            _scrollController?.scrollTo(
-              index: index + 2, // +2 to account for loader and footer
-              duration: const Duration(seconds: 1),
-              curve: Curves.easeInOut,
-              alignment: 0.1,
-            );
-          } else {
-            await streamChannel!.loadChannelAtMessage(quotedMessageId).then((_) async {
-              initialIndex = 21; // 19 + 2 | 19 is the index of the message
-              initialAlignment = 0.1;
-            });
-          }
-        },
+        _ => (quotedMessage) => _scrollToAndHighlight(
+          quotedMessage.id,
+          messages: messages,
+        ),
       },
     );
 
@@ -1245,16 +1265,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ),
     );
 
-    // Highlight the initial message with an animated background color flash.
-    if (!initialMessageHighlightComplete &&
-        widget.highlightInitialMessage &&
-        isInitialMessage(message.id, streamChannel)) {
+    if (_highlightedMessageId == message.id) {
       final colorScheme = context.streamColorScheme;
       final highlightColor = widget.messageHighlightColor ?? colorScheme.backgroundHighlight;
       child = TweenAnimationBuilder<Color?>(
+        key: ValueKey('highlight-$_highlightGeneration'),
         tween: ColorTween(begin: highlightColor, end: highlightColor.withValues(alpha: 0)),
         duration: const Duration(seconds: 3),
-        onEnd: () => initialMessageHighlightComplete = true,
+        onEnd: () {
+          if (_highlightedMessageId == message.id) {
+            setState(() => _highlightedMessageId = null);
+          }
+        },
         builder: (_, color, child) => ColoredBox(color: color!, child: child),
         child: Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: child),
       );
