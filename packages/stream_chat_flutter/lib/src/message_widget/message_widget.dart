@@ -206,11 +206,11 @@ class StreamMessageWidgetProps {
 
   /// Whether swiping the message triggers a quoted-reply action.
   ///
-  /// When true, the message can be swiped horizontally to initiate a reply.
-  /// The swipe direction is determined automatically based on message
-  /// alignment: end-to-start for the current user's messages and
-  /// start-to-end for other users' messages. On completion, [onReplyTap] is
-  /// invoked with the message.
+  /// When true, the message can be swiped from left to right to initiate a
+  /// reply. The swipe direction and reply icon position are always
+  /// start-to-end (left to right in LTR layouts), regardless of whether the
+  /// message belongs to the current user or another participant.
+  /// On completion, [onReplyTap] is invoked with the message.
   ///
   /// Swipe is disabled for deleted messages and messages in a failed state.
   ///
@@ -901,28 +901,23 @@ class _SwipeToReplyWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final alignment = StreamMessagePlacement.alignmentDirectionalOf(context);
-    final isEnd = alignment == AlignmentDirectional.centerEnd;
-
     return Swipeable(
       key: ValueKey('swipe-${message.id}'),
-      direction: isEnd ? SwipeDirection.endToStart : SwipeDirection.startToEnd,
+      direction: SwipeDirection.startToEnd,
       swipeThreshold: _swipeThreshold,
       onSwiped: (_) => onReplyTap(message),
       backgroundBuilder: (context, details) {
         final progress = math.min(details.progress, _swipeThreshold) / _swipeThreshold;
-
-        var offset = Offset.lerp(const Offset(-24, 0), const Offset(12, 0), progress)!;
-        if (isEnd) offset = Offset(-offset.dx, -offset.dy);
+        final offset = Offset.lerp(const Offset(-24, 0), const Offset(12, 0), progress)!;
 
         return Align(
-          alignment: alignment,
+          alignment: AlignmentDirectional.centerStart,
           child: Transform.translate(
             offset: offset,
             child: Opacity(
               opacity: progress,
               child: SizedBox.square(
-                dimension: 30,
+                dimension: 32,
                 child: CustomPaint(
                   painter: AnimatedCircleBorderPainter(
                     progress: progress,
@@ -931,8 +926,7 @@ class _SwipeToReplyWrapper extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       context.streamIcons.arrowShareLeft,
-                      size: lerpDouble(0, 18, progress),
-                      color: context.streamColorScheme.accentPrimary,
+                      size: lerpDouble(0, 20, progress),
                     ),
                   ),
                 ),
