@@ -26,6 +26,7 @@ class MessageComposerComponentProps {
     this.focusNode,
     this.currentUserId,
     required this.audioRecorderState,
+    this.onQuotedMessageCleared,
   });
 
   /// The controller for the message composer component.
@@ -58,6 +59,9 @@ class MessageComposerComponentProps {
   /// Whether the audio recording flow is active.
   final AudioRecorderState audioRecorderState;
 
+  /// Callback for when the quoted message is cleared.
+  final VoidCallback? onQuotedMessageCleared;
+
   /// Whether the audio recording flow is active.
   bool get isAudioRecordingFlowActive => audioRecorderState is RecordStateRecording || isAudioRecordingFlowStopped;
 
@@ -81,6 +85,7 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
+    required super.onQuotedMessageCleared,
   }) : super();
 
   /// Creates a new instance of [MessageComposerLeadingProps] from a [MessageComposerComponentProps].
@@ -96,6 +101,7 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
     );
   }
 }
@@ -113,6 +119,7 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
+    required super.onQuotedMessageCleared,
   }) : super();
 
   /// Creates a new instance of [MessageComposerTrailingProps] from a [MessageComposerComponentProps].
@@ -128,6 +135,7 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
     );
   }
 }
@@ -145,6 +153,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
+    required super.onQuotedMessageCleared,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputProps] from a [MessageComposerComponentProps].
@@ -160,6 +169,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
     );
   }
 }
@@ -177,6 +187,7 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
+    required super.onQuotedMessageCleared,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputLeadingProps] from a [MessageComposerComponentProps].
@@ -192,6 +203,7 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
     );
   }
 }
@@ -209,6 +221,7 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
+    required super.onQuotedMessageCleared,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputHeaderProps] from a [MessageComposerComponentProps].
@@ -224,6 +237,7 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
     );
   }
 }
@@ -241,6 +255,7 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
     required super.focusNode,
     required super.currentUserId,
     required super.audioRecorderState,
+    required super.onQuotedMessageCleared,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputTrailingProps] from a [MessageComposerComponentProps].
@@ -256,6 +271,7 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
       focusNode: props.focusNode,
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
     );
   }
 }
