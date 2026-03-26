@@ -112,6 +112,7 @@ class _DefaultMessageComposerAttachmentListState extends State<DefaultMessageCom
       // If an attachment has been added, scroll to the end.
       WidgetsBinding.instance.addPostFrameCallback(
         (_) {
+          if (!_scrollController.hasClients) return;
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 200),

@@ -174,7 +174,8 @@ class MessageInputVoiceRecordingAttachment extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller,
       builder: (context, state, _) {
-        final track = state.tracks.where((it) => it.key == attachment).first;
+        final track = state.tracks.firstWhereOrNull((it) => it.key == attachment);
+        if (track == null) return const SizedBox.shrink();
 
         return StreamVoiceRecordingAttachment(
           title: 'Voice Message',

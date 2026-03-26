@@ -495,8 +495,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
       if (hasQuote && _effectiveController.text.isEmpty) {
         _effectiveController.clearQuotedMessage();
         widget.onQuotedMessageCleared?.call();
+        return KeyEventResult.handled;
       }
-      return KeyEventResult.handled;
+      return KeyEventResult.ignored;
     }
     return KeyEventResult.ignored;
   }
