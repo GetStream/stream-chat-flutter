@@ -675,4 +675,22 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get sendMessageToStartConversationText => 'Send en melding for å starte samtalen';
+
+  @override
+  String get savedForLaterLabel => 'Lagret til senere';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Svarte i en tråd';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Også sendt i kanalen';
+
+  @override
+  String get viewLabel => 'Vis';
+
+  @override
+  String get reminderSetLabel => 'Påminnelse satt';
+
+  @override
+  String reminderAtText(String time) => 'I dag kl. $time';
 }

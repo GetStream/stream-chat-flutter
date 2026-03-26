@@ -676,4 +676,22 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get sendMessageToStartConversationText => '대화를 시작하려면 메시지를 보내세요';
+
+  @override
+  String get savedForLaterLabel => '나중을 위해 저장됨';
+
+  @override
+  String get repliedToThreadAnnotationLabel => '스레드에 답장함';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => '채널에도 전송됨';
+
+  @override
+  String get viewLabel => '보기';
+
+  @override
+  String get reminderSetLabel => '리마인더 설정됨';
+
+  @override
+  String reminderAtText(String time) => '오늘 $time';
 }

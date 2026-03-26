@@ -689,4 +689,22 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get sendMessageToStartConversationText => 'Envia un missatge per iniciar la conversa';
+
+  @override
+  String get savedForLaterLabel => 'Desat per a més tard';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Ha respost a un fil';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'També enviat al canal';
+
+  @override
+  String get viewLabel => 'Veure';
+
+  @override
+  String get reminderSetLabel => 'Recordatori establert';
+
+  @override
+  String reminderAtText(String time) => 'Avui a les $time';
 }
