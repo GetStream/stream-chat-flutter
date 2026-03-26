@@ -146,6 +146,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onModeratedMessageTap,
     this.onMessageLongPress,
     this.showFloatingDateDivider = true,
+    this.fadeFloatingDateDividerNearInline = true,
     this.threadSeparatorBuilder,
     this.unreadMessagesSeparatorBuilder,
     this.messageListController,
@@ -353,6 +354,12 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Flag for showing the floating date divider
   final bool showFloatingDateDivider;
+
+  /// Whether the floating date divider fades out when an inline date divider
+  /// for the same date is near the top of the viewport.
+  ///
+  /// Only has an effect when [showFloatingDateDivider] is true.
+  final bool fadeFloatingDateDividerNearInline;
 
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
@@ -936,6 +943,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             child: FloatingDateDivider(
               itemCount: itemCount,
               reverse: widget.reverse,
+              fadeNearInlineDivider: widget.fadeFloatingDateDividerNearInline,
               itemPositionListener: _itemPositionListener.itemPositions,
               messages: messages,
               dateDividerBuilder: switch (widget.floatingDateDividerBuilder) {
