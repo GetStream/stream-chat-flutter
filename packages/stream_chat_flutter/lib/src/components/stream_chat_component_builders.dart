@@ -13,6 +13,8 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   StreamComponentBuilder<MessageComposerInputTrailingProps>? messageComposerInputTrailing,
   StreamComponentBuilder<StreamMessageWidgetProps>? messageWidget,
   StreamComponentBuilder<UnreadIndicatorProps>? unreadIndicator,
+  StreamComponentBuilder<StreamMessageComposerAttachmentListProps>? messageComposerAttachmentList,
+  StreamComponentBuilder<StreamMessageComposerAttachmentProps>? messageComposerAttachment,
 }) {
   final builders = [
     if (channelListItem != null) StreamComponentBuilderExtension(builder: channelListItem),

@@ -368,7 +368,7 @@ extension MessageX on Message {
 
       messageTextToRender = messageTextToRender?.replaceAll(
         RegExp('@(${RegExp.escape(userId)}|${RegExp.escape(userName)})'),
-        linkify ? '[@$userName]($userId)' : '@$userName',
+        linkify ? '[@$userName](mention:$userId)' : '@$userName',
       );
     }
 

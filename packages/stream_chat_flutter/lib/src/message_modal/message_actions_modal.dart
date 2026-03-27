@@ -19,6 +19,7 @@ class StreamMessageActionsModal extends StatelessWidget {
     required this.messageWidget,
     this.alignment,
     this.showReactionPicker = false,
+    this.leadingInset = 0,
   });
 
   /// The message object that actions will be performed on.
@@ -53,6 +54,12 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// Defaults to `false`.
   final bool showReactionPicker;
 
+  /// Horizontal offset applied to the header (reaction picker) and footer (actions menu)
+  /// to align them with the message bubble content rather than the full message row.
+  ///
+  /// Defaults to `0` (no offset).
+  final double leadingInset;
+
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
@@ -63,18 +70,26 @@ class StreamMessageActionsModal extends StatelessWidget {
       return Navigator.pop(context, action);
     }
 
+    final insetPadding = EdgeInsetsDirectional.only(start: leadingInset);
+
     return StreamMessageDialog(
       spacing: spacing.xs,
       alignment: effectiveAlignment,
       headerBuilder: switch (showReactionPicker) {
-        true => (context) => StreamMessageReactionPicker(
-          message: message,
-          onReactionPicked: onReactionPicked,
+        true => (context) => Padding(
+          padding: insetPadding,
+          child: StreamMessageReactionPicker(
+            message: message,
+            onReactionPicked: onReactionPicked,
+          ),
         ),
         false => null,
       },
       contentBuilder: (context) => IgnorePointer(child: messageWidget),
-      footerBuilder: (context) => StreamContextMenu(children: messageActions),
+      footerBuilder: (context) => Padding(
+        padding: insetPadding,
+        child: StreamContextMenu(children: messageActions),
+      ),
     );
   }
 }

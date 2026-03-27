@@ -54,6 +54,7 @@ class _ThreadPageState extends State<ThreadPage> {
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
               onReplyTap: _reply,
+              swipeToReply: true,
               messageFilter: defaultFilter,
               showScrollToBottom: false,
               highlightInitialMessage: true,

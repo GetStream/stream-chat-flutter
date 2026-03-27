@@ -696,4 +696,22 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get sendMessageToStartConversationText => 'Invia un messaggio per iniziare la conversazione';
+
+  @override
+  String get savedForLaterLabel => 'Salvato per dopo';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Ha risposto a un thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Inviato anche nel canale';
+
+  @override
+  String get viewLabel => 'Visualizza';
+
+  @override
+  String get reminderSetLabel => 'Promemoria impostato';
+
+  @override
+  String reminderAtText(String time) => 'Oggi alle $time';
 }
