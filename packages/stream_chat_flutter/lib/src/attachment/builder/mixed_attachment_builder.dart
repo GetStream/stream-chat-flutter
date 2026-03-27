@@ -18,7 +18,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
        _giphyAttachmentBuilder = GiphyAttachmentBuilder(onAttachmentTap: onAttachmentTap),
        _galleryAttachmentBuilder = GalleryAttachmentBuilder(onAttachmentTap: onAttachmentTap),
        _fileAttachmentBuilder = FileAttachmentBuilder(onAttachmentTap: onAttachmentTap),
-       _urlAttachmentBuilder = UrlAttachmentBuilder(onAttachmentTap: onAttachmentTap),
+       _linkPreviewAttachmentBuilder = LinkPreviewAttachmentBuilder(onAttachmentTap: onAttachmentTap),
        _voiceRecordingAttachmentPlaylistBuilder = VoiceRecordingAttachmentPlaylistBuilder(
          onAttachmentTap: onAttachmentTap,
        );
@@ -28,7 +28,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   late final StreamAttachmentWidgetBuilder _giphyAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _galleryAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _fileAttachmentBuilder;
-  late final StreamAttachmentWidgetBuilder _urlAttachmentBuilder;
+  late final StreamAttachmentWidgetBuilder _linkPreviewAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _voiceRecordingAttachmentPlaylistBuilder;
 
   @override
@@ -83,7 +83,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       crossAxisAlignment: crossAxisAlignment,
       children: <Widget>[
         if (urls != null)
-          ?_urlAttachmentBuilder.build(context, message, {
+          ?_linkPreviewAttachmentBuilder.build(context, message, {
             AttachmentType.urlPreview: urls,
           }),
         if (shouldBuildGallery)

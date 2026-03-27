@@ -8,7 +8,7 @@ part 'gallery_attachment_builder.dart';
 part 'giphy_attachment_builder.dart';
 part 'image_attachment_builder.dart';
 part 'mixed_attachment_builder.dart';
-part 'url_attachment_builder.dart';
+part 'link_preview_attachment_builder.dart';
 part 'video_attachment_builder.dart';
 part 'voice_recording_attachment_playlist_builder.dart';
 part 'poll_attachment_builder.dart';
@@ -113,7 +113,10 @@ abstract class StreamAttachmentWidgetBuilder {
       ),
 
       // We don't handle URL attachments if the message is a reply.
-      if (message.quotedMessage == null) UrlAttachmentBuilder(onAttachmentTap: onAttachmentTap),
+      if (message.quotedMessage == null)
+        LinkPreviewAttachmentBuilder(
+          onAttachmentTap: onAttachmentTap,
+        ),
 
       // Fallback builder should always be the last builder in the list.
       const FallbackAttachmentBuilder(),

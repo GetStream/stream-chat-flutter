@@ -1,14 +1,14 @@
 part of 'attachment_widget_builder.dart';
 
 /// {@template urlAttachmentBuilder}
-/// A widget builder for url attachment type.
+/// A widget builder for link preview attachment type.
 ///
 /// This is used to show url attachments with a preview. e.g. youtube, twitter,
 /// etc.
 /// {@endtemplate}
-class UrlAttachmentBuilder extends StreamAttachmentWidgetBuilder {
+class LinkPreviewAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro urlAttachmentBuilder}
-  const UrlAttachmentBuilder({
+  const LinkPreviewAttachmentBuilder({
     this.style,
     this.constraints,
     this.onAttachmentTap,
