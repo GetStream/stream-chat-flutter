@@ -597,9 +597,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         curve: Curves.easeInOut,
         alignment: 0.1,
       );
-
-      _highlightMessage(messageId);
+    } else {
+      await streamChannel!.loadChannelAtMessage(messageId).then((_) async {
+        initialIndex = getInitialIndex(
+          null,
+          streamChannel!,
+          widget.messageFilter,
+          messageId: messageId,
+        );
+        initialAlignment = 0.1;
+      });
     }
+
+    _highlightMessage(messageId);
   }
 
   @override
