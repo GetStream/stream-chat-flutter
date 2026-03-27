@@ -1122,13 +1122,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final userId = StreamChat.of(context).currentUser!.id;
     final isMyMessage = message.user?.id == userId;
 
+    final contentKind = resolveContentKind(message);
     final isInThread = widget.parentMessage != null;
 
-    return StreamMessagePlacement(
-      data: StreamMessagePlacementData(
+    return StreamMessageLayout(
+      data: StreamMessageLayoutData(
         stackPosition: .single,
         alignment: isMyMessage ? .end : .start,
         listKind: isInThread ? .thread : .channel,
+        contentKind: contentKind,
       ),
       child: Builder(
         builder: (context) => switch (widget.parentMessageBuilder) {
@@ -1275,16 +1277,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final nextMessage = index - 1 >= 0 ? messages[index - 1] : null;
     final prevMessage = index + 1 < messages.length ? messages[index + 1] : null;
 
+    final contentKind = resolveContentKind(message);
+    final isInThread = widget.parentMessage != null;
     final stackPosition = computeStackPosition(message: message, previous: prevMessage, next: nextMessage);
 
-    final isInThread = widget.parentMessage != null;
-
-    Widget child = StreamMessagePlacement(
-      data: StreamMessagePlacementData(
+    Widget child = StreamMessageLayout(
+      data: StreamMessageLayoutData(
         stackPosition: stackPosition,
         alignment: isMyMessage ? .end : .start,
         listKind: isInThread ? .thread : .channel,
-        // channelKind: ,
+        contentKind: contentKind,
       ),
       child: Builder(
         builder: (context) => switch (widget.messageBuilder) {

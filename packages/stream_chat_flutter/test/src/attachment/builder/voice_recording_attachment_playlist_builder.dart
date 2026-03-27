@@ -48,11 +48,10 @@ void main() {
           await tester.pumpWidget(
             _wrapWithStreamChatApp(
               Builder(
-                builder: (context) => builder.build(
-                  context,
-                  Message(),
-                  attachments,
-                ),
+                builder: (context) {
+                  final attachment = builder.build(context, Message(), attachments);
+                  return attachment ?? const SizedBox.shrink();
+                },
               ),
             ),
           );

@@ -62,7 +62,7 @@ dependencies:
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: f77a2913af153a1c716da110ff7032e2a1826774
+      ref: 6d9e79bf2790982fa88182e10f24e630ba90728c
       path: packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
@@ -73,6 +73,7 @@ dependencies:
 
 dev_dependencies:
   alchemist: ^0.13.0
+  build_runner: ^2.4.9
   connectivity_plus_platform_interface: ^2.0.0
   faker_dart: ^0.2.1
   flutter_test:
@@ -81,6 +82,7 @@ dev_dependencies:
   path: ^1.8.3
   path_provider_platform_interface: ^2.0.0
   plugin_platform_interface: ^2.0.0
+  theme_extensions_builder: ^7.2.0
 
 flutter:
   assets:

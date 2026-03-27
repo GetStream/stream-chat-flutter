@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar_stack.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
+import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template pollOptionsListView}
 /// A widget that displays the list of poll options.
 ///
 /// Used in [StreamPollInteractor] to display the poll options to interact with.
+///
+/// See also:
+///
+///  * [PollOptionItem], the widget used to render each individual option.
+///  * [StreamPollInteractorThemeData.optionStyle], for customizing option
+///    appearance.
+///  * [StreamPollInteractor], the parent widget that uses this list.
 /// {@endtemplate}
 class PollOptionsListView extends StatelessWidget {
   /// {@macro pollOptionsListView}
@@ -15,6 +23,7 @@ class PollOptionsListView extends StatelessWidget {
     super.key,
     required this.poll,
     this.visibleOptionCount,
+    this.onSeeMoreOptions,
     this.showProgressBar = false,
     this.onCastVote,
     this.onRemoveVote,
@@ -27,6 +36,12 @@ class PollOptionsListView extends StatelessWidget {
   ///
   /// If null, all options will be visible.
   final int? visibleOptionCount;
+
+  /// Callback invoked when the user wants to see more options.
+  ///
+  /// This is only available if the poll has more options than the
+  /// [visibleOptionCount].
+  final VoidCallback? onSeeMoreOptions;
 
   /// Whether to show the voting progress bar.
   ///
@@ -65,36 +80,57 @@ class PollOptionsListView extends StatelessWidget {
       _ => poll.options,
     };
 
-    return ListView.separated(
-      shrinkWrap: true,
-      itemCount: options.length,
-      physics: const NeverScrollableScrollPhysics(),
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final option = options.elementAt(index);
-        return PollOptionItem(
-          key: ValueKey(option.id),
-          poll: poll,
-          option: option,
-          showProgressBar: showProgressBar,
-          onChanged: (checked) {
-            if (checked == null) return;
+    final spacing = context.streamSpacing;
+    final translations = context.translations;
 
-            // Handle voting based on the voting mode.
-            poll.votingMode.when(
-              disabled: () {}, // Do nothing
-              all: () => _handleVoteAction(option, checked: checked),
-              // Note: We don't need to remove the other votes in the unique
-              // voting mode as the backend handles it.
-              unique: () => _handleVoteAction(option, checked: checked),
-              limited: (count) => _handleVoteAction(
-                option,
-                checked: checked && poll.ownVotes.length < count,
-              ),
-            );
-          },
-        );
-      },
+    return Padding(
+      padding: .symmetric(horizontal: spacing.xs),
+      child: Column(
+        mainAxisSize: .min,
+        crossAxisAlignment: .stretch,
+        children: [
+          ListView.separated(
+            shrinkWrap: true,
+            itemCount: options.length,
+            physics: const NeverScrollableScrollPhysics(),
+            separatorBuilder: (_, __) => SizedBox(height: spacing.xxxs),
+            itemBuilder: (context, index) {
+              final option = options.elementAt(index);
+              return PollOptionItem(
+                key: ValueKey(option.id),
+                poll: poll,
+                option: option,
+                showProgressBar: showProgressBar,
+                onChanged: (checked) {
+                  if (checked == null) return;
+
+                  // Handle voting based on the voting mode.
+                  poll.votingMode.when(
+                    disabled: () {}, // Do nothing
+                    all: () => _handleVoteAction(option, checked: checked),
+                    // Note: We don't need to remove the other votes in the unique
+                    // voting mode as the backend handles it.
+                    unique: () => _handleVoteAction(option, checked: checked),
+                    limited: (count) => _handleVoteAction(
+                      option,
+                      checked: checked && poll.ownVotes.length < count,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          if (visibleOptionCount case final count? when count < poll.options.length)
+            StreamButton(
+              size: .small,
+              style: .secondary,
+              type: .ghost,
+              onTap: onSeeMoreOptions,
+              themeStyle: .from(tapTargetSize: .shrinkWrap),
+              label: translations.seeAllOptionsLabel(count: poll.options.length),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -106,6 +142,11 @@ class PollOptionsListView extends StatelessWidget {
 ///
 /// This widget is used to display the poll option and the number of votes it
 /// has received. Also shows the voters if the poll is public.
+///
+/// See also:
+///
+///  * [StreamPollOptionStyle], for customizing option appearance.
+///  * [PollOptionsListView], which uses this widget for each option.
 /// {@endtemplate}
 class PollOptionItem extends StatelessWidget {
   /// {@macro pollOptionItem}
@@ -135,74 +176,87 @@ class PollOptionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamPollInteractorTheme.of(context);
+    final theme = StreamPollInteractorTheme.of(context).optionStyle;
+    final defaults = _StreamPollOptionDefaults(context);
+
+    final radius = context.streamRadius;
+    final spacing = context.streamSpacing;
+
+    final effectiveTextStyle = theme?.textStyle ?? defaults.textStyle;
+    final effectiveVotesTextStyle = theme?.votesTextStyle ?? defaults.votesTextStyle;
+    final effectiveCheckboxStyle = theme?.checkboxStyle ?? defaults.checkboxStyle;
+    final effectiveVotesAvatarSize = theme?.votesAvatarSize ?? defaults.votesAvatarSize;
+    final effectiveProgressBarStyle = theme?.progressBarStyle ?? defaults.progressBarStyle;
 
     final pollClosed = poll.isClosed;
     final isOptionSelected = poll.hasCurrentUserVotedFor(option);
 
     final control = ExcludeFocus(
-      child: Checkbox(
-        value: isOptionSelected,
-        onChanged: pollClosed ? null : onChanged,
-        checkColor: theme.pollOptionCheckboxCheckColor,
-        shape: theme.pollOptionCheckboxShape,
-        side: theme.pollOptionCheckboxBorderSide,
-        activeColor: theme.pollOptionCheckboxActiveColor,
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: const VisualDensity(
-          vertical: VisualDensity.minimumDensity,
-          horizontal: VisualDensity.minimumDensity,
+      child: StreamCheckboxTheme(
+        data: .new(style: effectiveCheckboxStyle),
+        child: StreamCheckbox.circular(
+          size: .md,
+          value: isOptionSelected,
+          onChanged: pollClosed ? null : onChanged,
         ),
       ),
     );
 
     return InkWell(
+      borderRadius: .all(radius.md),
       onTap: pollClosed ? null : () => onChanged?.call(!isOptionSelected),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: .all(spacing.xs),
         child: Row(
-          spacing: 4,
+          spacing: spacing.sm,
           children: <Widget>[
             if (pollClosed case false) control,
             Expanded(
               child: Column(
-                spacing: 4,
+                spacing: spacing.xxs,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Row(
-                    spacing: 4,
+                    spacing: spacing.xs,
                     children: <Widget>[
                       Expanded(
                         child: Text(
                           option.text,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.pollOptionTextStyle,
+                          style: effectiveTextStyle,
                         ),
                       ),
-                      // Show voters only if the poll is public.
-                      if (poll.votingVisibility == VotingVisibility.public)
-                        OptionVoters(
-                          // We only show the latest 3 voters.
-                          voters: [
-                            ...?poll.latestVotesByOption[option.id],
-                          ].map((it) => it.user).whereType<User>().take(3),
-                        ),
-                      Text(
-                        poll.voteCountFor(option).toString(),
-                        style: theme.pollOptionVoteCountTextStyle,
+                      Row(
+                        mainAxisSize: .min,
+                        spacing: spacing.xxs,
+                        children: [
+                          // Show voters only if the poll is public.
+                          if (poll.votingVisibility == VotingVisibility.public)
+                            StreamUserAvatarStack(
+                              size: effectiveVotesAvatarSize,
+                              // We only show the latest 3 voters.
+                              users: [
+                                ...?poll.latestVotesByOption[option.id],
+                              ].map((it) => it.user).whereType<User>().take(3),
+                            ),
+                          Text(
+                            poll.voteCountFor(option).toString(),
+                            style: effectiveVotesTextStyle,
+                          ),
+                        ],
                       ),
                     ],
                   ),
                   if (showProgressBar)
-                    OptionVotesProgressBar(
-                      value: poll.voteRatioFor(option),
-                      borderRadius: theme.pollOptionVotesProgressBarBorderRadius ?? BorderRadius.circular(4),
-                      trackColor: theme.pollOptionVotesProgressBarTrackColor,
-                      valueColor: switch (poll.isOptionWinner(option)) {
-                        true => theme.pollOptionVotesProgressBarWinnerColor,
-                        false => theme.pollOptionVotesProgressBarValueColor,
-                      },
+                    StreamProgressBarTheme(
+                      data: .new(style: effectiveProgressBarStyle),
+                      child: TweenAnimationBuilder<double>(
+                        curve: Curves.easeOutCubic,
+                        duration: Durations.medium2,
+                        tween: Tween(begin: 0, end: poll.voteRatioFor(option)),
+                        builder: (_, value, _) => StreamProgressBar(value: value),
+                      ),
                     ),
                 ],
               ),
@@ -214,112 +268,47 @@ class PollOptionItem extends StatelessWidget {
   }
 }
 
-/// {@template optionVoters}
-/// A widget that displays the voters of an option.
-///
-/// Used in [PollOptionItem] to display the voters of a poll option.
-/// {@endtemplate}
-class OptionVoters extends StatelessWidget {
-  /// {@macro optionVoters}
-  const OptionVoters({
-    super.key,
-    this.radius = 10,
-    this.overlap = 0.5,
-    required this.voters,
-  }) : assert(
-         overlap >= 0 && overlap <= 1,
-         'Overlap must be between 0 and 1',
-       );
+// Default values for [StreamPollOptionStyle] backed by stream design tokens.
+class _StreamPollOptionDefaults extends StreamPollOptionStyle {
+  _StreamPollOptionDefaults(this._context);
 
-  /// The radius of the avatars.
-  final double radius;
+  final BuildContext _context;
 
-  /// The overlap between the avatars.
-  ///
-  /// The default value is 1/2 i.e. 50%.
-  final double overlap;
+  late final _alignment = StreamMessageLayout.messageAlignmentOf(_context);
+  late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+  late final StreamTextTheme _textTheme = _context.streamTextTheme;
 
-  /// The list of voters to display.
-  final Iterable<User> voters;
+  Color get _textColor => switch (_alignment) {
+    .start => _colorScheme.textPrimary,
+    .end => _colorScheme.brand.shade900,
+  };
 
   @override
-  Widget build(BuildContext context) {
-    if (voters.isEmpty) return const Empty();
-
-    return StreamUserAvatarStack(size: .xs, users: voters, overlap: overlap);
-  }
-}
-
-/// {@template optionVotesProgressBar}
-/// A widget that displays the progress of the votes for an option.
-///
-/// Used in [PollOptionItem] to display the progress of the votes for a
-/// particular option.
-/// {@endtemplate}
-class OptionVotesProgressBar extends StatelessWidget {
-  /// {@macro optionVotesProgressBar}
-  const OptionVotesProgressBar({
-    super.key,
-    required this.value,
-    this.minHeight = 4,
-    this.trackColor,
-    this.valueColor,
-    this.borderRadius = BorderRadius.zero,
-  });
-
-  /// The value of the progress bar.
-  final double value;
-
-  /// The minimum height of the progress bar.
-  final double minHeight;
-
-  /// The color of the track.
-  final Color? trackColor;
-
-  /// The color of the value.
-  final Color? valueColor;
-
-  /// The border radius of the progress bar.
-  ///
-  /// Defaults to [BorderRadius.zero].
-  final BorderRadiusGeometry borderRadius;
+  StreamAvatarStackSize get votesAvatarSize => StreamAvatarStackSize.xs;
 
   @override
-  Widget build(BuildContext context) {
-    final shape = RoundedRectangleBorder(borderRadius: borderRadius);
-    return Container(
-      constraints: BoxConstraints(
-        minWidth: double.infinity,
-        minHeight: minHeight,
-      ),
-      decoration: ShapeDecoration(
-        shape: shape,
-        color: trackColor,
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final size = constraints.constrain(Size.zero);
+  TextStyle get textStyle => _textTheme.captionDefault.copyWith(color: _textColor);
 
-          final textDirection = Directionality.of(context);
-          final alignment = switch (textDirection) {
-            TextDirection.ltr => Alignment.centerLeft,
-            TextDirection.rtl => Alignment.centerRight,
-          };
+  @override
+  TextStyle get votesTextStyle => _textTheme.metadataDefault.copyWith(color: _textColor);
 
-          return Align(
-            alignment: alignment,
-            child: AnimatedContainer(
-              height: size.height,
-              width: size.width * value,
-              duration: Durations.medium2,
-              decoration: ShapeDecoration(
-                shape: shape,
-                color: valueColor,
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  @override
+  StreamCheckboxStyle get checkboxStyle => StreamCheckboxStyle.from(
+    side: switch (_alignment) {
+      .start => BorderSide(color: _colorScheme.borderStrong),
+      .end => BorderSide(color: _colorScheme.brand.shade300),
+    },
+  );
+
+  @override
+  StreamProgressBarStyle get progressBarStyle => StreamProgressBarStyle(
+    trackColor: switch (_alignment) {
+      .start => _colorScheme.backgroundSurfaceStrong,
+      .end => _colorScheme.brand.shade200,
+    },
+    fillColor: switch (_alignment) {
+      .start => _colorScheme.accentNeutral,
+      .end => _colorScheme.accentPrimary,
+    },
+  );
 }

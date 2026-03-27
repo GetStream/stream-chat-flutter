@@ -1,17 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template streamImageAttachment}
-/// Shows an image attachment in a [StreamMessageWidget].
-/// {@endtemplate}
+/// An image attachment component with automatic sizing.
+///
+/// [StreamImageAttachment] displays an image attachment, automatically
+/// sized based on the image's original dimensions.
+///
+/// {@tool snippet}
+///
+/// Basic usage:
+///
+/// ```dart
+/// StreamImageAttachment(
+///   message: message,
+///   image: imageAttachment,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamImageAttachmentProps], which configures this widget.
+///  * [DefaultStreamImageAttachment], the default implementation.
 class StreamImageAttachment extends StatelessWidget {
-  /// {@macro streamImageAttachment}
-  const StreamImageAttachment({
+  /// Creates a [StreamImageAttachment].
+  StreamImageAttachment({
     super.key,
+    required Message message,
+    required Attachment image,
+    BoxConstraints? constraints,
+    ImageResize? resize,
+  }) : props = .new(
+         message: message,
+         image: image,
+         constraints: constraints,
+         resize: resize,
+       );
+
+  /// The properties that configure this attachment.
+  final StreamImageAttachmentProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final builder = context.chatComponentBuilder<StreamImageAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamImageAttachment(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamImageAttachment].
+///
+/// This class holds all the configuration options for an image attachment,
+/// allowing them to be passed through the [StreamComponentFactory].
+///
+/// See also:
+///
+///  * [StreamImageAttachment], which uses these properties.
+///  * [DefaultStreamImageAttachment], the default implementation.
+class StreamImageAttachmentProps {
+  /// Creates properties for an image attachment.
+  const StreamImageAttachmentProps({
     required this.message,
     required this.image,
-    this.shape,
-    this.constraints = const BoxConstraints(),
+    this.constraints,
     this.resize,
   });
 
@@ -21,13 +72,8 @@ class StreamImageAttachment extends StatelessWidget {
   /// The [Attachment] object containing the image information.
   final Attachment image;
 
-  /// The shape of the attachment.
-  ///
-  /// Defaults to [RoundedRectangleBorder] with a radius of 14.
-  final ShapeBorder? shape;
-
   /// The constraints to use when displaying the image.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
 
   /// The resize configuration for the image attachment thumbnail.
   ///
@@ -37,15 +83,41 @@ class StreamImageAttachment extends StatelessWidget {
   /// When null, the size is auto-calculated from the layout constraints
   /// and defaults to [ResizeMode.clip] and [CropMode.center].
   final ImageResize? resize;
+}
+
+const _kDefaultConstraints = BoxConstraints(
+  minWidth: 170,
+  maxWidth: 256,
+  minHeight: 100,
+  maxHeight: 300,
+);
+
+/// The default implementation of [StreamImageAttachment].
+///
+/// Renders the image thumbnail with upload progress indication.
+///
+/// See also:
+///
+///  * [StreamImageAttachment], the public API widget.
+///  * [StreamImageAttachmentProps], which configures this widget.
+class DefaultStreamImageAttachment extends StatelessWidget {
+  /// Creates a default Stream image attachment.
+  const DefaultStreamImageAttachment({
+    super.key,
+    required this.props,
+  });
+
+  /// The properties that configure this attachment.
+  final StreamImageAttachmentProps props;
 
   @override
   Widget build(BuildContext context) {
     BoxFit? fit;
-    final imageSize = image.originalSize;
+    final imageSize = props.image.originalSize;
 
     // If attachment size is available, we will tighten the constraints max
     // size to the attachment size.
-    var constraints = this.constraints;
+    var constraints = props.constraints ?? _kDefaultConstraints;
     if (imageSize != null) {
       constraints = constraints.tightenMaxSize(imageSize);
     } else {
@@ -54,39 +126,24 @@ class StreamImageAttachment extends StatelessWidget {
       fit = BoxFit.cover;
     }
 
-    final chatTheme = StreamChatTheme.of(context);
-    final colorTheme = chatTheme.colorTheme;
-    final shape =
-        this.shape ??
-        RoundedRectangleBorder(
-          side: BorderSide(
-            color: colorTheme.borders,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-          borderRadius: BorderRadius.circular(14),
-        );
-
-    return Container(
+    return ConstrainedBox(
       constraints: constraints,
-      clipBehavior: Clip.hardEdge,
-      decoration: ShapeDecoration(shape: shape),
       child: AspectRatio(
         aspectRatio: imageSize?.aspectRatio ?? 1,
         child: Stack(
+          fit: .expand,
           alignment: Alignment.center,
           children: [
             StreamImageAttachmentThumbnail(
-              image: image,
+              image: props.image,
               fit: fit,
-              width: double.infinity,
-              height: double.infinity,
-              resize: resize,
+              resize: props.resize,
             ),
             Padding(
               padding: const EdgeInsets.all(8),
               child: StreamAttachmentUploadStateBuilder(
-                message: message,
-                attachment: image,
+                message: props.message,
+                attachment: props.image,
               ),
             ),
           ],

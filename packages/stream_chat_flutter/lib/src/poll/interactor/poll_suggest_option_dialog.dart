@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
@@ -8,6 +7,12 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 /// Shows a dialog that allows the user to suggest an option for a poll.
 ///
 /// Optionally, you can provide an [initialOption] to pre-fill the text field.
+///
+/// See also:
+///
+///  * [PollSuggestOptionDialog], the dialog widget shown by this function.
+///  * [StreamPollInteractor], which invokes this via
+///    [StreamPollInteractor.onSuggestOption].
 /// {@endtemplate}
 Future<String?> showPollSuggestOptionDialog({
   required BuildContext context,
@@ -24,6 +29,12 @@ Future<String?> showPollSuggestOptionDialog({
 /// A dialog that allows the user to suggest an option for a poll.
 ///
 /// Optionally, you can provide an [initialOption] to pre-fill the text field.
+///
+/// See also:
+///
+///  * [showPollSuggestOptionDialog], the convenience function to show this
+///    dialog.
+///  * [StreamPollInteractor], the parent widget that triggers this dialog.
 /// {@endtemplate}
 class PollSuggestOptionDialog extends StatefulWidget {
   /// {@macro pollSuggestOptionDialog}
@@ -47,7 +58,6 @@ class _PollSuggestOptionDialogState extends State<PollSuggestOptionDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    final pollInteractorTheme = StreamPollInteractorTheme.of(context);
 
     final actions = [
       TextButton(
@@ -76,7 +86,7 @@ class _PollSuggestOptionDialogState extends State<PollSuggestOptionDialog> {
     return AlertDialog(
       title: Text(
         context.translations.suggestAnOptionLabel,
-        style: pollInteractorTheme.pollActionDialogTitleStyle,
+        // style: pollInteractorTheme.pollActionDialogTitleStyle,
       ),
       actions: actions,
       titlePadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -92,9 +102,10 @@ class _PollSuggestOptionDialogState extends State<PollSuggestOptionDialog> {
           vertical: 12,
           horizontal: 16,
         ),
-        style: pollInteractorTheme.pollActionDialogTextFieldStyle,
-        fillColor: pollInteractorTheme.pollActionDialogTextFieldFillColor,
-        borderRadius: pollInteractorTheme.pollActionDialogTextFieldBorderRadius,
+        // TODO: Fix when working on poll create screen
+        // style: pollInteractorTheme.pollActionDialogTextFieldStyle,
+        // fillColor: pollInteractorTheme.pollActionDialogTextFieldFillColor,
+        // borderRadius: pollInteractorTheme.pollActionDialogTextFieldBorderRadius,
         onChanged: (value) => setState(() => _option = value),
       ),
     );

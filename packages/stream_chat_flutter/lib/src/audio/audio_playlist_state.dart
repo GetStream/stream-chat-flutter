@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template playlistLoopMode}
 /// Represents the loop mode of a playlist.
@@ -24,7 +25,7 @@ class AudioPlaylistState {
   const AudioPlaylistState({
     required this.tracks,
     this.currentIndex,
-    this.speed = PlaybackSpeed.regular,
+    this.speed = StreamPlaybackSpeed.x1,
     this.loopMode = PlaylistLoopMode.off,
   });
 
@@ -37,7 +38,7 @@ class AudioPlaylistState {
   final int? currentIndex;
 
   /// The current playback speed of the playlist.
-  final PlaybackSpeed speed;
+  final StreamPlaybackSpeed speed;
 
   /// The current loop mode of the playlist.
   final PlaylistLoopMode loopMode;
@@ -47,7 +48,7 @@ class AudioPlaylistState {
   AudioPlaylistState copyWith({
     List<PlaylistTrack>? tracks,
     int? currentIndex,
-    PlaybackSpeed? speed,
+    StreamPlaybackSpeed? speed,
     PlaylistLoopMode? loopMode,
   }) {
     return AudioPlaylistState(
@@ -100,46 +101,6 @@ enum TrackState {
 
   /// Returns `true` if the track is currently paused.
   bool get isPaused => this == TrackState.paused;
-}
-
-/// {@template playbackSpeed}
-/// Represents the speed of a track.
-/// {@endtemplate}
-enum PlaybackSpeed {
-  /// The regular speed of the playback (1x).
-  regular._(1),
-
-  /// A faster speed of the playback (1.5x).
-  faster._(1.5),
-
-  /// The fastest speed of the playback (2x).
-  fastest._(2)
-  ;
-
-  const PlaybackSpeed._(this.speed);
-
-  /// Creates a [PlaybackSpeed] from the given value.
-  factory PlaybackSpeed.fromValue(double speed) {
-    return PlaybackSpeed.values.firstWhere(
-      (it) => it.speed == speed,
-      orElse: () => PlaybackSpeed.regular,
-    );
-  }
-
-  /// The speed of the playback.
-  final double speed;
-}
-
-/// Helper extension for [PlaybackSpeed].
-extension StreamAudioPlayerExtension on PlaybackSpeed {
-  /// Returns the next [PlaybackSpeed] value.
-  PlaybackSpeed get next {
-    return switch (this) {
-      PlaybackSpeed.regular => PlaybackSpeed.faster,
-      PlaybackSpeed.faster => PlaybackSpeed.fastest,
-      PlaybackSpeed.fastest => PlaybackSpeed.regular,
-    };
-  }
 }
 
 /// {@template playlistTrack}

@@ -1,10 +1,5 @@
 part of 'attachment_widget_builder.dart';
 
-const _kDefaultVideoConstraints = BoxConstraints.tightFor(
-  width: 256,
-  height: 195,
-);
-
 /// {@template videoAttachmentBuilder}
 /// A widget builder for [AttachmentType.video] attachment type.
 ///
@@ -13,20 +8,19 @@ const _kDefaultVideoConstraints = BoxConstraints.tightFor(
 class VideoAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro videoAttachmentBuilder}
   const VideoAttachmentBuilder({
-    this.shape,
-    this.padding = const EdgeInsets.all(2),
-    this.constraints = _kDefaultVideoConstraints,
+    this.style,
+    this.constraints,
     this.onAttachmentTap,
   });
 
-  /// The shape of the video attachment.
-  final ShapeBorder? shape;
+  /// The style of the video attachment container.
+  ///
+  /// When null, a default style with a rounded rectangle shape and border
+  /// is used.
+  final StreamMessageAttachmentStyle? style;
 
   /// The constraints to apply to the video attachment widget.
-  final BoxConstraints constraints;
-
-  /// The padding to apply to the video attachment widget.
-  final EdgeInsetsGeometry padding;
+  final BoxConstraints? constraints;
 
   /// The callback to call when the attachment is tapped.
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
@@ -43,7 +37,7 @@ class VideoAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
@@ -57,8 +51,8 @@ class VideoAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       onTap = () => onAttachmentTap!(message, video);
     }
 
-    return Padding(
-      padding: padding,
+    return StreamMessageAttachment(
+      style: style,
       child: InkWell(
         onTap: onTap,
         child: StreamVideoAttachment(

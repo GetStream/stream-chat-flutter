@@ -120,7 +120,8 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    final crossAxisAlignment = core.StreamMessagePlacement.crossAxisAlignmentOf(context);
+    final contentKind = core.StreamMessageLayout.contentKindOf(context);
+    final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
     if (widget.message.isDeleted) return const StreamMessageDeleted();
 
@@ -139,7 +140,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
               builder: (context) {
                 final bubbleContent = ConstrainedBox(
                   constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
-                  child: Column(
+                  child: core.StreamColumn(
                     spacing: spacing.xxs,
                     mainAxisSize: .min,
                     crossAxisAlignment: .start,
@@ -164,7 +165,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                               child: core.MessageComposerReplyAttachment(
                                 title: Text(quotedMessage.user?.name ?? ''),
                                 subtitle: StreamMessagePreviewText(message: quotedMessage),
-                                style: switch (core.StreamMessagePlacement.messageAlignmentOf(context)) {
+                                style: switch (core.StreamMessageLayout.messageAlignmentOf(context)) {
                                   core.StreamMessageAlignment.start => .incoming,
                                   core.StreamMessageAlignment.end => .outgoing,
                                 },
@@ -176,7 +177,6 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                         key: attachmentsKey,
                         message: widget.message,
                         attachmentBuilders: widget.attachmentBuilders,
-                        attachmentPadding: .symmetric(horizontal: spacing.xs),
                       ),
                       if (widget.message.text case final text? when text.isNotEmpty)
                         StreamMessageText(
@@ -188,10 +188,6 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                   ),
                 );
 
-                final emojiCount = core.StreamMessageText.emojiOnlyCount(widget.message.text);
-                final hideBubble = emojiCount != null && emojiCount <= 3;
-
-                if (hideBubble) return bubbleContent;
                 return core.StreamMessageBubble(child: bubbleContent);
               },
             ),
@@ -199,8 +195,8 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
           if (widget.message.replyCount case final replyCount? when replyCount > 0)
             core.StreamMessageReplies(
               maxAvatars: 3,
-              showConnector: true,
               onTap: widget.onRepliesTap,
+              showConnector: contentKind != .emojiOnly,
               label: Text('$replyCount replies'),
               avatars: widget.message.threadParticipants?.map(
                 (user) => StreamUserAvatar(user: user, showOnlineIndicator: false),
