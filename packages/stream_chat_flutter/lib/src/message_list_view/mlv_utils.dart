@@ -7,8 +7,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 int getInitialIndex(
   int? initialScrollIndex,
   StreamChannelState channelState,
-  bool Function(Message)? messageFilter,
-) {
+  bool Function(Message)? messageFilter, {
+  String? messageId,
+}) {
   if (initialScrollIndex != null) return initialScrollIndex;
 
   final channel = channelState.channel;
@@ -19,13 +20,14 @@ int getInitialIndex(
     ...channelState.channel.state!.messages.where(messageFilter ?? defaultMessageFilter(currentUser.id)),
   ].reversed.toList(growable: false);
 
-  // Return the initial message index if available.
-  if (channelState.initialMessageId case final initialMessageId?) {
-    final initialMessageIndex = messages.indexWhere(
-      (it) => it.id == initialMessageId,
+  // Return the target message index if available.
+  final targetMessageId = messageId ?? channelState.initialMessageId;
+  if (targetMessageId != null) {
+    final targetMessageIndex = messages.indexWhere(
+      (it) => it.id == targetMessageId,
     );
 
-    if (initialMessageIndex != -1) return initialMessageIndex + 2;
+    if (targetMessageIndex != -1) return targetMessageIndex + 2;
   }
 
   // Otherwise, return the first unread message index if available.
