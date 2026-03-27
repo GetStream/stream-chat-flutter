@@ -691,4 +691,22 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String reminderAtText(String time) => '今日 $time';
+
+  @override
+  String get createPollPromptLabel => '投票を作成してみんなに投票してもらおう！';
+
+  @override
+  String get takePhotoAndShareLabel => '写真を撮って共有';
+
+  @override
+  String get takeVideoAndShareLabel => '動画を撮って共有';
+
+  @override
+  String get openCameraLabel => 'カメラを開く';
+
+  @override
+  String get selectFilesToShareLabel => '共有するファイルを選択';
+
+  @override
+  String get openFilesLabel => 'ファイルを開く';
 }

@@ -693,4 +693,22 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String reminderAtText(String time) => 'I dag kl. $time';
+
+  @override
+  String get createPollPromptLabel => 'Lag en avstemning og la alle stemme!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Ta et bilde og del';
+
+  @override
+  String get takeVideoAndShareLabel => 'Ta en video og del';
+
+  @override
+  String get openCameraLabel => 'Åpne kamera';
+
+  @override
+  String get selectFilesToShareLabel => 'Velg filer å dele';
+
+  @override
+  String get openFilesLabel => 'Åpne filer';
 }

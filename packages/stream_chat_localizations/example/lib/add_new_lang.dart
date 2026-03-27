@@ -733,6 +733,24 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String reminderAtText(String time) => 'Today at $time';
+
+  @override
+  String get createPollPromptLabel => 'Create a poll and let everyone vote!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Take a photo and share';
+
+  @override
+  String get takeVideoAndShareLabel => 'Take a video and share';
+
+  @override
+  String get openCameraLabel => 'Open camera';
+
+  @override
+  String get selectFilesToShareLabel => 'Select files to share';
+
+  @override
+  String get openFilesLabel => 'Open files';
 }
 
 void main() async {

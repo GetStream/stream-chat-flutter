@@ -321,6 +321,12 @@ void main() {
       expect(localizations.viewLabel, isNotNull);
       expect(localizations.reminderSetLabel, isNotNull);
       expect(localizations.reminderAtText('3:00 PM'), isNotNull);
+      expect(localizations.createPollPromptLabel, isNotNull);
+      expect(localizations.takePhotoAndShareLabel, isNotNull);
+      expect(localizations.takeVideoAndShareLabel, isNotNull);
+      expect(localizations.openCameraLabel, isNotNull);
+      expect(localizations.selectFilesToShareLabel, isNotNull);
+      expect(localizations.openFilesLabel, isNotNull);
     });
   }
 

@@ -705,4 +705,22 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String reminderAtText(String time) => 'Heute um $time';
+
+  @override
+  String get createPollPromptLabel => 'Erstelle eine Umfrage und lass alle abstimmen!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Foto aufnehmen und teilen';
+
+  @override
+  String get takeVideoAndShareLabel => 'Video aufnehmen und teilen';
+
+  @override
+  String get openCameraLabel => 'Kamera öffnen';
+
+  @override
+  String get selectFilesToShareLabel => 'Dateien zum Teilen auswählen';
+
+  @override
+  String get openFilesLabel => 'Dateien öffnen';
 }

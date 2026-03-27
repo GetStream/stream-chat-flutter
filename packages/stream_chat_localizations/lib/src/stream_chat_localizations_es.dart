@@ -709,4 +709,22 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String reminderAtText(String time) => 'Hoy a las $time';
+
+  @override
+  String get createPollPromptLabel => '¡Crea una encuesta y deja que todos voten!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Toma una foto y comparte';
+
+  @override
+  String get takeVideoAndShareLabel => 'Graba un video y comparte';
+
+  @override
+  String get openCameraLabel => 'Abrir cámara';
+
+  @override
+  String get selectFilesToShareLabel => 'Selecciona archivos para compartir';
+
+  @override
+  String get openFilesLabel => 'Abrir archivos';
 }

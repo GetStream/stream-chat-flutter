@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamThreadHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header.png)
@@ -66,7 +66,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
     this.onBackPressed,
     this.title,
     this.subtitle,
-    this.centerTitle,
+    this.centerTitle = true,
     this.leading,
     this.actions,
     this.onTitleTap,
@@ -99,7 +99,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
   final Widget? subtitle;
 
   /// Whether the title should be centered
-  final bool? centerTitle;
+  final bool centerTitle;
 
   /// Leading widget
   final Widget? leading;
@@ -152,12 +152,8 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
               )
             : const SizedBox.shrink());
 
-    final theme = Theme.of(context);
-    return AppBar(
+    return StreamAppBar(
       automaticallyImplyLeading: false,
-      toolbarTextStyle: theme.textTheme.bodyMedium,
-      titleTextStyle: theme.textTheme.titleLarge,
-      systemOverlayStyle: theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       elevation: elevation,
       scrolledUnderElevation: scrolledUnderElevation,
       leading:
@@ -172,13 +168,6 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
       backgroundColor: backgroundColor ?? channelHeaderTheme.color,
       centerTitle: centerTitle,
       actions: actions,
-      shape: LinearBorder(
-        side: BorderSide(
-          color: colorScheme.borderDefault,
-          width: 1,
-        ),
-        bottom: const LinearBorderEdge(),
-      ),
       title: InkWell(
         onTap: onTitleTap,
         child: SizedBox(
@@ -197,7 +186,9 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
               if (showTypingIndicator)
                 StreamTypingIndicator(
                   channel: StreamChannel.of(context).channel,
-                  style: channelHeaderTheme.subtitleStyle,
+                  style:
+                      channelHeaderTheme.subtitleStyle ??
+                      textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
                   parentId: parent.id,
                   alternativeWidget: defaultSubtitle,
                 )
