@@ -323,22 +323,30 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   Message? get editingOriginalMessage => _editingOriginalMessage;
   Message? _editingOriginalMessage;
 
+  Message? _preEditMessage;
+
   /// Sets the controller to edit an existing [message].
   ///
   /// Stores a snapshot of [message] in [editingOriginalMessage] so the
   /// original content stays visible while the user types.
-  /// Resets [_initialMessage] to an empty message so that [cancelEditMessage]
-  /// returns to a clean empty state.
+  /// Saves the current composer state so [cancelEditMessage] can restore it.
   void editMessage(Message message) {
+    _preEditMessage = this.message;
     _editingOriginalMessage = message;
-    _initialMessage = Message();
     this.message = message.copyWith(state: MessageState.updating);
   }
 
-  /// Cancels the current edit and resets the controller to an empty state.
+  /// Cancels the current edit and restores the composer to the state it was
+  /// in before editing began.
   void cancelEditMessage() {
     _editingOriginalMessage = null;
-    reset();
+    if (_preEditMessage != null) {
+      message = _preEditMessage!;
+      _preEditMessage = null;
+    } else {
+      _initialMessage = Message();
+      reset();
+    }
   }
 
   /// Sets the [message] to the initial [Message] value.

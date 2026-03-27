@@ -1,6 +1,5 @@
 // ignore_for_file: lines_longer_than_80_chars
 
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -109,55 +108,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Slow mode ON'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'allows setting padding on message input',
-    skip: true,
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildWidget(
-          const StreamMessageInput(
-            padding: EdgeInsets.only(left: 50),
-          ),
-        ),
-      );
-
-      // wait for the initial state to be rendered.
-      await tester.pumpAndSettle();
-
-      expect(
-        find.descendant(
-          of: find.byType(StreamMessageValueListenableBuilder),
-          matching: find.byWidgetPredicate((w) => w is Padding && w.padding == const EdgeInsets.only(left: 50)),
-        ),
-        findsOneWidget,
-      );
-    },
-  );
-
-  testWidgets(
-    'allows setting explicit margin on text field',
-    skip: true,
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildWidget(
-          const StreamMessageInput(
-            textInputMargin: EdgeInsets.only(left: 50),
-          ),
-        ),
-      );
-      // wait for the initial state to be rendered.
-      await tester.pumpAndSettle();
-
-      expect(
-        find.descendant(
-          of: find.byType(DropTarget),
-          matching: find.byWidgetPredicate((w) => w is Container && w.margin == const EdgeInsets.only(left: 50)),
-        ),
-        findsOneWidget,
-      );
     },
   );
 

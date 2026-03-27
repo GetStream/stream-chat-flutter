@@ -663,7 +663,34 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Direkte posisjon';
-    return '📍 Posisjon';
+    if (isLive) return 'Direkte posisjon';
+    return 'Posisjon';
   }
+
+  @override
+  String get noConversationsYetText => 'Ingen samtaler ennå';
+
+  @override
+  String get replyToStartThreadText => 'Svar på en melding for å starte en tråd';
+
+  @override
+  String get sendMessageToStartConversationText => 'Send en melding for å starte samtalen';
+
+  @override
+  String get savedForLaterLabel => 'Lagret til senere';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Svarte i en tråd';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Også sendt i kanalen';
+
+  @override
+  String get viewLabel => 'Vis';
+
+  @override
+  String get reminderSetLabel => 'Påminnelse satt';
+
+  @override
+  String reminderAtText(String time) => 'I dag kl. $time';
 }

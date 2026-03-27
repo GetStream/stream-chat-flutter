@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -74,6 +77,7 @@ class StreamMessageWidget extends StatelessWidget {
     double? spacing,
     Color? backgroundColor,
     double maxWidth = 264,
+    bool swipeToReply = false,
     void Function(Message)? onMessageTap,
     void Function(Message)? onMessageLongPress,
     void Function(User)? onUserAvatarTap,
@@ -95,6 +99,7 @@ class StreamMessageWidget extends StatelessWidget {
          spacing: spacing,
          backgroundColor: backgroundColor,
          maxWidth: maxWidth,
+         swipeToReply: swipeToReply,
          onMessageTap: onMessageTap,
          onMessageLongPress: onMessageLongPress,
          onUserAvatarTap: onUserAvatarTap,
@@ -148,6 +153,7 @@ class StreamMessageWidgetProps {
     this.spacing,
     this.backgroundColor,
     this.maxWidth = 272,
+    this.swipeToReply = false,
     this.onMessageTap,
     this.onMessageLongPress,
     this.onUserAvatarTap,
@@ -198,6 +204,19 @@ class StreamMessageWidgetProps {
   /// [Flex] constraints. Use [double.infinity] to impose no cap from this
   /// widget. Defaults to `264` when not specified.
   final double maxWidth;
+
+  /// Whether swiping the message triggers a quoted-reply action.
+  ///
+  /// When true, the message can be swiped from left to right to initiate a
+  /// reply. The swipe direction and reply icon position are always
+  /// start-to-end (left to right in LTR layouts), regardless of whether the
+  /// message belongs to the current user or another participant.
+  /// On completion, [onReplyTap] is invoked with the message.
+  ///
+  /// Swipe is disabled for deleted messages and messages in a failed state.
+  ///
+  /// Defaults to false.
+  final bool swipeToReply;
 
   /// Called when the message is tapped.
   ///
@@ -310,6 +329,7 @@ class StreamMessageWidgetProps {
     double? spacing,
     Color? backgroundColor,
     double? maxWidth,
+    bool? swipeToReply,
     void Function(Message)? onMessageTap,
     void Function(Message)? onMessageLongPress,
     void Function(User)? onUserAvatarTap,
@@ -332,6 +352,7 @@ class StreamMessageWidgetProps {
       spacing: spacing ?? this.spacing,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       maxWidth: maxWidth ?? this.maxWidth,
+      swipeToReply: swipeToReply ?? this.swipeToReply,
       onMessageTap: onMessageTap ?? this.onMessageTap,
       onMessageLongPress: onMessageLongPress ?? this.onMessageLongPress,
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
@@ -379,7 +400,12 @@ class DefaultStreamMessage extends StatelessWidget {
 
     final placement = StreamMessageLayout.of(context);
     final theme = StreamMessageItemTheme.of(context);
-    final defaults = _StreamMessageWidgetDefaults(context, isPinned: message.pinned, state: message.state);
+    final defaults = _StreamMessageWidgetDefaults(
+      context,
+      isPinned: message.pinned,
+      isEdited: message.messageTextUpdatedAt != null,
+      state: message.state,
+    );
 
     final resolve = StreamMessageLayoutResolver(placement, [theme, defaults]);
 
@@ -437,7 +463,7 @@ class DefaultStreamMessage extends StatelessWidget {
       },
     );
 
-    return Material(
+    Widget result = Material(
       animateColor: true,
       color: effectiveBackgroundColor,
       child: PlatformWidgetBuilder(
@@ -499,6 +525,16 @@ class DefaultStreamMessage extends StatelessWidget {
         ),
       ),
     );
+
+    if (props.swipeToReply && props.onReplyTap != null && !message.isDeleted && !message.state.isFailed) {
+      result = _SwipeToReplyWrapper(
+        message: message,
+        onReplyTap: props.onReplyTap!,
+        child: result,
+      );
+    }
+
+    return result;
   }
 
   // Builds the action list for a bounced (moderation-error) message.
@@ -696,17 +732,37 @@ class DefaultStreamMessage extends StatelessWidget {
       currentUser: currentUser,
     );
 
+    final layout = StreamMessageLayout.of(context);
+    final theme = StreamMessageItemTheme.of(context);
+    final defaults = _StreamMessageWidgetDefaults(
+      context,
+      isPinned: message.pinned,
+      isEdited: message.messageTextUpdatedAt != null,
+      state: message.state,
+    );
+
+    final resolve = StreamMessageLayoutResolver(layout, [theme, defaults]);
+    final leadingVisibility = resolve((theme) => theme?.leadingVisibility);
+
+    var leadingInset = 0.0;
+    if (leadingVisibility != StreamVisibility.gone) {
+      final effectiveAvatarSize = theme.avatarSize ?? defaults.avatarSize;
+      final effectiveSpacing = props.spacing ?? theme.spacing ?? defaults.spacing;
+      leadingInset = effectiveAvatarSize.value + effectiveSpacing;
+    }
+
     final action = await showStreamDialog(
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
         data: StreamChatConfiguration.of(context),
         child: StreamMessageLayout(
-          data: StreamMessageLayout.of(context),
+          data: layout,
           child: StreamMessageActionsModal(
             message: message,
             messageActions: actions,
             showReactionPicker: showPicker,
+            leadingInset: leadingInset,
             messageWidget: StreamChannel(
               channel: channel,
               child: StreamMessageWidget(
@@ -860,6 +916,60 @@ extension on Poll {
   }
 }
 
+class _SwipeToReplyWrapper extends StatelessWidget {
+  const _SwipeToReplyWrapper({
+    required this.message,
+    required this.onReplyTap,
+    required this.child,
+  });
+
+  final Message message;
+  final void Function(Message) onReplyTap;
+  final Widget child;
+
+  static const _swipeThreshold = 0.2;
+
+  @override
+  Widget build(BuildContext context) {
+    return Swipeable(
+      key: ValueKey('swipe-${message.id}'),
+      direction: SwipeDirection.startToEnd,
+      swipeThreshold: _swipeThreshold,
+      onSwiped: (_) => onReplyTap(message),
+      backgroundBuilder: (context, details) {
+        final progress = math.min(details.progress, _swipeThreshold) / _swipeThreshold;
+        final offset = Offset.lerp(const Offset(-24, 0), const Offset(12, 0), progress)!;
+
+        return Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Transform.translate(
+            offset: offset,
+            child: Opacity(
+              opacity: progress,
+              child: SizedBox.square(
+                dimension: 32,
+                child: CustomPaint(
+                  painter: AnimatedCircleBorderPainter(
+                    progress: progress,
+                    color: context.streamColorScheme.borderDefault,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      context.streamIcons.arrowShareLeft,
+                      size: lerpDouble(0, 20, progress),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+}
+
 // Built-in fallback theme values for [DefaultStreamMessage].
 //
 // Used when neither the explicit props nor the ambient
@@ -868,10 +978,12 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   _StreamMessageWidgetDefaults(
     this._context, {
     this.isPinned = false,
+    this.isEdited = false,
     required MessageState state,
   }) : _messageState = state;
 
   final bool isPinned;
+  final bool isEdited;
 
   final BuildContext _context;
   final MessageState _messageState;
@@ -907,10 +1019,12 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   StreamMessageLayoutVisibility get headerVisibility => .all(.visible);
 
   @override
-  StreamMessageLayoutVisibility get footerVisibility => .resolveWith(
-    (placement) => switch (placement.stackPosition) {
-      .single || .bottom => .visible,
-      _ => .gone,
-    },
-  );
+  StreamMessageLayoutVisibility get footerVisibility => isEdited
+      ? .all(.visible)
+      : .resolveWith(
+          (placement) => switch (placement.stackPosition) {
+            .single || .bottom => .visible,
+            _ => .gone,
+          },
+        );
 }

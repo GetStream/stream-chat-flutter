@@ -113,7 +113,6 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                 widget.editMessageInputBuilder!(context, widget.message)
               else
                 StreamMessageInput(
-                  elevation: 0,
                   messageInputController: controller,
                   preMessageSending: (m) {
                     FocusScope.of(context).unfocus();

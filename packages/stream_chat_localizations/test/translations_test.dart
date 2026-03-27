@@ -312,6 +312,15 @@ void main() {
       expect(localizations.systemMessageLabel, isNotNull);
       expect(localizations.draftLabel, isNotNull);
       expect(localizations.locationLabel(), isNotNull);
+      expect(localizations.noConversationsYetText, isNotNull);
+      expect(localizations.replyToStartThreadText, isNotNull);
+      expect(localizations.sendMessageToStartConversationText, isNotNull);
+      expect(localizations.savedForLaterLabel, isNotNull);
+      expect(localizations.repliedToThreadAnnotationLabel, isNotNull);
+      expect(localizations.alsoSentInChannelAnnotationLabel, isNotNull);
+      expect(localizations.viewLabel, isNotNull);
+      expect(localizations.reminderSetLabel, isNotNull);
+      expect(localizations.reminderAtText('3:00 PM'), isNotNull);
     });
   }
 

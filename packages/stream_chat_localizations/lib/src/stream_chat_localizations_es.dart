@@ -679,7 +679,34 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Ubicación en vivo';
-    return '📍 Ubicación';
+    if (isLive) return 'Ubicación en vivo';
+    return 'Ubicación';
   }
+
+  @override
+  String get noConversationsYetText => 'Aún no hay conversaciones';
+
+  @override
+  String get replyToStartThreadText => 'Responde a un mensaje para iniciar un hilo';
+
+  @override
+  String get sendMessageToStartConversationText => 'Envía un mensaje para iniciar la conversación';
+
+  @override
+  String get savedForLaterLabel => 'Guardado para después';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Respondió a un hilo';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'También enviado en el canal';
+
+  @override
+  String get viewLabel => 'Ver';
+
+  @override
+  String get reminderSetLabel => 'Recordatorio establecido';
+
+  @override
+  String reminderAtText(String time) => 'Hoy a las $time';
 }

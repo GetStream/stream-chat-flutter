@@ -35,6 +35,12 @@ class StreamChatMessageComposer extends StatefulWidget {
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
     bool canAlsoSendToChannel = false,
+    VoidCallback? onQuotedMessageCleared,
+    TextInputAction? textInputAction,
+    TextInputType? keyboardType,
+    TextCapitalization textCapitalization = TextCapitalization.sentences,
+    bool autofocus = false,
+    bool autocorrect = true,
   }) : props = MessageComposerProps(
          controller: controller,
          isFloating: false,
@@ -49,6 +55,12 @@ class StreamChatMessageComposer extends StatefulWidget {
          sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
          feedback: feedback,
          canAlsoSendToChannel: canAlsoSendToChannel,
+         onQuotedMessageCleared: onQuotedMessageCleared,
+         textInputAction: textInputAction,
+         keyboardType: keyboardType,
+         textCapitalization: textCapitalization,
+         autofocus: autofocus,
+         autocorrect: autocorrect,
        );
 
   /// The controller for the message composer.
@@ -180,6 +192,12 @@ class MessageComposerProps {
     this.sendVoiceRecordingAutomatically = false,
     this.feedback = const AudioRecorderFeedback(),
     this.canAlsoSendToChannel = false,
+    this.onQuotedMessageCleared,
+    this.textInputAction,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.sentences,
+    this.autofocus = false,
+    this.autocorrect = true,
   });
 
   /// The controller for the message composer.
@@ -224,6 +242,24 @@ class MessageComposerProps {
   /// Whether the user can also send the message as a direct message.
   /// Usually used in threads.
   final bool canAlsoSendToChannel;
+
+  /// Callback for when the quoted message is cleared.
+  final VoidCallback? onQuotedMessageCleared;
+
+  /// The type of action button to use for the keyboard.
+  final TextInputAction? textInputAction;
+
+  /// The type of keyboard to use for editing the text.
+  final TextInputType? keyboardType;
+
+  /// {@macro flutter.widgets.editableText.textCapitalization}
+  final TextCapitalization textCapitalization;
+
+  /// Whether the text field should be focused initially.
+  final bool autofocus;
+
+  /// Whether to enable autocorrect.
+  final bool autocorrect;
 }
 
 extension on StreamAudioRecorderController {
@@ -280,6 +316,7 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
       isPickerOpen: props.isPickerOpen,
       audioRecorderState: audioRecorderState,
       focusNode: props.focusNode,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
     );
 
     return core.StreamCoreMessageComposer(
@@ -309,6 +346,11 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
                 focusNode: props.focusNode,
                 command: inputController.message.command?.toUpperCase(),
                 onDismissCommand: inputController.clear,
+                textInputAction: props.textInputAction,
+                keyboardType: props.keyboardType,
+                textCapitalization: props.textCapitalization,
+                autofocus: props.autofocus,
+                autocorrect: props.autocorrect,
               ),
               if (props.canAlsoSendToChannel)
                 DmCheckboxListTile(

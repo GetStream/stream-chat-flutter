@@ -271,6 +271,10 @@ extension StreamImagePickerX on StreamAttachmentPickerController {
 
     extraDataMap['file_size'] = file.size!;
 
+    if (type == AssetType.video) {
+      extraDataMap['duration'] = asset.videoDuration.inSeconds;
+    }
+
     final attachment = Attachment(
       id: asset.id,
       file: file,

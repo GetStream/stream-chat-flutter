@@ -678,7 +678,34 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Localização ao Vivo';
-    return '📍 Localização';
+    if (isLive) return 'Localização ao Vivo';
+    return 'Localização';
   }
+
+  @override
+  String get noConversationsYetText => 'Ainda não há conversas';
+
+  @override
+  String get replyToStartThreadText => 'Responda a uma mensagem para iniciar uma thread';
+
+  @override
+  String get sendMessageToStartConversationText => 'Envie uma mensagem para iniciar a conversa';
+
+  @override
+  String get savedForLaterLabel => 'Guardado para depois';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Respondeu a uma thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Também enviado no canal';
+
+  @override
+  String get viewLabel => 'Ver';
+
+  @override
+  String get reminderSetLabel => 'Lembrete definido';
+
+  @override
+  String reminderAtText(String time) => 'Hoje às $time';
 }

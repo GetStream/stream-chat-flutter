@@ -162,7 +162,8 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
               ...options.map(
                 (option) {
                   final supported = option.supportedTypes;
-                  final isEnabled = enabledTypes.any(supported.contains);
+                  // An option with no supportedTypes is always enabled.
+                  final isEnabled = supported.isEmpty || enabledTypes.any(supported.contains);
                   final isSelected = option == currentOption;
 
                   final onPressed = switch (isEnabled) {
@@ -319,6 +320,7 @@ Widget tabbedAttachmentPickerBuilder({
   AttachmentPickerOptionsBuilder? optionsBuilder,
   ValueSetter<AttachmentPickerError>? onError,
   ValueSetter<Poll>? onPollCreated,
+  ValueSetter<Command>? onCommandSelected,
 }) {
   final defaultOptions = <TabbedAttachmentPickerOption>[
     TabbedAttachmentPickerOption(
@@ -413,6 +415,14 @@ Widget tabbedAttachmentPickerBuilder({
           },
         );
       },
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'command-picker',
+      icon: context.streamIcons.runShortcut,
+      supportedTypes: [AttachmentPickerType.command],
+      optionViewBuilder: (context, controller) => StreamCommandPicker(
+        onCommandSelected: onCommandSelected,
+      ),
     ),
   ];
 

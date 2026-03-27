@@ -191,10 +191,6 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
                   if (state.currentIndex != index) return;
                   return _controller.pause();
                 },
-                onTrackSeekEnd: (_) async {
-                  if (state.currentIndex != index) return;
-                  return _controller.play();
-                },
                 onTrackSeekChanged: (progress) async {
                   if (state.currentIndex != index) return;
 
@@ -202,7 +198,7 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
                   final seekPosition = (duration * progress).toInt();
                   final seekDuration = Duration(microseconds: seekPosition);
 
-                  return _controller.seek(seekDuration);
+                  await _controller.seek(seekDuration);
                 },
               );
 

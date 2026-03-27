@@ -8,6 +8,8 @@ import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positi
 import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
 import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
+import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_empty_state.dart';
+import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
 import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
@@ -110,6 +112,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onThreadTap,
     this.onEditMessageTap,
     this.onReplyTap,
+    this.swipeToReply = false,
     this.onUserAvatarTap,
     this.onReactionsTap,
     this.onQuotedMessageTap,
@@ -144,6 +147,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onModeratedMessageTap,
     this.onMessageLongPress,
     this.showFloatingDateDivider = true,
+    this.fadeFloatingDateDividerNearInline = true,
     this.threadSeparatorBuilder,
     this.unreadMessagesSeparatorBuilder,
     this.messageListController,
@@ -221,6 +225,14 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Forwarded to each [StreamMessageWidget] in the list.
   final void Function(Message)? onReplyTap;
+
+  /// Whether swiping a message triggers a quoted-reply action.
+  ///
+  /// Forwarded to each [StreamMessageWidget] in the list via
+  /// [StreamMessageWidgetProps.swipeToReply].
+  ///
+  /// Defaults to false.
+  final bool swipeToReply;
 
   /// Called when a user avatar is tapped.
   ///
@@ -352,6 +364,12 @@ class StreamMessageListView extends StatefulWidget {
   /// Flag for showing the floating date divider
   final bool showFloatingDateDivider;
 
+  /// Whether the floating date divider fades out when an inline date divider
+  /// for the same date is near the top of the viewport.
+  ///
+  /// Only has an effect when [showFloatingDateDivider] is true.
+  final bool fadeFloatingDateDividerNearInline;
+
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
 
@@ -459,7 +477,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   List<Message> messages = <Message>[];
   Map<String, int> messagesIndex = {};
 
-  bool initialMessageHighlightComplete = false;
+  String? _highlightedMessageId;
+  int _highlightGeneration = 0;
 
   bool _inBetweenList = false;
 
@@ -500,6 +519,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
       _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
+
+      if (widget.highlightInitialMessage) {
+        final initialMessageId = streamChannel?.initialMessageId;
+        if (initialMessageId != null) {
+          _highlightedMessageId = initialMessageId;
+          _highlightGeneration++;
+        }
+      }
 
       initialIndex = getInitialIndex(
         widget.initialScrollIndex,
@@ -551,6 +578,40 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     super.dispose();
   }
 
+  void _highlightMessage(String messageId) {
+    setState(() {
+      _highlightedMessageId = messageId;
+      _highlightGeneration++;
+    });
+  }
+
+  Future<void> _scrollToAndHighlight(
+    String messageId, {
+    required List<Message> messages,
+  }) async {
+    final index = messages.indexWhere((m) => m.id == messageId);
+    if (index >= 0) {
+      await _scrollController?.scrollTo(
+        index: index + 2, // +2 to account for loader and footer
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeInOut,
+        alignment: 0.1,
+      );
+    } else {
+      await streamChannel!.loadChannelAtMessage(messageId).then((_) async {
+        initialIndex = getInitialIndex(
+          null,
+          streamChannel!,
+          widget.messageFilter,
+          messageId: messageId,
+        );
+        initialAlignment = 0.1;
+      });
+    }
+
+    _highlightMessage(messageId);
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: Revisit this nested Portal setup during desktop reactions refactor
@@ -563,23 +624,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           child: MessageListCore(
             paginationLimit: widget.paginationLimit,
             messageFilter: widget.messageFilter,
-            loadingBuilder:
-                widget.loadingBuilder ??
-                (context) => const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                ),
-            emptyBuilder:
-                widget.emptyBuilder ??
-                (context) => Center(
-                  child: Text(
-                    context.translations.emptyChatMessagesText,
-                    style: _streamTheme.textTheme.footnote.copyWith(
-                      color: _streamTheme.colorTheme.textHighEmphasis
-                          // ignore: deprecated_member_use
-                          .withOpacity(0.5),
-                    ),
-                  ),
-                ),
+            loadingBuilder: widget.loadingBuilder ?? (context) => const StreamMessageListSkeletonLoading(),
+            emptyBuilder: widget.emptyBuilder ?? (context) => const StreamMessageListEmptyState(),
             messageListBuilder: widget.messageListBuilder ?? (context, list) => _buildListView(list),
             messageListController: _messageListController,
             parentMessage: widget.parentMessage,
@@ -916,6 +962,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             child: FloatingDateDivider(
               itemCount: itemCount,
               reverse: widget.reverse,
+              fadeNearInlineDivider: widget.fadeFloatingDateDividerNearInline,
               itemPositionListener: _itemPositionListener.itemPositions,
               messages: messages,
               dateDividerBuilder: switch (widget.floatingDateDividerBuilder) {
@@ -1059,6 +1106,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   ) {
     final parentMessageProps = StreamMessageWidgetProps(
       message: message,
+      swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
@@ -1205,6 +1253,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final messageWidgetProps = StreamMessageWidgetProps(
       message: message,
+      swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
@@ -1216,23 +1265,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onUserMentionTap: widget.onUserMentionTap,
       onQuotedMessageTap: switch (widget.onQuotedMessageTap) {
         final onTap? => onTap,
-        _ => (quotedMessage) async {
-          final quotedMessageId = quotedMessage.id;
-          if (messages.map((e) => e.id).contains(quotedMessageId)) {
-            final index = messages.indexWhere((m) => m.id == quotedMessageId);
-            _scrollController?.scrollTo(
-              index: index + 2, // +2 to account for loader and footer
-              duration: const Duration(seconds: 1),
-              curve: Curves.easeInOut,
-              alignment: 0.1,
-            );
-          } else {
-            await streamChannel!.loadChannelAtMessage(quotedMessageId).then((_) async {
-              initialIndex = 21; // 19 + 2 | 19 is the index of the message
-              initialAlignment = 0.1;
-            });
-          }
-        },
+        _ => (quotedMessage) => _scrollToAndHighlight(
+          quotedMessage.id,
+          messages: messages,
+        ),
       },
     );
 
@@ -1260,16 +1296,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ),
     );
 
-    // Highlight the initial message with an animated background color flash.
-    if (!initialMessageHighlightComplete &&
-        widget.highlightInitialMessage &&
-        isInitialMessage(message.id, streamChannel)) {
+    if (_highlightedMessageId == message.id) {
       final colorScheme = context.streamColorScheme;
       final highlightColor = widget.messageHighlightColor ?? colorScheme.backgroundHighlight;
       child = TweenAnimationBuilder<Color?>(
+        key: ValueKey('highlight-$_highlightGeneration'),
         tween: ColorTween(begin: highlightColor, end: highlightColor.withValues(alpha: 0)),
         duration: const Duration(seconds: 3),
-        onEnd: () => initialMessageHighlightComplete = true,
+        onEnd: () {
+          if (_highlightedMessageId == message.id) {
+            setState(() => _highlightedMessageId = null);
+          }
+        },
         builder: (_, color, child) => ColoredBox(color: color!, child: child),
         child: Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: child),
       );
