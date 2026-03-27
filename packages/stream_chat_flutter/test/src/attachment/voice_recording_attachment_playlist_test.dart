@@ -166,7 +166,7 @@ void main() {
 
         // onTrackSeekEnd must be null so that play() is never called
         // when the user lifts their finger after scrubbing.
-        expect(attachment.onTrackSeekEnd, isNull);
+        expect(attachment.props.onTrackSeekEnd, isNull);
       },
     );
 
@@ -191,7 +191,7 @@ void main() {
         // the track to a playing state (track is idle, no AudioPlayer action
         // is triggered because there is no active audio source).
         expect(
-          () => attachment.onTrackSeekChanged?.call(0.5),
+          () => attachment.props.onTrackSeekChanged?.call(0.5),
           returnsNormally,
         );
 
@@ -201,7 +201,7 @@ void main() {
         final updatedAttachment = tester.widget<StreamVoiceRecordingAttachment>(
           attachmentFinder,
         );
-        expect(updatedAttachment.track.state, isNot(TrackState.playing));
+        expect(updatedAttachment.props.track.state, isNot(TrackState.playing));
       },
     );
 
