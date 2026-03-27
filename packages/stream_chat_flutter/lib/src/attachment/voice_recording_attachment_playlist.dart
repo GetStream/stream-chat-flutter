@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Signature for decorating each voice recording item in a playlist.
 ///

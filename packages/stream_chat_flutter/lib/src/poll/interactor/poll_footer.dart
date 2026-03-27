@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template pollFooter}

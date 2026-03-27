@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
