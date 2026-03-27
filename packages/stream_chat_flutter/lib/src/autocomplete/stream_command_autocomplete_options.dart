@@ -60,7 +60,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
             bottom: context.streamSpacing.xs,
           ),
           child: Align(
-            alignment: .centerStart,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(
               context.translations.instantCommandsLabel,
               style: textTheme.headingXs.copyWith(color: colorScheme.textTertiary),

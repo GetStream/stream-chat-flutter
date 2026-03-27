@@ -51,33 +51,6 @@ void main() {
     );
 
     testWidgets(
-      'uses custom shape when provided',
-      (WidgetTester tester) async {
-        final customShape = RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        );
-
-        await tester.pumpWidget(
-          _wrapWithStreamChatApp(
-            StreamVoiceRecordingAttachmentPlaylist(
-              message: MockMessage(),
-              voiceRecordings: [fakeAudioRecording1],
-              shape: customShape,
-            ),
-          ),
-        );
-
-        expect(find.byType(StreamVoiceRecordingAttachment), findsOneWidget);
-
-        final attachment = tester.widget<StreamVoiceRecordingAttachment>(
-          find.byType(StreamVoiceRecordingAttachment),
-        );
-
-        expect(attachment.shape, customShape);
-      },
-    );
-
-    testWidgets(
       'updates playlist when recordings change',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -143,7 +116,7 @@ void main() {
           find.byType(StreamVoiceRecordingAttachment),
         );
 
-        expect(attachment.constraints, constraints);
+        expect(attachment.props.constraints, constraints);
       },
     );
 
@@ -193,7 +166,7 @@ void main() {
 
         // onTrackSeekEnd must be null so that play() is never called
         // when the user lifts their finger after scrubbing.
-        expect(attachment.onTrackSeekEnd, isNull);
+        expect(attachment.props.onTrackSeekEnd, isNull);
       },
     );
 
@@ -218,7 +191,7 @@ void main() {
         // the track to a playing state (track is idle, no AudioPlayer action
         // is triggered because there is no active audio source).
         expect(
-          () => attachment.onTrackSeekChanged?.call(0.5),
+          () => attachment.props.onTrackSeekChanged?.call(0.5),
           returnsNormally,
         );
 
@@ -228,7 +201,7 @@ void main() {
         final updatedAttachment = tester.widget<StreamVoiceRecordingAttachment>(
           attachmentFinder,
         );
-        expect(updatedAttachment.track.state, isNot(TrackState.playing));
+        expect(updatedAttachment.props.track.state, isNot(TrackState.playing));
       },
     );
 

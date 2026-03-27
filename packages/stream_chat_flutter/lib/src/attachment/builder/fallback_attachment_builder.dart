@@ -21,13 +21,12 @@ class FallbackAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
   ) {
-    // Returns an empty widget because this builder will be used as a fallback
-    // when no other builder can handle the attachments.
-    return const Empty();
+    // No visual representation for unsupported attachment types.
+    return null;
   }
 }

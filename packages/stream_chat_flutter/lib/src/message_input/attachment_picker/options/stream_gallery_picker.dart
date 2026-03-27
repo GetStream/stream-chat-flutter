@@ -171,9 +171,8 @@ class _AddMoreTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         overlayColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.pressed)) return colorScheme.statePressed;
-          if (states.contains(WidgetState.hovered)) return colorScheme.stateHover;
-          if (states.contains(WidgetState.focused)) return colorScheme.stateFocused;
+          if (states.contains(WidgetState.pressed)) return colorScheme.backgroundPressed;
+          if (states.contains(WidgetState.hovered)) return colorScheme.backgroundHover;
           return null;
         }),
         child: Column(

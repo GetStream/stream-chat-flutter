@@ -5,10 +5,16 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
     show
         StreamAvatarGroupSize,
         StreamAvatarSize,
+        StreamAvatarStackSize,
+        StreamButtonThemeStyle,
+        StreamCheckboxStyle,
+        StreamProgressBarStyle,
+        StreamPlaybackSpeedToggleStyle,
         StreamAudioWaveformSlider,
         StreamAudioWaveform,
         StreamTheme,
         StreamIcons,
+        StreamImageSourceBadge,
         StreamThemeExtension,
         StreamComponentFactory,
         StreamComponentBuilder,
@@ -25,8 +31,14 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamEmojiData,
         StreamEmojiPickerSheet,
         StreamMessageAlignment,
-        StreamMessagePlacement,
+        StreamMessageLayout,
         StreamMessageStackPosition,
+        StreamMessageChannelKind,
+        StreamMessageListKind,
+        StreamMessageContentKind,
+        StreamMessageText,
+        StreamPlaybackSpeedToggle,
+        StreamPlaybackSpeed,
         StreamReactionPicker,
         StreamReactionPickerItem,
         StreamReactionPickerProps,
@@ -44,6 +56,7 @@ export 'src/attachment/builder/attachment_widget_builder.dart';
 export 'src/attachment/gallery_attachment.dart';
 export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
+export 'src/attachment/link_preview_attachment.dart';
 export 'src/attachment/stream_attachment_package.dart';
 export 'src/attachment/thumbnail/file_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
@@ -51,7 +64,6 @@ export 'src/attachment/thumbnail/image_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/media_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/thumbnail_error.dart';
 export 'src/attachment/thumbnail/video_attachment_thumbnail.dart';
-export 'src/attachment/url_attachment.dart';
 export 'src/attachment/video_attachment.dart';
 export 'src/attachment/voice_recording_attachment_playlist.dart';
 export 'src/attachment_actions_modal/attachment_actions_modal.dart';

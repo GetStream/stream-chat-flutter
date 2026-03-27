@@ -1,8 +1,8 @@
-import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 import '../mocks.dart';
 
@@ -41,8 +41,8 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      final image = tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
-      expect(image.imageUrl, 'https://bit.ly/321RmWb');
+      final image = tester.widget<StreamNetworkImage>(find.byType(StreamNetworkImage));
+      expect(image.props.url, 'https://bit.ly/321RmWb');
     },
   );
 
@@ -120,8 +120,8 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      final image = tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
-      expect(image.imageUrl, 'testimage');
+      final image = tester.widget<StreamNetworkImage>(find.byType(StreamNetworkImage));
+      expect(image.props.url, 'testimage');
     },
   );
 

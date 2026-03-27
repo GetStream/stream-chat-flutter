@@ -1,9 +1,5 @@
 part of 'attachment_widget_builder.dart';
 
-const _kDefaultPollMessageConstraints = BoxConstraints(
-  maxWidth: 270,
-);
-
 /// {@template pollAttachmentBuilder}
 /// A widget builder for Poll attachment type.
 ///
@@ -12,19 +8,18 @@ const _kDefaultPollMessageConstraints = BoxConstraints(
 class PollAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro pollAttachmentBuilder}
   const PollAttachmentBuilder({
-    this.shape,
-    this.padding = const EdgeInsets.all(8),
-    this.constraints = _kDefaultPollMessageConstraints,
+    this.style,
+    this.constraints,
   });
 
-  /// The shape of the poll attachment.
-  final ShapeBorder? shape;
+  /// The style of the poll attachment container.
+  ///
+  /// When null, a default style with a rounded rectangle shape and border
+  /// is used.
+  final StreamMessageAttachmentStyle? style;
 
   /// The constraints to apply to the poll attachment widget.
-  final BoxConstraints constraints;
-
-  /// The padding to apply to the poll attachment widget.
-  final EdgeInsetsGeometry padding;
+  final BoxConstraints? constraints;
 
   @override
   bool canHandle(
@@ -36,18 +31,21 @@ class PollAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
   ) {
     assert(debugAssertCanHandle(message, attachments), '');
 
-    return Padding(
-      padding: padding,
-      child: PollAttachment(
+    final effectiveStyle = StreamMessageAttachmentStyle.from(
+      backgroundColor: StreamColors.transparent,
+    ).merge(style);
+
+    return StreamMessageAttachment(
+      style: effectiveStyle,
+      child: StreamPollAttachment(
         message: message,
-        shape: shape,
         constraints: constraints,
       ),
     );

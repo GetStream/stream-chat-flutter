@@ -138,3 +138,31 @@ bool _isGroupBoundary(Message message, Message? neighbor) {
 
   return false;
 }
+
+/// Returns the [StreamMessageContentKind] for [message] based on its text,
+/// attachments, poll, and quoted reply.
+///
+/// The result is [StreamMessageContentKind.singleAttachment] when:
+/// - There is no text and no quoted reply
+/// - There is exactly one attachment or a poll
+///
+/// The result is [StreamMessageContentKind.emojiOnly] when:
+/// - There is no text, no quoted reply, no poll, and no attachments
+/// - The text contains only 1-3 emoji graphemes
+StreamMessageContentKind resolveContentKind(Message message) {
+  final hasText = message.text?.isNotEmpty == true;
+  final hasQuote = message.quotedMessage != null;
+  final hasPoll = message.poll != null;
+  final attachmentCount = message.attachments.length;
+
+  if (!hasText && !hasQuote && (hasPoll || attachmentCount == 1)) {
+    return .singleAttachment;
+  }
+
+  if (!hasQuote && attachmentCount == 0) {
+    final emojiCount = StreamMessageText.emojiOnlyCount(message.text);
+    if (emojiCount != null && emojiCount <= 3) return .emojiOnly;
+  }
+
+  return .standard;
+}

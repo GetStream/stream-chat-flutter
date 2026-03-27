@@ -11,7 +11,6 @@ import 'package:stream_chat_flutter/src/message_widget/components/stream_message
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_header.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_leading.dart';
-import 'package:stream_chat_flutter/src/misc/flexible_fractionally_sized_box.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessageContent;
 
@@ -77,7 +76,7 @@ class StreamMessageWidget extends StatelessWidget {
     EdgeInsetsGeometry? padding,
     double? spacing,
     Color? backgroundColor,
-    double widthFactor = 0.8,
+    double maxWidth = 264,
     bool swipeToReply = false,
     void Function(Message)? onMessageTap,
     void Function(Message)? onMessageLongPress,
@@ -99,7 +98,7 @@ class StreamMessageWidget extends StatelessWidget {
          padding: padding,
          spacing: spacing,
          backgroundColor: backgroundColor,
-         widthFactor: widthFactor,
+         maxWidth: maxWidth,
          swipeToReply: swipeToReply,
          onMessageTap: onMessageTap,
          onMessageLongPress: onMessageLongPress,
@@ -153,7 +152,7 @@ class StreamMessageWidgetProps {
     this.padding,
     this.spacing,
     this.backgroundColor,
-    this.widthFactor = 0.8,
+    this.maxWidth = 272,
     this.swipeToReply = false,
     this.onMessageTap,
     this.onMessageLongPress,
@@ -199,10 +198,12 @@ class StreamMessageWidgetProps {
   /// When null (the default), the background color is determined by the theme.
   final Color? backgroundColor;
 
-  /// Maximum width of the message content as a fraction of the parent width.
+  /// Maximum width of the message content column, in logical pixels.
   ///
-  /// Values should be between 0.0 and 1.0. Defaults to 0.8 when not specified.
-  final double widthFactor;
+  /// The content uses at most this width while still respecting the parent
+  /// [Flex] constraints. Use [double.infinity] to impose no cap from this
+  /// widget. Defaults to `264` when not specified.
+  final double maxWidth;
 
   /// Whether swiping the message triggers a quoted-reply action.
   ///
@@ -327,7 +328,7 @@ class StreamMessageWidgetProps {
     EdgeInsetsGeometry? padding,
     double? spacing,
     Color? backgroundColor,
-    double? widthFactor,
+    double? maxWidth,
     bool? swipeToReply,
     void Function(Message)? onMessageTap,
     void Function(Message)? onMessageLongPress,
@@ -350,7 +351,7 @@ class StreamMessageWidgetProps {
       padding: padding ?? this.padding,
       spacing: spacing ?? this.spacing,
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      widthFactor: widthFactor ?? this.widthFactor,
+      maxWidth: maxWidth ?? this.maxWidth,
       swipeToReply: swipeToReply ?? this.swipeToReply,
       onMessageTap: onMessageTap ?? this.onMessageTap,
       onMessageLongPress: onMessageLongPress ?? this.onMessageLongPress,
@@ -397,7 +398,7 @@ class DefaultStreamMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = props.message;
 
-    final placement = StreamMessagePlacement.of(context);
+    final placement = StreamMessageLayout.of(context);
     final theme = StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageWidgetDefaults(
       context,
@@ -406,7 +407,7 @@ class DefaultStreamMessage extends StatelessWidget {
       state: message.state,
     );
 
-    final resolve = StreamMessageStyleResolver(placement, [theme, defaults]);
+    final resolve = StreamMessageLayoutResolver(placement, [theme, defaults]);
 
     final effectivePadding = props.padding ?? theme.padding ?? defaults.padding;
     final effectiveSpacing = props.spacing ?? theme.spacing ?? defaults.spacing;
@@ -502,9 +503,8 @@ class DefaultStreamMessage extends StatelessWidget {
             child: MouseRegion(child: child),
           );
         },
-        child: FlexibleFractionallySizedBox(
-          widthFactor: props.widthFactor,
-          alignment: StreamMessagePlacement.alignmentDirectionalOf(context),
+        child: Align(
+          alignment: StreamMessageLayout.alignmentDirectionalOf(context),
           child: Padding(
             padding: effectivePadding,
             child: Row(
@@ -513,7 +513,12 @@ class DefaultStreamMessage extends StatelessWidget {
               crossAxisAlignment: .end,
               children: [
                 ?leadingWidget,
-                Flexible(child: contentWidget),
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: props.maxWidth),
+                    child: contentWidget,
+                  ),
+                ),
               ],
             ),
           ),
@@ -727,7 +732,7 @@ class DefaultStreamMessage extends StatelessWidget {
       currentUser: currentUser,
     );
 
-    final placement = StreamMessagePlacement.of(context);
+    final layout = StreamMessageLayout.of(context);
     final theme = StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageWidgetDefaults(
       context,
@@ -736,7 +741,7 @@ class DefaultStreamMessage extends StatelessWidget {
       state: message.state,
     );
 
-    final resolve = StreamMessageStyleResolver(placement, [theme, defaults]);
+    final resolve = StreamMessageLayoutResolver(layout, [theme, defaults]);
     final leadingVisibility = resolve((theme) => theme?.leadingVisibility);
 
     var leadingInset = 0.0;
@@ -751,8 +756,8 @@ class DefaultStreamMessage extends StatelessWidget {
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
         data: StreamChatConfiguration.of(context),
-        child: StreamMessagePlacement(
-          data: placement,
+        child: StreamMessageLayout(
+          data: layout,
           child: StreamMessageActionsModal(
             message: message,
             messageActions: actions,
@@ -1002,7 +1007,7 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   }
 
   @override
-  StreamMessageStyleVisibility get leadingVisibility => .resolveWith(
+  StreamMessageLayoutVisibility get leadingVisibility => .resolveWith(
     (placement) => switch ((placement.channelKind, placement.alignment, placement.stackPosition)) {
       (.direct, _, _) || (_, .end, _) => .gone,
       (_, _, .top || .middle) => .hidden,
@@ -1011,10 +1016,10 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   );
 
   @override
-  StreamMessageStyleVisibility get headerVisibility => .all(.visible);
+  StreamMessageLayoutVisibility get headerVisibility => .all(.visible);
 
   @override
-  StreamMessageStyleVisibility get footerVisibility => isEdited
+  StreamMessageLayoutVisibility get footerVisibility => isEdited
       ? .all(.visible)
       : .resolveWith(
           (placement) => switch (placement.stackPosition) {

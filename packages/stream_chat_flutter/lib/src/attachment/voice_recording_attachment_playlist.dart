@@ -1,58 +1,107 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template streamVoiceRecordingAttachmentPlaylist}
-/// Shows a voice recording attachment in a [StreamMessageWidget].
-/// {@endtemplate}
+/// Signature for decorating each voice recording item in a playlist.
+///
+/// The [child] is the default [StreamVoiceRecordingAttachment] widget built
+/// by the playlist. Return a widget that wraps [child] with the desired
+/// container.
+///
+/// See also:
+///
+///  * [StreamVoiceRecordingAttachmentPlaylist.itemDecorator], which uses this
+///    typedef.
+typedef StreamVoiceRecordingItemDecorator = Widget Function(BuildContext context, int index, Widget child);
+
+/// A playlist container for multiple voice recording attachments.
+///
+/// [StreamVoiceRecordingAttachmentPlaylist] manages audio playback across
+/// multiple voice recordings using a shared controller, ensuring only one
+/// recording plays at a time.
+///
+/// {@tool snippet}
+///
+/// Basic usage:
+///
+/// ```dart
+/// StreamVoiceRecordingAttachmentPlaylist(
+///   message: message,
+///   voiceRecordings: voiceRecordingAttachments,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// With a decorator to wrap each item in a message attachment container:
+///
+/// ```dart
+/// StreamVoiceRecordingAttachmentPlaylist(
+///   message: message,
+///   voiceRecordings: voiceRecordingAttachments,
+///   itemDecorator: (context, index, child) {
+///     return StreamMessageAttachment(style: style, child: child);
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamVoiceRecordingAttachment], the individual voice recording widget
+///    used for each item in the playlist.
 class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
-  /// {@macro streamVoiceRecordingAttachmentPlaylist}
+  /// Creates a [StreamVoiceRecordingAttachmentPlaylist].
   const StreamVoiceRecordingAttachmentPlaylist({
     super.key,
-    this.shape,
     required this.message,
     required this.voiceRecordings,
     this.padding,
     this.itemBuilder,
+    this.itemDecorator,
     this.separatorBuilder = _defaultVoiceRecordingPlaylistSeparatorBuilder,
-    this.constraints = const BoxConstraints(),
-    this.onRemovePressed,
+    this.constraints,
     this.voiceRecordingTitle,
   });
 
-  /// The shape of the attachment.
-  ///
-  /// Defaults to [RoundedRectangleBorder] with a radius of 14.
-  final ShapeBorder? shape;
-
-  /// The [Message] that the voice recording is attached to.
+  /// The [Message] that the voice recordings are attached to.
   final Message message;
 
-  /// The list of [Attachment] object containing the voice recording
+  /// The list of [Attachment] objects containing the voice recording
   /// information.
   final List<Attachment> voiceRecordings;
 
-  /// The constraints to use when displaying the voice recording.
-  final BoxConstraints constraints;
+  /// The constraints to use when displaying each voice recording.
+  final BoxConstraints? constraints;
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
 
   /// The builder to use for each voice recording.
   ///
-  /// If not provided, a default implementation will be used.
+  /// If not provided, a default implementation using
+  /// [StreamVoiceRecordingAttachment] will be used.
+  ///
+  /// When provided, [itemDecorator] is ignored since the builder has full
+  /// control over the item widget.
   final IndexedWidgetBuilder? itemBuilder;
+
+  /// Optional decorator that wraps each default voice recording item.
+  ///
+  /// Use this to provide context-specific containers around each
+  /// [StreamVoiceRecordingAttachment] without replacing the default
+  /// item building logic.
+  ///
+  /// Ignored when [itemBuilder] is provided.
+  final StreamVoiceRecordingItemDecorator? itemDecorator;
 
   /// The separator to use between the voice recordings.
   final IndexedWidgetBuilder separatorBuilder;
 
-  /// Callback called when the remove button is pressed.
-  final ValueSetter<Attachment>? onRemovePressed;
-
-  /// The title to use for the voice recording.
+  /// The title to use for each voice recording.
   final String? voiceRecordingTitle;
 
   // Default separator builder for the voice recording playlist.
@@ -60,7 +109,8 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
     BuildContext context,
     int index,
   ) {
-    return const Empty();
+    final spacing = context.streamSpacing;
+    return SizedBox(height: spacing.xxs);
   }
 
   @override
@@ -119,20 +169,13 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
               }
 
               final track = state.tracks[index];
-              Attachment? attachment;
-              if (track.key is Attachment) {
-                attachment = track.key as Attachment?;
-              }
-              return StreamVoiceRecordingAttachment(
+
+              final child = StreamVoiceRecordingAttachment(
                 track: track,
                 speed: state.speed,
-                showTitle: true,
+                showTitle: false,
                 title: widget.voiceRecordingTitle,
-                onRemovePressed: attachment != null && widget.onRemovePressed != null
-                    ? () => widget.onRemovePressed?.call(attachment!)
-                    : null,
-                shape: widget.shape,
-                constraints: widget.constraints,
+                constraints: widget.constraints ?? const BoxConstraints(),
                 onTrackPause: _controller.pause,
                 onChangeSpeed: _controller.setSpeed,
                 onTrackPlay: () async {
@@ -157,6 +200,12 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
                   await _controller.seek(seekDuration);
                 },
               );
+
+              if (widget.itemDecorator case final decorator?) {
+                return decorator(context, index, child);
+              }
+
+              return child;
             },
           ),
         );

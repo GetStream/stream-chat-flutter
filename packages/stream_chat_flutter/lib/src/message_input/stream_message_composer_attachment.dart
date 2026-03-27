@@ -177,42 +177,44 @@ class MessageInputVoiceRecordingAttachment extends StatelessWidget {
         final track = state.tracks.firstWhereOrNull((it) => it.key == attachment);
         if (track == null) return const SizedBox.shrink();
 
-        return StreamVoiceRecordingAttachment(
-          title: 'Voice Message',
-          showTitle: true,
-          track: track,
-          speed: state.speed,
+        return StreamMessageComposerAttachmentContainer(
           onRemovePressed: switch (onRemovePressed) {
             final callback? => () => callback(attachment),
             _ => null,
           },
-          onTrackPause: controller.pause,
-          onChangeSpeed: controller.setSpeed,
-          onTrackPlay: () async {
-            // Play the track directly if it is already loaded.
-            if (state.currentIndex == index) return controller.play();
-            // Otherwise, load the track first and then play it.
-            return controller.skipToItem(index);
-          },
-          // Only allow seeking if the current track is the one being
-          // interacted with.
-          onTrackSeekStart: (_) async {
-            if (state.currentIndex != index) return;
-            return controller.pause();
-          },
-          onTrackSeekEnd: (_) async {
-            if (state.currentIndex != index) return;
-            return controller.play();
-          },
-          onTrackSeekChanged: (progress) async {
-            if (state.currentIndex != index) return;
+          child: StreamVoiceRecordingAttachment(
+            title: 'Voice Message',
+            showTitle: true,
+            track: track,
+            speed: state.speed,
+            onTrackPause: controller.pause,
+            onChangeSpeed: controller.setSpeed,
+            onTrackPlay: () async {
+              // Play the track directly if it is already loaded.
+              if (state.currentIndex == index) return controller.play();
+              // Otherwise, load the track first and then play it.
+              return controller.skipToItem(index);
+            },
+            // Only allow seeking if the current track is the one being
+            // interacted with.
+            onTrackSeekStart: (_) async {
+              if (state.currentIndex != index) return;
+              return controller.pause();
+            },
+            onTrackSeekEnd: (_) async {
+              if (state.currentIndex != index) return;
+              return controller.play();
+            },
+            onTrackSeekChanged: (progress) async {
+              if (state.currentIndex != index) return;
 
-            final duration = track.duration.inMicroseconds;
-            final seekPosition = (duration * progress).toInt();
-            final seekDuration = Duration(microseconds: seekPosition);
+              final duration = track.duration.inMicroseconds;
+              final seekPosition = (duration * progress).toInt();
+              final seekDuration = Duration(microseconds: seekPosition);
 
-            return controller.seek(seekDuration);
-          },
+              return controller.seek(seekDuration);
+            },
+          ),
         );
       },
     );

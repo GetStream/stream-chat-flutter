@@ -102,7 +102,7 @@ void main() {
     goldenTest(
       '[${brightness.name}] -> PollEndVoteDialog looks fine',
       fileName: 'poll_end_vote_dialog_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 400, height: 200),
+      constraints: const BoxConstraints.tightFor(width: 400, height: 220),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
         const PollEndVoteDialog(),

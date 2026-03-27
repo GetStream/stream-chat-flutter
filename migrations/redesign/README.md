@@ -130,6 +130,7 @@ class MyCustomButton extends StatelessWidget {
 | Unread Indicator | [unread_indicator.md](unread_indicator.md) |
 | Reaction List & Detail Sheet | [reaction_list.md](reaction_list.md) |
 | Audio Waveform Theme | [audio_theme.md](audio_theme.md) |
+| Attachments & Polls | [attachments_and_polls.md](attachments_and_polls.md) |
 
 ## Need Help?
 
