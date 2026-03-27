@@ -1,6 +1,7 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
@@ -171,6 +172,63 @@ void main() {
         );
 
         expect(playlist.padding, padding);
+      },
+    );
+
+    testWidgets(
+      'does not play audio when track seek changes',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamVoiceRecordingAttachmentPlaylist(
+              message: MockMessage(),
+              voiceRecordings: [fakeAudioRecording1],
+            ),
+          ),
+        );
+
+        final attachment = tester.widget<StreamVoiceRecordingAttachment>(
+          find.byType(StreamVoiceRecordingAttachment),
+        );
+
+        // onTrackSeekEnd must be null so that play() is never called
+        // when the user lifts their finger after scrubbing.
+        expect(attachment.onTrackSeekEnd, isNull);
+      },
+    );
+
+    testWidgets(
+      'seek callback does not resume playback',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamVoiceRecordingAttachmentPlaylist(
+              message: MockMessage(),
+              voiceRecordings: [fakeAudioRecording1],
+            ),
+          ),
+        );
+
+        final attachmentFinder = find.byType(StreamVoiceRecordingAttachment);
+        final attachment = tester.widget<StreamVoiceRecordingAttachment>(
+          attachmentFinder,
+        );
+
+        // Invoking onTrackSeekChanged should not throw and should not change
+        // the track to a playing state (track is idle, no AudioPlayer action
+        // is triggered because there is no active audio source).
+        expect(
+          () => attachment.onTrackSeekChanged?.call(0.5),
+          returnsNormally,
+        );
+
+        await tester.pump();
+
+        // The track should still not be in a playing state.
+        final updatedAttachment = tester.widget<StreamVoiceRecordingAttachment>(
+          attachmentFinder,
+        );
+        expect(updatedAttachment.track.state, isNot(TrackState.playing));
       },
     );
 
