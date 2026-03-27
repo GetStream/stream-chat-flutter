@@ -214,7 +214,7 @@ class _ChannelPageState extends State<ChannelPage> {
 
     if (message.isDeleted || message.state.isFailed) return defaultWidget;
 
-    final alignment = StreamMessagePlacement.alignmentDirectionalOf(context);
+    final alignment = StreamMessageLayout.alignmentDirectionalOf(context);
     final isEnd = alignment == AlignmentDirectional.centerEnd;
 
     const threshold = 0.2;

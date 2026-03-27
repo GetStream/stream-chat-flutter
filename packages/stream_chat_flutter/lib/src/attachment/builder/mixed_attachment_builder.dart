@@ -12,39 +12,16 @@ part of 'attachment_widget_builder.dart';
 class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro mixedAttachmentBuilder}
   MixedAttachmentBuilder({
-    this.padding = const EdgeInsets.all(4),
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
-  }) : _imageAttachmentBuilder = ImageAttachmentBuilder(
-         padding: EdgeInsets.zero,
-         onAttachmentTap: onAttachmentTap,
-       ),
-       _videoAttachmentBuilder = VideoAttachmentBuilder(
-         padding: EdgeInsets.zero,
-         onAttachmentTap: onAttachmentTap,
-       ),
-       _giphyAttachmentBuilder = GiphyAttachmentBuilder(
-         padding: EdgeInsets.zero,
-         onAttachmentTap: onAttachmentTap,
-       ),
-       _galleryAttachmentBuilder = GalleryAttachmentBuilder(
-         padding: EdgeInsets.zero,
-         onAttachmentTap: onAttachmentTap,
-       ),
-       _fileAttachmentBuilder = FileAttachmentBuilder(
-         padding: EdgeInsets.zero,
-         onAttachmentTap: onAttachmentTap,
-       ),
-       _urlAttachmentBuilder = UrlAttachmentBuilder(
-         padding: EdgeInsets.zero,
-         onAttachmentTap: onAttachmentTap,
-       ),
+  }) : _imageAttachmentBuilder = ImageAttachmentBuilder(onAttachmentTap: onAttachmentTap),
+       _videoAttachmentBuilder = VideoAttachmentBuilder(onAttachmentTap: onAttachmentTap),
+       _giphyAttachmentBuilder = GiphyAttachmentBuilder(onAttachmentTap: onAttachmentTap),
+       _galleryAttachmentBuilder = GalleryAttachmentBuilder(onAttachmentTap: onAttachmentTap),
+       _fileAttachmentBuilder = FileAttachmentBuilder(onAttachmentTap: onAttachmentTap),
+       _urlAttachmentBuilder = UrlAttachmentBuilder(onAttachmentTap: onAttachmentTap),
        _voiceRecordingAttachmentPlaylistBuilder = VoiceRecordingAttachmentPlaylistBuilder(
-         padding: EdgeInsets.zero,
          onAttachmentTap: onAttachmentTap,
        );
-
-  /// The padding to apply to the mixed attachment widget.
-  final EdgeInsetsGeometry padding;
 
   late final StreamAttachmentWidgetBuilder _imageAttachmentBuilder;
   late final StreamAttachmentWidgetBuilder _videoAttachmentBuilder;
@@ -81,7 +58,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
@@ -98,45 +75,44 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
     final shouldBuildGallery = [...?images, ...?videos, ...?giphys].length > 1;
 
     final spacing = context.streamSpacing;
+    final crossAxisAlignment = StreamMessageLayout.crossAxisAlignmentOf(context);
 
-    return Padding(
-      padding: padding,
-      child: Column(
-        spacing: spacing.xs,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (urls != null)
-            _urlAttachmentBuilder.build(context, message, {
-              AttachmentType.urlPreview: urls,
-            }),
-          if (files != null)
-            _fileAttachmentBuilder.build(context, message, {
-              AttachmentType.file: files,
-            }),
-          if (voiceRecordings != null)
-            _voiceRecordingAttachmentPlaylistBuilder.build(context, message, {
-              AttachmentType.voiceRecording: voiceRecordings,
-            }),
-          if (shouldBuildGallery)
-            _galleryAttachmentBuilder.build(context, message, {
-              if (images != null) AttachmentType.image: images,
-              if (videos != null) AttachmentType.video: videos,
-              if (giphys != null) AttachmentType.giphy: giphys,
-            })
-          else if (images != null && images.length == 1)
-            _imageAttachmentBuilder.build(context, message, {
-              AttachmentType.image: images,
-            })
-          else if (videos != null && videos.length == 1)
-            _videoAttachmentBuilder.build(context, message, {
-              AttachmentType.video: videos,
-            })
-          else if (giphys != null && giphys.length == 1)
-            _giphyAttachmentBuilder.build(context, message, {
-              AttachmentType.giphy: giphys,
-            }),
-        ],
-      ),
+    return Column(
+      spacing: spacing.xs,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: crossAxisAlignment,
+      children: <Widget>[
+        if (urls != null)
+          ?_urlAttachmentBuilder.build(context, message, {
+            AttachmentType.urlPreview: urls,
+          }),
+        if (shouldBuildGallery)
+          ?_galleryAttachmentBuilder.build(context, message, {
+            if (images != null) AttachmentType.image: images,
+            if (videos != null) AttachmentType.video: videos,
+            if (giphys != null) AttachmentType.giphy: giphys,
+          })
+        else if (images != null && images.length == 1)
+          ?_imageAttachmentBuilder.build(context, message, {
+            AttachmentType.image: images,
+          })
+        else if (videos != null && videos.length == 1)
+          ?_videoAttachmentBuilder.build(context, message, {
+            AttachmentType.video: videos,
+          })
+        else if (giphys != null && giphys.length == 1)
+          ?_giphyAttachmentBuilder.build(context, message, {
+            AttachmentType.giphy: giphys,
+          }),
+        if (files != null)
+          ?_fileAttachmentBuilder.build(context, message, {
+            AttachmentType.file: files,
+          }),
+        if (voiceRecordings != null)
+          ?_voiceRecordingAttachmentPlaylistBuilder.build(context, message, {
+            AttachmentType.voiceRecording: voiceRecordings,
+          }),
+      ],
     );
   }
 }

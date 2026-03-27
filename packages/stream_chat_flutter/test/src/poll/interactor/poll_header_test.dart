@@ -21,7 +21,7 @@ void main() {
     goldenTest(
       '[${brightness.name}] -> PollHeader looks fine',
       fileName: 'poll_header_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
         PollHeader(poll: poll),
@@ -31,7 +31,7 @@ void main() {
     goldenTest(
       '[${brightness.name}] -> PollHeader with long question looks fine',
       fileName: 'poll_header_long_question_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      constraints: const BoxConstraints.tightFor(width: 300, height: 150),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
         PollHeader(
@@ -45,7 +45,7 @@ void main() {
     goldenTest(
       '[${brightness.name}] -> PollHeader subtitle with voting mode disabled looks fine',
       fileName: 'poll_header_subtitle_voting_mode_disabled_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
         PollHeader(
@@ -57,7 +57,7 @@ void main() {
     goldenTest(
       '[${brightness.name}] -> PollHeader subtitle with voting mode unique looks fine',
       fileName: 'poll_header_subtitle_voting_mode_unique_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
         PollHeader(
@@ -69,7 +69,7 @@ void main() {
     goldenTest(
       '[${brightness.name}] -> PollHeader subtitle with voting mode limited looks fine',
       fileName: 'poll_header_subtitle_voting_mode_limited_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
         PollHeader(
@@ -81,7 +81,7 @@ void main() {
     goldenTest(
       '[${brightness.name}] -> PollHeader subtitle with voting mode all looks fine',
       fileName: 'poll_header_subtitle_voting_mode_all_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 300, height: 100),
+      constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
         PollHeader(

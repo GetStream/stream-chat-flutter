@@ -189,7 +189,7 @@ These parameters have been removed entirely. See the **Migration Path** column f
 | `padding` | Outer padding around the message item (overrides theme) |
 | `spacing` | Horizontal spacing between avatar and content (overrides theme) |
 | `backgroundColor` | Background color for the message row (overrides theme) |
-| `widthFactor` | Max content width as fraction of parent (default: `0.8`) |
+| `maxWidth` | Max content width in logical pixels (default: `264`) |
 | `onMessageLinkTap` | `void Function(Message, String)` — receives message and URL |
 | `onUserMentionTap` | `void Function(User)` — receives the mentioned user |
 | `onQuotedMessageTap` | `void Function(Message)` — receives the quoted message object |

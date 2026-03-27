@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget_catalog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template onAttachmentWidgetTap}
 /// A callback that is called when an attachment widget is tapped.
@@ -36,14 +37,12 @@ typedef OnAttachmentWidgetTap = FutureOr<bool> Function(BuildContext context, Me
 ///
 /// Used in [MessageCard]. Should not be used elsewhere.
 /// {@endtemplate}
-class ParseAttachments extends StatelessWidget {
+class ParseAttachments extends NullableStatelessWidget {
   /// {@macro parseAttachments}
   const ParseAttachments({
     super.key,
     required this.message,
     this.attachmentBuilders,
-    this.attachmentPadding,
-    this.attachmentShape,
     this.onAttachmentTap,
     this.onShowMessage,
     this.onLinkTap,
@@ -56,12 +55,6 @@ class ParseAttachments extends StatelessWidget {
 
   /// {@macro attachmentBuilders}
   final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
-
-  /// {@macro attachmentPadding}
-  final EdgeInsetsGeometry? attachmentPadding;
-
-  /// {@macro attachmentShape}
-  final ShapeBorder? attachmentShape;
 
   /// {@macro onAttachmentTap}
   final OnAttachmentWidgetTap? onAttachmentTap;
@@ -79,7 +72,7 @@ class ParseAttachments extends StatelessWidget {
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
-  Widget build(BuildContext context) {
+  Widget? nullableBuild(BuildContext context) {
     Future<void> effectiveOnAttachmentTap(
       Message message,
       Attachment attachment,
@@ -99,8 +92,6 @@ class ParseAttachments extends StatelessWidget {
     // Create a default attachmentBuilders list if not provided.
     final builders = StreamAttachmentWidgetBuilder.defaultBuilders(
       message: message,
-      shape: attachmentShape,
-      padding: attachmentPadding,
       onAttachmentTap: effectiveOnAttachmentTap,
       customAttachmentBuilders: effectiveAttachmentBuilder,
     );

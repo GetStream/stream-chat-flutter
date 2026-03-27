@@ -347,44 +347,7 @@ class StreamChatThemeData {
           color: colorTheme.textHighEmphasis,
         ),
       ),
-      pollInteractorTheme: StreamPollInteractorThemeData(
-        pollTitleStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollSubtitleStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        pollOptionTextStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionVoteCountTextStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        pollOptionCheckboxShape: const CircleBorder(),
-        pollOptionCheckboxCheckColor: Colors.white,
-        pollOptionCheckboxActiveColor: colorTheme.accentPrimary,
-        pollOptionCheckboxBorderSide: BorderSide(
-          width: 2,
-          color: colorTheme.disabled,
-        ),
-        pollOptionVotesProgressBarMinHeight: 4,
-        pollOptionVotesProgressBarTrackColor: colorTheme.disabled,
-        pollOptionVotesProgressBarValueColor: colorTheme.accentPrimary,
-        pollOptionVotesProgressBarWinnerColor: colorTheme.accentInfo,
-        pollOptionVotesProgressBarBorderRadius: BorderRadius.circular(4),
-        pollActionButtonStyle: TextButton.styleFrom(
-          textStyle: textTheme.headline,
-          foregroundColor: colorTheme.accentPrimary,
-        ),
-        pollActionDialogTitleStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollActionDialogTextFieldStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollActionDialogTextFieldBorderRadius: BorderRadius.circular(12),
-        pollActionDialogTextFieldFillColor: colorTheme.inputBg,
-      ),
+      pollInteractorTheme: const StreamPollInteractorThemeData(),
       pollResultsDialogTheme: StreamPollResultsDialogThemeData(
         backgroundColor: colorTheme.appBg,
         appBarElevation: 1,

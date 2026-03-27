@@ -93,10 +93,7 @@ command:
       svg_icon_widget: ^0.0.1
       # TODO: Replace with hosted version before merging PR
       stream_core_flutter:
-        git:
-          url: https://github.com/GetStream/stream-core-flutter.git
-          ref: 8057a775c2ed764dbd5cbabd2dd60d3cd68d2f08
-          path: packages/stream_core_flutter
+        path: /Users/xsahil03x/StudioProjects/stream-core-flutter/packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
       url_launcher: ^6.3.0
@@ -120,6 +117,7 @@ command:
       path_provider_platform_interface: ^2.0.0
       plugin_platform_interface: ^2.0.0
       test: ^1.24.6
+      theme_extensions_builder: ^7.2.0
 
     hooks:
       # Updates the version.dart file after bootstrapping with the current version from pubspec.yaml

@@ -32,9 +32,10 @@ class StreamMessageFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = StreamChat.of(context).currentUser;
+    final channelKind = core.StreamMessageLayout.channelKindOf(context);
 
     Widget? usernameWidget;
-    if (message.user case final user? when user.id != currentUser?.id) {
+    if (message.user case final user? when channelKind == .group && user.id != currentUser?.id) {
       usernameWidget = Text(user.name, maxLines: 1, overflow: .ellipsis);
     }
 

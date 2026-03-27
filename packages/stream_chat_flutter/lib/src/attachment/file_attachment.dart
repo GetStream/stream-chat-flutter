@@ -1,28 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/file_attachment_thumbnail.dart';
+import 'package:stream_chat_flutter/src/components/stream_chat_component_builders.dart';
 import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
-/// {@template streamFileAttachment}
-/// Displays file attachments that have been sent in a chat.
+/// A file attachment component with file information and actions.
 ///
-/// Used in [MessageWidget].
-/// {@endtemplate}
+/// [StreamFileAttachment] presents a file attachment, including the file
+/// name, size, and appropriate actions based on the message state.
+///
+/// {@tool snippet}
+///
+/// Basic usage:
+///
+/// ```dart
+/// StreamFileAttachment(
+///   message: message,
+///   file: fileAttachment,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamFileAttachmentProps], which configures this widget.
+///  * [DefaultStreamFileAttachment], the default implementation.
 class StreamFileAttachment extends StatelessWidget {
-  /// {@macro streamFileAttachment}
-  const StreamFileAttachment({
+  /// Creates a [StreamFileAttachment].
+  StreamFileAttachment({
     super.key,
+    required Message message,
+    required Attachment file,
+    BoxConstraints? constraints,
+    Widget? title,
+    Widget? trailing,
+  }) : props = .new(
+         message: message,
+         file: file,
+         constraints: constraints,
+         title: title,
+         trailing: trailing,
+       );
+
+  /// The properties that configure this attachment.
+  final StreamFileAttachmentProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final builder = context.chatComponentBuilder<StreamFileAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamFileAttachment(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamFileAttachment].
+///
+/// This class holds all the configuration options for a file attachment,
+/// allowing them to be passed through the [StreamComponentFactory].
+///
+/// See also:
+///
+///  * [StreamFileAttachment], which uses these properties.
+///  * [DefaultStreamFileAttachment], the default implementation.
+class StreamFileAttachmentProps {
+  /// Creates properties for a file attachment.
+  const StreamFileAttachmentProps({
     required this.message,
     required this.file,
     this.title,
     this.trailing,
-    this.shape,
-    this.backgroundColor,
-    this.constraints = const BoxConstraints(),
+    this.constraints,
   });
 
   /// The [Message] that the file is attached to.
@@ -31,18 +82,8 @@ class StreamFileAttachment extends StatelessWidget {
   /// The [Attachment] object containing the file information.
   final Attachment file;
 
-  /// The shape of the attachment.
-  ///
-  /// Defaults to [RoundedRectangleBorder] with a radius of 12.
-  final ShapeBorder? shape;
-
-  /// The background color of the attachment.
-  ///
-  /// Defaults to [StreamChatTheme.colorTheme.barsBg].
-  final Color? backgroundColor;
-
   /// The constraints to use when displaying the file.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
 
   /// Widget for displaying the title of the attachment.
   /// (usually the file name)
@@ -51,67 +92,75 @@ class StreamFileAttachment extends StatelessWidget {
   /// Widget for displaying at the end of the attachment.
   /// (such as a download button)
   final Widget? trailing;
+}
+
+const _kDefaultConstraints = BoxConstraints(
+  minWidth: 256,
+  maxWidth: 256,
+  minHeight: 64,
+);
+
+/// The default implementation of [StreamFileAttachment].
+///
+/// Renders the file information with download and upload controls.
+///
+/// See also:
+///
+///  * [StreamFileAttachment], the public API widget.
+///  * [StreamFileAttachmentProps], which configures this widget.
+class DefaultStreamFileAttachment extends StatelessWidget {
+  /// Creates a default Stream file attachment.
+  const DefaultStreamFileAttachment({
+    super.key,
+    required this.props,
+  });
+
+  /// The properties that configure this attachment.
+  final StreamFileAttachmentProps props;
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
-    final textTheme = chatTheme.textTheme;
-    final colorTheme = chatTheme.colorTheme;
+    final file = props.file;
 
-    final backgroundColor = this.backgroundColor ?? colorTheme.barsBg;
-    final shape =
-        this.shape ??
-        RoundedRectangleBorder(
-          side: BorderSide(
-            color: colorTheme.borders,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        );
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+    final constraints = props.constraints ?? _kDefaultConstraints;
 
-    return Container(
+    return ConstrainedBox(
       constraints: constraints,
-      clipBehavior: Clip.hardEdge,
-      decoration: ShapeDecoration(
-        shape: shape,
-        color: backgroundColor,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 40,
-            margin: const EdgeInsets.all(8),
-            child: _FileTypeImage(file: file),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  file.title ?? context.translations.fileText,
-                  maxLines: 1,
-                  style: textTheme.bodyBold,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                _FileAttachmentSubtitle(attachment: file),
-              ],
+      child: Padding(
+        padding: .all(spacing.sm),
+        child: Row(
+          spacing: spacing.sm,
+          children: [
+            SizedBox(
+              width: 32,
+              height: 40,
+              child: _FileTypeImage(file: file),
             ),
-          ),
-          const SizedBox(width: 8),
-          Material(
-            type: MaterialType.transparency,
-            child:
-                trailing ??
-                _Trailing(
-                  attachment: file,
-                  message: message,
-                ),
-          ),
-        ],
+            Expanded(
+              child: Column(
+                spacing: spacing.xxs,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    maxLines: 2,
+                    file.title ?? context.translations.fileText,
+                    style: textTheme.captionEmphasis.copyWith(color: colorScheme.textPrimary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  _FileAttachmentSubtitle(attachment: file),
+                ],
+              ),
+            ),
+            Material(
+              type: MaterialType.transparency,
+              child: props.trailing ?? _Trailing(attachment: file, message: props.message),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -173,12 +222,9 @@ class _Trailing extends StatelessWidget {
 
     if (message.state.isCompleted) {
       return IconButton(
-        icon: Icon(
-          context.streamIcons.arrowDown,
-          color: theme.colorTheme.textHighEmphasis,
-        ),
+        icon: Icon(context.streamIcons.arrowDown),
+        color: theme.colorTheme.textHighEmphasis,
         visualDensity: VisualDensity.compact,
-        splashRadius: 16,
         onPressed: () async {
           final assetUrl = attachment.assetUrl;
           if (assetUrl != null) {
@@ -283,11 +329,11 @@ class _FileAttachmentSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
     final size = attachment.file?.size ?? attachment.extraData['file_size'];
-    final textStyle = theme.textTheme.footnote.copyWith(
-      color: theme.colorTheme.textLowEmphasis,
-    );
+    final textStyle = textTheme.metadataDefault.copyWith(color: colorScheme.textPrimary);
     return attachment.uploadState.when(
       preparing: () => Text(fileSize(size), style: textStyle),
       inProgress: (sent, total) => StreamUploadProgressIndicator(
@@ -295,13 +341,10 @@ class _FileAttachmentSubtitle extends StatelessWidget {
         total: total,
         showBackground: false,
         textStyle: textStyle,
-        progressIndicatorColor: theme.colorTheme.accentPrimary,
+        progressIndicatorColor: colorScheme.accentPrimary,
       ),
       success: () => Text(fileSize(size), style: textStyle),
-      failed: (_) => Text(
-        context.translations.uploadErrorLabel,
-        style: textStyle,
-      ),
+      failed: (_) => Text(context.translations.uploadErrorLabel, style: textStyle),
     );
   }
 }

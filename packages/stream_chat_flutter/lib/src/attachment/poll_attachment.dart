@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/components/stream_chat_component_builders.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_add_comment_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_end_vote_dialog.dart';
@@ -8,46 +9,109 @@ import 'package:stream_chat_flutter/src/poll/stream_poll_comments_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_options_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_results_dialog.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
-const _maxVisibleOptionCount = 10;
-
-/// {@template pollMessage}
-/// A widget that displays a message poll attachment in a [StreamMessageWidget].
-/// {@endtemplate}
-class PollAttachment extends StatefulWidget {
-  /// {@macro pollMessage}
-  const PollAttachment({
+/// An interactive poll attachment with voting and results.
+///
+/// [StreamPollAttachment] presents an interactive poll, supporting
+/// voting, comments, and results viewing.
+///
+/// {@tool snippet}
+///
+/// Basic usage:
+///
+/// ```dart
+/// StreamPollAttachment(
+///   message: message,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamPollAttachmentProps], which configures this widget.
+///  * [DefaultStreamPollAttachment], the default implementation.
+class StreamPollAttachment extends StatelessWidget {
+  /// Creates a [StreamPollAttachment].
+  StreamPollAttachment({
     super.key,
-    required this.message,
-    this.shape,
-    this.constraints = const BoxConstraints(),
-  });
+    required Message message,
+    BoxConstraints? constraints,
+  }) : props = .new(
+         message: message,
+         constraints: constraints,
+       );
 
-  /// The message with the poll to display.
-  final Message message;
-
-  /// The shape of the poll attachment.
-  final ShapeBorder? shape;
-
-  /// The constraints to apply to the poll attachment widget.
-  final BoxConstraints constraints;
+  /// The properties that configure this attachment.
+  final StreamPollAttachmentProps props;
 
   @override
-  State<PollAttachment> createState() => _PollAttachmentState();
+  Widget build(BuildContext context) {
+    final builder = context.chatComponentBuilder<StreamPollAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamPollAttachment(props: props);
+  }
 }
 
-class _PollAttachmentState extends State<PollAttachment> {
-  late final _messageNotifier = ValueNotifier(widget.message);
+/// Properties for configuring a [StreamPollAttachment].
+///
+/// This class holds all the configuration options for a poll attachment,
+/// allowing them to be passed through the [StreamComponentFactory].
+///
+/// See also:
+///
+///  * [StreamPollAttachment], which uses these properties.
+///  * [DefaultStreamPollAttachment], the default implementation.
+class StreamPollAttachmentProps {
+  /// Creates properties for a poll attachment.
+  const StreamPollAttachmentProps({
+    required this.message,
+    this.constraints,
+  });
+
+  /// The message containing the poll.
+  final Message message;
+
+  /// The constraints to use when displaying the poll.
+  final BoxConstraints? constraints;
+}
+
+const _maxVisibleOptionCount = 10;
+const _kDefaultConstraints = BoxConstraints(maxWidth: 270);
+
+/// The default implementation of [StreamPollAttachment].
+///
+/// Renders an interactive poll with voting and result controls.
+///
+/// See also:
+///
+///  * [StreamPollAttachment], the public API widget.
+///  * [StreamPollAttachmentProps], which configures this widget.
+class DefaultStreamPollAttachment extends StatefulWidget {
+  /// Creates a default Stream poll attachment.
+  const DefaultStreamPollAttachment({
+    super.key,
+    required this.props,
+  });
+
+  /// The properties that configure this attachment.
+  final StreamPollAttachmentProps props;
 
   @override
-  void didUpdateWidget(covariant PollAttachment oldWidget) {
+  State<DefaultStreamPollAttachment> createState() => _DefaultStreamPollAttachmentState();
+}
+
+class _DefaultStreamPollAttachmentState extends State<DefaultStreamPollAttachment> {
+  late final _messageNotifier = ValueNotifier(widget.props.message);
+
+  @override
+  void didUpdateWidget(covariant DefaultStreamPollAttachment oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.message != widget.message) {
-      // If the message changes, schedule an update for the next frame
+    if (oldWidget.props.message != widget.props.message) {
+      // If the message changes, schedule an update for the next frame.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _messageNotifier.value = widget.message;
+        _messageNotifier.value = widget.props.message;
       });
     }
   }
@@ -60,18 +124,6 @@ class _PollAttachmentState extends State<PollAttachment> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
-    final shape =
-        widget.shape ??
-        RoundedRectangleBorder(
-          side: BorderSide(
-            color: theme.colorTheme.borders,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-          borderRadius: BorderRadius.circular(14),
-        );
-
     return ValueListenableBuilder(
       valueListenable: _messageNotifier,
       builder: (context, message, child) {
@@ -111,9 +163,10 @@ class _PollAttachmentState extends State<PollAttachment> {
           channel.createPollOption(poll, PollOption(text: optionText));
         }
 
-        return Container(
-          constraints: widget.constraints,
-          decoration: ShapeDecoration(shape: shape),
+        final constraints = widget.props.constraints ?? _kDefaultConstraints;
+
+        return ConstrainedBox(
+          constraints: constraints,
           child: StreamPollInteractor(
             poll: poll,
             currentUser: currentUser,

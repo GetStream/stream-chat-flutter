@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_footer.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() async {
   final currentUser = User(id: 'user-1', name: 'User');
@@ -32,13 +33,13 @@ void main() async {
 
       final endVoteButton = find.ancestor(
         of: find.text('End Vote'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(endVoteButton, findsOneWidget);
 
       expect(
-        tester.widget<PollFooterButton>(endVoteButton).onPressed,
+        tester.widget<StreamButton>(endVoteButton).props.onTap,
         isNotNull,
       );
     },
@@ -59,7 +60,7 @@ void main() async {
 
       final endVoteButton = find.ancestor(
         of: find.text('End Vote'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(endVoteButton, findsNothing);
@@ -84,7 +85,7 @@ void main() async {
 
       final endVoteButton = find.ancestor(
         of: find.text('End Vote'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(endVoteButton, findsNothing);
@@ -106,12 +107,12 @@ void main() async {
 
       final addCommentButton = find.ancestor(
         of: find.text('Add a comment'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(addCommentButton, findsOneWidget);
       expect(
-        tester.widget<PollFooterButton>(addCommentButton).onPressed,
+        tester.widget<StreamButton>(addCommentButton).props.onTap,
         isNotNull,
       );
     },
@@ -135,7 +136,7 @@ void main() async {
 
       final addCommentButton = find.ancestor(
         of: find.text('Add a comment'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(addCommentButton, findsNothing);
@@ -157,12 +158,12 @@ void main() async {
 
       final viewCommentsButton = find.ancestor(
         of: find.text('View Comments'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(viewCommentsButton, findsOneWidget);
       expect(
-        tester.widget<PollFooterButton>(viewCommentsButton).onPressed,
+        tester.widget<StreamButton>(viewCommentsButton).props.onTap,
         isNotNull,
       );
     },
@@ -185,7 +186,7 @@ void main() async {
 
       final viewCommentsButton = find.ancestor(
         of: find.text('View Comments'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(viewCommentsButton, findsNothing);
@@ -209,12 +210,12 @@ void main() async {
 
       final suggestOptionButton = find.ancestor(
         of: find.text('Suggest an option'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(suggestOptionButton, findsOneWidget);
       expect(
-        tester.widget<PollFooterButton>(suggestOptionButton).onPressed,
+        tester.widget<StreamButton>(suggestOptionButton).props.onTap,
         isNotNull,
       );
     },
@@ -238,7 +239,7 @@ void main() async {
 
       final suggestOptionButton = find.ancestor(
         of: find.text('Suggest an option'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(suggestOptionButton, findsNothing);
@@ -260,19 +261,19 @@ void main() async {
 
       final viewResultsButton = find.ancestor(
         of: find.text('View Results'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
       expect(viewResultsButton, findsOneWidget);
       expect(
-        tester.widget<PollFooterButton>(viewResultsButton).onPressed,
+        tester.widget<StreamButton>(viewResultsButton).props.onTap,
         isNotNull,
       );
     },
   );
 
   testWidgets(
-    'View Results button is disabled if there are no votes',
+    'View Results button is not visible if there are no votes',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
@@ -286,63 +287,10 @@ void main() async {
 
       final viewResultsButton = find.ancestor(
         of: find.text('View Results'),
-        matching: find.byType(PollFooterButton),
+        matching: find.byType(StreamButton),
       );
 
-      expect(viewResultsButton, findsOneWidget);
-      expect(
-        tester.widget<PollFooterButton>(viewResultsButton).onPressed,
-        isNull,
-      );
-    },
-  );
-
-  testWidgets(
-    'See More Options button is visible if there are more options',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          PollFooter(
-            poll: poll,
-            visibleOptionCount: 2,
-            currentUser: currentUser,
-            onSeeMoreOptions: () {},
-          ),
-        ),
-      );
-
-      final seeMoreOptionsButton = find.ancestor(
-        of: find.text('See all ${poll.options.length} options'),
-        matching: find.byType(PollFooterButton),
-      );
-
-      expect(seeMoreOptionsButton, findsOneWidget);
-      expect(
-        tester.widget<PollFooterButton>(seeMoreOptionsButton).onPressed,
-        isNotNull,
-      );
-    },
-  );
-
-  testWidgets(
-    'See More Options button is not visible when all options are visible',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        _wrapWithMaterialApp(
-          PollFooter(
-            poll: poll,
-            currentUser: currentUser,
-            onSeeMoreOptions: () {},
-          ),
-        ),
-      );
-
-      final seeMoreOptionsButton = find.ancestor(
-        of: find.text('See all ${poll.options.length} options'),
-        matching: find.byType(PollFooterButton),
-      );
-
-      expect(seeMoreOptionsButton, findsNothing);
+      expect(viewResultsButton, findsNothing);
     },
   );
 }

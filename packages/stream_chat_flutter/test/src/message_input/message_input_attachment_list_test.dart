@@ -167,7 +167,7 @@ void main() {
         );
 
         // Expect 2 media attachments
-        expect(find.byType(Stack), findsNWidgets(2));
+        expect(find.byType(StreamMediaAttachmentBuilder), findsNWidgets(2));
       },
     );
 

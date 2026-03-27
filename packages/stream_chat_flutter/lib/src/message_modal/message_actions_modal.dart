@@ -56,7 +56,7 @@ class StreamMessageActionsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    final effectiveAlignment = alignment ?? StreamMessagePlacement.alignmentDirectionalOf(context);
+    final effectiveAlignment = alignment ?? StreamMessageLayout.alignmentDirectionalOf(context);
 
     void onReactionPicked(Reaction reaction) {
       final action = SelectReaction(message: message, reaction: reaction);

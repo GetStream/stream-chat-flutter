@@ -50,33 +50,6 @@ void main() {
     );
 
     testWidgets(
-      'uses custom shape when provided',
-      (WidgetTester tester) async {
-        final customShape = RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        );
-
-        await tester.pumpWidget(
-          _wrapWithStreamChatApp(
-            StreamVoiceRecordingAttachmentPlaylist(
-              message: MockMessage(),
-              voiceRecordings: [fakeAudioRecording1],
-              shape: customShape,
-            ),
-          ),
-        );
-
-        expect(find.byType(StreamVoiceRecordingAttachment), findsOneWidget);
-
-        final attachment = tester.widget<StreamVoiceRecordingAttachment>(
-          find.byType(StreamVoiceRecordingAttachment),
-        );
-
-        expect(attachment.shape, customShape);
-      },
-    );
-
-    testWidgets(
       'updates playlist when recordings change',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -142,7 +115,7 @@ void main() {
           find.byType(StreamVoiceRecordingAttachment),
         );
 
-        expect(attachment.constraints, constraints);
+        expect(attachment.props.constraints, constraints);
       },
     );
 

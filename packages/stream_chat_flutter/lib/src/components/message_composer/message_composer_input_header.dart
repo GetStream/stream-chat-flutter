@@ -95,9 +95,17 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                 padding: contentPadding,
                 child: StreamVoiceRecordingAttachmentPlaylist(
                   voiceRecordings: voiceRecordings,
-                  onRemovePressed: _onAttachmentRemovePressed,
                   voiceRecordingTitle: 'Voice Message',
                   message: props.controller.message,
+                  itemDecorator: (context, index, child) {
+                    final attachment = voiceRecordings.elementAtOrNull(index);
+                    if (attachment == null) return child;
+
+                    return StreamMessageComposerAttachmentContainer(
+                      onRemovePressed: () => _onAttachmentRemovePressed(attachment),
+                      child: child,
+                    );
+                  },
                 ),
               ),
             if (hasAttachments)

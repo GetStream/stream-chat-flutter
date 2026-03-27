@@ -31,7 +31,7 @@ Widget? streamMessageHeader({
   final icons = context.streamIcons;
   final textTheme = context.streamTextTheme;
   final colorScheme = context.streamColorScheme;
-  final crossAxisAlignment = StreamMessagePlacement.crossAxisAlignmentOf(context);
+  final crossAxisAlignment = StreamMessageLayout.crossAxisAlignmentOf(context);
 
   Widget? savedForLaterAnnotation;
   if (message.reminder case final reminder? when reminder.remindAt == null) {
@@ -54,7 +54,7 @@ Widget? streamMessageHeader({
 
   Widget? showInChannelAnnotation;
   if (message.showInChannel case true) {
-    final listKind = StreamMessagePlacement.listKindOf(context);
+    final listKind = StreamMessageLayout.listKindOf(context);
     final annotationLabel = switch (listKind) {
       .channel => 'Replied to a thread · ',
       .thread => 'Also sent in channel · ',

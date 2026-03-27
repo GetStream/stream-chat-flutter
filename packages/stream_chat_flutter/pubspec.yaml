@@ -60,10 +60,7 @@ dependencies:
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^10.0.0-beta.12
   stream_core_flutter:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 8057a775c2ed764dbd5cbabd2dd60d3cd68d2f08
-      path: packages/stream_core_flutter
+    path: /Users/xsahil03x/StudioProjects/stream-core-flutter/packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
   theme_extensions_builder_annotation: ^7.1.0
@@ -73,6 +70,7 @@ dependencies:
 
 dev_dependencies:
   alchemist: ^0.13.0
+  build_runner: ^2.4.9
   connectivity_plus_platform_interface: ^2.0.0
   faker_dart: ^0.2.1
   flutter_test:
@@ -81,6 +79,7 @@ dev_dependencies:
   path: ^1.8.3
   path_provider_platform_interface: ^2.0.0
   plugin_platform_interface: ^2.0.0
+  theme_extensions_builder: ^7.2.0
 
 flutter:
   assets:

@@ -13,6 +13,14 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   StreamComponentBuilder<MessageComposerInputTrailingProps>? messageComposerInputTrailing,
   StreamComponentBuilder<StreamMessageWidgetProps>? messageWidget,
   StreamComponentBuilder<UnreadIndicatorProps>? unreadIndicator,
+  StreamComponentBuilder<StreamImageAttachmentProps>? imageAttachment,
+  StreamComponentBuilder<StreamVideoAttachmentProps>? videoAttachment,
+  StreamComponentBuilder<StreamGiphyAttachmentProps>? giphyAttachment,
+  StreamComponentBuilder<StreamGalleryAttachmentProps>? galleryAttachment,
+  StreamComponentBuilder<StreamFileAttachmentProps>? fileAttachment,
+  StreamComponentBuilder<StreamLinkPreviewAttachmentProps>? linkPreviewAttachment,
+  StreamComponentBuilder<StreamVoiceRecordingAttachmentProps>? voiceRecordingAttachment,
+  StreamComponentBuilder<StreamPollAttachmentProps>? pollAttachment,
 }) {
   final builders = [
     if (channelListItem != null) StreamComponentBuilderExtension(builder: channelListItem),
@@ -25,6 +33,14 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
     if (messageComposerInputTrailing != null) StreamComponentBuilderExtension(builder: messageComposerInputTrailing),
     if (messageWidget != null) StreamComponentBuilderExtension(builder: messageWidget),
     if (unreadIndicator != null) StreamComponentBuilderExtension(builder: unreadIndicator),
+    if (imageAttachment != null) StreamComponentBuilderExtension(builder: imageAttachment),
+    if (videoAttachment != null) StreamComponentBuilderExtension(builder: videoAttachment),
+    if (giphyAttachment != null) StreamComponentBuilderExtension(builder: giphyAttachment),
+    if (galleryAttachment != null) StreamComponentBuilderExtension(builder: galleryAttachment),
+    if (fileAttachment != null) StreamComponentBuilderExtension(builder: fileAttachment),
+    if (linkPreviewAttachment != null) StreamComponentBuilderExtension(builder: linkPreviewAttachment),
+    if (voiceRecordingAttachment != null) StreamComponentBuilderExtension(builder: voiceRecordingAttachment),
+    if (pollAttachment != null) StreamComponentBuilderExtension(builder: pollAttachment),
   ];
 
   return builders;
