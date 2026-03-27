@@ -1,8 +1,5 @@
 // ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
 
-import 'dart:math' as math;
-import 'dart:ui';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -106,8 +103,8 @@ class _ChannelPageState extends State<ChannelPage> {
                   highlightInitialMessage: widget.highlightInitialMessage,
                   onEditMessageTap: _editMessage,
                   onReplyTap: _reply,
+                  swipeToReply: true,
                   messageFilter: defaultFilter,
-                  messageBuilder: _messageBuilder,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(parent: parentMessage!);
                   },
@@ -199,61 +196,6 @@ class _ChannelPageState extends State<ChannelPage> {
     }
 
     return channel.sendStaticLocation(location: result.coordinates);
-  }
-
-  Widget _messageBuilder(
-    BuildContext context,
-    Message message,
-    StreamMessageWidgetProps defaultProps,
-  ) {
-    final defaultWidget = StreamMessageWidget.fromProps(props: defaultProps);
-
-    if (message.isDeleted || message.state.isFailed) return defaultWidget;
-
-    final alignment = StreamMessagePlacement.alignmentDirectionalOf(context);
-    final isEnd = alignment == AlignmentDirectional.centerEnd;
-
-    const threshold = 0.2;
-
-    return Swipeable(
-      key: ValueKey(message.id),
-      direction: isEnd ? SwipeDirection.endToStart : SwipeDirection.startToEnd,
-      swipeThreshold: threshold,
-      onSwiped: (_) => _reply(message),
-      backgroundBuilder: (context, details) {
-        final progress = math.min(details.progress, threshold) / threshold;
-
-        var offset = Offset.lerp(const Offset(-24, 0), const Offset(12, 0), progress)!;
-        if (isEnd) offset = Offset(-offset.dx, -offset.dy);
-
-        return Align(
-          alignment: alignment,
-          child: Transform.translate(
-            offset: offset,
-            child: Opacity(
-              opacity: progress,
-              child: SizedBox.square(
-                dimension: 30,
-                child: CustomPaint(
-                  painter: AnimatedCircleBorderPainter(
-                    progress: progress,
-                    color: context.streamColorScheme.borderDefault,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      context.streamIcons.arrowShareLeft,
-                      size: lerpDouble(0, 18, progress),
-                      color: context.streamColorScheme.accentPrimary,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-      child: defaultWidget,
-    );
   }
 
   bool defaultFilter(Message m) {

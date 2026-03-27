@@ -679,9 +679,36 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 लाइव लोकेशन';
-    return '📍 लोकेशन';
+    if (isLive) return 'लाइव लोकेशन';
+    return 'लोकेशन';
   }
+
+  @override
+  String get noConversationsYetText => 'अभी तक कोई बातचीत नहीं';
+
+  @override
+  String get replyToStartThreadText => 'थ्रेड शुरू करने के लिए किसी संदेश का जवाब दें';
+
+  @override
+  String get sendMessageToStartConversationText => 'बातचीत शुरू करने के लिए एक संदेश भेजें';
+
+  @override
+  String get savedForLaterLabel => 'बाद के लिए सहेजा गया';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'एक थ्रेड का जवाब दिया';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'चैनल में भी भेजा गया';
+
+  @override
+  String get viewLabel => 'देखें';
+
+  @override
+  String get reminderSetLabel => 'रिमाइंडर सेट';
+
+  @override
+  String reminderAtText(String time) => 'आज $time पर';
 
   @override
   String get createPollPromptLabel => 'पोल बनाएं और सबको वोट करने दें!';

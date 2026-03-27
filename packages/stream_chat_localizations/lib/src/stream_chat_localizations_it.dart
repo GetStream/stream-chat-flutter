@@ -684,9 +684,36 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Posizione dal vivo';
-    return '📍 Posizione';
+    if (isLive) return 'Posizione dal vivo';
+    return 'Posizione';
   }
+
+  @override
+  String get noConversationsYetText => 'Ancora nessuna conversazione';
+
+  @override
+  String get replyToStartThreadText => 'Rispondi a un messaggio per avviare un thread';
+
+  @override
+  String get sendMessageToStartConversationText => 'Invia un messaggio per iniziare la conversazione';
+
+  @override
+  String get savedForLaterLabel => 'Salvato per dopo';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Ha risposto a un thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Inviato anche nel canale';
+
+  @override
+  String get viewLabel => 'Visualizza';
+
+  @override
+  String get reminderSetLabel => 'Promemoria impostato';
+
+  @override
+  String reminderAtText(String time) => 'Oggi alle $time';
 
   @override
   String get createPollPromptLabel => 'Crea un sondaggio e fai votare tutti!';

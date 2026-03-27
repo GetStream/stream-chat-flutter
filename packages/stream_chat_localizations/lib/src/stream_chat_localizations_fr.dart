@@ -681,9 +681,36 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Position en direct';
-    return '📍 Position';
+    if (isLive) return 'Position en direct';
+    return 'Position';
   }
+
+  @override
+  String get noConversationsYetText => 'Pas encore de conversations';
+
+  @override
+  String get replyToStartThreadText => 'Répondez à un message pour démarrer un fil';
+
+  @override
+  String get sendMessageToStartConversationText => 'Envoyez un message pour démarrer la conversation';
+
+  @override
+  String get savedForLaterLabel => 'Enregistré pour plus tard';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'A répondu à un fil';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Également envoyé dans le canal';
+
+  @override
+  String get viewLabel => 'Voir';
+
+  @override
+  String get reminderSetLabel => 'Rappel défini';
+
+  @override
+  String reminderAtText(String time) => "Aujourd'hui à $time";
 
   @override
   String get createPollPromptLabel => 'Créez un sondage et laissez tout le monde voter !';

@@ -18,9 +18,9 @@ Widget wrapWithStreamChat(
 }
 
 void main() {
-  group('StreamMessageInputAttachmentList tests', () {
+  group('StreamMessageComposerAttachmentList tests', () {
     testWidgets(
-      'StreamMessageInputAttachmentList should render attachments',
+      'StreamMessageComposerAttachmentList should render attachments',
       (WidgetTester tester) async {
         final attachments = [
           Attachment(type: 'file', id: 'file1'),
@@ -30,7 +30,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
@@ -44,7 +44,7 @@ void main() {
     );
 
     testWidgets(
-      'StreamMessageInputAttachmentList should call onRemovePressed callback',
+      'StreamMessageComposerAttachmentList should call onRemovePressed callback',
       (WidgetTester tester) async {
         Attachment? removedAttachment;
 
@@ -55,7 +55,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
               onRemovePressed: (attachment) {
                 removedAttachment = attachment;
@@ -77,13 +77,13 @@ void main() {
     );
 
     testWidgets(
-      '''StreamMessageInputAttachmentList should display empty box if no attachments''',
+      '''StreamMessageComposerAttachmentList should display empty box if no attachments''',
       (WidgetTester tester) async {
         final attachments = <Attachment>[];
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
@@ -106,7 +106,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            MessageInputFileAttachments(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
@@ -128,7 +128,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            MessageInputFileAttachments(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
               onRemovePressed: (attachment) {
                 removedAttachment = attachment;

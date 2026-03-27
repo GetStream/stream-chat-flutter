@@ -37,7 +37,10 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
   Widget build(BuildContext context) {
     // 45 degrees = 0.125 turns
     const closedRotation = 0.125;
-    final showButton = !props.isAudioRecordingFlowActive && props.controller.message.command == null;
+    final showButton =
+        props.onAttachmentButtonPressed != null &&
+        !props.isAudioRecordingFlowActive &&
+        props.controller.message.command == null;
 
     return AnimatedOpacity(
       opacity: showButton ? 1.0 : 0.0,

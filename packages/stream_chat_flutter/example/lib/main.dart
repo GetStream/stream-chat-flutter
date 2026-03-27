@@ -1,8 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
 import 'dart:async';
-import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -254,74 +252,8 @@ class _ChannelPageState extends State<ChannelPage> {
           Expanded(
             child: StreamMessageListView(
               threadBuilder: (_, parent) => ThreadPage(parent: parent!),
-              messageBuilder: (context, message, defaultProps) {
-                // The threshold after which the message is considered
-                // swiped.
-                const threshold = 0.2;
-
-                final currentUser = StreamChat.of(context).currentUser;
-                final isMyMessage = message.user?.id == currentUser?.id;
-
-                // The direction in which the message can be swiped.
-                final swipeDirection = isMyMessage ? SwipeDirection.endToStart : SwipeDirection.startToEnd;
-
-                return Swipeable(
-                  key: ValueKey(message.id),
-                  direction: swipeDirection,
-                  swipeThreshold: threshold,
-                  onSwiped: (details) => reply(message),
-                  backgroundBuilder: (context, details) {
-                    // The alignment of the swipe action.
-                    final alignment = isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
-
-                    // The progress of the swipe action.
-                    final progress = math.min(details.progress, threshold) / threshold;
-
-                    // The offset for the reply icon.
-                    var offset = Offset.lerp(
-                      const Offset(-24, 0),
-                      const Offset(12, 0),
-                      progress,
-                    )!;
-
-                    // If the message is mine, we need to flip the offset.
-                    if (isMyMessage) {
-                      offset = Offset(-offset.dx, -offset.dy);
-                    }
-
-                    final _streamTheme = StreamChatTheme.of(context);
-
-                    return Align(
-                      alignment: alignment,
-                      child: Transform.translate(
-                        offset: offset,
-                        child: Opacity(
-                          opacity: progress,
-                          child: SizedBox.square(
-                            dimension: 30,
-                            child: CustomPaint(
-                              painter: AnimatedCircleBorderPainter(
-                                progress: progress,
-                                color: _streamTheme.colorTheme.borders,
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  context.streamIcons.arrowShareLeft,
-                                  size: lerpDouble(0, 18, progress),
-                                  color: _streamTheme.colorTheme.accentPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  child: DefaultStreamMessage(
-                    props: defaultProps.copyWith(onReplyTap: reply),
-                  ),
-                );
-              },
+              onReplyTap: reply,
+              swipeToReply: true,
             ),
           ),
           StreamMessageInput(

@@ -685,8 +685,8 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live Location';
-    return '📍 Location';
+    if (isLive) return 'Live Location';
+    return 'Location';
   }
 
   @override
@@ -706,6 +706,33 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String videosAttachmentCountText(int count) {
     return count == 1 ? 'Video' : '$count videos';
   }
+
+  @override
+  String get noConversationsYetText => 'No conversations yet';
+
+  @override
+  String get replyToStartThreadText => 'Reply to a message to start a thread';
+
+  @override
+  String get sendMessageToStartConversationText => 'Send a message to start the conversation';
+
+  @override
+  String get savedForLaterLabel => 'Saved for later';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Replied to a thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Also sent in channel';
+
+  @override
+  String get viewLabel => 'View';
+
+  @override
+  String get reminderSetLabel => 'Reminder set';
+
+  @override
+  String reminderAtText(String time) => 'Today at $time';
 
   @override
   String get createPollPromptLabel => 'Create a poll and let everyone vote!';

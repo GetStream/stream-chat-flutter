@@ -569,6 +569,35 @@ abstract class Translations {
   /// [isLive] indicates if the location is live or not.
   String locationLabel({bool isLive = false});
 
+  /// The text shown when there are no conversations yet.
+  String get noConversationsYetText;
+
+  /// The text shown when there are no threads yet.
+  String get replyToStartThreadText;
+
+  /// The text shown to prompt the user to send a message.
+  String get sendMessageToStartConversationText;
+
+  /// The label for the "Saved for later" message annotation.
+  String get savedForLaterLabel;
+
+  /// The annotation label shown on a message that was replied to a thread,
+  /// displayed in channel view (e.g. "Replied to a thread").
+  String get repliedToThreadAnnotationLabel;
+
+  /// The annotation label shown on a message that was also sent in channel,
+  /// displayed in thread view (e.g. "Also sent in channel").
+  String get alsoSentInChannelAnnotationLabel;
+
+  /// The "View" link label used in message annotations.
+  String get viewLabel;
+
+  /// The annotation label for a reminder (e.g. "Reminder set").
+  String get reminderSetLabel;
+
+  /// The text displaying the reminder time (e.g. "Today at 3:00 PM").
+  String reminderAtText(String time);
+
   /// The label for "Create a poll and let everyone vote!"
   String get createPollPromptLabel;
 
@@ -1267,9 +1296,36 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live Location';
-    return '📍 Location';
+    if (isLive) return 'Live Location';
+    return 'Location';
   }
+
+  @override
+  String get noConversationsYetText => 'No conversations yet';
+
+  @override
+  String get replyToStartThreadText => 'Reply to a message to start a thread';
+
+  @override
+  String get sendMessageToStartConversationText => 'Send a message to start the conversation';
+
+  @override
+  String get savedForLaterLabel => 'Saved for later';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Replied to a thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Also sent in channel';
+
+  @override
+  String get viewLabel => 'View';
+
+  @override
+  String get reminderSetLabel => 'Reminder set';
+
+  @override
+  String reminderAtText(String time) => 'Today at $time';
 
   @override
   String get createPollPromptLabel => 'Create a poll and let everyone vote!';

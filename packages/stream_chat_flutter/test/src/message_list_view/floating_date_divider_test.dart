@@ -311,6 +311,7 @@ void main() {
             FloatingDateDivider(
               itemPositionListener: itemPositionListener,
               reverse: false,
+              fadeNearInlineDivider: false,
               messages: messages,
               itemCount: itemCount,
             ),
@@ -381,6 +382,7 @@ void main() {
           FloatingDateDivider(
             itemPositionListener: itemPositionListener,
             reverse: true, // Use getBottomElementIndex
+            fadeNearInlineDivider: false,
             messages: messages,
             itemCount: itemCount,
           ),
