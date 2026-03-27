@@ -62,7 +62,7 @@ class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuil
   }
 }
 
-// Default values for [StreamPollInteractorThemeData] backed by stream design tokens.
+// Default values for [StreamVoiceRecordingAttachmentThemeData] backed by stream design tokens.
 class _StreamVoiceRecordingAttachmentDefaults extends StreamVoiceRecordingAttachmentThemeData {
   _StreamVoiceRecordingAttachmentDefaults(this._context);
 
