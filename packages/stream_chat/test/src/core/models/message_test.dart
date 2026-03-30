@@ -2,6 +2,7 @@
 
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
@@ -534,6 +535,94 @@ void main() {
       expect(message.moderation?.originalText, 'original message text');
       expect(message.isFlagged, isTrue);
     });
+  });
+
+  group('syncWith', () {
+    test('should preserve local timestamps from the other message', () {
+      final localCreatedAt = DateTime(2024, 1, 1);
+      final localUpdatedAt = DateTime(2024, 1, 2);
+      final localDeletedAt = DateTime(2024, 1, 3);
+
+      final serverMessage = Message(id: 'msg-1', text: 'Hello');
+      final localMessage = Message(
+        id: 'msg-1',
+        text: 'Hello',
+        localCreatedAt: localCreatedAt,
+        localUpdatedAt: localUpdatedAt,
+        localDeletedAt: localDeletedAt,
+      );
+
+      final synced = serverMessage.syncWith(localMessage);
+      expect(synced.localCreatedAt, localCreatedAt);
+      expect(synced.localUpdatedAt, localUpdatedAt);
+      expect(synced.localDeletedAt, localDeletedAt);
+    });
+
+    test('should return this if other is null', () {
+      final message = Message(id: 'msg-1', text: 'Hello');
+      final synced = message.syncWith(null);
+      expect(identical(synced, message), isTrue);
+    });
+
+    test(
+      'should preserve deletedForMe from local when server does not have it',
+      () {
+        final serverMessage = Message(
+          id: 'msg-1',
+          text: 'Hello',
+        );
+        final localMessage = Message(
+          id: 'msg-1',
+          text: 'Hello',
+          deletedForMe: true,
+          type: MessageType.deleted,
+          state: MessageState.deletedForMe,
+        );
+
+        final synced = serverMessage.syncWith(localMessage);
+        expect(synced.deletedForMe, isTrue);
+        expect(synced.type, MessageType.deleted);
+        expect(synced.state, MessageState.deletedForMe);
+        expect(synced.isDeleted, isTrue);
+      },
+    );
+
+    test(
+      'should keep server deletedForMe when both server and local have it',
+      () {
+        final serverMessage = Message(
+          id: 'msg-1',
+          text: 'Hello',
+          deletedForMe: true,
+          type: MessageType.deleted,
+          state: MessageState.deletedForMe,
+        );
+        final localMessage = Message(
+          id: 'msg-1',
+          text: 'Hello',
+          deletedForMe: true,
+          type: MessageType.deleted,
+          state: MessageState.deletedForMe,
+        );
+
+        final synced = serverMessage.syncWith(localMessage);
+        expect(synced.deletedForMe, isTrue);
+        expect(synced.type, MessageType.deleted);
+        expect(synced.state, MessageState.deletedForMe);
+      },
+    );
+
+    test(
+      'should not set deletedForMe when neither server nor local have it',
+      () {
+        final serverMessage = Message(id: 'msg-1', text: 'Hello');
+        final localMessage = Message(id: 'msg-1', text: 'Hello');
+
+        final synced = serverMessage.syncWith(localMessage);
+        expect(synced.deletedForMe, isNull);
+        expect(synced.type, isNot(MessageType.deleted));
+      },
+    );
   });
 }
 

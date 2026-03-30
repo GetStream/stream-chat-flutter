@@ -585,11 +585,22 @@ class Message extends Equatable implements ComparableFieldProvider {
   Message syncWith(Message? other) {
     if (other == null) return this;
 
-    return copyWith(
+    var synced = copyWith(
       localCreatedAt: other.localCreatedAt,
       localUpdatedAt: other.localUpdatedAt,
       localDeletedAt: other.localDeletedAt,
     );
+
+    // The backend does not always enrich this deletedForMe field
+    if (other.deletedForMe == true && synced.deletedForMe != true) {
+      synced = synced.copyWith(
+        deletedForMe: true,
+        type: MessageType.deleted,
+        state: MessageState.deletedForMe,
+      );
+    }
+
+    return synced;
   }
 
   @override
