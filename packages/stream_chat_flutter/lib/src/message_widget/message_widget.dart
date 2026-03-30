@@ -52,7 +52,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessage
 /// StreamMessageWidget(
 ///   message: message,
 ///   onMessageTap: (msg) => print('Tapped: ${msg.id}'),
-///   onThreadTap: (msg) => Navigator.push(...),
+///   onThreadTap: (parent, threadMsg) => Navigator.push(...),
 ///   onUserAvatarTap: (user) => showProfile(user),
 /// )
 /// ```
@@ -83,7 +83,8 @@ class StreamMessageWidget extends StatelessWidget {
     void Function(User)? onUserAvatarTap,
     void Function(Message message, String url)? onMessageLinkTap,
     void Function(User user)? onUserMentionTap,
-    void Function(Message)? onThreadTap,
+    void Function(Message parentMessage, Message? threadMessage)? onThreadTap,
+    void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
     void Function(Message)? onReactionsTap,
     void Function(Message quotedMessage)? onQuotedMessageTap,
@@ -106,6 +107,7 @@ class StreamMessageWidget extends StatelessWidget {
          onMessageLinkTap: onMessageLinkTap,
          onUserMentionTap: onUserMentionTap,
          onThreadTap: onThreadTap,
+         onViewInChannelTap: onViewInChannelTap,
          onReplyTap: onReplyTap,
          onReactionsTap: onReactionsTap,
          onQuotedMessageTap: onQuotedMessageTap,
@@ -160,6 +162,7 @@ class StreamMessageWidgetProps {
     this.onMessageLinkTap,
     this.onUserMentionTap,
     this.onThreadTap,
+    this.onViewInChannelTap,
     this.onReplyTap,
     this.onReactionsTap,
     this.onQuotedMessageTap,
@@ -252,12 +255,23 @@ class StreamMessageWidgetProps {
 
   /// Called when the thread reply indicator is tapped.
   ///
-  /// Receives the parent [Message] of the thread. If the message was shown
-  /// in-channel via [Message.showInChannel], the original parent message is
-  /// fetched before invoking the callback.
+  /// [parentMessage] is the root message of the thread. When the tapped
+  /// message was shown in-channel via [Message.showInChannel],
+  /// [threadMessage] contains the original in-channel reply so that the
+  /// caller can scroll to / highlight it inside the thread view.
+  /// Otherwise [threadMessage] is null.
   ///
   /// If null, tapping the thread indicator has no effect.
-  final void Function(Message message)? onThreadTap;
+  final void Function(Message parentMessage, Message? threadMessage)? onThreadTap;
+
+  /// Called when the "View" button on the "Also sent in channel" annotation
+  /// is tapped inside a thread view.
+  ///
+  /// Typically used to pop the thread screen and scroll to / highlight the
+  /// message in the parent channel list.
+  ///
+  /// When null, the "View" button falls back to [onThreadTap].
+  final void Function(Message message)? onViewInChannelTap;
 
   /// Called when the quoted-reply action is selected from the actions list.
   ///
@@ -335,7 +349,8 @@ class StreamMessageWidgetProps {
     void Function(User)? onUserAvatarTap,
     void Function(Message, String)? onMessageLinkTap,
     void Function(User)? onUserMentionTap,
-    void Function(Message)? onThreadTap,
+    void Function(Message, Message?)? onThreadTap,
+    void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
     void Function(Message)? onReactionsTap,
     void Function(Message)? onQuotedMessageTap,
@@ -359,6 +374,7 @@ class StreamMessageWidgetProps {
       onMessageLinkTap: onMessageLinkTap ?? this.onMessageLinkTap,
       onUserMentionTap: onUserMentionTap ?? this.onUserMentionTap,
       onThreadTap: onThreadTap ?? this.onThreadTap,
+      onViewInChannelTap: onViewInChannelTap ?? this.onViewInChannelTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
@@ -428,11 +444,17 @@ class DefaultStreamMessage extends StatelessWidget {
       );
     }
 
+    final listKind = StreamMessageLayout.listKindOf(context);
+    final onViewTap = switch ((listKind, props.onViewInChannelTap)) {
+      (.thread, final onTap?) => () => onTap(message),
+      _ => () => _onViewThread(context, message),
+    };
+
     final headerWidget = effectiveHeaderVisibility.apply(
       streamMessageHeader(
         context: context,
         message: message,
-        onViewChannelTap: () => _onViewThread(context, message),
+        onViewChannelTap: onViewTap,
       ),
     );
     final footerWidget = effectiveFooterVisibility.apply(StreamMessageFooter(message: message));
@@ -638,18 +660,18 @@ class DefaultStreamMessage extends StatelessWidget {
   }
 
   // Resolves the thread parent (fetching if shown in-channel) and invokes
-  // the onThreadTap callback.
+  // the onThreadTap callback with both the parent and the original message.
   Future<void> _onViewThread(
     BuildContext context,
     Message message,
   ) async {
     try {
-      var threadMessage = message;
       if (message.showInChannel case true) {
         final streamChannel = StreamChannel.of(context);
-        threadMessage = await streamChannel.getMessage(message.parentId!);
+        final parentMessage = await streamChannel.getMessage(message.parentId!);
+        return props.onThreadTap?.call(parentMessage, message);
       }
-      return props.onThreadTap?.call(threadMessage);
+      return props.onThreadTap?.call(message, null);
     } catch (e, stk) {
       debugPrint('Error while fetching message: $e, $stk');
     }
@@ -800,7 +822,7 @@ class DefaultStreamMessage extends StatelessWidget {
     UnpinMessage() => channel.unpinMessage(action.message),
     ResendMessage() => channel.retryMessage(action.message),
     QuotedReply() => props.onReplyTap?.call(action.message),
-    ThreadReply() => props.onThreadTap?.call(action.message),
+    ThreadReply() => props.onThreadTap?.call(action.message, null),
   };
 
   // Copies the message text (with mentions replaced) to the clipboard.
