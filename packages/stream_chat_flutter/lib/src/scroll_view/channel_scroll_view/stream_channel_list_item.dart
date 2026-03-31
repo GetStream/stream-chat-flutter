@@ -479,7 +479,7 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
           );
         } else if (message.state.isCompleted) {
           icon = Icon(
-            context.streamIcons.checkmark1Small,
+            context.streamIcons.checkmark2Small,
             size: 16,
             color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );
