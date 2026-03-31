@@ -65,7 +65,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        context.streamIcons.image20,
+                        context.streamIcons.image32,
                         size: 136,
                         color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),

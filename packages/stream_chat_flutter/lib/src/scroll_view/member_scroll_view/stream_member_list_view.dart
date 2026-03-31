@@ -321,7 +321,7 @@ class StreamMemberListView extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               child: StreamScrollViewEmptyWidget(
                 emptyIcon: Icon(
-                  context.streamIcons.user20,
+                  context.streamIcons.user32,
                   size: 148,
                   color: chatThemeData.colorTheme.disabled,
                 ),

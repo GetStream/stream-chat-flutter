@@ -328,7 +328,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                               Padding(
                                                 padding: const EdgeInsets.all(24),
                                                 child: Icon(
-                                                  context.streamIcons.search20,
+                                                  context.streamIcons.search32,
                                                   size: 96,
                                                   color: Colors.grey,
                                                 ),

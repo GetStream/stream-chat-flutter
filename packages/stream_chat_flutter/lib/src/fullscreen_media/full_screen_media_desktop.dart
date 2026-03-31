@@ -149,7 +149,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                 Navigator.of(context).pop();
               },
               child: Icon(
-                context.streamIcons.xmark20,
+                context.streamIcons.xmark32,
                 size: 30,
               ),
             ),

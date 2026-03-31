@@ -239,7 +239,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                       Padding(
                                         padding: const EdgeInsets.all(24),
                                         child: Icon(
-                                          context.streamIcons.search20,
+                                          context.streamIcons.search32,
                                           size: 96,
                                           color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                                         ),

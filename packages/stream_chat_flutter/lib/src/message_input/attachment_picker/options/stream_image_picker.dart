@@ -64,7 +64,7 @@ class StreamImagePicker extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.camera20,
+                context.streamIcons.camera32,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),
@@ -90,7 +90,7 @@ class StreamImagePicker extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.camera20,
+                context.streamIcons.camera32,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),

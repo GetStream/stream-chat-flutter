@@ -479,13 +479,13 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
           );
         } else if (message.state.isCompleted) {
           icon = Icon(
-            context.streamIcons.checkmark12,
+            context.streamIcons.checkmark16,
             size: 16,
             color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );
         } else if (message.state.isOutgoing) {
           icon = Icon(
-            context.streamIcons.clock20,
+            context.streamIcons.clock16,
             size: 16,
             color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );

@@ -87,7 +87,7 @@ class StreamFilePicker extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.file20,
+                context.streamIcons.file32,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),
@@ -115,7 +115,7 @@ class StreamFilePicker extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.file20,
+                context.streamIcons.file32,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),

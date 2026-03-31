@@ -248,7 +248,7 @@ class _SuccessState extends StatelessWidget {
         maxRadius: 10,
         child: Icon(
           size: 16,
-          context.streamIcons.checkmark20,
+          context.streamIcons.checkmark16,
           color: StreamChatTheme.of(context).colorTheme.barsBg,
         ),
       ),

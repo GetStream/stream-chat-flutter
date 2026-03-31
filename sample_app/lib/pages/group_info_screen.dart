@@ -483,7 +483,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
         _GroupInfoListTile(
           title: AppLocalizations.of(context).photosAndVideos,
-          icon: context.streamIcons.image20,
+          icon: context.streamIcons.image32,
           iconSize: 32,
           iconPadding: 12,
           onTap: () {
@@ -504,7 +504,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
         _GroupInfoListTile(
           title: AppLocalizations.of(context).files,
-          icon: context.streamIcons.file20,
+          icon: context.streamIcons.file32,
           iconSize: 32,
           iconPadding: 12,
           onTap: () {
@@ -614,7 +614,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                       Padding(
                                         padding: const EdgeInsets.all(24),
                                         child: Icon(
-                                          context.streamIcons.search20,
+                                          context.streamIcons.search32,
                                           size: 96,
                                           color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                                         ),

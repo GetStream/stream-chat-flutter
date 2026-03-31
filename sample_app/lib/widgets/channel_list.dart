@@ -211,7 +211,7 @@ class _ChannelListDefault extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
                   emptyIcon: Icon(
-                    context.streamIcons.messageBubble20,
+                    context.streamIcons.messageBubble32,
                     size: 148,
                     color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),
@@ -260,7 +260,7 @@ class _ChannelListSearch extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(24),
                         child: Icon(
-                          context.streamIcons.search20,
+                          context.streamIcons.search32,
                           size: 96,
                           color: Colors.grey,
                         ),

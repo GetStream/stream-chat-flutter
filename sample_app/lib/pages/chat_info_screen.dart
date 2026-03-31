@@ -191,7 +191,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Icon(
-              context.streamIcons.image20,
+              context.streamIcons.image32,
               size: 36,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
@@ -223,7 +223,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Icon(
-              context.streamIcons.file20,
+              context.streamIcons.file32,
               size: 32,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
@@ -413,7 +413,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    context.streamIcons.messageBubble20,
+                    context.streamIcons.messageBubble32,
                     size: 136,
                     color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),
