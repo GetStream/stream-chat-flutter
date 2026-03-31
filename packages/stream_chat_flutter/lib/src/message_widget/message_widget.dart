@@ -94,6 +94,8 @@ class StreamMessageWidget extends StatelessWidget {
     void Function(BuildContext, Message)? onBouncedErrorMessageActions,
     void Function(Message)? onEditMessageTap,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    ShowMessageCallback? onShowMessage,
+    AttachmentActionsBuilder? attachmentActionsModalBuilder,
   }) : props = .new(
          message: message,
          padding: padding,
@@ -117,6 +119,8 @@ class StreamMessageWidget extends StatelessWidget {
          onBouncedErrorMessageActions: onBouncedErrorMessageActions,
          onEditMessageTap: onEditMessageTap,
          attachmentBuilders: attachmentBuilders,
+         onShowMessage: onShowMessage,
+         attachmentActionsModalBuilder: attachmentActionsModalBuilder,
        );
 
   /// Creates a chat message widget from pre-built [props].
@@ -172,6 +176,8 @@ class StreamMessageWidgetProps {
     this.onBouncedErrorMessageActions,
     this.onEditMessageTap,
     this.attachmentBuilders,
+    this.onShowMessage,
+    this.attachmentActionsModalBuilder,
   });
 
   /// The message to display.
@@ -335,6 +341,20 @@ class StreamMessageWidgetProps {
   /// priority for attachment types they can handle.
   final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
 
+  /// Called when the "show in chat" action is tapped in the full-screen
+  /// media gallery.
+  ///
+  /// Receives the [Message] and its [Channel] so the caller can scroll to
+  /// the message in the channel view.
+  final ShowMessageCallback? onShowMessage;
+
+  /// Widget builder for the attachment actions modal shown in the full-screen
+  /// media gallery.
+  ///
+  /// When non-null, allows customizing the [AttachmentActionsModal] displayed
+  /// when the user taps the actions button in the gallery header.
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
+
   /// Returns a copy of this [StreamMessageWidgetProps] with the given fields
   /// replaced with new values.
   StreamMessageWidgetProps copyWith({
@@ -360,6 +380,8 @@ class StreamMessageWidgetProps {
     void Function(BuildContext, Message)? onBouncedErrorMessageActions,
     void Function(Message)? onEditMessageTap,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    ShowMessageCallback? onShowMessage,
+    AttachmentActionsBuilder? attachmentActionsModalBuilder,
   }) {
     return StreamMessageWidgetProps(
       message: message ?? this.message,
@@ -384,6 +406,8 @@ class StreamMessageWidgetProps {
       onBouncedErrorMessageActions: onBouncedErrorMessageActions ?? this.onBouncedErrorMessageActions,
       onEditMessageTap: onEditMessageTap ?? this.onEditMessageTap,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
+      onShowMessage: onShowMessage ?? this.onShowMessage,
+      attachmentActionsModalBuilder: attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
     );
   }
 }
@@ -467,6 +491,9 @@ class DefaultStreamMessage extends StatelessWidget {
       reactionSorting: props.reactionSorting,
       onQuotedMessageTap: props.onQuotedMessageTap,
       onRepliesTap: () => _onViewThread(context, message),
+      onShowMessage: props.onShowMessage,
+      onReplyTap: props.onReplyTap,
+      attachmentActionsModalBuilder: props.attachmentActionsModalBuilder,
       onLinkTap: (_, href, __) {
         if (href == null) return;
         if (props.onMessageLinkTap case final onTap?) return onTap(message, href);
