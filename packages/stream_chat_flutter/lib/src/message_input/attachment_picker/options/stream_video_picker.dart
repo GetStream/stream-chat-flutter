@@ -54,7 +54,7 @@ class StreamVideoPicker extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.video,
+                context.streamIcons.video20,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),
@@ -80,7 +80,7 @@ class StreamVideoPicker extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.video,
+                context.streamIcons.video20,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),

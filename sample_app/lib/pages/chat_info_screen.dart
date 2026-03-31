@@ -126,7 +126,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               leading: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22),
                 child: Icon(
-                  context.streamIcons.mute,
+                  context.streamIcons.mute20,
                   size: 24,
                   color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                 ),
@@ -161,13 +161,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
             child: Icon(
-              context.streamIcons.pin,
+              context.streamIcons.pin20,
               size: 24,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
           trailing: Icon(
-            context.streamIcons.chevronRight,
+            context.streamIcons.chevronRight20,
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
@@ -191,13 +191,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Icon(
-              context.streamIcons.images1Alt,
+              context.streamIcons.image20,
               size: 36,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
           trailing: Icon(
-            context.streamIcons.chevronRight,
+            context.streamIcons.chevronRight20,
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
@@ -223,13 +223,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Icon(
-              context.streamIcons.fileBend,
+              context.streamIcons.file20,
               size: 32,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
           trailing: Icon(
-            context.streamIcons.chevronRight,
+            context.streamIcons.chevronRight20,
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
@@ -255,13 +255,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
             child: Icon(
-              context.streamIcons.users,
+              context.streamIcons.users20,
               size: 24,
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
             ),
           ),
           trailing: Icon(
-            context.streamIcons.chevronRight,
+            context.streamIcons.chevronRight20,
             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
           ),
           onTap: () {
@@ -287,7 +287,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       leading: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 22),
         child: Icon(
-          context.streamIcons.trashBin,
+          context.streamIcons.delete20,
           size: 24,
           color: StreamChatTheme.of(context).colorTheme.accentError,
         ),
@@ -306,7 +306,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       question: AppLocalizations.of(context).deleteConversationAreYouSure,
       cancelText: AppLocalizations.of(context).cancel.toUpperCase(),
       icon: Icon(
-        context.streamIcons.trashBin,
+        context.streamIcons.delete20,
         color: StreamChatTheme.of(context).colorTheme.accentError,
       ),
     );
@@ -413,7 +413,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    context.streamIcons.bubble3ChatMessage,
+                    context.streamIcons.messageBubble20,
                     size: 136,
                     color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),

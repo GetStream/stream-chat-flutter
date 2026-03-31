@@ -28,7 +28,7 @@ class StreamMessageDeleted extends StatelessWidget {
         spacing: spacing.xxs,
         mainAxisSize: .min,
         children: [
-          Icon(icons.circleBanSign, size: 16),
+          Icon(icons.noSign20, size: 16),
           core.StreamMessageText(padding: .zero, context.translations.messageDeletedLabel),
         ],
       ),

@@ -158,7 +158,7 @@ class MessageInfoSheet extends StatelessWidget {
           ),
           IconButton(
             iconSize: 32,
-            icon: Icon(context.streamIcons.crossMedium),
+            icon: Icon(context.streamIcons.xmark20),
             onPressed: Navigator.of(context).maybePop,
             color: colorTheme.textHighEmphasis,
             padding: const EdgeInsets.all(4),
@@ -269,7 +269,7 @@ class _UserReadTile extends StatelessWidget {
 
           // Status icon
           Icon(
-            context.streamIcons.doupleCheckmark1Small,
+            context.streamIcons.checks16,
             size: 18,
             color: switch (isDelivered) {
               true => theme.colorTheme.textLowEmphasis,

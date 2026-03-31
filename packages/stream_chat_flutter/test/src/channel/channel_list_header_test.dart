@@ -193,7 +193,7 @@ void main() {
       await tester.pump();
 
       await tester.tap(find.byType(StreamUserAvatar));
-      await tester.tap(find.byIcon(StreamIconData.iconPlusLarge));
+      await tester.tap(find.byIcon(StreamIconData.plus20));
       expect(tapped, 2);
     },
   );

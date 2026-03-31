@@ -186,7 +186,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Icon(
-                        context.streamIcons.peopleAdd,
+                        context.streamIcons.userAdd20,
                         color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                       ),
                     ),
@@ -320,7 +320,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 12),
                             child: Icon(
-                              context.streamIcons.chevronDown,
+                              context.streamIcons.chevronDown20,
                               color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                             ),
                           ),
@@ -397,7 +397,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: Icon(context.streamIcons.crossSmall),
+                    icon: Icon(context.streamIcons.xmark16),
                     onPressed: () {
                       setState(() {
                         _nameController.text = _getChannelName(
@@ -412,7 +412,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   ),
                   IconButton(
                     color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                    icon: Icon(context.streamIcons.checkmark2),
+                    icon: Icon(context.streamIcons.checkmark20),
                     onPressed: () {
                       try {
                         channel.update({
@@ -440,7 +440,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         if (channel.canMuteChannel)
           _GroupInfoToggle(
             title: AppLocalizations.of(context).muteGroup,
-            icon: context.streamIcons.mute,
+            icon: context.streamIcons.mute20,
             channelStream: channel.isMutedStream,
             localNotifier: mutedBool,
             onTurnOff: channel.unmute,
@@ -448,7 +448,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           ),
         _GroupInfoToggle(
           title: AppLocalizations.of(context).pinGroup,
-          icon: context.streamIcons.pin,
+          icon: context.streamIcons.pin20,
           channelStream: channel.isPinnedStream,
           localNotifier: isPinned,
           onTurnOff: channel.unpin,
@@ -456,7 +456,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
         _GroupInfoToggle(
           title: AppLocalizations.of(context).archiveGroup,
-          icon: context.streamIcons.bookmark,
+          icon: context.streamIcons.save20,
           channelStream: channel.isArchivedStream,
           localNotifier: isArchived,
           onTurnOff: channel.unarchive,
@@ -464,7 +464,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
         _GroupInfoListTile(
           title: AppLocalizations.of(context).pinnedMessages,
-          icon: context.streamIcons.pin,
+          icon: context.streamIcons.pin20,
           iconSize: 24,
           iconPadding: 16,
           onTap: () {
@@ -483,7 +483,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
         _GroupInfoListTile(
           title: AppLocalizations.of(context).photosAndVideos,
-          icon: context.streamIcons.images1Alt,
+          icon: context.streamIcons.image20,
           iconSize: 32,
           iconPadding: 12,
           onTap: () {
@@ -504,7 +504,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
         _GroupInfoListTile(
           title: AppLocalizations.of(context).files,
-          icon: context.streamIcons.fileBend,
+          icon: context.streamIcons.file20,
           iconSize: 32,
           iconPadding: 12,
           onTap: () {
@@ -532,7 +532,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Icon(
-                context.streamIcons.peopleRemove,
+                context.streamIcons.userRemove20,
                 size: 24,
                 color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
               ),
@@ -552,7 +552,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 question: AppLocalizations.of(context).leaveConversationAreYouSure,
                 cancelText: AppLocalizations.of(context).cancel.toUpperCase(),
                 icon: Icon(
-                  context.streamIcons.peopleRemove,
+                  context.streamIcons.userRemove20,
                   color: StreamChatTheme.of(context).colorTheme.accentError,
                 ),
               );
@@ -614,7 +614,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                       Padding(
                                         padding: const EdgeInsets.all(24),
                                         child: Icon(
-                                          context.streamIcons.magnifyingGlassSearch,
+                                          context.streamIcons.search20,
                                           size: 96,
                                           color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                                         ),
@@ -660,7 +660,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 ),
                 prefixIconConstraints: BoxConstraints.tight(const Size(40, 24)),
                 prefixIcon: Icon(
-                  context.streamIcons.magnifyingGlassSearch,
+                  context.streamIcons.search20,
                   color: theme.colorTheme.textHighEmphasis,
                   size: 24,
                 ),
@@ -682,7 +682,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           ),
         ),
         IconButton(
-          icon: Icon(context.streamIcons.crossSmall),
+          icon: Icon(context.streamIcons.xmark16),
           color: theme.colorTheme.textHighEmphasis,
           onPressed: () => Navigator.pop(context),
         ),
@@ -736,7 +736,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     _buildModalListTile(
                       context,
                       Icon(
-                        context.streamIcons.people,
+                        context.streamIcons.user20,
                         color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                         size: 24,
                       ),
@@ -768,7 +768,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     _buildModalListTile(
                       context,
                       Icon(
-                        context.streamIcons.bubble3ChatMessage,
+                        context.streamIcons.messageBubble20,
                         color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                         size: 24,
                       ),
@@ -799,7 +799,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     _buildModalListTile(
                       context,
                       Icon(
-                        context.streamIcons.peopleRemove,
+                        context.streamIcons.userRemove20,
                         color: StreamChatTheme.of(context).colorTheme.accentError,
                         size: 24,
                       ),
@@ -824,7 +824,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   _buildModalListTile(
                     context,
                     Icon(
-                      context.streamIcons.crossSmall,
+                      context.streamIcons.xmark16,
                       color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                       size: 24,
                     ),
@@ -1046,7 +1046,7 @@ class _GroupInfoListTile extends StatelessWidget {
         ),
       ),
       trailing: Icon(
-        context.streamIcons.chevronRight,
+        context.streamIcons.chevronRight20,
         color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
       ),
       onTap: onTap,

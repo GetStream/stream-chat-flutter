@@ -159,7 +159,7 @@ class _GallerySelectedIndicator extends StatelessWidget {
       ),
       child: selected
           ? Icon(
-              context.streamIcons.checkmark1Small,
+              context.streamIcons.checkmark12,
               fontWeight: FontWeight.w900,
               size: 12,
               color: Colors.white,

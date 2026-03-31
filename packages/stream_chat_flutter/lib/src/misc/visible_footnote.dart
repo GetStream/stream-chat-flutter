@@ -18,7 +18,7 @@ class StreamVisibleFootnote extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
-          context.streamIcons.eyeOpen,
+          context.streamIcons.eyeFill20,
           size: 16,
           color: chatThemeData.colorTheme.textLowEmphasis,
         ),

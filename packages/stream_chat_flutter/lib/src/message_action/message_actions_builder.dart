@@ -35,19 +35,19 @@ class StreamMessageActionsBuilder {
         value: ResendMessage(message: message),
         label: Text(context.translations.sendAnywayLabel),
         leading: Icon(
-          icons.paperPlaneTopRight,
+          icons.send20,
           color: StreamChatTheme.of(context).colorTheme.accentPrimary,
         ),
       ),
       StreamContextMenuAction<MessageAction>(
         value: EditMessage(message: message),
         label: Text(context.translations.editMessageLabel),
-        leading: Icon(icons.editBig),
+        leading: Icon(icons.edit20),
       ),
       StreamContextMenuAction<MessageAction>.destructive(
         value: HardDeleteMessage(message: message),
         label: Text(context.translations.deleteMessageLabel),
-        leading: Icon(icons.trashBin),
+        leading: Icon(icons.delete20),
       ),
     ];
   }
@@ -77,7 +77,7 @@ class StreamMessageActionsBuilder {
         if (messageState.isSendingFailed || messageState.isUpdatingFailed) ...[
           StreamContextMenuAction(
             value: ResendMessage(message: message),
-            leading: Icon(icons.paperPlaneTopRight),
+            leading: Icon(icons.send20),
             label: Text(
               context.translations.toggleResendOrResendEditedMessage(
                 isUpdateFailed: messageState.isUpdatingFailed,
@@ -87,7 +87,7 @@ class StreamMessageActionsBuilder {
           if (messageState.isSendingFailed)
             StreamContextMenuAction.destructive(
               value: HardDeleteMessage(message: message),
-              leading: Icon(icons.trashBin),
+              leading: Icon(icons.delete20),
               label: Text(
                 context.translations.toggleDeleteRetryDeleteMessageText(
                   isDeleteFailed: false,
@@ -98,7 +98,7 @@ class StreamMessageActionsBuilder {
         if (message.state.isDeletingFailed)
           StreamContextMenuAction.destructive(
             value: ResendMessage(message: message),
-            leading: Icon(icons.trashBin),
+            leading: Icon(icons.delete20),
             label: Text(
               context.translations.toggleDeleteRetryDeleteMessageText(
                 isDeleteFailed: true,
@@ -133,7 +133,7 @@ class StreamMessageActionsBuilder {
         StreamContextMenuAction(
           value: QuotedReply(message: message),
           label: Text(context.translations.replyLabel),
-          leading: Icon(icons.arrowShareLeft),
+          leading: Icon(icons.reply20),
         ),
       );
     }
@@ -143,7 +143,7 @@ class StreamMessageActionsBuilder {
         StreamContextMenuAction(
           value: ThreadReply(message: message),
           label: Text(context.translations.threadReplyLabel),
-          leading: Icon(icons.bubbleText6ChatMessage),
+          leading: Icon(icons.thread20),
         ),
       );
     }
@@ -153,7 +153,7 @@ class StreamMessageActionsBuilder {
         return StreamContextMenuAction(
           value: MarkUnread(message: message),
           label: Text(context.translations.markAsUnreadLabel),
-          leading: Icon(icons.bubbleWideNotificationChatMessage),
+          leading: Icon(icons.notification20),
         );
       }
 
@@ -174,7 +174,7 @@ class StreamMessageActionsBuilder {
         StreamContextMenuAction(
           value: CopyMessage(message: message),
           label: Text(context.translations.copyMessageLabel),
-          leading: Icon(icons.squareBehindSquare2Copy),
+          leading: Icon(icons.copy20),
         ),
       );
     }
@@ -185,7 +185,7 @@ class StreamMessageActionsBuilder {
           StreamContextMenuAction(
             value: EditMessage(message: message),
             label: Text(context.translations.editMessageLabel),
-            leading: Icon(icons.editBig),
+            leading: Icon(icons.edit20),
           ),
         );
       }
@@ -207,7 +207,7 @@ class StreamMessageActionsBuilder {
         StreamContextMenuAction(
           value: action,
           label: Text(label.call(pinned: isPinned)),
-          leading: Icon(icons.pin),
+          leading: Icon(icons.pin20),
         ),
       );
     }
@@ -218,7 +218,7 @@ class StreamMessageActionsBuilder {
       messageActions.add(
         StreamContextMenuAction.destructive(
           value: DeleteMessage(message: message),
-          leading: Icon(icons.trashBin),
+          leading: Icon(icons.delete20),
           label: Text(label.call(isDeleteFailed: false)),
         ),
       );
@@ -229,7 +229,7 @@ class StreamMessageActionsBuilder {
         StreamContextMenuAction(
           value: FlagMessage(message: message),
           label: Text(context.translations.flagMessageLabel),
-          leading: Icon(icons.flag2),
+          leading: Icon(icons.flag20),
         ),
       );
     }
@@ -248,7 +248,7 @@ class StreamMessageActionsBuilder {
         StreamContextMenuAction(
           value: action,
           label: Text(label.call(isMuted: isMuted)),
-          leading: Icon(icons.mute),
+          leading: Icon(icons.mute20),
         ),
       );
     }

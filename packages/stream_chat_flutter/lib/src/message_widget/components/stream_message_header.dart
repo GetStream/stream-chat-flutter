@@ -39,7 +39,7 @@ Widget? streamMessageHeader({
   Widget? savedForLaterAnnotation;
   if (message.reminder case final reminder? when reminder.remindAt == null) {
     savedForLaterAnnotation = StreamMessageAnnotation(
-      leading: Icon(icons.bookmark, color: colorScheme.accentPrimary),
+      leading: Icon(icons.save20, color: colorScheme.accentPrimary),
       label: Text(translations.savedForLaterLabel, style: TextStyle(color: colorScheme.accentPrimary)),
     );
   }
@@ -48,7 +48,7 @@ Widget? streamMessageHeader({
   if (message.pinned case true) {
     final currentUser = StreamChat.of(context).currentUser!;
     pinnedAnnotation = StreamMessageAnnotation(
-      leading: Icon(icons.pin),
+      leading: Icon(icons.pin20),
       label: Text(
         translations.pinnedByUserText(
           pinnedBy: message.pinnedBy ?? currentUser,
@@ -68,7 +68,7 @@ Widget? streamMessageHeader({
 
     showInChannelAnnotation = StreamMessageAnnotation(
       onTap: onViewChannelTap,
-      leading: Icon(icons.arrowUpRight),
+      leading: Icon(icons.arrowUpRight20),
       label: Text.rich(
         TextSpan(
           text: annotationLabel,
@@ -86,7 +86,7 @@ Widget? streamMessageHeader({
   Widget? reminderAnnotation;
   if (message.reminder?.remindAt?.toLocal() case final remindAt?) {
     reminderAnnotation = StreamMessageAnnotation(
-      leading: Icon(icons.bellNotification),
+      leading: Icon(icons.bell20),
       label: Text.rich(
         TextSpan(
           text: '${translations.reminderSetLabel} · ',

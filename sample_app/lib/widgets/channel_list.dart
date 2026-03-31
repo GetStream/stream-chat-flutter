@@ -171,7 +171,7 @@ class _ChannelListDefault extends StatelessWidget {
                     CustomSlidableAction(
                       backgroundColor: backgroundColor,
                       child: Icon(
-                        context.streamIcons.trashBin,
+                        context.streamIcons.delete20,
                         color: chatTheme.colorTheme.accentError,
                       ),
                       onPressed: (_) async {
@@ -182,7 +182,7 @@ class _ChannelListDefault extends StatelessWidget {
                           okText: 'Delete',
                           cancelText: 'Cancel',
                           icon: Icon(
-                            context.streamIcons.trashBin,
+                            context.streamIcons.delete20,
                             color: chatTheme.colorTheme.accentError,
                           ),
                         );
@@ -211,7 +211,7 @@ class _ChannelListDefault extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
                   emptyIcon: Icon(
-                    context.streamIcons.bubble3ChatMessage,
+                    context.streamIcons.messageBubble20,
                     size: 148,
                     color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),
@@ -260,7 +260,7 @@ class _ChannelListSearch extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(24),
                         child: Icon(
-                          context.streamIcons.magnifyingGlassSearch,
+                          context.streamIcons.search20,
                           size: 96,
                           color: Colors.grey,
                         ),
