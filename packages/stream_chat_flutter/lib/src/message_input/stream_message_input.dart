@@ -664,14 +664,18 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
               ),
             ),
           ),
-          _buildInlineAttachmentPicker(context),
-        ].nonNulls.toList(),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: _buildInlineAttachmentPicker(context),
+          ),
+        ],
       ),
     );
   }
 
-  Widget? _buildInlineAttachmentPicker(BuildContext context) {
-    if (!_isPickerVisible) return null;
+  Widget _buildInlineAttachmentPicker(BuildContext context) {
+    if (!_isPickerVisible) return const SizedBox.shrink();
 
     final allowedTypes = _getAllowedAttachmentPickerTypes();
 
