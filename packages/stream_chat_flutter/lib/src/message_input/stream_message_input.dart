@@ -624,52 +624,58 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
-      builder: (context, value, _) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DropTarget(
-            onDragDone: (details) async {
-              final attachments = <Attachment>[];
-              for (final file in details.files) {
-                attachments.add(await file.toAttachment(type: AttachmentType.file));
-              }
-              if (attachments.isNotEmpty) _addAttachments(attachments);
-            },
-            onDragEntered: (_) {},
-            onDragExited: (_) {},
-            child: Focus(
-              skipTraversal: true,
-              onKeyEvent: _handleKeyPressed,
-              child: StreamChatMessageComposer(
-                controller: controller,
-                currentUserId: currentUserId,
-                onAttachmentButtonPressed: widget.disableAttachments ? null : _onAttachmentButtonPressed,
-                isPickerOpen: _isPickerVisible,
-                placeholder: _getHint(context) ?? '',
-                focusNode: focusNode,
-                onSendPressed: sendMessage,
-                canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-                audioRecorderController: widget.enableVoiceRecording ? _audioRecorderController : null,
-                sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
-                feedback: widget.voiceRecordingFeedback,
-                onQuotedMessageCleared: () {
-                  _effectiveController.clearQuotedMessage();
-                  widget.onQuotedMessageCleared?.call();
-                },
-                textInputAction: widget.textInputAction,
-                keyboardType: widget.keyboardType,
-                textCapitalization: widget.textCapitalization,
-                autofocus: widget.autofocus,
-                autocorrect: widget.autoCorrect,
+      builder: (context, value, _) => PopScope(
+        canPop: !_isPickerVisible,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) _hidePicker();
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropTarget(
+              onDragDone: (details) async {
+                final attachments = <Attachment>[];
+                for (final file in details.files) {
+                  attachments.add(await file.toAttachment(type: AttachmentType.file));
+                }
+                if (attachments.isNotEmpty) _addAttachments(attachments);
+              },
+              onDragEntered: (_) {},
+              onDragExited: (_) {},
+              child: Focus(
+                skipTraversal: true,
+                onKeyEvent: _handleKeyPressed,
+                child: StreamChatMessageComposer(
+                  controller: controller,
+                  currentUserId: currentUserId,
+                  onAttachmentButtonPressed: widget.disableAttachments ? null : _onAttachmentButtonPressed,
+                  isPickerOpen: _isPickerVisible,
+                  placeholder: _getHint(context) ?? '',
+                  focusNode: focusNode,
+                  onSendPressed: sendMessage,
+                  canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
+                  audioRecorderController: widget.enableVoiceRecording ? _audioRecorderController : null,
+                  sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
+                  feedback: widget.voiceRecordingFeedback,
+                  onQuotedMessageCleared: () {
+                    _effectiveController.clearQuotedMessage();
+                    widget.onQuotedMessageCleared?.call();
+                  },
+                  textInputAction: widget.textInputAction,
+                  keyboardType: widget.keyboardType,
+                  textCapitalization: widget.textCapitalization,
+                  autofocus: widget.autofocus,
+                  autocorrect: widget.autoCorrect,
+                ),
               ),
             ),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            child: _buildInlineAttachmentPicker(context),
-          ),
-        ],
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: _buildInlineAttachmentPicker(context),
+            ),
+          ],
+        ),
       ),
     );
   }
