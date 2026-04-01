@@ -148,7 +148,7 @@ class StreamMessageActionsBuilder {
       );
     }
 
-    if (canReceiveReadEvents) {
+    if (canReceiveReadEvents && !isSentByCurrentUser) {
       StreamContextMenuAction<MessageAction> markUnreadAction() {
         return StreamContextMenuAction(
           value: MarkUnread(message: message),
