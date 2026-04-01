@@ -255,7 +255,11 @@ void main() {
       // Wait for animations to complete.
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      expect(find.byKey(const Key('custom-type-customParty')), findsOneWidget);
+      // _TypeBasedReactionIconResolver defines one reaction ('customParty')
+      // that resolves to StreamUnicodeEmoji('❓'). Verify the fallback emoji
+      // is rendered via a StreamEmoji widget inside the picker.
+      expect(find.byType(StreamEmoji), findsOneWidget);
+      expect(find.text('❓'), findsOneWidget);
     },
   );
 
@@ -413,8 +417,9 @@ class _TestReactionIconResolver extends ReactionIconResolver {
   String? emojiCode(String type) => streamSupportedEmojis[type]?.emoji;
 
   @override
-  Widget resolve(BuildContext context, String type) {
-    return Text(emojiCode(type) ?? type);
+  StreamEmojiContent resolve(String type) {
+    if (emojiCode(type) case final emoji?) return StreamUnicodeEmoji(emoji);
+    return const StreamUnicodeEmoji('❓');
   }
 }
 
@@ -433,7 +438,10 @@ class _CustomReactionIconResolver extends ReactionIconResolver {
   String? emojiCode(String type) => streamSupportedEmojis[type]?.emoji;
 
   @override
-  Widget resolve(BuildContext context, String type) => Text(emojiCode(type) ?? type);
+  StreamEmojiContent resolve(String type) {
+    if (emojiCode(type) case final emoji?) return StreamUnicodeEmoji(emoji);
+    return const StreamUnicodeEmoji('❓');
+  }
 }
 
 class _TypeBasedReactionIconResolver extends ReactionIconResolver {
@@ -449,8 +457,8 @@ class _TypeBasedReactionIconResolver extends ReactionIconResolver {
   String? emojiCode(String type) => null;
 
   @override
-  Widget resolve(BuildContext context, String type) {
-    return SizedBox.square(key: Key('custom-type-$type'));
+  StreamEmojiContent resolve(String type) {
+    return const StreamUnicodeEmoji('❓');
   }
 }
 
@@ -467,11 +475,8 @@ class _SubsetDefaultReactionIconResolver extends ReactionIconResolver {
   String? emojiCode(String type) => streamSupportedEmojis[type]?.emoji;
 
   @override
-  Widget resolve(BuildContext context, String type) {
-    if (emojiCode(type) case final emoji?) {
-      return Text(emoji);
-    }
-
-    return const Text('❓');
+  StreamEmojiContent resolve(String type) {
+    if (emojiCode(type) case final emoji?) return StreamUnicodeEmoji(emoji);
+    return const StreamUnicodeEmoji('❓');
   }
 }

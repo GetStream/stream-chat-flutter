@@ -22,7 +22,7 @@ typedef OnReactionPicked = ValueSetter<Reaction>;
 /// See also:
 ///
 ///  * [StreamReactionPicker], the domain-agnostic core picker.
-///  * [ReactionIconResolver], which maps reaction types to emoji widgets.
+///  * [ReactionIconResolver], which maps reaction types to emoji content models.
 ///  * [StreamReactionPickerTheme], for customising the picker appearance.
 /// {@endtemplate}
 class StreamMessageReactionPicker extends StatelessWidget {
@@ -52,7 +52,7 @@ class StreamMessageReactionPicker extends StatelessWidget {
       ...reactionTypes.map(
         (type) => StreamReactionPickerItem(
           key: type,
-          emoji: resolver.resolve(context, type),
+          emoji: resolver.resolve(type),
           // If the reaction is present in ownReactions, it is selected.
           isSelected: ownReactionsMap[type] != null,
         ),
