@@ -164,7 +164,7 @@ class StreamMessageActionsBuilder {
       }
       // If the message is in the channel view, only other user messages can be
       // marked unread.
-      else if (!isSentByCurrentUser && (!isThreadMessage || canShowInChannel)) {
+      else if (!isThreadMessage || canShowInChannel) {
         messageActions.add(markUnreadAction());
       }
     }

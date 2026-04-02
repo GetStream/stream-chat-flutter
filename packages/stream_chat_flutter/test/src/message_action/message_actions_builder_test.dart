@@ -488,6 +488,37 @@ void main() {
         reason: 'Mark unread unavailable without read events capability',
       );
     });
+
+    testWidgets(
+      'excludes mark unread action for own messages even if parent message',
+      (tester) async {
+        final context = await _getContext(tester);
+
+        final channelWithReadEvents = _getChannelWithCapabilities([
+          ChannelCapability.sendMessage,
+          ChannelCapability.sendReply,
+          ChannelCapability.readEvents,
+        ]);
+
+        final ownParentMessage = createTestMessage(
+          userId: currentUser.id,
+          replyCount: 5,
+        );
+
+        final actions = StreamMessageActionsBuilder.buildActions(
+          context: context,
+          message: ownParentMessage,
+          channel: channelWithReadEvents,
+          currentUser: currentUser,
+        );
+
+        actions.notExpects<MarkUnread>(
+          reason:
+              'Mark unread should not be available for own messages, '
+              'even if it is a parent message',
+        );
+      },
+    );
   });
 
   group('buildBouncedErrorActions', () {
