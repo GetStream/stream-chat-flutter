@@ -486,52 +486,60 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                     'theme',
                     defaultValue: 0,
                   ),
-                  builder: (context, snapshot) => MaterialApp.router(
-                    theme: ThemeData(
-                      brightness: .light,
-                      extensions: [StreamTheme.light()],
+                  builder: (context, snapshot) => PreferenceBuilder<bool>(
+                    preference: _initNotifier.initData!.preferences.getBool(
+                      'forceRtl',
+                      defaultValue: false,
                     ),
-                    darkTheme: ThemeData(
-                      brightness: .dark,
-                      extensions: [StreamTheme.dark()],
-                    ),
-                    themeMode: const {
-                      -1: ThemeMode.dark,
-                      0: ThemeMode.system,
-                      1: ThemeMode.light,
-                    }[snapshot],
-                    supportedLocales: const [
-                      Locale('en'),
-                      Locale('it'),
-                    ],
-                    localizationsDelegates: const [
-                      AppLocalizationsDelegate(),
-                      GlobalStreamChatLocalizations.delegate,
-                      GlobalMaterialLocalizations.delegate,
-                      GlobalWidgetsLocalizations.delegate,
-                    ],
-                    builder: (context, child) => StreamChat(
-                      client: _initNotifier.initData!.client,
-                      componentBuilders: StreamComponentBuilders(
-                        extensions: streamChatComponentBuilders(
-                          messageWidget: customMessageWidgetBuilder,
+                    builder: (context, forceRtl) => MaterialApp.router(
+                      theme: ThemeData(
+                        brightness: .light,
+                        extensions: [StreamTheme.light()],
+                      ),
+                      darkTheme: ThemeData(
+                        brightness: .dark,
+                        extensions: [StreamTheme.dark()],
+                      ),
+                      themeMode: const {
+                        -1: ThemeMode.dark,
+                        0: ThemeMode.system,
+                        1: ThemeMode.light,
+                      }[snapshot],
+                      supportedLocales: const [
+                        Locale('en'),
+                        Locale('it'),
+                      ],
+                      localizationsDelegates: const [
+                        AppLocalizationsDelegate(),
+                        GlobalStreamChatLocalizations.delegate,
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                      ],
+                      builder: (context, child) => Directionality(
+                        textDirection: forceRtl ? TextDirection.rtl : TextDirection.ltr,
+                        child: StreamChat(
+                          client: _initNotifier.initData!.client,
+                          componentBuilders: StreamComponentBuilders(
+                            extensions: streamChatComponentBuilders(
+                              messageWidget: customMessageWidgetBuilder,
+                            ),
+                          ),
+                          streamChatConfigData: StreamChatConfigurationData(
+                            draftMessagesEnabled: true,
+                            enforceUniqueReactions: false,
+                            attachmentBuilders: [
+                              LocationAttachmentBuilder(
+                                onAttachmentTap: (context, location) {
+                                  showLocationDetailDialog(context: context, location: location);
+                                },
+                              ),
+                            ],
+                          ),
+                          child: child,
                         ),
                       ),
-                      streamChatConfigData: StreamChatConfigurationData(
-                        draftMessagesEnabled: true,
-                        enforceUniqueReactions: false,
-                        attachmentBuilders: [
-                          LocationAttachmentBuilder(
-                            onAttachmentTap: (context, location) {
-                              showLocationDetailDialog(context: context, location: location);
-                            },
-                          ),
-                        ],
-                      ),
-
-                      child: child,
+                      routerConfig: _setupRouter(),
                     ),
-                    routerConfig: _setupRouter(),
                   ),
                 );
               },
