@@ -173,7 +173,7 @@ class _AddMoreTile extends StatelessWidget {
         overlayColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.pressed)) return colorScheme.backgroundPressed;
           if (states.contains(WidgetState.hovered)) return colorScheme.backgroundHover;
-          return null;
+          return StreamColors.transparent;
         }),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

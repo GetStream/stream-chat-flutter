@@ -27,9 +27,11 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamEmojiButton,
         StreamEmojiChipBar,
         StreamEmojiChipItem,
-        StreamEmojiSize,
+        StreamEmojiContent,
         StreamEmojiData,
         StreamEmojiPickerSheet,
+        StreamEmojiSize,
+        StreamImageEmoji,
         StreamMessageAlignment,
         StreamMessageLayout,
         StreamMessageStackPosition,
@@ -46,6 +48,7 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamReactionPickerThemeData,
         StreamReactionsPosition,
         StreamReactionsType,
+        StreamUnicodeEmoji,
         streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
