@@ -13,7 +13,7 @@ dependencies:
     path: ../packages/stream_chat_jaspr
 
 dev_dependencies:
-  build_runner: ^2.10.0
+  build_runner: ^2.4.9
   build_web_compilers: ^4.4.6
   jaspr_builder: ^0.22.3
   jaspr_test: ^0.22.3
