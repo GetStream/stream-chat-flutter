@@ -139,7 +139,7 @@ class _UserReactionItem extends StatelessWidget {
                   ),
                   child: StreamEmoji(
                     size: StreamEmojiSize.sm,
-                    emoji: resolver.resolve(context, reaction.type),
+                    emoji: resolver.resolve(reaction.type),
                   ),
                 ),
               ),

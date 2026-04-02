@@ -173,7 +173,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
             for (final MapEntry(:key, :value) in reactionGroups.entries)
               StreamEmojiChipItem(
                 value: key,
-                emoji: resolver.resolve(context, key),
+                emoji: resolver.resolve(key),
                 count: value.count,
               ),
           ],
@@ -210,7 +210,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
                 leading: StreamUserAvatar(size: .md, user: user, showOnlineIndicator: false),
                 title: Text(user.name),
                 subtitle: isOwnReaction ? const Text('Tap to remove') : null,
-                trailing: StreamEmoji(size: .md, emoji: resolver.resolve(context, reaction.type)),
+                trailing: StreamEmoji(size: .md, emoji: resolver.resolve(reaction.type)),
                 onTap: switch (isOwnReaction) {
                   true => () {
                     final action = SelectReaction(message: widget.message, reaction: reaction);
