@@ -253,7 +253,7 @@ void main() {
               padding: const EdgeInsets.all(8),
               child: StreamVoiceRecordingAttachment(
                 track: track,
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
               ),
             ),
           ),
@@ -292,49 +292,7 @@ void main() {
               padding: const EdgeInsets.all(8),
               child: StreamVoiceRecordingAttachment(
                 track: track,
-                speed: PlaybackSpeed.regular,
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
-
-  goldenTest(
-    'voice recording attachment custom trailing',
-    fileName: 'voice_recording_attachment_custom',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
-    builder: () {
-      final client = MockClient();
-      final clientState = MockClientState();
-      when(() => client.state).thenReturn(clientState);
-
-      final track = PlaylistTrack(
-        uri: Uri.parse('https://example.com/recording.m4a'),
-        title: 'Voice message',
-        duration: const Duration(seconds: 15),
-        waveform: List.generate(35, (i) => (i % 7) / 7.0),
-        state: TrackState.idle,
-      );
-
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(8),
-              child: StreamVoiceRecordingAttachment(
-                track: track,
-                speed: PlaybackSpeed.regular,
-                trailingBuilder: (context, t, speed, onChangeSpeed) => TextButton(
-                  onPressed: () {},
-                  child: Text('${speed.speed}x'),
-                ),
+                speed: StreamPlaybackSpeed.x1,
               ),
             ),
           ),
