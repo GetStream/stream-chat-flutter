@@ -47,7 +47,7 @@ void main() {
         expect(iconButton.onPressed, isNull);
 
         // Verify default idle icon is shown
-        expect(find.byIcon(StreamIconData.iconPaperPlaneTopRight), findsOneWidget);
+        expect(find.byIcon(StreamIconData.send20), findsOneWidget);
       },
     );
 
@@ -71,7 +71,7 @@ void main() {
         expect(iconButton.onPressed, isNotNull);
 
         // Verify default active icon is shown
-        expect(find.byIcon(StreamIconData.iconArrowUp), findsOneWidget);
+        expect(find.byIcon(StreamIconData.arrowUp20), findsOneWidget);
       },
     );
 

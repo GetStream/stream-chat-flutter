@@ -172,7 +172,7 @@ class StreamAudioRecorderButton extends StatelessWidget {
         state: recordState,
         button: RecordButton(
           onPressed: () {}, // Allows showing ripple effect on tap.
-          icon: Icon(context.streamIcons.microphone),
+          icon: Icon(context.streamIcons.voice20),
         ),
         builder: (context, state, recordButton) => switch (state) {
           // Show only the record button if the recording is not in progress.
@@ -448,17 +448,17 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.trashBin),
+                icon: Icon(context.streamIcons.delete20),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordCancel,
               ),
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.stop),
+                icon: Icon(context.streamIcons.stopFill20),
                 color: theme.colorTheme.accentError,
                 onPressed: onRecordStop,
               ),
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.circleCheck),
+                icon: Icon(context.streamIcons.checkmark20),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordEnd,
               ),
@@ -606,12 +606,12 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.trashBin),
+                icon: Icon(context.streamIcons.delete20),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordCancel,
               ),
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.circleCheck),
+                icon: Icon(context.streamIcons.checkmark20),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordFinish,
               ),
@@ -658,13 +658,13 @@ class SwipeToLockButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Icon(
-            isLocked ? streamIcons.lock : streamIcons.unlocked,
+            isLocked ? streamIcons.lock20 : streamIcons.unlock20,
             size: 20,
             color: colorScheme.textPrimary,
           ),
           if (!isLocked) ...[
             Icon(
-              streamIcons.chevronTop,
+              streamIcons.chevronUp20,
               size: 20,
               color: colorScheme.textPrimary,
             ),
@@ -734,9 +734,9 @@ class PlaybackControlButton extends StatelessWidget {
             );
           },
         ),
-        TrackState.idle => Icon(context.streamIcons.playSolid),
-        TrackState.paused => Icon(context.streamIcons.playSolid),
-        TrackState.playing => Icon(context.streamIcons.pause),
+        TrackState.idle => Icon(context.streamIcons.playFill20),
+        TrackState.paused => Icon(context.streamIcons.playFill20),
+        TrackState.playing => Icon(context.streamIcons.pauseFill20),
       },
     );
   }
@@ -765,7 +765,7 @@ class PlaybackTimerIndicator extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          context.streamIcons.microphone,
+          context.streamIcons.voice20,
           size: kDefaultMessageInputIconSize,
           color: switch (duration.inSeconds) {
             > 0 => theme.colorTheme.accentError,
@@ -856,7 +856,7 @@ class SlideToCancelIndicator extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Icon(
-            context.streamIcons.chevronLeft,
+            context.streamIcons.chevronLeft20,
             color: theme.colorTheme.textLowEmphasis,
           ),
         ],

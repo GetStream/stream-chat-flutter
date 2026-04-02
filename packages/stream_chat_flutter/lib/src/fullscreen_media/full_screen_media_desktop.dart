@@ -149,7 +149,7 @@ class _FullScreenMediaDesktopState extends State<FullScreenMediaDesktop> {
                 Navigator.of(context).pop();
               },
               child: Icon(
-                context.streamIcons.crossMedium,
+                context.streamIcons.xmark32,
                 size: 30,
               ),
             ),
@@ -399,7 +399,7 @@ class _DownloadMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
     return StreamContextMenuAction(
-      leading: Icon(icons.arrowDown),
+      leading: Icon(icons.arrowDown20),
       label: Text(context.translations.downloadLabel),
       onTap: () {
         final handler = StreamAttachmentHandler.instance;

@@ -123,12 +123,12 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                 child: IconButton(
                   icon: _chips.isEmpty
                       ? Icon(
-                          context.streamIcons.people,
+                          context.streamIcons.user20,
                           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                           size: 24,
                         )
                       : Icon(
-                          context.streamIcons.peopleAdd,
+                          context.streamIcons.userAdd20,
                           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                           size: 24,
                         ),

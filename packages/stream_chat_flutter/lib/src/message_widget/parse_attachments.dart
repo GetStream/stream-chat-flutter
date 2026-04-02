@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget_catalog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// {@template onAttachmentWidgetTap}
 /// A callback that is called when an attachment widget is tapped.
@@ -37,7 +37,7 @@ typedef OnAttachmentWidgetTap = FutureOr<bool> Function(BuildContext context, Me
 ///
 /// Used in [MessageCard]. Should not be used elsewhere.
 /// {@endtemplate}
-class ParseAttachments extends NullableStatelessWidget {
+class ParseAttachments extends core.NullableStatelessWidget {
   /// {@macro parseAttachments}
   const ParseAttachments({
     super.key,

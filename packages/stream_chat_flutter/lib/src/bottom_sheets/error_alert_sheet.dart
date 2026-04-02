@@ -26,7 +26,7 @@ class ErrorAlertSheet extends StatelessWidget {
           height: 26,
         ),
         Icon(
-          context.streamIcons.exclamationCircle1,
+          context.streamIcons.exclamationCircleFill20,
           color: _streamChatTheme.colorTheme.accentError,
           size: 24,
         ),

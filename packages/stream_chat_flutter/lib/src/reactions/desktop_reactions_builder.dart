@@ -203,11 +203,9 @@ class _BottomReaction extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ConstrainedBox(
-                constraints: BoxConstraints.tight(
-                  const Size.square(14),
-                ),
-                child: resolver.resolve(context, reaction.type),
+              StreamEmoji(
+                size: StreamEmojiSize.sm,
+                emoji: resolver.resolve(reaction.type),
               ),
               const SizedBox(width: 4),
               Text(

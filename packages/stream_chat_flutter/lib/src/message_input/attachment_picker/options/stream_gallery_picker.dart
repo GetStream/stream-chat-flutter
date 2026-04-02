@@ -100,7 +100,7 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                   children: [
                     Icon(
                       size: 32,
-                      context.streamIcons.images1Alt,
+                      context.streamIcons.image32,
                       color: colorScheme.textTertiary,
                     ),
                     SizedBox(height: spacing.xs),
@@ -173,13 +173,13 @@ class _AddMoreTile extends StatelessWidget {
         overlayColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.pressed)) return colorScheme.backgroundPressed;
           if (states.contains(WidgetState.hovered)) return colorScheme.backgroundHover;
-          return null;
+          return StreamColors.transparent;
         }),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              context.streamIcons.plusLarge,
+              context.streamIcons.plus20,
               size: 20,
               color: colorScheme.textTertiary,
             ),
