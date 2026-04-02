@@ -29,7 +29,7 @@ command:
       cached_network_image: ^3.3.1
       chewie: ^1.8.1
       collection: ^1.17.2
-      connectivity_plus: ">=6.0.3 <7.1.0"
+      connectivity_plus: ">=6.0.3 <8.0.0"
       cupertino_icons: ^1.0.3
       desktop_drop: '>=0.5.0 <0.8.0'
       device_info_plus: '>=11.0.0 <13.0.0'

@@ -166,6 +166,10 @@ jobs:
           flutter-version: ${{ env.flutter_version }}
           channel: stable
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      - uses: maxim-lobanov/setup-xcode@v1
+        if: matrix.platform == 'ios'
+        with:
+          xcode-version: '26.3'
       - name: "Install Tools"
         run: flutter pub global activate melos
       - name: "Bootstrap Workspace"
