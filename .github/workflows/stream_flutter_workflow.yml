@@ -169,7 +169,7 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         if: ${{ matrix.platform == 'ios' }}
         with:
-          xcode-version: '26.4'
+          xcode-version: '26.3'
       - name: "Install Tools"
         run: flutter pub global activate melos
       - name: "Bootstrap Workspace"
