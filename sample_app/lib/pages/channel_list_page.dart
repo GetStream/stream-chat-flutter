@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:sample_app/pages/draft_list_page.dart';
 import 'package:sample_app/pages/reminders_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/pages/user_mentions_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/utils/shared_location_service.dart';
 import 'package:sample_app/widgets/channel_list.dart';
@@ -243,6 +245,27 @@ class LeftDrawer extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14.5,
                     ),
+                  ),
+                ),
+                PreferenceBuilder<bool>(
+                  preference: context.read<InitNotifier>().initData!.preferences.getBool(
+                    'forceRtl',
+                    defaultValue: false,
+                  ),
+                  builder: (context, forceRtl) => SwitchListTile(
+                    secondary: Icon(
+                      Icons.format_textdirection_r_to_l,
+                      color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
+                    ),
+                    title: const Text(
+                      'Force RTL',
+                      style: TextStyle(fontSize: 14.5),
+                    ),
+                    value: forceRtl,
+                    onChanged: (value) async {
+                      final sp = await StreamingSharedPreferences.instance;
+                      sp.setBool('forceRtl', value);
+                    },
                   ),
                 ),
                 Expanded(
