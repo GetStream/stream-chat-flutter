@@ -4,10 +4,8 @@ import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
-/// Displays the message header containing contextual annotations for the given
-/// [message].
+/// Displays contextual annotations for the given [message].
 ///
 /// Annotations are shown in the following order when applicable:
 ///
@@ -24,16 +22,16 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 ///
 /// See also:
 ///
-///  * [DefaultStreamMessage], which controls header visibility.
-class StreamMessageHeader extends core.NullableStatelessWidget {
-  /// Creates a message header for the given [message].
-  const StreamMessageHeader({
+///  * [DefaultStreamMessage], which controls annotation visibility.
+class StreamMessageAnnotations extends core.NullableStatelessWidget {
+  /// Creates message annotations for the given [message].
+  const StreamMessageAnnotations({
     super.key,
     required this.message,
     this.onViewChannelTap,
   });
 
-  /// The message whose header to display.
+  /// The message whose annotations to display.
   final Message message;
 
   /// Called when the "View" link in the show-in-channel annotation is tapped.
@@ -45,11 +43,11 @@ class StreamMessageHeader extends core.NullableStatelessWidget {
     final icons = context.streamIcons;
     final textTheme = context.streamTextTheme;
     final colorScheme = context.streamColorScheme;
-    final crossAxisAlignment = StreamMessageLayout.crossAxisAlignmentOf(context);
+    final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
     Widget? savedForLaterAnnotation;
     if (message.reminder case final reminder? when reminder.remindAt == null) {
-      savedForLaterAnnotation = StreamMessageAnnotation(
+      savedForLaterAnnotation = core.StreamMessageAnnotation(
         leading: Icon(icons.save20, color: colorScheme.accentPrimary),
         label: Text(translations.savedForLaterLabel, style: TextStyle(color: colorScheme.accentPrimary)),
       );
@@ -58,7 +56,7 @@ class StreamMessageHeader extends core.NullableStatelessWidget {
     Widget? pinnedAnnotation;
     if (message.pinned case true) {
       final currentUser = StreamChat.of(context).currentUser!;
-      pinnedAnnotation = StreamMessageAnnotation(
+      pinnedAnnotation = core.StreamMessageAnnotation(
         leading: Icon(icons.pin20),
         label: Text(
           translations.pinnedByUserText(
@@ -71,13 +69,13 @@ class StreamMessageHeader extends core.NullableStatelessWidget {
 
     Widget? showInChannelAnnotation;
     if (message.showInChannel case true) {
-      final listKind = StreamMessageLayout.listKindOf(context);
+      final listKind = core.StreamMessageLayout.listKindOf(context);
       final annotationLabel = switch (listKind) {
         .channel => '${translations.repliedToThreadAnnotationLabel} · ',
         .thread => '${translations.alsoSentInChannelAnnotationLabel} · ',
       };
 
-      showInChannelAnnotation = StreamMessageAnnotation(
+      showInChannelAnnotation = core.StreamMessageAnnotation(
         onTap: onViewChannelTap,
         leading: Icon(icons.arrowUpRight20),
         label: Text.rich(
@@ -96,7 +94,7 @@ class StreamMessageHeader extends core.NullableStatelessWidget {
 
     Widget? reminderAnnotation;
     if (message.reminder?.remindAt?.toLocal() case final remindAt?) {
-      reminderAnnotation = StreamMessageAnnotation(
+      reminderAnnotation = core.StreamMessageAnnotation(
         leading: Icon(icons.bell20),
         label: Text.rich(
           TextSpan(
@@ -121,7 +119,7 @@ class StreamMessageHeader extends core.NullableStatelessWidget {
 
     if (children.isEmpty) return null;
 
-    return StreamColumn(
+    return core.StreamColumn(
       mainAxisSize: .min,
       crossAxisAlignment: crossAxisAlignment,
       children: children,

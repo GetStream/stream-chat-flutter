@@ -31,18 +31,18 @@ This guide covers migrating the message widget and message list view from the ol
 |-----|-----|
 | `StreamMessageWidget` (50+ params) | `StreamMessageWidget` (thin shell) + `StreamMessageWidgetProps` |
 | `MessageWidgetContent` | `DefaultStreamMessage` + `StreamMessageContent` |
-| `BottomRow` | `StreamMessageFooter` |
+| `BottomRow` | `StreamMessageMetadata` |
 | `StreamMessageText` (message_text.dart) | `StreamMessageText` (components/stream_message_text.dart) |
 | `StreamDeletedMessage` | `StreamMessageDeleted` |
 | `MessageCard` | `core.StreamMessageBubble` |
 | `TextBubble` | `core.StreamMessageBubble` |
-| `PinnedMessage` | `StreamMessageHeader` widget |
+| `PinnedMessage` | `StreamMessageAnnotations` widget |
 | `QuotedMessage` | Inline in `StreamMessageContent` |
-| `Username` | Inline in `StreamMessageFooter` |
+| `Username` | Inline in `StreamMessageMetadata` |
 | `SendingIndicatorBuilder` | `StreamMessageSendingStatus` |
 | `ThreadReplyPainter` | `core.StreamMessageReplies` |
 | `ThreadParticipants` | Inline in `core.StreamMessageReplies` |
-| `UserAvatarTransform` | `StreamMessageLeading` |
+| `UserAvatarTransform` | `StreamUserAvatar` (inline in `DefaultStreamMessage`) |
 | `DisplayWidget` enum | `StreamVisibility` (from theme) |
 | `MessageBuilder` typedef | `StreamMessageWidgetBuilder` typedef |
 | `ParentMessageBuilder` typedef | `StreamMessageWidgetBuilder` typedef |
@@ -62,9 +62,9 @@ The old design used a single monolithic `StreamMessageWidget` with 50+ parameter
 - **`StreamMessageWidgetProps`** — plain data class holding all configuration. Supports `copyWith()`.
 - **`DefaultStreamMessage`** — the default rendering implementation. Composes the sub-components below.
 - **`StreamMessageContent`** — bubble, attachments, text, reactions. Thread replies are passed in as a pre-built widget from `DefaultStreamMessage`.
-- **`StreamMessageFooter`** — username, timestamp, sending status, edited indicator.
-- **`StreamMessageHeader`** — pinned, saved-for-later, show-in-channel annotations.
-- **`StreamMessageLeading`** — author avatar.
+- **`StreamMessageMetadata`** — username, timestamp, sending status, edited indicator.
+- **`StreamMessageAnnotations`** — pinned, saved-for-later, show-in-channel annotations.
+- **`StreamUserAvatar`** — author avatar (inline in `DefaultStreamMessage`).
 - **`StreamMessageReactions`** — clustered reaction chips around the bubble.
 - **`StreamMessageText`** — markdown-rendered message text.
 - **`StreamMessageDeleted`** — deleted message placeholder.
@@ -135,7 +135,7 @@ These parameters have been removed entirely. See the **Migration Path** column f
 | `showEditedLabel` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
 | `showSendingIndicator` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
 | `showThreadReplyIndicator` | Controlled via `StreamMessageItemThemeData.repliesVisibility` |
-| `showInChannelIndicator` | Shown automatically via `StreamMessageHeader` |
+| `showInChannelIndicator` | Shown automatically via `StreamMessageAnnotations` |
 | `showUserAvatar` (`DisplayWidget`) | Controlled via `StreamMessageItemThemeData.avatarVisibility` |
 
 #### Builder Callbacks
@@ -147,7 +147,7 @@ These parameters have been removed entirely. See the **Migration Path** column f
 | `quotedMessageBuilder` | Use component factory to replace `StreamMessageContent` |
 | `deletedMessageBuilder` | Use component factory to replace `StreamMessageContent` |
 | `editMessageInputBuilder` | Removed; use `onEditMessageTap` callback instead |
-| `bottomRowBuilderWithDefaultWidget` | Use component factory; `StreamMessageFooter` is the new equivalent |
+| `bottomRowBuilderWithDefaultWidget` | Use component factory; `StreamMessageMetadata` is the new equivalent |
 | `reactionPickerBuilder` | Configured globally via `StreamChatConfigurationData.reactionIconResolver` |
 | `reactionIndicatorBuilder` | Replaced by `StreamMessageReactions` component |
 
@@ -452,17 +452,17 @@ StreamMessageListView(
 |---|---|---|
 | `message_widget_content.dart` | `MessageWidgetContent` | `DefaultStreamMessage` + `StreamMessageContent` |
 | `message_widget_content_components.dart` | Various internal helpers | Merged into `components/` sub-widgets |
-| `bottom_row.dart` | `BottomRow` | `StreamMessageFooter` |
+| `bottom_row.dart` | `BottomRow` | `StreamMessageMetadata` |
 | `message_text.dart` | `StreamMessageText` | `components/stream_message_text.dart` |
 | `deleted_message.dart` | `StreamDeletedMessage` | `StreamMessageDeleted` |
 | `message_card.dart` | `MessageCard` | `core.StreamMessageBubble` |
 | `text_bubble.dart` | `TextBubble` | `core.StreamMessageBubble` |
-| `pinned_message.dart` | `PinnedMessage` | `StreamMessageHeader` widget |
+| `pinned_message.dart` | `PinnedMessage` | `StreamMessageAnnotations` widget |
 | `quoted_message.dart` | `QuotedMessage` | Inline in `StreamMessageContent` |
 | `thread_painter.dart` | `ThreadReplyPainter` | `core.StreamMessageReplies` |
 | `thread_participants.dart` | `ThreadParticipants` | Inline in `core.StreamMessageReplies` |
-| `user_avatar_transform.dart` | `UserAvatarTransform` | `StreamMessageLeading` |
-| `username.dart` | `Username` | Inline in `StreamMessageFooter` |
+| `user_avatar_transform.dart` | `UserAvatarTransform` | `StreamUserAvatar` (inline in `DefaultStreamMessage`) |
+| `username.dart` | `Username` | Inline in `StreamMessageMetadata` |
 | `sending_indicator_builder.dart` | `SendingIndicatorBuilder` | `StreamMessageSendingStatus` |
 
 ---

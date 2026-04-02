@@ -48,13 +48,13 @@ class StreamMessageContent extends StatefulWidget {
 
   /// Optional annotation widget displayed above the message content column.
   ///
-  /// Typically a [StreamMessageHeader] containing pinned, reminder,
+  /// Typically a [StreamMessageAnnotations] containing pinned, reminder,
   /// or show-in-channel annotations.
   final Widget? annotation;
 
   /// Optional metadata widget displayed below the message content column.
   ///
-  /// Typically a [StreamMessageFooter] containing the author name, timestamp,
+  /// Typically a [StreamMessageMetadata] containing the author name, timestamp,
   /// and sending status.
   final Widget? metadata;
 
