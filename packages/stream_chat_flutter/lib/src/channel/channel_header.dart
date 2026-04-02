@@ -181,7 +181,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
               elevation: elevation,
               scrolledUnderElevation: scrolledUnderElevation,
               leading: Padding(
-                padding: EdgeInsets.only(left: context.streamSpacing.sm),
+                padding: .directional(start: context.streamSpacing.sm),
                 child: leadingWidget,
               ),
               leadingWidth: StreamAvatarSize.lg.value,
@@ -194,7 +194,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
                   <Widget>[
                     if (effectiveCenterTitle)
                       Padding(
-                        padding: EdgeInsets.only(right: context.streamSpacing.sm),
+                        padding: .directional(end: context.streamSpacing.sm),
                         child: Center(
                           child: GestureDetector(
                             onTap: onImageTap,
