@@ -15,7 +15,7 @@ typedef StreamSvgIconData = SvgIconData;
 class StreamSvgIcon extends StatelessWidget {
   /// Creates a [StreamSvgIcon].
   ///
-  /// Depcreated in favor of regular [Icon] widgets.
+  /// Deprecated in favor of regular [Icon] widgets.
   /// New icons can be replaced using the [StreamIcons] theme data.
   ///
   /// Previously:
@@ -27,84 +27,81 @@ class StreamSvgIcon extends StatelessWidget {
   /// Replacement:
   ///
   /// ```dart
-  /// Icon(context.streamIcons.arrowRight)
+  /// Icon(context.streamIcons.arrowRight20)
   /// ```
   ///
   /// List of replacement icons:
   ///
-  /// Exact / close matches:
-  /// - StreamSvgIcons.arrowRight -> context.streamIcons.arrowRight
-  /// - StreamSvgIcons.attach -> context.streamIcons.paperclip1
-  /// - StreamSvgIcons.camera -> context.streamIcons.camera1
-  /// - StreamSvgIcons.check -> context.streamIcons.checkmark2
-  /// - StreamSvgIcons.checkAll -> context.streamIcons.doupleCheckmark1Small
-  /// - StreamSvgIcons.checkSend -> context.streamIcons.circleCheck
-  /// - StreamSvgIcons.close -> context.streamIcons.crossMedium
-  /// - StreamSvgIcons.closeSmall -> context.streamIcons.crossSmall
-  /// - StreamSvgIcons.copy -> context.streamIcons.squareBehindSquare2Copy
-  /// - StreamSvgIcons.delete -> context.streamIcons.trashBin
-  /// - StreamSvgIcons.down -> context.streamIcons.chevronDown
-  /// - StreamSvgIcons.edit -> context.streamIcons.editBig
-  /// - StreamSvgIcons.error -> context.streamIcons.exclamationCircle1
-  /// - StreamSvgIcons.eye -> context.streamIcons.eyeOpen
-  /// - StreamSvgIcons.flag -> context.streamIcons.flag2
-  /// - StreamSvgIcons.left -> context.streamIcons.chevronLeft
-  /// - StreamSvgIcons.lightning -> context.streamIcons.thunder
-  /// - StreamSvgIcons.link -> context.streamIcons.chainLink3
-  /// - StreamSvgIcons.lock -> context.streamIcons.lock
-  /// - StreamSvgIcons.mentions -> context.streamIcons.at
-  /// - StreamSvgIcons.mic -> context.streamIcons.microphone
-  /// - StreamSvgIcons.mute -> context.streamIcons.mute
-  /// - StreamSvgIcons.notification -> context.streamIcons.bellNotification
-  /// - StreamSvgIcons.pause -> context.streamIcons.pause
-  /// - StreamSvgIcons.penWrite -> context.streamIcons.pencil
-  /// - StreamSvgIcons.pin -> context.streamIcons.pin
-  /// - StreamSvgIcons.right -> context.streamIcons.chevronRight
-  /// - StreamSvgIcons.search -> context.streamIcons.magnifyingGlassSearch
-  /// - StreamSvgIcons.settings -> context.streamIcons.settingsGear2
-  /// - StreamSvgIcons.smile -> context.streamIcons.emojiSmile
-  /// - StreamSvgIcons.stop -> context.streamIcons.stop
-  /// - StreamSvgIcons.time -> context.streamIcons.clock
-  /// - StreamSvgIcons.up -> context.streamIcons.chevronTop
-  /// - StreamSvgIcons.volumeUp -> context.streamIcons.volumeFull
-  ///
-  /// Conceptual matches (similar purpose, may differ visually):
-  /// - StreamSvgIcons.award -> context.streamIcons.trophy
-  /// - StreamSvgIcons.circleUp -> context.streamIcons.arrowUp (no circle)
-  /// - StreamSvgIcons.contacts -> context.streamIcons.users
-  /// - StreamSvgIcons.download -> context.streamIcons.arrowDown (no tray)
-  /// - StreamSvgIcons.emptyCircleRight -> context.streamIcons.chevronRight (no circle)
-  /// - StreamSvgIcons.files -> context.streamIcons.fileBend (folder vs document)
-  /// - StreamSvgIcons.grid -> context.streamIcons.layoutGrid1 (3x3 vs 2x2)
-  /// - StreamSvgIcons.group -> context.streamIcons.users
-  /// - StreamSvgIcons.loveReaction -> context.streamIcons.heart2
-  /// - StreamSvgIcons.menuPoint -> context.streamIcons.dotsGrid1x3Vertical
-  /// - StreamSvgIcons.message -> context.streamIcons.bubble3ChatMessage
-  /// - StreamSvgIcons.messageUnread -> context.streamIcons.bubbleWideNotificationChatMessage
-  /// - StreamSvgIcons.pictures -> context.streamIcons.images1Alt
-  /// - StreamSvgIcons.play -> context.streamIcons.playSolid
-  /// - StreamSvgIcons.polls -> context.streamIcons.chart5
-  /// - StreamSvgIcons.record -> context.streamIcons.video
-  /// - StreamSvgIcons.reload -> context.streamIcons.arrowRotateRightLeftRepeatRefresh
-  /// - StreamSvgIcons.reply -> context.streamIcons.arrowShareLeft
-  /// - StreamSvgIcons.retry -> context.streamIcons.arrowRotateClockwise
-  /// - StreamSvgIcons.save -> context.streamIcons.bookmark (arrow vs ribbon)
-  /// - StreamSvgIcons.send -> context.streamIcons.paperPlane
-  /// - StreamSvgIcons.sendMessage -> context.streamIcons.paperPlaneTopRight (no circle)
-  /// - StreamSvgIcons.share -> context.streamIcons.shareOs
-  /// - StreamSvgIcons.shareArrow -> context.streamIcons.shareRedirectLink
-  /// - StreamSvgIcons.threadReply -> context.streamIcons.bubbleAnnotation2ChatMessage
-  /// - StreamSvgIcons.user -> context.streamIcons.people
-  /// - StreamSvgIcons.userAdd -> context.streamIcons.peopleAdd
-  /// - StreamSvgIcons.userDelete -> context.streamIcons.peopleRemove
-  /// - StreamSvgIcons.userRemove -> context.streamIcons.peopleRemove
-  /// - StreamSvgIcons.userSettings -> context.streamIcons.peopleEditUserRights
-  /// - StreamSvgIcons.videoCall -> context.streamIcons.videoSolid
+  /// - StreamSvgIcons.arrowRight -> context.streamIcons.arrowRight20
+  /// - StreamSvgIcons.attach -> context.streamIcons.attachment20
+  /// - StreamSvgIcons.award -> context.streamIcons.trophy20
+  /// - StreamSvgIcons.camera -> context.streamIcons.camera20
+  /// - StreamSvgIcons.check -> context.streamIcons.checkmark20
+  /// - StreamSvgIcons.checkAll -> context.streamIcons.checks20
+  /// - StreamSvgIcons.checkSend -> context.streamIcons.checkmark20
+  /// - StreamSvgIcons.circleUp -> context.streamIcons.arrowUp20
+  /// - StreamSvgIcons.close -> context.streamIcons.xmark20
+  /// - StreamSvgIcons.closeSmall -> context.streamIcons.xmark16
+  /// - StreamSvgIcons.contacts -> context.streamIcons.users20
+  /// - StreamSvgIcons.copy -> context.streamIcons.copy20
+  /// - StreamSvgIcons.delete -> context.streamIcons.delete20
+  /// - StreamSvgIcons.down -> context.streamIcons.chevronDown20
+  /// - StreamSvgIcons.download -> context.streamIcons.download20
+  /// - StreamSvgIcons.edit -> context.streamIcons.edit20
+  /// - StreamSvgIcons.emptyCircleRight -> context.streamIcons.chevronRight20
+  /// - StreamSvgIcons.error -> context.streamIcons.exclamationCircleFill20
+  /// - StreamSvgIcons.eye -> context.streamIcons.eyeFill20
+  /// - StreamSvgIcons.files -> context.streamIcons.file20
+  /// - StreamSvgIcons.flag -> context.streamIcons.flag20
+  /// - StreamSvgIcons.grid -> context.streamIcons.gallery20
+  /// - StreamSvgIcons.group -> context.streamIcons.users20
+  /// - StreamSvgIcons.left -> context.streamIcons.chevronLeft20
+  /// - StreamSvgIcons.lightning -> context.streamIcons.bolt20
+  /// - StreamSvgIcons.link -> context.streamIcons.link20
+  /// - StreamSvgIcons.lock -> context.streamIcons.lock20
+  /// - StreamSvgIcons.mentions -> context.streamIcons.mention20
+  /// - StreamSvgIcons.menuPoint -> context.streamIcons.more20
+  /// - StreamSvgIcons.message -> context.streamIcons.messageBubble20
+  /// - StreamSvgIcons.messageUnread -> context.streamIcons.notification20
+  /// - StreamSvgIcons.mic -> context.streamIcons.voice20
+  /// - StreamSvgIcons.mute -> context.streamIcons.mute20
+  /// - StreamSvgIcons.notification -> context.streamIcons.bell20
+  /// - StreamSvgIcons.pause -> context.streamIcons.pauseFill20
+  /// - StreamSvgIcons.penWrite -> context.streamIcons.edit20
+  /// - StreamSvgIcons.pictures -> context.streamIcons.image20
+  /// - StreamSvgIcons.pin -> context.streamIcons.pin20
+  /// - StreamSvgIcons.play -> context.streamIcons.playFill20
+  /// - StreamSvgIcons.polls -> context.streamIcons.poll20
+  /// - StreamSvgIcons.record -> context.streamIcons.video20
+  /// - StreamSvgIcons.reload -> context.streamIcons.refresh20
+  /// - StreamSvgIcons.reply -> context.streamIcons.reply20
+  /// - StreamSvgIcons.retry -> context.streamIcons.retry20
+  /// - StreamSvgIcons.right -> context.streamIcons.chevronRight20
+  /// - StreamSvgIcons.save -> context.streamIcons.save20
+  /// - StreamSvgIcons.search -> context.streamIcons.search20
+  /// - StreamSvgIcons.send -> context.streamIcons.send20
+  /// - StreamSvgIcons.sendMessage -> context.streamIcons.send20
+  /// - StreamSvgIcons.share -> context.streamIcons.export20
+  /// - StreamSvgIcons.shareArrow -> context.streamIcons.share20
+  /// - StreamSvgIcons.smile -> context.streamIcons.emoji20
+  /// - StreamSvgIcons.stop -> context.streamIcons.stopFill20
+  /// - StreamSvgIcons.threadReply -> context.streamIcons.thread20
+  /// - StreamSvgIcons.time -> context.streamIcons.clock20
+  /// - StreamSvgIcons.up -> context.streamIcons.chevronUp20
+  /// - StreamSvgIcons.user -> context.streamIcons.user20
+  /// - StreamSvgIcons.userAdd -> context.streamIcons.userAdd20
+  /// - StreamSvgIcons.userDelete -> context.streamIcons.userRemove20
+  /// - StreamSvgIcons.userRemove -> context.streamIcons.userRemove20
+  /// - StreamSvgIcons.userSettings -> context.streamIcons.userCheck20
+  /// - StreamSvgIcons.videoCall -> context.streamIcons.videoFill20
+  /// - StreamSvgIcons.volumeUp -> context.streamIcons.audio20
   ///
   /// Removed in new set (no equivalent):
   /// - StreamSvgIcons.cloudDownload
   /// - StreamSvgIcons.lolReaction
+  /// - StreamSvgIcons.loveReaction
   /// - StreamSvgIcons.moon
+  /// - StreamSvgIcons.settings
   /// - StreamSvgIcons.thumbsDownReaction
   /// - StreamSvgIcons.thumbsUpReaction
   /// - StreamSvgIcons.wutReaction

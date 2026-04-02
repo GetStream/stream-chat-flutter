@@ -108,7 +108,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 color: _isGroupNameEmpty
                     ? StreamChatTheme.of(context).colorTheme.textLowEmphasis
                     : StreamChatTheme.of(context).colorTheme.accentPrimary,
-                icon: Icon(context.streamIcons.checkmark2),
+                icon: Icon(context.streamIcons.checkmark20),
                 onPressed: _isGroupNameEmpty
                     ? null
                     : () async {
@@ -265,7 +265,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               height: 26,
             ),
             Icon(
-              context.streamIcons.exclamationCircle1,
+              context.streamIcons.exclamationCircleFill20,
               color: StreamChatTheme.of(context).colorTheme.accentError,
               size: 24,
             ),

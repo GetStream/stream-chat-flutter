@@ -222,7 +222,7 @@ class _Trailing extends StatelessWidget {
 
     if (message.state.isCompleted) {
       return IconButton(
-        icon: Icon(context.streamIcons.arrowDown),
+        icon: Icon(context.streamIcons.arrowDown20),
         color: theme.colorTheme.textHighEmphasis,
         visualDensity: VisualDensity.compact,
         onPressed: () async {
@@ -243,7 +243,7 @@ class _Trailing extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
           icon: Icon(
-            context.streamIcons.crossMedium,
+            context.streamIcons.xmark20,
             color: theme.colorTheme.barsBg,
           ),
           fillColor: theme.colorTheme.overlayDark,
@@ -254,7 +254,7 @@ class _Trailing extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
           icon: Icon(
-            context.streamIcons.crossMedium,
+            context.streamIcons.xmark20,
             color: theme.colorTheme.barsBg,
           ),
           fillColor: theme.colorTheme.overlayDark,
@@ -267,7 +267,7 @@ class _Trailing extends StatelessWidget {
           backgroundColor: theme.colorTheme.accentPrimary,
           maxRadius: 12,
           child: Icon(
-            context.streamIcons.checkmark2,
+            context.streamIcons.checkmark20,
             color: theme.colorTheme.barsBg,
           ),
         ),
@@ -276,7 +276,7 @@ class _Trailing extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: _TrailingButton(
           icon: Icon(
-            context.streamIcons.arrowRotateClockwise,
+            context.streamIcons.retry20,
             color: theme.colorTheme.barsBg,
           ),
           fillColor: theme.colorTheme.overlayDark,

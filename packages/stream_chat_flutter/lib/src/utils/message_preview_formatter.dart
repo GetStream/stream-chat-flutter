@@ -322,7 +322,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       children: [
         WidgetSpan(
           child: Icon(
-            context.streamIcons.circleBanSign,
+            context.streamIcons.noSign16,
             size: 16,
             color: context.streamColorScheme.textTertiary,
           ),
@@ -492,11 +492,11 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   InlineSpan _attachmentPrefix(BuildContext context, String? type) {
     final icons = context.streamIcons;
     return switch (type) {
-      AttachmentType.audio || AttachmentType.voiceRecording => WidgetSpan(child: Icon(icons.microphone, size: 16)),
-      AttachmentType.image => WidgetSpan(child: Icon(icons.camera1, size: 16)),
-      AttachmentType.video => WidgetSpan(child: Icon(icons.video, size: 16)),
+      AttachmentType.audio || AttachmentType.voiceRecording => WidgetSpan(child: Icon(icons.voice16, size: 16)),
+      AttachmentType.image => WidgetSpan(child: Icon(icons.camera16, size: 16)),
+      AttachmentType.video => WidgetSpan(child: Icon(icons.video16, size: 16)),
       AttachmentType.giphy => const TextSpan(text: '/giphy'),
-      _ => WidgetSpan(child: Icon(icons.fileBend, size: 16)),
+      _ => WidgetSpan(child: Icon(icons.file16, size: 16)),
     };
   }
 
@@ -571,7 +571,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
 
     return TextSpan(
       children: [
-        WidgetSpan(child: Icon(context.streamIcons.chart5, size: 16)),
+        WidgetSpan(child: Icon(context.streamIcons.poll16, size: 16)),
         if (latestVoterSpan case final latestVoterSpan?) ...[
           WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
           latestVoterSpan,
@@ -614,7 +614,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     final colorScheme = context.streamColorScheme;
     return TextSpan(
       children: [
-        WidgetSpan(child: Icon(context.streamIcons.mapPin, size: 16)),
+        WidgetSpan(child: Icon(context.streamIcons.location16, size: 16)),
         WidgetSpan(
           child: SizedBox(width: context.streamSpacing.xxs),
         ),

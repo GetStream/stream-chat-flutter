@@ -127,7 +127,7 @@ class UnreadIndicatorButton extends StatelessWidget {
                   child: Row(
                     children: [
                       Icon(
-                        context.streamIcons.arrowUp,
+                        context.streamIcons.arrowUp20,
                         size: 20,
                       ),
                       SizedBox(width: context.streamSpacing.xs),
@@ -144,7 +144,7 @@ class UnreadIndicatorButton extends StatelessWidget {
                       ),
                       IconButton(
                         iconSize: 20,
-                        icon: Icon(context.streamIcons.crossMedium),
+                        icon: Icon(context.streamIcons.xmark20),
                         padding: const EdgeInsets.all(5),
                         style: IconButton.styleFrom(
                           foregroundColor: colorTheme.textSecondary,

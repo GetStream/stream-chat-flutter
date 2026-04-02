@@ -29,7 +29,7 @@ command:
       cached_network_image: ^3.3.1
       chewie: ^1.8.1
       collection: ^1.17.2
-      connectivity_plus: ">=6.0.3 <8.0.0"
+      connectivity_plus: ">=6.0.3 <7.1.0"
       cupertino_icons: ^1.0.3
       desktop_drop: '>=0.5.0 <0.8.0'
       device_info_plus: '>=11.0.0 <13.0.0'
@@ -95,7 +95,7 @@ command:
       stream_core_flutter:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
-          ref: 69791bf7a70cbebece46e2c260c3af950e354fc5
+          ref: 72dd75d0a4f9d4e7551ad34639a9a0e70ccd84de
           path: packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
