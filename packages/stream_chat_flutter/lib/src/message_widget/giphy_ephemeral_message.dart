@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart' hide Action;
 import 'package:stream_chat_flutter/src/attachment/giphy_attachment.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_metadata.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// Signature for the action callback passed to [GiphyEphemeralMessage].
 ///
@@ -45,22 +45,22 @@ class GiphyEphemeralMessage extends StatelessWidget {
 
     final effectiveConstraints = constraints ?? _kDefaultConstraints;
 
-    return StreamMessageLayout(
-      data: const StreamMessageLayoutData(
+    return core.StreamMessageLayout(
+      data: const core.StreamMessageLayoutData(
         alignment: .end,
         stackPosition: .single,
         contentKind: .singleAttachment,
       ),
       child: Builder(
         builder: (context) => Align(
-          alignment: StreamMessageLayout.alignmentDirectionalOf(context),
+          alignment: core.StreamMessageLayout.alignmentDirectionalOf(context),
           child: Padding(
             padding: .symmetric(horizontal: spacing.md),
             child: ConstrainedBox(
               constraints: effectiveConstraints,
-              child: StreamMessageContent(
-                footer: StreamMessageFooter(message: message),
-                child: StreamMessageBubble(
+              child: core.StreamMessageContent(
+                footer: StreamMessageMetadata(message: message),
+                child: core.StreamMessageBubble(
                   child: Column(
                     mainAxisSize: .min,
                     crossAxisAlignment: .stretch,
@@ -115,11 +115,11 @@ class GiphyActions extends StatelessWidget {
           ...actions.map(
             (action) {
               final style = switch (action.style) {
-                'primary' => StreamButtonStyle.primary,
-                _ => StreamButtonStyle.secondary,
+                'primary' => core.StreamButtonStyle.primary,
+                _ => core.StreamButtonStyle.secondary,
               };
 
-              return StreamButton(
+              return core.StreamButton(
                 label: action.text,
                 style: style,
                 type: .ghost,
