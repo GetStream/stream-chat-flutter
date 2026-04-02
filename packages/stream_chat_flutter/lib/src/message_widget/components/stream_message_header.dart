@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
-/// Builds the message header containing contextual annotations for the given
+/// Displays the message header containing contextual annotations for the given
 /// [message].
 ///
 /// Annotations are shown in the following order when applicable:
@@ -19,100 +19,112 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 ///     invokes [onViewChannelTap].
 ///  4. **Reminder** — when a reminder exists with a scheduled time.
 ///
-/// Returns `null` when no annotations apply, allowing the caller to skip
-/// rendering the header entirely.
+/// Returns `null` when no annotations apply, allowing [StreamColumn] to
+/// collapse the widget and skip spacing automatically.
 ///
 /// See also:
 ///
 ///  * [DefaultStreamMessage], which controls header visibility.
-Widget? streamMessageHeader({
-  required BuildContext context,
-  required Message message,
-  VoidCallback? onViewChannelTap,
-}) {
-  final translations = context.translations;
-  final icons = context.streamIcons;
-  final textTheme = context.streamTextTheme;
-  final colorScheme = context.streamColorScheme;
-  final crossAxisAlignment = StreamMessageLayout.crossAxisAlignmentOf(context);
+class StreamMessageHeader extends core.NullableStatelessWidget {
+  /// Creates a message header for the given [message].
+  const StreamMessageHeader({
+    super.key,
+    required this.message,
+    this.onViewChannelTap,
+  });
 
-  Widget? savedForLaterAnnotation;
-  if (message.reminder case final reminder? when reminder.remindAt == null) {
-    savedForLaterAnnotation = StreamMessageAnnotation(
-      leading: Icon(icons.bookmark, color: colorScheme.accentPrimary),
-      label: Text(translations.savedForLaterLabel, style: TextStyle(color: colorScheme.accentPrimary)),
-    );
-  }
+  /// The message whose header to display.
+  final Message message;
 
-  Widget? pinnedAnnotation;
-  if (message.pinned case true) {
-    final currentUser = StreamChat.of(context).currentUser!;
-    pinnedAnnotation = StreamMessageAnnotation(
-      leading: Icon(icons.pin),
-      label: Text(
-        translations.pinnedByUserText(
-          pinnedBy: message.pinnedBy ?? currentUser,
-          currentUser: currentUser,
+  /// Called when the "View" link in the show-in-channel annotation is tapped.
+  final VoidCallback? onViewChannelTap;
+
+  @override
+  Widget? nullableBuild(BuildContext context) {
+    final translations = context.translations;
+    final icons = context.streamIcons;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+    final crossAxisAlignment = StreamMessageLayout.crossAxisAlignmentOf(context);
+
+    Widget? savedForLaterAnnotation;
+    if (message.reminder case final reminder? when reminder.remindAt == null) {
+      savedForLaterAnnotation = StreamMessageAnnotation(
+        leading: Icon(icons.bookmark, color: colorScheme.accentPrimary),
+        label: Text(translations.savedForLaterLabel, style: TextStyle(color: colorScheme.accentPrimary)),
+      );
+    }
+
+    Widget? pinnedAnnotation;
+    if (message.pinned case true) {
+      final currentUser = StreamChat.of(context).currentUser!;
+      pinnedAnnotation = StreamMessageAnnotation(
+        leading: Icon(icons.pin),
+        label: Text(
+          translations.pinnedByUserText(
+            pinnedBy: message.pinnedBy ?? currentUser,
+            currentUser: currentUser,
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget? showInChannelAnnotation;
-  if (message.showInChannel case true) {
-    final listKind = StreamMessageLayout.listKindOf(context);
-    final annotationLabel = switch (listKind) {
-      .channel => '${translations.repliedToThreadAnnotationLabel} · ',
-      .thread => '${translations.alsoSentInChannelAnnotationLabel} · ',
-    };
+    Widget? showInChannelAnnotation;
+    if (message.showInChannel case true) {
+      final listKind = StreamMessageLayout.listKindOf(context);
+      final annotationLabel = switch (listKind) {
+        .channel => '${translations.repliedToThreadAnnotationLabel} · ',
+        .thread => '${translations.alsoSentInChannelAnnotationLabel} · ',
+      };
 
-    showInChannelAnnotation = StreamMessageAnnotation(
-      onTap: onViewChannelTap,
-      leading: Icon(icons.arrowUpRight),
-      label: Text.rich(
-        TextSpan(
-          text: annotationLabel,
-          children: [
-            TextSpan(
-              text: translations.viewLabel,
-              style: textTheme.metadataDefault.copyWith(color: colorScheme.textLink),
-            ),
-          ],
+      showInChannelAnnotation = StreamMessageAnnotation(
+        onTap: onViewChannelTap,
+        leading: Icon(icons.arrowUpRight),
+        label: Text.rich(
+          TextSpan(
+            text: annotationLabel,
+            children: [
+              TextSpan(
+                text: translations.viewLabel,
+                style: textTheme.metadataDefault.copyWith(color: colorScheme.textLink),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget? reminderAnnotation;
-  if (message.reminder?.remindAt?.toLocal() case final remindAt?) {
-    reminderAnnotation = StreamMessageAnnotation(
-      leading: Icon(icons.bellNotification),
-      label: Text.rich(
-        TextSpan(
-          text: '${translations.reminderSetLabel} · ',
-          children: [
-            TextSpan(
-              text: translations.reminderAtText(Jiffy.parseFromDateTime(remindAt).jm),
-              style: textTheme.metadataDefault,
-            ),
-          ],
+    Widget? reminderAnnotation;
+    if (message.reminder?.remindAt?.toLocal() case final remindAt?) {
+      reminderAnnotation = StreamMessageAnnotation(
+        leading: Icon(icons.bellNotification),
+        label: Text.rich(
+          TextSpan(
+            text: '${translations.reminderSetLabel} · ',
+            children: [
+              TextSpan(
+                text: translations.reminderAtText(Jiffy.parseFromDateTime(remindAt).jm),
+                style: textTheme.metadataDefault,
+              ),
+            ],
+          ),
         ),
-      ),
+      );
+    }
+
+    final children = [
+      ?savedForLaterAnnotation,
+      ?pinnedAnnotation,
+      ?showInChannelAnnotation,
+      ?reminderAnnotation,
+    ];
+
+    if (children.isEmpty) return null;
+
+    return StreamColumn(
+      mainAxisSize: .min,
+      crossAxisAlignment: crossAxisAlignment,
+      children: children,
     );
   }
-
-  final children = [
-    ?savedForLaterAnnotation,
-    ?pinnedAnnotation,
-    ?showInChannelAnnotation,
-    ?reminderAnnotation,
-  ];
-
-  if (children.isEmpty) return null;
-
-  return StreamColumn(
-    mainAxisSize: .min,
-    crossAxisAlignment: crossAxisAlignment,
-    children: children,
-  );
 }

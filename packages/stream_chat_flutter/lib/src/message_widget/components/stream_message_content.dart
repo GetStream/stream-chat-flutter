@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
 import 'package:stream_chat_flutter/src/channel/stream_message_preview_text.dart';
-import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
@@ -11,11 +10,14 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// Composes the main message content including the bubble, attachments, text,
-/// reactions, and thread reply indicator.
+/// and reactions.
 ///
 /// For deleted messages a [StreamMessageDeleted] placeholder is shown.
-/// Otherwise the content displays attachments, message text, reactions, and
-/// a thread reply indicator (when [Message.replyCount] is greater than zero).
+/// Otherwise the content displays attachments, message text, and reactions.
+///
+/// The [annotation], [metadata], and [replies] slots are passed in from
+/// [DefaultStreamMessage] and rendered in the appropriate positions via the
+/// core [core.StreamMessageContent] layout.
 ///
 /// When the message consists of three or fewer emoji-only characters, the
 /// bubble background is hidden so the emoji appear at a larger visual size.
@@ -30,13 +32,13 @@ class StreamMessageContent extends StatefulWidget {
   const StreamMessageContent({
     super.key,
     required this.message,
-    this.header,
-    this.footer,
+    this.annotation,
+    this.metadata,
+    this.replies,
     this.attachmentBuilders,
     this.onLinkTap,
     this.onMentionTap,
     this.onReactionsTap,
-    this.onRepliesTap,
     this.onQuotedMessageTap,
     this.reactionSorting,
   });
@@ -44,17 +46,23 @@ class StreamMessageContent extends StatefulWidget {
   /// The message to display.
   final Message message;
 
-  /// Optional header widget displayed above the message content column.
+  /// Optional annotation widget displayed above the message content column.
   ///
-  /// Typically a [streamMessageHeader] result containing pinned, reminder,
+  /// Typically a [StreamMessageHeader] containing pinned, reminder,
   /// or show-in-channel annotations.
-  final Widget? header;
+  final Widget? annotation;
 
-  /// Optional footer widget displayed below the message content column.
+  /// Optional metadata widget displayed below the message content column.
   ///
   /// Typically a [StreamMessageFooter] containing the author name, timestamp,
   /// and sending status.
-  final Widget? footer;
+  final Widget? metadata;
+
+  /// Optional replies indicator widget displayed below the bubble.
+  ///
+  /// Typically a [core.StreamMessageReplies] showing reply count and
+  /// participant avatars.
+  final Widget? replies;
 
   /// Custom attachment builders for rendering message attachments.
   ///
@@ -76,11 +84,6 @@ class StreamMessageContent extends StatefulWidget {
   ///
   /// If null, tapping reactions has no effect.
   final VoidCallback? onReactionsTap;
-
-  /// Called when the thread reply indicator is tapped.
-  ///
-  /// If null, tapping the reply indicator has no effect.
-  final VoidCallback? onRepliesTap;
 
   /// Called when the quoted message is tapped.
   ///
@@ -120,14 +123,13 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    final contentKind = core.StreamMessageLayout.contentKindOf(context);
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
     if (widget.message.isDeleted) return const StreamMessageDeleted();
 
     return core.StreamMessageContent(
-      header: widget.header,
-      footer: widget.footer,
+      header: widget.annotation,
+      footer: widget.metadata,
       child: core.StreamColumn(
         mainAxisSize: .min,
         crossAxisAlignment: crossAxisAlignment,
@@ -192,16 +194,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
               },
             ),
           ),
-          if (widget.message.replyCount case final replyCount? when replyCount > 0)
-            core.StreamMessageReplies(
-              maxAvatars: 3,
-              onTap: widget.onRepliesTap,
-              showConnector: contentKind != .emojiOnly,
-              label: Text('$replyCount replies'),
-              avatars: widget.message.threadParticipants?.map(
-                (user) => StreamUserAvatar(user: user, showOnlineIndicator: false),
-              ),
-            ),
+          if (widget.replies case final replies?) replies,
         ],
       ),
     );

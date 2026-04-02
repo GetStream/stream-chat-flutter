@@ -36,7 +36,7 @@ This guide covers migrating the message widget and message list view from the ol
 | `StreamDeletedMessage` | `StreamMessageDeleted` |
 | `MessageCard` | `core.StreamMessageBubble` |
 | `TextBubble` | `core.StreamMessageBubble` |
-| `PinnedMessage` | `streamMessageHeader()` function |
+| `PinnedMessage` | `StreamMessageHeader` widget |
 | `QuotedMessage` | Inline in `StreamMessageContent` |
 | `Username` | Inline in `StreamMessageFooter` |
 | `SendingIndicatorBuilder` | `StreamMessageSendingStatus` |
@@ -61,9 +61,9 @@ The old design used a single monolithic `StreamMessageWidget` with 50+ parameter
 - **`StreamMessageWidget`** — thin shell that resolves the `StreamComponentFactory` and delegates to the factory builder or `DefaultStreamMessage`.
 - **`StreamMessageWidgetProps`** — plain data class holding all configuration. Supports `copyWith()`.
 - **`DefaultStreamMessage`** — the default rendering implementation. Composes the sub-components below.
-- **`StreamMessageContent`** — bubble, attachments, text, reactions, thread replies.
+- **`StreamMessageContent`** — bubble, attachments, text, reactions. Thread replies are passed in as a pre-built widget from `DefaultStreamMessage`.
 - **`StreamMessageFooter`** — username, timestamp, sending status, edited indicator.
-- **`streamMessageHeader()`** — pinned, saved-for-later, show-in-channel annotations.
+- **`StreamMessageHeader`** — pinned, saved-for-later, show-in-channel annotations.
 - **`StreamMessageLeading`** — author avatar.
 - **`StreamMessageReactions`** — clustered reaction chips around the bubble.
 - **`StreamMessageText`** — markdown-rendered message text.
@@ -130,13 +130,13 @@ These parameters have been removed entirely. See the **Migration Path** column f
 | `showPinButton` | Controlled via channel permissions (`canPinMessage`) |
 | `showPinHighlight` | Controlled via `StreamMessageItemThemeData` background color |
 | `showReactionPicker` | Removed |
-| `showUsername` | Controlled via `StreamMessageItemThemeData.footerVisibility` |
-| `showTimestamp` | Controlled via `StreamMessageItemThemeData.footerVisibility` |
-| `showEditedLabel` | Controlled via `StreamMessageItemThemeData.footerVisibility` |
-| `showSendingIndicator` | Controlled via `StreamMessageItemThemeData.footerVisibility` |
-| `showThreadReplyIndicator` | Shown automatically when `replyCount > 0` |
-| `showInChannelIndicator` | Shown automatically via `streamMessageHeader()` |
-| `showUserAvatar` (`DisplayWidget`) | Controlled via `StreamMessageItemThemeData.leadingVisibility` |
+| `showUsername` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
+| `showTimestamp` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
+| `showEditedLabel` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
+| `showSendingIndicator` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
+| `showThreadReplyIndicator` | Controlled via `StreamMessageItemThemeData.repliesVisibility` |
+| `showInChannelIndicator` | Shown automatically via `StreamMessageHeader` |
+| `showUserAvatar` (`DisplayWidget`) | Controlled via `StreamMessageItemThemeData.avatarVisibility` |
 
 #### Builder Callbacks
 
@@ -400,12 +400,13 @@ The old per-property visibility booleans are replaced by a structured visibility
 
 ```dart
 StreamMessageItemThemeData(
-  leadingVisibility: StreamMessageStyleVisibility(
+  avatarVisibility: StreamMessageStyleVisibility(
     incoming: StreamVisibility.visible,
     outgoing: StreamVisibility.gone,
   ),
-  headerVisibility: StreamMessageStyleVisibility(...),
-  footerVisibility: StreamMessageStyleVisibility(...),
+  annotationVisibility: StreamMessageStyleVisibility(...),
+  metadataVisibility: StreamMessageStyleVisibility(...),
+  repliesVisibility: StreamMessageStyleVisibility(...),
 
   incoming: StreamMessageItemStyle(
     padding: EdgeInsets.all(4),
@@ -456,7 +457,7 @@ StreamMessageListView(
 | `deleted_message.dart` | `StreamDeletedMessage` | `StreamMessageDeleted` |
 | `message_card.dart` | `MessageCard` | `core.StreamMessageBubble` |
 | `text_bubble.dart` | `TextBubble` | `core.StreamMessageBubble` |
-| `pinned_message.dart` | `PinnedMessage` | `streamMessageHeader()` function |
+| `pinned_message.dart` | `PinnedMessage` | `StreamMessageHeader` widget |
 | `quoted_message.dart` | `QuotedMessage` | Inline in `StreamMessageContent` |
 | `thread_painter.dart` | `ThreadReplyPainter` | `core.StreamMessageReplies` |
 | `thread_participants.dart` | `ThreadParticipants` | Inline in `core.StreamMessageReplies` |

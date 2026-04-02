@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// row.
 ///
 /// Visibility of this widget (visible, hidden, or gone) is controlled by
-/// [StreamMessageItemThemeData.leadingVisibility] in the parent
+/// [StreamMessageItemThemeData.avatarVisibility] in the parent
 /// [DefaultStreamMessage].
 ///
 /// See also:
