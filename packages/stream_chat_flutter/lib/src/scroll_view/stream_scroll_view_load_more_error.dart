@@ -77,7 +77,7 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
       child:
           this.errorIcon ??
           Icon(
-            context.streamIcons.arrowRotateClockwise,
+            context.streamIcons.retry20,
             color: Colors.white,
           ),
     );

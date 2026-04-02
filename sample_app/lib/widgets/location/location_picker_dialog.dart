@@ -307,7 +307,7 @@ class LocationPickerOptionItem extends StatelessWidget {
               ),
             ),
             Icon(
-              context.streamIcons.chevronRight,
+              context.streamIcons.chevronRight20,
               size: 24,
               color: colorTheme.textLowEmphasis,
             ),

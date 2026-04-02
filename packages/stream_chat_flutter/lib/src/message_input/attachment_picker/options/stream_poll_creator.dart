@@ -46,7 +46,7 @@ class StreamPollCreator extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.chart5,
+                context.streamIcons.poll32,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),
@@ -72,7 +72,7 @@ class StreamPollCreator extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.chart5,
+                context.streamIcons.poll32,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.md),

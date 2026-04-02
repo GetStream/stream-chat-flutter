@@ -35,7 +35,7 @@ class ClearInputItemButton extends StatelessWidget {
             _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
         child: Center(
           child: Icon(
-            context.streamIcons.crossMedium,
+            context.streamIcons.xmark20,
             size: 24,
             color: _streamChatTheme.colorTheme.barsBg,
           ),

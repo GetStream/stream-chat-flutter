@@ -955,7 +955,7 @@ class _SwipeToReplyWrapper extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      context.streamIcons.arrowShareLeft,
+                      context.streamIcons.reply20,
                       size: lerpDouble(0, 20, progress),
                     ),
                   ),

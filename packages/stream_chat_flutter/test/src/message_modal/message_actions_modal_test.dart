@@ -18,22 +18,22 @@ void main() {
   final messageActions = <StreamContextMenuAction<MessageAction>>[
     StreamContextMenuAction<MessageAction>(
       label: const Text('Reply'),
-      leading: const Icon(StreamIconData.iconArrowShareLeft),
+      leading: const Icon(StreamIconData.reply20),
       value: QuotedReply(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Thread Reply'),
-      leading: const Icon(StreamIconData.iconBubbleAnnotation2ChatMessage),
+      leading: const Icon(StreamIconData.thread20),
       value: ThreadReply(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Copy Message'),
-      leading: const Icon(StreamIconData.iconSquareBehindSquare2Copy),
+      leading: const Icon(StreamIconData.copy20),
       value: CopyMessage(message: message),
     ),
     StreamContextMenuAction<MessageAction>.destructive(
       label: const Text('Delete Message'),
-      leading: const Icon(StreamIconData.iconTrashBin),
+      leading: const Icon(StreamIconData.delete20),
       value: DeleteMessage(message: message),
     ),
   ];

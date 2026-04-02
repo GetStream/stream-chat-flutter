@@ -163,6 +163,6 @@ class _StreamUserAvatarPlaceholder extends StatelessWidget {
       };
     }
 
-    return Icon(context.streamIcons.people);
+    return Icon(context.streamIcons.user20);
   }
 }

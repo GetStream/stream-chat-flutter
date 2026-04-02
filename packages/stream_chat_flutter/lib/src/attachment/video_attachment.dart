@@ -118,7 +118,7 @@ class DefaultStreamVideoAttachment extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Icon(
-                  context.streamIcons.playSolid,
+                  context.streamIcons.playFill20,
                   color: context.streamColorScheme.textOnAccent,
                 ),
               ),
