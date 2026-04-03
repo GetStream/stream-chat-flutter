@@ -148,6 +148,7 @@ class StreamMessageActionsBuilder {
       );
     }
 
+    // Mark unread action is only available for other users' messages.
     if (canReceiveReadEvents && !isSentByCurrentUser) {
       StreamContextMenuAction<MessageAction> markUnreadAction() {
         return StreamContextMenuAction(
