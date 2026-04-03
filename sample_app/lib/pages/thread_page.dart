@@ -7,10 +7,12 @@ class ThreadPage extends StatefulWidget {
     required this.parent,
     this.initialScrollIndex,
     this.initialAlignment,
+    this.onViewInChannelTap,
   });
   final Message parent;
   final int? initialScrollIndex;
   final double? initialAlignment;
+  final void Function(Message message)? onViewInChannelTap;
 
   @override
   State<ThreadPage> createState() => _ThreadPageState();
@@ -58,6 +60,7 @@ class _ThreadPageState extends State<ThreadPage> {
               messageFilter: defaultFilter,
               showScrollToBottom: false,
               highlightInitialMessage: true,
+              onViewInChannelTap: widget.onViewInChannelTap,
             ),
           ),
           if (widget.parent.type != 'deleted')

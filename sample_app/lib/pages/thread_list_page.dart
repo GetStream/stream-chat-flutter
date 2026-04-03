@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/thread_page.dart';
+import 'package:sample_app/routes/routes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ThreadListPage extends StatefulWidget {
@@ -49,14 +51,27 @@ class _ThreadListPageState extends State<ThreadListPage> {
                     return StreamChannel(
                       channel: channel,
                       initialMessageId: thread.draft?.parentId,
-                      child: BetterStreamBuilder(
-                        stream: channel.state?.messagesStream.map(
-                          (messages) => messages.firstWhereOrNull(
-                            (m) => m.id == thread.parentMessage?.id,
-                          ),
-                        ),
+                      child: BetterStreamBuilder<Message>(
+                        initialData: thread.parentMessage,
+                        stream: channel.state?.messagesStream
+                            .map(
+                              (messages) => messages.firstWhereOrNull(
+                                (m) => m.id == thread.parentMessage?.id,
+                              ),
+                            )
+                            .where((msg) => msg != null)
+                            .cast<Message>(),
                         builder: (_, parentMessage) {
-                          return ThreadPage(parent: parentMessage);
+                          return ThreadPage(
+                            parent: parentMessage,
+                            onViewInChannelTap: (message) {
+                              GoRouter.of(context).goNamed(
+                                Routes.CHANNEL_PAGE.name,
+                                pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                                queryParameters: {'mid': message.id},
+                              );
+                            },
+                          );
                         },
                       ),
                     );
