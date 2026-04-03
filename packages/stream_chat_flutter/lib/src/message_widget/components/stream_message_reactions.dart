@@ -16,7 +16,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 ///
 ///  * [StreamMessageScaffold], which hosts this widget around the bubble.
 ///  * [StreamChatConfigurationData.reactionIconResolver], which maps reaction
-///    type strings to emoji widgets.
+///    type strings to emoji content models.
 class StreamMessageReactions extends StatelessWidget {
   /// Creates a message reactions widget for the given [message].
   const StreamMessageReactions({
@@ -72,7 +72,7 @@ class StreamMessageReactions extends StatelessWidget {
     final items = sortedReactionGroups?.map(
       (group) => core.StreamReactionsItem(
         count: group.value.count,
-        emoji: core.StreamEmoji(size: .sm, emoji: resolver.resolve(context, group.key)),
+        emoji: resolver.resolve(group.key),
       ),
     );
 

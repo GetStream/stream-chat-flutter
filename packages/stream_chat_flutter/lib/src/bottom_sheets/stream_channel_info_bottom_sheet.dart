@@ -121,7 +121,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Icon(
-              context.streamIcons.people,
+              context.streamIcons.user20,
               color: colorTheme.textLowEmphasis,
             ),
           ),
@@ -134,7 +134,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Icon(
-                context.streamIcons.peopleRemove,
+                context.streamIcons.userRemove20,
                 color: colorTheme.textLowEmphasis,
               ),
             ),
@@ -145,7 +145,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Icon(
-                context.streamIcons.trashBin,
+                context.streamIcons.delete20,
                 color: colorTheme.accentError,
               ),
             ),
@@ -157,7 +157,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Icon(
-              context.streamIcons.crossMedium,
+              context.streamIcons.xmark20,
               color: colorTheme.textLowEmphasis,
             ),
           ),

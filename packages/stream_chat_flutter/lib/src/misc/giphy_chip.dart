@@ -22,7 +22,7 @@ class GiphyChip extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            context.streamIcons.thunder,
+            context.streamIcons.bolt16,
             size: 16,
             color: colorTheme.barsBg,
           ),

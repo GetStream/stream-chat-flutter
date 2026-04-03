@@ -22,17 +22,17 @@ void main() {
   final messageActions = <StreamContextMenuAction<MessageAction>>[
     StreamContextMenuAction<MessageAction>(
       label: const Text('Send Anyway'),
-      leading: const Icon(StreamIconData.iconPaperPlane),
+      leading: const Icon(StreamIconData.send20),
       value: ResendMessage(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Edit Message'),
-      leading: const Icon(StreamIconData.iconEditBig),
+      leading: const Icon(StreamIconData.edit20),
       value: EditMessage(message: message),
     ),
     StreamContextMenuAction<MessageAction>.destructive(
       label: const Text('Delete Message'),
-      leading: const Icon(StreamIconData.iconTrashBin),
+      leading: const Icon(StreamIconData.delete20),
       value: HardDeleteMessage(message: message),
     ),
   ];

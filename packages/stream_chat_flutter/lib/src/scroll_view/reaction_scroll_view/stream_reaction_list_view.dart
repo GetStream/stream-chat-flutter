@@ -190,7 +190,7 @@ class StreamReactionListView extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             child: StreamScrollViewEmptyWidget(
               emptyIcon: Icon(
-                context.streamIcons.emojiSmile,
+                context.streamIcons.emoji32,
                 size: 148,
                 color: StreamChatTheme.of(context).colorTheme.disabled,
               ),

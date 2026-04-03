@@ -42,7 +42,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: _controller,
       builder: (context, value, child) {
-        final hasText = _controller.text.isNotEmpty;
+        final hasText = _controller.text.trim().isNotEmpty;
         final hasContent = hasText || _controller.attachments.isNotEmpty;
         final isEditing = !_controller.message.state.isInitial;
         final hasCommand = _controller.message.command != null;

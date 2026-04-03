@@ -149,7 +149,7 @@ class DefaultStreamLinkPreviewAttachment extends StatelessWidget {
                     mainAxisSize: .min,
                     spacing: spacing.xxs,
                     children: [
-                      Icon(icons.chainLink3, size: 12),
+                      Icon(icons.link12, size: 12),
                       Expanded(
                         child: Text(
                           titleLink,

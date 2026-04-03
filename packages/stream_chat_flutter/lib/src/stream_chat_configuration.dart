@@ -243,8 +243,8 @@ class StreamChatConfigurationData {
   /// The widget that will be built when the user image is loading.
   final Widget Function(BuildContext, User)? placeholderUserImage;
 
-  /// The resolver used to convert reaction types into widgets and to
-  /// provide the list of supported/default reaction types.
+  /// The resolver used to convert reaction types into [StreamEmojiContent]
+  /// models and to provide the list of supported/default reaction types.
   ///
   /// Defaults to [DefaultReactionIconResolver].
   final ReactionIconResolver reactionIconResolver;

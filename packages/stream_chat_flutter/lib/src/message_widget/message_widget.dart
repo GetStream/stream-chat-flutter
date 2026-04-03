@@ -7,12 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_annotations.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_header.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_leading.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_metadata.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessageContent;
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// A chat message widget that renders a single message with its attachments,
 /// reactions, and interaction callbacks.
@@ -439,7 +438,7 @@ class DefaultStreamMessage extends StatelessWidget {
     final message = props.message;
 
     final placement = StreamMessageLayout.of(context);
-    final theme = StreamMessageItemTheme.of(context);
+    final theme = core.StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageWidgetDefaults(
       context,
       isPinned: message.pinned,
@@ -447,23 +446,24 @@ class DefaultStreamMessage extends StatelessWidget {
       state: message.state,
     );
 
-    final resolve = StreamMessageLayoutResolver(placement, [theme, defaults]);
+    final resolve = core.StreamMessageLayoutResolver(placement, [theme, defaults]);
 
     final effectivePadding = props.padding ?? theme.padding ?? defaults.padding;
     final effectiveSpacing = props.spacing ?? theme.spacing ?? defaults.spacing;
     final effectiveBackgroundColor = props.backgroundColor ?? theme.backgroundColor ?? defaults.backgroundColor;
-    final effectiveLeadingVisibility = resolve((theme) => theme?.leadingVisibility);
-    final effectiveHeaderVisibility = resolve((theme) => theme?.headerVisibility);
-    final effectiveFooterVisibility = resolve((theme) => theme?.footerVisibility);
+    final effectiveAvatarVisibility = resolve((theme) => theme?.avatarVisibility);
+    final effectiveAnnotationVisibility = resolve((theme) => theme?.annotationVisibility);
+    final effectiveMetadataVisibility = resolve((theme) => theme?.metadataVisibility);
+    final effectiveRepliesVisibility = resolve((theme) => theme?.repliesVisibility);
 
     Widget? leadingWidget;
     if (props.message.user case final user?) {
       final effectiveAvatarSize = theme.avatarSize ?? defaults.avatarSize;
 
-      leadingWidget = effectiveLeadingVisibility.apply(
-        StreamAvatarTheme(
+      leadingWidget = effectiveAvatarVisibility.apply(
+        core.StreamAvatarTheme(
           data: .new(size: effectiveAvatarSize),
-          child: StreamMessageLeading(author: user),
+          child: StreamUserAvatar(user: user, showOnlineIndicator: false),
         ),
       );
     }
@@ -474,23 +474,40 @@ class DefaultStreamMessage extends StatelessWidget {
       _ => () => _onViewThread(context, message),
     };
 
-    final headerWidget = effectiveHeaderVisibility.apply(
-      streamMessageHeader(
-        context: context,
+    final annotationWidget = effectiveAnnotationVisibility.apply(
+      StreamMessageAnnotations(
         message: message,
         onViewChannelTap: onViewTap,
       ),
     );
-    final footerWidget = effectiveFooterVisibility.apply(StreamMessageFooter(message: message));
+
+    final metadataWidget = effectiveMetadataVisibility.apply(
+      StreamMessageMetadata(message: message),
+    );
+
+    Widget? repliesWidget;
+    if (message.replyCount case final replyCount? when replyCount > 0) {
+      repliesWidget = effectiveRepliesVisibility.apply(
+        core.StreamMessageReplies(
+          maxAvatars: 3,
+          onTap: () => _onViewThread(context, message),
+          showConnector: placement.contentKind != .jumbomoji,
+          label: Text('$replyCount replies'),
+          avatars: message.threadParticipants?.map(
+            (user) => StreamUserAvatar(user: user, showOnlineIndicator: false),
+          ),
+        ),
+      );
+    }
 
     final contentWidget = StreamMessageContent(
       message: message,
-      header: headerWidget,
-      footer: footerWidget,
+      annotation: annotationWidget,
+      metadata: metadataWidget,
+      replies: repliesWidget,
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
       onQuotedMessageTap: props.onQuotedMessageTap,
-      onRepliesTap: () => _onViewThread(context, message),
       onShowMessage: props.onShowMessage,
       onReplyTap: props.onReplyTap,
       attachmentActionsModalBuilder: props.attachmentActionsModalBuilder,
@@ -782,7 +799,7 @@ class DefaultStreamMessage extends StatelessWidget {
     );
 
     final layout = StreamMessageLayout.of(context);
-    final theme = StreamMessageItemTheme.of(context);
+    final theme = core.StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageWidgetDefaults(
       context,
       isPinned: message.pinned,
@@ -790,11 +807,11 @@ class DefaultStreamMessage extends StatelessWidget {
       state: message.state,
     );
 
-    final resolve = StreamMessageLayoutResolver(layout, [theme, defaults]);
-    final leadingVisibility = resolve((theme) => theme?.leadingVisibility);
+    final resolve = core.StreamMessageLayoutResolver(layout, [theme, defaults]);
+    final avatarVisibility = resolve((theme) => theme?.avatarVisibility);
 
     var leadingInset = 0.0;
-    if (leadingVisibility != StreamVisibility.gone) {
+    if (avatarVisibility != core.StreamVisibility.gone) {
       final effectiveAvatarSize = theme.avatarSize ?? defaults.avatarSize;
       final effectiveSpacing = props.spacing ?? theme.spacing ?? defaults.spacing;
       leadingInset = effectiveAvatarSize.value + effectiveSpacing;
@@ -818,7 +835,7 @@ class DefaultStreamMessage extends StatelessWidget {
                 key: const Key('MessageWidget'),
                 message: message.trimmed,
                 padding: EdgeInsets.zero,
-                backgroundColor: StreamColors.transparent,
+                backgroundColor: core.StreamColors.transparent,
               ),
             ),
           ),
@@ -1004,7 +1021,7 @@ class _SwipeToReplyWrapper extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      context.streamIcons.arrowShareLeft,
+                      context.streamIcons.reply20,
                       size: lerpDouble(0, 20, progress),
                     ),
                   ),
@@ -1023,7 +1040,7 @@ class _SwipeToReplyWrapper extends StatelessWidget {
 //
 // Used when neither the explicit props nor the ambient
 // [StreamMessageItemThemeData] provide a value for a given property.
-class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
+class _StreamMessageWidgetDefaults extends core.StreamMessageItemThemeData {
   _StreamMessageWidgetDefaults(
     this._context, {
     this.isPinned = false,
@@ -1037,8 +1054,8 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   final BuildContext _context;
   final MessageState _messageState;
 
-  late final StreamSpacing _spacing = _context.streamSpacing;
-  late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+  late final core.StreamSpacing _spacing = _context.streamSpacing;
+  late final core.StreamColorScheme _colorScheme = _context.streamColorScheme;
 
   @override
   double get spacing => _spacing.xs;
@@ -1052,11 +1069,11 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   @override
   Color? get backgroundColor {
     if (isPinned && !_messageState.isDeleted) return _colorScheme.backgroundHighlight;
-    return StreamColors.transparent;
+    return core.StreamColors.transparent;
   }
 
   @override
-  StreamMessageLayoutVisibility get leadingVisibility => .resolveWith(
+  core.StreamMessageLayoutVisibility get avatarVisibility => .resolveWith(
     (placement) => switch ((placement.channelKind, placement.alignment, placement.stackPosition)) {
       (.direct, _, _) || (_, .end, _) => .gone,
       (_, _, .top || .middle) => .hidden,
@@ -1065,15 +1082,24 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   );
 
   @override
-  StreamMessageLayoutVisibility get headerVisibility => .all(.visible);
+  core.StreamMessageLayoutVisibility get annotationVisibility => .all(.visible);
 
   @override
-  StreamMessageLayoutVisibility get footerVisibility => isEdited
-      ? .all(.visible)
-      : .resolveWith(
-          (placement) => switch (placement.stackPosition) {
-            .single || .bottom => .visible,
-            _ => .gone,
-          },
-        );
+  core.StreamMessageLayoutVisibility get metadataVisibility {
+    if (isEdited) return .all(.visible);
+    return .resolveWith(
+      (placement) => switch (placement.stackPosition) {
+        .single || .bottom => .visible,
+        _ => .gone,
+      },
+    );
+  }
+
+  @override
+  core.StreamMessageLayoutVisibility get repliesVisibility => .resolveWith(
+    (layout) => switch (layout.listKind) {
+      .thread => .gone,
+      .channel => .visible,
+    },
+  );
 }

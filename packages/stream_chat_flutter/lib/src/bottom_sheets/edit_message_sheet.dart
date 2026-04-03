@@ -90,7 +90,7 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: Icon(
-                        context.streamIcons.editBig,
+                        context.streamIcons.edit20,
                         color: streamChatThemeData.colorTheme.disabled,
                       ),
                     ),
@@ -101,7 +101,7 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       icon: Icon(
-                        context.streamIcons.crossSmall,
+                        context.streamIcons.xmark16,
                         color: streamChatThemeData.colorTheme.textLowEmphasis,
                       ),
                       onPressed: Navigator.of(context).pop,
