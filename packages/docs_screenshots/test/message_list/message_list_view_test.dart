@@ -20,14 +20,14 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
     ),
     Message(
       id: 'msg-2',
-      text: 'Doing great, thanks! 😊',
+      text: 'Doing great, thanks!',
       user: _currentUser,
       createdAt: DateTime(2024, 6, 1, 10, 1),
     ),
     if (withPinned)
       Message(
         id: 'msg-pinned',
-        text: 'This is an important announcement 📌',
+        text: 'This is an important announcement',
         user: _otherUser,
         createdAt: DateTime(2024, 6, 1, 10, 2),
         pinned: true,

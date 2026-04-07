@@ -23,7 +23,7 @@ void main() {
         messages: [
           Message(
             id: 'msg-1',
-            text: 'Hey everyone! 👋',
+            text: 'Hey everyone!',
             user: User(id: 'user-2', name: 'Bob'),
             createdAt: DateTime(2024, 6, 1, 10, 30),
           ),

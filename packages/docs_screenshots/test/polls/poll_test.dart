@@ -16,7 +16,6 @@ void main() {
     builder: () {
       final client = MockClient();
 
-
       final controller = StreamPollController(
         poll: Poll(
           id: 'poll-1',
@@ -53,7 +52,6 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 400),
     builder: () {
       final client = MockClient();
-
 
       final currentUser = User(id: 'user-1', name: 'Alice');
 
@@ -117,10 +115,10 @@ void main() {
         poll: Poll(
           id: 'poll-3',
           name: 'Pizza or Tacos for the team lunch?',
-          options: [
-            const PollOption(id: 'p1', text: 'Pizza 🍕'),
-            const PollOption(id: 'p2', text: 'Tacos 🌮'),
-            const PollOption(id: 'p3', text: 'Both!'),
+          options: const [
+            PollOption(id: 'p1', text: 'Pizza'),
+            PollOption(id: 'p2', text: 'Tacos'),
+            PollOption(id: 'p3', text: 'Both!'),
           ],
         ),
       );
