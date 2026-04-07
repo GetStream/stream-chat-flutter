@@ -443,6 +443,7 @@ class DefaultStreamMessage extends StatelessWidget {
       context,
       isPinned: message.pinned,
       isEdited: message.messageTextUpdatedAt != null,
+      isBouncedWithError: message.isBouncedWithError,
       state: message.state,
     );
 
@@ -453,6 +454,7 @@ class DefaultStreamMessage extends StatelessWidget {
     final effectiveBackgroundColor = props.backgroundColor ?? theme.backgroundColor ?? defaults.backgroundColor;
     final effectiveAvatarVisibility = resolve((theme) => theme?.avatarVisibility);
     final effectiveAnnotationVisibility = resolve((theme) => theme?.annotationVisibility);
+    final effectiveErrorBadgeVisibility = resolve((theme) => theme?.errorBadgeVisibility);
     final effectiveMetadataVisibility = resolve((theme) => theme?.metadataVisibility);
     final effectiveRepliesVisibility = resolve((theme) => theme?.repliesVisibility);
 
@@ -468,16 +470,13 @@ class DefaultStreamMessage extends StatelessWidget {
       );
     }
 
-    final listKind = StreamMessageLayout.listKindOf(context);
-    final onViewTap = switch ((listKind, props.onViewInChannelTap)) {
-      (.thread, final onTap?) => () => onTap(message),
-      _ => () => _onViewThread(context, message),
-    };
-
     final annotationWidget = effectiveAnnotationVisibility.apply(
       StreamMessageAnnotations(
         message: message,
-        onViewChannelTap: onViewTap,
+        onViewChannelTap: switch (props.onViewInChannelTap) {
+          final onTap? => () => onTap(message),
+          _ => () => _onViewThread(context, message),
+        },
       ),
     );
 
@@ -500,9 +499,14 @@ class DefaultStreamMessage extends StatelessWidget {
       );
     }
 
+    final errorBadgeWidget = effectiveErrorBadgeVisibility.apply(
+      core.StreamErrorBadge(size: core.StreamErrorBadgeSize.sm),
+    );
+
     final contentWidget = StreamMessageContent(
       message: message,
       annotation: annotationWidget,
+      errorBadge: errorBadgeWidget,
       metadata: metadataWidget,
       replies: repliesWidget,
       attachmentBuilders: props.attachmentBuilders,
@@ -1045,11 +1049,13 @@ class _StreamMessageWidgetDefaults extends core.StreamMessageItemThemeData {
     this._context, {
     this.isPinned = false,
     this.isEdited = false,
+    this.isBouncedWithError = false,
     required MessageState state,
   }) : _messageState = state;
 
   final bool isPinned;
   final bool isEdited;
+  final bool isBouncedWithError;
 
   final BuildContext _context;
   final MessageState _messageState;
@@ -1083,6 +1089,11 @@ class _StreamMessageWidgetDefaults extends core.StreamMessageItemThemeData {
 
   @override
   core.StreamMessageLayoutVisibility get annotationVisibility => .all(.visible);
+
+  @override
+  core.StreamMessageLayoutVisibility get errorBadgeVisibility => .all(
+    _messageState.isFailed || isBouncedWithError ? .visible : .gone,
+  );
 
   @override
   core.StreamMessageLayoutVisibility get metadataVisibility {
