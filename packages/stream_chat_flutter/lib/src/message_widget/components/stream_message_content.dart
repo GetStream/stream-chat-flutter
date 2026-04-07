@@ -34,6 +34,7 @@ class StreamMessageContent extends StatefulWidget {
     super.key,
     required this.message,
     this.annotation,
+    this.errorBadge,
     this.metadata,
     this.replies,
     this.attachmentBuilders,
@@ -55,6 +56,12 @@ class StreamMessageContent extends StatefulWidget {
   /// Typically a [StreamMessageAnnotations] containing pinned, reminder,
   /// or show-in-channel annotations.
   final Widget? annotation;
+
+  /// Optional error badge widget overlaid on the message bubble.
+  ///
+  /// When non-null, the badge is positioned at the top-end corner of the
+  /// bubble using a [Stack] with [PositionedDirectional].
+  final Widget? errorBadge;
 
   /// Optional metadata widget displayed below the message content column.
   ///
@@ -208,7 +215,19 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                   ),
                 );
 
-                return core.StreamMessageBubble(child: bubbleContent);
+                final bubble = core.StreamMessageBubble(child: bubbleContent);
+
+                if (widget.errorBadge case final errorBadge?) {
+                  return Stack(
+                    clipBehavior: .none,
+                    children: [
+                      bubble,
+                      PositionedDirectional(top: 8, end: -12, child: errorBadge),
+                    ],
+                  );
+                }
+
+                return bubble;
               },
             ),
           ),
