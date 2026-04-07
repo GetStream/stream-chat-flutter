@@ -1,4 +1,5 @@
 import 'package:alchemist/alchemist.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -50,22 +51,26 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
   ];
 }
 
-Widget _buildMessageListViewScaffold({
+Widget _buildMessageListViewInDevice({
   required MockClient client,
   required MockChannel channel,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      streamChatThemeData: docsStreamChatThemeData(),
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: const Scaffold(
-          body: StreamMessageListView(),
+  return DeviceFrame(
+    device: Devices.ios.iPhone13,
+    isFrameVisible: true,
+    screen: MaterialApp(
+      theme: docsScreenshotsTheme(),
+      debugShowCheckedModeBanner: false,
+      home: StreamChat(
+        client: client,
+        streamChatThemeData: docsStreamChatThemeData(),
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: StreamChannel(
+          showLoading: false,
+          channel: channel,
+          child: const Scaffold(
+            body: StreamMessageListView(),
+          ),
         ),
       ),
     ),
@@ -78,7 +83,7 @@ void main() {
   goldenTest(
     'message list view default',
     fileName: 'message_list_view',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 600),
+    constraints: const BoxConstraints.tightFor(width: 430, height: 932),
     builder: () {
       final messages = _buildMessages();
       final client = MockClient();
@@ -96,7 +101,7 @@ void main() {
       );
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', name: 'Alice'));
 
-      return _buildMessageListViewScaffold(client: client, channel: channel);
+      return _buildMessageListViewInDevice(client: client, channel: channel);
     },
   );
 
@@ -121,7 +126,22 @@ void main() {
       );
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', name: 'Alice'));
 
-      return _buildMessageListViewScaffold(client: client, channel: channel);
+      return MaterialApp(
+        theme: docsScreenshotsTheme(),
+        debugShowCheckedModeBanner: false,
+        home: StreamChat(
+          client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          child: StreamChannel(
+            showLoading: false,
+            channel: channel,
+            child: const Scaffold(
+              body: StreamMessageListView(),
+            ),
+          ),
+        ),
+      );
     },
   );
 
@@ -146,7 +166,22 @@ void main() {
       );
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', name: 'Alice'));
 
-      return _buildMessageListViewScaffold(client: client, channel: channel);
+      return MaterialApp(
+        theme: docsScreenshotsTheme(),
+        debugShowCheckedModeBanner: false,
+        home: StreamChat(
+          client: client,
+          streamChatThemeData: docsStreamChatThemeData(),
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          child: StreamChannel(
+            showLoading: false,
+            channel: channel,
+            child: const Scaffold(
+              body: StreamMessageListView(),
+            ),
+          ),
+        ),
+      );
     },
   );
 }

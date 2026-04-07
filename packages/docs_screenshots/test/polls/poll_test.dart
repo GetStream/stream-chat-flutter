@@ -6,13 +6,36 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
 
+final _sender = User(id: 'user-2', name: 'Bob');
+
+Widget _buildMessageScaffold({
+  required MockClient client,
+  required MockChannel channel,
+  required Widget child,
+}) {
+  return MaterialApp(
+    theme: docsScreenshotsTheme(),
+    debugShowCheckedModeBanner: false,
+    home: StreamChat(
+      client: client,
+      streamChatThemeData: docsStreamChatThemeData(),
+      connectivityStream: Stream.value([ConnectivityResult.mobile]),
+      child: StreamChannel(
+        showLoading: false,
+        channel: channel,
+        child: Scaffold(body: child),
+      ),
+    ),
+  );
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   goldenTest(
     'poll creator widget',
     fileName: 'poll_creator',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 600),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 650),
     builder: () {
       final client = MockClient();
 
@@ -36,6 +59,19 @@ void main() {
           streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: null,
+              ),
+              title: const Text('Create Poll'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: null,
+                ),
+              ],
+            ),
             body: StreamPollCreatorWidget(
               controller: controller,
               shrinkWrap: true,
@@ -49,11 +85,20 @@ void main() {
   goldenTest(
     'poll interactor widget',
     fileName: 'poll_interactor',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 400),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 500),
     builder: () {
       final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel(type: 'messaging', id: 'general');
+      final channelState = MockChannelState();
 
-      final currentUser = User(id: 'user-1', name: 'Alice');
+      setupMockChannel(
+        client: client,
+        clientState: clientState,
+        channel: channel,
+        channelState: channelState,
+        channelName: 'General',
+      );
 
       final poll = Poll(
         id: 'poll-2',
@@ -73,21 +118,18 @@ void main() {
         voteCount: 28,
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: SingleChildScrollView(
-              child: StreamPollInteractor(
-                poll: poll,
-                currentUser: currentUser,
-              ),
-            ),
-          ),
+      final pollMessage = Message(
+        id: 'poll-msg',
+        user: _sender,
+        poll: poll,
+        createdAt: DateTime(2024, 6, 1, 10, 0),
+      );
+
+      return _buildMessageScaffold(
+        client: client,
+        channel: channel,
+        child: Center(
+          child: StreamMessageWidget(message: pollMessage),
         ),
       );
     },

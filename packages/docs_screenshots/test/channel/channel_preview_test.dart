@@ -1,4 +1,5 @@
 import 'package:alchemist/alchemist.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -48,7 +49,7 @@ void main() {
   goldenTest(
     'channel list view',
     fileName: 'channel_list_view',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 400),
+    constraints: const BoxConstraints.tightFor(width: 430, height: 932),
     builder: () {
       final client = MockClient();
 
@@ -115,17 +116,27 @@ void main() {
 
       stubQueryChannelsForGoldens(client, channels);
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: StreamChannelListView(
-              controller: controller,
-              shrinkWrap: true,
+      return DeviceFrame(
+        device: Devices.ios.iPhone13,
+        isFrameVisible: true,
+        screen: MaterialApp(
+          theme: docsScreenshotsTheme(),
+          debugShowCheckedModeBanner: false,
+          home: StreamChat(
+            client: client,
+            streamChatThemeData: docsStreamChatThemeData(),
+            connectivityStream: Stream.value([ConnectivityResult.mobile]),
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('Stream Chat'),
+                actions: [
+                  IconButton(icon: const Icon(Icons.edit_outlined), onPressed: null),
+                ],
+              ),
+              body: StreamChannelListView(
+                controller: controller,
+                shrinkWrap: true,
+              ),
             ),
           ),
         ),
@@ -161,15 +172,25 @@ void main() {
           streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
-            body: Swipeable(
-              key: const ValueKey('swipeable-channel'),
-              backgroundBuilder: (context, details) => Container(
-                color: Colors.red,
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: const Icon(Icons.delete, color: Colors.white),
-              ),
-              child: StreamChannelListItem(channel: channel),
+            body: Stack(
+              children: [
+                Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.delete, color: Colors.white),
+                      Text('Delete', style: TextStyle(color: Colors.white, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                Transform.translate(
+                  offset: const Offset(-80, 0),
+                  child: StreamChannelListItem(channel: channel),
+                ),
+              ],
             ),
           ),
         ),

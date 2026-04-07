@@ -73,6 +73,54 @@ Widget _buildVoiceRecorderScaffold({
   );
 }
 
+/// Scaffold that shows a message bubble + the voice widget + an input bar,
+/// giving context to how voice recording looks in a real conversation.
+Widget _buildVoiceRecordingContextScaffold({
+  required MockClient client,
+  required MockChannel channel,
+  required Widget voiceWidget,
+}) {
+  return MaterialApp(
+    theme: docsScreenshotsTheme(),
+    debugShowCheckedModeBanner: false,
+    home: StreamChat(
+      client: client,
+      streamChatThemeData: docsStreamChatThemeData(),
+      connectivityStream: Stream.value([ConnectivityResult.mobile]),
+      child: StreamChannel(
+        showLoading: false,
+        channel: channel,
+        child: Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  reverse: true,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: voiceWidget,
+                    ),
+                    StreamMessageWidget(
+                      message: Message(
+                        id: 'ctx-msg',
+                        text: 'Hey, listen to this!',
+                        user: User(id: 'user-2', name: 'Bob'),
+                        createdAt: DateTime(2024, 6, 1, 10, 0),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const StreamMessageInput(enableVoiceRecording: true),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void _setupChannel(MockClient client, MockClientState clientState, MockChannel channel, MockChannelState channelState) {
   setupMockChannel(
     client: client,
@@ -210,37 +258,38 @@ void main() {
   goldenTest(
     'voice recording attachment idle',
     fileName: 'voice_recording_attachment',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 400),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
-      when(() => client.state).thenReturn(clientState);
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      _setupChannel(client, clientState, channel, channelState);
 
-      final track = PlaylistTrack(
-        uri: Uri.parse('https://example.com/recording.m4a'),
-        title: 'Voice message',
-        duration: const Duration(seconds: 15),
-        waveform: List.generate(35, (i) => (i % 7) / 7.0),
-        state: TrackState.idle,
+      final voiceMessage = Message(
+        id: 'voice-msg',
+        user: User(id: 'user-2', name: 'Bob'),
+        attachments: [
+          Attachment(
+            type: 'voiceRecording',
+            assetUrl: 'https://example.com/recording.m4a',
+            uploadState: const UploadState.success(),
+            extraData: const {
+              'duration': 15.0,
+              'waveform_data': <double>[0.1, 0.3, 0.5, 0.7, 0.9, 0.7, 0.5, 0.3, 0.1,
+                0.2, 0.4, 0.6, 0.8, 0.6, 0.4, 0.2, 0.5, 0.8, 0.6, 0.3,
+                0.1, 0.4, 0.7, 0.9, 0.6, 0.3, 0.1, 0.4, 0.7, 0.5, 0.2,
+                0.6, 0.8, 0.4, 0.2],
+            },
+          ),
+        ],
+        createdAt: DateTime(2024, 6, 1, 10, 0),
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(8),
-              child: StreamVoiceRecordingAttachment(
-                track: track,
-                speed: StreamPlaybackSpeed.x1,
-              ),
-            ),
-          ),
-        ),
+      return _buildVoiceRecordingContextScaffold(
+        client: client,
+        channel: channel,
+        voiceWidget: StreamMessageWidget(message: voiceMessage),
       );
     },
   );
@@ -248,38 +297,38 @@ void main() {
   goldenTest(
     'voice recording attachment playing',
     fileName: 'voice_recording_attachment_playing',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 400),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
-      when(() => client.state).thenReturn(clientState);
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      _setupChannel(client, clientState, channel, channelState);
 
-      final track = PlaylistTrack(
-        uri: Uri.parse('https://example.com/recording.m4a'),
-        title: 'Voice message',
-        duration: const Duration(seconds: 15),
-        position: const Duration(seconds: 7),
-        waveform: List.generate(35, (i) => (i % 7) / 7.0),
-        state: TrackState.playing,
+      final voiceMessage = Message(
+        id: 'voice-msg-playing',
+        user: User(id: 'user-2', name: 'Bob'),
+        attachments: [
+          Attachment(
+            type: 'voiceRecording',
+            assetUrl: 'https://example.com/recording.m4a',
+            uploadState: const UploadState.success(),
+            extraData: const {
+              'duration': 15.0,
+              'waveform_data': <double>[0.1, 0.3, 0.5, 0.7, 0.9, 0.7, 0.5, 0.3, 0.1,
+                0.2, 0.4, 0.6, 0.8, 0.6, 0.4, 0.2, 0.5, 0.8, 0.6, 0.3,
+                0.1, 0.4, 0.7, 0.9, 0.6, 0.3, 0.1, 0.4, 0.7, 0.5, 0.2,
+                0.6, 0.8, 0.4, 0.2],
+            },
+          ),
+        ],
+        createdAt: DateTime(2024, 6, 1, 10, 0),
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(8),
-              child: StreamVoiceRecordingAttachment(
-                track: track,
-                speed: StreamPlaybackSpeed.x1,
-              ),
-            ),
-          ),
-        ),
+      return _buildVoiceRecordingContextScaffold(
+        client: client,
+        channel: channel,
+        voiceWidget: StreamMessageWidget(message: voiceMessage),
       );
     },
   );

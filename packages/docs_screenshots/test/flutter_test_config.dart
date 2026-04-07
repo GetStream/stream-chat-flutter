@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:alchemist/alchemist.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,6 +22,11 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
+      goldenTestTheme: GoldenTestTheme(
+        backgroundColor: Colors.transparent,
+        borderColor: Colors.transparent,
+        nameTextStyle: const TextStyle(fontSize: 18),
+      ),
       ciGoldensConfig: const CiGoldensConfig(enabled: false),
       platformGoldensConfig: const PlatformGoldensConfig(enabled: true),
     ),

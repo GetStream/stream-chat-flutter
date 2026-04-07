@@ -56,11 +56,12 @@ Thread _makeThread({
   );
 }
 
-Widget _buildThreadListScaffold({
+Widget _buildFullAppThreadScaffold({
   required MockClient client,
   required StreamThreadListController controller,
   Widget Function(BuildContext)? emptyBuilder,
   Widget Function(BuildContext, Thread)? customItemBuilder,
+  Widget? banner,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
@@ -70,12 +71,42 @@ Widget _buildThreadListScaffold({
       streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: Scaffold(
-        body: StreamThreadListView(
-          controller: controller,
-          emptyBuilder: emptyBuilder,
-          itemBuilder: customItemBuilder != null
-              ? (context, threads, index, defaultWidget) => customItemBuilder(context, threads[index])
-              : null,
+        appBar: AppBar(
+          title: const Text('Stream Chat'),
+          actions: [
+            IconButton(icon: const Icon(Icons.edit_outlined), onPressed: null),
+          ],
+        ),
+        body: Column(
+          children: [
+            if (banner != null) banner,
+            Expanded(
+              child: StreamThreadListView(
+                controller: controller,
+                emptyBuilder: emptyBuilder,
+                itemBuilder: customItemBuilder != null
+                    ? (context, threads, index, defaultWidget) => customItemBuilder(context, threads[index])
+                    : null,
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: 2,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline),
+              label: 'Chats',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.alternate_email),
+              label: 'Mentions',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.comment_outlined),
+              label: 'Threads',
+            ),
+          ],
         ),
       ),
     ),
@@ -88,7 +119,7 @@ void main() {
   goldenTest(
     'thread list view with threads',
     fileName: 'thread_list_view',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 600),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
       stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
@@ -122,14 +153,14 @@ void main() {
 
       stubQueryThreadsForGoldens(client, threads);
 
-      return _buildThreadListScaffold(client: client, controller: controller);
+      return _buildFullAppThreadScaffold(client: client, controller: controller);
     },
   );
 
   goldenTest(
     'thread list view empty state',
     fileName: 'thread_list_view_empty',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 600),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
       stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
@@ -141,7 +172,7 @@ void main() {
 
       stubQueryThreadsForGoldens(client, const []);
 
-      return _buildThreadListScaffold(
+      return _buildFullAppThreadScaffold(
         client: client,
         controller: controller,
         emptyBuilder: (context) => const Center(
@@ -211,21 +242,45 @@ void main() {
   goldenTest(
     'thread list unread banner',
     fileName: 'thread_list_unread_banner',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: StreamUnreadThreadsBanner(
-              unreadThreads: const {'thread-1', 'thread-2', 'thread-3'},
-            ),
-          ),
+      stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
+
+      final threads = [
+        _makeThread(
+          id: 'general',
+          channelName: 'General',
+          parentText: 'Has anyone tried the new Flutter version?',
+          latestReplyText: 'Yes! The performance improvements are amazing.',
+          unreadCount: 2,
+        ),
+        _makeThread(
+          id: 'design',
+          channelName: 'Design',
+          parentText: 'The new color palette looks great!',
+          latestReplyText: 'Agreed, especially the dark mode colors.',
+        ),
+        _makeThread(
+          id: 'engineering',
+          channelName: 'Engineering',
+          parentText: 'We should refactor the auth module',
+          latestReplyText: 'I can take that on next sprint.',
+        ),
+      ];
+
+      final controller = StreamThreadListController.fromValue(
+        PagedValue(items: threads),
+        client: client,
+      );
+
+      stubQueryThreadsForGoldens(client, threads);
+
+      return _buildFullAppThreadScaffold(
+        client: client,
+        controller: controller,
+        banner: StreamUnreadThreadsBanner(
+          unreadThreads: const {'thread-1', 'thread-2', 'thread-3'},
         ),
       );
     },

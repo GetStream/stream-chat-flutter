@@ -34,7 +34,7 @@ void main() {
   goldenTest(
     'draft list view',
     fileName: 'draft_list_view',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 400),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 550),
     builder: () {
       final client = MockClient();
       stubMockClientCurrentUser(client, OwnUser(id: 'user-1', name: 'Alice'));
@@ -72,9 +72,33 @@ void main() {
           streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
-            body: StreamDraftListView(
-              controller: controller,
-              shrinkWrap: true,
+            appBar: AppBar(
+              title: const Text('Stream Chat'),
+              actions: [
+                IconButton(icon: const Icon(Icons.edit_outlined), onPressed: null),
+              ],
+            ),
+            body: StreamDraftListView(controller: controller),
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: 3,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.chat_bubble_outline),
+                  label: 'Chats',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.alternate_email),
+                  label: 'Mentions',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.comment_outlined),
+                  label: 'Threads',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.edit_note),
+                  label: 'Drafts',
+                ),
+              ],
             ),
           ),
         ),

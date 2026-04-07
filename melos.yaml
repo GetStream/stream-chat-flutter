@@ -33,6 +33,7 @@ command:
       cupertino_icons: ^1.0.3
       desktop_drop: '>=0.5.0 <0.8.0'
       device_info_plus: '>=11.0.0 <13.0.0'
+      device_preview: ^1.2.0
       diacritic: ^0.1.5
       dio: ^5.4.3+1
       drift: ^2.28.0
