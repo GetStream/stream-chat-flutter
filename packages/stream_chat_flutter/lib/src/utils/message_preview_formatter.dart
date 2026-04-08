@@ -328,6 +328,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   /// both styled with the tertiary text color.
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message, {TextStyle? textStyle}) {
+    final iconSize = (textStyle?.fontSize ?? 16) + 2;
     return TextSpan(
       style: textStyle,
       children: [
@@ -335,7 +336,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
           alignment: PlaceholderAlignment.middle,
           child: Icon(
             context.streamIcons.noSign16,
-            size: textStyle?.fontSize ?? 16,
+            size: iconSize,
             color: context.streamColorScheme.textTertiary,
           ),
         ),
@@ -483,7 +484,10 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       return TextSpan(
         children: [
           prefix,
-          WidgetSpan(alignment: PlaceholderAlignment.middle, child: SizedBox(width: context.streamSpacing.xxs)),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: SizedBox(width: context.streamSpacing.xxs),
+          ),
           _textSpanWithMentions(messageText, mentionedUsers, colorScheme),
         ],
       );
@@ -499,24 +503,36 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     return TextSpan(
       children: [
         prefix,
-        WidgetSpan(alignment: PlaceholderAlignment.middle, child: SizedBox(width: context.streamSpacing.xxs)),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: SizedBox(width: context.streamSpacing.xxs),
+        ),
         ?suffix,
       ],
     );
   }
 
   InlineSpan _attachmentPrefix(BuildContext context, String? type, {TextStyle? textStyle}) {
-    final size = textStyle?.fontSize ?? 16;
+    final size = (textStyle?.fontSize ?? 14) + 2;
     final icons = context.streamIcons;
     return switch (type) {
-      AttachmentType.audio || AttachmentType.voiceRecording =>
-        WidgetSpan(alignment: PlaceholderAlignment.middle, child: Icon(icons.voice16, size: size)),
-      AttachmentType.image =>
-        WidgetSpan(alignment: PlaceholderAlignment.middle, child: Icon(icons.camera16, size: size)),
-      AttachmentType.video =>
-        WidgetSpan(alignment: PlaceholderAlignment.middle, child: Icon(icons.video16, size: size)),
+      AttachmentType.audio || AttachmentType.voiceRecording => WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Icon(icons.voice16, size: size),
+      ),
+      AttachmentType.image => WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Icon(icons.camera16, size: size),
+      ),
+      AttachmentType.video => WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Icon(icons.video16, size: size),
+      ),
       AttachmentType.giphy => const TextSpan(text: '/giphy'),
-      _ => WidgetSpan(alignment: PlaceholderAlignment.middle, child: Icon(icons.file16, size: size)),
+      _ => WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Icon(icons.file16, size: size),
+      ),
     };
   }
 
@@ -577,6 +593,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     TextStyle? textStyle,
   }) {
     final translations = context.translations;
+    final iconSize = (textStyle?.fontSize ?? 16) + 2;
     TextSpan? latestVoterSpan;
 
     if (poll.latestVotes.firstOrNull case final latestVote?) {
@@ -594,12 +611,21 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     return TextSpan(
       style: textStyle,
       children: [
-        WidgetSpan(alignment: PlaceholderAlignment.middle, child: Icon(context.streamIcons.poll16, size: textStyle?.fontSize ?? 16)),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Icon(context.streamIcons.poll16, size: iconSize),
+        ),
         if (latestVoterSpan case final latestVoterSpan?) ...[
-          WidgetSpan(alignment: PlaceholderAlignment.middle, child: SizedBox(width: context.streamSpacing.xxs)),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: SizedBox(width: context.streamSpacing.xxs),
+          ),
           latestVoterSpan,
         ] else if (poll.name.trim() case final pollName when pollName.isNotEmpty) ...[
-          WidgetSpan(alignment: PlaceholderAlignment.middle, child: SizedBox(width: context.streamSpacing.xxs)),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: SizedBox(width: context.streamSpacing.xxs),
+          ),
           TextSpan(text: pollName),
         ],
       ],
@@ -637,10 +663,14 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     TextStyle? textStyle,
   }) {
     final colorScheme = context.streamColorScheme;
+    final iconSize = (textStyle?.fontSize ?? 16) + 2;
     return TextSpan(
       style: textStyle,
       children: [
-        WidgetSpan(alignment: PlaceholderAlignment.middle, child: Icon(context.streamIcons.location16, size: textStyle?.fontSize ?? 16)),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Icon(context.streamIcons.location16, size: iconSize),
+        ),
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,
           child: SizedBox(width: context.streamSpacing.xxs),

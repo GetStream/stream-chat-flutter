@@ -98,9 +98,7 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
     final latestReply = thread.latestReplies.lastOrNull;
     final channel = thread.channel;
     final language = currentUser?.language;
-    final unreadMessageCount = thread.read
-        ?.firstWhereOrNull((read) => read.user.id == currentUser?.id)
-        ?.unreadMessages;
+    final unreadMessageCount = thread.read?.firstWhereOrNull((read) => read.user.id == currentUser?.id)?.unreadMessages;
     final latestActivityAt = thread.lastMessageAt ?? latestReply?.createdAt ?? thread.updatedAt;
     final avatarUser = parentMessage?.user ?? latestReply?.user ?? thread.createdBy;
     final channelName =
