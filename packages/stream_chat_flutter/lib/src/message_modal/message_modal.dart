@@ -27,7 +27,7 @@ class StreamMessageDialog extends StatelessWidget {
     this.useSafeArea = true,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
-    this.insetPadding = const EdgeInsets.all(8),
+    this.insetPadding = const EdgeInsets.all(16),
     this.alignment = Alignment.center,
   });
 
