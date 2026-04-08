@@ -448,29 +448,7 @@ class StreamChatThemeData {
         pollOptionVoteItemBackgroundColor: colorTheme.inputBg,
         pollOptionVoteItemBorderRadius: BorderRadius.circular(12),
       ),
-      threadListTileTheme: StreamThreadListTileThemeData(
-        backgroundColor: colorTheme.barsBg,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-        threadUnreadMessageCountStyle: textTheme.footnoteBold.copyWith(
-          color: Colors.white,
-        ),
-        threadUnreadMessageCountBackgroundColor: channelPreviewTheme.unreadCounterColor,
-        threadChannelNameStyle: textTheme.bodyBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        threadReplyToMessageStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        threadLatestReplyTimestampStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        threadLatestReplyUsernameStyle: textTheme.bodyBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        threadLatestReplyMessageStyle: textTheme.body.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-      ),
+      threadListTileTheme: const StreamThreadListTileThemeData(),
       draftListTileTheme: StreamDraftListTileThemeData(
         backgroundColor: colorTheme.barsBg,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
