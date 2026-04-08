@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_input/tld.dart';
-import 'package:stream_chat_flutter/src/misc/simple_safe_area.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kCommandTrigger = '/';
@@ -351,13 +351,17 @@ class StreamMessageInput extends StatefulWidget {
 }
 
 /// State of [StreamMessageInput]
-class StreamMessageInputState extends State<StreamMessageInput> with RestorationMixin<StreamMessageInput> {
+class StreamMessageInputState extends State<StreamMessageInput>
+    with RestorationMixin<StreamMessageInput>, SingleTickerProviderStateMixin {
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool get _isPickerVisible => _pickerController != null;
   StreamAttachmentPickerController? _pickerController;
   StreamSubscription<CustomAttachmentPickerResult>? _customResultSubscription;
   bool _isSyncingControllers = false;
+
+  late final AnimationController _pickerAnimationController;
+  late final CurvedAnimation _pickerAnimation;
 
   late StreamChatThemeData _streamChatTheme;
   late StreamMessageInputThemeData _messageInputTheme;
@@ -397,6 +401,14 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   @override
   void initState() {
     super.initState();
+    _pickerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _pickerAnimation = CurvedAnimation(
+      parent: _pickerAnimationController,
+      curve: Curves.easeInOut,
+    );
     if (widget.messageInputController == null) {
       _createLocalController();
     } else {
@@ -543,15 +555,31 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
     };
 
     final spacing = context.streamSpacing;
+    final safeAreaEnabled = widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true;
+    final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: context.streamColorScheme.backgroundElevation1,
         ),
-        child: SimpleSafeArea(
-          enabled: !_isPickerVisible && (widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true),
-          minimum: _isPickerVisible ? .zero : .only(bottom: spacing.md),
+        child: AnimatedBuilder(
+          animation: _pickerAnimation,
+          builder: (context, child) {
+            final safeAreaPadding = safeAreaEnabled
+                ? EdgeInsets.lerp(
+                    EdgeInsets.only(
+                      left: viewPadding.left,
+                      top: viewPadding.top,
+                      right: viewPadding.right,
+                      bottom: math.max(viewPadding.bottom, spacing.md),
+                    ),
+                    EdgeInsets.zero,
+                    _pickerAnimation.value,
+                  )!
+                : EdgeInsets.zero;
+            return Padding(padding: safeAreaPadding, child: child);
+          },
           child: Center(heightFactor: 1, child: messageInput),
         ),
       ),
@@ -669,9 +697,9 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
                 ),
               ),
             ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
+            SizeTransition(
+              sizeFactor: _pickerAnimation,
+              axisAlignment: -1,
               child: _buildInlineAttachmentPicker(context),
             ),
           ],
@@ -771,7 +799,10 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
   void _onAttachmentButtonPressed() => _isPickerVisible ? _hidePicker() : _showPicker();
 
   void _showPicker() {
-    if (_isPickerVisible) return;
+    if (_isPickerVisible) {
+      _pickerAnimationController.forward();
+      return;
+    }
 
     setState(() {
       final attachmentLimit = widget.attachmentLimit;
@@ -795,11 +826,14 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
         _effectiveFocusNode.unfocus();
       }
     });
+    _pickerAnimationController.forward();
   }
 
   void _hidePicker() {
     if (!_isPickerVisible) return;
-    setState(_disposePickerResources);
+    _pickerAnimationController.reverse().then((_) {
+      if (mounted) setState(_disposePickerResources);
+    });
   }
 
   void _disposePickerResources() {
@@ -1162,6 +1196,8 @@ class StreamMessageInputState extends State<StreamMessageInput> with Restoration
 
   @override
   void dispose() {
+    _pickerAnimation.dispose();
+    _pickerAnimationController.dispose();
     _disposePickerResources();
     _effectiveController
       ..removeListener(_onChangedThrottled)
