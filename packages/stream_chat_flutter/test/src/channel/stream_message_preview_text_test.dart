@@ -83,7 +83,7 @@ void main() {
 
       final icons = _findIcons(tester);
       expect(icons, hasLength(1));
-      expect(icons.first.size, 14);
+      expect(icons.first.size, 16);
 
       expect(_extractText(tester), 'Message deleted');
 
@@ -215,7 +215,7 @@ void main() {
 
       final icons = _findIcons(tester);
       expect(icons, hasLength(1));
-      expect(icons.first.size, 14);
+      expect(icons.first.size, 16);
       expect(_extractText(tester), 'Photo');
     });
 
