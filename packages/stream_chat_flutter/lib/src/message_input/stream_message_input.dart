@@ -397,6 +397,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   StreamSubscription<Draft?>? _draftStreamSubscription;
+  StreamSubscription<Event>? _messageUpdatedSubscription;
+  StreamSubscription<Event>? _messageDeletedSubscription;
 
   @override
   void initState() {
@@ -443,6 +445,36 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
       _draftStreamSubscription = draftStream?.distinct().listen(_onDraftUpdate);
     }
+
+    // Keeps the quoted message in sync with remote changes while composing.
+    if (!_isEditing) {
+      _messageUpdatedSubscription = channel.on(EventType.messageUpdated).listen(_onQuotedMessageUpdated);
+
+      _messageDeletedSubscription = channel.on(EventType.messageDeleted).listen(_onQuotedMessageDeleted);
+    }
+  }
+
+  void _onQuotedMessageUpdated(Event event) {
+    final updatedMessage = event.message;
+    if (updatedMessage == null) return;
+
+    if (_effectiveController.message.quotedMessageId == updatedMessage.id) {
+      _effectiveController.quotedMessage = updatedMessage;
+    }
+  }
+
+  void _onQuotedMessageDeleted(Event event) {
+    final deletedMessageId = event.message?.id;
+    if (deletedMessageId == null) return;
+
+    if (_effectiveController.message.quotedMessageId == deletedMessageId) {
+      _clearQuotedMessage();
+    }
+  }
+
+  void _clearQuotedMessage() {
+    _effectiveController.clearQuotedMessage();
+    widget.onQuotedMessageCleared?.call();
   }
 
   void _onDraftUpdate(Draft? draft) {
@@ -1209,6 +1241,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
     _onChangedThrottled.cancel();
     _audioRecorderController.dispose();
     _draftStreamSubscription?.cancel();
+    _messageUpdatedSubscription?.cancel();
+    _messageDeletedSubscription?.cancel();
     super.dispose();
   }
 }
