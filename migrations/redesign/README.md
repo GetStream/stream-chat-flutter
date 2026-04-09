@@ -131,6 +131,8 @@ class MyCustomButton extends StatelessWidget {
 | Reaction List & Detail Sheet | [reaction_list.md](reaction_list.md) |
 | Audio Waveform Theme | [audio_theme.md](audio_theme.md) |
 | Attachments & Polls | [attachments_and_polls.md](attachments_and_polls.md) |
+| Headers, Icons & Configuration | [headers_and_icons.md](headers_and_icons.md) |
+| Localizations | [localizations.md](localizations.md) |
 
 ## Need Help?
 

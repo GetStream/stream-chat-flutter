@@ -596,15 +596,15 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     final iconSize = (textStyle?.fontSize ?? 16) + 2;
     TextSpan? latestVoterSpan;
 
-    if (poll.latestVotes.firstOrNull case final latestVote?) {
+    if (poll.latestVotes.firstOrNull case final latestVote?
+        when latestVote.answerText != null && latestVote.answerText!.isNotEmpty) {
+      final answerText = latestVote.answerText!;
       if (latestVote.user?.id == currentUser?.id) {
         final youVoted = translations.pollYouVotedText;
-        latestVoterSpan = TextSpan(text: '$youVoted: ${latestVote.answerText}');
+        latestVoterSpan = TextSpan(text: '$youVoted: $answerText');
       } else if (latestVote.user case final latestVoter?) {
-        if (latestVote.answerText != null) {
-          final someoneVoted = translations.pollSomeoneVotedText(latestVoter.name.split(' ')[0]);
-          latestVoterSpan = TextSpan(text: '$someoneVoted: ${latestVote.answerText}');
-        }
+        final someoneVoted = translations.pollSomeoneVotedText(latestVoter.name.split(' ')[0]);
+        latestVoterSpan = TextSpan(text: '$someoneVoted: $answerText');
       }
     }
 

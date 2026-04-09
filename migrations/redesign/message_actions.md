@@ -27,6 +27,9 @@ This guide covers the migration for the redesigned message action components in 
 | `StreamMessageActionItem` | **Removed** — rendering built into `StreamContextMenuAction` |
 | `StreamMessageActionsModal.onActionTap` | **Removed** — use `onTap` per-action or await the dialog return value |
 | `StreamMessageActionsModal.messageActions` | **Type changed**: `List<StreamMessageAction>` → `List<Widget>` |
+| `StreamMessageActionsModal.reverse` | **Removed** — use `alignment: AlignmentGeometry?` |
+| `StreamMessageActionsModal.reactionPickerBuilder` | **Removed** — use `showReactionPicker: bool` |
+| `StreamMessageReactionsModal` | **Deleted** — use `ReactionDetailSheet` (see [reaction_list.md](reaction_list.md)) |
 | `StreamMessageReactionsModal.onReactionPicked` | **Removed** — await the dialog return value (`SelectReaction`) |
 | `ModeratedMessageActionsModal.onActionTap` | **Removed** — use `onTap` per-action or await the dialog return value |
 | `ModeratedMessageActionsModal.messageActions` | **Type changed**: `List<StreamMessageAction>` → `List<StreamContextMenuAction>` |
@@ -157,6 +160,9 @@ StreamContextMenuAction<MessageAction>(
 
 - `onActionTap: OnMessageActionTap?` parameter **removed** — the modal no longer holds a top-level callback; use `onTap` on individual actions or await the dialog's return value
 - `messageActions` parameter type changed from `List<StreamMessageAction>` to `List<Widget>`
+- `reverse: bool` parameter **removed** — use `alignment: AlignmentGeometry?` instead
+- `reactionPickerBuilder: ReactionPickerBuilder` parameter **removed** — use `showReactionPicker: bool` instead
+- New `leadingInset: double` parameter added (default `0`)
 
 ### Migration
 
@@ -227,6 +233,7 @@ if (action is CopyMessage) _copyMessage(action.message);
 
 ### Breaking Changes
 
+- `StreamMessageReactionsModal` class has been **deleted**. Any direct reference to the class will cause a compile error. Use `ReactionDetailSheet` instead — see [Reaction List & Detail Sheet](reaction_list.md).
 - `onReactionPicked: OnMessageActionTap<SelectReaction>?` parameter **removed** — the modal now pops the route with a `SelectReaction`; await the dialog return value to handle it
 
 ### Migration

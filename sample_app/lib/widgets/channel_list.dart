@@ -124,79 +124,81 @@ class _ChannelListDefault extends StatelessWidget {
           controller: channelListController,
           itemBuilder: (context, channels, index, defaultWidget) {
             final channel = channels[index];
-            final backgroundColor = chatTheme.colorTheme.inputBg;
-            final canDeleteChannel = channel.canDeleteChannel;
-            return Slidable(
-              groupTag: 'channels-actions',
-              endActionPane: ActionPane(
-                extentRatio: canDeleteChannel ? 0.40 : 0.20,
-                motion: const BehindMotion(),
-                children: [
-                  CustomSlidableAction(
-                    backgroundColor: backgroundColor,
-                    onPressed: (_) {
-                      showChannelInfoModalBottomSheet(
-                        context: context,
-                        channel: channel,
-                        onViewInfoTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                final isOneToOne = channel.memberCount == 2 && channel.isDistinct;
-                                return StreamChannel(
-                                  channel: channel,
-                                  child: isOneToOne
-                                      ? ChatInfoScreen(
-                                          messageTheme: chatTheme.ownMessageTheme,
-                                          user: channel.state!.members
-                                              .where((m) => m.userId != channel.client.state.currentUser!.id)
-                                              .first
-                                              .user,
-                                        )
-                                      : GroupInfoScreen(
-                                          messageTheme: chatTheme.ownMessageTheme,
-                                        ),
-                                );
-                              },
-                            ),
+            return StreamBuilder<bool>(
+              stream: channel.isMutedStream,
+              initialData: channel.isMuted,
+              builder: (context, snapshot) {
+                final isMuted = snapshot.data ?? false;
+                return Slidable(
+                  groupTag: 'channels-actions',
+                  endActionPane: ActionPane(
+                    extentRatio: 0.4,
+                    motion: const BehindMotion(),
+                    children: [
+                      CustomSlidableAction(
+                        backgroundColor: context.streamColorScheme.backgroundSurface,
+                        onPressed: (_) {
+                          showChannelInfoModalBottomSheet(
+                            context: context,
+                            channel: channel,
+                            onViewInfoTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    final isOneToOne = channel.memberCount == 2 && channel.isDistinct;
+                                    return StreamChannel(
+                                      channel: channel,
+                                      child: isOneToOne
+                                          ? ChatInfoScreen(
+                                              messageTheme: chatTheme.ownMessageTheme,
+                                              user: channel.state!.members
+                                                  .where((m) => m.userId != channel.client.state.currentUser!.id)
+                                                  .first
+                                                  .user,
+                                            )
+                                          : GroupInfoScreen(
+                                              messageTheme: chatTheme.ownMessageTheme,
+                                            ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                    child: const Icon(Icons.more_horiz),
-                  ),
-                  if (canDeleteChannel)
-                    CustomSlidableAction(
-                      backgroundColor: backgroundColor,
-                      child: Icon(
-                        context.streamIcons.delete20,
-                        color: chatTheme.colorTheme.accentError,
+                        child: const Icon(Icons.more_horiz),
                       ),
-                      onPressed: (_) async {
-                        final res = await showConfirmationBottomSheet(
-                          context,
-                          title: 'Delete Conversation',
-                          question: 'Are you sure you want to delete this conversation?',
-                          okText: 'Delete',
-                          cancelText: 'Cancel',
-                          icon: Icon(
-                            context.streamIcons.delete20,
-                            color: chatTheme.colorTheme.accentError,
-                          ),
-                        );
-                        if (res == true) {
-                          await channelListController.deleteChannel(channel);
-                        }
-                      },
-                    ),
-                ],
-              ),
-              child: ColoredBox(
-                color: channel.isPinned ? chatTheme.colorTheme.highlight : Colors.transparent,
-                child: defaultWidget,
-              ),
+                      CustomSlidableAction(
+                        backgroundColor: chatTheme.colorTheme.accentPrimary,
+                        foregroundColor: Colors.white,
+                        onPressed: (_) async {
+                          if (isMuted) {
+                            await channel.unmute();
+                          } else {
+                            await channel.mute();
+                          }
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              isMuted ? context.streamIcons.audio20 : context.streamIcons.mute20,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  child: ColoredBox(
+                    color: channel.isPinned ? chatTheme.colorTheme.highlight : Colors.transparent,
+                    child: defaultWidget,
+                  ),
+                );
+              },
             );
           },
           onChannelTap: (channel) {

@@ -205,7 +205,7 @@ The attachment thumbnails shown in the composer input header are now rendered by
 
 ### `StreamMessageComposerAttachmentList`
 
-Renders the full list of attachment thumbnails in the composer. It replaces the old `StreamMessageInputAttachmentList` in the composer context.
+Renders the full list of attachment thumbnails in the composer. The old `StreamMessageInputAttachmentList` class has been **deleted** — any direct reference to it will cause a compile error. Use `StreamMessageComposerAttachmentList` instead.
 
 **Props class:** `StreamMessageComposerAttachmentListProps`
 
