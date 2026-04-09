@@ -76,5 +76,6 @@ MaterialApp(
 
 - [ ] Remove any `StreamChatThemeData.audioWaveformTheme` usages
 - [ ] Remove any `StreamChatThemeData.audioWaveformSliderTheme` usages
+- [ ] Remove `audioWaveformTheme` and `audioWaveformSliderTheme` from any `StreamChatThemeData.copyWith()` calls — these parameters no longer exist and will cause a compile error
 - [ ] Move audio waveform color / style customizations into a `StreamTheme` extension on `MaterialApp`
 - [ ] Import paths for `StreamAudioWaveform` and `StreamAudioWaveformSlider` remain the same (`package:stream_chat_flutter/stream_chat_flutter.dart`)

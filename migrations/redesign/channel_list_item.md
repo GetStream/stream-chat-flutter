@@ -128,7 +128,7 @@ StreamChannelListTile(
 
 ## Theme Migration
 
-`StreamChannelPreviewThemeData` has been replaced by `StreamChannelListItemThemeData`.
+`StreamChannelPreviewThemeData` has been replaced by `StreamChannelListItemThemeData`. Additionally, the `StreamChannelPreviewTheme` inherited widget itself is deprecated — replace it with `StreamChannelListItemTheme`.
 
 ### Property Mapping
 
@@ -261,7 +261,7 @@ ChannelLastMessageDate(
 - [ ] Replace `StreamChannelListTile` with `StreamChannelListItem`
 - [ ] Remove `tileColor`, `visualDensity`, `contentPadding`, `selectedTileColor`, `unreadIndicatorBuilder` parameters
 - [ ] Move slot customization (`leading`, `title`, `subtitle`, `trailing`) to `StreamComponentFactory`
-- [ ] Replace `StreamChannelPreviewTheme` with `StreamChannelListItemTheme`
+- [ ] Replace `StreamChannelPreviewTheme` inherited widget with `StreamChannelListItemTheme` — `StreamChannelPreviewTheme` is `@Deprecated` and will be removed in a future release
 - [ ] Replace `StreamChatThemeData.channelPreviewTheme` with `StreamChatThemeData.channelListItemTheme`
 - [ ] Rename `lastMessageAtStyle` to `timestampStyle`
 - [ ] Move `lastMessageAtFormatter` from theme to `ChannelLastMessageDate(formatter: ...)`
