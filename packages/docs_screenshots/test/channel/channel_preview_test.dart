@@ -175,20 +175,23 @@ void main() {
             body: Stack(
               children: [
                 Container(
-                  color: Colors.red,
+                  color: Colors.grey[200],
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.delete, color: Colors.white),
-                      Text('Delete', style: TextStyle(color: Colors.white, fontSize: 12)),
+                      Icon(Icons.delete, color: Colors.red),
+                      Text('Delete', style: TextStyle(color: Colors.red, fontSize: 12)),
                     ],
                   ),
                 ),
                 Transform.translate(
                   offset: const Offset(-80, 0),
-                  child: StreamChannelListItem(channel: channel),
+                  child: ColoredBox(
+                    color: Colors.white,
+                    child: StreamChannelListItem(channel: channel),
+                  ),
                 ),
               ],
             ),
