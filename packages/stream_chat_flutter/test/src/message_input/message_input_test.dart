@@ -360,9 +360,6 @@ void main() {
       );
       when(() => channelState.messages).thenReturn([]);
       when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
-      when(() => channel.on(any(), any(), any(), any())).thenAnswer(
-        (_) => const Stream<Event>.empty(),
-      );
     });
 
     testWidgets(
@@ -624,11 +621,12 @@ void main() {
     setUp(() {
       registerFallbackValue(Message());
 
+      eventController = StreamController<Event>.broadcast();
+
       client = MockClient();
       clientState = MockClientState();
-      channel = MockChannel();
+      channel = MockChannel(eventStream: eventController.stream);
       channelState = MockChannelState();
-      eventController = StreamController<Event>.broadcast();
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
@@ -644,12 +642,6 @@ void main() {
       when(() => channelState.membersStream).thenAnswer((_) => Stream.value([]));
       when(() => channelState.messages).thenReturn([]);
       when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
-
-      when(() => channel.on(any(), any(), any(), any())).thenAnswer((invocation) {
-        final eventType = invocation.positionalArguments[0] as String?;
-        if (eventType == null) return eventController.stream;
-        return eventController.stream.where((e) => e.type == eventType);
-      });
     });
 
     tearDown(() => eventController.close());
