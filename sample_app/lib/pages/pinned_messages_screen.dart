@@ -106,7 +106,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
           if (channel.state == null) {
             await channel.watch();
           }
-          router.pushNamed(
+          router.goNamed(
             Routes.CHANNEL_PAGE.name,
             pathParameters: Routes.CHANNEL_PAGE.params(channel),
             queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
