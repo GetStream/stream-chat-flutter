@@ -657,201 +657,208 @@ void main() {
     group('quoted message', () {
       testWidgets(
         'clears quoted message on message.deleted event',
-      (tester) async {
-        final quotedMessage = Message(
-          id: 'quoted-msg-id',
-          text: 'Original message',
-          user: User(id: 'other-user'),
-        );
-        final controller = StreamMessageInputController(
-          message: Message(
-            quotedMessage: quotedMessage,
-            quotedMessageId: quotedMessage.id,
-          ),
-        );
-        addTearDown(controller.dispose);
-
-        var onQuotedMessageClearedCalled = false;
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StreamChat(
-              client: client,
-              child: StreamChannel(
-                channel: channel,
-                child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
-                    messageInputController: controller,
-                    onQuotedMessageCleared: () {
-                      onQuotedMessageClearedCalled = true;
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(controller.message.quotedMessageId, 'quoted-msg-id');
-
-        eventController.add(Event(
-          type: EventType.messageDeleted,
-          message: Message(id: 'quoted-msg-id'),
-        ));
-        await tester.pump();
-
-        expect(onQuotedMessageClearedCalled, isTrue);
-      },
-    );
-
-    testWidgets(
-      'does not clear quoted message when a different message is deleted',
-      (tester) async {
-        final quotedMessage = Message(
-          id: 'quoted-msg-id',
-          text: 'Original message',
-          user: User(id: 'other-user'),
-        );
-        final controller = StreamMessageInputController(
-          message: Message(
-            quotedMessage: quotedMessage,
-            quotedMessageId: quotedMessage.id,
-          ),
-        );
-        addTearDown(controller.dispose);
-
-        var onQuotedMessageClearedCalled = false;
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StreamChat(
-              client: client,
-              child: StreamChannel(
-                channel: channel,
-                child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
-                    messageInputController: controller,
-                    onQuotedMessageCleared: () {
-                      onQuotedMessageClearedCalled = true;
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        eventController.add(Event(
-          type: EventType.messageDeleted,
-          message: Message(id: 'some-other-msg-id'),
-        ));
-        await tester.pump();
-
-        expect(controller.message.quotedMessageId, 'quoted-msg-id');
-        expect(controller.message.quotedMessage, isNotNull);
-        expect(onQuotedMessageClearedCalled, isFalse);
-      },
-    );
-
-    testWidgets(
-      'updates quoted message on message.updated event',
-      (tester) async {
-        final quotedMessage = Message(
-          id: 'quoted-msg-id',
-          text: 'Original text',
-          user: User(id: 'other-user'),
-        );
-        final controller = StreamMessageInputController(
-          message: Message(
-            quotedMessage: quotedMessage,
-            quotedMessageId: quotedMessage.id,
-          ),
-        );
-        addTearDown(controller.dispose);
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StreamChat(
-              client: client,
-              child: StreamChannel(
-                channel: channel,
-                child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
-                    messageInputController: controller,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(controller.message.quotedMessage?.text, 'Original text');
-
-        eventController.add(Event(
-          type: EventType.messageUpdated,
-          message: Message(
+        (tester) async {
+          final quotedMessage = Message(
             id: 'quoted-msg-id',
-            text: 'Edited text',
+            text: 'Original message',
             user: User(id: 'other-user'),
-          ),
-        ));
-        await tester.pump();
+          );
+          final controller = StreamMessageInputController(
+            message: Message(
+              quotedMessage: quotedMessage,
+              quotedMessageId: quotedMessage.id,
+            ),
+          );
+          addTearDown(controller.dispose);
 
-        expect(controller.message.quotedMessageId, 'quoted-msg-id');
-        expect(controller.message.quotedMessage?.text, 'Edited text');
-      },
-    );
+          var onQuotedMessageClearedCalled = false;
 
-    testWidgets(
-      'does not update quoted message when a different message is updated',
-      (tester) async {
-        final quotedMessage = Message(
-          id: 'quoted-msg-id',
-          text: 'Original text',
-          user: User(id: 'other-user'),
-        );
-        final controller = StreamMessageInputController(
-          message: Message(
-            quotedMessage: quotedMessage,
-            quotedMessageId: quotedMessage.id,
-          ),
-        );
-        addTearDown(controller.dispose);
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StreamChat(
-              client: client,
-              child: StreamChannel(
-                channel: channel,
-                child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
-                    messageInputController: controller,
+          await tester.pumpWidget(
+            MaterialApp(
+              home: StreamChat(
+                client: client,
+                child: StreamChannel(
+                  channel: channel,
+                  child: Scaffold(
+                    bottomNavigationBar: StreamMessageInput(
+                      messageInputController: controller,
+                      onQuotedMessageCleared: () {
+                        onQuotedMessageClearedCalled = true;
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-        await tester.pumpAndSettle();
+          );
+          await tester.pumpAndSettle();
 
-        eventController.add(Event(
-          type: EventType.messageUpdated,
-          message: Message(
-            id: 'some-other-msg-id',
-            text: 'Edited text',
+          expect(controller.message.quotedMessageId, 'quoted-msg-id');
+
+          eventController.add(
+            Event(
+              type: EventType.messageDeleted,
+              message: Message(id: 'quoted-msg-id'),
+            ),
+          );
+          await tester.pump();
+
+          expect(onQuotedMessageClearedCalled, isTrue);
+        },
+      );
+
+      testWidgets(
+        'does not clear quoted message when a different message is deleted',
+        (tester) async {
+          final quotedMessage = Message(
+            id: 'quoted-msg-id',
+            text: 'Original message',
             user: User(id: 'other-user'),
-          ),
-        ));
-        await tester.pump();
+          );
+          final controller = StreamMessageInputController(
+            message: Message(
+              quotedMessage: quotedMessage,
+              quotedMessageId: quotedMessage.id,
+            ),
+          );
+          addTearDown(controller.dispose);
 
-        expect(controller.message.quotedMessage?.text, 'Original text');
-      },
-    );
+          var onQuotedMessageClearedCalled = false;
 
+          await tester.pumpWidget(
+            MaterialApp(
+              home: StreamChat(
+                client: client,
+                child: StreamChannel(
+                  channel: channel,
+                  child: Scaffold(
+                    bottomNavigationBar: StreamMessageInput(
+                      messageInputController: controller,
+                      onQuotedMessageCleared: () {
+                        onQuotedMessageClearedCalled = true;
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          eventController.add(
+            Event(
+              type: EventType.messageDeleted,
+              message: Message(id: 'some-other-msg-id'),
+            ),
+          );
+          await tester.pump();
+
+          expect(controller.message.quotedMessageId, 'quoted-msg-id');
+          expect(controller.message.quotedMessage, isNotNull);
+          expect(onQuotedMessageClearedCalled, isFalse);
+        },
+      );
+
+      testWidgets(
+        'updates quoted message on message.updated event',
+        (tester) async {
+          final quotedMessage = Message(
+            id: 'quoted-msg-id',
+            text: 'Original text',
+            user: User(id: 'other-user'),
+          );
+          final controller = StreamMessageInputController(
+            message: Message(
+              quotedMessage: quotedMessage,
+              quotedMessageId: quotedMessage.id,
+            ),
+          );
+          addTearDown(controller.dispose);
+
+          await tester.pumpWidget(
+            MaterialApp(
+              home: StreamChat(
+                client: client,
+                child: StreamChannel(
+                  channel: channel,
+                  child: Scaffold(
+                    bottomNavigationBar: StreamMessageInput(
+                      messageInputController: controller,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(controller.message.quotedMessage?.text, 'Original text');
+
+          eventController.add(
+            Event(
+              type: EventType.messageUpdated,
+              message: Message(
+                id: 'quoted-msg-id',
+                text: 'Edited text',
+                user: User(id: 'other-user'),
+              ),
+            ),
+          );
+          await tester.pump();
+
+          expect(controller.message.quotedMessageId, 'quoted-msg-id');
+          expect(controller.message.quotedMessage?.text, 'Edited text');
+        },
+      );
+
+      testWidgets(
+        'does not update quoted message when a different message is updated',
+        (tester) async {
+          final quotedMessage = Message(
+            id: 'quoted-msg-id',
+            text: 'Original text',
+            user: User(id: 'other-user'),
+          );
+          final controller = StreamMessageInputController(
+            message: Message(
+              quotedMessage: quotedMessage,
+              quotedMessageId: quotedMessage.id,
+            ),
+          );
+          addTearDown(controller.dispose);
+
+          await tester.pumpWidget(
+            MaterialApp(
+              home: StreamChat(
+                client: client,
+                child: StreamChannel(
+                  channel: channel,
+                  child: Scaffold(
+                    bottomNavigationBar: StreamMessageInput(
+                      messageInputController: controller,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          eventController.add(
+            Event(
+              type: EventType.messageUpdated,
+              message: Message(
+                id: 'some-other-msg-id',
+                text: 'Edited text',
+                user: User(id: 'other-user'),
+              ),
+            ),
+          );
+          await tester.pump();
+
+          expect(controller.message.quotedMessage?.text, 'Original text');
+        },
+      );
     });
 
     group('editing message', () {
@@ -886,14 +893,16 @@ void main() {
           expect(controller.message.id, 'editing-msg-id');
           expect(controller.message.text, 'Original text');
 
-          eventController.add(Event(
-            type: EventType.messageUpdated,
-            message: Message(
-              id: 'editing-msg-id',
-              text: 'Updated by another device',
-              user: User(id: 'user-id'),
+          eventController.add(
+            Event(
+              type: EventType.messageUpdated,
+              message: Message(
+                id: 'editing-msg-id',
+                text: 'Updated by another device',
+                user: User(id: 'user-id'),
+              ),
             ),
-          ));
+          );
           await tester.pump();
 
           expect(controller.message.id, 'editing-msg-id');
@@ -929,14 +938,16 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          eventController.add(Event(
-            type: EventType.messageUpdated,
-            message: Message(
-              id: 'some-other-msg-id',
-              text: 'Edited text',
-              user: User(id: 'other-user'),
+          eventController.add(
+            Event(
+              type: EventType.messageUpdated,
+              message: Message(
+                id: 'some-other-msg-id',
+                text: 'Edited text',
+                user: User(id: 'other-user'),
+              ),
             ),
-          ));
+          );
           await tester.pump();
 
           expect(controller.message.text, 'Original text');
@@ -974,10 +985,12 @@ void main() {
           expect(controller.message.id, 'editing-msg-id');
           expect(controller.message.state.isUpdating, isTrue);
 
-          eventController.add(Event(
-            type: EventType.messageDeleted,
-            message: Message(id: 'editing-msg-id'),
-          ));
+          eventController.add(
+            Event(
+              type: EventType.messageDeleted,
+              message: Message(id: 'editing-msg-id'),
+            ),
+          );
           await tester.pump();
 
           expect(controller.message.id, isNot('editing-msg-id'));
@@ -1013,10 +1026,12 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          eventController.add(Event(
-            type: EventType.messageDeleted,
-            message: Message(id: 'some-other-msg-id'),
-          ));
+          eventController.add(
+            Event(
+              type: EventType.messageDeleted,
+              message: Message(id: 'some-other-msg-id'),
+            ),
+          );
           await tester.pump();
 
           expect(controller.message.id, 'editing-msg-id');
