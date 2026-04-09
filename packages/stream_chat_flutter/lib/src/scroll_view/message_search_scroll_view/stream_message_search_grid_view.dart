@@ -322,7 +322,7 @@ class StreamMessageSearchGridView extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
                   emptyIcon: Icon(
-                    context.streamIcons.bubble3ChatMessage,
+                    context.streamIcons.messageBubble32,
                     size: 148,
                     color: chatThemeData.colorTheme.disabled,
                   ),

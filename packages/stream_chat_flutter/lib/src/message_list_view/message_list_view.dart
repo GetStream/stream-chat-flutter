@@ -110,8 +110,11 @@ class StreamMessageListView extends StatefulWidget {
     this.parentMessage,
     this.threadBuilder,
     this.onThreadTap,
+    this.onViewInChannelTap,
     this.onEditMessageTap,
     this.onReplyTap,
+    this.onShowMessage,
+    this.attachmentActionsModalBuilder,
     this.swipeToReply = false,
     this.onUserAvatarTap,
     this.onReactionsTap,
@@ -216,6 +219,19 @@ class StreamMessageListView extends StatefulWidget {
   /// built using [threadBuilder]
   final ThreadTapCallback? onThreadTap;
 
+  /// Called when the "View" button on the "Also sent in channel" annotation
+  /// is tapped inside a thread view.
+  ///
+  /// Use this to navigate to the channel screen and scroll to / highlight
+  /// the given [Message].
+  ///
+  /// When null and the thread was opened via the default [threadBuilder]
+  /// navigation, the thread screen is automatically popped and the channel
+  /// list scrolls to the message. Provide this callback to override that
+  /// behaviour — for example when the thread is opened from a thread list
+  /// or deep link where popping would not land on the channel screen.
+  final void Function(Message message)? onViewInChannelTap;
+
   /// {@macro onEditMessageTap}
   ///
   /// If provided, the inline edit flow is used instead of the edit bottom sheet.
@@ -225,6 +241,18 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Forwarded to each [StreamMessageWidget] in the list.
   final void Function(Message)? onReplyTap;
+
+  /// Called when the "show in chat" action is tapped in the full-screen
+  /// media gallery.
+  ///
+  /// Forwarded to each [StreamMessageWidget] in the list.
+  final ShowMessageCallback? onShowMessage;
+
+  /// Widget builder for the attachment actions modal shown in the full-screen
+  /// media gallery.
+  ///
+  /// Forwarded to each [StreamMessageWidget] in the list.
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// Whether swiping a message triggers a quoted-reply action.
   ///
@@ -451,7 +479,7 @@ class StreamMessageListView extends StatefulWidget {
 
 class _StreamMessageListViewState extends State<StreamMessageListView> {
   ItemScrollController? _scrollController;
-  void Function(Message)? _onThreadTap;
+  void Function(Message parentMessage, Message? threadMessage)? _onThreadTap;
   final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
   late final ItemPositionsListener _itemPositionListener;
   int? _messageListLength;
@@ -520,21 +548,28 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
       _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
 
-      if (widget.highlightInitialMessage) {
-        final initialMessageId = streamChannel?.initialMessageId;
-        if (initialMessageId != null) {
-          _highlightedMessageId = initialMessageId;
-          _highlightGeneration++;
-        }
+      final highlightMessageId = widget.highlightInitialMessage
+          ? (streamChannel?.initialMessageId ?? _ThreadHighlightScope.of(context))
+          : null;
+
+      if (highlightMessageId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _moveToAndHighlight(
+            messages: messages,
+            messageId: highlightMessageId,
+            initialScrollIndex: widget.initialScrollIndex,
+            scrollTo: false,
+          );
+        });
+      } else {
+        initialIndex = getInitialIndex(
+          widget.initialScrollIndex,
+          streamChannel!,
+          widget.messageFilter,
+        );
+        initialAlignment = _initialAlignment;
       }
-
-      initialIndex = getInitialIndex(
-        widget.initialScrollIndex,
-        streamChannel!,
-        widget.messageFilter,
-      );
-
-      initialAlignment = _initialAlignment;
 
       if (_scrollController?.isAttached == true) {
         _scrollController?.jumpTo(
@@ -585,31 +620,50 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     });
   }
 
-  Future<void> _scrollToAndHighlight(
-    String messageId, {
+  Future<void> _moveToAndHighlight({
     required List<Message> messages,
+    String? messageId,
+    int? initialScrollIndex,
+    bool scrollTo = true,
   }) async {
-    final index = messages.indexWhere((m) => m.id == messageId);
-    if (index >= 0) {
-      await _scrollController?.scrollTo(
-        index: index + 2, // +2 to account for loader and footer
-        duration: const Duration(seconds: 1),
-        curve: Curves.easeInOut,
-        alignment: 0.1,
+    if (messageId != null) {
+      final index = messages.indexWhere((m) => m.id == messageId);
+
+      if (index >= 0) {
+        if (scrollTo) {
+          _scrollController?.scrollTo(
+            index: index + 2, // +2 to account for loader and footer
+            duration: const Duration(seconds: 1),
+            curve: Curves.easeInOut,
+            alignment: 0.1,
+          );
+        } else {
+          _scrollController?.jumpTo(
+            index: index + 2, // +2 to account for loader and footer
+            alignment: 0.1,
+          );
+        }
+      } else {
+        await streamChannel!.loadChannelAtMessage(messageId).then((_) async {
+          initialIndex = getInitialIndex(
+            initialScrollIndex,
+            streamChannel!,
+            widget.messageFilter,
+            messageId: messageId,
+          );
+          initialAlignment = 0.1;
+        });
+      }
+    } else if (initialScrollIndex != null) {
+      _scrollController?.jumpTo(
+        index: initialScrollIndex,
+        alignment: initialAlignment,
       );
-    } else {
-      await streamChannel!.loadChannelAtMessage(messageId).then((_) async {
-        initialIndex = getInitialIndex(
-          null,
-          streamChannel!,
-          widget.messageFilter,
-          messageId: messageId,
-        );
-        initialAlignment = 0.1;
-      });
     }
 
-    _highlightMessage(messageId);
+    if (messageId != null) {
+      _highlightMessage(messageId);
+    }
   }
 
   @override
@@ -1112,6 +1166,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onMessageLongPress: widget.onMessageLongPress,
       onEditMessageTap: widget.onEditMessageTap,
       onReplyTap: widget.onReplyTap,
+      onShowMessage: widget.onShowMessage,
+      attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
       onUserAvatarTap: widget.onUserAvatarTap,
       onReactionsTap: widget.onReactionsTap,
       onQuotedMessageTap: widget.onQuotedMessageTap,
@@ -1181,11 +1237,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 },
                 child: widget.reverse
                     ? Icon(
-                        context.streamIcons.arrowDown,
+                        context.streamIcons.arrowDown20,
                         color: _streamTheme.colorTheme.textHighEmphasis,
                       )
                     : Icon(
-                        context.streamIcons.arrowUp,
+                        context.streamIcons.arrowUp20,
                         color: _streamTheme.colorTheme.textHighEmphasis,
                       ),
               ),
@@ -1255,18 +1311,29 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       message: message,
       swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
+      onViewInChannelTap: _isThreadConversation
+          ? widget.onViewInChannelTap ?? (message) => Navigator.of(context).pop(message.id)
+          : null,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
       onEditMessageTap: widget.onEditMessageTap,
       onReplyTap: widget.onReplyTap,
+      onShowMessage: switch (widget.onShowMessage) {
+        final onTap? => onTap,
+        _ => (message, _) => _moveToAndHighlight(
+          messageId: message.id,
+          messages: messages,
+        ),
+      },
+      attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
       onUserAvatarTap: widget.onUserAvatarTap,
       onReactionsTap: widget.onReactionsTap,
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
       onQuotedMessageTap: switch (widget.onQuotedMessageTap) {
         final onTap? => onTap,
-        _ => (quotedMessage) => _scrollToAndHighlight(
-          quotedMessage.id,
+        _ => (quotedMessage) => _moveToAndHighlight(
+          messageId: quotedMessage.id,
           messages: messages,
         ),
       },
@@ -1391,37 +1458,64 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // Case 1: widget.onThreadTap is provided.
       // The created callback will use widget.onThreadTap, passing the result
       // of widget.threadBuilder (if provided) as the second argument.
-      (final onThreadTap?, final threadBuilder) => (Message message) {
+      (final onThreadTap?, final threadBuilder) => (Message parentMessage, Message? threadMessage) {
         onThreadTap(
-          message,
-          threadBuilder?.call(context, message),
+          parentMessage,
+          threadBuilder?.call(context, parentMessage),
         );
       },
       // Case 2: widget.onThreadTap is null, but widget.threadBuilder is provided.
       // The created callback will perform the default navigation action,
       // using widget.threadBuilder to build the thread page.
-      (null, final threadBuilder?) => (Message message) {
-        final threadPage = StreamChatConfiguration(
+      (null, final threadBuilder?) => (Message parentMessage, Message? threadMessage) async {
+        Widget threadPage = StreamChatConfiguration(
           // This is needed to provide the nearest reaction icons to the
           // StreamMessageReactionsModal.
           data: StreamChatConfiguration.of(context),
           child: StreamChannel(
             channel: streamChannel!.channel,
             child: BetterStreamBuilder<Message>(
-              initialData: message,
+              initialData: parentMessage,
               stream: streamChannel!.channel.state?.messagesStream.map(
-                (it) => it.firstWhere((m) => m.id == message.id),
+                (it) => it.firstWhere((m) => m.id == parentMessage.id),
               ),
               builder: (_, data) => threadBuilder(context, data),
             ),
           ),
         );
 
-        Navigator.of(context).push(
+        if (threadMessage != null) {
+          threadPage = _ThreadHighlightScope(
+            messageId: threadMessage.id,
+            child: threadPage,
+          );
+        }
+
+        final result = await Navigator.of(context).push<String>(
           MaterialPageRoute(builder: (_) => threadPage),
         );
+
+        if (result != null && mounted) {
+          _moveToAndHighlight(messageId: result, messages: messages);
+        }
       },
       _ => null,
     };
   }
+}
+
+class _ThreadHighlightScope extends InheritedWidget {
+  const _ThreadHighlightScope({
+    required this.messageId,
+    required super.child,
+  });
+
+  final String messageId;
+
+  static String? of(BuildContext context) {
+    return context.findAncestorWidgetOfExactType<_ThreadHighlightScope>()?.messageId;
+  }
+
+  @override
+  bool updateShouldNotify(_ThreadHighlightScope oldWidget) => messageId != oldWidget.messageId;
 }

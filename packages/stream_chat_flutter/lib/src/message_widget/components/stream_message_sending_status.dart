@@ -10,13 +10,13 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// Once the message is fully sent, an icon indicates whether it has been
 /// sent, delivered, or read.
 ///
-/// This widget is typically used inside [StreamMessageFooter] and is only
+/// This widget is typically used inside [StreamMessageMetadata] and is only
 /// shown for messages sent by the current user.
 ///
 /// See also:
 ///
 ///  * [StreamSendingIndicator], which renders the sent/delivered/read icon.
-///  * [StreamMessageFooter], which hosts this widget.
+///  * [StreamMessageMetadata], which hosts this widget.
 class StreamMessageSendingStatus extends StatelessWidget {
   /// Creates a sending status widget for the given [message].
   const StreamMessageSendingStatus({

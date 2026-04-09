@@ -49,9 +49,9 @@ class SearchTextField extends StatelessWidget {
               decoration: InputDecoration(
                 prefixIconConstraints: BoxConstraints.tight(const Size(36, 24)),
                 prefixIcon: Padding(
-                  padding: EdgeInsets.only(left: spacing.md),
+                  padding: .directional(start: spacing.md),
                   child: Icon(
-                    context.streamIcons.magnifyingGlassSearch,
+                    context.streamIcons.search20,
                     color: colorScheme.textTertiary,
                     size: 20,
                   ),
@@ -73,7 +73,7 @@ class SearchTextField extends StatelessWidget {
               child: IconButton(
                 color: Colors.grey,
                 padding: EdgeInsets.zero,
-                icon: Icon(context.streamIcons.crossSmall),
+                icon: Icon(context.streamIcons.xmark16),
                 splashRadius: 24,
                 onPressed: () {
                   if (controller!.text.isNotEmpty) {

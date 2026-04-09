@@ -7,12 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_annotations.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_header.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_leading.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_metadata.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessageContent;
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// A chat message widget that renders a single message with its attachments,
 /// reactions, and interaction callbacks.
@@ -52,7 +51,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessage
 /// StreamMessageWidget(
 ///   message: message,
 ///   onMessageTap: (msg) => print('Tapped: ${msg.id}'),
-///   onThreadTap: (msg) => Navigator.push(...),
+///   onThreadTap: (parent, threadMsg) => Navigator.push(...),
 ///   onUserAvatarTap: (user) => showProfile(user),
 /// )
 /// ```
@@ -83,7 +82,8 @@ class StreamMessageWidget extends StatelessWidget {
     void Function(User)? onUserAvatarTap,
     void Function(Message message, String url)? onMessageLinkTap,
     void Function(User user)? onUserMentionTap,
-    void Function(Message)? onThreadTap,
+    void Function(Message parentMessage, Message? threadMessage)? onThreadTap,
+    void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
     void Function(Message)? onReactionsTap,
     void Function(Message quotedMessage)? onQuotedMessageTap,
@@ -93,6 +93,8 @@ class StreamMessageWidget extends StatelessWidget {
     void Function(BuildContext, Message)? onBouncedErrorMessageActions,
     void Function(Message)? onEditMessageTap,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    ShowMessageCallback? onShowMessage,
+    AttachmentActionsBuilder? attachmentActionsModalBuilder,
   }) : props = .new(
          message: message,
          padding: padding,
@@ -106,6 +108,7 @@ class StreamMessageWidget extends StatelessWidget {
          onMessageLinkTap: onMessageLinkTap,
          onUserMentionTap: onUserMentionTap,
          onThreadTap: onThreadTap,
+         onViewInChannelTap: onViewInChannelTap,
          onReplyTap: onReplyTap,
          onReactionsTap: onReactionsTap,
          onQuotedMessageTap: onQuotedMessageTap,
@@ -115,6 +118,8 @@ class StreamMessageWidget extends StatelessWidget {
          onBouncedErrorMessageActions: onBouncedErrorMessageActions,
          onEditMessageTap: onEditMessageTap,
          attachmentBuilders: attachmentBuilders,
+         onShowMessage: onShowMessage,
+         attachmentActionsModalBuilder: attachmentActionsModalBuilder,
        );
 
   /// Creates a chat message widget from pre-built [props].
@@ -160,6 +165,7 @@ class StreamMessageWidgetProps {
     this.onMessageLinkTap,
     this.onUserMentionTap,
     this.onThreadTap,
+    this.onViewInChannelTap,
     this.onReplyTap,
     this.onReactionsTap,
     this.onQuotedMessageTap,
@@ -169,6 +175,8 @@ class StreamMessageWidgetProps {
     this.onBouncedErrorMessageActions,
     this.onEditMessageTap,
     this.attachmentBuilders,
+    this.onShowMessage,
+    this.attachmentActionsModalBuilder,
   });
 
   /// The message to display.
@@ -252,12 +260,23 @@ class StreamMessageWidgetProps {
 
   /// Called when the thread reply indicator is tapped.
   ///
-  /// Receives the parent [Message] of the thread. If the message was shown
-  /// in-channel via [Message.showInChannel], the original parent message is
-  /// fetched before invoking the callback.
+  /// [parentMessage] is the root message of the thread. When the tapped
+  /// message was shown in-channel via [Message.showInChannel],
+  /// [threadMessage] contains the original in-channel reply so that the
+  /// caller can scroll to / highlight it inside the thread view.
+  /// Otherwise [threadMessage] is null.
   ///
   /// If null, tapping the thread indicator has no effect.
-  final void Function(Message message)? onThreadTap;
+  final void Function(Message parentMessage, Message? threadMessage)? onThreadTap;
+
+  /// Called when the "View" button on the "Also sent in channel" annotation
+  /// is tapped inside a thread view.
+  ///
+  /// Typically used to pop the thread screen and scroll to / highlight the
+  /// message in the parent channel list.
+  ///
+  /// When null, the "View" button falls back to [onThreadTap].
+  final void Function(Message message)? onViewInChannelTap;
 
   /// Called when the quoted-reply action is selected from the actions list.
   ///
@@ -321,6 +340,20 @@ class StreamMessageWidgetProps {
   /// priority for attachment types they can handle.
   final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
 
+  /// Called when the "show in chat" action is tapped in the full-screen
+  /// media gallery.
+  ///
+  /// Receives the [Message] and its [Channel] so the caller can scroll to
+  /// the message in the channel view.
+  final ShowMessageCallback? onShowMessage;
+
+  /// Widget builder for the attachment actions modal shown in the full-screen
+  /// media gallery.
+  ///
+  /// When non-null, allows customizing the [AttachmentActionsModal] displayed
+  /// when the user taps the actions button in the gallery header.
+  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
+
   /// Returns a copy of this [StreamMessageWidgetProps] with the given fields
   /// replaced with new values.
   StreamMessageWidgetProps copyWith({
@@ -335,7 +368,8 @@ class StreamMessageWidgetProps {
     void Function(User)? onUserAvatarTap,
     void Function(Message, String)? onMessageLinkTap,
     void Function(User)? onUserMentionTap,
-    void Function(Message)? onThreadTap,
+    void Function(Message, Message?)? onThreadTap,
+    void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
     void Function(Message)? onReactionsTap,
     void Function(Message)? onQuotedMessageTap,
@@ -345,6 +379,8 @@ class StreamMessageWidgetProps {
     void Function(BuildContext, Message)? onBouncedErrorMessageActions,
     void Function(Message)? onEditMessageTap,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    ShowMessageCallback? onShowMessage,
+    AttachmentActionsBuilder? attachmentActionsModalBuilder,
   }) {
     return StreamMessageWidgetProps(
       message: message ?? this.message,
@@ -359,6 +395,7 @@ class StreamMessageWidgetProps {
       onMessageLinkTap: onMessageLinkTap ?? this.onMessageLinkTap,
       onUserMentionTap: onUserMentionTap ?? this.onUserMentionTap,
       onThreadTap: onThreadTap ?? this.onThreadTap,
+      onViewInChannelTap: onViewInChannelTap ?? this.onViewInChannelTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
@@ -368,6 +405,8 @@ class StreamMessageWidgetProps {
       onBouncedErrorMessageActions: onBouncedErrorMessageActions ?? this.onBouncedErrorMessageActions,
       onEditMessageTap: onEditMessageTap ?? this.onEditMessageTap,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
+      onShowMessage: onShowMessage ?? this.onShowMessage,
+      attachmentActionsModalBuilder: attachmentActionsModalBuilder ?? this.attachmentActionsModalBuilder,
     );
   }
 }
@@ -399,52 +438,83 @@ class DefaultStreamMessage extends StatelessWidget {
     final message = props.message;
 
     final placement = StreamMessageLayout.of(context);
-    final theme = StreamMessageItemTheme.of(context);
+    final theme = core.StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageWidgetDefaults(
       context,
       isPinned: message.pinned,
       isEdited: message.messageTextUpdatedAt != null,
+      isBouncedWithError: message.isBouncedWithError,
       state: message.state,
     );
 
-    final resolve = StreamMessageLayoutResolver(placement, [theme, defaults]);
+    final resolve = core.StreamMessageLayoutResolver(placement, [theme, defaults]);
 
     final effectivePadding = props.padding ?? theme.padding ?? defaults.padding;
     final effectiveSpacing = props.spacing ?? theme.spacing ?? defaults.spacing;
     final effectiveBackgroundColor = props.backgroundColor ?? theme.backgroundColor ?? defaults.backgroundColor;
-    final effectiveLeadingVisibility = resolve((theme) => theme?.leadingVisibility);
-    final effectiveHeaderVisibility = resolve((theme) => theme?.headerVisibility);
-    final effectiveFooterVisibility = resolve((theme) => theme?.footerVisibility);
+    final effectiveAvatarVisibility = resolve((theme) => theme?.avatarVisibility);
+    final effectiveAnnotationVisibility = resolve((theme) => theme?.annotationVisibility);
+    final effectiveErrorBadgeVisibility = resolve((theme) => theme?.errorBadgeVisibility);
+    final effectiveMetadataVisibility = resolve((theme) => theme?.metadataVisibility);
+    final effectiveRepliesVisibility = resolve((theme) => theme?.repliesVisibility);
 
     Widget? leadingWidget;
     if (props.message.user case final user?) {
       final effectiveAvatarSize = theme.avatarSize ?? defaults.avatarSize;
 
-      leadingWidget = effectiveLeadingVisibility.apply(
-        StreamAvatarTheme(
+      leadingWidget = effectiveAvatarVisibility.apply(
+        core.StreamAvatarTheme(
           data: .new(size: effectiveAvatarSize),
-          child: StreamMessageLeading(author: user),
+          child: StreamUserAvatar(user: user, showOnlineIndicator: false),
         ),
       );
     }
 
-    final headerWidget = effectiveHeaderVisibility.apply(
-      streamMessageHeader(
-        context: context,
+    final annotationWidget = effectiveAnnotationVisibility.apply(
+      StreamMessageAnnotations(
         message: message,
-        onViewChannelTap: () => _onViewThread(context, message),
+        onViewChannelTap: switch (props.onViewInChannelTap) {
+          final onTap? => () => onTap(message),
+          _ => () => _onViewThread(context, message),
+        },
       ),
     );
-    final footerWidget = effectiveFooterVisibility.apply(StreamMessageFooter(message: message));
+
+    final metadataWidget = effectiveMetadataVisibility.apply(
+      StreamMessageMetadata(message: message),
+    );
+
+    Widget? repliesWidget;
+    if (message.replyCount case final replyCount? when replyCount > 0) {
+      repliesWidget = effectiveRepliesVisibility.apply(
+        core.StreamMessageReplies(
+          maxAvatars: 3,
+          onTap: () => _onViewThread(context, message),
+          showConnector: placement.contentKind != .jumbomoji,
+          label: Text('$replyCount replies'),
+          avatars: message.threadParticipants?.map(
+            (user) => StreamUserAvatar(user: user, showOnlineIndicator: false),
+          ),
+        ),
+      );
+    }
+
+    final errorBadgeWidget = effectiveErrorBadgeVisibility.apply(
+      core.StreamErrorBadge(size: core.StreamErrorBadgeSize.sm),
+    );
 
     final contentWidget = StreamMessageContent(
       message: message,
-      header: headerWidget,
-      footer: footerWidget,
+      annotation: annotationWidget,
+      errorBadge: errorBadgeWidget,
+      metadata: metadataWidget,
+      replies: repliesWidget,
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
       onQuotedMessageTap: props.onQuotedMessageTap,
-      onRepliesTap: () => _onViewThread(context, message),
+      onShowMessage: props.onShowMessage,
+      onReplyTap: props.onReplyTap,
+      attachmentActionsModalBuilder: props.attachmentActionsModalBuilder,
       onLinkTap: (_, href, __) {
         if (href == null) return;
         if (props.onMessageLinkTap case final onTap?) return onTap(message, href);
@@ -638,18 +708,18 @@ class DefaultStreamMessage extends StatelessWidget {
   }
 
   // Resolves the thread parent (fetching if shown in-channel) and invokes
-  // the onThreadTap callback.
+  // the onThreadTap callback with both the parent and the original message.
   Future<void> _onViewThread(
     BuildContext context,
     Message message,
   ) async {
     try {
-      var threadMessage = message;
       if (message.showInChannel case true) {
         final streamChannel = StreamChannel.of(context);
-        threadMessage = await streamChannel.getMessage(message.parentId!);
+        final parentMessage = await streamChannel.getMessage(message.parentId!);
+        return props.onThreadTap?.call(parentMessage, message);
       }
-      return props.onThreadTap?.call(threadMessage);
+      return props.onThreadTap?.call(message, null);
     } catch (e, stk) {
       debugPrint('Error while fetching message: $e, $stk');
     }
@@ -733,7 +803,7 @@ class DefaultStreamMessage extends StatelessWidget {
     );
 
     final layout = StreamMessageLayout.of(context);
-    final theme = StreamMessageItemTheme.of(context);
+    final theme = core.StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageWidgetDefaults(
       context,
       isPinned: message.pinned,
@@ -741,11 +811,11 @@ class DefaultStreamMessage extends StatelessWidget {
       state: message.state,
     );
 
-    final resolve = StreamMessageLayoutResolver(layout, [theme, defaults]);
-    final leadingVisibility = resolve((theme) => theme?.leadingVisibility);
+    final resolve = core.StreamMessageLayoutResolver(layout, [theme, defaults]);
+    final avatarVisibility = resolve((theme) => theme?.avatarVisibility);
 
     var leadingInset = 0.0;
-    if (leadingVisibility != StreamVisibility.gone) {
+    if (avatarVisibility != core.StreamVisibility.gone) {
       final effectiveAvatarSize = theme.avatarSize ?? defaults.avatarSize;
       final effectiveSpacing = props.spacing ?? theme.spacing ?? defaults.spacing;
       leadingInset = effectiveAvatarSize.value + effectiveSpacing;
@@ -769,7 +839,7 @@ class DefaultStreamMessage extends StatelessWidget {
                 key: const Key('MessageWidget'),
                 message: message.trimmed,
                 padding: EdgeInsets.zero,
-                backgroundColor: StreamColors.transparent,
+                backgroundColor: core.StreamColors.transparent,
               ),
             ),
           ),
@@ -800,7 +870,7 @@ class DefaultStreamMessage extends StatelessWidget {
     UnpinMessage() => channel.unpinMessage(action.message),
     ResendMessage() => channel.retryMessage(action.message),
     QuotedReply() => props.onReplyTap?.call(action.message),
-    ThreadReply() => props.onThreadTap?.call(action.message),
+    ThreadReply() => props.onThreadTap?.call(action.message, null),
   };
 
   // Copies the message text (with mentions replaced) to the clipboard.
@@ -955,7 +1025,7 @@ class _SwipeToReplyWrapper extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      context.streamIcons.arrowShareLeft,
+                      context.streamIcons.reply20,
                       size: lerpDouble(0, 20, progress),
                     ),
                   ),
@@ -974,22 +1044,24 @@ class _SwipeToReplyWrapper extends StatelessWidget {
 //
 // Used when neither the explicit props nor the ambient
 // [StreamMessageItemThemeData] provide a value for a given property.
-class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
+class _StreamMessageWidgetDefaults extends core.StreamMessageItemThemeData {
   _StreamMessageWidgetDefaults(
     this._context, {
     this.isPinned = false,
     this.isEdited = false,
+    this.isBouncedWithError = false,
     required MessageState state,
   }) : _messageState = state;
 
   final bool isPinned;
   final bool isEdited;
+  final bool isBouncedWithError;
 
   final BuildContext _context;
   final MessageState _messageState;
 
-  late final StreamSpacing _spacing = _context.streamSpacing;
-  late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+  late final core.StreamSpacing _spacing = _context.streamSpacing;
+  late final core.StreamColorScheme _colorScheme = _context.streamColorScheme;
 
   @override
   double get spacing => _spacing.xs;
@@ -1003,11 +1075,11 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   @override
   Color? get backgroundColor {
     if (isPinned && !_messageState.isDeleted) return _colorScheme.backgroundHighlight;
-    return StreamColors.transparent;
+    return core.StreamColors.transparent;
   }
 
   @override
-  StreamMessageLayoutVisibility get leadingVisibility => .resolveWith(
+  core.StreamMessageLayoutVisibility get avatarVisibility => .resolveWith(
     (placement) => switch ((placement.channelKind, placement.alignment, placement.stackPosition)) {
       (.direct, _, _) || (_, .end, _) => .gone,
       (_, _, .top || .middle) => .hidden,
@@ -1016,15 +1088,29 @@ class _StreamMessageWidgetDefaults extends StreamMessageItemThemeData {
   );
 
   @override
-  StreamMessageLayoutVisibility get headerVisibility => .all(.visible);
+  core.StreamMessageLayoutVisibility get annotationVisibility => .all(.visible);
 
   @override
-  StreamMessageLayoutVisibility get footerVisibility => isEdited
-      ? .all(.visible)
-      : .resolveWith(
-          (placement) => switch (placement.stackPosition) {
-            .single || .bottom => .visible,
-            _ => .gone,
-          },
-        );
+  core.StreamMessageLayoutVisibility get errorBadgeVisibility => .all(
+    _messageState.isFailed || isBouncedWithError ? .visible : .gone,
+  );
+
+  @override
+  core.StreamMessageLayoutVisibility get metadataVisibility {
+    if (isEdited) return .all(.visible);
+    return .resolveWith(
+      (placement) => switch (placement.stackPosition) {
+        .single || .bottom => .visible,
+        _ => .gone,
+      },
+    );
+  }
+
+  @override
+  core.StreamMessageLayoutVisibility get repliesVisibility => .resolveWith(
+    (layout) => switch (layout.listKind) {
+      .thread => .gone,
+      .channel => .visible,
+    },
+  );
 }

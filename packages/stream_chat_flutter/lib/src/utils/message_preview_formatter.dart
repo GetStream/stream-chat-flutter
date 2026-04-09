@@ -137,8 +137,9 @@ abstract interface class MessagePreviewFormatter {
 ///   TextSpan formatPollMessage(
 ///     BuildContext context,
 ///     Poll poll,
-///     User? currentUser,
-///   ) {
+///     User? currentUser, {
+///     TextStyle? textStyle,
+///   }) {
 ///     return TextSpan(text: poll.name.isEmpty ? 'Poll' : poll.name);
 ///   }
 /// }
@@ -178,12 +179,15 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     User? currentUser,
     TextStyle? textStyle,
   }) {
+    final effectiveTextStyle = textStyle ?? DefaultTextStyle.of(context).style;
+
     final previewText = _buildPreviewText(
       context,
       message,
       channel,
       currentUser,
       showCaption: showCaption,
+      textStyle: effectiveTextStyle,
     );
 
     return TextSpan(children: [previewText], style: textStyle);
@@ -195,9 +199,10 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     ChannelModel? channel,
     User? currentUser, {
     bool showCaption = true,
+    TextStyle? textStyle,
   }) {
     if (message.isDeleted) {
-      return formatDeletedMessage(context, message);
+      return formatDeletedMessage(context, message, textStyle: textStyle);
     }
 
     if (message.isSystem) {
@@ -205,7 +210,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     }
 
     if (message.poll case final poll?) {
-      return formatPollMessage(context, poll, currentUser);
+      return formatPollMessage(context, poll, currentUser, textStyle: textStyle);
     }
 
     TextSpan? messageSpan;
@@ -216,12 +221,14 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
         message,
         location,
         showCaption: showCaption,
+        textStyle: textStyle,
       );
     } else {
       messageSpan = formatRegularMessage(
         context,
         message,
         showCaption: showCaption,
+        textStyle: textStyle,
       );
     }
 
@@ -278,6 +285,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   ///   BuildContext context,
   ///   Message message, {
   ///   bool showCaption = true,
+  ///   TextStyle? textStyle,
   /// }) {
   ///   final text = message.text;
   ///   if (text == null || text.isEmpty) return null;
@@ -289,6 +297,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     BuildContext context,
     Message message, {
     bool showCaption = true,
+    TextStyle? textStyle,
   }) {
     final messageText = switch (message.text?.trim()) {
       final text? when text.isNotEmpty => text,
@@ -309,6 +318,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       message.attachments,
       mentionedUsers: mentionedUsers,
       showCaption: showCaption,
+      textStyle: textStyle,
     );
   }
 
@@ -317,17 +327,21 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   /// Shows a ban icon followed by the localized deleted message label,
   /// both styled with the tertiary text color.
   @protected
-  TextSpan formatDeletedMessage(BuildContext context, Message message) {
+  TextSpan formatDeletedMessage(BuildContext context, Message message, {TextStyle? textStyle}) {
+    final iconSize = (textStyle?.fontSize ?? 16) + 2;
     return TextSpan(
+      style: textStyle,
       children: [
         WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
           child: Icon(
-            context.streamIcons.circleBanSign,
-            size: 16,
+            context.streamIcons.noSign16,
+            size: iconSize,
             color: context.streamColorScheme.textTertiary,
           ),
         ),
         WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
           child: SizedBox(width: context.streamSpacing.xxs),
         ),
         TextSpan(
@@ -432,6 +446,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   ///   Iterable<Attachment> attachments, {
   ///   List<User> mentionedUsers = const [],
   ///   bool showCaption = true,
+  ///   TextStyle? textStyle,
   /// }) {
   ///   final attachment = attachments.firstOrNull;
   ///   if (attachment?.type == 'product') {
@@ -443,6 +458,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   ///     attachments,
   ///     mentionedUsers: mentionedUsers,
   ///     showCaption: showCaption,
+  ///     textStyle: textStyle,
   ///   );
   /// }
   /// ```
@@ -453,6 +469,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     Iterable<Attachment> attachments, {
     List<User> mentionedUsers = const [],
     bool showCaption = true,
+    TextStyle? textStyle,
   }) {
     final colorScheme = context.streamColorScheme;
     final attachment = attachments.firstOrNull;
@@ -461,13 +478,16 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     }
 
     final mixedTypes = attachments.any((it) => it.type != attachment.type);
-    final prefix = _attachmentPrefix(context, mixedTypes ? null : attachment.type);
+    final prefix = _attachmentPrefix(context, mixedTypes ? null : attachment.type, textStyle: textStyle);
 
     if (showCaption && messageText != null) {
       return TextSpan(
         children: [
           prefix,
-          WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: SizedBox(width: context.streamSpacing.xxs),
+          ),
           _textSpanWithMentions(messageText, mentionedUsers, colorScheme),
         ],
       );
@@ -483,20 +503,36 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     return TextSpan(
       children: [
         prefix,
-        WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: SizedBox(width: context.streamSpacing.xxs),
+        ),
         ?suffix,
       ],
     );
   }
 
-  InlineSpan _attachmentPrefix(BuildContext context, String? type) {
+  InlineSpan _attachmentPrefix(BuildContext context, String? type, {TextStyle? textStyle}) {
+    final size = (textStyle?.fontSize ?? 14) + 2;
     final icons = context.streamIcons;
     return switch (type) {
-      AttachmentType.audio || AttachmentType.voiceRecording => WidgetSpan(child: Icon(icons.microphone, size: 16)),
-      AttachmentType.image => WidgetSpan(child: Icon(icons.camera1, size: 16)),
-      AttachmentType.video => WidgetSpan(child: Icon(icons.video, size: 16)),
+      AttachmentType.audio || AttachmentType.voiceRecording => WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Icon(icons.voice16, size: size),
+      ),
+      AttachmentType.image => WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Icon(icons.camera16, size: size),
+      ),
+      AttachmentType.video => WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Icon(icons.video16, size: size),
+      ),
       AttachmentType.giphy => const TextSpan(text: '/giphy'),
-      _ => WidgetSpan(child: Icon(icons.fileBend, size: 16)),
+      _ => WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Icon(icons.file16, size: size),
+      ),
     };
   }
 
@@ -541,8 +577,9 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   /// TextSpan formatPollMessage(
   ///   BuildContext context,
   ///   Poll poll,
-  ///   User? currentUser,
-  /// ) {
+  ///   User? currentUser, {
+  ///   TextStyle? textStyle,
+  /// }) {
   ///   return TextSpan(
   ///     text: poll.name.isEmpty ? 'Poll' : poll.name,
   ///   );
@@ -552,9 +589,11 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   TextSpan formatPollMessage(
     BuildContext context,
     Poll poll,
-    User? currentUser,
-  ) {
+    User? currentUser, {
+    TextStyle? textStyle,
+  }) {
     final translations = context.translations;
+    final iconSize = (textStyle?.fontSize ?? 16) + 2;
     TextSpan? latestVoterSpan;
 
     if (poll.latestVotes.firstOrNull case final latestVote?) {
@@ -570,13 +609,23 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     }
 
     return TextSpan(
+      style: textStyle,
       children: [
-        WidgetSpan(child: Icon(context.streamIcons.chart5, size: 16)),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Icon(context.streamIcons.poll16, size: iconSize),
+        ),
         if (latestVoterSpan case final latestVoterSpan?) ...[
-          WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: SizedBox(width: context.streamSpacing.xxs),
+          ),
           latestVoterSpan,
         ] else if (poll.name.trim() case final pollName when pollName.isNotEmpty) ...[
-          WidgetSpan(child: SizedBox(width: context.streamSpacing.xxs)),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: SizedBox(width: context.streamSpacing.xxs),
+          ),
           TextSpan(text: pollName),
         ],
       ],
@@ -598,6 +647,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   ///   Message message,
   ///   Location location, {
   ///   bool showCaption = true,
+  ///   TextStyle? textStyle,
   /// }) {
   ///   return TextSpan(
   ///     text: '(${location.latitude}, ${location.longitude})',
@@ -610,12 +660,19 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     Message message,
     Location location, {
     bool showCaption = true,
+    TextStyle? textStyle,
   }) {
     final colorScheme = context.streamColorScheme;
+    final iconSize = (textStyle?.fontSize ?? 16) + 2;
     return TextSpan(
+      style: textStyle,
       children: [
-        WidgetSpan(child: Icon(context.streamIcons.mapPin, size: 16)),
         WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Icon(context.streamIcons.location16, size: iconSize),
+        ),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
           child: SizedBox(width: context.streamSpacing.xxs),
         ),
         if (message.text?.trim() case final messageText? when messageText.isNotEmpty && showCaption) ...[

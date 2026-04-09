@@ -1070,8 +1070,9 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
   TextSpan formatPollMessage(
     BuildContext context,
     Poll poll,
-    User? currentUser,
-  ) {
+    User? currentUser, {
+    TextStyle? textStyle,
+  }) {
     return TextSpan(
       text: poll.name.trim().isEmpty ? '📊 Poll' : '📊 Poll: ${poll.name}',
     );
@@ -1083,6 +1084,7 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
     Message message,
     Location location, {
     bool showCaption = true,
+    TextStyle? textStyle,
   }) {
     return const TextSpan(text: '🗺️ -> Location Shared');
   }
@@ -1094,6 +1096,7 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
     Iterable<Attachment> attachments, {
     List<User> mentionedUsers = const [],
     bool showCaption = true,
+    TextStyle? textStyle,
   }) {
     final attachment = attachments.firstOrNull;
 
@@ -1108,6 +1111,7 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
       attachments,
       mentionedUsers: mentionedUsers,
       showCaption: showCaption,
+      textStyle: textStyle,
     );
   }
 }

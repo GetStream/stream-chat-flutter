@@ -136,7 +136,7 @@ class ChooseUserPage extends StatelessWidget {
                             ),
                           ),
                           trailing: Icon(
-                            context.streamIcons.arrowRight,
+                            context.streamIcons.arrowRight20,
                             color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                           ),
                         );
@@ -146,7 +146,7 @@ class ChooseUserPage extends StatelessWidget {
                         leading: CircleAvatar(
                           backgroundColor: StreamChatTheme.of(context).colorTheme.borders,
                           child: Icon(
-                            context.streamIcons.settingsGear2,
+                            Icons.settings,
                             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                           ),
                         ),

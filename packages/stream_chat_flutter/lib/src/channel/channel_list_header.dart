@@ -141,7 +141,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
               leading: switch ((leading, user)) {
                 (final leading?, _) => leading,
                 (_, final user?) => Padding(
-                  padding: EdgeInsets.only(left: context.streamSpacing.sm),
+                  padding: .directional(start: context.streamSpacing.sm),
                   child: Center(
                     child: GestureDetector(
                       onTap: switch (onUserAvatarTap) {
@@ -161,7 +161,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
                 ),
                 _ => const Empty(),
               },
-              actionsPadding: EdgeInsets.only(right: context.streamSpacing.sm),
+              actionsPadding: .directional(end: context.streamSpacing.sm),
               actions:
                   actions ??
                   [
@@ -174,7 +174,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
                         };
 
                         return StreamButton.icon(
-                          icon: context.streamIcons.plusLarge,
+                          icon: context.streamIcons.plus20,
                           onTap: callback,
                         );
                       },

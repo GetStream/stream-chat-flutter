@@ -21,12 +21,12 @@ class StreamCommandIcon extends StatelessWidget {
       child: switch (command.name) {
         'giphy' => const StreamSvgIcon(icon: StreamSvgIcons.giphy),
         'imgur' => const StreamSvgIcon(icon: StreamSvgIcons.imgur),
-        'ban' => Icon(context.streamIcons.peopleRemove),
-        'flag' => Icon(context.streamIcons.flag2),
-        'mute' => Icon(context.streamIcons.mute),
-        'unban' => Icon(context.streamIcons.peopleAdd),
-        'unmute' => Icon(context.streamIcons.volumeFull),
-        _ => Icon(context.streamIcons.thunder),
+        'ban' => Icon(context.streamIcons.userRemove20),
+        'flag' => Icon(context.streamIcons.flag20),
+        'mute' => Icon(context.streamIcons.mute20),
+        'unban' => Icon(context.streamIcons.userAdd20),
+        'unmute' => Icon(context.streamIcons.audio20),
+        _ => Icon(context.streamIcons.bolt20),
       },
     );
   }
