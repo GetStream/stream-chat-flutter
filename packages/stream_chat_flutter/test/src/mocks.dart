@@ -21,7 +21,8 @@ class MockChannel extends Mock implements Channel {
       ChannelCapability.sendMessage,
       ChannelCapability.uploadFile,
     ],
-  });
+    Stream<Event>? eventStream,
+  }) : _eventStream = eventStream ?? const Stream.empty();
 
   @override
   final String type;
@@ -60,6 +61,19 @@ class MockChannel extends Mock implements Channel {
   // ignore: prefer_expression_function_bodies
   Future<void> keyStroke([String? parentId]) async {
     return;
+  }
+
+  final Stream<Event> _eventStream;
+
+  @override
+  Stream<Event> on([
+    String? eventType,
+    String? eventType2,
+    String? eventType3,
+    String? eventType4,
+  ]) {
+    if (eventType == null) return _eventStream;
+    return _eventStream.where((e) => e.type == eventType);
   }
 }
 
