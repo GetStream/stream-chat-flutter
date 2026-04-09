@@ -136,7 +136,6 @@ class _ChannelListDefault extends StatelessWidget {
                     extentRatio: 0.4,
                     motion: const BehindMotion(),
                     children: [
-                     
                       CustomSlidableAction(
                         backgroundColor: context.streamColorScheme.backgroundSurface,
                         onPressed: (_) {
