@@ -124,7 +124,6 @@ class _ChannelListDefault extends StatelessWidget {
           controller: channelListController,
           itemBuilder: (context, channels, index, defaultWidget) {
             final channel = channels[index];
-            final backgroundColor = chatTheme.colorTheme.inputBg;
             return StreamBuilder<bool>(
               stream: channel.isMutedStream,
               initialData: channel.isMuted,
