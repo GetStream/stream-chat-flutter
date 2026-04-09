@@ -109,6 +109,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamChannelListHeader(
+        titleBuilder: _currentIndex == 0
+            ? null
+            : (context, status, client) {
+                return Text(
+                  _navBarItems[_currentIndex].label!,
+                  style: context.streamTextTheme.headingSm,
+                );
+              },
         onNewChatButtonTap: () {
           GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
         },

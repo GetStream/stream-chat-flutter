@@ -14,6 +14,54 @@ String formatDate(BuildContext context, DateTime date) {
   return Jiffy.parseFromDateTime(date).yMd;
 }
 
+/// Output examples:
+/// - `Just now`
+/// - `Today at 9:41`
+/// - `Yesterday at 9:41`
+/// - `Saturday at 9:41`
+/// - `Jan 1st at 9:41`
+String formatRecentDateTime(
+  BuildContext context,
+  DateTime date, {
+  DateTime? referenceDate,
+}) {
+  final localDate = date.toLocal();
+  final now = (referenceDate ?? DateTime.now()).toLocal();
+  final difference = now.difference(localDate).abs();
+
+  if (difference < const Duration(minutes: 1)) return 'Just now';
+
+  final jiffyDate = Jiffy.parseFromDateTime(localDate);
+  final time = jiffyDate.format(pattern: 'H:mm');
+
+  if (_isSameDay(localDate, now)) {
+    return '${context.translations.todayLabel} at $time';
+  }
+
+  final yesterday = now.subtract(const Duration(days: 1));
+  if (_isSameDay(localDate, yesterday)) {
+    return '${context.translations.yesterdayLabel} at $time';
+  }
+
+  if (_isWithinPreviousWeek(localDate, now)) {
+    return '${jiffyDate.EEEE} at $time';
+  }
+
+  return '${jiffyDate.format(pattern: 'MMM do')} at $time';
+}
+
+bool _isSameDay(DateTime a, DateTime b) {
+  final jiffyA = Jiffy.parseFromDateTime(a);
+  final jiffyB = Jiffy.parseFromDateTime(b);
+  return jiffyA.isSame(jiffyB, unit: Unit.day);
+}
+
+bool _isWithinPreviousWeek(DateTime date, DateTime referenceDate) {
+  final jiffyDate = Jiffy.parseFromDateTime(date);
+  final jiffyReference = Jiffy.parseFromDateTime(referenceDate);
+  return jiffyDate.isAfter(jiffyReference.subtract(days: 7), unit: Unit.day);
+}
+
 /// Extension on [DateTime] to provide common date comparison utilities.
 extension DateTimeComparisonUtils on DateTime {
   /// Returns true if the date is today.

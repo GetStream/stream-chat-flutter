@@ -16,11 +16,17 @@ Widget defaultThreadListViewSeparatorBuilder(
 
 /// Signature for the item builder that creates the children of the
 /// [StreamThreadListView].
+///
 typedef StreamThreadListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidgetBuilder<Thread, StreamThreadListTile>;
 
 /// {@template streamThreadListView}
-/// A [ListView] that shows a list of [Thread]'s. It uses a
-/// [StreamThreadListController] to load the threads in paginated form.
+/// A [ListView] that shows a list of [Thread]'s the current user participated
+/// in.
+///
+/// Uses a [StreamThreadListController] to load threads in paginated form.
+///
+/// Each row is rendered using [StreamThreadListTile], which can be customized
+/// app-wide through [StreamComponentFactory].
 ///
 /// Example:
 ///
@@ -28,16 +34,13 @@ typedef StreamThreadListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidget
 /// StreamThreadListView(
 ///   controller: controller,
 ///   onThreadTap: (thread) {
-///     // Handle thread tap event
-///   },
-///   onThreadLongPress: (thread) {
-///     // Handle thread long press event
+///     // Navigate to thread conversation
 ///   },
 /// )
 /// ```
 ///
 /// See also:
-/// * [StreamThreadListTile]
+/// * [StreamMessageWidget], which renders each thread's parent message.
 /// * [StreamThreadListController]
 /// {@endtemplate}
 class StreamThreadListView extends StatelessWidget {
@@ -74,6 +77,7 @@ class StreamThreadListView extends StatelessWidget {
   final StreamThreadListController controller;
 
   /// A builder that is called to build items in the [ListView].
+  ///
   final StreamThreadListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
@@ -88,10 +92,10 @@ class StreamThreadListView extends StatelessWidget {
   /// A builder that is called to build the error state of the list.
   final Widget Function(BuildContext, StreamChatError)? errorBuilder;
 
-  /// Called when the user taps this list tile.
+  /// Called when the user taps a thread.
   final void Function(Thread)? onThreadTap;
 
-  /// Called when the user long-presses on this list tile.
+  /// Called when the user long-presses on a thread.
   final void Function(Thread)? onThreadLongPress;
 
   /// The index to take into account when triggering [controller.loadMore].
@@ -300,7 +304,6 @@ class StreamThreadListView extends StatelessWidget {
         final currentUser = StreamChat.of(context).currentUser;
         final onTap = onThreadTap;
         final onLongPress = onThreadLongPress;
-
         final tile = StreamThreadListTile(
           thread: thread,
           currentUser: currentUser,
