@@ -446,35 +446,35 @@ class StreamMessageInputState extends State<StreamMessageInput>
       _draftStreamSubscription = draftStream?.distinct().listen(_onDraftUpdate);
     }
 
-    // Keeps the quoted message in sync with remote changes while composing.
-    if (!_isEditing) {
-      _messageUpdatedSubscription = channel.on(EventType.messageUpdated).listen(_onQuotedMessageUpdated);
-
-      _messageDeletedSubscription = channel.on(EventType.messageDeleted).listen(_onQuotedMessageDeleted);
-    }
+    // Keeps the composer in sync with remote message changes.
+    _messageUpdatedSubscription = channel.on(EventType.messageUpdated).listen(_onMessageUpdated);
+    _messageDeletedSubscription = channel.on(EventType.messageDeleted).listen(_onMessageDeleted);
   }
 
-  void _onQuotedMessageUpdated(Event event) {
+  void _onMessageUpdated(Event event) {
     final updatedMessage = event.message;
     if (updatedMessage == null) return;
 
     if (_effectiveController.message.quotedMessageId == updatedMessage.id) {
       _effectiveController.quotedMessage = updatedMessage;
     }
+
+    if (_isEditing && _effectiveController.message.id == updatedMessage.id) {
+      _effectiveController.editMessage(updatedMessage);
+    }
   }
 
-  void _onQuotedMessageDeleted(Event event) {
+  void _onMessageDeleted(Event event) {
     final deletedMessageId = event.message?.id;
     if (deletedMessageId == null) return;
 
     if (_effectiveController.message.quotedMessageId == deletedMessageId) {
-      _clearQuotedMessage();
+      widget.onQuotedMessageCleared?.call();
     }
-  }
 
-  void _clearQuotedMessage() {
-    _effectiveController.clearQuotedMessage();
-    widget.onQuotedMessageCleared?.call();
+    if (_isEditing && _effectiveController.message.id == deletedMessageId) {
+      _effectiveController.cancelEditMessage();
+    }
   }
 
   void _onDraftUpdate(Draft? draft) {
