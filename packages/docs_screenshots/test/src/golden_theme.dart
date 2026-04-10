@@ -43,7 +43,7 @@ StreamChatThemeData docsStreamChatThemeData() {
   const roboto = TextStyle(fontFamily: 'Roboto');
   final base = StreamChatThemeData.light();
   final textTheme = base.textTheme.merge(
-    StreamTextTheme.light(
+    const StreamTextTheme.light(
       body: roboto,
       bodyBold: roboto,
       title: roboto,

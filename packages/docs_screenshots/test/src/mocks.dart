@@ -82,8 +82,7 @@ class MockChannel extends Mock implements Channel {
     String? eventType2,
     String? eventType3,
     String? eventType4,
-  ]) =>
-      const Stream.empty();
+  ]) => const Stream.empty();
 }
 
 class MockChannelState extends Mock implements ChannelClientState {
@@ -118,7 +117,12 @@ void setupMockChannel({
 }) {
   final allMembers = members.isNotEmpty
       ? members
-      : [Member(userId: 'user-id', user: User(id: 'user-id'))];
+      : [
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          ),
+        ];
 
   when(() => client.state).thenReturn(clientState);
   when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));

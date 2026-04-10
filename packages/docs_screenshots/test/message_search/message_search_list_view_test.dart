@@ -13,18 +13,18 @@ GetMessageResponse _makeSearchResult({
   required String userName,
   required String channelName,
 }) {
-  final response = GetMessageResponse();
-  response.message = Message(
-    id: messageId,
-    text: text,
-    user: User(id: 'user-$messageId', name: userName),
-    createdAt: DateTime(2024, 6, 1, 10, 0),
-  );
-  response.channel = ChannelModel(
-    id: 'ch-$messageId',
-    type: 'messaging',
-    extraData: {'name': channelName},
-  );
+  final response = GetMessageResponse()
+    ..message = Message(
+      id: messageId,
+      text: text,
+      user: User(id: 'user-$messageId', name: userName),
+      createdAt: DateTime(2024, 6, 1, 10, 0),
+    )
+    ..channel = ChannelModel(
+      id: 'ch-$messageId',
+      type: 'messaging',
+      extraData: {'name': channelName},
+    );
   return response;
 }
 

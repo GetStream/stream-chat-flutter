@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
@@ -60,8 +59,7 @@ Future<void> _loadEmojiFont() async {
     for (final path in paths) {
       final file = File(path);
       if (!file.existsSync()) continue;
-      final loader = FontLoader(family);
-      loader.addFont(file.readAsBytes().then(ByteData.sublistView));
+      final loader = FontLoader(family)..addFont(file.readAsBytes().then(ByteData.sublistView));
       await loader.load();
       return; // Stop after the first font successfully loaded.
     }

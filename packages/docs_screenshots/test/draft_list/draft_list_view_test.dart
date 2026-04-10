@@ -74,8 +74,8 @@ void main() {
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Stream Chat'),
-              actions: [
-                IconButton(icon: const Icon(Icons.edit_outlined), onPressed: null),
+              actions: const [
+                IconButton(icon: Icon(Icons.edit_outlined), onPressed: null),
               ],
             ),
             body: StreamDraftListView(controller: controller),

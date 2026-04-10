@@ -43,10 +43,10 @@ void main() {
         poll: Poll(
           id: 'poll-1',
           name: 'What is your favorite programming language?',
-          options: [
-            const PollOption(id: 'opt-1', text: 'Dart'),
-            const PollOption(id: 'opt-2', text: 'Swift'),
-            const PollOption(id: 'opt-3', text: 'Kotlin'),
+          options: const [
+            PollOption(id: 'opt-1', text: 'Dart'),
+            PollOption(id: 'opt-2', text: 'Swift'),
+            PollOption(id: 'opt-3', text: 'Kotlin'),
           ],
         ),
       );
@@ -60,14 +60,14 @@ void main() {
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             appBar: AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.close),
+              leading: const IconButton(
+                icon: Icon(Icons.close),
                 onPressed: null,
               ),
               title: const Text('Create Poll'),
-              actions: [
+              actions: const [
                 IconButton(
-                  icon: const Icon(Icons.send),
+                  icon: Icon(Icons.send),
                   onPressed: null,
                 ),
               ],
@@ -103,13 +103,13 @@ void main() {
       final poll = Poll(
         id: 'poll-2',
         name: 'Which feature would you like to see next?',
-        options: [
-          const PollOption(id: 'opt-a', text: 'Offline mode'),
-          const PollOption(id: 'opt-b', text: 'Message scheduling'),
-          const PollOption(id: 'opt-c', text: 'Voice messages'),
-          const PollOption(id: 'opt-d', text: 'Reactions 2.0'),
+        options: const [
+          PollOption(id: 'opt-a', text: 'Offline mode'),
+          PollOption(id: 'opt-b', text: 'Message scheduling'),
+          PollOption(id: 'opt-c', text: 'Voice messages'),
+          PollOption(id: 'opt-d', text: 'Reactions 2.0'),
         ],
-        voteCountsByOption: {
+        voteCountsByOption: const {
           'opt-a': 8,
           'opt-b': 5,
           'opt-c': 12,

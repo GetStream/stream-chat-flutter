@@ -73,8 +73,8 @@ Widget _buildFullAppThreadScaffold({
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Stream Chat'),
-          actions: [
-            IconButton(icon: const Icon(Icons.edit_outlined), onPressed: null),
+          actions: const [
+            IconButton(icon: Icon(Icons.edit_outlined), onPressed: null),
           ],
         ),
         body: Column(
@@ -222,7 +222,7 @@ void main() {
           streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
-            body: Container(
+            body: DecoratedBox(
               decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(color: Colors.blue.shade700, width: 4),
@@ -279,8 +279,8 @@ void main() {
       return _buildFullAppThreadScaffold(
         client: client,
         controller: controller,
-        banner: StreamUnreadThreadsBanner(
-          unreadThreads: const {'thread-1', 'thread-2', 'thread-3'},
+        banner: const StreamUnreadThreadsBanner(
+          unreadThreads: {'thread-1', 'thread-2', 'thread-3'},
         ),
       );
     },
