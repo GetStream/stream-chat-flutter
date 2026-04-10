@@ -27,11 +27,7 @@ dev_dependencies:
   mocktail: ^1.0.0
   plugin_platform_interface: ^2.0.0
   record: ">=5.2.0 <7.0.0"
-  stream_core_flutter:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: c0c5986c2388d7064b81e207ad82ddadb9021032
-      path: packages/stream_core_flutter
+  stream_core_flutter: ^0.1.0
 
 flutter:
   uses-material-design: true
