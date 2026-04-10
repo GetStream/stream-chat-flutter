@@ -1,3 +1,2 @@
-# docs_screenshots uses platform (macOS) goldens only; CI variants are disabled in flutter_test_config.
-**/goldens/ci/
+# docs_screenshots uses platform (macOS) goldens only
 !**/goldens/macos/*

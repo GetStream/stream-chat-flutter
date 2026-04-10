@@ -19,6 +19,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // and therefore not picked up by loadFonts(); they must be loaded explicitly.
   await _loadEmojiFont();
 
+  final isRunningInCi = Platform.environment.containsKey('CI') || Platform.environment.containsKey('GITHUB_ACTIONS');
+
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
       goldenTestTheme: GoldenTestTheme(
@@ -26,8 +28,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         borderColor: Colors.transparent,
         nameTextStyle: const TextStyle(fontSize: 18),
       ),
-      ciGoldensConfig: const CiGoldensConfig(enabled: false),
-      platformGoldensConfig: const PlatformGoldensConfig(enabled: true),
+      ciGoldensConfig: CiGoldensConfig(enabled: isRunningInCi),
+      platformGoldensConfig: PlatformGoldensConfig(enabled: !isRunningInCi),
     ),
     run: testMain,
   );
