@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
@@ -25,7 +24,6 @@ class PollDeleteOptionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    final pollCreatorTheme = StreamPollCreatorTheme.of(context);
 
     final actions = [
       TextButton(
@@ -49,14 +47,8 @@ class PollDeleteOptionDialog extends StatelessWidget {
     ];
 
     return AlertDialog(
-      title: Text(
-        context.translations.deletePollOptionLabel,
-        style: pollCreatorTheme.actionDialogTitleStyle,
-      ),
-      content: Text(
-        context.translations.deletePollOptionQuestion,
-        style: pollCreatorTheme.actionDialogContentStyle,
-      ),
+      title: Text(context.translations.deletePollOptionLabel),
+      content: Text(context.translations.deletePollOptionQuestion),
       actions: actions,
       titlePadding: const EdgeInsetsDirectional.fromSTEB(16, 24, 16, 4),
       contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 24),

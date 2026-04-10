@@ -1,9 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
-import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 class _NullConst {
   const _NullConst();
@@ -116,41 +114,48 @@ class _PollQuestionTextFieldState extends State<PollQuestionTextField> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamPollCreatorTheme.of(context);
-    final fillColor = theme.questionTextFieldFillColor;
-    final borderRadius = theme.questionTextFieldBorderRadius;
+    final defaults = _PollQuestionTextFieldDefaults(context);
+
+    final spacing = context.streamSpacing;
+
+    final effectiveTitleStyle = theme.headerTextStyle ?? defaults.headerTextStyle;
+    final effectiveInputStyle = theme.questionInputStyle ?? defaults.questionInputStyle;
 
     return Column(
+      spacing: spacing.xs,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.title case final title?) ...[
-          Text(title, style: theme.questionHeaderStyle),
-          const SizedBox(height: 8),
-        ],
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: fillColor,
-            borderRadius: borderRadius,
-          ),
-          child: StreamPollTextField(
-            initialValue: _question.text,
-            hintText: widget.hintText,
-            fillColor: fillColor,
-            style: theme.questionTextFieldStyle,
-            borderRadius: borderRadius,
-            errorText: _question.error,
-            errorStyle: theme.questionTextFieldErrorStyle,
-            onChanged: (text) {
-              _question = _question.copyWith(
-                text: text,
-                error: _validateQuestion(text),
-              );
+        if (widget.title case final title?) Text(title, style: effectiveTitleStyle),
+        StreamTextInput(
+          initialValue: _question.text,
+          hintText: widget.hintText,
+          helperText: _question.error,
+          helperState: _question.error != null ? .error : null,
+          textCapitalization: TextCapitalization.sentences,
+          style: effectiveInputStyle,
+          onChanged: (text) {
+            _question = _question.copyWith(
+              text: text,
+              error: _validateQuestion(text),
+            );
 
-              widget.onChanged?.call(_question);
-            },
-          ),
+            widget.onChanged?.call(_question);
+          },
         ),
       ],
     );
   }
+}
+
+class _PollQuestionTextFieldDefaults extends StreamPollCreatorThemeData {
+  _PollQuestionTextFieldDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final _colorScheme = _context.streamColorScheme;
+  late final _textTheme = _context.streamTextTheme;
+
+  @override
+  TextStyle get headerTextStyle => _textTheme.headingSm.copyWith(color: _colorScheme.textPrimary);
 }

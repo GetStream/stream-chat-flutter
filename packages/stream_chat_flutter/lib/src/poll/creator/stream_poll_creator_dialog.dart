@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template showStreamPollCreatorDialog}
 /// Shows the poll creator dialog based on the screen size.
@@ -110,7 +111,6 @@ class _StreamPollCreatorDialogState extends State<StreamPollCreatorDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    final pollCreatorTheme = StreamPollCreatorTheme.of(context);
 
     final actions = [
       TextButton(
@@ -129,11 +129,6 @@ class _StreamPollCreatorDialogState extends State<StreamPollCreatorDialog> {
           return TextButton(
             onPressed: isValid
                 ? () {
-                    final errors = _controller.validateGranularly();
-                    if (errors.isNotEmpty) {
-                      return;
-                    }
-
                     final sanitizedPoll = _controller.sanitizedPoll;
                     return Navigator.of(context).pop(sanitizedPoll);
                   }
@@ -150,16 +145,13 @@ class _StreamPollCreatorDialogState extends State<StreamPollCreatorDialog> {
     ];
 
     return AlertDialog(
-      title: Text(
-        context.translations.createPollLabel(),
-        style: pollCreatorTheme.appBarTitleStyle,
-      ),
+      title: Text(context.translations.createPollLabel()),
       titlePadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       actions: actions,
       contentPadding: EdgeInsets.zero,
       actionsPadding: const EdgeInsets.all(8),
-      backgroundColor: pollCreatorTheme.backgroundColor,
+      backgroundColor: theme.colorTheme.appBg,
       content: SizedBox(
         width: 640, // Similar to BottomSheet default width on M3
         child: StreamPollCreatorWidget(
@@ -219,40 +211,52 @@ class _StreamPollCreatorFullScreenDialogState extends State<StreamPollCreatorFul
   @override
   Widget build(BuildContext context) {
     final theme = StreamPollCreatorTheme.of(context);
+    final defaults = _StreamPollCreatorFullScreenDialogDefaults(context);
+
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+
+    final effectivePrimaryActionStyle = theme.primaryActionStyle ?? defaults.primaryActionStyle;
+    final effectiveSecondaryActionStyle = theme.secondaryActionStyle ?? defaults.secondaryActionStyle;
 
     return Scaffold(
-      backgroundColor: theme.backgroundColor,
-      appBar: AppBar(
-        elevation: theme.appBarElevation,
-        backgroundColor: theme.appBarBackgroundColor,
-        foregroundColor: theme.appBarForegroundColor,
-        title: Text(
-          context.translations.createPollLabel(),
-          style: theme.appBarTitleStyle,
+      backgroundColor: colorScheme.backgroundApp,
+      appBar: StreamAppBar(
+        backgroundColor: colorScheme.backgroundElevation1,
+        title: Text(context.translations.createPollLabel()),
+        leading: Padding(
+          padding: EdgeInsetsDirectional.only(start: spacing.sm),
+          child: Center(
+            child: StreamButton.icon(
+              style: .secondary,
+              type: .outline,
+              size: .medium,
+              icon: context.streamIcons.xmark20,
+              onTap: Navigator.of(context).maybePop,
+              themeStyle: effectiveSecondaryActionStyle,
+            ),
+          ),
         ),
+        actionsPadding: EdgeInsetsDirectional.only(end: spacing.sm),
         actions: [
           ValueListenableBuilder(
             valueListenable: _controller,
             builder: (context, poll, child) {
-              final colorTheme = StreamChatTheme.of(context).colorTheme;
-
               final isValid = _controller.validate();
 
-              return IconButton(
-                color: colorTheme.accentPrimary,
-                disabledColor: colorTheme.disabled,
-                icon: Icon(context.streamIcons.send20),
-                onPressed: isValid
-                    ? () {
-                        final errors = _controller.validateGranularly();
-                        if (errors.isNotEmpty) {
-                          return;
-                        }
-
-                        final sanitizedPoll = _controller.sanitizedPoll;
-                        return Navigator.of(context).pop(sanitizedPoll);
-                      }
-                    : null,
+              return StreamButton.icon(
+                style: .primary,
+                type: .solid,
+                size: .medium,
+                icon: context.streamIcons.checkmark20,
+                themeStyle: effectivePrimaryActionStyle,
+                onTap: switch (isValid) {
+                  false => null,
+                  true => () {
+                    final sanitizedPoll = _controller.sanitizedPoll;
+                    return Navigator.of(context).pop(sanitizedPoll);
+                  },
+                },
               );
             },
           ),
@@ -264,4 +268,21 @@ class _StreamPollCreatorFullScreenDialogState extends State<StreamPollCreatorFul
       ),
     );
   }
+}
+
+class _StreamPollCreatorFullScreenDialogDefaults extends StreamPollCreatorThemeData {
+  _StreamPollCreatorFullScreenDialogDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final _colorScheme = _context.streamColorScheme;
+
+  @override
+  StreamButtonThemeStyle get primaryActionStyle => .from(tapTargetSize: .shrinkWrap);
+
+  @override
+  StreamButtonThemeStyle get secondaryActionStyle => .from(
+    tapTargetSize: .shrinkWrap,
+    borderColor: _colorScheme.borderDefault,
+  );
 }

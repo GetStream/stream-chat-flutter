@@ -48,6 +48,18 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamReactionPickerThemeData,
         StreamReactionsPosition,
         StreamReactionsType,
+        StreamStepper,
+        StreamStepperProps,
+        StreamStepperStyle,
+        StreamStepperTheme,
+        StreamStepperThemeData,
+        StreamTextInputStyle,
+        StreamTextInputTheme,
+        StreamTextInputThemeData,
+        StreamToggleSwitch,
+        StreamToggleSwitchStyle,
+        StreamToggleSwitchTheme,
+        StreamToggleSwitchThemeData,
         StreamUnicodeEmoji,
         streamSupportedEmojis;
 
@@ -153,7 +165,6 @@ export 'src/poll/stream_poll_comments_dialog.dart';
 export 'src/poll/stream_poll_option_votes_dialog.dart';
 export 'src/poll/stream_poll_options_dialog.dart';
 export 'src/poll/stream_poll_results_dialog.dart';
-export 'src/poll/stream_poll_text_field.dart';
 export 'src/reactions/detail/reaction_detail_sheet.dart';
 export 'src/reactions/picker/reaction_picker.dart';
 export 'src/reactions/user_reactions.dart';
