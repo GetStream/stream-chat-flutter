@@ -88,12 +88,12 @@ void main() {
       );
 
       // Find the add button
-      final addButton = find.byType(FilledButton);
+      final addButton = find.addOptionButton();
       expect(addButton, findsOneWidget);
 
       // The button should be disabled since we're at max options
-      final button = tester.widget<FilledButton>(addButton);
-      expect(button.onPressed, isNull);
+      final button = tester.widget<StreamButton>(addButton);
+      expect(button.props.onTap, isNull);
     });
 
     testWidgets('should respect both min and max options', (tester) async {
@@ -114,8 +114,7 @@ void main() {
       expect(textFields, findsNWidgets(2));
 
       // Add two more options to reach maximum
-      final addButton = find.byType(FilledButton);
-      await tester.tap(addButton);
+      await tester.tap(find.addOptionButton());
       await tester.pumpAndSettle();
 
       // Fill the newly added option so we can add another
@@ -124,15 +123,16 @@ void main() {
       await tester.pumpAndSettle();
 
       // Add one more option
-      await tester.tap(addButton);
+      await tester.tap(find.addOptionButton());
       await tester.pumpAndSettle();
 
       // Should now have 4 options (max reached)
       expect(find.byType(TextField), findsNWidgets(4));
 
       // Add button should now be disabled since we reached max
-      final button = tester.widget<FilledButton>(addButton);
-      expect(button.onPressed, isNull);
+      final addButton = find.addOptionButton();
+      final button = tester.widget<StreamButton>(addButton);
+      expect(button.props.onTap, isNull);
     });
 
     testWidgets(
@@ -151,9 +151,9 @@ void main() {
         );
 
         // Add button should be enabled for unlimited options
-        final addButton = find.byType(FilledButton);
-        final button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNotNull);
+        final addButton = find.addOptionButton();
+        final button = tester.widget<StreamButton>(addButton);
+        expect(button.props.onTap, isNotNull);
       },
     );
   });
@@ -172,8 +172,7 @@ void main() {
       );
 
       // Find the add button and tap it
-      final addButton = find.byType(FilledButton);
-      await tester.tap(addButton);
+      await tester.tap(find.addOptionButton());
       await tester.pumpAndSettle();
 
       // Verify that there are now 2 text fields
@@ -205,12 +204,12 @@ void main() {
         );
 
         // Find the add button
-        final addButton = find.byType(FilledButton);
+        final addButton = find.addOptionButton();
         expect(addButton, findsOneWidget);
 
         // The button should be disabled since there's already an empty option
-        final button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNull);
+        final button = tester.widget<StreamButton>(addButton);
+        expect(button.props.onTap, isNull);
       },
     );
 
@@ -230,12 +229,12 @@ void main() {
         );
 
         // Find the add button
-        final addButton = find.byType(FilledButton);
+        final addButton = find.addOptionButton();
         expect(addButton, findsOneWidget);
 
         // The button should be enabled since no empty options exist
-        final button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNotNull);
+        final button = tester.widget<StreamButton>(addButton);
+        expect(button.props.onTap, isNotNull);
       },
     );
 
@@ -255,9 +254,9 @@ void main() {
         );
 
         // Initially, add button should be disabled
-        var addButton = find.byType(FilledButton);
-        var button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNull);
+        var addButton = find.addOptionButton();
+        var button = tester.widget<StreamButton>(addButton);
+        expect(button.props.onTap, isNull);
 
         // Fill the empty option
         final textFields = find.byType(TextField);
@@ -265,9 +264,9 @@ void main() {
         await tester.pumpAndSettle();
 
         // Now add button should be enabled
-        addButton = find.byType(FilledButton);
-        button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNotNull);
+        addButton = find.addOptionButton();
+        button = tester.widget<StreamButton>(addButton);
+        expect(button.props.onTap, isNotNull);
       },
     );
   });
@@ -292,8 +291,7 @@ void main() {
         );
 
         // Find the add button and tap it
-        final addButton = find.byType(FilledButton);
-        await tester.tap(addButton);
+        await tester.tap(find.addOptionButton());
         await tester.pumpAndSettle();
 
         // Verify a new option was added
@@ -373,7 +371,7 @@ void main() {
       );
 
       // Find the delete buttons
-      final deleteButtons = find.byIcon(StreamIconData.delete20);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle20);
       expect(deleteButtons, findsNWidgets(3));
 
       // Tap the first delete button
@@ -411,7 +409,7 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(3));
 
       // Find and tap the delete button for the first option
-      final deleteButtons = find.byIcon(StreamIconData.delete20);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle20);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 
@@ -445,7 +443,7 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(3));
 
       // Find and tap the delete button for the first option
-      final deleteButtons = find.byIcon(StreamIconData.delete20);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle20);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 
@@ -479,7 +477,7 @@ void main() {
         expect(find.byType(TextField), findsNWidgets(2));
 
         // Try to delete the first option
-        final deleteButtons = find.byIcon(StreamIconData.delete20);
+        final deleteButtons = find.byIcon(StreamIconData.minusCircle20);
         await tester.tap(deleteButtons.first);
         await tester.pumpAndSettle();
 
@@ -505,6 +503,11 @@ void main() {
       },
     );
   });
+}
+
+extension on CommonFinders {
+  /// Finds the "Add an option" [StreamButton] at the bottom of the list.
+  Finder addOptionButton() => find.widgetWithText(StreamButton, 'Add an option');
 }
 
 Widget _wrapWithMaterialApp(
