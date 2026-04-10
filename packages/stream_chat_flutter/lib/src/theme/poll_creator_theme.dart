@@ -20,7 +20,7 @@ part 'poll_creator_theme.g.theme.dart';
 ///   data: StreamPollCreatorThemeData(
 ///     headerTextStyle: TextStyle(fontWeight: FontWeight.w700),
 ///     configOptionStyle: StreamPollConfigOptionStyle(
-///       toggleSwitchStyle: StreamToggleSwitchStyle.from(
+///       switchStyle: StreamSwitchStyle.from(
 ///         selectedTrackColor: Colors.green,
 ///       ),
 ///     ),
@@ -151,7 +151,7 @@ class StreamPollConfigOptionStyle with _$StreamPollConfigOptionStyle {
     this.childSpacing,
     this.titleTextStyle,
     this.descriptionTextStyle,
-    this.toggleSwitchStyle,
+    this.switchStyle,
     this.stepperStyle,
   });
 
@@ -184,7 +184,7 @@ class StreamPollConfigOptionStyle with _$StreamPollConfigOptionStyle {
   /// The visual styling for the toggle switch in the card.
   ///
   /// If null, the toggle switch uses its own inherited theme defaults.
-  final StreamToggleSwitchStyle? toggleSwitchStyle;
+  final StreamSwitchStyle? switchStyle;
 
   /// The visual styling for the stepper control in the card.
   ///

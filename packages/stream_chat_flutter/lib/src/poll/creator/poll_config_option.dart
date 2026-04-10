@@ -127,7 +127,7 @@ class _PollConfigOptionHeader extends StatelessWidget {
 
     final effectiveTitleStyle = configOptionStyle?.titleTextStyle ?? defaults.titleTextStyle;
     final effectiveDescriptionStyle = configOptionStyle?.descriptionTextStyle ?? defaults.descriptionTextStyle;
-    final effectiveToggleSwitchStyle = configOptionStyle?.toggleSwitchStyle ?? defaults.toggleSwitchStyle;
+    final effectiveSwitchStyle = configOptionStyle?.switchStyle ?? defaults.switchStyle;
 
     return Row(
       spacing: spacing.md,
@@ -144,10 +144,10 @@ class _PollConfigOptionHeader extends StatelessWidget {
             ],
           ),
         ),
-        StreamToggleSwitch(
+        StreamSwitch(
           value: value,
           onChanged: onChanged,
-          style: effectiveToggleSwitchStyle,
+          style: effectiveSwitchStyle,
         ),
       ],
     );

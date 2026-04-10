@@ -56,10 +56,10 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamTextInputStyle,
         StreamTextInputTheme,
         StreamTextInputThemeData,
-        StreamToggleSwitch,
-        StreamToggleSwitchStyle,
-        StreamToggleSwitchTheme,
-        StreamToggleSwitchThemeData,
+        StreamSwitch,
+        StreamSwitchStyle,
+        StreamSwitchTheme,
+        StreamSwitchThemeData,
         StreamUnicodeEmoji,
         streamSupportedEmojis;
 

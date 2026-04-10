@@ -96,7 +96,7 @@ extension on CommonFinders {
     return find
         .descendant(
           of: card.first,
-          matching: find.byType(StreamToggleSwitch),
+          matching: find.byType(StreamSwitch),
         )
         .first;
   }
