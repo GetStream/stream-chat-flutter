@@ -34,7 +34,7 @@ class _ThreadListPageState extends State<ThreadListPage> {
           await controller.refresh(resetValue: false);
           controller.clearUnseenThreadIds();
         },
-        child: child!,
+        child: child,
       ),
       child: StreamThreadListView(
         controller: controller,
