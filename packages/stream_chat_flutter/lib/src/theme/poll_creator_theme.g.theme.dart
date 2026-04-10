@@ -183,11 +183,7 @@ mixin _$StreamPollConfigOptionStyle {
         b.descriptionTextStyle,
         t,
       ),
-      switchStyle: StreamSwitchStyle.lerp(
-        a.switchStyle,
-        b.switchStyle,
-        t,
-      ),
+      switchStyle: StreamSwitchStyle.lerp(a.switchStyle, b.switchStyle, t),
       stepperStyle: StreamStepperStyle.lerp(a.stepperStyle, b.stepperStyle, t),
     );
   }
@@ -236,8 +232,7 @@ mixin _$StreamPollConfigOptionStyle {
           _this.descriptionTextStyle?.merge(other.descriptionTextStyle) ??
           other.descriptionTextStyle,
       switchStyle:
-          _this.switchStyle?.merge(other.switchStyle) ??
-          other.switchStyle,
+          _this.switchStyle?.merge(other.switchStyle) ?? other.switchStyle,
       stepperStyle:
           _this.stepperStyle?.merge(other.stepperStyle) ?? other.stepperStyle,
     );
