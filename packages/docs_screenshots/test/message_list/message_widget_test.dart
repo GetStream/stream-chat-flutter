@@ -46,7 +46,12 @@ Widget _buildMessageScaffold({
   );
 }
 
-void _setupBasicChannel(MockClient client, MockClientState clientState, MockChannel channel, MockChannelState channelState) {
+void _setupBasicChannel(
+  MockClient client,
+  MockClientState clientState,
+  MockChannel channel,
+  MockChannelState channelState,
+) {
   setupMockChannel(
     client: client,
     clientState: clientState,
@@ -89,42 +94,51 @@ void main() {
       return _buildMessageScaffold(
         client: client,
         channel: channel,
-        child: StreamMessageActionsModal(
-          message: message,
-          showReactionPicker: true,
-          messageWidget: StreamMessageWidget(message: message),
-          messageActions: [
-            StreamContextMenuAction(
-              value: const _ReplyAction(),
-              leading: const Icon(Icons.reply),
-              label: const Text('Reply'),
-            ),
-            StreamContextMenuAction(
-              value: const _ThreadReplyAction(),
-              leading: const Icon(Icons.comment_outlined),
-              label: const Text('Thread Reply'),
-            ),
-            StreamContextMenuAction(
-              value: const _EditAction(),
-              leading: const Icon(Icons.edit_outlined),
-              label: const Text('Edit Message'),
-            ),
-            StreamContextMenuAction(
-              value: const _CopyAction(),
-              leading: const Icon(Icons.copy_outlined),
-              label: const Text('Copy Message'),
-            ),
-            StreamContextMenuAction(
-              value: const _PinAction(),
-              leading: const Icon(Icons.push_pin_outlined),
-              label: const Text('Pin to Conversation'),
-            ),
-            StreamContextMenuAction.destructive(
-              value: const _DeleteAction(),
-              leading: const Icon(Icons.delete_outlined),
-              label: const Text('Delete Message'),
-            ),
-          ],
+        child: Builder(
+          builder: (context) {
+            const effectiveAvatarSize = StreamAvatarSize.md;
+            final effectiveSpacing = context.streamSpacing.md + context.streamSpacing.xs;
+            final leadingInset = effectiveAvatarSize.value + effectiveSpacing;
+
+            return StreamMessageActionsModal(
+              message: message,
+              showReactionPicker: true,
+              leadingInset: leadingInset,
+              messageWidget: StreamMessageWidget(message: message),
+              messageActions: [
+                StreamContextMenuAction(
+                  value: const _ReplyAction(),
+                  leading: const Icon(Icons.reply),
+                  label: const Text('Reply'),
+                ),
+                StreamContextMenuAction(
+                  value: const _ThreadReplyAction(),
+                  leading: const Icon(Icons.comment_outlined),
+                  label: const Text('Thread Reply'),
+                ),
+                StreamContextMenuAction(
+                  value: const _EditAction(),
+                  leading: const Icon(Icons.edit_outlined),
+                  label: const Text('Edit Message'),
+                ),
+                StreamContextMenuAction(
+                  value: const _CopyAction(),
+                  leading: const Icon(Icons.copy_outlined),
+                  label: const Text('Copy Message'),
+                ),
+                StreamContextMenuAction(
+                  value: const _PinAction(),
+                  leading: const Icon(Icons.push_pin_outlined),
+                  label: const Text('Pin to Conversation'),
+                ),
+                StreamContextMenuAction.destructive(
+                  value: const _DeleteAction(),
+                  leading: const Icon(Icons.delete_outlined),
+                  label: const Text('Delete Message'),
+                ),
+              ],
+            );
+          },
         ),
       );
     },
