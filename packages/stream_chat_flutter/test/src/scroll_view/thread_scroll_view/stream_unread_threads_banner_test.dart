@@ -10,7 +10,10 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 400, height: 100),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
-        const StreamUnreadThreadsBanner(unreadThreads: {'id1', 'id2', 'id3'}),
+        const StreamUnreadThreadsBanner(
+          enabled: true,
+          unreadThreads: {'id1', 'id2', 'id3'},
+        ),
       ),
     );
   }
